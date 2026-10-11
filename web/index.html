@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La Cote du Héros — guide de cote des livres-jeux</title>
 <meta name="description" content="Série, édition, année : composez une sélection de livres dont vous êtes le héros et lisez la cote moyenne, la médiane et la répartition des prix.">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#2a1c13">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,10 +21,6 @@
 <script>
   // Illustration de l'accueil : une des trois, au hasard
   document.documentElement.dataset.accueil = 1 + Math.floor(Math.random() * 3);
-</script>
-<script>
-  // Thème choisi précédemment (évite un flash au chargement)
-  try { var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
 </head>
 <body data-page="accueil">
@@ -44,9 +40,6 @@
       <a href="#etagere">L'étagère</a>
       <a href="#apropos">À propos</a>
       <a href="le-projet.html">Le projet</a>
-      <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
-        <span class="lampe-ico" aria-hidden="true"></span><span class="lampe-txt">Éclairage</span>
-      </button>
     </nav>
   </div>
 </header>

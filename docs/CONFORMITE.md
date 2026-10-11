@@ -5,7 +5,7 @@ Vérification faite dans le code le 11 octobre 2026 ; ce n'est pas un avis jurid
 ## Ce que le site fait réellement
 - Aucun cookie (`document.cookie` absent), aucun formulaire, aucune mesure d'audience, aucune publicité, aucun pixel.
 - Aucune ressource externe : polices, images, jaquettes et données sont hébergées avec le site (recherche de tout domaine externe dans `web/` : seuls des liens sortants, GitHub, BnF).
-- Trois clés de stockage local, jamais envoyées : `cote-theme`, `cote-collection-v1`, `cote-parcours-v1`. Un cache hors ligne (service worker) ne contient que les fichiers du site.
+- Deux clés de stockage local, jamais envoyées : `cote-collection-v1` et `cote-parcours-v1` (l'ancienne clé `cote-theme`, du temps du thème clair, n'est plus écrite). Un cache hors ligne (service worker) ne contient que les fichiers du site.
 - Hébergement : GitHub Pages (GitHub, Inc.).
 
 ## Pages

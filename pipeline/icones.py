@@ -15,7 +15,7 @@ RACINE = Path(__file__).resolve().parent.parent
 SOURCE = RACINE / "docs" / "icones-propositions" / "source-mage-or.png"
 SORTIE = RACINE / "web" / "icons"
 CENTRE, RAYON = (620, 606), 541                      # anneau de l'emblème dans l'image source
-BRUN = np.array([0x1a, 0x12, 0x0c], dtype=float)     # le noir de l'image devient ce brun très sombre
+BRUN = np.array([0x05, 0x05, 0x05], dtype=float)     # le noir de l'image devient un noir presque pur
 
 
 def emblème():

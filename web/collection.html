@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ma collection · La Cote du Héros</title>
 <meta name="description" content="Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#2a1c13">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preload" href="fonts/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
@@ -15,9 +15,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="stylesheet" href="style.css">
-<script>
-  try { var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
-</script>
 </head>
 <body class="annexe page-collection" data-page="collection">
 <a class="evitement" href="#main">Aller au contenu</a>
@@ -35,9 +32,6 @@
       <a href="collection.html" aria-current="page">Ma collection <span class="nb-coll" id="nb-coll"></span></a>
       <a href="./#etagere">L'étagère</a>
       <a href="le-projet.html">Le projet</a>
-      <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
-        <span class="lampe-ico" aria-hidden="true"></span><span class="lampe-txt">Éclairage</span>
-      </button>
     </nav>
   </div>
 </header>

@@ -41,9 +41,6 @@ def entete(courante):
       <a href="collection.html">Ma collection</a>
       <a href="./#etagere">L'étagère</a>
       {lien("le-projet.html", "Le projet", "le-projet.html")}
-      <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
-        <span class="lampe-ico" aria-hidden="true"></span><span class="lampe-txt">Éclairage</span>
-      </button>
     </nav>
   </div>
 </header>'''
@@ -95,8 +92,8 @@ def page(nom, corps):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{titre}</title>
 <meta name="description" content="{desc}">{noindex}
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#2a1c13">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preload" href="fonts/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
@@ -105,9 +102,6 @@ def page(nom, corps):
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="stylesheet" href="style.css">
-<script>
-  try {{ var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; }} catch (e) {{}}
-</script>
 </head>
 <body class="annexe">
 <a class="evitement" href="#main">Aller au contenu</a>
@@ -184,12 +178,11 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p class="chapeau">En bref : <strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.</p>
 
 <h2>Ce qui est enregistré sur votre appareil</h2>
-<p>Pour fonctionner comme vous le demandez, le guide écrit trois réglages dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.</p>
+<p>Pour fonctionner comme vous le demandez, le guide écrit deux enregistrements dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.</p>
 <div class="tableau-page">
 <table>
   <thead><tr><th scope="col">Nom</th><th scope="col">Contenu</th><th scope="col">Pourquoi</th></tr></thead>
   <tbody>
-    <tr><td data-label="Nom"><code>cote-theme</code></td><td data-label="Contenu">Votre choix d'éclairage (clair ou sombre)</td><td data-label="Pourquoi">Retrouver l'éclairage choisi</td></tr>
     <tr><td data-label="Nom"><code>cote-collection-v1</code></td><td data-label="Contenu">Les livres de « Ma collection », leur état, leur quantité</td><td data-label="Pourquoi">Conserver votre collection d'une visite à l'autre</td></tr>
     <tr><td data-label="Nom"><code>cote-parcours-v1</code></td><td data-label="Contenu">L'avancement de l'inventaire guidé</td><td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>
   </tbody>
@@ -287,8 +280,8 @@ def page_collection(index_html):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ma collection · La Cote du Héros</title>
 <meta name="description" content="Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.">
-<meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#2a1c13">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preload" href="fonts/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
@@ -297,9 +290,6 @@ def page_collection(index_html):
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="stylesheet" href="style.css">
-<script>
-  try {{ var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; }} catch (e) {{}}
-</script>
 </head>
 <body class="annexe page-collection" data-page="collection">
 <a class="evitement" href="#main">Aller au contenu</a>

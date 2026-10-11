@@ -38,7 +38,7 @@ Spécification établie avec les compétences `aesthetic-literacy` et `aesthetic
 - **Boutons / segments** : pilule à bordure fine ; état actif plein bordeaux ; zone tactile de 44 px.
 - **Cartes** : fond parchemin clair, bordure fine, ombre douce ; la carte de cote est coiffée d'un double filet.
 - **Champs** : bordure à 3:1 de contraste minimum, étiquette en petites capitales.
-- **Navigation** : bandeau noyer sobre, liens d'ancre ; bouton « Éclairage » pour le mode sombre.
+- **Navigation** : bandeau noir sobre, liens d'ancre.
 - **En-tête** : titre grand format, chiffres clés, éventail de cinq jaquettes.
 - **Titres** : Cormorant Garamond ; sections séparées par un filet double.
 - **Séparateurs** : filet double laiton ou simple filet de ligne.
@@ -52,7 +52,7 @@ Spécification établie avec les compétences `aesthetic-literacy` et `aesthetic
 
 - **Contraste (WCAG AA)** : tous les couples de texte vérifiés passent (≥ 4,5). Les bordures de champ passent à 3,27 (clair) et 4,58 (sombre). Barres de graphique : corrigées pour atteindre 3:1 en clair (`#a07a2c`, 3,69).
 - **Mouvement réduit** : les animations sont neutralisées ; aucune information ne dépend d'un mouvement.
-- **Mode sombre** : fourni (cuir et lampe de bureau), suit le réglage du système, avec un bouton pour forcer l'éclairage.
+- **Style** : fond noir unique (voir « Style unique : fond noir » plus bas) ; plus de thème clair.
 - **Risque de lassitude** : Dark Academia est une esthétique très répandue depuis 2020. Ici elle reste au service d'un sujet de bibliophile, ce qui limite le risque.
 - **Prix** : toujours sur des surfaces sobres ; le bandeau « Cotes d'archives » rappelle que les prix sont anciens.
 - **Aucune dépendance externe** : polices, images et données sont servies par le site lui-même.
@@ -127,3 +127,7 @@ Sous 700 px de large, une barre fixe en bas remplace les liens de l'en-tête (qu
 - **Éditions** : sous chaque colonne V1 à V5, un bouton « Tout » (devient « Aucun ») coche cette édition pour toutes les séries choisies ; « Tout sélectionner » et « Tout désélectionner » valent pour l'ensemble du tableau.
 - **Couvertures** : sous chaque jaquette, trois boutons C, BE, TBE (convenable, bon état, très bon état). Toucher l'état déjà choisi retire le livre. Toucher la couverture garde l'état par défaut de la liste.
 - **Autres éditions** : au-dessus de la liste, des onglets V1 à V5 permettent d'ajouter une édition non cochée (utile après le chargement d'un fichier). Le petit chiffre indique les livres déjà cochés.
+
+## Style unique : fond noir
+
+Le site n'a plus de thème clair ni de bouton d'éclairage : un seul style, **fond noir** (`#000`), cartes en gris très sombre (`#0e0e0e`, `#181818`), texte crème, accent jaune doré foncé, bandeau « site en construction » en bordeaux. Plus aucun brun : le grain de papier a été supprimé, les icônes sont refaites sur fond noir (`python pipeline/icones.py`). `color-scheme: dark` rend aussi les champs, listes et barres de défilement du navigateur sombres.

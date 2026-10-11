@@ -1,20 +1,5 @@
-/* Pages annexes (projet, confidentialité, mentions légales) : éclairage, hors ligne, pastille de la collection. */
+/* Pages annexes (projet, confidentialité, mentions légales) : hors ligne et pastille de la collection. */
 (function () {
-  var bouton = document.getElementById('lampe');
-  if (bouton) {
-    var sombre = function () {
-      var t = document.documentElement.dataset.theme;
-      return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-    };
-    var maj = function () { bouton.setAttribute('aria-pressed', String(sombre())); };
-    bouton.addEventListener('click', function () {
-      var t = sombre() ? 'light' : 'dark';
-      document.documentElement.dataset.theme = t;
-      try { localStorage.setItem('cote-theme', t); } catch (e) { /* sans conséquence */ }
-      maj();
-    });
-    maj();
-  }
   // nombre d'exemplaires de la collection, sur l'entrée « Ma collection » de la barre du bas
   try {
     var coll = JSON.parse(localStorage.getItem('cote-collection-v1') || '{}') || {};

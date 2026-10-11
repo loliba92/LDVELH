@@ -133,23 +133,6 @@
     window.addEventListener('hashchange', () => { lireAdresse(); synchroniser(); afficher(); });
     let attente;
     window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
-    construireLampe();
-  }
-
-  function construireLampe() {
-    const bouton = $('#lampe');
-    const sombre = () => {
-      const t = document.documentElement.dataset.theme;
-      return t ? t === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-    };
-    const maj = () => bouton.setAttribute('aria-pressed', String(sombre()));
-    bouton.addEventListener('click', () => {
-      const t = sombre() ? 'light' : 'dark';
-      document.documentElement.dataset.theme = t;
-      try { localStorage.setItem('cote-theme', t); } catch (e) { /* stockage indisponible : sans conséquence */ }
-      maj();
-    });
-    maj();
   }
 
   function synchroniser() {
@@ -750,7 +733,6 @@
   let limiteColl = 30;
 
   function initPageCollection() {
-    construireLampe();
     brancherCollection();
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
     let attente;
