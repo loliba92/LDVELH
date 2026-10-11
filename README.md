@@ -35,6 +35,8 @@ python pipeline/import_catalogue.py       # importe les versions dans editions.c
 python pipeline/enrich_bnf.py             # complète les fiches avec le catalogue de la BnF
 python pipeline/add_book.py ISBN          # ajouter un livre
 python pipeline/build_db.py               # (re)construire la base en étoile
+python pipeline/export_site.py            # exporter les données du site
+python -m http.server 8000 --directory web   # voir le site sur http://localhost:8000
 ```
 
 Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv`.
@@ -44,6 +46,6 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 - [x] Catalogue historique extrait : 5 versions, 430 éditions, 226 livres distincts
 - [ ] Sources de prix d'occasion
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
-- [ ] Site web
+- [x] Site web, première version : filtres, moyennes, regroupements, fiche d'un livre (voir `web/README.md`)
 
 Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).
