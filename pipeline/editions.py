@@ -13,7 +13,7 @@ BASE = ROOT / "data" / "processed" / "editions.csv"
 
 COLUMNS = ["id", "isbn13", "isbn10", "livre", "titre", "version", "en_vente", "serie", "numero",
            "auteurs", "traducteur",
-           "illustrateur", "editeur", "collection_editeur", "annee", "pages", "notice_bnf",
+           "illustrateur", "editeur", "collection_editeur", "annee", "annee_bnf", "pages", "notice_bnf",
            "statut", "source", "date_maj"]
 
 BNF_URL = "https://catalogue.bnf.fr/api/SRU"
@@ -122,7 +122,8 @@ def lookup_bnf(isbn13, isbn10, pause=1.0):
             auteurs.append(nom)
     collection = next((d[len("Collection : "):] for d in texts("description")
                        if d.startswith("Collection : ")), "")
-    collection = collection.split(" ; ")[0].strip()
+    collection = re.sub(r"^Collection\s+", "", collection.split(" ; ")[0].strip())
+    collection = collection[:1].upper() + collection[1:]
     fmt = " ".join(texts("format"))
     pages = (re.search(r"(\d+)\s*p\.", fmt) or [None, ""])[1]
     ark = next((i for i in texts("identifier") if i.startswith("http")), "")

@@ -68,7 +68,8 @@ CREATE TABLE DimVersion (
     numero_serie         TEXT,
     editeur              TEXT,                  -- Gallimard, Alkonost...
     collection_editeur   TEXT,                  -- Folio Junior...
-    annee                INTEGER,
+    annee                INTEGER,               -- année indiquée par collection-ldvelh.fr
+    annee_bnf            INTEGER,               -- année de la notice BnF (peut différer : tirages)
     pages                INTEGER,
     traducteur           TEXT,
     illustrateur         TEXT,

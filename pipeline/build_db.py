@@ -121,13 +121,14 @@ def load_livres_versions(cx):
             cx.execute(
                 """INSERT INTO DimVersion(id,isbn13,isbn10,livre_key,numero_version,libelle_version,
                    est_derniere_version,en_vente,titre_version,serie,numero_serie,editeur,
-                   collection_editeur,annee,pages,traducteur,illustrateur,notice_bnf,statut)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   collection_editeur,annee,annee_bnf,pages,traducteur,illustrateur,notice_bnf,statut)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (r["id"], r.get("isbn13") or None, r.get("isbn10") or None, livre_key, n,
                  (r.get("version") or f"V{n}").strip(), int(n == derniere),
                  int(ev) if ev in ("0", "1") else None, r["titre"], r.get("serie") or None,
                  r.get("numero") or None, r.get("editeur") or None, r.get("collection_editeur") or None,
                  int(r["annee"]) if (r.get("annee") or "").isdigit() else None,
+                 int(r["annee_bnf"]) if (r.get("annee_bnf") or "").isdigit() else None,
                  int(r["pages"]) if (r.get("pages") or "").isdigit() else None,
                  r.get("traducteur") or None, r.get("illustrateur") or None,
                  r.get("notice_bnf") or None, r.get("statut") or "brut"))
