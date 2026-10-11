@@ -40,4 +40,4 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
 - [ ] Site web
 
-Voir `docs/ARCHITECTURE.md` pour le détail.
+Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité).
