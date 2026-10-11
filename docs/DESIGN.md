@@ -103,3 +103,7 @@ Principes : un seul choix par écran ; jamais de perte (fermer et reprendre à t
 ## Application installable (PWA)
 
 Comme sur Scénario : manifeste (`web/manifest.webmanifest`), icônes (`web/icons/`, dont une version « maskable » pour Android) et bouton « Installer l'application » (visible seulement quand le navigateur le propose ; sur iPhone, une aide en pied de page). En plus, `web/sw.js` rend l'application utilisable sans réseau : pages, scripts, styles et données passent par le réseau d'abord (version à jour) avec copie locale en secours ; jaquettes, polices et icônes viennent de la copie locale. Les chemins sont relatifs, car le site vit sous `/LDVELH/`. Pour forcer le renouvellement des copies, changer `VERSION` dans `sw.js`.
+
+## Image d'ambiance de l'accueil (Pexels)
+
+Photo de bibliothèque ancienne en fond du haut de page, sous un voile de la couleur du fond : dense derrière le texte (contraste mesuré ≥ 4,5 en thème clair et sombre, ordinateur et téléphone), léger du côté des jaquettes. Elle est choisie avec `scrapers/image_accueil.py` (`--chercher` pour proposer des candidats, `--retenir ID` pour l'enregistrer en `web/images/accueil.webp`, 1600 px, environ 75 Ko). La clé Pexels vient de la variable d'environnement `PEXELS_API_KEY` et n'est jamais dans le dépôt ni envoyée au navigateur ; la photo est stockée localement, le site ne dépend pas de Pexels à l'affichage. Crédit en pied de page : Phát Trương, Pexels.
