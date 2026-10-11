@@ -1,4 +1,4 @@
-# Design : proposition « La Cote du Héros » (`web/v2/`)
+# Design : « La Cote du Héros » (`web/`)
 
 Spécification établie avec les compétences `aesthetic-literacy` et `aesthetic-application`.
 
@@ -81,3 +81,15 @@ Valeurs déjà conformes : contrastes de texte (≥ 4,5), contrastes non textuel
 - **Lecture** : titres possédés sur titres existants par série (barre de progression), pièces les plus cotées, tableau modifiable de tous les exemplaires, filtre « Seulement ma collection ».
 - **Export / import** : JSON (avec l'estimation) et CSV (séparateur point-virgule, lisible par Excel en français). Import d'une liste d'ISBN (10 ou 13 chiffres, avec ou sans tirets), éventuellement suivis de l'état et de la quantité, ou d'un fichier exporté.
 - **Réserve** : l'estimation repose sur des cotes d'archives. Elle ne remplace ni une expertise ni un prix de vente réel, et le dit sur l'écran.
+
+## 7. Inventaire guidé
+
+Constituer une collection livre par livre est long ; le parcours procède du général au particulier, et s'enregistre à chaque geste :
+
+1. **Bienvenue** : annonce des quatre étapes et choix de l'état habituel (convenable, bon état, TBE).
+2. **Séries** : un écran de tuiles (couverture et nom), on touche celles dont on a au moins un livre.
+3. **Éditions** : un seul tableau séries × V1 à V5 ; les éditions inexistantes pour une série sont grisées.
+4. **Listes** : une par série et édition. « Tout cocher » pour une édition complète, puis on décoche les manquants ; ou saisie de numéros (« 252, 267-272 ») ; l'état se règle par liste et s'applique aux livres cochés.
+5. **Bilan** : patrimoine estimé, plancher, plafond, et téléchargement du fichier JSON (ou CSV).
+
+Principes : un seul choix par écran ; jamais de perte (fermer et reprendre à tout moment, les choix déjà faits sont repris) ; fenêtre en plein écran sur téléphone, zones tactiles de 44 px ; progression visible (barre et « liste 2 sur 5 »).

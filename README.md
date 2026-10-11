@@ -46,6 +46,6 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 - [x] Catalogue historique extrait : 5 versions, 430 éditions, 226 livres distincts
 - [ ] Sources de prix d'occasion
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
-- [x] Site web, première version : filtres, moyennes, regroupements, fiche d'un livre (voir `web/README.md`)
+- [x] Site web « La Cote du Héros » : sélection, cote, étagère de jaquettes, ma collection, inventaire guidé (voir `web/README.md`)
 
-Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/EVOLUTIONS.md` (classements, évolution des prix), `docs/DESIGN.md` (design de la proposition `web/v2/`, audit PencilPlaybook, fonction « Ma collection »), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).
+Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/EVOLUTIONS.md` (classements, évolution des prix), `docs/DESIGN.md` (design du site, audit PencilPlaybook, « Ma collection » et inventaire guidé), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).
