@@ -48,4 +48,4 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
 - [x] Site web, première version : filtres, moyennes, regroupements, fiche d'un livre (voir `web/README.md`)
 
-Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).
+Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/EVOLUTIONS.md` (classements, évolution des prix), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).

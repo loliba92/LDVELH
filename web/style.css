@@ -216,3 +216,7 @@ tr.courant { background: var(--accent-fond); }
   table.cartes td.principal .livre { gap: 10px; }
   table.cartes tr.courant { padding-left: 8px; padding-right: 8px; width: calc(100% + 16px); margin: 0 -8px; }
 }
+
+/* Avertissement sur les prix */
+.alerte { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--ligne); border-left: 4px solid var(--or); border-radius: 8px; background: var(--carte); color: var(--texte); font-size: .92rem; }
+.alerte[hidden] { display: none; }

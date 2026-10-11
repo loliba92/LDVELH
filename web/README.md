@@ -29,9 +29,11 @@ python pipeline/export_site.py
 - **Regrouper par** série, version, année, décennie ou éditeur : une ligne par groupe avec sa moyenne ; un clic sur une ligne applique le groupe comme filtre.
 - **Fiche d'un livre** : informations, prix par état, et toutes les versions du même livre côte à côte.
 - Les filtres sont dans l'adresse de la page : on peut la copier pour partager une vue.
-- **Jaquettes** : miniature dans la liste, image plus grande dans la fiche. Les images ne sont pas copiées : elles sont chargées depuis collection-ldvelh.fr, et une tuile les remplace si l'image manque.
+- **Jaquettes** : miniature dans la liste, image plus grande dans la fiche. Elles sont stockées dans `web/covers/` (deux tailles recompressées) par `python scrapers/telecharger_jaquettes.py`. Une tuile remplace l'image si elle manque. Droits : les jaquettes appartiennent à leurs éditeurs, source collection-ldvelh.fr.
 - Sur téléphone, les filtres sont repliés et un résumé indique ceux qui sont actifs.
 
 ## Limite actuelle
 
-Les prix sont des prix historiques de collection-ldvelh.fr, sans date précise. Le pied de page le rappelle. Quand des ventes réelles seront chargées dans la base, la moyenne par version les inclura automatiquement (c'est la moyenne de toutes les observations hors lots).
+Les prix sont **anciens** : ils viennent du relevé de collection-ldvelh.fr, qui n'est plus mis à jour. Un bandeau le rappelle au-dessus des moyennes, et le pied de page aussi. Quand des ventes réelles seront chargées dans la base, la moyenne par version les inclura automatiquement (c'est la moyenne de toutes les observations hors lots).
+
+Idées à venir (classements, prix qui évoluent vite) : voir `docs/EVOLUTIONS.md`.

@@ -15,6 +15,7 @@ import editions
 
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
+COVERS = editions.ROOT / "web" / "covers"
 
 REQUETE = """
 SELECT v.version_key, v.id, v.isbn13, v.titre_version, l.livre_id, l.titre AS livre, sr.nom AS serie,
@@ -46,6 +47,9 @@ def main():
     versions = []
     for r in cx.execute(REQUETE):
         p = prix.get(r["version_key"], {})
+        isbn = r["isbn13"]
+        petite = f"covers/small/{isbn}.webp" if isbn and (COVERS / "small" / f"{isbn}.webp").exists() else None
+        grande = f"covers/medium/{isbn}.webp" if isbn and (COVERS / "medium" / f"{isbn}.webp").exists() else None
         versions.append({
             "id": r["id"], "isbn13": r["isbn13"], "titre": r["titre_version"], "livre_id": r["livre_id"],
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
@@ -54,7 +58,7 @@ def main():
             "en_vente": r["en_vente"], "annee": r["annee"], "annee_bnf": r["annee_bnf"],
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
-            "notice": r["notice_bnf"], "couverture": r["couverture"], "statut": r["statut"],
+            "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: p.get(e, {}).get("prix") for e in ("convenable", "bon", "tres_bon")},
             "nb_obs": {e: p.get(e, {}).get("nb", 0) for e in ("convenable", "bon", "tres_bon")},
         })
@@ -72,10 +76,11 @@ def main():
     (SORTIE / "versions.json").write_text(json.dumps(versions, ensure_ascii=False, separators=(",", ":")),
                                           encoding="utf-8")
     (SORTIE / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+    sans_image = sum(1 for v in versions if not v["couverture"])
     sans_prix = sum(1 for v in versions if all(x is None for x in v["prix"].values()))
     taille = (SORTIE / "versions.json").stat().st_size // 1024
     print(f"{len(versions)} versions, {meta['nb_livres']} livres, {meta['nb_series']} séries exportés "
-          f"({taille} Ko) ; {sans_prix} version(s) sans prix")
+          f"({taille} Ko) ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette")
 
 
 if __name__ == "__main__":

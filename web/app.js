@@ -18,8 +18,8 @@
   const miniature = (b) => (b.couverture
     ? `<img class="jaq" src="${esc(b.couverture)}" alt="" width="44" height="62" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-i="${initiale(b)}">`
     : `<span class="jaq jaq-vide" aria-hidden="true">${initiale(b)}</span>`);
-  const grande = (b) => (b.couverture
-    ? `<img class="jaq-grande" src="${esc(b.couverture.replace('/small/', '/medium/'))}" alt="Jaquette de ${esc(b.titre)}" width="150" height="212" decoding="async" referrerpolicy="no-referrer" data-i="${initiale(b)}">`
+  const grande = (b) => (b.couverture_grande
+    ? `<img class="jaq-grande" src="${esc(b.couverture_grande)}" alt="Jaquette de ${esc(b.titre)}" width="150" height="212" decoding="async" referrerpolicy="no-referrer" data-i="${initiale(b)}">`
     : '');
 
   let DATA = [];
@@ -214,6 +214,8 @@
     $('#nb-filtres').textContent = nf ? `· ${nf} actif${nf > 1 ? 's' : ''}` : '';
     $('#compte').textContent = `· ${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     afficherKpis(liste);
+    $('#alerte').textContent = avertissement();
+    $('#alerte').hidden = !avertissement();
     $('#bloc-tri').hidden = S.g !== 'liste';
     if (!liste.length) {
       $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne correspond à ces filtres.</p>';
@@ -382,7 +384,7 @@
               ${cellulesPrix(x)}
             </tr>`).join('')}</tbody>
         </table>` : ''}
-        <p class="sous" style="margin-top:16px">Prix historiques relevés sur collection-ldvelh.fr, sans date précise : ce ne sont pas des prix de vente constatés aujourd'hui.</p>
+        <p class="sous" style="margin-top:16px">${esc(avertissement())}</p>
       </div>`;
     const dlg = $('#fiche');
     $('#fermer').addEventListener('click', () => dlg.close());
@@ -410,13 +412,19 @@
     if (bouton) { e.stopPropagation(); ouvrirFiche(bouton.dataset.id); }
   });
 
+  // Tant qu'aucune vente réelle n'est chargée, les prix sont des prix anciens : on le dit clairement.
+  const prixAnciens = () => !(META.types_prix || []).some((t) => t.startsWith('Vente réelle'));
+  const avertissement = () => (prixAnciens()
+    ? "Prix anciens, issus d'un relevé de collection-ldvelh.fr qui n'est plus mis à jour : un ordre de grandeur, pas la cote d'aujourd'hui."
+    : '');
+
   function afficherPied() {
     $('#pied').innerHTML =
       `<p><strong>Comment lire ces prix.</strong> Chaque prix est la moyenne, pour l'état choisi, des livres du filtre. ` +
       `Un livre sans prix pour un état est ignoré dans cette moyenne.</p>` +
       `<p>Source des prix : ${esc((META.sources_prix || []).join(', '))}.` +
-      `${(META.types_prix || []).some((t) => t.startsWith('Vente réelle')) ? '' : " Ce ne sont pas des prix de vente constatés aujourd'hui."}</p>` +
-      `<p>Jaquettes : collection-ldvelh.fr (droits réservés aux éditeurs).</p>` +
+      `${prixAnciens() ? ' Ces prix sont anciens et ne sont plus mis à jour.' : ''}</p>` +
+      `<p>Jaquettes : © leurs éditeurs, reproduites ici à titre d'illustration ; source : collection-ldvelh.fr.</p>` +
       `<p>${META.nb_versions} versions · ${META.nb_livres} livres · ${META.nb_series} séries · données générées le ` +
       `${new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>`;
   }
