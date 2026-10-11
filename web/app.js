@@ -240,7 +240,27 @@
     const m = v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
     return { n: v.length, avg: somme / v.length, min: v[0], max: v[v.length - 1], med: m };
   }
-  const prixAnciens = () => !(META.types_prix || []).some((t) => t.startsWith('Vente réelle'));
+  /* Nature des prix : « archives » (ancien relevé) ou prix actuels (annonces, ventes) pour une partie des éditions */
+  const nbActuels = () => META.nb_prix_actuels || 0;
+  const prixAnciens = () => nbActuels() === 0;
+  const infoPrix = (b, k) => (b.prix_info && b.prix_info[k]) || null;
+  const estActuel = (i) => !!i && i.source !== 'archives';
+  const NATURES = { annonces: 'annonce', ventes: 'vente', rachats: 'rachat' };
+  const dateCourte = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  function legendePrix(b, k) {
+    const i = infoPrix(b, k);
+    if (b.prix[k] == null) return '';
+    if (!estActuel(i)) return `Cote d'archives (ancien relevé de ${SRC}) : un ordre de grandeur.`;
+    const mot = NATURES[i.nature] || 'observation';
+    const base = `${i.nb} ${mot}${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}`;
+    const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
+    return `${base} · confiance ${i.confiance}.${reserve}`;
+  }
+  function texteEstimation(bl) {
+    if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";
+    return `Estimation d'après les cotes de la sélection et l'état que vous indiquez : ${bl.actuels} exemplaire${bl.actuels > 1 ? 's' : ''} sur ${bl.exemplaires - bl.sansCote} ` +
+      `${bl.actuels > 1 ? 'reposent' : 'repose'} sur des prix actuels, les autres sur des cotes d'archives. Elle ne remplace ni une expertise ni un prix de vente réel.`;
+  }
 
   /* ---------- Affichage général ---------- */
   function afficher() {
@@ -514,6 +534,7 @@
         </div>
         <h3>Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
+        <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
         ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
@@ -577,15 +598,15 @@
 
   function bilan() {
     const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b);
-    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0;
+    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0;
     lignes.forEach(({ b, c }) => {
       exemplaires += c.qte;
       const v = valeurLigne(b, c);
-      if (v == null) sansCote += c.qte; else total += v;
+      if (v == null) sansCote += c.qte; else { total += v; if (estActuel(infoPrix(b, c.etat))) actuels += c.qte; }
       bas += (b.prix.convenable ?? 0) * c.qte;
       haut += (b.prix.tres_bon ?? 0) * c.qte;
     });
-    return { lignes, total, bas, haut, exemplaires, sansCote, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
+    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
   }
 
   function afficherCollection() {
@@ -649,7 +670,7 @@
             <div><dt>Plancher</dt><dd>${fmt(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmt(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
           </dl>
-          <p class="trois">Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.</p>
+          <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
           <div class="coll-actions">
             <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
@@ -712,7 +733,9 @@
     if (format === 'json') {
       telecharger(`ma-collection-${jour}.json`, JSON.stringify({
         application: 'La Cote du Héros', version: 1, exporte_le: jour,
-        avertissement: 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.',
+        avertissement: prixAnciens()
+          ? 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.'
+          : 'Estimation mêlant prix actuels (annonces, ventes) et cotes d\'archives : un ordre de grandeur, pas un prix de vente.',
         estimation: { total: Math.round(bl.total * 100) / 100, exemplaires: bl.exemplaires, titres: bl.titres },
         exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat] })),
       }, null, 2), 'application/json');
@@ -994,7 +1017,7 @@
             <div><dt>Plancher</dt><dd>${fmt(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmt(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></small></dd></div>
           </dl>
-          <p class="trois">Estimation d'après des cotes d'archives et l'état que vous avez indiqué : un ordre de grandeur, pas un prix de vente.</p>
+          <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${pl(bl.sansCote, 'exemplaire')} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
         </div>
       </div>
@@ -1092,7 +1115,11 @@
       `<strong>${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</strong> : ${esc(minus(e.def.replace(' TBE signifie « très bon état ».', '')))}`).join('<br>');
     $('#pied-sources').innerHTML = prixAnciens()
       ? `Prix : ancien relevé du site ${SRC}, qui n'est plus mis à jour. Ils indiquent un ordre de grandeur, pas la cote du jour.`
-      : `Prix : relevé du site ${SRC} et ventes constatées.`;
+      : `Prix : cotes d'archives du site ${SRC}, complétées pour ${nbActuels()} cote${nbActuels() > 1 ? 's' : ''} par des prix actuels (annonces et ventes constatées). Une annonce est un prix demandé, pas un prix payé.`;
+    const avis = $('#avis-prix');
+    if (avis) avis.innerHTML = prixAnciens()
+      ? "<strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour."
+      : `<strong>Prix actuels en cours d'ajout.</strong> ${nbActuels() > 1 ? `${nbActuels()} cotes reposent` : '1 cote repose'} sur des prix récents ; les autres restent des cotes d'archives, à lire comme un repère de grandeur.`;
     $('#pied-meta').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries · données du ` +
       new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '.';
   }

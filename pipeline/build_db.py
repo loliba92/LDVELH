@@ -24,6 +24,7 @@ ROOT = editions.ROOT
 DB = ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SCHEMA = Path(__file__).resolve().parent / "schema.sql"
 MANUAL = ROOT / "data" / "manual" / "observations.csv"
+OCCASION = ROOT / "data" / "raw" / "occasion"
 RAW = ROOT / "data" / "raw" / "collection-ldvelh"
 
 ETATS = [  # code, libellé, rang, description
@@ -160,7 +161,7 @@ def load_livres_versions(cx):
                  r.get("notice_bnf") or None, r.get("couverture") or None, r.get("statut") or "brut"))
 
 
-def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot=0, url=None):
+def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot=0, url=None, nb=1):
     v = cx.execute("SELECT version_key, livre_key, serie_key FROM DimVersion WHERE id=?", (version_id,)).fetchone()
     if v is None:
         raise ValueError(f"édition inconnue : {version_id}")
@@ -175,9 +176,9 @@ def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot
     cle = "|".join(map(str, (version_id, etat, d, source, type_prix, prix, url or "")))
     cur = cx.execute(
         """INSERT OR IGNORE INTO FaitPrix(version_key,livre_key,serie_key,etat_key,date_key,source_key,type_key,
-           prix,frais_port,est_lot,url,cle_naturelle,date_chargement) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+           prix,frais_port,est_lot,nb_annonces,url,cle_naturelle,date_chargement) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (v[0], v[1], v[2], keys["etat_key"], date_key, keys["source_key"], keys["type_key"], prix, port,
-         lot, url, cle, datetime.now().isoformat(timespec="seconds")))
+         lot, nb, url, cle, datetime.now().isoformat(timespec="seconds")))
     return cur.rowcount
 
 
@@ -218,7 +219,7 @@ def load_manuel(cx, chemin):
                     raise ValueError(f"prix illisible : {r['prix']}")
                 ajoute = insert_fait(cx, ident, date.fromisoformat(r["date"]), r["source"], r["type_prix"],
                                      r.get("etat") or "inconnu", prix, to_float(r.get("frais_port")),
-                                     int(r.get("lot") or 0), r.get("url") or None)
+                                     int(r.get("lot") or 0), r.get("url") or None, max(1, int(r.get("nb") or 1)))
                 n += ajoute
                 doublons += 1 - ajoute
             except (ValueError, KeyError) as e:
@@ -226,10 +227,35 @@ def load_manuel(cx, chemin):
     return n, doublons, erreurs
 
 
+def load_ebay(cx, dossier):
+    """Relevés d'annonces eBay agrégés : data/raw/occasion/ebay-AAAA-MM-JJ.csv.
+
+    Une ligne par livre et par état : isbn13, date, etat, nb_annonces, prix_min, prix_median, prix_max.
+    Seule la médiane entre dans la base (nature « prix demandé », nombre d'annonces conservé).
+    """
+    n, doublons, erreurs, fichiers = 0, 0, [], sorted(Path(dossier).glob("ebay-*.csv"))
+    for fichier in fichiers:
+        with open(fichier, newline="", encoding="utf-8") as f:
+            for i, r in enumerate(csv.DictReader(f), start=2):
+                try:
+                    ident = editions.normalize_isbn(r["isbn13"])[0]
+                    prix, nb = to_float(r["prix_median"]), int(r["nb_annonces"])
+                    if prix is None or prix <= 0 or nb < 1:
+                        raise ValueError(f"valeurs invalides (prix {r['prix_median']}, annonces {r['nb_annonces']})")
+                    ajoute = insert_fait(cx, ident, date.fromisoformat(r["date"]), "ebay_api", "prix_demande",
+                                         r["etat"], round(prix, 2), nb=nb)
+                    n += ajoute
+                    doublons += 1 - ajoute
+                except (ValueError, KeyError) as e:
+                    erreurs.append(f"{fichier.name} ligne {i} : {e}")
+    return n, doublons, erreurs, len(fichiers)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", default=str(DB))
     p.add_argument("--manual", default=str(MANUAL))
+    p.add_argument("--occasion", default=str(OCCASION), help="dossier des relevés d'annonces agrégés (ebay-*.csv)")
     a = p.parse_args()
 
     db = Path(a.db)
@@ -242,6 +268,9 @@ def main():
         load_livres_versions(cx)
         n_hist, ignores, orphelins = load_historique(cx)
         n_man, doublons, erreurs = load_manuel(cx, a.manual)
+        n_ebay, dbl_ebay, err_ebay, nb_fichiers = load_ebay(cx, a.occasion)
+        doublons += dbl_ebay
+        erreurs += err_ebay
     cx.execute("PRAGMA foreign_keys = ON")
     problemes = cx.execute("PRAGMA foreign_key_check").fetchall()
 
@@ -250,11 +279,11 @@ def main():
     print(f"Base écrite : {db}")
     print(f"  DimLivre {compte('DimLivre')} | DimSerie {compte('DimSerie')} | DimVersion {compte('DimVersion')} | DimEtat {compte('DimEtat')} | "
           f"DimSource {compte('DimSource')} | DimTypePrix {compte('DimTypePrix')} | DimDate {compte('DimDate')}")
-    print(f"  FaitPrix {compte('FaitPrix')} (historique {n_hist}, saisies manuelles {n_man}; "
+    print(f"  FaitPrix {compte('FaitPrix')} (historique {n_hist}, saisies manuelles {n_man}, relevés eBay {n_ebay} dans {nb_fichiers} fichier(s); "
           f"{ignores} prix historiques vides ou à 0 ignorés, {doublons} doublon(s) de saisie ignoré(s), "
           f"{orphelins} prix sans édition connue écartés)")
     for e in erreurs:
-        print(f"  ✗ {Path(a.manual).name} {e}")
+        print(f"  ✗ {e}")
     print("  Contrôle des clés étrangères :", "OK" if not problemes else f"{len(problemes)} anomalie(s)")
     cx.close()
     return 1 if (problemes or erreurs) else 0

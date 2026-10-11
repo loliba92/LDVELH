@@ -102,6 +102,7 @@ CREATE TABLE FaitPrix (
     prix            REAL NOT NULL CHECK (prix >= 0),   -- en euros, hors port
     frais_port      REAL CHECK (frais_port IS NULL OR frais_port >= 0),
     est_lot         INTEGER NOT NULL DEFAULT 0,
+    nb_annonces     INTEGER NOT NULL DEFAULT 1 CHECK (nb_annonces >= 1),   -- annonces résumées par cette observation (médiane d'un relevé)
     url             TEXT,
     cle_naturelle   TEXT NOT NULL UNIQUE,              -- évite de charger deux fois la même observation
     date_chargement TEXT NOT NULL

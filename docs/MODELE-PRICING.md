@@ -73,3 +73,8 @@ Pour un livre à faible liquidité, on utilise le bas de fourchette plutôt que 
 - Les prix demandés surestiment les prix vendus.
 - Sans accès aux ventes de Vinted et Leboncoin, ces plateformes (probablement les plus actives) ne sont représentées que par la saisie assistée.
 - La rareté réelle dépend aussi de l'édition précise ; tant que l'ISBN manque, le rapprochement reste approximatif.
+
+
+## Mise en œuvre
+
+Le modèle est codé dans `pipeline/estimation.py` et appliqué par `pipeline/export_site.py`. Détails, sources et démarches : [PRIX-ACTUELS.md](PRIX-ACTUELS.md).
