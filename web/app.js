@@ -216,7 +216,7 @@
     $('#nb-filtres').textContent = nf ? `· ${nf} actif${nf > 1 ? 's' : ''}` : '';
     $('#compte').textContent = `· ${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     afficherKpis(liste);
-    $('#alerte').textContent = avertissement();
+    $('#alerte').innerHTML = avertissement();
     $('#alerte').hidden = !avertissement();
     $('#bloc-tri').hidden = S.g !== 'liste';
     if (!liste.length) {
@@ -386,7 +386,7 @@
               ${cellulesPrix(x)}
             </tr>`).join('')}</tbody>
         </table>` : ''}
-        <p class="sous" style="margin-top:16px">${esc(avertissement())}</p>
+        <p class="sous" style="margin-top:16px">${avertissement()}</p>
       </div>`;
     const dlg = $('#fiche');
     $('#fermer').addEventListener('click', () => dlg.close());
@@ -416,17 +416,19 @@
 
   // Tant qu'aucune vente réelle n'est chargée, les prix sont des prix anciens : on le dit clairement.
   const prixAnciens = () => !(META.types_prix || []).some((t) => t.startsWith('Vente réelle'));
+  // L'adresse du site source ne doit jamais être coupée en fin de ligne
+  const SRC = '<span class="nowrap">collection-ldvelh.fr</span>';
   const avertissement = () => (prixAnciens()
-    ? "Prix anciens, issus d'un relevé de collection-ldvelh.fr qui n'est plus mis à jour : un ordre de grandeur, pas la cote d'aujourd'hui."
+    ? `Prix anciens, issus d'un relevé de ${SRC} qui n'est plus mis à jour : un ordre de grandeur, pas la cote d'aujourd'hui.`
     : '');
 
   function afficherPied() {
     $('#pied').innerHTML =
       `<p><strong>Comment lire ces prix.</strong> Chaque prix est la moyenne, pour l'état choisi, des livres du filtre. ` +
       `Un livre sans prix pour un état est ignoré dans cette moyenne. TBE : très bon état.</p>` +
-      `<p>Source des prix : ${esc((META.sources_prix || []).join(', '))}.` +
+      `<p>Source des prix : ${esc((META.sources_prix || []).join(', ')).replace('collection-ldvelh.fr', SRC)}.` +
       `${prixAnciens() ? ' Ces prix sont anciens et ne sont plus mis à jour.' : ''}</p>` +
-      `<p>Jaquettes : © leurs éditeurs, reproduites ici à titre d'illustration ; source : collection-ldvelh.fr.</p>` +
+      `<p>Jaquettes : © leurs éditeurs, reproduites ici à titre d'illustration ; source : ${SRC}.</p>` +
       `<p>${META.nb_versions} versions · ${META.nb_livres} livres · ${META.nb_series} séries · données générées le ` +
       `${new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>`;
   }
