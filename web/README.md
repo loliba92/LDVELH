@@ -10,6 +10,11 @@ python -m http.server 8000 --directory web
 
 puis ouvrir http://localhost:8000 (le site ne s'ouvre pas en double-cliquant sur le fichier : le navigateur refuse de lire les données).
 
+## Proposition de refonte : `web/v2/`
+
+Une nouvelle présentation, « La Cote du Héros », est proposée à côté du site actuel, qui reste inchangé : https://loliba92.github.io/LDVELH/v2/
+Elle lit les mêmes données (`web/data/`) et les mêmes jaquettes (`web/covers/`). La spécification du design (jetons, repères, composants, points d'attention) est dans `docs/DESIGN.md`.
+
 ## En ligne
 
 Le site est publié par GitHub Pages à chaque envoi sur `main` (fichier `.github/workflows/pages.yml`), à l'adresse https://loliba92.github.io/LDVELH/ .

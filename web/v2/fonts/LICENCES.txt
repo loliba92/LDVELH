@@ -1,0 +1,4 @@
+Polices auto-hébergées (sous-ensemble latin), obtenues depuis Google Fonts.
+- Cormorant Garamond — © The Cormorant Project Authors — SIL Open Font License 1.1
+- Source Sans 3 — © Adobe — SIL Open Font License 1.1
+Texte de la licence : https://openfontlicense.org
