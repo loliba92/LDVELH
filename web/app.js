@@ -256,6 +256,13 @@
     const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
     return `${base} · confiance ${i.confiance}.${reserve}`;
   }
+  function lignePro(b, k) {
+    const v = b.prix_pro && b.prix_pro[k];
+    if (v == null) return '';
+    const i = b.prix_pro_info[k];
+    return `<p class="sous legende-prix"><strong>Chez les professionnels : ${fmt(v)}</strong> (boutiques, reconditionneurs) · ${i.nb} relevé${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}. ` +
+      'Ces prix sont plus élevés que ceux des particuliers : ils ne sont pas inclus dans la cote ci-dessus.</p>';
+  }
   function texteEstimation(bl) {
     if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";
     return `Estimation d'après les cotes de la sélection et l'état que vous indiquez : ${bl.actuels} exemplaire${bl.actuels > 1 ? 's' : ''} sur ${bl.exemplaires - bl.sansCote} ` +
@@ -535,6 +542,7 @@
         <h3>Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+        ${lignePro(b, sel.k)}
         ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">

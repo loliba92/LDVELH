@@ -4,7 +4,8 @@
     python pipeline/add_prix.py 9782070583805 8 --etat tres_bon --type achat --date 2026-10-03 --url https://...
 
 Types : vente (vous avez vendu à ce prix), achat (vous avez acheté), releve (prix vu sur une annonce),
-        rachat (offre d'un professionnel). Une vente réelle compte plus qu'une annonce dans l'estimation.
+        rachat (offre d'un professionnel qui rachète), pro (prix de vente d'une boutique ou d'un reconditionneur,
+        série à part : plus élevée que les particuliers). Une vente réelle compte plus qu'une annonce dans l'estimation.
 Ensuite : python pipeline/build_db.py && python pipeline/export_site.py
 """
 import argparse
@@ -23,6 +24,7 @@ TYPES = {  # option -> (source, type_prix)
     "achat": ("achat_perso", "vente_reelle"),
     "releve": ("releve_manuel", "prix_demande"),
     "rachat": ("releve_manuel", "rachat"),
+    "pro": ("releve_manuel", "prix_pro"),
 }
 ETATS = ("convenable", "bon", "tres_bon")
 

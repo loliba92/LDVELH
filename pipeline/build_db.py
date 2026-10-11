@@ -46,6 +46,7 @@ TYPES = [  # code, libellé, poids, prix réel ?
     ("vente_reelle", "Vente réelle", 1.0, 1),
     ("vente_probable", "Vente probable (annonce disparue)", 0.6, 0),
     ("prix_demande", "Prix demandé (annonce active)", 0.3, 0),
+    ("prix_pro", "Prix de vente professionnel (boutique, reconditionneur)", 0.3, 0),
     ("rachat", "Prix de rachat par un professionnel", 0.4, 1),
     ("historique", "Prix historique", 0.2, 0),
 ]

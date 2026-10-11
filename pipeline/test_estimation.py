@@ -71,6 +71,10 @@ class TestEstimation(unittest.TestCase):
         r = estimer([Obs(25, "vente_reelle", date(2026, 10, 5), 1), Obs(30, "prix_demande", date(2026, 10, 10), 6)], AUJ)
         self.assertEqual((r["nature"], r["nb"]), ("ventes", 1))
 
+    def test_serie_professionnelle_estimee_a_part(self):
+        pro = estimer([Obs(75, "prix_pro", date(2026, 10, 10), 4)], AUJ)
+        self.assertEqual((pro["prix"], pro["nature"], pro["nb"]), (75, "professionnels", 4))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
