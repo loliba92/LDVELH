@@ -14,6 +14,14 @@
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+  const initiale = (b) => esc((b.serie || '?').trim().charAt(0).toUpperCase());
+  const miniature = (b) => (b.couverture
+    ? `<img class="jaq" src="${esc(b.couverture)}" alt="" width="44" height="62" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-i="${initiale(b)}">`
+    : `<span class="jaq jaq-vide" aria-hidden="true">${initiale(b)}</span>`);
+  const grande = (b) => (b.couverture
+    ? `<img class="jaq-grande" src="${esc(b.couverture.replace('/small/', '/medium/'))}" alt="Jaquette de ${esc(b.titre)}" width="150" height="212" decoding="async" referrerpolicy="no-referrer" data-i="${initiale(b)}">`
+    : '');
+
   let DATA = [];
   let META = {};
   let VERSIONS = [];
@@ -252,8 +260,8 @@
     const vus = tri.slice(0, limite);
     const lignes = vus.map((b) => `
       <tr class="cliquable" data-id="${esc(b.id)}">
-        <td class="principal titre-livre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button>
-          <span class="sous">${esc(b.serie)}${b.numero && b.numero !== '000' ? ' n° ' + esc(b.numero) : ''}</span></td>
+        <td class="principal titre-livre"><div class="livre">${miniature(b)}<div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button>
+          <span class="sous">${esc(b.serie)}${b.numero && b.numero !== '000' ? ' n° ' + esc(b.numero) : ''}</span></div></div></td>
         <td data-label="Version"><span class="badge">${esc(b.version)}</span></td>
         <td data-label="Année">${b.annee ?? '—'}</td>
         <td data-label="Éditeur">${esc(b.editeur || '—')}</td>
@@ -344,6 +352,8 @@
           <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button>
         </div>
         <p class="fiche-sous"><span class="badge">${esc(b.version)}</span> ${esc(b.serie)}${numero}${b.en_vente === 1 ? ' · encore en vente' : ''}</p>
+        <div class="fiche-corps">
+        ${grande(b)}
         <dl class="infos">
           ${ligne('Auteurs', esc(b.auteurs))}
           ${ligne('Traducteur', esc(b.traducteur))}
@@ -355,6 +365,7 @@
           ${ligne('ISBN', esc(b.isbn13))}
           ${ligne('Source', notice)}
         </dl>
+        </div>
         <h3>Prix de cette version</h3>
         <div class="mini-prix">
           ${ETATS.map((e) => `<div><span class="petit">${e.label}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}
@@ -381,6 +392,19 @@
     dlg.scrollTop = 0;
   }
 
+  // Une jaquette qui ne charge pas est remplacée par une tuile (l'événement « error » ne remonte pas : phase de capture)
+  document.addEventListener('error', (e) => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement)) return;
+    if (img.classList.contains('jaq') || img.classList.contains('jaq-grande')) {
+      const t = document.createElement('span');
+      t.className = img.classList.contains('jaq') ? 'jaq jaq-vide' : 'jaq-grande jaq-vide';
+      t.setAttribute('aria-hidden', 'true');
+      t.textContent = img.dataset.i || '?';
+      img.replaceWith(t);
+    }
+  }, true);
+
   document.addEventListener('click', (e) => {
     const bouton = e.target.closest('button[data-id]');
     if (bouton) { e.stopPropagation(); ouvrirFiche(bouton.dataset.id); }
@@ -392,6 +416,7 @@
       `Un livre sans prix pour un état est ignoré dans cette moyenne.</p>` +
       `<p>Source des prix : ${esc((META.sources_prix || []).join(', '))}.` +
       `${(META.types_prix || []).some((t) => t.startsWith('Vente réelle')) ? '' : " Ce ne sont pas des prix de vente constatés aujourd'hui."}</p>` +
+      `<p>Jaquettes : collection-ldvelh.fr (droits réservés aux éditeurs).</p>` +
       `<p>${META.nb_versions} versions · ${META.nb_livres} livres · ${META.nb_series} séries · données générées le ` +
       `${new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>`;
   }

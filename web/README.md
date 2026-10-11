@@ -10,6 +10,11 @@ python -m http.server 8000 --directory web
 
 puis ouvrir http://localhost:8000 (le site ne s'ouvre pas en double-cliquant sur le fichier : le navigateur refuse de lire les données).
 
+## En ligne
+
+Le site est publié par GitHub Pages à chaque envoi sur `main` (fichier `.github/workflows/pages.yml`), à l'adresse https://loliba92.github.io/LDVELH/ .
+Première fois seulement : dans le dépôt, **Settings → Pages → Build and deployment → Source : GitHub Actions**.
+
 ## Mettre à jour les données
 
 ```
@@ -24,6 +29,7 @@ python pipeline/export_site.py
 - **Regrouper par** série, version, année, décennie ou éditeur : une ligne par groupe avec sa moyenne ; un clic sur une ligne applique le groupe comme filtre.
 - **Fiche d'un livre** : informations, prix par état, et toutes les versions du même livre côte à côte.
 - Les filtres sont dans l'adresse de la page : on peut la copier pour partager une vue.
+- **Jaquettes** : miniature dans la liste, image plus grande dans la fiche. Les images ne sont pas copiées : elles sont chargées depuis collection-ldvelh.fr, et une tuile les remplace si l'image manque.
 - Sur téléphone, les filtres sont repliés et un résumé indique ceux qui sont actifs.
 
 ## Limite actuelle

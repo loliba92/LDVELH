@@ -146,8 +146,8 @@ def load_livres_versions(cx):
             cx.execute(
                 """INSERT INTO DimVersion(id,isbn13,isbn10,livre_key,serie_key,numero_version,libelle_version,
                    est_derniere_version,en_vente,titre_version,numero_serie,editeur,
-                   collection_editeur,annee,annee_bnf,pages,traducteur,illustrateur,notice_bnf,statut)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                   collection_editeur,annee,annee_bnf,pages,traducteur,illustrateur,notice_bnf,couverture,statut)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (r["id"], r.get("isbn13") or None, r.get("isbn10") or None, livre_key,
                  series_keys[serie_code(r)], n,
                  (r.get("version") or f"V{n}").strip(), int(n == derniere),
@@ -157,7 +157,7 @@ def load_livres_versions(cx):
                  int(r["annee_bnf"]) if (r.get("annee_bnf") or "").isdigit() else None,
                  int(r["pages"]) if (r.get("pages") or "").isdigit() else None,
                  r.get("traducteur") or None, r.get("illustrateur") or None,
-                 r.get("notice_bnf") or None, r.get("statut") or "brut"))
+                 r.get("notice_bnf") or None, r.get("couverture") or None, r.get("statut") or "brut"))
 
 
 def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot=0, url=None):

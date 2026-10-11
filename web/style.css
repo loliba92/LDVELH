@@ -161,7 +161,7 @@ dialog::backdrop { background: rgba(20, 16, 10, .55); }
 .mini-prix div { padding: 10px 12px; border: 1px solid var(--ligne); border-radius: 10px; background: var(--fond); }
 .mini-prix .petit { display: block; font-size: .78rem; color: var(--discret); }
 .mini-prix .valeur { font-size: 1.25rem; font-weight: 700; }
-.courant td { background: var(--accent-fond); }
+tr.courant { background: var(--accent-fond); }
 
 /* Tablette et téléphone */
 @media (max-width: 860px) {
@@ -198,4 +198,21 @@ dialog::backdrop { background: rgba(20, 16, 10, .55); }
 @media (min-width: 701px) {
   .filtres[hidden] { display: grid; }
   .resume { display: none !important; }
+}
+
+/* Jaquettes */
+.livre { display: flex; gap: 12px; align-items: flex-start; }
+.livre > div { min-width: 0; }
+.jaq { flex: none; display: block; width: 44px; height: 62px; object-fit: cover; border-radius: 3px; background: var(--ligne); box-shadow: 0 1px 3px rgba(31, 27, 22, .25); }
+.jaq-vide { display: flex; align-items: center; justify-content: center; background: var(--accent-fond); color: var(--accent); font-weight: 700; box-shadow: none; border: 1px solid var(--ligne); }
+.fiche-corps { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 4px; }
+.fiche-corps .infos { flex: 1; min-width: 0; }
+.jaq-grande { flex: none; display: block; width: 150px; height: 212px; object-fit: cover; border-radius: 4px; background: var(--ligne); box-shadow: 0 2px 8px rgba(31, 27, 22, .3); }
+.jaq-grande.jaq-vide { display: flex; font-size: 3rem; }
+@media (max-width: 700px) {
+  .fiche-corps { flex-direction: column; align-items: center; }
+  .fiche-corps .infos { width: 100%; }
+  .jaq-grande { width: 130px; height: 184px; }
+  table.cartes td.principal .livre { gap: 10px; }
+  table.cartes tr.courant { padding-left: 8px; padding-right: 8px; width: calc(100% + 16px); margin: 0 -8px; }
 }

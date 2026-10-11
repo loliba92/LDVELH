@@ -73,6 +73,8 @@ def main():
                 ligne["version"] = r["version"]
             if not ligne.get("livre"):
                 ligne["livre"] = nom_livre
+            if not ligne.get("couverture") and r.get("cover_url"):
+                ligne["couverture"] = r["cover_url"]
             if not ligne.get("en_vente") and r["version"] in EN_VENTE:
                 ligne["en_vente"] = EN_VENTE[r["version"]]
             completes += 1
@@ -80,6 +82,7 @@ def main():
         ligne = {"id": ident, "isbn13": isbn13, "isbn10": isbn10, "livre": nom_livre,
                  "titre": r["titre"], "version": r["version"], "en_vente": EN_VENTE.get(r["version"], ""),
                  "serie": serie, "numero": numero, "annee": (r.get("date") or "")[:4],
+                 "couverture": r.get("cover_url") or "",
                  "statut": "brut", "source": "collection-ldvelh", "date_maj": editions.today()}
         base.append(ligne)
         par_id[ident] = ligne

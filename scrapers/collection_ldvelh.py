@@ -56,7 +56,7 @@ nouveaux_livres = [
 ]
 
 FIELDNAMES = ['version', 'titre', 'prix', 'serie', 'rang_serie', 'note', 'numero', 'own', 'date', 'isbn',
-              'last_date', 'link', 'collection_percentage', 'prix_convenable', 'prix_bon_etat',
+              'last_date', 'link', 'cover_url', 'collection_percentage', 'prix_convenable', 'prix_bon_etat',
               'prix_tres_bon_etat']
 
 
@@ -111,6 +111,7 @@ def scrape_version(version, current_date):
     for book in page.find_all('div', {'data-titre': True}):
         lien = book.find('a', href=True)
         href = lien['href'] if lien else None
+        image = book.select_one('.tg-frontcover img')  # jaquette (petite taille)
         serie_brute = book.get('data-serie', '')
         serie, _, rang = serie_brute.partition('-')  # « Défis Fantastiques-01 » : série et rang dans la série
         titre = book['data-titre']
@@ -127,6 +128,7 @@ def scrape_version(version, current_date):
             'isbn': href.split('/')[-1] if href else None,
             'last_date': current_date,
             'link': href,
+            'cover_url': image.get('src') if image else None,
             'collection_percentage': percentages.get(titre, 'N/A'),
         }
         info.update(prices_by_condition.get(titre, {'prix_convenable': None, 'prix_bon_etat': None,

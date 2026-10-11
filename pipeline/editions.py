@@ -14,7 +14,7 @@ BASE = ROOT / "data" / "processed" / "editions.csv"
 
 COLUMNS = ["id", "isbn13", "isbn10", "livre", "titre", "version", "en_vente", "serie", "numero",
            "auteurs", "traducteur",
-           "illustrateur", "editeur", "collection_editeur", "annee", "annee_bnf", "pages", "notice_bnf",
+           "illustrateur", "editeur", "collection_editeur", "annee", "annee_bnf", "pages", "notice_bnf", "couverture",
            "statut", "source", "date_maj"]
 
 BNF_URL = "https://catalogue.bnf.fr/api/SRU"

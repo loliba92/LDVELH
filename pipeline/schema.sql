@@ -85,6 +85,7 @@ CREATE TABLE DimVersion (
     traducteur           TEXT,
     illustrateur         TEXT,
     notice_bnf           TEXT,
+    couverture           TEXT,                  -- adresse de la jaquette (petite taille)
     statut               TEXT NOT NULL          -- brut / enrichi / vérifié
 );
 

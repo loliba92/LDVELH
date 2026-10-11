@@ -20,7 +20,7 @@ REQUETE = """
 SELECT v.version_key, v.id, v.isbn13, v.titre_version, l.livre_id, l.titre AS livre, sr.nom AS serie,
        v.numero_serie, v.libelle_version, v.numero_version, v.est_derniere_version, v.en_vente,
        v.annee, v.annee_bnf, v.editeur, v.collection_editeur, v.pages, l.auteurs, v.traducteur,
-       v.illustrateur, v.notice_bnf, v.statut
+       v.illustrateur, v.notice_bnf, v.couverture, v.statut
 FROM DimVersion v
 JOIN DimLivre l ON l.livre_key = v.livre_key
 JOIN DimSerie sr ON sr.serie_key = v.serie_key
@@ -54,7 +54,7 @@ def main():
             "en_vente": r["en_vente"], "annee": r["annee"], "annee_bnf": r["annee_bnf"],
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
-            "notice": r["notice_bnf"], "statut": r["statut"],
+            "notice": r["notice_bnf"], "couverture": r["couverture"], "statut": r["statut"],
             "prix": {e: p.get(e, {}).get("prix") for e in ("convenable", "bon", "tres_bon")},
             "nb_obs": {e: p.get(e, {}).get("nb", 0) for e in ("convenable", "bon", "tres_bon")},
         })
