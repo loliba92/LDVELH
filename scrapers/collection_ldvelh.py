@@ -3,8 +3,10 @@
 Le site est « calé » sur la version 1 ; le menu « Changer d'Univers » bascule vers /version/V2, etc.
 Le choix est mémorisé par la session : on utilise donc une session par version.
 
-    python scrapers/collection_ldvelh.py
+    python scrapers/collection_ldvelh.py                 # les 5 versions
+    python scrapers/collection_ldvelh.py --versions V3   # une ou plusieurs versions seulement
 """
+import argparse
 import csv
 import time
 from collections import Counter
@@ -135,16 +137,25 @@ def scrape_version(version, current_date):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--versions', nargs='+', choices=VERSIONS, default=VERSIONS,
+                        help="versions à extraire (par défaut : toutes)")
+    args = parser.parse_args()
+    complet = list(args.versions) == VERSIONS
+
     current_date = datetime.now().strftime("%Y-%m-%d")
     books_data = []
-    for version in VERSIONS:
+    for version in args.versions:
         books_data += scrape_version(version, current_date)
-    for livre in nouveaux_livres:
-        books_data.append({**livre, 'version': 'V1', 'last_date': current_date})
+    if 'V1' in args.versions:
+        for livre in nouveaux_livres:
+            books_data.append({**livre, 'version': 'V1', 'last_date': current_date})
 
     output_dir = Path(__file__).resolve().parent.parent / 'data' / 'raw' / 'collection-ldvelh'
     output_dir.mkdir(parents=True, exist_ok=True)
-    filename = output_dir / f'books_data-{current_date}.csv'
+    # Un relevé partiel porte le nom des versions, pour ne pas écraser le relevé complet du jour
+    suffixe = '' if complet else '-' + '-'.join(args.versions)
+    filename = output_dir / f'books_data-{current_date}{suffixe}.csv'
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
         writer.writeheader()

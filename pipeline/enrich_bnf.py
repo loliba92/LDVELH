@@ -9,7 +9,9 @@ Pour chaque édition au statut « brut » ayant un ISBN :
 Un rapport des écarts est écrit dans data/processed/rapport_enrichissement.csv.
 
     python pipeline/enrich_bnf.py
+    python pipeline/enrich_bnf.py --revalider   # recontrôle l'ISBN des fiches déjà enrichies
 """
+import argparse
 import csv
 import difflib
 import re
@@ -44,10 +46,30 @@ def propre_collection(c):
     return c[:1].upper() + c[1:]
 
 
+def isbn_incoherent(r, fiche):
+    """Vrai si la notice annonce des ISBN et que celui de la fiche n'en fait pas partie."""
+    return bool(r["isbn13"] and fiche.get("isbns") and r["isbn13"] not in fiche["isbns"])
+
+
+def vide(r):
+    for c in CHAMPS:
+        r[c] = ""
+    r["statut"] = "brut"
+    r["source"] = "collection-ldvelh"
+
+
 def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--revalider", action="store_true",
+                    help="recontrôle les fiches enrichies dont l'année BnF s'écarte de plus de 2 ans")
+    args = ap.parse_args()
     rows = editions.load()
-    a_faire = [r for r in rows if (r["isbn13"] or r["statut"] == "brut") and (
-        r["statut"] in ("brut", "a_verifier") or (r["statut"] == "enrichi" and not r.get("annee_bnf")))]
+    if args.revalider:
+        a_faire = [r for r in rows if r["statut"] == "enrichi" and r["isbn13"] and r["annee"].isdigit()
+                   and r["annee_bnf"].isdigit() and abs(int(r["annee"]) - int(r["annee_bnf"])) > 2]
+    else:
+        a_faire = [r for r in rows if (r["isbn13"] or r["statut"] == "brut") and (
+            r["statut"] in ("brut", "a_verifier") or (r["statut"] == "enrichi" and not r.get("annee_bnf")))]
     print(f"{len(a_faire)} édition(s) à enrichir sur {len(rows)}")
     rapport, nb = [], {"enrichi": 0, "a_verifier": 0, "introuvable": 0, "erreur": 0}
     for i, r in enumerate(a_faire, start=1):
@@ -58,12 +80,23 @@ def main():
             rapport.append([r["id"], r["titre"], "", "", "erreur", str(e)[:80]])
             continue
         confirmation = "isbn"
-        if fiche is None:  # secours : recherche par titre, avec confirmation
+        if fiche is not None and isbn_incoherent(r, fiche):
+            # La notice trouvée porte d'autres ISBN : c'est un autre livre ou une autre édition
+            if args.revalider:
+                vide(r)
+            nb["a_verifier"] += 1
+            rapport.append([r["id"], r["titre"], fiche["titre"], "", "isbn_different",
+                            f"ISBN de la notice : {', '.join(fiche['isbns'])[:60]}"])
+            fiche = None
+            confirmation = "refuse"
+        if fiche is None and confirmation != "refuse":  # secours : recherche par titre, avec confirmation
             try:
-                fiche, confirmation = editions.lookup_bnf_titre(r["titre"], r["numero"], r["isbn13"])
+                fiche, confirmation = editions.lookup_bnf_titre(r["titre"], r["numero"], r["isbn13"], r.get("annee", ""))
             except Exception as e:
                 fiche, confirmation = None, ""
         if fiche is None:
+            if args.revalider:
+                vide(r)  # ancienne fiche non confirmée par l'ISBN : on retire les données douteuses
             nb["introuvable"] += 1
             rapport.append([r["id"], r["titre"], "", "", "introuvable", ""])
             continue

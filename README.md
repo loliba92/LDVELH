@@ -30,7 +30,9 @@ docs/                Choix techniques, schéma des données, indice de liquidit�
 
 ```
 pip install -r requirements.txt
-python scrapers/collection_ldvelh.py      # extraction du catalogue
+python scrapers/collection_ldvelh.py      # extraction des 5 versions (V1 à V5) du catalogue
+python pipeline/import_catalogue.py       # importe les versions dans editions.csv et les relie par titre
+python pipeline/enrich_bnf.py             # complète les fiches avec le catalogue de la BnF
 python pipeline/add_book.py ISBN          # ajouter un livre
 python pipeline/build_db.py               # (re)construire la base en étoile
 ```
@@ -39,7 +41,7 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 
 ## Avancement
 
-- [x] Catalogue historique extrait (190 livres + 5 ajouts manuels)
+- [x] Catalogue historique extrait : 5 versions, 430 éditions, 226 livres distincts
 - [ ] Sources de prix d'occasion
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
 - [ ] Site web

@@ -1,24 +1,132 @@
 id,titre_base,titre_bnf,similitude,resultat,remarque
-9782070333714,La Cité Interdite,La Cité interdite,1.00,enrichi,année 2003 vs BnF 1986
-9782070333844,Le Royaume de l'Oubli,Le Royaume de l'oubli,1.00,enrichi,année 2003 vs BnF 1987
-9782070332526,Le Sorcier de la Montagne de Feu,Le Sorcier de la montagne de feu,1.00,enrichi,année 1983 vs BnF 1986
 9782070332670,L'Île du Roi Lézard,L'Île du roi Lézard,1.00,enrichi,année 1984 vs BnF 1986
 9782070332687,La Citadelle du Chaos,La Citadelle du chaos,1.00,enrichi,année 1984 vs BnF 1986
 9782070332694,La Forêt de la Malédiction,La Forêt de la malédiction,1.00,enrichi,année 1984 vs BnF 1986
 9782070332700,La Galaxie Tragique,La Galaxie tragique,1.00,enrichi,année 1984 vs BnF 1986
 9782070332724,Le Labyrinthe de la Mort,Le Labyrinthe de la mort,1.00,enrichi,année 1984 vs BnF 1986
-9782070592265,Le Chasseur de Mages,Le chasseur de mages,1.00,enrichi,année 2003 vs BnF 1995
-9782070334018,Le Château de Dracula,Le Château de Dracula,1.00,enrichi,année 1991 vs BnF 1987
-9782070334087,L'Ombre de la Guillotine,L'Ombre de la guillotine,1.00,enrichi,année 1990 vs BnF 1987
-9782070334223,Le Carillon de la Mort,Le Carillon de la mort,1.00,enrichi,année 1995 vs BnF 1987
-9782070334728,La Métropole de la Peur,La Métropole de la peur,1.00,enrichi,année 2003 vs BnF 1987
 9782070566044,L'Ancienne Prophétie,L'ancienne prophétie,1.00,enrichi,trouvé par le titre (confirmation : numero)
 9782070567126,Les Murailles de Spyte,Les murailles de Spyte,1.00,enrichi,trouvé par le titre (confirmation : numero)
+LOCAL-L'Œil_Noir-001,L'Aventurie,L'Aventurie,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+LOCAL-L'Œil_Noir-003,Le Livre des Règles 2,Le Livre des règles. 2,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070544028,Le Tombeau du Vampire,Le tombeau du vampire (Nouv. présentation) Dave Morris ; trad. de l'anglais Patrick Floersheim ; ill. Leo Hartas,1.00,enrichi,année 2002 vs BnF 2000
+9782070584635,Le Dragon de la Nuit,Le dragon de la nuit,1.00,enrichi,année 1999 vs BnF 1997
+9782070542888,Le Trésor des pharaons,Le trésor des pharaons,1.00,enrichi,année 2002 vs BnF 2000
+9782070541812,La Guerre de Troie aura-t-elle lieu ?,La guerre de Troie aura t-elle lieu ?,1.00,enrichi,année 2002 vs BnF 2000
+9782070543540,Sacrifice chez les aztèques,Sacrifice chez les Aztèques,1.00,enrichi,année 2002 vs BnF 2000
+9782070595457,La Guerre des Runes,La guerre des runes,1.00,enrichi,année 1999 vs BnF 1997
+9782070512713,Le Peuple maudit,,,introuvable,
+9782070544035,Le Seigneur de l'Ombre,Dragon d'or,0.43,a_verifier,
+9782070660797,Rendez-vous avec la M.O.R.T,Rendez-vous avec la MORT (Nouvelle éd.) Steve Jackson ; illustrations de Declan Considine ; traduit de l'anglais par Arnaud Dupin de Beyssat,0.34,a_verifier,
+9782070509270,La Planète Rebelle,,,introuvable,
+9782070512645,Le Voleur d'Ames,,,introuvable,
+9782070509331,La Tour de la Destruction,,,introuvable,
+9782070512614,L'Arpenteur de la Lune,,,introuvable,
+9782070507023,Les Mercenaires du Levant,,,introuvable,
+9782070507030,Les Mondes de l'Aleph,,,introuvable,
+9782070507047,Le Siège de Sardath,,,introuvable,
+9782070506941,Retour à la Montagne de Feu,,,introuvable,
+9782070507054,Les Mages de Solani,,,introuvable,
+9782070506958,La Légende de Zagor,,,introuvable,
+9782070509348,Le Sépulcre des Ombres,,,introuvable,
+9782070509287,Le Voleur de Vie,,,introuvable,
+9782070509355,Les Chevaliers du Destin,,,introuvable,
+9782070512621,Le Chasseur de Mages,,,introuvable,
 9782070520312,Initiation au Jeu d'Aventure,,,introuvable,
 9782070520329,Les Accessoires du Maître,,,introuvable,
 9782070520343,Extension au Jeu d'Aventure,,,introuvable,
-LOCAL-L'Œil_Noir-001,L'Aventurie,L'Aventurie,1.00,a_verifier,trouvé par le titre (confirmation : titre)
 LOCAL-L'Œil_Noir-002,Le Livre des Règles,,,introuvable,
-LOCAL-L'Œil_Noir-003,Le Livre des Règles 2,Le Livre des règles. 2,1.00,a_verifier,trouvé par le titre (confirmation : titre)
 LOCAL-L'Œil_Noir-004,Le Livre des Aventures,,,introuvable,
 LOCAL-L'Œil_Noir-005,"Héros, Monstres et Forces Obscures",,,introuvable,
+9782075166805,Le Gouffre maudit,Le gouffre maudit (Nouvelle éd.) Joe Dever ; illustrations de Gary Chalk ; traduit de l'anglais par Camille Fabien,1.00,enrichi,année 2022 vs BnF 2024
+9782075168694,Les Maîtres des ténèbres (Edition Augmentée),Les maîtres des ténèbres (Éd. augmentée) Joe Dever ; illustrations de Richard Sampson (NerdGore) ; traduit de l'anglais par Sophie Brun et Camille Fabien,0.36,a_verifier,
+9782070506842,Les Grottes de Kalte,Les grottes de Kalte,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070509478,La Pierre de la Sagesse,,,introuvable,
+9782070512652,Dans l'Enfer de la Jungle,,,introuvable,
+9782070506897,L'Héritage de Vashna,,,introuvable,
+9782070512690,La Tour de Cristal,,,introuvable,
+9782070512683,La Porte d'Ombre,,,introuvable,
+9782070506903,Le Combat des Loups,,,introuvable,
+9782070506910,La Malédiction de Naar,,,introuvable,
+9782070509430,Le Voyage de la Pierre de Lune,,,introuvable,
+9782070512676,Les Pirates de Shadaki,,,introuvable,
+9782070506774,L'Antre des Dragons,,,introuvable,
+9782070509386,Le Voyage de l'Effroi,,,introuvable,
+9782070509393,Au Royaume de l'Epouvante,Au royaume de l'épouvante,1.00,enrichi,trouvé par le titre (confirmation : numero)
+9782070514571,Meurtre au Club Diogène,,,introuvable,
+9782070512706,L'Emeraude de la Rivière Noire,,,introuvable,
+9782070514564,Le Maître Chanteur d'Appledore,,,introuvable,
+9782070514540,Le Crime du Docteur Watson,,,introuvable,
+9782070514519,La Conspiration des Dynamiteurs,,,introuvable,
+9782070514557,Un Duel dans le Yorkshire,,,introuvable,
+9782070514526,Pour l'Honneur de la Reine,,,introuvable,
+9782070507016,L'Héritier Disparu,,,introuvable,
+9782070509256,Les Sept Serpents,,,introuvable,
+9782070509263,La Couronnes des Rois,,,introuvable,
+9782070506996,Le Mystère de Compton,,,introuvable,
+9782070507009,La Villa des Revenants,,,introuvable,
+9782070506859,La Traversée Infernale,La traversée infernale,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070506811,Le Gouffre Maudit,Le gouffre maudit,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070506835,La Forteresse Maudite,La forteresse maudite,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070506873,Dans les Entrailles de Torgar,Dans les entrailles de Torgar,1.00,a_verifier,trouvé par le titre (confirmation : titre)
+9782070506736,Le Sorcier Majdar,Le sorcier Majdar,1.00,enrichi,année 1999 vs BnF 1996
+9782070333714,La Cité Interdite,La Cité interdite,1.00,enrichi,année 2003 vs BnF 1986
+9782070506781,La Cité Interdite,La cité Interdite,1.00,enrichi,année 1999 vs BnF 1996
+9782070333844,Le Royaume de l'Oubli,Le Royaume de l'oubli,1.00,enrichi,année 2003 vs BnF 1987
+9782070544042,La Malédiction du Pharaon,La malédiction du pharaon (Nouv. éd.) Oliver Johnson ; trad. de l'anglais Laura Pitch ; ill. Mark Dunn,1.00,enrichi,année 2003 vs BnF 2000
+9782070332526,Le Sorcier de la Montagne de Feu,Le Sorcier de la montagne de feu,1.00,enrichi,année 1983 vs BnF 1986
+9782070509195,Le Sorcier de la Montagne de Feu,,,introuvable,
+9782070647408,Le Sorcier de la Montagne de Feu,Le sorcier de la montagne de feu,1.00,enrichi,année 2012 vs BnF 2007
+9782070511945,L'Ile du Roi Lézard,,,introuvable,
+9782070647415,La Citadelle du Chaos,La citadelle du chaos,1.00,enrichi,année 2012 vs BnF 2007
+9782070506927,La Forêt de la Malédiction,,,introuvable,
+9782070647422,La Forêt de malédiction,La forêt de la malédiction,1.00,enrichi,année 2012 vs BnF 2007
+9782070509201,La Cité des Voleurs,,,introuvable,
+9782070647439,La Cité des voleurs,La cité des voleurs,1.00,enrichi,année 2012 vs BnF 2007
+9782070509218,Le Labyrinthe de la Mort,,,introuvable,
+9782070509232,Le Manoir de l'Enfer,Le manoir de l'enfer,1.00,enrichi,année 1997 vs BnF 2002
+9782070506934,La Sorcière des Neiges,,,introuvable,
+9782070514588,Le Talisman de la Mort,,,introuvable,
+9782070506989,Le Mercenaire de l'Espace,,,introuvable,
+9782070509294,Défis sanglants sur l'Océan,,,introuvable,
+9782070514533,La Créature venue du Chaos,,,introuvable,
+9782075084499,La Crypte du Sorcier,La crypte du sorcier,1.00,enrichi,année 2017 vs BnF 2007
+9782070509300,Les Rôdeurs de la Nuit,,,introuvable,
+9782070509317,Le Vampire du Château Noir,,,introuvable,
+9782070509225,Les Sombres Cohortes,,,introuvable,
+9782070512638,Le Volcan de Zamarra,,,introuvable,
+9782070514502,Le Sceptre Noir,,,introuvable,
+9782070512607,L'Ancienne Prophétie,,,introuvable,
+9782070509324,Le Repaire des Morts Vivants,,,introuvable,
+9782070506965,La Légende des Guerriers Fantômes,,,introuvable,
+9782075084543,La Légende de Zagor,La légende de Zagor,1.00,enrichi,année 2017 vs BnF 2007
+9782070592265,Le Chasseur de Mages,Le chasseur de mages,1.00,enrichi,année 2003 vs BnF 1995
+9782070334018,Le Château de Dracula,Le Château de Dracula,1.00,enrichi,année 1991 vs BnF 1987
+9782070509362,Le Château de Dracula,,,introuvable,
+9782070506750,Frankenstein le Maudit,,,introuvable,
+9782070334087,L'Ombre de la Guillotine,L'Ombre de la guillotine,1.00,enrichi,année 1990 vs BnF 1987
+9782070334223,Le Carillon de la Mort,Le Carillon de la mort,1.00,enrichi,année 1995 vs BnF 1987
+9782070509485,Les Maîtres des Ténèbres,,,introuvable,
+9782070647323,Les Maîtres des ténèbres,Les maîtres des ténèbres,1.00,enrichi,année 2012 vs BnF 2006
+9782070647330,La Traversée infernale,La traversée infernale,1.00,enrichi,année 2012 vs BnF 2006
+9782070647347,Les Grottes de Kalte,Les grottes de Kalte,1.00,enrichi,année 2012 vs BnF 2006
+9782070647354,Le Gouffre maudit,Le gouffre maudit,1.00,enrichi,année 2012 vs BnF 2006
+9782070334728,La Métropole de la Peur,La Métropole de la peur,1.00,enrichi,année 2003 vs BnF 1987
+9782070512669,La Métropole de la Peur,,,introuvable,
+9782070506828,Les Prisonniers du Temps,,,introuvable,
+9782070649518,Les Prisonniers du Temps,Les prisonniers du temps,1.00,enrichi,année 2014 vs BnF 2006
+9782070509461,Le Crépuscule des Maîtres,,,introuvable,
+9782070509454,Les Druides de Cener,,,introuvable,
+9782070662234,Les Druides de Cener,Les druides de Cener,1.00,enrichi,année 2015 vs BnF 2006
+9782070509447,Le Captif du Roi Sorcier,,,introuvable,
+9782070506880,La Croisade du Désespoir,,,introuvable,
+9782070509409,La Horde des Démons,,,introuvable,
+9782070506743,Les Cryptes de la Terreur,,,introuvable,
+9782070509416,L'Ultime Combat de la Horde,,,introuvable,
+9782070509423,Les Maîtres du Mal,,,introuvable,
+9782070509379,Le Château des Ténèbres,,,introuvable,
+9782070506767,Les Portes de l'Au-delà,,,introuvable,
+9782070509614,Le Temps de la Malédiction,,,introuvable,
+9782070509621,Le Tombeau des Maléfices,,,introuvable,
+9782070509638,La Légion des Morts,,,introuvable,
+9782070509249,Les Collines Maléfiques,,,introuvable,
+9782070506972,La Cité des Pièges,,,introuvable,

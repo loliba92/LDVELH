@@ -118,11 +118,22 @@ def _fiche_depuis_notice(rec):
     pages = (re.search(r"(\d+)\s*p\.", fmt) or [None, ""])[1]
     ark = next((i for i in texts("identifier") if i.startswith("http")), "")
     isbn = next((i[5:] for i in texts("identifier") if i.startswith("ISBN ")), "")
+    isbns = []
+    for i in texts("identifier"):
+        if i.startswith("ISBN "):
+            try:
+                isbns.append(normalize_isbn(i[5:])[0])
+            except ValueError:
+                pass
+    for d in texts("description"):  # « Code à barres commercial : EAN 9782070583805 »
+        m = re.search(r"EAN\s*(\d{13})", d)
+        if m and m.group(1) not in isbns:
+            isbns.append(m.group(1))
     editeur = re.sub(r"\s*\(.*?\)", "", (texts("publisher") or [""])[0]).strip()
     return {"titre": titre, "auteurs": " ; ".join(auteurs), "traducteur": traducteur,
             "illustrateur": illustrateur, "editeur": editeur,
             "collection_editeur": collection, "annee": (texts("date") or [""])[0][:4],
-            "pages": pages, "notice_bnf": ark, "isbn": isbn, "numero_collection": numero_col,
+            "pages": pages, "notice_bnf": ark, "isbn": isbn, "isbns": isbns, "numero_collection": numero_col,
             "livre_jeu": "dont vous êtes le héros" in collection_brute.lower()}
 
 
@@ -138,11 +149,17 @@ def _sru(query, maximum, pause):
 
 def lookup_bnf(isbn13, isbn10, pause=1.0):
     """Cherche l'édition dans le catalogue de la BnF par ISBN. Renvoie un dict ou None."""
-    recs = _sru(f'bib.isbn all "{isbn10 or isbn13}"', 1, pause)
-    return _fiche_depuis_notice(recs[0]) if recs else None
+    # Les notices anciennes sont indexées par l'ISBN-10, les récentes par l'ISBN-13 : on essaie les deux.
+    for isbn in (isbn10, isbn13):
+        if not isbn:
+            continue
+        recs = _sru(f'bib.isbn all "{isbn}"', 1, pause)
+        if recs:
+            return _fiche_depuis_notice(recs[0])
+    return None
 
 
-def lookup_bnf_titre(titre, numero="", isbn13="", pause=1.0):
+def lookup_bnf_titre(titre, numero="", isbn13="", annee="", pause=1.0):
     """Recherche de secours par titre. Renvoie (fiche, confirmation) ou (None, '').
 
     confirmation : « isbn » (même ISBN), « numero » (même numéro de collection) ou
@@ -161,6 +178,9 @@ def lookup_bnf_titre(titre, numero="", isbn13="", pause=1.0):
         f = _fiche_depuis_notice(rec)
         ratio = difflib.SequenceMatcher(None, n(titre), n(f["titre"])).ratio()
         if ratio < 0.9:
+            continue
+        # Une autre édition du même titre (V1 de 1986 vs V5 de 2022) n'est pas la bonne notice
+        if annee.isdigit() and f["annee"].isdigit() and abs(int(annee) - int(f["annee"])) > 2:
             continue
         # Les chiffres doivent être identiques : « Livre des règles » ≠ « Livre des règles 2 »
         if re.findall(r"\d+", n(titre)) != re.findall(r"\d+", n(f["titre"])):
