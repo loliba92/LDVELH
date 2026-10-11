@@ -76,6 +76,8 @@ def feuille(courante, racine_a_propos="./#apropos"):
 </dialog>'''
 
 
+BANDEAU = '<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Les prix sont en cours d\'ajustement et de vérification.</p>'
+
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="le-projet.html">Le projet</a>
       <a href="confidentialite.html">Confidentialité</a>
@@ -109,6 +111,8 @@ def page(nom, corps):
 </head>
 <body class="annexe">
 <a class="evitement" href="#main">Aller au contenu</a>
+
+{BANDEAU}
 
 {entete(nom)}
 
@@ -152,7 +156,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h2>Comment les prix sont estimés</h2>
 <p><strong>Une cote est une estimation, jamais un prix fixé.</strong> Elle donne un ordre de grandeur, pas la somme qu'on obtiendra.</p>
 <ol>
-  <li><strong>Aujourd'hui, ce sont des cotes d'archives.</strong> Les prix viennent d'un ancien relevé du site collection-ldvelh.fr, qui n'est plus tenu à jour. Le guide le signale à l'accueil et sur chaque fiche d'édition.</li>
+  <li><strong>Aujourd'hui, ce sont des cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour. Le guide le signale à l'accueil et sur chaque fiche d'édition.</li>
   <li><strong>Des prix actuels sont en préparation.</strong> Ils viendront de ventes et d'achats réellement constatés, puis d'annonces en ligne lues par les interfaces officielles des plateformes, sous réserve de leurs conditions d'utilisation. De ces annonces, on ne garde que des chiffres d'ensemble (nombre, minimum, médiane, maximum) : ni titre d'annonce, ni vendeur.</li>
   <li><strong>La méthode est une médiane pondérée.</strong> Une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive. Un prix récent compte plus qu'un prix ancien : le poids d'une observation est divisé par deux tous les 90 jours. Une annonce reste un prix demandé, pas un prix payé : le guide ne la corrige pas et le signale.</li>
 </ol>
@@ -300,6 +304,8 @@ def page_collection(index_html):
 </head>
 <body class="annexe page-collection" data-page="collection">
 <a class="evitement" href="#main">Aller au contenu</a>
+
+{BANDEAU}
 
 {nav}
 

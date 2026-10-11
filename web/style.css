@@ -132,7 +132,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; 
 .formulaire[hidden] { display: none; }
 .champ { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 label, .etiquette { font: 700 .78rem var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-input[type="search"], select {
+input[type="search"], .deux input, select {
   width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r);
   background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); text-transform: none; letter-spacing: 0;
 }
@@ -444,9 +444,9 @@ dialog::backdrop { background: rgba(20, 13, 8, .62); }
 .hero-cta { margin: 18px 0 0; }
 
 /* Inventaire guidé */
-dialog.parcours { max-width: none; width: min(980px, calc(100vw - 16px)); height: min(94vh, 920px); max-height: none; padding: 0; overflow: hidden; }
+dialog.parcours { max-width: none; width: min(980px, calc(100vw - 16px)); height: fit-content; min-height: min(58vh, 540px); max-height: min(94vh, 920px); padding: 0; overflow: hidden; }
 dialog.parcours[open] { display: flex; }
-.parcours-cadre { display: flex; flex-direction: column; width: 100%; min-height: 0; }
+.parcours-cadre { display: flex; flex-direction: column; width: 100%; min-height: 0; flex: 1 1 auto; }
 .parcours-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 22px 12px; }
 .parcours-tete h2 { font-size: 2rem; letter-spacing: -0.015em; }
 .parcours-tete h2:focus { outline: none; }
@@ -515,7 +515,7 @@ dialog.parcours[open] { display: flex; }
 .bilan .coll-actions { margin-top: 14px; }
 
 @media (max-width: 700px) {
-  dialog.parcours { width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; border-left: 0; border-right: 0; }
+  dialog.parcours { width: 100vw; height: 100dvh; min-height: 0; max-height: 100dvh; border-radius: 0; border-left: 0; border-right: 0; }
   .parcours-tete { padding: 14px 14px 10px; }
   .parcours-tete h2 { font-size: 1.55rem; }
   .parcours-barre { margin: 0 14px; }
@@ -645,3 +645,19 @@ dialog.parcours[open] { display: flex; }
 .contenu-collection { max-width: 980px; padding-top: 28px; padding-bottom: 30px; }
 .contenu-collection .collection { margin: 0; }
 .menu a[aria-current="page"] { color: var(--gold); }
+
+/* Bandeau « site en construction » */
+.bandeau-chantier { margin: 0; padding: 8px 16px; background: #7a1f2b; color: #fbf7ec; text-align: center; font: 600 .92rem/1.35 var(--f-ui); border-bottom: 1px solid rgba(251, 247, 236, .25); text-wrap: balance; }
+.bandeau-chantier strong { font-weight: 800; letter-spacing: .02em; }
+
+/* Titre de l'accueil précédé de l'icône */
+.hero h1 { display: flex; align-items: center; gap: .28em; }
+.titre-icone { flex: none; width: 1.12em; height: 1.12em; border-radius: 50%; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+
+/* Histogramme : tranches à toucher */
+.histo.interactif .h-clic { fill: transparent; cursor: pointer; outline: none; }
+.histo.interactif .h-clic:hover { fill: color-mix(in srgb, var(--accent) 12%, transparent); }
+.histo.interactif .h-clic:focus-visible { stroke: var(--accent); stroke-width: 2; }
+.histo .h-choisie { fill: var(--accent); }
+.leg.filtre-actif { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#prix-etat { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }

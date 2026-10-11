@@ -35,7 +35,7 @@ ETATS = [  # code, libellé, rang, description
     ("neuf", "Neuf", 4, "Jamais lu, sous blister ou non"),
 ]
 SOURCES = [  # code, nom, famille, accès, fiabilité
-    ("collection_ldvelh", "collection-ldvelh.fr (historique)", "historique", "fichier", 0.3),
+    ("collection_ldvelh", "Relevé d'archives (historique)", "historique", "fichier", 0.3),
     ("ebay_api", "eBay (interface officielle)", "marketplace", "api", 0.8),
     ("vente_perso", "Mes ventes", "perso", "saisie", 1.0),
     ("achat_perso", "Mes achats", "perso", "saisie", 0.9),

@@ -28,7 +28,7 @@ python pipeline/export_site.py
 
 ## Limites actuelles
 
-Les prix sont **anciens** : ils viennent d'un relevé de collection-ldvelh.fr qui n'est plus mis à jour. Un bandeau le rappelle, ainsi que le pied de page et l'estimation du patrimoine.
+Les prix sont **anciens** : ils viennent d'un ancien relevé qui n'est plus mis à jour. Un bandeau le rappelle, ainsi que le pied de page et l'estimation du patrimoine.
 
 ## Anciennes versions
 

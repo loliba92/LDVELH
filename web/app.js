@@ -18,7 +18,6 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const SRC = '<span class="nowrap">collection-ldvelh.fr</span>';
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
   const numero = (b) => (b.numero && b.numero !== '000' ? ` n° ${b.numero}` : '');
@@ -30,7 +29,7 @@
   let S = {};
 
   const defaut = () => ({
-    q: '', serie: '', ed: '', amin: '', amax: '', vente: false, versions: new Set(VERSIONS),
+    q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, versions: new Set(VERSIONS),
     h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false,
   });
 
@@ -124,6 +123,8 @@
     $('#f-ed').addEventListener('change', (e) => { S.ed = e.target.value; changer(); });
     $('#f-amin').addEventListener('change', (e) => { S.amin = e.target.value; changer(); });
     $('#f-amax').addEventListener('change', (e) => { S.amax = e.target.value; changer(); });
+    $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
+    $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
     $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; changer(); });
     brancherParcours();
@@ -131,10 +132,11 @@
       if (e.target.checked) S.versions.add(e.target.value); else S.versions.delete(e.target.value);
       changer();
     });
-    $('#h-etats').addEventListener('change', (e) => { S.h = e.target.value; ecrireAdresse(); afficher(); });
+    $('#h-etats').addEventListener('change', (e) => { S.h = e.target.value; $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`; ecrireAdresse(); afficher(); });
     $('#f-vue').addEventListener('change', (e) => { S.vue = e.target.value; changer(); });
     $('#f-tri').addEventListener('change', (e) => { S.tri = e.target.value; changer(); });
     $('#f-groupe').addEventListener('change', (e) => { S.g = e.target.value; changer(); });
+    brancherHisto();
     $('#reinit').addEventListener('click', () => { const { h, vue, tri, g } = S; S = { ...defaut(), h, vue, tri, g }; synchroniser(); changer(); });
     $('#bascule').addEventListener('click', () => basculerSelecteur());
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
@@ -162,7 +164,9 @@
 
   function synchroniser() {
     $('#f-q').value = S.q; $('#f-serie').value = S.serie; $('#f-ed').value = S.ed;
-    $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
+    $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
+    $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
+    $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     document.querySelectorAll('#f-versions input').forEach((i) => { i.checked = S.versions.has(i.value); });
     document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
@@ -172,7 +176,7 @@
   function changer() { limite = PAR_PAGE; ecrireAdresse(); afficher(); }
 
   function nbFiltres() {
-    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.vente, S.mine, S.versions.size !== VERSIONS.length].filter(Boolean).length;
+    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.versions.size !== VERSIONS.length].filter(Boolean).length;
   }
   function resumeFiltres() {
     const t = [];
@@ -180,6 +184,7 @@
     if (S.serie) t.push(S.serie);
     if (S.ed) t.push(S.ed);
     if (S.amin || S.amax) t.push(S.amin && S.amax ? (S.amin === S.amax ? S.amin : `${S.amin}–${S.amax}`) : (S.amin ? `depuis ${S.amin}` : `jusqu'en ${S.amax}`));
+    if (S.pmin !== '' || S.pmax !== '') t.push(libTranche(S.pmin, S.pmax));
     if (S.versions.size !== VERSIONS.length) t.push([...S.versions].sort().join(', ') || 'aucune édition');
     if (S.vente) t.push('encore en vente');
     if (S.mine) t.push('ma collection');
@@ -208,6 +213,8 @@
     if (S.ed) p.set('ed', S.ed);
     if (S.amin) p.set('amin', S.amin);
     if (S.amax) p.set('amax', S.amax);
+    if (S.pmin !== '') p.set('pmin', S.pmin);
+    if (S.pmax !== '') p.set('pmax', S.pmax);
     if (S.vente) p.set('vente', '1');
     if (S.mine) p.set('mine', '1');
     if (S.versions.size !== d.versions.size) p.set('v', [...S.versions].join(','));
@@ -222,7 +229,7 @@
     const p = new URLSearchParams(location.hash.slice(1));
     S = defaut();
     S.q = p.get('q') || ''; S.serie = p.get('serie') || ''; S.ed = p.get('ed') || '';
-    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1';
+    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1';
     if (p.has('v')) S.versions = new Set(p.get('v').split(',').filter((v) => VERSIONS.includes(v)));
     if (ETATS.some((e) => e.k === p.get('h'))) S.h = p.get('h');
     if (['etagere', 'liste', 'groupe'].includes(p.get('vue'))) S.vue = p.get('vue');
@@ -231,15 +238,20 @@
   }
 
   /* ---------- Calculs ---------- */
-  function filtrer() {
+  const libTranche = (mini, maxi) => (mini !== '' && maxi !== '' ? `${fmtN(+mini)} à ${fmtN(+maxi)} €` : (mini !== '' ? `à partir de ${fmtN(+mini)} €` : `moins de ${fmtN(+maxi)} €`));
+  function filtrer(avecPrix = true) {
     const q = norm(S.q.trim());
+    const k = etatDe(S.h).k;
+    const pmin = avecPrix && S.pmin !== '' ? +S.pmin : null;
+    const pmax = avecPrix && S.pmax !== '' ? +S.pmax : null;
     const amin = S.amin ? +S.amin : null;
     const amax = S.amax ? +S.amax : null;
     return DATA.filter((b) =>
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]));
+      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) &&
+      ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
     const v = liste.map((b) => b.prix[k]).filter((x) => x != null).sort((a, b) => a - b);
@@ -258,7 +270,7 @@
   function legendePrix(b, k) {
     const i = infoPrix(b, k);
     if (b.prix[k] == null) return '';
-    if (!estActuel(i)) return `Cote d'archives (ancien relevé de ${SRC}) : un ordre de grandeur.`;
+    if (!estActuel(i)) return `Cote d'archives (ancien relevé) : un ordre de grandeur.`;
     const mot = NATURES[i.nature] || 'observation';
     const base = `${i.nb} ${mot}${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}`;
     const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
@@ -280,7 +292,7 @@
     majResume();
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     afficherCote(liste);
-    afficherHisto(liste);
+    afficherHisto();
     afficherCollection();
     $('#bloc-tri').hidden = S.vue === 'groupe';
     $('#bloc-groupe').hidden = S.vue !== 'groupe';
@@ -339,18 +351,20 @@
   }
   const pasAxe = (maxi) => [1, 2, 5, 10, 20, 25, 50, 100, 200, 500].find((p) => maxi / p <= 4) || 500;
 
-  function afficherHisto(liste) {
-    const e = etatDe(S.h);
-    const valeurs = liste.map((b) => b.prix[e.k]).filter((x) => x != null);
-    const zone = $('#histo');
-    $('#titre-histo').textContent = `Où se situent les prix · ${e.long.toLowerCase()}`;
-    $('#histo-chiffres').hidden = !valeurs.length;
+  /* Histogramme générique : zone, légende, note et tableau sont des éléments ; `valeurs` les prix à répartir.
+     Avec `choix`, chaque tranche est un bouton qui renvoie sa borne (mini, maxi) : maxi = null pour « à partir de ». */
+  function histogramme({ zone, legende, note, table, valeurs, etat, nom, choix, sel, vide }) {
+    zone.classList.toggle('interactif', !!choix);
+    const au = (n) => `${n} ${n > 1 ? nom.p : nom.s}`;
     if (!valeurs.length) {
-      zone.innerHTML = '<p class="vide-histo">Aucun prix pour cette sélection.</p>';
-      $('#histo-legende').innerHTML = ''; $('#histo-table').innerHTML = ''; $('#histo-note').textContent = '';
-      return;
+      zone.innerHTML = `<p class="vide-histo">${vide}</p>`;
+      legende.innerHTML = ''; table.innerHTML = ''; note.textContent = '';
+      return false;
     }
-    const st = stat(liste, e.k);
+    const tri = [...valeurs].sort((a, b) => a - b);
+    const n = tri.length;
+    const moy = tri.reduce((a, b) => a + b, 0) / n;
+    const med = n % 2 ? tri[(n - 1) / 2] : (tri[n / 2 - 1] + tri[n / 2]) / 2;
     const t = tranches(valeurs);
     const avecPlus = t.plus > 0;
     const nbBarres = t.nb + (avecPlus ? 1 : 0);
@@ -361,46 +375,79 @@
     const pw = W - m.g - m.d, ph = H - m.h - m.b, bw = pw / nbBarres;
     const pas = pasAxe(Math.max(...toutes));
     const ymax = Math.ceil(Math.max(...toutes) / pas) * pas;
-    const y = (n) => m.h + ph - (n / ymax) * ph;
+    const y = (c) => m.h + ph - (c / ymax) * ph;
     const xPrix = (v) => (v < t.limite ? m.g + (v / t.limite) * (t.nb * bw) : m.g + t.nb * bw + bw / 2);
+    const borne = (i) => (avecPlus && i === t.nb ? { mini: t.limite, maxi: null } : { mini: i * t.largeur, maxi: (i + 1) * t.largeur });
+    const choisie = (b) => !!sel && sel.mini !== '' && +sel.mini === b.mini && ((b.maxi === null && sel.maxi === '') || (b.maxi !== null && sel.maxi !== '' && +sel.maxi === b.maxi));
 
-    let svg = '', nombres = '';
+    let svg = '', nombres = '', zones = '';
     for (let g = 0; g <= ymax; g += pas) {
       svg += `<line class="${g === 0 ? 'h-axe' : 'h-grille'}" x1="${m.g}" x2="${W - m.d}" y1="${y(g)}" y2="${y(g)}"/>` +
              `<text class="h-txt" x="${m.g - 6}" y="${y(g) + 4}" text-anchor="end">${g}</text>`;
     }
-    toutes.forEach((n, i) => {
-      const plus = avecPlus && i === t.nb;
-      const debut = i * t.largeur;
-      const lib = plus ? `à partir de ${fmtN(t.limite)} €` : `de ${fmtN(debut)} à ${fmtN(debut + t.largeur)} €`;
+    toutes.forEach((c, i) => {
+      const b = borne(i), plus = b.maxi === null;
+      const lib = plus ? `à partir de ${fmtN(b.mini)} €` : `de ${fmtN(b.mini)} à ${fmtN(b.maxi)} €`;
       const x = m.g + i * bw + 1.5;
-      svg += `<rect class="${plus ? 'h-bar-plus' : 'h-bar'}" x="${x}" y="${y(n)}" width="${Math.max(1, bw - 3)}" height="${(n / ymax) * ph}" rx="2">` +
-             `<title>${lib} : ${n} livre${n > 1 ? 's' : ''}</title></rect>`;
-      if (n > 0 && bw >= 17) nombres += `<text class="h-n" x="${x + (bw - 3) / 2}" y="${y(n) - 4}" text-anchor="middle">${n}</text>`;
+      const on = choisie(b);
+      svg += `<rect class="${plus ? 'h-bar-plus' : 'h-bar'}${on ? ' h-choisie' : ''}" x="${x}" y="${y(c)}" width="${Math.max(1, bw - 3)}" height="${(c / ymax) * ph}" rx="2">` +
+             `<title>${lib} : ${au(c)}</title></rect>`;
+      if (c > 0 && bw >= 17) nombres += `<text class="h-n" x="${x + (bw - 3) / 2}" y="${y(c) - 4}" text-anchor="middle">${c}</text>`;
+      if (choix) {
+        zones += `<rect class="h-clic" tabindex="0" role="button" aria-pressed="${on}" data-mini="${b.mini}" data-maxi="${b.maxi === null ? '' : b.maxi}" ` +
+                 `aria-label="${on ? 'Retirer le filtre' : 'Ne garder que'} ${lib} : ${au(c)}" x="${m.g + i * bw}" y="${m.h}" width="${bw}" height="${ph}"/>`;
+      }
     });
     const pasEt = Math.max(1, Math.ceil(36 / bw));
     for (let i = 0; i <= t.nb; i += pasEt) {
       svg += `<text class="h-txt" x="${m.g + i * bw}" y="${H - 10}" text-anchor="${i === 0 ? 'start' : 'middle'}">${fmtN(i * t.largeur)}${i === 0 ? ' €' : ''}</text>`;
     }
     if (avecPlus) svg += `<text class="h-txt" x="${m.g + t.nb * bw + bw / 2}" y="${H - 10}" text-anchor="middle">+</text>`;
-    svg += `<line class="h-med" x1="${xPrix(st.med)}" x2="${xPrix(st.med)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
-    svg += `<line class="h-moy" x1="${xPrix(st.avg)}" x2="${xPrix(st.avg)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
-    svg += nombres;
-    zone.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" ` +
-      `aria-label="Histogramme des prix en ${esc(e.long.toLowerCase())} : ${valeurs.length} livres, médiane ${fmt(st.med)}, moyenne ${fmt(st.avg)}">${svg}</svg>`;
-    $('#histo-note').textContent =
-      `Chaque barre compte les livres dont le prix tombe dans la tranche (${fmtN(t.largeur)} € de large). ` +
-      `${valeurs.length} livre${valeurs.length > 1 ? 's' : ''} chiffré${valeurs.length > 1 ? 's' : ''}` +
-      `${avecPlus ? `, dont ${t.plus} à partir de ${fmtN(t.limite)} € regroupés dans la dernière barre` : ''}.`;
-    $('#histo-legende').innerHTML =
-      `<span class="leg"><i class="trait med"></i>Médiane ${fmt(st.med)}</span><span class="leg"><i class="trait"></i>Moyenne ${fmt(st.avg)}</span>` +
-      (st.avg >= t.limite ? '<span class="leg sous">La moyenne dépasse la dernière tranche affichée.</span>' : '');
-    $('#histo-table').innerHTML = '<table><thead><tr><th>Tranche de prix</th><th class="num">Livres</th><th class="num">Part</th></tr></thead><tbody>' +
-      toutes.map((n, i) => {
-        const plus = avecPlus && i === t.nb;
-        const d = i * t.largeur;
-        return `<tr><td>${plus ? `À partir de ${fmtN(t.limite)} €` : `${fmtN(d)} à ${fmtN(d + t.largeur)} €`}</td><td class="num">${n}</td><td class="num">${Math.round((n / valeurs.length) * 100)} %</td></tr>`;
+    svg += `<line class="h-med" x1="${xPrix(med)}" x2="${xPrix(med)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
+    svg += `<line class="h-moy" x1="${xPrix(moy)}" x2="${xPrix(moy)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
+    svg += nombres + zones;
+    zone.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="${choix ? 'group' : 'img'}" ` +
+      `aria-label="Histogramme des prix en ${esc(etat)} : ${au(n)}, médiane ${fmt(med)}, moyenne ${fmt(moy)}">${svg}</svg>`;
+    note.textContent =
+      `Chaque barre compte les ${nom.p} dont le prix tombe dans la tranche (${fmtN(t.largeur)} € de large). ` +
+      `${au(n)} chiffré${n > 1 ? 's' : ''}` +
+      `${avecPlus ? `, dont ${t.plus} à partir de ${fmtN(t.limite)} € regroupés dans la dernière barre` : ''}.` +
+      (choix ? ' Touchez une barre pour ne garder que les livres de cette tranche.' : '');
+    legende.innerHTML =
+      `<span class="leg"><i class="trait med"></i>Médiane ${fmt(med)}</span><span class="leg"><i class="trait"></i>Moyenne ${fmt(moy)}</span>` +
+      (moy >= t.limite ? '<span class="leg sous">La moyenne dépasse la dernière tranche affichée.</span>' : '') +
+      (choix && sel && (sel.mini !== '' || sel.maxi !== '')
+        ? `<span class="leg filtre-actif">Tranche gardée : <b>${libTranche(sel.mini, sel.maxi)}</b> <button type="button" class="bouton-lien" data-effacer-prix>Retirer</button></span>` : '');
+    table.innerHTML = `<table><thead><tr><th>Tranche de prix</th><th class="num">${nom.p.charAt(0).toUpperCase() + nom.p.slice(1)}</th><th class="num">Part</th></tr></thead><tbody>` +
+      toutes.map((c, i) => {
+        const b = borne(i);
+        return `<tr><td>${b.maxi === null ? `À partir de ${fmtN(b.mini)} €` : `${fmtN(b.mini)} à ${fmtN(b.maxi)} €`}</td><td class="num">${c}</td><td class="num">${Math.round((c / n) * 100)} %</td></tr>`;
       }).join('') + '</tbody></table>';
+    return true;
+  }
+
+  function afficherHisto() {
+    const e = etatDe(S.h);
+    const valeurs = filtrer(false).map((b) => b.prix[e.k]).filter((x) => x != null);   // sans la tranche : toutes les barres restent
+    $('#titre-histo').textContent = `Où se situent les prix · ${e.long.toLowerCase()}`;
+    const ok = histogramme({ zone: $('#histo'), legende: $('#histo-legende'), note: $('#histo-note'), table: $('#histo-table'),
+      valeurs, etat: e.long.toLowerCase(), nom: { s: 'livre', p: 'livres' }, choix: true, sel: { mini: S.pmin, maxi: S.pmax }, vide: 'Aucun prix pour cette sélection.' });
+    $('#histo-chiffres').hidden = !ok;
+  }
+  function brancherHisto() {
+    const zone = $('#histo');
+    const choisir = (el) => {
+      const mini = el.dataset.mini, maxi = el.dataset.maxi;
+      const dejà = S.pmin === mini && S.pmax === maxi;
+      S.pmin = dejà ? '' : mini; S.pmax = dejà ? '' : maxi;
+      synchroniser(); changer();
+      annonce(dejà ? 'Filtre de prix retiré.' : `Tranche gardée : ${libTranche(S.pmin, S.pmax)}.`);
+    };
+    zone.addEventListener('click', (e) => { const el = e.target.closest('.h-clic'); if (el) choisir(el); });
+    zone.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('h-clic')) { e.preventDefault(); choisir(e.target); } });
+    $('#histo-legende').addEventListener('click', (e) => {
+      if (e.target.closest('[data-effacer-prix]')) { S.pmin = ''; S.pmax = ''; synchroniser(); changer(); annonce('Filtre de prix retiré.'); }
+    });
   }
 
   /* ---------- Étagère (jaquettes) ---------- */
@@ -549,7 +596,7 @@
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${fmt(x.prix[sel.k])}</span></button>`).join('')}</div>` : ''}
-        ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un relevé de ${SRC} qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
+        ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
       </div>`;
     const dlg = $('#fiche');
     brancherFicheCollection(b);
@@ -692,12 +739,23 @@
           </div>
         </div>
       </div>
+      <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
+      <p class="sous" id="coll-histo-note"></p>
+      <div id="coll-histo" class="histo"></div>
+      <div class="legende" id="coll-histo-legende"></div>
+      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>
       <h3>Par série</h3>
       <table class="cartes groupes"><thead><tr><th>Série</th><th class="num">Titres possédés</th><th class="num">Exemplaires</th><th class="num">Valeur estimée</th></tr></thead><tbody>${lignesSerie}</tbody></table>
       ${pieces.length ? `<h3>Vos pièces les plus cotées</h3><div class="pieces">${htmlPieces}</div>` : ''}
       <h3>Vos exemplaires</h3>
       <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody>${lignesEx}</tbody></table>
       ${reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : ''}`;
+    // répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état
+    const valeursColl = [];
+    bl.lignes.forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
+    const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
+      valeurs: valeursColl, etat: 'l\'état de chaque exemplaire', nom: { s: 'exemplaire', p: 'exemplaires' }, choix: false, vide: 'Aucun exemplaire n\'a de cote.' });
+    $('#coll-histo-chiffres').hidden = !okH;
   }
   let limiteColl = 30;
 
@@ -705,6 +763,8 @@
     construireLampe();
     brancherCollection();
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
+    let attente;
+    window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
     afficher();
     if (new URLSearchParams(location.search).has('inventaire')) {
       history.replaceState(null, '', location.pathname + location.hash);
@@ -1233,8 +1293,8 @@
     $('#etats-def').innerHTML = ETATS.map((e) =>
       `<strong>${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</strong> : ${esc(minus(e.def.replace(' TBE signifie « très bon état ».', '')))}`).join('<br>');
     $('#pied-sources').innerHTML = prixAnciens()
-      ? `Prix : ancien relevé du site ${SRC}, qui n'est plus mis à jour. Ils indiquent un ordre de grandeur, pas la cote du jour.`
-      : `Prix : cotes d'archives du site ${SRC}, complétées pour ${nbActuels()} cote${nbActuels() > 1 ? 's' : ''} par des prix actuels (annonces et ventes constatées). Une annonce est un prix demandé, pas un prix payé.`;
+      ? `Prix : ancien relevé, qui n'est plus mis à jour. Ils indiquent un ordre de grandeur, pas la cote du jour.`
+      : `Prix : cotes d'archives (ancien relevé), complétées pour ${nbActuels()} cote${nbActuels() > 1 ? 's' : ''} par des prix actuels (annonces et ventes constatées). Une annonce est un prix demandé, pas un prix payé.`;
     const avis = $('#avis-prix');
     if (avis) avis.innerHTML = prixAnciens()
       ? "<strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour."

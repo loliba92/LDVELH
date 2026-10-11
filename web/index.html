@@ -26,6 +26,8 @@
 <body data-page="accueil">
 <a class="evitement" href="#main">Aller au contenu</a>
 
+<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Les prix sont en cours d'ajustement et de vérification.</p>
+
 <header class="bandeau">
   <div class="cadre bandeau-in">
     <a class="marque" href="#haut" aria-label="La Cote du Héros, accueil">
@@ -49,7 +51,7 @@
   <div class="cadre hero-in">
     <div class="hero-texte">
       <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
-      <h1>La Cote du Héros</h1>
+      <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
       <p class="chapeau">Choisissez une série, une édition, une époque. Le guide calcule aussitôt la cote moyenne de votre sélection, de l'exemplaire convenable au très bon état, et montre où se répartissent les prix.</p>
       <ul class="chiffres-hero" id="chiffres-hero" aria-label="Contenu du guide"></ul>
       <p class="hero-cta"><button type="button" class="bouton" data-parcours id="hero-parcours">Constituer ma collection pas à pas</button>
@@ -87,6 +89,14 @@
           <select id="f-amin" aria-label="Première année"></select>
           <span aria-hidden="true">à</span>
           <select id="f-amax" aria-label="Dernière année"></select>
+        </div>
+      </div>
+      <div class="champ" role="group" aria-labelledby="lib-prix">
+        <span class="etiquette" id="lib-prix">Prix <small id="prix-etat"></small></span>
+        <div class="deux">
+          <input type="number" id="f-pmin" min="0" step="1" inputmode="numeric" placeholder="Min. €" aria-label="Prix minimum, en euros">
+          <span aria-hidden="true">à</span>
+          <input type="number" id="f-pmax" min="0" step="1" inputmode="numeric" placeholder="Max. €" aria-label="Prix maximum, en euros">
         </div>
       </div>
       <div class="champ" role="group" aria-labelledby="lib-editions">
