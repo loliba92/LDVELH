@@ -35,6 +35,8 @@
   });
 
   /* ---------- Chargement ---------- */
+  const PAGE = document.body.dataset.page || 'accueil';   // « accueil » ou « collection »
+
   async function charger() {
     try {
       const [v, m] = await Promise.all([
@@ -50,6 +52,8 @@
     DATA.forEach((b) => { b._txt = norm([b.titre, b.livre, b.auteurs, b.isbn13, b.serie, b.editeur].join(' ')); });
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
     S = defaut();
+    chargerColl();
+    if (PAGE === 'collection') { initPageCollection(); return; }
     construireHero();
     construireControles();
     lireAdresse();
@@ -122,7 +126,7 @@
     $('#f-amax').addEventListener('change', (e) => { S.amax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
     $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; changer(); });
-    brancherCollection();
+    brancherParcours();
     $('#f-versions').addEventListener('change', (e) => {
       if (e.target.checked) S.versions.add(e.target.value); else S.versions.delete(e.target.value);
       changer();
@@ -268,6 +272,7 @@
 
   /* ---------- Affichage général ---------- */
   function afficher() {
+    if (PAGE === 'collection') { afficherCollection(); return; }
     const liste = filtrer();
     const nf = nbFiltres();
     $('#nb-filtres').textContent = nf ? String(nf) : '';
@@ -620,6 +625,7 @@
       $(sel).textContent = n ? String(n) : '';
       $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
     });
+    if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
     $('#coll-prive').innerHTML = (stockageOk
       ? 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder ou la retrouver sur un autre appareil.'
@@ -695,8 +701,18 @@
   }
   let limiteColl = 30;
 
+  function initPageCollection() {
+    construireLampe();
+    brancherCollection();
+    $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
+    afficher();
+    if (new URLSearchParams(location.search).has('inventaire')) {
+      history.replaceState(null, '', location.pathname + location.hash);
+      ouvrirParcours();
+    }
+  }
+
   function brancherCollection() {
-    chargerColl();
     // actions de la carte (déléguées : la carte est redessinée à chaque changement)
     $('#collection').addEventListener('change', (e) => {
       const id = e.target.dataset.etat || e.target.dataset.qte;
@@ -717,7 +733,7 @@
         }
       }
     });
-    brancherParcours();
+    brancherParcours();                 // l'inventaire guidé est ouvert depuis la page collection
     $('#imp-go').addEventListener('click', () => importerTexte($('#imp-texte').value));
     $('#imp-fichier').addEventListener('change', async (e) => {
       const f = e.target.files[0];
@@ -1191,7 +1207,10 @@
       }
       if (act === 'debut') { P.phase = 'series'; rendre(); return; }
       if (act === 'fin') { P.phase = 'fin'; rendre(); return; }
-      if (act === 'voir') { dlg.close(); $('#collection').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      if (act === 'voir') {
+        if (PAGE === 'collection') { dlg.close(); $('#collection').scrollIntoView({ behavior: 'smooth', block: 'start' }); } else location.href = 'collection.html';
+        return;
+      }
       if (act === 'suiv') {
         if (P.phase === 'series') P.phase = 'editions';
         else if (P.phase === 'editions') { construireFile(); P.i = 0; P.phase = P.file.length ? 'liste' : 'fin'; }
@@ -1247,7 +1266,7 @@
   let invite = null;
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); invite = e; const b = $('#installer'); if (b) b.hidden = false; });
   window.addEventListener('appinstalled', () => { invite = null; const b = $('#installer'); if (b) b.hidden = true; });
-  $('#installer').addEventListener('click', async () => {
+  if ($('#installer')) $('#installer').addEventListener('click', async () => {
     if (!invite) return;
     invite.prompt();
     await invite.userChoice.catch(() => null);

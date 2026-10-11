@@ -9,7 +9,7 @@ Vérification faite dans le code le 11 octobre 2026 ; ce n'est pas un avis jurid
 - Hébergement : GitHub Pages (GitHub, Inc.).
 
 ## Pages
-`le-projet.html`, `confidentialite.html`, `mentions-legales.html`, produites par `python pipeline/construire_pages.py`. Liens en pied de page de l'accueil et des trois pages (vérifié fichier par fichier) ; `web/v2/index.html` n'est qu'une redirection vers l'accueil. Sur téléphone, accès par la feuille « Plus » de la barre du bas.
+`collection.html`, `le-projet.html`, `confidentialite.html`, `mentions-legales.html`, produites par `python pipeline/construire_pages.py`. Liens en pied de page de l'accueil et des trois pages (vérifié fichier par fichier) ; `web/v2/index.html` n'est qu'une redirection vers l'accueil. Sur téléphone, accès par la feuille « Plus » de la barre du bas.
 
 ## Ne s'applique pas, et pourquoi
 Bandeau cookies et page cookies (aucun traceur) ; CGV et médiateur de la consommation (aucune vente) ; CGU (aucun compte ni contenu d'utilisateur) ; formulaires (il n'y en a pas) ; déclaration d'accessibilité (éditeur personnel, sans activité commerciale).

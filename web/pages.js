@@ -19,7 +19,7 @@
   try {
     var coll = JSON.parse(localStorage.getItem('cote-collection-v1') || '{}') || {};
     var n = Object.keys(coll).reduce(function (a, k) { return a + (coll[k].qte || 1); }, 0);
-    var lien = document.querySelector('#barre-bas a[href="./#collection"]');
+    var lien = document.querySelector('#barre-bas a[href="collection.html"]');
     if (lien && n) {
       var pastille = document.createElement('b');
       pastille.className = 'nb-coll';

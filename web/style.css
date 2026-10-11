@@ -74,7 +74,7 @@ a { color: var(--accent); text-underline-offset: 3px; }
 abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
 h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; margin: 0; letter-spacing: 0; }
 .hero h1 { letter-spacing: -0.03em; }
-.cote h2, .etagere h2, .collection h2, .pied h2 { letter-spacing: -0.015em; }
+.cote h2, .etagere h2, .collection h1, .collection h2, .pied h2 { letter-spacing: -0.015em; }
 
 /* Bandeau noyer */
 .bandeau { background: var(--walnut); color: var(--walnut-text); border-bottom: 3px double var(--brass); }
@@ -157,7 +157,7 @@ input[type="search"], select {
 .contenu { display: grid; gap: 28px; min-width: 0; }
 .cote, .etagere, .collection { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 22px; min-width: 0; }
 .cote-tete, .etagere-tete { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 3px double var(--line); }
-.cote h2, .etagere h2, .collection h2 { font-size: 1.9rem; }
+.cote h2, .etagere h2, .collection h1, .collection h2 { font-size: 1.9rem; }
 .compte { margin: 0; color: var(--muted); font-style: italic; font-family: var(--f-display); font-size: 1.2rem; font-weight: 500; }
 .cote-corps { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 26px; align-items: center; }
 .sceau { position: relative; width: 224px; height: 224px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border-radius: 50%;
@@ -330,7 +330,7 @@ dialog::backdrop { background: rgba(20, 13, 8, .62); }
   .eventail img:nth-child(2) { transform: translateX(calc(-50% - 74px)) rotate(-6deg) translateY(-8px); }
   .eventail img:nth-child(4) { transform: translateX(calc(-50% + 74px)) rotate(6deg) translateY(-8px); }
   .cote, .etagere, .collection { padding: 16px; }
-  .cote h2, .etagere h2, .collection h2 { font-size: 1.6rem; }
+  .cote h2, .etagere h2, .collection h1, .collection h2 { font-size: 1.6rem; }
   .cote-corps { grid-template-columns: 1fr; gap: 18px; }
   .sceau { width: 200px; height: 200px; }
   .sceau-prix { font-size: 2.7rem; }
@@ -579,8 +579,8 @@ dialog.parcours[open] { display: flex; }
   .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 2px;
     background: none; border: 0; color: var(--walnut-text); font: 600 .72rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
   .barre-bas svg { flex: none; }
-  .barre-bas a[aria-current="location"], .barre-bas button[aria-current="page"] { color: var(--gold); }
-  .barre-bas a[aria-current="location"]::before, .barre-bas button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; background: var(--gold); border-radius: 0 0 3px 3px; }
+  .barre-bas a[aria-current], .barre-bas button[aria-current="page"] { color: var(--gold); }
+  .barre-bas a[aria-current]::before, .barre-bas button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; background: var(--gold); border-radius: 0 0 3px 3px; }
   .barre-bas .barre-centre { color: var(--gold); }
   .barre-bas .barre-centre svg { width: 34px; height: 34px; padding: 5px; margin-top: -14px; border-radius: 50%; background: var(--gold); color: var(--walnut); border: 3px solid var(--walnut); box-shadow: 0 0 0 1px var(--gold); }
   .barre-bas a:focus-visible, .barre-bas button:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; border-radius: 6px; }
@@ -639,4 +639,9 @@ dialog.parcours[open] { display: flex; }
 .pied-liens a { display: inline-flex; align-items: center; min-height: 44px; color: var(--gold); font-weight: 600; text-underline-offset: 3px; }
 .annexe .pied { margin-top: 12px; }
 .annexe .pied-liens { margin-top: 0; border-top: 0; padding-top: 0; }
+.menu a[aria-current="page"] { color: var(--gold); }
+
+/* Page « Ma collection » */
+.contenu-collection { max-width: 980px; padding-top: 28px; padding-bottom: 30px; }
+.contenu-collection .collection { margin: 0; }
 .menu a[aria-current="page"] { color: var(--gold); }

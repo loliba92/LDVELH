@@ -38,7 +38,7 @@ def entete(courante):
     </a>
     <nav class="menu" aria-label="Navigation">
       <a href="./#cote">La cote</a>
-      <a href="./#collection">Ma collection</a>
+      <a href="collection.html">Ma collection</a>
       <a href="./#etagere">L'étagère</a>
       {lien("le-projet.html", "Le projet", "le-projet.html")}
       <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
@@ -55,7 +55,7 @@ def barre(courante):
   <a href="./#cote">{ico('<path d="M5 20V11M12 20V5M19 20v-7"/>')}<span>La cote</span></a>
   <a href="./#etagere">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">{ico('<path d="M12 5v14M5 12h14"/>')}<span>Inventaire</span></a>
-  <a href="./#collection">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
+  <a href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>')}<span>Plus</span></button>
 </nav>'''
 
@@ -258,7 +258,82 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 '''
 
 
+COLLECTION_SECTION = '    <section class="collection" id="collection" aria-labelledby="titre-collection">\n      <div class="cote-tete">\n        <h2 id="titre-collection">Ma collection</h2>\n        <p class="compte" id="coll-compte"></p>\n      </div>\n      <div id="coll-corps"></div>\n      <details class="importer" id="importer">\n        <summary>Importer une liste</summary>\n        <div class="importer-corps">\n          <p class="sous">Collez des ISBN (un par ligne ou séparés par des espaces), éventuellement suivis de l\'état (convenable, bon, TBE) et du nombre d\'exemplaires. Vous pouvez aussi charger un fichier exporté d\'ici (JSON ou CSV), ou un simple fichier texte.</p>\n          <label for="imp-texte">Liste d\'ISBN</label>\n          <textarea id="imp-texte" rows="5" placeholder="9782070583805 bon 1&#10;9782075100649 TBE 2"></textarea>\n          <div class="importer-actions">\n            <button type="button" class="bouton" id="imp-go">Ajouter à ma collection</button>\n            <label class="bouton bouton-clair" for="imp-fichier">Charger un fichier</label>\n            <input type="file" id="imp-fichier" accept=".json,.csv,.txt,text/plain,application/json" hidden>\n          </div>\n          <p class="statut" id="imp-statut" role="status" aria-live="polite"></p>\n        </div>\n      </details>\n      <p class="sous prive" id="coll-prive"></p>\n    </section>\n\n'
+
+
+def barre_collection():
+    """Barre du bas de la page collection : l'inventaire ouvre sa fenêtre sur place, « Ma collection » est la page en cours."""
+    b = barre("collection.html")
+    b = b.replace('<a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">',
+                  '<button type="button" class="barre-centre" data-parcours aria-label="Inventaire guidé de ma collection">')
+    b = b.replace('<span>Inventaire</span></a>', '<span>Inventaire</span></button>')
+    b = b.replace('<a href="collection.html">', '<a href="collection.html" aria-current="page">')
+    return b.replace('<span>Ma collection</span></a>', '<span>Ma collection</span><b class="nb-coll" id="nb-coll-bas"></b></a>')
+
+
+def page_collection(index_html):
+    """Page « Ma collection » : la section, l'inventaire guidé et la fiche viennent de l'accueil (une seule source)."""
+    import re
+    dlg = lambda ident: re.search(r'<dialog[^>]*id="%s".*?</dialog>' % ident, index_html, re.S).group(0)
+    nav = entete("collection.html").replace('<a href="collection.html">Ma collection</a>', '<a href="collection.html" aria-current="page">Ma collection <span class="nb-coll" id="nb-coll"></span></a>')
+    bar = barre_collection()
+    return f'''<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ma collection · La Cote du Héros</title>
+<meta name="description" content="Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2a1c13">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="stylesheet" href="style.css">
+<script>
+  try {{ var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; }} catch (e) {{}}
+</script>
+</head>
+<body class="annexe page-collection" data-page="collection">
+<a class="evitement" href="#main">Aller au contenu</a>
+
+{nav}
+
+<main id="main" class="cadre contenu-collection">
+{COLLECTION_SECTION.replace('<h2 id="titre-collection">Ma collection</h2>', '<h1 id="titre-collection">Ma collection</h1>')}</main>
+
+<footer class="pied">
+  <div class="cadre pied-in">
+    {PIED_LIENS}
+    <p class="sous">La Cote du Héros · guide indépendant, sans publicité. Votre collection reste dans votre navigateur : voir <a href="confidentialite.html">Confidentialité</a>.</p>
+  </div>
+</footer>
+
+{bar}
+
+{feuille("collection.html")}
+
+<div class="sr-only" id="annonce" role="status" aria-live="polite"></div>
+
+{dlg("parcours")}
+
+{dlg("fiche")}
+
+<script src="plus.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
+'''
+
+
 def main():
+    index_html = (WEB / "index.html").read_text(encoding="utf-8")
+    (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
+    print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS)):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)

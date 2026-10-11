@@ -115,3 +115,9 @@ Emblème fourni par le propriétaire (mage encapuchonné, or sur noir), conserv�
 ## Barre de menu du bas (téléphones)
 
 Sous 700 px de large, une barre fixe en bas remplace les liens de l'en-tête (qui n'est pas collant et masque ses liens sur téléphone) : La cote, L'étagère, **Inventaire** (bouton central, ouvre l'inventaire guidé), Ma collection (avec le nombre d'exemplaires) et À propos. Chaque entrée a une icône et un libellé ; l'entrée de la section en cours est dorée (`aria-current="location"`, suivie par un `IntersectionObserver`). La barre respecte la zone sûre des iPhone, laisse de la place en bas de page, et se masque pendant la saisie au clavier. Sur ordinateur, elle n'existe pas : le menu du haut reste inchangé.
+
+## Organisation des pages
+
+- **Accueil (`index.html`)** : le filtre à gauche ; à droite, la cote de la sélection puis, en dessous, l'étagère.
+- **Ma collection (`collection.html`)** : page dédiée (estimation, répartition par série, pièces les plus cotées, exemplaires, import et export, inventaire guidé). Elle est générée par `pipeline/construire_pages.py`, et `app.js` s'adapte à la page (`data-page`). Le menu du haut et la barre du bas y mènent ; la pastille indique le nombre d'exemplaires.
+- **Pages annexes** : Le projet, Confidentialité, Mentions légales (voir plus haut).

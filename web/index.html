@@ -23,7 +23,7 @@
   try { var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
 </script>
 </head>
-<body>
+<body data-page="accueil">
 <a class="evitement" href="#main">Aller au contenu</a>
 
 <header class="bandeau">
@@ -34,7 +34,7 @@
     </a>
     <nav class="menu" aria-label="Navigation">
       <a href="#cote">La cote</a>
-      <a href="#collection">Ma collection <span class="nb-coll" id="nb-coll"></span></a>
+      <a href="collection.html">Ma collection <span class="nb-coll" id="nb-coll"></span></a>
       <a href="#etagere">L'étagère</a>
       <a href="#apropos">À propos</a>
       <a href="le-projet.html">Le projet</a>
@@ -127,29 +127,6 @@
       </div>
     </section>
 
-    <section class="collection" id="collection" aria-labelledby="titre-collection">
-      <div class="cote-tete">
-        <h2 id="titre-collection">Ma collection</h2>
-        <p class="compte" id="coll-compte"></p>
-      </div>
-      <div id="coll-corps"></div>
-      <details class="importer" id="importer">
-        <summary>Importer une liste</summary>
-        <div class="importer-corps">
-          <p class="sous">Collez des ISBN (un par ligne ou séparés par des espaces), éventuellement suivis de l'état (convenable, bon, TBE) et du nombre d'exemplaires. Vous pouvez aussi charger un fichier exporté d'ici (JSON ou CSV), ou un simple fichier texte.</p>
-          <label for="imp-texte">Liste d'ISBN</label>
-          <textarea id="imp-texte" rows="5" placeholder="9782070583805 bon 1&#10;9782075100649 TBE 2"></textarea>
-          <div class="importer-actions">
-            <button type="button" class="bouton" id="imp-go">Ajouter à ma collection</button>
-            <label class="bouton bouton-clair" for="imp-fichier">Charger un fichier</label>
-            <input type="file" id="imp-fichier" accept=".json,.csv,.txt,text/plain,application/json" hidden>
-          </div>
-          <p class="statut" id="imp-statut" role="status" aria-live="polite"></p>
-        </div>
-      </details>
-      <p class="sous prive" id="coll-prive"></p>
-    </section>
-
     <section class="etagere" id="etagere" aria-labelledby="titre-etagere">
       <div class="etagere-tete">
         <h2 id="titre-etagere">Sur l'étagère</h2>
@@ -221,7 +198,7 @@
   <a href="#cote" data-sec="cote"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-7"/></svg><span>La cote</span></a>
   <a href="#etagere" data-sec="etagere"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
   <button type="button" class="barre-centre" data-parcours aria-label="Inventaire guidé de ma collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Inventaire</span></button>
-  <a href="#collection" data-sec="collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span><b class="nb-coll" id="nb-coll-bas"></b></a>
+  <a href="collection.html"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span><b class="nb-coll" id="nb-coll-bas"></b></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg><span>Plus</span></button>
 </nav>
 
