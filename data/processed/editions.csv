@@ -1,0 +1,196 @@
+id,isbn13,isbn10,titre,serie,numero,auteurs,traducteur,illustrateur,editeur,collection_editeur,annee,pages,notice_bnf,statut,source,date_maj
+9782070333707,9782070333707,2070333701,Le Sorcier Majdar,Astre d'Or,370,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333714,9782070333714,207033371X,La Cité Interdite,Astre d'Or,371,,,,,,2003,,,brut,collection-ldvelh,2026-10-11
+9782070333844,9782070333844,2070333841,Le Royaume de l'Oubli,Astre d'Or,384,,,,,,2003,,,brut,collection-ldvelh,2026-10-11
+9782070334056,9782070334056,2070334058,La Guerre des Sorciers,Astre d'Or,405,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333516,9782070333516,2070333515,La Vengeance d'Althéos,Chroniques Crétoises,351,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333646,9782070333646,2070333647,Le Labyrinthe du Roi Minos,Chroniques Crétoises,364,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333653,9782070333653,2070333655,L'Odyssée d'Althéos,Chroniques Crétoises,365,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070583799,9782070583799,2070583791,L'Etoile de la Destinée,Destins,730,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070583805,9782070583805,2070583805,Le Pirate des Sept Mers,Destins,731,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070583782,9782070583782,2070583783,Le Peuple Maudit,Destins,755,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070583812,9782070583812,2070583813,Le Collier Maléfique,Destins,762,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070332823,9782070332823,2070332829,Issel le Guerrier,Double Jeu,282,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070334872,9782070334872,2070334872,Darian le Magicien,Double Jeu,487,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335275,9782070335275,2070335275,Coréus le Prince,Double Jeu,527,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335282,9782070335282,2070335283,Bardik le Voleur,Double Jeu,528,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070336098,9782070336098,2070336093,Lothar le Sorcier,Double Jeu,609,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070336104,9782070336104,2070336107,Clovis le Chevalier,Double Jeu,610,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070333165,9782070333165,2070333167,Le Tombeau du Vampire,Dragon d'Or,316,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333172,9782070333172,2070333175,Le Dieu Perdu,Dragon d'Or,317,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333271,9782070333271,2070333272,Le Seigneur de l'Ombre,Dragon d'Or,327,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333332,9782070333332,2070333337,La Malédiction du Pharaon,Dragon d'Or,333,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333561,9782070333561,2070333566,Le Château des Âmes Damnées,Dragon d'Or,356,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333929,9782070333929,2070333922,L'Œil du Dragon,Dragon d'Or,392,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070332526,9782070332526,2070332527,Le Sorcier de la Montagne de Feu,Défis Fantastiques,252,,,,,,1983,,,brut,collection-ldvelh,2026-10-11
+9782070332670,9782070332670,2070332675,L'Île du Roi Lézard,Défis Fantastiques,267,,,,,,1984,,,brut,collection-ldvelh,2026-10-11
+9782070332687,9782070332687,2070332683,La Citadelle du Chaos,Défis Fantastiques,268,,,,,,1984,,,brut,collection-ldvelh,2026-10-11
+9782070332694,9782070332694,2070332691,La Forêt de la Malédiction,Défis Fantastiques,269,,,,,,1984,,,brut,collection-ldvelh,2026-10-11
+9782070332700,9782070332700,2070332705,La Galaxie Tragique,Défis Fantastiques,270,,,,,,1984,,,brut,collection-ldvelh,2026-10-11
+9782070332717,9782070332717,2070332713,La Cité des Voleurs,Défis Fantastiques,271,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332724,9782070332724,2070332721,Le Labyrinthe de la Mort,Défis Fantastiques,272,,,,,,1984,,,brut,collection-ldvelh,2026-10-11
+9782070332861,9782070332861,2070332861,Le Manoir de l'Enfer,Défis Fantastiques,286,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332878,9782070332878,207033287X,La Sorcière des Neiges,Défis Fantastiques,287,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332885,9782070332885,2070332888,Le Marais aux Scorpions,Défis Fantastiques,288,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332892,9782070332892,2070332896,Le Talisman de la Mort,Défis Fantastiques,289,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332984,9782070332984,2070332985,Le Mercenaire de l'Espace,Défis Fantastiques,298,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333110,9782070333110,2070333116,Le Temple de la Terreur,Défis Fantastiques,311,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333264,9782070333264,2070333264,Le Combattant de l'Autoroute,Défis Fantastiques,326,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333325,9782070333325,2070333329,Les Trafiquants de Kelter,Défis Fantastiques,332,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333356,9782070333356,2070333353,Rendez-vous avec la MORT,Défis Fantastiques,335,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333363,9782070333363,2070333361,La Planète Rebelle,Défis Fantastiques,336,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333509,9782070333509,2070333507,Défis Sanglants sur l'Océan,Défis Fantastiques,350,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333622,9782070333622,2070333620,Les Démons des Profondeurs,Défis Fantastiques,362,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333837,9782070333837,2070333833,Les Spectres de l'Angoisse,Défis Fantastiques,383,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070333851,9782070333851,207033385X,L'Epreuve des Champions,Défis Fantastiques,385,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334049,9782070334049,207033404X,La Grande Menace des Robots,Défis Fantastiques,404,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334148,9782070334148,2070334147,L'Epée du Samourai,Défis Fantastiques,414,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334155,9782070334155,2070334155,La Créature Venue du Chaos,Défis Fantastiques,415,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070334179,9782070334179,2070334171,La Forteresse du Cauchemar,Défis Fantastiques,417,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334711,9782070334711,2070334716,Les Sceaux de la Destruction,Défis Fantastiques,471,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070334735,9782070334735,2070334732,Le Chasseur des Etoiles,Défis Fantastiques,473,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070334742,9782070334742,2070334740,La Crypte du Sorcier,Défis Fantastiques,474,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070335060,9782070335060,2070335062,L'Empire des Hommes-Lezards,Défis Fantastiques,506,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335121,9782070335121,2070335127,Les Gouffres de la Cruauté,Défis Fantastiques,512,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335220,9782070335220,2070335224,Les Rôdeurs de la Nuit,Défis Fantastiques,522,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335299,9782070335299,2070335291,Le Justicier de l'Univers,Défis Fantastiques,529,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335305,9782070335305,2070335305,Le Voleur d'Âmes,Défis Fantastiques,530,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335404,9782070335404,2070335402,Les Esclaves de l'Eternité,Défis Fantastiques,540,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335848,9782070335848,2070335844,Le Vampire du Château Noir,Défis Fantastiques,584,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335855,9782070335855,2070335852,La Nuit des Mutants,Défis Fantastiques,585,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335862,9782070335862,2070335860,Les Sombres Cohortes,Défis Fantastiques,586,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335923,9782070335923,2070335925,L'Elu des Six Clans,Défis Fantastiques,592,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335930,9782070335930,2070335933,Le Volcan de Zamarra,Défis Fantastiques,593,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335947,9782070335947,2070335941,La Vengeance des Démons,Défis Fantastiques,594,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070336074,9782070336074,2070336077,Le Sceptre Noir,Défis Fantastiques,607,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566044,9782070566044,2070566048,L'Ancienne Prophétie,Défis Fantastiques,636,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566051,9782070566051,2070566056,Le Repaire des Morts-Vivants,Défis Fantastiques,637,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566389,9782070566389,2070566382,La Légende des Guerriers Fantômes,Défis Fantastiques,644,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070567881,9782070567881,2070567885,La Tour de la Destruction,Défis Fantastiques,682,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070568154,9782070568154,2070568156,L'Arpenteur de la Lune,Défis Fantastiques,683,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070568734,9782070568734,2070568733,Les Mercenaires du Levant,Défis Fantastiques,698,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070579631,9782070579631,2070579638,Les Mondes de l'Aleph,Défis Fantastiques,699,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070582686,9782070582686,207058268X,Le Siège de Sardath,Défis Fantastiques,716,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070582693,9782070582693,2070582698,Retour à la Montagne de Feu,Défis Fantastiques,717,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070583140,9782070583140,2070583147,Les Mages de Solani,Défis Fantastiques,721,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070585151,9782070585151,2070585158,La Légende de Zagor,Défis Fantastiques,735,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070586134,9782070586134,2070586138,Le Sépulcre des Ombres,Défis Fantastiques,740,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070586943,9782070586943,2070586944,Le Voleur de Vie,Défis Fantastiques,745,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070587667,9782070587667,2070587665,Les Chevaliers du Destin,Défis Fantastiques,764,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070592265,9782070592265,207059226X,Le Chasseur de Mages,Défis Fantastiques,767,,,,,,2003,,,brut,collection-ldvelh,2026-10-11
+9782070335022,9782070335022,207033502X,Keldrilh le Ménestrel,Défis et Sortilèges,502,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335039,9782070335039,2070335038,Caïthness l'Elémentaliste,Défis et Sortilèges,503,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335046,9782070335046,2070335046,Péreim le Chevalier,Défis et Sortilèges,504,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335053,9782070335053,2070335054,Kandjar le Magicien,Défis et Sortilèges,505,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070566440,9782070566440,2070566447,Les Héritiers de Dorgan,Défis et Sortilèges,648,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566495,9782070566495,2070566498,Le Sanctuaire des Horlas,Défis et Sortilèges,649,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070567386,9782070567386,2070567389,La Huitième Porte,Défis et Sortilèges,672,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070567393,9782070567393,2070567397,L'Ultime Réincarnation,Défis et Sortilèges,673,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070334018,9782070334018,2070334015,Le Château de Dracula,Epouvante!,401,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070334025,9782070334025,2070334023,Frankenstein le Maudit,Epouvante!,402,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334087,9782070334087,2070334082,L'Ombre de la Guillotine,Histoire,408,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070334094,9782070334094,2070334090,A Feu et a Sang,Histoire,409,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334162,9782070334162,2070334163,La Dernière Invasion,Histoire,416,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334858,9782070334858,2070334856,Pour l'Indépendance,Histoire,485,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335718,9782070335718,2070335712,Les Vaisseaux de Feu,Histoire,571,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070336203,9782070336203,2070336204,Les Treize Mages,L'Epée de Légende,620,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070336210,9782070336210,2070336212,Le Maître des Rêves,L'Epée de Légende,621,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070336319,9782070336319,207033631X,Le Port des Assassins,L'Epée de Légende,631,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566556,9782070566556,2070566552,L'impossible Mission,L'Epée de Légende,643,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070567126,9782070567126,2070567125,Les Murailles de Spyte,L'Epée de Légende,662,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070520312,9782070520312,2070520315,Initiation au Jeu d'Aventure,L'Œil Noir,000,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070520329,9782070520329,2070520323,Les Accessoires du Maître,L'Œil Noir,000,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070520343,9782070520343,207052034X,Extension au Jeu d'Aventure,L'Œil Noir,000,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-001,,,L'Aventurie,L'Œil Noir,001,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-002,,,Le Livre des Règles,L'Œil Noir,002,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-003,,,Le Livre des Règles 2,L'Œil Noir,003,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-004,,,Le Livre des Aventures,L'Œil Noir,004,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-005,,,"Héros, Monstres et Forces Obscures",L'Œil Noir,005,,,,,,,,,brut,collection-ldvelh,2026-10-11
+9782070333202,9782070333202,2070333205,La Source de Mort,L'Œil Noir,320,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333219,9782070333219,2070333213,La Fille du Calife,L'Œil Noir,321,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333226,9782070333226,2070333221,A l'Auberge du Sanglier Noir,L'Œil Noir,322,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333233,9782070333233,207033323X,Le Fleuve du Désastre,L'Œil Noir,323,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333240,9782070333240,2070333248,La Forêt sans Retour,L'Œil Noir,324,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333257,9782070333257,2070333256,Les Sept Coupes Magiques,L'Œil Noir,325,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333370,9782070333370,207033337X,Le Tournoi des Félons,L'Œil Noir,337,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333387,9782070333387,2070333388,Le Magicien des Glaces,L'Œil Noir,338,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333394,9782070333394,2070333396,L'Archipel des Cyclopes,L'Œil Noir,339,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333400,9782070333400,207033340X,Dans les Griffes du Démon,L'Œil Noir,340,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333417,9782070333417,2070333418,La Porte des Mondes,L'Œil Noir,341,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333424,9782070333424,2070333426,Le Navire des Âmes Perdues,L'Œil Noir,342,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333745,9782070333745,2070333744,Le Bourreau de Thalussa,L'Œil Noir,374,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333752,9782070333752,2070333752,Les Hiéroglyphes de l'Horreur,L'Œil Noir,375,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333769,9782070333769,2070333760,Les Spectres des Marais,L'Œil Noir,376,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333776,9782070333776,2070333779,La Reine des Amazones,L'Œil Noir,377,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333783,9782070333783,2070333787,Le Chemin Maudit,L'Œil Noir,378,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333790,9782070333790,2070333795,Les Esclaves d'Al Anfa,L'Œil Noir,379,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333721,9782070333721,2070333728,Les Parchemins de Kettsuinn,La Voie du Tigre,372,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333738,9782070333738,2070333736,La Vengeance du Ninja,La Voie du Tigre,373,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333905,9782070333905,2070333906,L'Usurpateur d'Irsmun,La Voie du Tigre,390,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333912,9782070333912,2070333914,Le Grand Maître d'Irsmun,La Voie du Tigre,391,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334278,9782070334278,2070334279,Les Seigneurs de la Guerre,La Voie du Tigre,427,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334704,9782070334704,2070334708,Les Démons de Manmarch,La Voie du Tigre,470,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070335749,9782070335749,2070335747,La Forêt du Dragon,Le Maître du Destin,574,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335756,9782070335756,2070335755,Le Maître du Feu,Le Maître du Destin,575,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070334223,9782070334223,2070334228,Le Carillon de la Mort,Les Messagers du Temps,422,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070334247,9782070334247,2070334244,L'Homme au Cheval de Brume,Les Messagers du Temps,424,,,,,,1988,,,brut,collection-ldvelh,2026-10-11
+9782070334254,9782070334254,2070334252,Objectif : Apocalypse,Les Messagers du Temps,425,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070334230,9782070334230,2070334236,Le Masque de Sang,Les Messagers du Temps,426,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070333530,9782070333530,2070333531,L'Horreur dans la Vallée,Les Portes Interdites,353,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333547,9782070333547,207033354X,Terreur Hors du Temps,Les Portes Interdites,354,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070335480,9782070335480,2070335488,Le Livre des Règles,Les Terres de Légende,548,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335497,9782070335497,2070335496,Initiation à la Magie,Les Terres de Légende,549,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335503,9782070335503,207033550X,Le Secret des Elfes,Les Terres de Légende,550,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335510,9782070335510,2070335518,Les Créatures de l'Ombre,Les Terres de Légende,551,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335763,9782070335763,2070335763,La Puissance des Ténèbres,Les Terres de Légende,551,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070335770,9782070335770,2070335771,Les Terres de Légende,Les Terres de Légende,577,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070332908,9782070332908,207033290X,Les Maîtres des Ténèbres,Loup Solitaire,290,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332915,9782070332915,2070332918,La Traversée Infernale,Loup Solitaire,291,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332960,9782070332960,2070332969,Les Grottes de Kalte,Loup Solitaire,296,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332977,9782070332977,2070332977,Le Gouffre Maudit,Loup Solitaire,297,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333301,9782070333301,2070333302,Le Tyran du Désert,Loup Solitaire,330,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333691,9782070333691,2070333698,La Pierre de la Sagesse,Loup Solitaire,369,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070334032,9782070334032,2070334031,La Forteresse Maudite,Loup Solitaire,403,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334209,9782070334209,2070334201,Dans l'Enfer de la Jungle,Loup Solitaire,420,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070334728,9782070334728,2070334724,La Métropole de la Peur,Loup Solitaire,472,,,,,,2003,,,brut,collection-ldvelh,2026-10-11
+9782070335381,9782070335381,2070335380,Dans les Entrailles de Torgar,Loup Solitaire,538,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335398,9782070335398,2070335399,Les Prisonniers du Temps,Loup Solitaire,539,,,,,,1989,,,brut,collection-ldvelh,2026-10-11
+9782070335701,9782070335701,2070335704,Le Crépuscule des Maîtres,Loup Solitaire,570,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070336081,9782070336081,2070336085,Les Druides de Cener,Loup Solitaire,608,,,,,,1990,,,brut,collection-ldvelh,2026-10-11
+9782070336111,9782070336111,2070336115,Le Captif du Roi Sorcier,Loup Solitaire,611,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070567119,9782070567119,2070567117,La Croisade du Désespoir,Loup Solitaire,661,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070567874,9782070567874,2070567877,L'Héritage de Vashna,Loup Solitaire,681,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070568802,9782070568802,2070568806,La Tour de Cristal,Loup Solitaire,696,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070569649,9782070569649,2070569640,La Porte d'Ombre,Loup Solitaire,707,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070584413,9782070584413,2070584410,Le Combat des Loups,Loup Solitaire,720,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070585168,9782070585168,2070585166,La Malédiction de Naar,Loup Solitaire,749,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070587674,9782070587674,2070587673,Le Voyage de la Pierre de Lune,Loup Solitaire,763,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070587650,9782070587650,2070587657,Les Pirates de Shadaki,Loup Solitaire,765,,,,,,1995,,,brut,collection-ldvelh,2026-10-11
+9782070333189,9782070333189,2070333183,La Horde des Démons,Loup*Ardent,318,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333196,9782070333196,2070333191,Les Cryptes de la Terreur,Loup*Ardent,319,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333318,9782070333318,2070333310,L'Ultime Combat de la Horde,Loup*Ardent,331,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333349,9782070333349,2070333345,Les Maîtres du Mal,Loup*Ardent,334,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070569403,9782070569403,2070569403,L'Homme aux Cent Visages,Métamorphose,705,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070569410,9782070569410,2070569411,L'Oracle de Balkh,Métamorphose,706,,,,,,1994,,,brut,collection-ldvelh,2026-10-11
+9782070333141,9782070333141,2070333140,L'Antre des Dragons,Quête du Graal,314,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333158,9782070333158,2070333159,Le Château des Ténèbres,Quête du Graal,315,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333288,9782070333288,2070333280,Les Portes de l'Au-delà,Quête du Graal,328,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333295,9782070333295,2070333299,Le Voyage de l'Effroi,Quête du Graal,329,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333493,9782070333493,2070333493,Au Royaume de l'Epouvante,Quête du Graal,349,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333639,9782070333639,2070333639,Le Temps de la Malédiction,Quête du Graal,363,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070333684,9782070333684,207033368X,Le Tombeau des Maléfices,Quête du Graal,368,,,,,,1986,,,brut,collection-ldvelh,2026-10-11
+9782070334193,9782070334193,2070334198,La Légion des Morts,Quête du Graal,419,,,,,,1987,,,brut,collection-ldvelh,2026-10-11
+9782070336227,9782070336227,2070336220,Meurtre au Club Diogène,Sherlock Holmes,622,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070336234,9782070336234,2070336239,L'Emeraude de la Rivière Noire,Sherlock Holmes,623,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070336326,9782070336326,2070336328,Le Maître Chanteur d'Appledore,Sherlock Holmes,632,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070566075,9782070566075,2070566072,Le Crime du Docteur Watson,Sherlock Holmes,645,,,,,,1991,,,brut,collection-ldvelh,2026-10-11
+9782070567539,9782070567539,2070567532,La Conspiration des Dynamiteurs,Sherlock Holmes,650,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070566891,9782070566891,2070566897,Un Duel dans le Yorkshire,Sherlock Holmes,671,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070567195,9782070567195,2070567192,Pour l'Honneur de la Reine,Sherlock Holmes,680,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070567898,9782070567898,2070567893,L'Héritier Disparu,Sherlock Holmes,697,,,,,,1993,,,brut,collection-ldvelh,2026-10-11
+9782070332939,9782070332939,2070332934,Les Collines Maléfiques,Sorcellerie!,293,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332946,9782070332946,2070332942,La Cité des Pièges,Sorcellerie!,294,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070332953,9782070332953,2070332950,Les Sept Serpents,Sorcellerie!,295,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070333103,9782070333103,2070333108,La Couronnes des Rois,Sorcellerie!,310,,,,,,1985,,,brut,collection-ldvelh,2026-10-11
+9782070567683,9782070567683,2070567680,Le Mystère de Compton,Super Sherlock,678,,,,,,1992,,,brut,collection-ldvelh,2026-10-11
+9782070567690,9782070567690,2070567699,La Villa des Revenants,Super Sherlock,679,,,,,,1993,,,brut,collection-ldvelh,2026-10-11

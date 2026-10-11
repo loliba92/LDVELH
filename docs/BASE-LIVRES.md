@@ -14,12 +14,22 @@ Exemple : l'œuvre *Down Among the Dead Men* (Dave Morris) a au moins deux édit
 
 ## 2. Champs d'une édition (`data/processed/editions.csv`)
 
-`isbn13` (clé), `isbn10`, `titre`, `oeuvre_id`, `titre_original`, `auteurs`, `traducteur`, `illustrateur`, `editeur`, `collection`, `numero_collection`, `annee`, `pages`, `format`, `prix_editeur`, `couverture_url`, `source_notice`, `statut` (brut / enrichi / vérifié), `date_maj`.
+`id` (clé : ISBN-13, ou `LOCAL-série-numéro` sans ISBN), `isbn13`, `isbn10`, `titre`, `serie`, `numero`, `auteurs`, `traducteur`, `illustrateur`, `editeur`, `collection_editeur`, `annee`, `pages`, `notice_bnf`, `statut` (brut / enrichi / vérifié), `source`, `date_maj`.
 
 Règles :
-- l'ISBN-13 sans tirets est la clé ; l'ISBN-10 est converti ;
-- un livre sans ISBN reçoit un identifiant interne (`LOCAL-` + série + numéro) et le statut « à compléter » ;
-- une valeur ajoutée à la main est marquée comme telle (`source_notice = manuel`).
+- l'ISBN-13 sans tirets est la clé ; l'ISBN-10 est calculé ;
+- un livre sans ISBN reçoit un identifiant `LOCAL-` et le statut « brut » ;
+- `serie` et `numero` désignent la série de livres-jeux (ex. Défis Fantastiques n° 43) ; `collection_editeur` est la collection de l'éditeur (ex. Folio Junior) ;
+- la source de chaque fiche est conservée (`collection-ldvelh`, `bnf`, `manuel`).
+
+## 2 bis. Ajouter un livre
+
+```
+python pipeline/add_book.py 9782070583805 --serie "Destins" --numero 731
+python pipeline/add_book.py --file isbn.txt        # un ISBN par ligne
+```
+
+L'outil valide l'ISBN (clé de contrôle), refuse les doublons, complète la fiche par la BnF, puis indique ce qu'il reste à renseigner. Il avertit quand la série n'est pas précisée, car la BnF renvoie n'importe quel livre.
 
 ## 3. Sources pour construire la base
 
