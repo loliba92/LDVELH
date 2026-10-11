@@ -107,3 +107,7 @@ Comme sur Scénario : manifeste (`web/manifest.webmanifest`), icônes (`web/icon
 ## Image d'ambiance de l'accueil (Pexels)
 
 Photo de bibliothèque ancienne en fond du haut de page, sous un voile de la couleur du fond : dense derrière le texte (contraste mesuré ≥ 4,5 en thème clair et sombre, ordinateur et téléphone), léger du côté des jaquettes. Elle est choisie avec `scrapers/image_accueil.py` (`--chercher` pour proposer des candidats, `--retenir ID` pour l'enregistrer en `web/images/accueil.webp`, 1600 px, environ 75 Ko). La clé Pexels vient de la variable d'environnement `PEXELS_API_KEY` et n'est jamais dans le dépôt ni envoyée au navigateur ; la photo est stockée localement, le site ne dépend pas de Pexels à l'affichage. Crédit en pied de page : Phát Trương, Pexels.
+
+## Icône du site : le mage doré
+
+Emblème fourni par le propriétaire (mage encapuchonné, or sur noir), conservé dans `docs/icones-propositions/source-mage-or.png`. `python pipeline/icones.py` en tire toutes les déclinaisons : icônes de l'application (`web/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` pour Android), icône iPhone (`apple-touch-icon.png`), favicons (`web/favicon-16.png`, `favicon-32.png`, `favicon.ico`). Le noir de l'image est remplacé par le brun du site. Le même emblème sert de logo dans l'en-tête. Les anciennes propositions dessinées à la main ont été abandonnées.

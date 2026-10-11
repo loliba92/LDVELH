@@ -1,10 +1,10 @@
 /* Service worker de La Cote du Héros : l'application s'ouvre sans réseau.
    - pages, scripts, styles, données : réseau d'abord (toujours la version à jour), copie locale en secours ;
    - jaquettes, polices, icônes : copie locale d'abord (elles ne changent pas). */
-const VERSION = 'cdh-v2';
+const VERSION = 'cdh-v3';
 const COEUR = ['./', 'index.html', 'app.js', 'style.css', 'manifest.webmanifest', 'data/versions.json', 'data/meta.json',
   'fonts/cormorant-garamond.woff2', 'fonts/cormorant-garamond-italic.woff2', 'fonts/source-sans-3.woff2',
-  'icons/icon-192.png', 'icons/apple-touch-icon.png', 'images/accueil.webp'];
+  'icons/icon-192.png', 'icons/apple-touch-icon.png', 'favicon-32.png', 'images/accueil.webp'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => Promise.all(COEUR.map((u) => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));

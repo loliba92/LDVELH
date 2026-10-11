@@ -80,8 +80,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; 
 .bandeau { background: var(--walnut); color: var(--walnut-text); border-bottom: 3px double var(--brass); }
 .bandeau-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
 .marque { display: inline-flex; align-items: center; gap: 12px; color: var(--walnut-text); text-decoration: none; }
-.marque-sceau { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--gold); box-shadow: inset 0 0 0 3px var(--walnut), inset 0 0 0 4px var(--gold);
-  background: radial-gradient(circle, var(--gold) 0 5px, transparent 6px); }
+.marque-sceau { width: 38px; height: 38px; flex: none; border-radius: 50%; background: url("icons/icon-192.png") center / cover no-repeat; }
 .marque-nom { font: 700 1.45rem/1 var(--f-display); letter-spacing: 0; }
 .menu { display: flex; align-items: center; gap: 4px; }
 .menu a { color: var(--walnut-text); text-decoration: none; padding: 8px 12px; border-radius: var(--r); font-weight: 600; font-size: .95rem; }
