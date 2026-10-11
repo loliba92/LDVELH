@@ -87,8 +87,33 @@ def load_dimensions(cx):
     cx.executemany("INSERT INTO DimTypePrix(code,libelle,poids_modele,est_prix_reel) VALUES (?,?,?,?)", TYPES)
 
 
+def load_series(cx, rows):
+    """Une ligne par série ; « Non classée » sert aux livres sans série."""
+    series = {}
+    for r in rows:
+        nom = (r.get("serie") or "").strip() or "Non classée"
+        series.setdefault(slug(nom), nom)
+    keys = {}
+    for code, nom in sorted(series.items()):
+        membres = [r for r in rows if (slug((r.get("serie") or "").strip() or "Non classée")) == code]
+        annees = [int(r["annee"]) for r in membres if (r.get("annee") or "").isdigit()]
+        editeurs = [r["editeur"] for r in membres if r.get("editeur")]
+        principal = max(set(editeurs), key=editeurs.count) if editeurs else None
+        cur = cx.execute("INSERT INTO DimSerie(code,nom,nb_versions,annee_min,annee_max,editeur_principal) "
+                         "VALUES (?,?,?,?,?,?)", (code, nom, len(membres),
+                                                  min(annees) if annees else None,
+                                                  max(annees) if annees else None, principal))
+        keys[code] = cur.lastrowid
+    return keys
+
+
+def serie_code(r):
+    return slug((r.get("serie") or "").strip() or "Non classée")
+
+
 def load_livres_versions(cx):
     rows = editions.load()
+    series_keys = load_series(cx, rows)
     # Deux versions ne sont regroupées que si la colonne « livre » est renseignée et identique.
     # Deux titres identiques peuvent désigner des jeux différents : jamais de regroupement automatique.
     groupes = {}
@@ -119,13 +144,14 @@ def load_livres_versions(cx):
             n = numeros[r["id"]]
             ev = r.get("en_vente")
             cx.execute(
-                """INSERT INTO DimVersion(id,isbn13,isbn10,livre_key,numero_version,libelle_version,
-                   est_derniere_version,en_vente,titre_version,serie,numero_serie,editeur,
+                """INSERT INTO DimVersion(id,isbn13,isbn10,livre_key,serie_key,numero_version,libelle_version,
+                   est_derniere_version,en_vente,titre_version,numero_serie,editeur,
                    collection_editeur,annee,annee_bnf,pages,traducteur,illustrateur,notice_bnf,statut)
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (r["id"], r.get("isbn13") or None, r.get("isbn10") or None, livre_key, n,
+                (r["id"], r.get("isbn13") or None, r.get("isbn10") or None, livre_key,
+                 series_keys[serie_code(r)], n,
                  (r.get("version") or f"V{n}").strip(), int(n == derniere),
-                 int(ev) if ev in ("0", "1") else None, r["titre"], r.get("serie") or None,
+                 int(ev) if ev in ("0", "1") else None, r["titre"],
                  r.get("numero") or None, r.get("editeur") or None, r.get("collection_editeur") or None,
                  int(r["annee"]) if (r.get("annee") or "").isdigit() else None,
                  int(r["annee_bnf"]) if (r.get("annee_bnf") or "").isdigit() else None,
@@ -135,7 +161,7 @@ def load_livres_versions(cx):
 
 
 def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot=0, url=None):
-    v = cx.execute("SELECT version_key, livre_key FROM DimVersion WHERE id=?", (version_id,)).fetchone()
+    v = cx.execute("SELECT version_key, livre_key, serie_key FROM DimVersion WHERE id=?", (version_id,)).fetchone()
     if v is None:
         raise ValueError(f"édition inconnue : {version_id}")
     keys = {}
@@ -148,9 +174,9 @@ def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot
     date_key = ensure_date(cx, d)
     cle = "|".join(map(str, (version_id, etat, d, source, type_prix, prix, url or "")))
     cur = cx.execute(
-        """INSERT OR IGNORE INTO FaitPrix(version_key,livre_key,etat_key,date_key,source_key,type_key,
-           prix,frais_port,est_lot,url,cle_naturelle,date_chargement) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
-        (v[0], v[1], keys["etat_key"], date_key, keys["source_key"], keys["type_key"], prix, port,
+        """INSERT OR IGNORE INTO FaitPrix(version_key,livre_key,serie_key,etat_key,date_key,source_key,type_key,
+           prix,frais_port,est_lot,url,cle_naturelle,date_chargement) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (v[0], v[1], v[2], keys["etat_key"], date_key, keys["source_key"], keys["type_key"], prix, port,
          lot, url, cle, datetime.now().isoformat(timespec="seconds")))
     return cur.rowcount
 
@@ -222,7 +248,7 @@ def main():
     def compte(t):
         return cx.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
     print(f"Base écrite : {db}")
-    print(f"  DimLivre {compte('DimLivre')} | DimVersion {compte('DimVersion')} | DimEtat {compte('DimEtat')} | "
+    print(f"  DimLivre {compte('DimLivre')} | DimSerie {compte('DimSerie')} | DimVersion {compte('DimVersion')} | DimEtat {compte('DimEtat')} | "
           f"DimSource {compte('DimSource')} | DimTypePrix {compte('DimTypePrix')} | DimDate {compte('DimDate')}")
     print(f"  FaitPrix {compte('FaitPrix')} (historique {n_hist}, saisies manuelles {n_man}; "
           f"{ignores} prix historiques vides ou à 0 ignorés, {doublons} doublon(s) de saisie ignoré(s), "

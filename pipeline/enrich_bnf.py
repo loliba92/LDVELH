@@ -46,17 +46,23 @@ def propre_collection(c):
 
 def main():
     rows = editions.load()
-    a_faire = [r for r in rows if r["isbn13"] and (
+    a_faire = [r for r in rows if (r["isbn13"] or r["statut"] == "brut") and (
         r["statut"] in ("brut", "a_verifier") or (r["statut"] == "enrichi" and not r.get("annee_bnf")))]
     print(f"{len(a_faire)} édition(s) à enrichir sur {len(rows)}")
     rapport, nb = [], {"enrichi": 0, "a_verifier": 0, "introuvable": 0, "erreur": 0}
     for i, r in enumerate(a_faire, start=1):
         try:
-            fiche = editions.lookup_bnf(r["isbn13"], r["isbn10"], pause=1.0)
+            fiche = editions.lookup_bnf(r["isbn13"], r["isbn10"], pause=1.0) if r["isbn13"] else None
         except Exception as e:
             nb["erreur"] += 1
             rapport.append([r["id"], r["titre"], "", "", "erreur", str(e)[:80]])
             continue
+        confirmation = "isbn"
+        if fiche is None:  # secours : recherche par titre, avec confirmation
+            try:
+                fiche, confirmation = editions.lookup_bnf_titre(r["titre"], r["numero"], r["isbn13"])
+            except Exception as e:
+                fiche, confirmation = None, ""
         if fiche is None:
             nb["introuvable"] += 1
             rapport.append([r["id"], r["titre"], "", "", "introuvable", ""])
@@ -73,11 +79,14 @@ def main():
             for c in CHAMPS:
                 if not r.get(c) and fiche.get(c):
                     r[c] = propre_collection(fiche[c]) if c == "collection_editeur" else fiche[c]
-            r["statut"] = "enrichi"
+            r["statut"] = "enrichi" if confirmation in ("isbn", "numero") else "a_verifier"
+            if confirmation != "isbn":
+                rapport.append([r["id"], r["titre"], fiche["titre"], f"{s:.2f}", r["statut"],
+                                f"trouvé par le titre (confirmation : {confirmation})"])
             r["annee_bnf"] = fiche.get("annee", "")
             r["source"] = "collection-ldvelh+bnf"
             r["date_maj"] = editions.today()
-            nb["enrichi"] += 1
+            nb["enrichi" if r["statut"] == "enrichi" else "a_verifier"] += 1
             if ecart_annee:
                 rapport.append([r["id"], r["titre"], fiche["titre"], f"{s:.2f}", "enrichi", ecart_annee])
         if i % 20 == 0:

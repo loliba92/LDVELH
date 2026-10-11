@@ -2,6 +2,7 @@
 import csv
 import re
 import time
+import unicodedata
 import xml.etree.ElementTree as ET
 from datetime import date
 from pathlib import Path
@@ -93,22 +94,10 @@ def _name(raw):
     return raw, role
 
 
-def lookup_bnf(isbn13, isbn10, pause=1.0):
-    """Cherche l'édition dans le catalogue de la BnF. Renvoie un dict ou None."""
-    time.sleep(pause)
-    isbn = isbn10 or isbn13
-    params = {"version": "1.2", "operation": "searchRetrieve", "recordSchema": "dublincore",
-              "maximumRecords": "1", "query": f'bib.isbn all "{isbn}"'}
-    r = requests.get(BNF_URL, params=params, timeout=30,
-                     headers={"User-Agent": "LDVELH-catalogue/0.1 (projet de cote de livres-jeux)"})
-    r.raise_for_status()
-    root = ET.fromstring(r.content)
-    rec = root.find(".//dc:title/..", NS)
-    if rec is None:
-        return None
-
+def _fiche_depuis_notice(rec):
+    """Transforme une notice Dublin Core de la BnF en fiche (dict)."""
     def texts(tag):
-        return [e.text.strip() for e in rec.findall(f"dc:{tag}", NS) if e.text]
+        return [e.text.strip() for e in rec.findall(f".//dc:{tag}", NS) if e.text]
 
     titre = (texts("title") or [""])[0].split(" / ")[0].strip()
     auteurs, traducteur, illustrateur = [], "", ""
@@ -120,18 +109,77 @@ def lookup_bnf(isbn13, isbn10, pause=1.0):
             illustrateur = nom
         elif role.startswith("Auteur") or role == "":
             auteurs.append(nom)
-    collection = next((d[len("Collection : "):] for d in texts("description")
-                       if d.startswith("Collection : ")), "")
-    collection = re.sub(r"^Collection\s+", "", collection.split(" ; ")[0].strip())
+    collection_brute = next((d[len("Collection : "):] for d in texts("description")
+                             if d.startswith("Collection : ")), "")
+    collection = re.sub(r"^Collection\s+", "", collection_brute.split(" ; ")[0].split(". ")[0].strip())
     collection = collection[:1].upper() + collection[1:]
+    numero_col = (re.search(r";\s*(\d+)", collection_brute) or [None, ""])[1]
     fmt = " ".join(texts("format"))
     pages = (re.search(r"(\d+)\s*p\.", fmt) or [None, ""])[1]
     ark = next((i for i in texts("identifier") if i.startswith("http")), "")
+    isbn = next((i[5:] for i in texts("identifier") if i.startswith("ISBN ")), "")
     editeur = re.sub(r"\s*\(.*?\)", "", (texts("publisher") or [""])[0]).strip()
     return {"titre": titre, "auteurs": " ; ".join(auteurs), "traducteur": traducteur,
             "illustrateur": illustrateur, "editeur": editeur,
             "collection_editeur": collection, "annee": (texts("date") or [""])[0][:4],
-            "pages": pages, "notice_bnf": ark}
+            "pages": pages, "notice_bnf": ark, "isbn": isbn, "numero_collection": numero_col,
+            "livre_jeu": "dont vous êtes le héros" in collection_brute.lower()}
+
+
+def _sru(query, maximum, pause):
+    time.sleep(pause)
+    params = {"version": "1.2", "operation": "searchRetrieve", "recordSchema": "dublincore",
+              "maximumRecords": str(maximum), "query": query}
+    r = requests.get(BNF_URL, params=params, timeout=30,
+                     headers={"User-Agent": "LDVELH-catalogue/0.1 (projet de cote de livres-jeux)"})
+    r.raise_for_status()
+    return ET.fromstring(r.content).findall(".//srw:record", NS)
+
+
+def lookup_bnf(isbn13, isbn10, pause=1.0):
+    """Cherche l'édition dans le catalogue de la BnF par ISBN. Renvoie un dict ou None."""
+    recs = _sru(f'bib.isbn all "{isbn10 or isbn13}"', 1, pause)
+    return _fiche_depuis_notice(recs[0]) if recs else None
+
+
+def lookup_bnf_titre(titre, numero="", isbn13="", pause=1.0):
+    """Recherche de secours par titre. Renvoie (fiche, confirmation) ou (None, '').
+
+    confirmation : « isbn » (même ISBN), « numero » (même numéro de collection) ou
+    « titre » (titre identique et collection « Un livre dont vous êtes le héros »,
+    à faire confirmer à la main).
+    """
+    import difflib
+    def n(t):
+        t = unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode().lower()
+        t = re.sub(r"\b(le|la|les|l|un|une|de|du|des|d|et|a)\b", " ", t)
+        return re.sub(r"[^a-z0-9]+", " ", t).strip()
+    # Les lettres isolées issues des élisions (L', D') ne sont pas indexées : on les retire.
+    mots = " ".join(m for m in re.sub(r"[\"'’]", " ", titre).split() if len(m) > 1)
+    meilleur = (None, "", 0.0)
+    for rec in _sru(f'bib.title all "{mots}"', 15, pause):
+        f = _fiche_depuis_notice(rec)
+        ratio = difflib.SequenceMatcher(None, n(titre), n(f["titre"])).ratio()
+        if ratio < 0.9:
+            continue
+        # Les chiffres doivent être identiques : « Livre des règles » ≠ « Livre des règles 2 »
+        if re.findall(r"\d+", n(titre)) != re.findall(r"\d+", n(f["titre"])):
+            continue
+        if isbn13 and f["isbn"]:
+            try:
+                if normalize_isbn(f["isbn"])[0] == isbn13:
+                    return f, "isbn"
+            except ValueError:
+                pass
+        if numero and f["numero_collection"] and f["numero_collection"] == numero.lstrip("0"):
+            conf = "numero"
+        elif f["livre_jeu"] and f["editeur"].lower().startswith("gallimard"):
+            conf = "titre"
+        else:
+            continue
+        if ratio > meilleur[2]:
+            meilleur = (f, conf, ratio)
+    return (meilleur[0], meilleur[1]) if meilleur[0] else (None, "")
 
 
 def today():

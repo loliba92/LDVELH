@@ -6,8 +6,10 @@ Base SQLite : `data/warehouse/ldvelh.sqlite`, reconstruite par `python pipeline/
                  DimDate          DimEtat
                     \              /
    DimSource ---- FaitPrix ---- DimTypePrix
-                    /      \
-              DimVersion --- DimLivre
+                  /   |   \
+          DimVersion  |   DimSerie
+                  \   |   /
+                   DimLivre
 ```
 
 ## La table de faits
@@ -20,13 +22,14 @@ Mesures : `prix` (hors port), `frais_port`, `est_lot`. Une clé naturelle unique
 | Dimension | Rôle | Exemples |
 |---|---|---|
 | **DimLivre** | Le livre au sens du texte, toutes éditions confondues | *Down Among the Dead Men* |
+| **DimSerie** | La série de livres-jeux, avec son nombre de titres, ses années extrêmes et son éditeur principal | Défis Fantastiques, Loup Solitaire, Sherlock Holmes, Super Sherlock… (23 séries) |
 | **DimVersion** | Une édition précise : V1, V2… V5, autre éditeur | V1 = Défis Fantastiques n° 43 (1991) ; V2 = Folio Junior n° 731 (1994) ; V5 = réédition Alkonost (2024) |
 | **DimEtat** | État du livre | Convenable, Bon, Très bon, Neuf, Non précisé |
 | **DimDate** | Calendrier de l'observation | année, trimestre, mois, semaine, jour |
 | **DimSource** | D'où vient le prix | historique, eBay (API), mes ventes, relevé manuel… avec un indice de fiabilité |
 | **DimTypePrix** | Nature du prix | vente réelle, vente probable, prix demandé, rachat, historique, avec le poids utilisé par le modèle de prix |
 
-L'éditeur (Gallimard, Alkonost…), la série (Défis Fantastiques, Loup Solitaire…) et la collection sont des colonnes de DimVersion. On pourra en faire des dimensions séparées plus tard si nécessaire.
+L'éditeur (Gallimard, Alkonost…) et la collection de l'éditeur (Folio Junior…) sont des colonnes de DimVersion. On pourra en faire des dimensions séparées si le besoin se confirme. Une version sans série est rangée dans « Non classée ».
 
 ## Les versions
 

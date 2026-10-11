@@ -63,7 +63,7 @@ id,isbn13,isbn10,livre,titre,version,en_vente,serie,numero,auteurs,traducteur,il
 9782070335930,9782070335930,2070335933,,Le Volcan de Zamarra,V1,,Défis Fantastiques,593,Luke Sharp,Olivier Meyer,David Gallagher,Gallimard,Folio junior,1990,1990,244,http://catalogue.bnf.fr/ark:/12148/cb35088184s,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070335947,9782070335947,2070335941,,La Vengeance des Démons,V1,,Défis Fantastiques,594,Jim Bambra ; Stephen Hand,Mona de Pracontal,Martin McKenna,Gallimard,Folio junior,1990,1990,224,http://catalogue.bnf.fr/ark:/12148/cb35176145c,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070336074,9782070336074,2070336077,,Le Sceptre Noir,V1,,Défis Fantastiques,607,Keith Martin,Camille Fabien,David Gallagher,Gallimard,Folio junior,1991,1991,224,http://catalogue.bnf.fr/ark:/12148/cb354669885,enrichi,collection-ldvelh+bnf,2026-10-11
-9782070566044,9782070566044,2070566048,,L'Ancienne Prophétie,V1,,Défis Fantastiques,636,,,,,,1991,,,,brut,collection-ldvelh,2026-10-11
+9782070566044,9782070566044,2070566048,,L'Ancienne Prophétie,V1,,Défis Fantastiques,636,Paul Mason ; Steve Williams,Mona de Pracontal,Terry Oakes,Gallimard,Folio junior,1991,1991,230,http://catalogue.bnf.fr/ark:/12148/cb35464339t,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070566051,9782070566051,2070566056,,Le Repaire des Morts-Vivants,V1,,Défis Fantastiques,637,Dave Morris ; Jamie Thomson,Nicolas Grenier,David Gallagher,Gallimard,Folio junior,1991,1991,264,http://catalogue.bnf.fr/ark:/12148/cb35473766s,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070566389,9782070566389,2070566382,,La Légende des Guerriers Fantômes,V1,,Défis Fantastiques,644,Stephen Hand,Alexis Galmot,Martin McKenna,Gallimard,Folio junior,1991,1991,250,http://catalogue.bnf.fr/ark:/12148/cb35473756g,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070567881,9782070567881,2070567885,,La Tour de la Destruction,V1,,Défis Fantastiques,682,Keith Martin,Mona de Pracontal,Pete Knifton,Gallimard,Défis fantastiques,1992,1992,220,http://catalogue.bnf.fr/ark:/12148/cb35535009v,enrichi,collection-ldvelh+bnf,2026-10-11
@@ -97,13 +97,13 @@ id,isbn13,isbn10,livre,titre,version,en_vente,serie,numero,auteurs,traducteur,il
 9782070336210,9782070336210,2070336212,,Le Maître des Rêves,V1,,L'Epée de Légende,621,Dave Morris ; Oliver Johnson,Yannick Surcouf,Russ Nicholson,Gallimard,L'épée de légende,1991,1991,274,http://catalogue.bnf.fr/ark:/12148/cb35411101t,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070336319,9782070336319,207033631X,,Le Port des Assassins,V1,,L'Epée de Légende,631,Dave Morris ; Oliver Johnson,Yannick Surcouf,Russ Nicholson,Gallimard,L'épée de légende,1991,1991,301,http://catalogue.bnf.fr/ark:/12148/cb35464372n,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070566556,9782070566556,2070566552,,L'impossible Mission,V1,,L'Epée de Légende,643,Dave Morris ; Oliver Johnson,Yannick Surcouf,Russ Nicholson,Gallimard,L'épée de légende,1991,1991,294,http://catalogue.bnf.fr/ark:/12148/cb354760897,enrichi,collection-ldvelh+bnf,2026-10-11
-9782070567126,9782070567126,2070567125,,Les Murailles de Spyte,V1,,L'Epée de Légende,662,,,,,,1992,,,,brut,collection-ldvelh,2026-10-11
+9782070567126,9782070567126,2070567125,,Les Murailles de Spyte,V1,,L'Epée de Légende,662,Dave Morris ; Oliver Johnson ; Jamie Thomson,Yannick Surcouf,Russ Nicholson,Gallimard,Folio junior,1992,1992,276,http://catalogue.bnf.fr/ark:/12148/cb35495008k,enrichi,collection-ldvelh+bnf,2026-10-11
 9782070520312,9782070520312,2070520315,,Initiation au Jeu d'Aventure,V1,,L'Œil Noir,000,,,,,,1985,,,,brut,collection-ldvelh,2026-10-11
 9782070520329,9782070520329,2070520323,,Les Accessoires du Maître,V1,,L'Œil Noir,000,,,,,,1985,,,,brut,collection-ldvelh,2026-10-11
 9782070520343,9782070520343,207052034X,,Extension au Jeu d'Aventure,V1,,L'Œil Noir,000,,,,,,,,,,brut,collection-ldvelh,2026-10-11
-LOCAL-L'Œil_Noir-001,,,,L'Aventurie,V1,,L'Œil Noir,001,,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-001,,,,L'Aventurie,V1,,L'Œil Noir,001,Ulrich Kiesow,Danielle Plociennik,Ina Kramer,Gallimard,Folio junior,,1986,175,http://catalogue.bnf.fr/ark:/12148/cb43433592s,a_verifier,collection-ldvelh+bnf,2026-10-11
 LOCAL-L'Œil_Noir-002,,,,Le Livre des Règles,V1,,L'Œil Noir,002,,,,,,,,,,brut,collection-ldvelh,2026-10-11
-LOCAL-L'Œil_Noir-003,,,,Le Livre des Règles 2,V1,,L'Œil Noir,003,,,,,,,,,,brut,collection-ldvelh,2026-10-11
+LOCAL-L'Œil_Noir-003,,,,Le Livre des Règles 2,V1,,L'Œil Noir,003,Werner Fuchs,Érica Ménard,Jochen Fortmann,Gallimard,Folio junior,,1986,190,http://catalogue.bnf.fr/ark:/12148/cb43433591f,a_verifier,collection-ldvelh+bnf,2026-10-11
 LOCAL-L'Œil_Noir-004,,,,Le Livre des Aventures,V1,,L'Œil Noir,004,,,,,,,,,,brut,collection-ldvelh,2026-10-11
 LOCAL-L'Œil_Noir-005,,,,"Héros, Monstres et Forces Obscures",V1,,L'Œil Noir,005,,,,,,,,,,brut,collection-ldvelh,2026-10-11
 9782070333202,9782070333202,2070333205,,La Source de Mort,V1,,L'Œil Noir,320,Philip Neumann,,,Gallimard,Folio junior,1985,1985,126,http://catalogue.bnf.fr/ark:/12148/cb34911922q,enrichi,collection-ldvelh+bnf,2026-10-11

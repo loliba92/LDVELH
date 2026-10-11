@@ -52,6 +52,17 @@ CREATE TABLE DimLivre (
     nb_versions    INTEGER NOT NULL DEFAULT 1
 );
 
+-- Dimension : la série de livres-jeux (Défis Fantastiques, Super Sherlock, Loup Solitaire...)
+CREATE TABLE DimSerie (
+    serie_key        INTEGER PRIMARY KEY,
+    code             TEXT NOT NULL UNIQUE,      -- identifiant lisible (slug)
+    nom              TEXT NOT NULL,
+    nb_versions      INTEGER NOT NULL DEFAULT 0,
+    annee_min        INTEGER,                   -- première année d'édition connue
+    annee_max        INTEGER,
+    editeur_principal TEXT
+);
+
 -- Dimension : la version (édition précise) d'un livre : V1, V2... V5, autres éditeurs
 CREATE TABLE DimVersion (
     version_key          INTEGER PRIMARY KEY,
@@ -59,12 +70,12 @@ CREATE TABLE DimVersion (
     isbn13               TEXT,
     isbn10               TEXT,
     livre_key            INTEGER NOT NULL REFERENCES DimLivre(livre_key),
+    serie_key            INTEGER NOT NULL REFERENCES DimSerie(serie_key),
     numero_version       INTEGER NOT NULL,      -- 1 = première version
     libelle_version      TEXT NOT NULL,         -- V1, V2...
     est_derniere_version INTEGER NOT NULL,      -- 1 si la plus récente du livre
     en_vente             INTEGER,               -- 1 = encore vendue neuve, 0 = épuisée, NULL = inconnu
     titre_version        TEXT NOT NULL,         -- titre porté par cette version
-    serie                TEXT,                  -- Défis Fantastiques, Loup Solitaire...
     numero_serie         TEXT,
     editeur              TEXT,                  -- Gallimard, Alkonost...
     collection_editeur   TEXT,                  -- Folio Junior...
@@ -82,6 +93,7 @@ CREATE TABLE FaitPrix (
     prix_key        INTEGER PRIMARY KEY AUTOINCREMENT,
     version_key     INTEGER NOT NULL REFERENCES DimVersion(version_key),
     livre_key       INTEGER NOT NULL REFERENCES DimLivre(livre_key),
+    serie_key       INTEGER NOT NULL REFERENCES DimSerie(serie_key),
     etat_key        INTEGER NOT NULL REFERENCES DimEtat(etat_key),
     date_key        INTEGER NOT NULL REFERENCES DimDate(date_key),
     source_key      INTEGER NOT NULL REFERENCES DimSource(source_key),
@@ -95,6 +107,7 @@ CREATE TABLE FaitPrix (
 );
 CREATE INDEX ix_fait_version ON FaitPrix(version_key);
 CREATE INDEX ix_fait_livre   ON FaitPrix(livre_key);
+CREATE INDEX ix_fait_serie   ON FaitPrix(serie_key);
 CREATE INDEX ix_fait_etat    ON FaitPrix(etat_key);
 CREATE INDEX ix_fait_date    ON FaitPrix(date_key);
 CREATE INDEX ix_fait_source  ON FaitPrix(source_key);
@@ -103,13 +116,14 @@ CREATE INDEX ix_fait_type    ON FaitPrix(type_key);
 -- Vue de lecture : tout est déjà joint
 CREATE VIEW VueFaitPrix AS
 SELECT f.prix_key, d.date, l.titre AS livre, v.libelle_version, v.titre_version, v.id,
-       v.serie, v.numero_serie, v.editeur, v.collection_editeur, v.annee AS annee_version,
+       sr.nom AS serie, v.numero_serie, v.editeur, v.collection_editeur, v.annee AS annee_version,
        v.en_vente, v.est_derniere_version,
        e.libelle AS etat, e.rang AS etat_rang, s.nom AS source, t.libelle AS type_prix,
        t.est_prix_reel, f.prix, f.frais_port, f.est_lot, f.url
 FROM FaitPrix f
 JOIN DimVersion v ON v.version_key = f.version_key
 JOIN DimLivre l   ON l.livre_key   = f.livre_key
+JOIN DimSerie sr  ON sr.serie_key  = f.serie_key
 JOIN DimEtat e    ON e.etat_key    = f.etat_key
 JOIN DimDate d    ON d.date_key    = f.date_key
 JOIN DimSource s  ON s.source_key  = f.source_key
