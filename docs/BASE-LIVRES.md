@@ -58,3 +58,13 @@ Aucune source ne suffira seule. La BnF est la plus fiable pour les livres franç
 
 - Périmètre : seulement les collections françaises, ou aussi les éditions étrangères et les rééditions récentes ?
 - Où commencer le contrôle manuel : par les livres les plus chers ou par les plus courants ?
+
+## 6. Les versions (V1, V2… V5) et la BnF
+
+Constaté le 2026-10-11 :
+- La BnF liste les éditions d'un titre (éditeur, année, collection, numéro dans la collection, ISBN). Elle a parfois plusieurs notices pour le même ISBN (une par tirage), ce qui explique des écarts d'année avec collection-ldvelh.fr (champ `annee_bnf`).
+- Elle ne donne **pas** de numéro de version et **pas** de lien explicite entre les éditions d'un même livre. « V1, V2… » est une convention de la communauté : elle se fixe à la main.
+- Sa notice porte la mention « Un Livre dont vous êtes le héros » dans la collection : test fiable pour confirmer qu'un ISBN est un livre-jeu.
+- Les rééditions changent souvent de numérotation (ex. *Le Sorcier de la Montagne de Feu* : Folio Junior n° 252, puis Défis fantastiques n° 1 en 2007 et 2018).
+
+Convention retenue : les livres issus de collection-ldvelh.fr sont la **V1**. Les rééditions sont proposées par `pipeline/find_versions.py` dans `data/processed/versions_candidates.csv` (classées par année), puis validées une à une avec `add_book.py --livre ... --version Vn`.
