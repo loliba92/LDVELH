@@ -99,3 +99,7 @@ Principes : un seul choix par écran ; jamais de perte (fermer et reprendre à t
 - **Écran de départ** : « Reprendre là où j'en étais » (si un avancement est mémorisé) ou « Continuer avec ma collection » ; « Charger mon fichier » (JSON, CSV ou liste d'ISBN) ; « Repartir de zéro » (avec confirmation).
 - **Fichier chargé** : les livres sont ajoutés à la collection, puis les séries, les éditions et les couvertures sont cochées d'après leur contenu. L'inventaire s'ouvre à l'étape « Séries », avec un message de bilan.
 - **Enregistrement à chaque étape** : la collection est écrite à chaque clic (`cote-collection-v1`), l'avancement (étape, séries, éditions, liste en cours, état habituel) dans `cote-parcours-v1`. Le pied de l'inventaire affiche « Enregistré dans ce navigateur à HH:MM » et un lien « Télécharger ma sauvegarde » (JSON).
+
+## Application installable (PWA)
+
+Comme sur Scénario : manifeste (`web/manifest.webmanifest`), icônes (`web/icons/`, dont une version « maskable » pour Android) et bouton « Installer l'application » (visible seulement quand le navigateur le propose ; sur iPhone, une aide en pied de page). En plus, `web/sw.js` rend l'application utilisable sans réseau : pages, scripts, styles et données passent par le réseau d'abord (version à jour) avec copie locale en secours ; jaquettes, polices et icônes viennent de la copie locale. Les chemins sont relatifs, car le site vit sous `/LDVELH/`. Pour forcer le renouvellement des copies, changer `VERSION` dans `sw.js`.

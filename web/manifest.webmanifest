@@ -1,0 +1,23 @@
+{
+  "name": "La Cote du Héros",
+  "short_name": "Cote du Héros",
+  "description": "Guide de cote des livres dont vous êtes le héros : prix, éditions, et estimation de votre collection.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f0e8d6",
+  "theme_color": "#2a1c13",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["books", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Ma collection", "url": "./#collection", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
