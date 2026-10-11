@@ -41,6 +41,21 @@ WHERE f.est_lot = 0
 ETATS = ("convenable", "bon", "tres_bon")
 
 
+def aligner(par_etat):
+    """Cohérence : un état supérieur ne vaut jamais moins qu'un état inférieur (convenable <= bon <= très bon).
+    Sinon le prix est remonté au niveau de l'état inférieur, et marqué « ajusté ». Renvoie le nombre de prix remontés."""
+    plancher, n = None, 0
+    for e in ETATS:
+        est = par_etat.get(e)
+        if not est:
+            continue
+        if plancher is not None and est["prix"] < plancher:
+            par_etat[e] = {**est, "prix": plancher, "ajuste": True}
+            n += 1
+        plancher = max(plancher or 0, par_etat[e]["prix"])
+    return n
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--db", type=Path, default=DB)
@@ -56,6 +71,7 @@ def main():
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
     prix = {cle: {e: estimer(obs, args.aujourdhui) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
+    nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
 
     versions = []
     for r in cx.execute(REQUETE):
@@ -74,7 +90,7 @@ def main():
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance")}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     meta = {
@@ -97,7 +113,7 @@ def main():
     sans_prix = sum(1 for v in versions if all(x is None for x in v["prix"].values()))
     taille = (sortie / "versions.json").stat().st_size // 1024
     print(f"{len(versions)} versions, {meta['nb_livres']} livres, {meta['nb_series']} séries exportés "
-          f"({taille} Ko) ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette")
+          f"({taille} Ko) ; {nb_ajustes} prix remonté(s) pour rester cohérents (C ≤ BE ≤ TBE) ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette")
 
 
 if __name__ == "__main__":

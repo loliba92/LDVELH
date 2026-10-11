@@ -29,9 +29,9 @@
       <span class="marque-nom">La Cote du Héros</span>
     </a>
     <nav class="menu" aria-label="Navigation">
-      <a href="./#cote">La cote</a>
+      <a class="menu-maison" href="./"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
+      <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
-      <a href="./#etagere">L'étagère</a>
       <a href="le-projet.html">Le projet</a>
     </nav>
   </div>
@@ -59,8 +59,8 @@
 
 <h2>Propriété intellectuelle</h2>
 <ul>
-  <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits]. Le code est consultable sur <a href="https://github.com/loliba92/LDVELH" target="_blank" rel="noopener">le dépôt public</a>.</li>
-  <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide gratuit et non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
+  <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits].</li>
+  <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
   <li><strong>Données bibliographiques</strong> : catalogue général de la Bibliothèque nationale de France.</li>
   <li><strong>Illustration de l'accueil</strong> : [À COMPLÉTER : auteur ou source de l'illustration, et conditions d'utilisation]</li>
   <li><strong>Polices</strong> : Cormorant Garamond (© The Cormorant Project Authors) et Source Sans 3 (© Adobe), licence SIL Open Font 1.1.</li>
@@ -91,16 +91,16 @@
 </footer>
 
 <nav class="barre-bas" id="barre-bas" aria-label="Menu du bas">
-  <a href="./#cote"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-7"/></svg><span>La cote</span></a>
-  <a href="./#etagere"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
+  <a href="./"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
+  <a href="./#recherche"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Inventaire</span></a>
   <a href="collection.html"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg><span>Plus</span></button>
 </nav>
 
-<dialog class="feuille" id="plus" aria-labelledby="plus-titre">
+<dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
   <ul class="feuille-liste">
     <li><a href="le-projet.html"><b>Le projet</b><small>Pourquoi ce guide, d'où viennent les prix</small></a></li>
     <li><a href="./#apropos"><b>À propos de la cote</b><small>Ce qu'est la cote, les éditions V1 à V5</small></a></li>

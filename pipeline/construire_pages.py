@@ -37,9 +37,9 @@ def entete(courante):
       <span class="marque-nom">La Cote du Héros</span>
     </a>
     <nav class="menu" aria-label="Navigation">
-      <a href="./#cote">La cote</a>
+      <a class="menu-maison" href="./"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
+      <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
-      <a href="./#etagere">L'étagère</a>
       {lien("le-projet.html", "Le projet", "le-projet.html")}
     </nav>
   </div>
@@ -49,8 +49,8 @@ def entete(courante):
 def barre(courante):
     plus_actif = ' aria-current="page"'
     return f'''<nav class="barre-bas" id="barre-bas" aria-label="Menu du bas">
-  <a href="./#cote">{ico('<path d="M5 20V11M12 20V5M19 20v-7"/>')}<span>La cote</span></a>
-  <a href="./#etagere">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
+  <a href="./">{ico('<path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>')}<span>Accueil</span></a>
+  <a href="./#recherche">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">{ico('<path d="M12 5v14M5 12h14"/>')}<span>Inventaire</span></a>
   <a href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>')}<span>Plus</span></button>
@@ -61,9 +61,9 @@ def feuille(courante, racine_a_propos="./#apropos"):
     def e(href, titre, detail, page=None):
         cur = ' aria-current="page"' if page is not None and page == courante else ""
         return f'<li><a href="{href}"{cur}><b>{titre}</b><small>{detail}</small></a></li>'
-    return f'''<dialog class="feuille" id="plus" aria-labelledby="plus-titre">
+    return f'''<dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
   <ul class="feuille-liste">
     {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
@@ -164,13 +164,13 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 </ul>
 
 <h2>Ce que le guide ne fait pas</h2>
-<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
+<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin et eBay des fiches ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
 <h2>Votre collection reste chez vous</h2>
 <p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
 <h2>Signaler une erreur, proposer un prix</h2>
-<p>Une édition manquante, une fiche erronée, un prix que vous avez constaté : écrivez-le dans un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> (un compte GitHub est nécessaire). Le code du guide est public sur le même dépôt.</p>
+<p>Une édition manquante, une fiche erronée, un prix que vous avez constaté : écrivez-le dans un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> (un compte GitHub est nécessaire).</p>
 '''
 
 CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
@@ -204,7 +204,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Le site est hébergé par GitHub Pages (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub peut enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de l'hébergeur et non de l'éditeur, qui n'y a pas accès. GitHub est établi aux États-Unis ; son traitement des données est décrit dans sa <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, recherches sur Vinted, Leboncoin ou eBay, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
 
 <h2>Vos droits</h2>
 <p>Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
@@ -234,8 +234,8 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 
 <h2>Propriété intellectuelle</h2>
 <ul>
-  <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits]. Le code est consultable sur <a href="https://github.com/loliba92/LDVELH" target="_blank" rel="noopener">le dépôt public</a>.</li>
-  <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide gratuit et non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
+  <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits].</li>
+  <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
   <li><strong>Données bibliographiques</strong> : catalogue général de la Bibliothèque nationale de France.</li>
   <li><strong>Illustration de l'accueil</strong> : [À COMPLÉTER : auteur ou source de l'illustration, et conditions d'utilisation]</li>
   <li><strong>Polices</strong> : Cormorant Garamond (© The Cormorant Project Authors) et Source Sans 3 (© Adobe), licence SIL Open Font 1.1.</li>
@@ -298,8 +298,16 @@ def page_collection(index_html):
 
 {nav}
 
+<header class="banniere" aria-labelledby="titre-page">
+  <div class="cadre banniere-in">
+    <p class="surtitre">Mon inventaire</p>
+    <h1 id="titre-page">Ma collection</h1>
+    <p class="chapeau">Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.</p>
+  </div>
+</header>
+
 <main id="main" class="cadre contenu-collection">
-{COLLECTION_SECTION.replace('<h2 id="titre-collection">Ma collection</h2>', '<h1 id="titre-collection">Ma collection</h1>')}</main>
+{COLLECTION_SECTION.replace('<h2 id="titre-collection">Ma collection</h2>', '<h2 id="titre-collection">Estimation</h2>')}</main>
 
 <footer class="pied">
   <div class="cadre pied-in">

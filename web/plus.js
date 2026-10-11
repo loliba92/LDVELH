@@ -1,6 +1,6 @@
 /* Feuille « Plus » de la barre du bas : Le projet, À propos, Confidentialité, Mentions légales. */
 (function () {
-  var feuille = document.getElementById('plus');
+  var feuille = document.getElementById('feuille-plus');
   if (!feuille || !feuille.showModal) return;
   var boutons = document.querySelectorAll('[data-plus]');
   boutons.forEach(function (b) {

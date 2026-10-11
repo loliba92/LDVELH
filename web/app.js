@@ -11,8 +11,11 @@
       def: 'Presque comme à la parution : peu ou pas de traces de lecture. TBE signifie « très bon état ».' },
   ];
   const PAR_PAGE = 48;
-  const eur = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+  // Prix : toujours un chiffre après la virgule ; patrimoine et totaux : aucun (fmtE)
+  const eur = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const eurEntier = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
   const fmt = (v) => (v == null ? '—' : eur.format(v));
+  const fmtE = (v) => (v == null ? '—' : eurEntier.format(v));
   const fmtN = (x) => (Number.isInteger(x) ? String(x) : x.toLocaleString('fr-FR'));
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
@@ -29,7 +32,7 @@
   let S = {};
 
   const defaut = () => ({
-    q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, versions: new Set(VERSIONS),
+    q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'cote', versions: new Set(VERSIONS),
     h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false,
   });
 
@@ -127,10 +130,15 @@
     $('#f-tri').addEventListener('change', (e) => { S.tri = e.target.value; changer(); });
     $('#f-groupe').addEventListener('change', (e) => { S.g = e.target.value; changer(); });
     brancherHisto();
-    $('#reinit').addEventListener('click', () => { const { h, vue, tri, g } = S; S = { ...defaut(), h, vue, tri, g }; synchroniser(); changer(); });
+    brancherOnglets();
+    $('#reinit').addEventListener('click', () => { const { h, vue, tri, g, onglet } = S; S = { ...defaut(), h, vue, tri, g, onglet }; synchroniser(); changer(); });
     $('#bascule').addEventListener('click', () => basculerSelecteur());
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
-    window.addEventListener('hashchange', () => { lireAdresse(); synchroniser(); afficher(); });
+    window.addEventListener('hashchange', () => {
+      const h = location.hash.slice(1);
+      if (h && !h.includes('=')) return;      // simple ancre de section (#cote, #apropos…) : les filtres restent
+      lireAdresse(); synchroniser(); afficher();
+    });
     let attente;
     window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
   }
@@ -195,6 +203,7 @@
     if (S.vue !== 'etagere') p.set('vue', S.vue);
     if (S.tri !== 'serie') p.set('tri', S.tri);
     if (S.g !== 'serie') p.set('g', S.g);
+    if (S.onglet !== 'cote') p.set('onglet', S.onglet);
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
@@ -208,6 +217,7 @@
     if (['etagere', 'liste', 'groupe'].includes(p.get('vue'))) S.vue = p.get('vue');
     if (['serie', 'titre', 'annee', 'cher', 'pascher'].includes(p.get('tri'))) S.tri = p.get('tri');
     if (['serie', 'version', 'annee', 'decennie', 'editeur'].includes(p.get('g'))) S.g = p.get('g');
+    if (['cote', 'etagere'].includes(p.get('onglet'))) S.onglet = p.get('onglet');
   }
 
   /* ---------- Calculs ---------- */
@@ -243,11 +253,12 @@
   function legendePrix(b, k) {
     const i = infoPrix(b, k);
     if (b.prix[k] == null) return '';
-    if (!estActuel(i)) return `Cote d'archives (ancien relevé) : un ordre de grandeur.`;
+    const aligne = i && i.ajuste ? ' Alignée sur l\'état inférieur : un état supérieur ne vaut jamais moins qu\'un état inférieur.' : '';
+    if (!estActuel(i)) return `Cote d'archives (ancien relevé) : un ordre de grandeur.${aligne}`;
     const mot = NATURES[i.nature] || 'observation';
     const base = `${i.nb} ${mot}${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}`;
     const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
-    return `${base} · confiance ${i.confiance}.${reserve}`;
+    return `${base} · confiance ${i.confiance}.${reserve}${aligne}`;
   }
   function texteEstimation(bl) {
     if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";
@@ -256,14 +267,40 @@
   }
 
   /* ---------- Affichage général ---------- */
+  // Onglets « Cote de la sélection » / « Sur l'étagère » : un seul panneau à la fois, sans défilement
+  function appliquerOnglet() {
+    ['cote', 'etagere'].forEach((n) => {
+      const on = S.onglet === n;
+      $('#' + n).hidden = !on;
+      $('#onglet-' + n).setAttribute('aria-selected', String(on));
+      $('#onglet-' + n).tabIndex = on ? 0 : -1;
+    });
+  }
+  function choisirOnglet(n, focus) {
+    if (S.onglet === n) return;
+    S.onglet = n; ecrireAdresse(); afficher();
+    if (focus) $('#onglet-' + n).focus();
+  }
+  function brancherOnglets() {
+    const ordre = ['cote', 'etagere'];
+    ordre.forEach((n) => $('#onglet-' + n).addEventListener('click', () => choisirOnglet(n)));
+    $('.onglets-vue').addEventListener('keydown', (e) => {
+      const i = ordre.indexOf(S.onglet);
+      const cible = { ArrowRight: ordre[(i + 1) % 2], ArrowLeft: ordre[(i + 1) % 2], Home: ordre[0], End: ordre[1] }[e.key];
+      if (cible) { e.preventDefault(); choisirOnglet(cible, true); }
+    });
+  }
+
   function afficher() {
     if (PAGE === 'collection') { afficherCollection(); return; }
+    appliquerOnglet();
     const liste = filtrer();
     const nf = nbFiltres();
     $('#nb-filtres').textContent = nf ? String(nf) : '';
     $('#nb-filtres').setAttribute('aria-label', nf ? `${nf} filtre${nf > 1 ? 's' : ''} actif${nf > 1 ? 's' : ''}` : '');
     majResume();
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
+    $('#nb-onglet').textContent = String(liste.length);
     afficherCote(liste);
     afficherHisto();
     afficherCollection();
@@ -279,7 +316,7 @@
       afficherGroupes(liste);
     }
     if (S.mine && !liste.length && !Object.keys(COLL).length) {
-      $('#resultats').innerHTML = '<p class="vide-global">Votre collection est vide. Touchez le signet d\'une jaquette pour y ajouter un livre.</p>';
+      $('#resultats').innerHTML = '<p class="vide-global">Votre collection est vide. Touchez C, BE ou TBE sous une jaquette pour y ajouter un livre.</p>';
     }
     afficherPied();
   }
@@ -454,8 +491,8 @@
           <span class="infos"><span class="titre">${esc(b.titre)}</span><span class="meta" style="display:block">${esc(b.serie)}${esc(numero(b))}${b.annee ? ' · ' + b.annee : ''}</span></span>
           <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
         </button>
-        <button type="button" class="possede" data-possede="${esc(b.id)}" aria-pressed="${poss ? 'true' : 'false'}"
-          aria-label="${poss ? 'Retirer de ma collection' : 'Ajouter à ma collection'} : ${esc(b.titre)}, édition ${esc(b.version)}" title="${poss ? 'Dans ma collection : retirer' : 'Ajouter à ma collection'}"><span class="signet" aria-hidden="true"></span></button>
+        <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
+          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -536,6 +573,21 @@
   }
 
   /* ---------- Fiche d'un livre ---------- */
+  // Recherche de cette édition sur trois sites d'annonces (liens simples, ouverts dans un nouvel onglet)
+  const requete = (t) => encodeURIComponent(t).replace(/%20/g, '+');
+  function blocRecherche(b) {
+    const q = requete(`${b.titre} livre héros`);
+    const ebay = requete(`${b.titre} ${b.isbn13 || 'livre héros'}`);
+    const liens = [
+      ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
+      ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&shippable=1&owner_type=all&sort=time`],
+      ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
+    ];
+    return `<h3>Chercher cette édition en vente</h3>
+        <p class="liens-vente">${liens.map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('')}</p>
+        <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -564,6 +616,7 @@
         <h3>Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+        ${blocRecherche(b)}
         ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
@@ -582,8 +635,8 @@
 
   // Clic sur une carte ou un titre
   document.addEventListener('click', (e) => {
-    const signet = e.target.closest('button[data-possede]');
-    if (signet) { basculerPossede(signet.dataset.possede); return; }
+    const etatBtn = e.target.closest('button[data-etat-possede]');
+    if (etatBtn) { basculerPossede(etatBtn.dataset.etatPossede, etatBtn.dataset.e); return; }
     const carte = e.target.closest('button[data-id]');
     if (carte) ouvrirFiche(carte.dataset.id);
   });
@@ -615,11 +668,15 @@
   let INDEX = null;
   const livreDe = (id) => (INDEX || (INDEX = parId())).get(id);
 
-  function basculerPossede(id) {
+  // C / BE / TBE sur une jaquette : ajoute le livre dans cet état ; retoucher l'état choisi le retire
+  function basculerPossede(id, etat) {
     const b = livreDe(id);
     if (!b) return;
-    if (COLL[id]) { delete COLL[id]; annonce(`${b.titre} retiré de votre collection.`); }
-    else { COLL[id] = { etat: S.h, qte: 1 }; annonce(`${b.titre} ajouté à votre collection, en ${etatDe(S.h).long.toLowerCase()}.`); }
+    if (COLL[id] && COLL[id].etat === etat) { delete COLL[id]; annonce(`${b.titre} retiré de votre collection.`); }
+    else {
+      COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1 };
+      annonce(`${b.titre} : en ${etatDe(etat).long.toLowerCase()} dans votre collection.`);
+    }
     sauverColl();
     afficher();
   }
@@ -653,7 +710,7 @@
     const zone = $('#coll-corps');
     if (!n) {
       zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
-        <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher le <strong>signet</strong> d'une jaquette sur l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
+        <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>`;
       return;
     }
@@ -673,7 +730,7 @@
       return `<tr><td class="principal"><div class="l-livre"><b style="font:700 1.1rem var(--f-display)">${esc(nom)}</b></div></td>
         <td class="num" data-label="Titres"><span class="prix-c">${e.titres.size}</span> <span class="sous">sur ${tot}</span><span class="progres"><i style="width:${Math.round((e.titres.size / tot) * 100)}%"></i></span></td>
         <td class="num" data-label="Exemplaires"><span class="prix-c">${e.ex}</span></td>
-        <td class="num" data-label="Valeur estimée"><span class="prix-c">${fmt(e.val)}</span><span class="barre" style="width:${Math.max(4, (e.val / maxVal) * 100)}%"></span></td></tr>`;
+        <td class="num" data-label="Valeur estimée"><span class="prix-c">${fmtE(e.val)}</span><span class="barre" style="width:${Math.max(4, (e.val / maxVal) * 100)}%"></span></td></tr>`;
     }).join('');
     // pièces les plus cotées
     const pieces = [...bl.lignes].filter((x) => x.b.prix[x.c.etat] != null).sort((a, b) => b.b.prix[b.c.etat] - a.b.prix[a.c.etat]).slice(0, 5);
@@ -695,12 +752,12 @@
     const reste = triees.length - vus.length;
     zone.innerHTML = `
       <div class="coll-haut">
-        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmt(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmt(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
+        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
         <div>
           <dl class="stats">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
-            <div><dt>Plancher</dt><dd>${fmt(bl.bas)}<small>tout en convenable</small></dd></div>
-            <div><dt>Plafond</dt><dd>${fmt(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
+            <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
+            <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
@@ -1148,18 +1205,18 @@
     const bl = bilan();
     tete('Terminé', bl.exemplaires ? 'Votre inventaire est prêt' : 'Aucun livre coché', 100);
     if (!bl.exemplaires) {
-      $('#parcours-corps').innerHTML = '<p>Vous n\'avez coché aucun livre. Revenez en arrière pour choisir des séries et des éditions, ou fermez et ajoutez vos livres un par un avec les signets.</p>';
+      $('#parcours-corps').innerHTML = '<p>Vous n\'avez coché aucun livre. Revenez en arrière pour choisir des séries et des éditions, ou fermez et ajoutez vos livres un par un avec C, BE ou TBE sous les jaquettes.</p>';
       pied(bouton('debut', '← Recommencer', 'bouton-clair'), bouton('fermer', 'Fermer'));
       return;
     }
     $('#parcours-corps').innerHTML = `
       <div class="bilan">
-        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmt(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmt(bl.total)}</span><span class="sceau-etat">${pl(bl.exemplaires, 'exemplaire')}</span></div>
+        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${pl(bl.exemplaires, 'exemplaire')}</span></div>
         <div>
           <dl class="stats">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${pl(bl.lignes.length, 'édition')}</small></dd></div>
-            <div><dt>Plancher</dt><dd>${fmt(bl.bas)}<small>tout en convenable</small></dd></div>
-            <div><dt>Plafond</dt><dd>${fmt(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></small></dd></div>
+            <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
+            <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></small></dd></div>
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${pl(bl.sansCote, 'exemplaire')} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
@@ -1334,15 +1391,24 @@
       new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '.';
   }
 
+  /* ---------- Maison et logo : retour tout en haut de l'accueil, sans toucher aux filtres ---------- */
+  document.addEventListener('click', (e) => {
+    const maison = e.target.closest('a[href="#haut"]');
+    if (!maison) return;
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
+
   /* ---------- Barre du bas (téléphones) : section en cours et clavier ---------- */
   (function barreBas() {
     const liens = [...document.querySelectorAll('#barre-bas a[data-sec]')];
-    const sections = liens.map((l) => document.getElementById(l.dataset.sec)).filter(Boolean);
+    const idsDe = (l) => l.dataset.sec.split(' ');
+    const sections = [...new Set(liens.flatMap(idsDe))].map((id) => document.getElementById(id)).filter(Boolean);
     if ('IntersectionObserver' in window && sections.length) {
       const io = new IntersectionObserver((entrees) => {
         entrees.forEach((e) => {
           if (!e.isIntersecting) return;
-          liens.forEach((l) => { if (l.dataset.sec === e.target.id) l.setAttribute('aria-current', 'location'); else l.removeAttribute('aria-current'); });
+          liens.forEach((l) => { if (idsDe(l).includes(e.target.id)) l.setAttribute('aria-current', 'location'); else l.removeAttribute('aria-current'); });
         });
       }, { rootMargin: '-35% 0px -60% 0px' });
       sections.forEach((s) => io.observe(s));
