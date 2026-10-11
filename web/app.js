@@ -72,16 +72,6 @@
       `<li><b>${META.nb_livres}</b><span>livres</span></li>` +
       `<li><b>${META.nb_series}</b><span>séries</span></li>` +
       `<li><b>${VERSIONS.length}</b><span>générations d'éditions</span></li>`;
-    // Cinq jaquettes de séries différentes (la plus chère de chaque série, en V1)
-    const parSerie = new Map();
-    DATA.filter((b) => b.version === 'V1' && b.couverture_grande).forEach((b) => {
-      const cur = parSerie.get(b.serie);
-      if (!cur || (b.prix.tres_bon ?? 0) > (cur.prix.tres_bon ?? 0)) parSerie.set(b.serie, b);
-    });
-    const choix = [...parSerie.values()].sort((a, b) => (b.prix.tres_bon ?? 0) - (a.prix.tres_bon ?? 0)).slice(0, 5);
-    const ordre = [choix[3], choix[1], choix[0], choix[2], choix[4]].filter(Boolean);
-    $('#eventail').innerHTML = ordre.map((b) =>
-      `<img src="${esc(racine(b.couverture_grande))}" alt="" width="150" height="210" decoding="async">`).join('');
   }
 
   /* ---------- Contrôles ---------- */

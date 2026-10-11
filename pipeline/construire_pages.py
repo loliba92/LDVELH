@@ -166,7 +166,6 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <ul>
   <li><strong>Catalogue et fiches</strong> : notices du catalogue général de la Bibliothèque nationale de France, complétées à partir de l'ancien relevé.</li>
   <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration.</li>
-  <li><strong>Photo de l'accueil</strong> : Phát Trương, via Pexels.</li>
   <li><strong>Polices</strong> : Cormorant Garamond et Source Sans 3, sous licence SIL Open Font 1.1, hébergées avec le site.</li>
 </ul>
 
@@ -212,7 +211,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Le site est hébergé par GitHub Pages (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub peut enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de l'hébergeur et non de l'éditeur, qui n'y a pas accès. GitHub est établi aux États-Unis ; son traitement des données est décrit dans sa <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, Pexels, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
 
 <h2>Vos droits</h2>
 <p>Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
@@ -245,7 +244,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
   <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits]. Le code est consultable sur <a href="https://github.com/loliba92/LDVELH" target="_blank" rel="noopener">le dépôt public</a>.</li>
   <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide gratuit et non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
   <li><strong>Données bibliographiques</strong> : catalogue général de la Bibliothèque nationale de France.</li>
-  <li><strong>Photo de l'accueil</strong> : <a href="https://www.pexels.com/photo/dimly-lit-vintage-library-bookcase-scene-37302575/" target="_blank" rel="noopener">Phát Trương</a>, <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</li>
+  <li><strong>Illustration de l'accueil</strong> : [À COMPLÉTER : auteur ou source de l'illustration, et conditions d'utilisation]</li>
   <li><strong>Polices</strong> : Cormorant Garamond (© The Cormorant Project Authors) et Source Sans 3 (© Adobe), licence SIL Open Font 1.1.</li>
 </ul>
 

@@ -104,9 +104,9 @@ Principes : un seul choix par écran ; jamais de perte (fermer et reprendre à t
 
 Comme sur Scénario : manifeste (`web/manifest.webmanifest`), icônes (`web/icons/`, dont une version « maskable » pour Android) et bouton « Installer l'application » (visible seulement quand le navigateur le propose ; sur iPhone, une aide en pied de page). En plus, `web/sw.js` rend l'application utilisable sans réseau : pages, scripts, styles et données passent par le réseau d'abord (version à jour) avec copie locale en secours ; jaquettes, polices et icônes viennent de la copie locale. Les chemins sont relatifs, car le site vit sous `/LDVELH/`. Pour forcer le renouvellement des copies, changer `VERSION` dans `sw.js`.
 
-## Image d'ambiance de l'accueil (Pexels)
+## Haut de page de l'accueil : l'illustration
 
-Photo de bibliothèque ancienne en fond du haut de page, sous un voile de la couleur du fond : dense derrière le texte (contraste mesuré ≥ 4,5 en thème clair et sombre, ordinateur et téléphone), léger du côté des jaquettes. Elle est choisie avec `scrapers/image_accueil.py` (`--chercher` pour proposer des candidats, `--retenir ID` pour l'enregistrer en `web/images/accueil.webp`, 1600 px, environ 75 Ko). La clé Pexels vient de la variable d'environnement `PEXELS_API_KEY` et n'est jamais dans le dépôt ni envoyée au navigateur ; la photo est stockée localement, le site ne dépend pas de Pexels à l'affichage. Crédit en pied de page : Phát Trương, Pexels.
+Fond toujours sombre : un fondu noir porte le bandeau, l'icône, le nom du site (titre précédé de l'icône) et les textes ; l'illustration (un mage face à un dragon, fournie par le propriétaire, `web/images/accueil-dragon.webp`) apparaît à droite sur ordinateur, en bas sur téléphone. Le contraste du texte a été mesuré (≥ 6,5 sur toutes les tailles, thèmes clair et sombre). Les deux autres illustrations proposées sont conservées dans `docs/images-accueil/` : pour en changer, copier le fichier choisi sur `web/images/accueil-dragon.webp` et relancer la publication. L'ancienne photo Pexels et l'éventail de jaquettes ont été retirés ; `scrapers/image_accueil.py` reste disponible pour chercher d'autres images libres de droits.
 
 ## Icône du site : le mage doré
 
