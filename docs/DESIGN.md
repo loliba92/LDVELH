@@ -93,3 +93,9 @@ Constituer une collection livre par livre est long ; le parcours procède du gé
 5. **Bilan** : patrimoine estimé, plancher, plafond, et téléchargement du fichier JSON (ou CSV).
 
 Principes : un seul choix par écran ; jamais de perte (fermer et reprendre à tout moment, les choix déjà faits sont repris) ; fenêtre en plein écran sur téléphone, zones tactiles de 44 px ; progression visible (barre et « liste 2 sur 5 »).
+
+## Inventaire guidé : reprise et sauvegarde
+
+- **Écran de départ** : « Reprendre là où j'en étais » (si un avancement est mémorisé) ou « Continuer avec ma collection » ; « Charger mon fichier » (JSON, CSV ou liste d'ISBN) ; « Repartir de zéro » (avec confirmation).
+- **Fichier chargé** : les livres sont ajoutés à la collection, puis les séries, les éditions et les couvertures sont cochées d'après leur contenu. L'inventaire s'ouvre à l'étape « Séries », avec un message de bilan.
+- **Enregistrement à chaque étape** : la collection est écrite à chaque clic (`cote-collection-v1`), l'avancement (étape, séries, éditions, liste en cours, état habituel) dans `cote-parcours-v1`. Le pied de l'inventaire affiche « Enregistré dans ce navigateur à HH:MM » et un lien « Télécharger ma sauvegarde » (JSON).

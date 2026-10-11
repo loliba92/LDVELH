@@ -542,3 +542,14 @@ dialog.parcours[open] { display: flex; }
   .num-ligne .bouton { flex: none; padding: 8px 16px; }
 }
 .legende-prix { margin: 8px 0 0; max-width: 60ch; }
+
+/* Inventaire guidé : reprise et sauvegarde */
+.reprise { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface-2); }
+.reprise h3 { margin: 0 0 10px; font-size: 1.15rem; }
+.reprise-choix { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.bouton-choix { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 2px; text-align: left; height: auto; padding: 10px 14px; }
+.bouton-choix small { font: 400 .85rem var(--f-ui); opacity: .85; }
+.reprise .statut { margin-top: 8px; min-height: 0; }
+.parcours-pied { flex-wrap: wrap; }
+.pa-sauve { flex-basis: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: .88rem; color: var(--muted); }
+.pa-sauve .bouton-lien { font-size: .88rem; }

@@ -770,10 +770,10 @@
   };
   function statut(t, erreur) { const el = $('#imp-statut'); el.textContent = t; el.classList.toggle('erreur', !!erreur); }
 
-  function importerTexte(texte) {
+  function importer(texte) {
     const entrees = []; // { isbn13, etat, qte }
     const brut = String(texte || '').trim();
-    if (!brut) { statut('Rien à importer : la liste est vide.', true); return; }
+    if (!brut) return { erreur: 'Rien à importer : la liste est vide.' };
     try {
       if (brut.startsWith('{') || brut.startsWith('[')) {
         const j = JSON.parse(brut);
@@ -783,7 +783,7 @@
           else entrees.push({ cle: x.isbn13 || x.isbn || x.id, etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1 });
         });
       }
-    } catch (e) { statut('Le JSON est illisible.', true); return; }
+    } catch (e) { return { erreur: 'Le JSON est illisible.' }; }
     if (!entrees.length) {
       brut.split(/\r?\n/).forEach((ligne, i) => {
         if (!ligne.trim() || (i === 0 && /isbn/i.test(ligne) && /;|,|\t/.test(ligne))) return;
@@ -808,11 +808,19 @@
       if (avant) maj += 1; else ajoutes += 1;
     });
     sauverColl(); afficher();
-    const morceaux = [`${ajoutes} ajouté${ajoutes > 1 ? 's' : ''}`];
-    if (maj) morceaux.push(`${maj} mis à jour`);
-    if (inconnus.length) morceaux.push(`${inconnus.length} non reconnu${inconnus.length > 1 ? 's' : ''} (${inconnus.slice(0, 4).join(', ')}${inconnus.length > 4 ? '…' : ''})`);
-    statut(morceaux.join(' · ') + '.', !ajoutes && !maj);
-    if (ajoutes || maj) $('#imp-texte').value = '';
+    return { ajoutes, maj, inconnus };
+  }
+  function resumeImport(r) {
+    const morceaux = [`${r.ajoutes} ajouté${r.ajoutes > 1 ? 's' : ''}`];
+    if (r.maj) morceaux.push(`${r.maj} mis à jour`);
+    if (r.inconnus.length) morceaux.push(`${r.inconnus.length} non reconnu${r.inconnus.length > 1 ? 's' : ''} (${r.inconnus.slice(0, 4).join(', ')}${r.inconnus.length > 4 ? '…' : ''})`);
+    return morceaux.join(' · ') + '.';
+  }
+  function importerTexte(texte) {
+    const r = importer(texte);
+    if (r.erreur) { statut(r.erreur, true); return; }
+    statut(resumeImport(r), !r.ajoutes && !r.maj);
+    if (r.ajoutes || r.maj) $('#imp-texte').value = '';
   }
 
   // Fiche : bloc « dans ma collection »
@@ -843,8 +851,34 @@
 
 
   /* ---------- Inventaire guidé : séries → éditions → listes → bilan ---------- */
-  const P = { phase: 'intro', etat: 'bon', series: new Set(), cellules: new Set(), file: [], i: 0 };
-  let INFO = null;
+  const P = { phase: 'intro', etat: 'bon', series: new Set(), cellules: new Set(), file: [], i: 0, message: '' };
+  const CLE_P = 'cote-parcours-v1';
+  let INFO = null, REPRISE = null, derniereSauvegarde = null;
+  const heure = (d) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  function majIndicateur() {
+    const el = $('#pa-save');
+    if (el) el.textContent = derniereSauvegarde ? `✓ Enregistré dans ce navigateur à ${heure(derniereSauvegarde)}` : '';
+  }
+  /* Mémorise l'avancement (étape, séries, éditions, liste en cours) ; la collection l'est déjà à chaque clic */
+  function memoriser() {
+    try {
+      localStorage.setItem(CLE_P, JSON.stringify({ phase: P.phase, etat: P.etat, i: P.i, series: [...P.series], cellules: [...P.cellules] }));
+      derniereSauvegarde = new Date();
+    } catch (e) { /* stockage indisponible : l'indicateur reste vide */ }
+    majIndicateur();
+  }
+  function lireParcours() {
+    try {
+      const j = JSON.parse(localStorage.getItem(CLE_P) || 'null');
+      if (!j || !['series', 'editions', 'liste'].includes(j.phase)) return null;
+      const series = (j.series || []).filter((n) => INFO.has(n));
+      const cellules = (j.cellules || []).filter((c) => { const [n, v] = c.split('|'); return INFO.has(n) && INFO.get(n).edit.has(v); });
+      return { phase: j.phase, etat: ETATS.some((e) => e.k === j.etat) ? j.etat : 'bon', i: j.i | 0, series, cellules };
+    } catch (e) { return null; }
+  }
+  function depuisCollection() {
+    Object.keys(COLL).forEach((id) => { const b = livreDe(id); if (b) { P.series.add(b.serie); P.cellules.add(cleCell(b.serie, b.version)); } });
+  }
   const cleCell = (serie, v) => `${serie}|${v}`;
   function infoSeries() {
     const m = new Map();
@@ -863,8 +897,10 @@
 
   function ouvrirParcours() {
     INFO = INFO || infoSeries();
-    P.phase = 'intro'; P.series = new Set(); P.cellules = new Set(); P.file = []; P.i = 0;
-    Object.keys(COLL).forEach((id) => { const b = livreDe(id); if (b) { P.series.add(b.serie); P.cellules.add(cleCell(b.serie, b.version)); } });
+    P.phase = 'intro'; P.series = new Set(); P.cellules = new Set(); P.file = []; P.i = 0; P.message = '';
+    REPRISE = lireParcours();
+    if (REPRISE) { P.etat = REPRISE.etat; REPRISE.series.forEach((n) => P.series.add(n)); REPRISE.cellules.forEach((c) => P.cellules.add(c)); }
+    depuisCollection();
     if (!$('#parcours').open) $('#parcours').showModal();
     rendre();
   }
@@ -877,13 +913,17 @@
     barre.firstElementChild.style.width = `${pct}%`;
   }
   function pied(gauche, droite, info) {
-    $('#parcours-pied').innerHTML = `<div class="gauche">${gauche}</div><div class="droite">${info ? `<span class="info">${info}</span>` : ''}${droite}</div>`;
+    const sauve = ['series', 'editions', 'liste'].includes(P.phase)
+      ? `<div class="pa-sauve"><span id="pa-save" role="status"></span><button type="button" class="bouton-lien" data-pa="sauve">Télécharger ma sauvegarde</button></div>` : '';
+    $('#parcours-pied').innerHTML = `<div class="gauche">${gauche}</div><div class="droite">${info ? `<span class="info">${info}</span>` : ''}${droite}</div>${sauve}`;
+    majIndicateur();
   }
   const bouton = (act, txt, cls = '', dis = false) => `<button type="button" class="bouton ${cls}" data-pa="${act}"${dis ? ' disabled' : ''}>${txt}</button>`;
 
   function rendre() {
     const corps = $('#parcours-corps');
     ({ intro: etapeIntro, series: etapeSeries, editions: etapeEditions, liste: etapeListe, fin: etapeFin })[P.phase]();
+    if (P.phase !== 'intro') memoriser();
     corps.scrollTop = 0;
     $('#parcours-titre').focus({ preventScroll: true });
   }
@@ -891,7 +931,21 @@
   function etapeIntro() {
     const dejaN = Object.values(COLL).reduce((a, c) => a + c.qte, 0);
     tete('Inventaire guidé', 'Faisons l\'inventaire de votre collection', 0);
+    const etapes = { series: 'les séries', editions: 'les éditions', liste: 'les listes de livres' };
+    const reprendre = REPRISE
+      ? bouton('reprendre', `Reprendre là où j'en étais<small>${etapes[REPRISE.phase]} · ${dejaN ? pl(dejaN, 'exemplaire') : 'aucun livre coché'}</small>`, 'bouton-choix')
+      : (dejaN ? bouton('reprendre', `Continuer avec ma collection<small>${pl(dejaN, 'exemplaire')} déjà enregistré${dejaN > 1 ? 's' : ''} dans ce navigateur</small>`, 'bouton-choix') : '');
     $('#parcours-corps').innerHTML = `
+      <section class="reprise" aria-labelledby="pe-reprise">
+        <h3 id="pe-reprise">${reprendre ? 'Reprendre ou repartir ?' : 'Vous avez déjà un fichier ?'}</h3>
+        <div class="reprise-choix">
+          ${reprendre}
+          <label class="bouton bouton-clair bouton-choix" for="pe-fichier">Charger mon fichier<small>sauvegarde JSON, CSV ou liste d'ISBN : tout est coché pour vous</small></label>
+          <input type="file" id="pe-fichier" accept=".json,.csv,.txt,text/plain,application/json" hidden>
+          ${dejaN ? bouton('zero', 'Repartir de zéro<small>efface la collection de ce navigateur</small>', 'bouton-clair bouton-choix') : ''}
+        </div>
+        <p class="statut" id="pe-statut" role="status" aria-live="polite"></p>
+      </section>
       <p>Inutile de tout saisir à la main : on avance par grandes masses, de la série jusqu'à la couverture.</p>
       <ol class="etapes">
         <li><strong>Vos séries</strong> : vous touchez celles dont vous avez au moins un livre.</li>
@@ -903,7 +957,6 @@
       <div class="choix-etat" role="radiogroup" aria-label="État habituel">
         ${ETATS.map((e) => `<label><input type="radio" name="pe-etat" value="${e.k}"${e.k === P.etat ? ' checked' : ''}><span>${e.k === 'tres_bon' ? 'Très bon état (TBE)' : e.court}<small>${esc(e.def.replace(' TBE signifie « très bon état ».', ''))}</small></span></label>`).join('')}
       </div>
-      ${dejaN ? `<p class="sous">Vous avez déjà ${pl(dejaN, 'exemplaire')} : l'inventaire les reprend et vous laisse les corriger.</p>` : ''}
       <p class="sous">Tout s'enregistre au fil de l'eau, dans ce navigateur uniquement. Vous pouvez fermer à tout moment et reprendre plus tard.</p>`;
     pied(bouton('fermer', 'Plus tard', 'bouton-clair'), bouton('commencer', 'Commencer →'));
   }
@@ -911,7 +964,7 @@
   function etapeSeries() {
     tete('Étape 1 sur 3 · Séries', 'Quelles séries avez-vous ?', 20);
     const liste = [...INFO.values()].sort((a, b) => b.nb - a.nb || a.nom.localeCompare(b.nom, 'fr'));
-    $('#parcours-corps').innerHTML = `<p>Touchez chaque série dont vous possédez <strong>au moins un livre</strong>. Pas besoin de réfléchir aux éditions pour l'instant.</p>
+    $('#parcours-corps').innerHTML = `${P.message ? `<p class="statut" role="status">${esc(P.message)}</p>` : ''}<p>Touchez chaque série dont vous possédez <strong>au moins un livre</strong>. Pas besoin de réfléchir aux éditions pour l'instant.</p>
       <div class="tuiles" id="pa-series">${liste.map((e) => {
         const modele = [...e.edit.values()].flat().filter((b) => b.couverture).sort((x, y) => x.version_n - y.version_n || numDe(x) - numDe(y))[0];
         const on = P.series.has(e.nom);
@@ -1035,7 +1088,20 @@
     $('#parcours-fermer').addEventListener('click', () => dlg.close());
     dlg.addEventListener('close', () => { afficher(); });
     dlg.addEventListener('change', (e) => {
-      if (e.target.name === 'pe-etat') P.etat = e.target.value;
+      if (e.target.name === 'pe-etat') { P.etat = e.target.value; memoriser(); }
+      if (e.target.id === 'pe-fichier') {
+        const f = e.target.files[0];
+        if (!f) return;
+        f.text().then((texte) => {
+          const r = importer(texte), st = $('#pe-statut');
+          e.target.value = '';
+          if (r.erreur || (!r.ajoutes && !r.maj)) { st.textContent = r.erreur || 'Aucun livre de ce fichier n\'a été reconnu.'; st.classList.add('erreur'); return; }
+          depuisCollection();
+          P.message = `${resumeImport(r)} Vos séries et éditions sont déjà cochées : vérifiez, complétez, puis continuez.`;
+          P.phase = 'series'; rendre();
+        }).catch(() => { const st = $('#pe-statut'); st.textContent = 'Ce fichier n\'a pas pu être lu.'; st.classList.add('erreur'); });
+        return;
+      }
       if (e.target.id === 'pl-etat') {
         P.etat = e.target.value;
         const { serie, v } = P.file[P.i];
@@ -1051,19 +1117,19 @@
         const on = t.getAttribute('aria-pressed') !== 'true';
         t.setAttribute('aria-pressed', String(on));
         if (on) P.series.add(t.dataset.serie); else P.series.delete(t.dataset.serie);
-        majPiedSeries(); return;
+        majPiedSeries(); memoriser(); return;
       }
       if (t.dataset.cell) {                                    // cellule série × édition
         const on = t.getAttribute('aria-pressed') !== 'true';
         t.setAttribute('aria-pressed', String(on));
         if (on) P.cellules.add(t.dataset.cell); else P.cellules.delete(t.dataset.cell);
-        majPiedEditions(); return;
+        majPiedEditions(); memoriser(); return;
       }
       if (t.dataset.livre) {                                   // couverture
         const b = livreDe(t.dataset.livre);
         cocher(b, t.getAttribute('aria-pressed') !== 'true');
         sauverColl();
-        const { serie, v } = P.file[P.i]; majCompteur(livresDe(serie, v)); return;
+        memoriser(); const { serie, v } = P.file[P.i]; majCompteur(livresDe(serie, v)); return;
       }
       if (t.id === 'pa-json') { exporter('json'); return; }
       if (t.id === 'pa-csv') { exporter('csv'); return; }
@@ -1073,7 +1139,7 @@
       if (act === 'tout' || act === 'rien') {
         liste.forEach((b) => cocher(b, act === 'tout'));
         if (act === 'tout') liste.forEach((b) => { COLL[b.id].etat = P.etat; });
-        sauverColl(); majCompteur(liste);
+        sauverColl(); memoriser(); majCompteur(liste);
         $('#pl-retour').textContent = act === 'tout' ? 'Toute l\'édition est cochée : touchez les livres qui vous manquent pour les décocher.' : 'Tout est décoché.';
         return;
       }
@@ -1089,6 +1155,25 @@
       }
       if (act === 'fermer') { dlg.close(); return; }
       if (act === 'commencer') { P.phase = 'series'; rendre(); return; }
+      if (act === 'sauve') { exporter('json'); return; }
+      if (act === 'reprendre') {
+        P.message = '';
+        if (REPRISE && REPRISE.phase !== 'series') {
+          P.phase = REPRISE.phase;
+          if (REPRISE.phase === 'liste') {
+            construireFile();
+            if (P.file.length) P.i = Math.min(Math.max(REPRISE.i, 0), P.file.length - 1); else P.phase = 'editions';
+          }
+        } else P.phase = 'series';
+        rendre(); return;
+      }
+      if (act === 'zero') {
+        if (window.confirm('Effacer toute votre collection de ce navigateur ? Pensez à la sauvegarder avant : cette action est définitive.')) {
+          COLL = {}; sauverColl(); try { localStorage.removeItem(CLE_P); } catch (err) { /* sans effet */ }
+          afficher(); ouvrirParcours();
+        }
+        return;
+      }
       if (act === 'debut') { P.phase = 'series'; rendre(); return; }
       if (act === 'fin') { P.phase = 'fin'; rendre(); return; }
       if (act === 'voir') { dlg.close(); $('#collection').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
