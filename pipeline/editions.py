@@ -58,6 +58,22 @@ def normalize_isbn(raw):
     raise ValueError(f"ISBN de longueur inattendue : {raw}")
 
 
+# --- Éditeurs : une seule graphie par maison ----------------------------------
+
+# Graphie retenue, par clé normalisée (sans accent, sans majuscule, tirets et points = espaces).
+EDITEURS = {"gallimard jeunesse": "Gallimard Jeunesse", "gallimard": "Gallimard"}
+
+
+def normaliser_editeur(nom):
+    """« Gallimard jeunesse », « gallimard-jeunesse » et « Gallimard Jeunesse » donnent tous « Gallimard Jeunesse »."""
+    propre = re.sub(r"\s+", " ", (nom or "").strip())
+    if not propre:
+        return ""
+    cle = unicodedata.normalize("NFKD", propre).encode("ascii", "ignore").decode().lower()
+    cle = re.sub(r"[\s\-_.]+", " ", cle).strip()
+    return EDITEURS.get(cle, propre)
+
+
 # --- Lecture / écriture de la base -------------------------------------------
 
 def load(path=None):
@@ -65,7 +81,10 @@ def load(path=None):
     if not path.exists():
         return []
     with open(path, newline="", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+    for r in rows:
+        r["editeur"] = normaliser_editeur(r.get("editeur"))
+    return rows
 
 
 def save(rows, path=None):
@@ -76,7 +95,7 @@ def save(rows, path=None):
         w = csv.DictWriter(f, fieldnames=COLUMNS)
         w.writeheader()
         for r in rows:
-            w.writerow({c: r.get(c, "") for c in COLUMNS})
+            w.writerow({c: (normaliser_editeur(r.get(c)) if c == "editeur" else r.get(c, "")) for c in COLUMNS})
 
 
 # --- Interrogation de la BnF -------------------------------------------------
@@ -129,7 +148,7 @@ def _fiche_depuis_notice(rec):
         m = re.search(r"EAN\s*(\d{13})", d)
         if m and m.group(1) not in isbns:
             isbns.append(m.group(1))
-    editeur = re.sub(r"\s*\(.*?\)", "", (texts("publisher") or [""])[0]).strip()
+    editeur = normaliser_editeur(re.sub(r"\s*\(.*?\)", "", (texts("publisher") or [""])[0]).strip())
     return {"titre": titre, "auteurs": " ; ".join(auteurs), "traducteur": traducteur,
             "illustrateur": illustrateur, "editeur": editeur,
             "collection_editeur": collection, "annee": (texts("date") or [""])[0][:4],
