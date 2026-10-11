@@ -220,3 +220,5 @@ tr.courant { background: var(--accent-fond); }
 /* Avertissement sur les prix */
 .alerte { margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--ligne); border-left: 4px solid var(--or); border-radius: 8px; background: var(--carte); color: var(--texte); font-size: .92rem; }
 .alerte[hidden] { display: none; }
+
+abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }

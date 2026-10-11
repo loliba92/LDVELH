@@ -4,9 +4,11 @@
   const ETATS = [
     { k: 'convenable', label: 'Convenable' },
     { k: 'bon', label: 'Bon état' },
-    { k: 'tres_bon', label: 'Très bon état' },
+    { k: 'tres_bon', label: 'TBE', long: 'Très bon état' },
   ];
   const PAR_PAGE = 100;
+  // « TBE » avec info-bulle ; les autres états s'écrivent en toutes lettres
+  const nomEtat = (e) => (e.long ? `<abbr title="${e.long}">${e.label}</abbr>` : e.label);
   const eur = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
   const $ = (s) => document.querySelector(s);
   const fmt = (v) => (v == null ? '—' : eur.format(v));
@@ -231,9 +233,9 @@
     $('#kpis').innerHTML = ETATS.map((e) => {
       const s = stat(liste, e.k);
       if (!s.n) {
-        return `<div class="kpi"><h3>${e.label}</h3><p class="gros">—</p><p class="vide">Aucun prix pour ce filtre</p></div>`;
+        return `<div class="kpi"><h3>${nomEtat(e)}</h3><p class="gros">—</p><p class="vide">Aucun prix pour ce filtre</p></div>`;
       }
-      return `<div class="kpi"><h3>${e.label}</h3><p class="gros">${fmt(s.avg)}</p>` +
+      return `<div class="kpi"><h3>${nomEtat(e)}</h3><p class="gros">${fmt(s.avg)}</p>` +
         `<p class="detail">Médiane ${fmt(s.med)}</p>` +
         `<p class="detail">De ${fmt(s.min)} à ${fmt(s.max)}</p>` +
         `<p class="detail">${s.n} livre${s.n > 1 ? 's' : ''} chiffré${s.n > 1 ? 's' : ''} sur ${liste.length}</p></div>`;
@@ -273,7 +275,7 @@
     $('#resultats').innerHTML = `
       <table class="cartes liste">
         <thead><tr><th>Livre</th><th>Version</th><th>Année</th><th>Éditeur</th>
-          ${ETATS.map((e) => `<th class="num">${e.label}</th>`).join('')}</tr></thead>
+          ${ETATS.map((e) => `<th class="num">${nomEtat(e)}</th>`).join('')}</tr></thead>
         <tbody>${lignes}</tbody>
       </table>
       ${reste > 0 ? `<button type="button" class="plus" id="plus">Afficher les ${Math.min(reste, PAR_PAGE)} suivants (${reste} restants)</button>` : ''}`;
@@ -318,7 +320,7 @@
     $('#resultats').innerHTML = `
       <table class="cartes groupes">
         <thead><tr><th>${libelle}</th><th class="num">Livres</th>
-          ${ETATS.map((e) => `<th class="num">${e.label} (moyenne)</th>`).join('')}</tr></thead>
+          ${ETATS.map((e) => `<th class="num">${nomEtat(e)} (moyenne)</th>`).join('')}</tr></thead>
         <tbody>${lignes}</tbody>
       </table>
       <p class="sous" style="margin:12px 0 0">Cliquez sur une ligne pour ne garder que ce groupe et voir ses livres.</p>`;
@@ -370,12 +372,12 @@
         </div>
         <h3>Prix de cette version</h3>
         <div class="mini-prix">
-          ${ETATS.map((e) => `<div><span class="petit">${e.label}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}
+          ${ETATS.map((e) => `<div><span class="petit">${nomEtat(e)}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}
         </div>
         ${autres.length > 1 ? `
         <h3>Les ${autres.length} versions de ce livre</h3>
         <table class="cartes versions">
-          <thead><tr><th>Version</th><th>Année</th><th>Éditeur</th>${ETATS.map((e) => `<th class="num">${e.label}</th>`).join('')}</tr></thead>
+          <thead><tr><th>Version</th><th>Année</th><th>Éditeur</th>${ETATS.map((e) => `<th class="num">${nomEtat(e)}</th>`).join('')}</tr></thead>
           <tbody>${autres.map((x) => `
             <tr class="cliquable${x.id === b.id ? ' courant' : ''}" data-autre="${esc(x.id)}">
               <td class="principal sans-etiquette"><span class="badge">${esc(x.version)}</span>${x.id === b.id ? ' <span class="sous" style="display:inline">(affichée)</span>' : ''}</td>
@@ -421,7 +423,7 @@
   function afficherPied() {
     $('#pied').innerHTML =
       `<p><strong>Comment lire ces prix.</strong> Chaque prix est la moyenne, pour l'état choisi, des livres du filtre. ` +
-      `Un livre sans prix pour un état est ignoré dans cette moyenne.</p>` +
+      `Un livre sans prix pour un état est ignoré dans cette moyenne. TBE : très bon état.</p>` +
       `<p>Source des prix : ${esc((META.sources_prix || []).join(', '))}.` +
       `${prixAnciens() ? ' Ces prix sont anciens et ne sont plus mis à jour.' : ''}</p>` +
       `<p>Jaquettes : © leurs éditeurs, reproduites ici à titre d'illustration ; source : collection-ldvelh.fr.</p>` +
