@@ -56,3 +56,28 @@ Spécification établie avec les compétences `aesthetic-literacy` et `aesthetic
 - **Risque de lassitude** : Dark Academia est une esthétique très répandue depuis 2020. Ici elle reste au service d'un sujet de bibliophile, ce qui limite le risque.
 - **Prix** : toujours sur des surfaces sobres ; le bandeau « Cotes d'archives » rappelle que les prix sont anciens.
 - **Aucune dépendance externe** : polices, images et données sont servies par le site lui-même.
+
+## 5. Audit avec PencilPlaybook
+
+Le playbook `PencilPlaybook` (`.claude/skills/PencilPlaybook/`, MIT, source dans `SOURCE.txt`) est conçu pour l'outil Pencil.dev, non disponible ici. Sa section « Perceptual Design Defaults » a servi de liste de contrôle. Écarts corrigés :
+
+| Règle | Avant | Après |
+|---|---|---|
+| Titre d'affichage (56 px et plus) : interlettrage de −0,03 em | +0,005 em | −0,03 em ; titres de section −0,015 em |
+| Survol : écart de clarté d'au moins 8 % | liens du menu, éditions, segments et cartes sans retour visible | survols ajoutés ou renforcés |
+| Boutons à 6 px (les pilules font « grand public ») | pilules à 999 px | 6 px (le sceau reste rond : c'est un sceau) |
+| Zones tactiles de 44 px sur téléphone | quelques boutons à 32–40 px | 44 px partout |
+| Contour de focus : décalage de 2 px, suit l'arrondi | arrondi forcé à 3 px | arrondi de l'élément |
+| Mouvement : 200–300 ms, décélération | 280 ms, courbe maison | 250 ms, `cubic-bezier(0, 0, .2, 1)` |
+| Longueur de ligne : 45 à 75 caractères | notes sans limite | 70 caractères maximum |
+
+Valeurs déjà conformes : contrastes de texte (≥ 4,5), contrastes non textuels (≥ 3), corps de texte non blanc pur en mode sombre, interligne 1,55 pour le texte et 1,1 pour les titres, rayon des cartes de 6 px, aucun texte sous 10 px.
+
+## 6. Ma collection
+
+- **Stockage** : dans le navigateur de chacun (`localStorage`, clé `cote-collection-v1`). Rien n'est envoyé, aucun compte. Si le stockage est indisponible (navigation privée), un message le dit.
+- **Ajout** : signet en haut à droite de chaque jaquette (« + » puis « ✓ »), ou case « Je possède ce livre » dans la fiche. L'état proposé est celui de la cote affichée ; il se règle ensuite, ainsi que le nombre d'exemplaires.
+- **Estimation** : patrimoine = somme, par exemplaire, de la cote de l'état indiqué. Plancher (tout en convenable) et plafond (tout en TBE) encadrent le total. Les exemplaires sans cote pour l'état choisi sont signalés et exclus du total.
+- **Lecture** : titres possédés sur titres existants par série (barre de progression), pièces les plus cotées, tableau modifiable de tous les exemplaires, filtre « Seulement ma collection ».
+- **Export / import** : JSON (avec l'estimation) et CSV (séparateur point-virgule, lisible par Excel en français). Import d'une liste d'ISBN (10 ou 13 chiffres, avec ou sans tirets), éventuellement suivis de l'état et de la quantité, ou d'un fichier exporté.
+- **Réserve** : l'estimation repose sur des cotes d'archives. Elle ne remplace ni une expertise ni un prix de vente réel, et le dit sur l'écran.

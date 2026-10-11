@@ -1,0 +1,10 @@
+Source : https://github.com/stevembarclay/pencilplaybook
+Commit : b7324295d73d67ea0a672cf16832880c111df0ed (2026-03-25, "Add before/after screenshots to README")
+Licence : MIT (voir LICENSE)
+Cloné dans ce projet le 2026-10-11 sur demande du propriétaire du projet.
+
+Retiré du clone pour le dépôt : dossier .git (éviter un dépôt imbriqué), docs/ (images et vidéo de démonstration),
+.claude/ (outils d'aide internes du dépôt d'origine, non relus), .gitignore.
+Note : ce playbook est conçu pour l'outil Pencil.dev (commandes MCP get_editor_state, set_variables, etc.),
+non disponible dans cet environnement. On s'en sert ici comme liste de contrôle de valeurs de design
+(section « Perceptual Design Defaults » de SKILL.md). L'assistant de configuration n'a pas été lancé.

@@ -26,6 +26,7 @@
     </a>
     <nav class="menu" aria-label="Navigation">
       <a href="#cote">La cote</a>
+      <a href="#collection">Ma collection <span class="nb-coll" id="nb-coll"></span></a>
       <a href="#etagere">L'étagère</a>
       <a href="#apropos">À propos</a>
       <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
@@ -82,6 +83,7 @@
         <div class="editions" id="f-versions"></div>
       </div>
       <label class="case"><input type="checkbox" id="f-vente"><span>Encore en vente neuve</span></label>
+      <label class="case"><input type="checkbox" id="f-mine"><span>Seulement ma collection</span></label>
       <button type="button" class="bouton-lien" id="reinit">Tout effacer</button>
     </div>
   </aside>
@@ -112,6 +114,29 @@
           <div id="histo-table"></div>
         </details>
       </div>
+    </section>
+
+    <section class="collection" id="collection" aria-labelledby="titre-collection">
+      <div class="cote-tete">
+        <h2 id="titre-collection">Ma collection</h2>
+        <p class="compte" id="coll-compte"></p>
+      </div>
+      <div id="coll-corps"></div>
+      <details class="importer" id="importer">
+        <summary>Importer une liste</summary>
+        <div class="importer-corps">
+          <p class="sous">Collez des ISBN (un par ligne ou séparés par des espaces), éventuellement suivis de l'état (convenable, bon, TBE) et du nombre d'exemplaires. Vous pouvez aussi charger un fichier exporté d'ici (JSON ou CSV), ou un simple fichier texte.</p>
+          <label for="imp-texte">Liste d'ISBN</label>
+          <textarea id="imp-texte" rows="5" placeholder="9782070583805 bon 1&#10;9782075100649 TBE 2"></textarea>
+          <div class="importer-actions">
+            <button type="button" class="bouton" id="imp-go">Ajouter à ma collection</button>
+            <label class="bouton bouton-clair" for="imp-fichier">Charger un fichier</label>
+            <input type="file" id="imp-fichier" accept=".json,.csv,.txt,text/plain,application/json" hidden>
+          </div>
+          <p class="statut" id="imp-statut" role="status" aria-live="polite"></p>
+        </div>
+      </details>
+      <p class="sous prive" id="coll-prive"></p>
     </section>
 
     <section class="etagere" id="etagere" aria-labelledby="titre-etagere">
@@ -174,6 +199,8 @@
     </div>
   </div>
 </footer>
+
+<div class="sr-only" id="annonce" role="status" aria-live="polite"></div>
 
 <dialog id="fiche" aria-labelledby="fiche-titre">
   <div class="fiche-contenu" id="fiche-contenu"></div>

@@ -13,6 +13,7 @@ puis ouvrir http://localhost:8000 (le site ne s'ouvre pas en double-cliquant sur
 ## Proposition de refonte : `web/v2/`
 
 Une nouvelle présentation, « La Cote du Héros », est proposée à côté du site actuel, qui reste inchangé : https://loliba92.github.io/LDVELH/v2/
+Elle propose en plus **Ma collection** : chacun marque ses livres (état, nombre d'exemplaires) et obtient une estimation de son patrimoine, stockée uniquement dans son navigateur, avec export et import (voir `docs/DESIGN.md`, section 6).
 Elle lit les mêmes données (`web/data/`) et les mêmes jaquettes (`web/covers/`). La spécification du design (jetons, repères, composants, points d'attention) est dans `docs/DESIGN.md`.
 
 ## En ligne
