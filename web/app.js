@@ -612,8 +612,10 @@
   function afficherCollection() {
     const bl = bilan();
     const n = bl.exemplaires;
-    $('#nb-coll').textContent = n ? String(n) : '';
-    $('#nb-coll').setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
+    ['#nb-coll', '#nb-coll-bas'].forEach((sel) => {
+      $(sel).textContent = n ? String(n) : '';
+      $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
+    });
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
     $('#coll-prive').innerHTML = (stockageOk
       ? 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder ou la retrouver sur un autre appareil.'
@@ -1217,6 +1219,25 @@
     $('#pied-meta').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries · données du ` +
       new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '.';
   }
+
+  /* ---------- Barre du bas (téléphones) : section en cours et clavier ---------- */
+  (function barreBas() {
+    const liens = [...document.querySelectorAll('#barre-bas a[data-sec]')];
+    const sections = liens.map((l) => document.getElementById(l.dataset.sec)).filter(Boolean);
+    if ('IntersectionObserver' in window && sections.length) {
+      const io = new IntersectionObserver((entrees) => {
+        entrees.forEach((e) => {
+          if (!e.isIntersecting) return;
+          liens.forEach((l) => { if (l.dataset.sec === e.target.id) l.setAttribute('aria-current', 'location'); else l.removeAttribute('aria-current'); });
+        });
+      }, { rootMargin: '-35% 0px -60% 0px' });
+      sections.forEach((s) => io.observe(s));
+    }
+    // le clavier virtuel pousse les barres fixes au-dessus des champs : on masque la barre pendant la saisie
+    const champ = (el) => el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) && !['checkbox', 'radio', 'button', 'file'].includes(el.type);
+    document.addEventListener('focusin', (e) => { if (champ(e.target)) document.body.classList.add('clavier'); });
+    document.addEventListener('focusout', () => document.body.classList.remove('clavier'));
+  })();
 
   /* ---------- Application installable (PWA) ---------- */
   let invite = null;

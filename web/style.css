@@ -570,3 +570,24 @@ dialog.parcours[open] { display: flex; }
   :root:not([data-theme="light"]) .tuile-serie[aria-pressed="true"]::after { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.5l2.7 2.7L13 6.5' fill='none' stroke='%2316110c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; }
   :root:not([data-theme="light"]) .tuile-livre[aria-pressed="true"] .coche { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4.5 9.5l3 3L13.5 6' fill='none' stroke='%2316110c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat; }
 }
+
+/* Barre de menu du bas (téléphones) : l'en-tête n'est pas collant et ses liens disparaissent, donc la navigation reste à portée de pouce */
+.barre-bas { display: none; }
+@media (max-width: 700px) {
+  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch;
+    padding: 0 4px env(safe-area-inset-bottom); background: var(--walnut); border-top: 3px double var(--brass); box-shadow: 0 -6px 18px rgba(0, 0, 0, .28); }
+  .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 2px;
+    background: none; border: 0; color: var(--walnut-text); font: 600 .72rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
+  .barre-bas svg { flex: none; }
+  .barre-bas a[aria-current="location"] { color: var(--gold); }
+  .barre-bas a[aria-current="location"]::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; background: var(--gold); border-radius: 0 0 3px 3px; }
+  .barre-bas .barre-centre { color: var(--gold); }
+  .barre-bas .barre-centre svg { width: 34px; height: 34px; padding: 5px; margin-top: -14px; border-radius: 50%; background: var(--gold); color: var(--walnut); border: 3px solid var(--walnut); box-shadow: 0 0 0 1px var(--gold); }
+  .barre-bas a:focus-visible, .barre-bas button:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; border-radius: 6px; }
+  .barre-bas .nb-coll { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; }
+  .barre-bas .nb-coll:empty { display: none; }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  html { scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+  body.clavier .barre-bas { display: none; }
+  body.clavier { padding-bottom: 0; }
+}

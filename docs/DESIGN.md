@@ -111,3 +111,7 @@ Photo de bibliothèque ancienne en fond du haut de page, sous un voile de la cou
 ## Icône du site : le mage doré
 
 Emblème fourni par le propriétaire (mage encapuchonné, or sur noir), conservé dans `docs/icones-propositions/source-mage-or.png`. `python pipeline/icones.py` en tire toutes les déclinaisons : icônes de l'application (`web/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` pour Android), icône iPhone (`apple-touch-icon.png`), favicons (`web/favicon-16.png`, `favicon-32.png`, `favicon.ico`). Le noir de l'image est remplacé par le brun du site. Le même emblème sert de logo dans l'en-tête. Les anciennes propositions dessinées à la main ont été abandonnées.
+
+## Barre de menu du bas (téléphones)
+
+Sous 700 px de large, une barre fixe en bas remplace les liens de l'en-tête (qui n'est pas collant et masque ses liens sur téléphone) : La cote, L'étagère, **Inventaire** (bouton central, ouvre l'inventaire guidé), Ma collection (avec le nombre d'exemplaires) et À propos. Chaque entrée a une icône et un libellé ; l'entrée de la section en cours est dorée (`aria-current="location"`, suivie par un `IntersectionObserver`). La barre respecte la zone sûre des iPhone, laisse de la place en bas de page, et se masque pendant la saisie au clavier. Sur ordinateur, elle n'existe pas : le menu du haut reste inchangé.
