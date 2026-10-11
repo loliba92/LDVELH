@@ -964,7 +964,7 @@
   function etapeSeries() {
     tete('Étape 1 sur 3 · Séries', 'Quelles séries avez-vous ?', 20);
     const liste = [...INFO.values()].sort((a, b) => b.nb - a.nb || a.nom.localeCompare(b.nom, 'fr'));
-    $('#parcours-corps').innerHTML = `${P.message ? `<p class="statut" role="status">${esc(P.message)}</p>` : ''}<p>Touchez chaque série dont vous possédez <strong>au moins un livre</strong>. Vous choisirez ensuite, à l'étape suivante, les éditions (V1 à V5) que vous possédez dans chaque série : inutile d'y penser maintenant.</p>
+    $('#parcours-corps').innerHTML = `${P.message ? `<p class="statut" role="status">${esc(P.message)}</p>` : ''}<p>Touchez chaque série dont vous possédez <strong>au moins un livre</strong>. Vous choisirez ensuite, à l'étape suivante, les éditions (V1 à V5) que vous possédez dans chaque série.</p>
       <div class="boutons-liste">${bouton('series-tout', 'Tout sélectionner')}${bouton('series-rien', 'Tout désélectionner', 'bouton-clair')}</div>
       <div class="tuiles" id="pa-series">${liste.map((e) => {
         const modele = [...e.edit.values()].flat().filter((b) => b.couverture).sort((x, y) => x.version_n - y.version_n || numDe(x) - numDe(y))[0];
