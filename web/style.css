@@ -41,14 +41,14 @@
 }
 :root[data-theme="dark"] {
   --bg: #16110c; --surface: #211a13; --surface-2: #2a2118; --text: #efe4cf; --muted: #b9a98f;
-  --line: #3b3125; --line-strong: #8d7b5e; --accent: #e09aa5; --accent-soft: #3d262b; --on-accent: #16110c;
+  --line: #3b3125; --line-strong: #8d7b5e; --accent: #cf9a2e; --accent-soft: #3a2e15; --on-accent: #16110c;
   --brass: #d2a64a; --brass-text: #d2a64a; --brass-fill: #b08a37; --bar: #b08a37; --walnut: #0f0b08; --shadow: none;
   --shadow-cover: 0 2px 6px rgba(0, 0, 0, .6), 0 10px 22px rgba(0, 0, 0, .45); --grain: .1;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #16110c; --surface: #211a13; --surface-2: #2a2118; --text: #efe4cf; --muted: #b9a98f;
-    --line: #3b3125; --line-strong: #8d7b5e; --accent: #e09aa5; --accent-soft: #3d262b; --on-accent: #16110c;
+    --line: #3b3125; --line-strong: #8d7b5e; --accent: #cf9a2e; --accent-soft: #3a2e15; --on-accent: #16110c;
     --brass: #d2a64a; --brass-text: #d2a64a; --brass-fill: #b08a37; --bar: #b08a37; --walnut: #0f0b08; --shadow: none;
     --shadow-cover: 0 2px 6px rgba(0, 0, 0, .6), 0 10px 22px rgba(0, 0, 0, .45); --grain: .1;
   }
@@ -563,3 +563,11 @@ dialog.parcours[open] { display: flex; }
 .bouton[hidden] { display: none; }
 #parcours-corps > .boutons-liste { margin: 0 0 12px; }
 .tuile-serie > span:last-child { min-width: 0; padding-right: 22px; }
+
+/* Thème sombre : l'accent est un jaune doré foncé ; les coches passent en trait sombre pour rester contrastées */
+:root[data-theme="dark"] .tuile-serie[aria-pressed="true"]::after { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.5l2.7 2.7L13 6.5' fill='none' stroke='%2316110c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; }
+:root[data-theme="dark"] .tuile-livre[aria-pressed="true"] .coche { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4.5 9.5l3 3L13.5 6' fill='none' stroke='%2316110c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tuile-serie[aria-pressed="true"]::after { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.5l2.7 2.7L13 6.5' fill='none' stroke='%2316110c' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; }
+  :root:not([data-theme="light"]) .tuile-livre[aria-pressed="true"] .coche { background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M4.5 9.5l3 3L13.5 6' fill='none' stroke='%2316110c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat; }
+}
