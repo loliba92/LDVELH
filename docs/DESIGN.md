@@ -106,7 +106,7 @@ Comme sur Scénario : manifeste (`web/manifest.webmanifest`), icônes (`web/icon
 
 ## Haut de page de l'accueil : l'illustration
 
-Fond toujours sombre : un fondu noir porte le bandeau, l'icône, le nom du site (titre précédé de l'icône) et les textes ; l'illustration (un mage face à un dragon, fournie par le propriétaire, `web/images/accueil-dragon.webp`) apparaît à droite sur ordinateur, en bas sur téléphone. Le contraste du texte a été mesuré (≥ 6,5 sur toutes les tailles, thèmes clair et sombre). Les deux autres illustrations proposées sont conservées dans `docs/images-accueil/` : pour en changer, copier le fichier choisi sur `web/images/accueil-dragon.webp` et relancer la publication. L'ancienne photo Pexels et l'éventail de jaquettes ont été retirés ; `scrapers/image_accueil.py` reste disponible pour chercher d'autres images libres de droits.
+Fond toujours sombre : un fondu noir porte le bandeau, l'icône, le nom du site (titre précédé de l'icône) et les textes ; l'illustration (un mage face à un dragon, fournie par le propriétaire) apparaît à droite sur ordinateur, en bas sur téléphone. Trois illustrations (`web/images/accueil-1.webp`, `-2`, `-3`) sont tirées au hasard à chaque visite (petit script dans l'en-tête de `index.html`, cadrage propre à chacune dans `style.css`). Le contraste du texte a été mesuré (≥ 6,5 sur toutes les tailles, thèmes clair et sombre). Les originaux sont conservés dans `docs/images-accueil/`. L'ancienne photo Pexels et l'éventail de jaquettes ont été retirés ; `scrapers/image_accueil.py` reste disponible pour chercher d'autres images libres de droits.
 
 ## Icône du site : le mage doré
 
@@ -121,3 +121,9 @@ Sous 700 px de large, une barre fixe en bas remplace les liens de l'en-tête (qu
 - **Accueil (`index.html`)** : le filtre à gauche ; à droite, la cote de la sélection puis, en dessous, l'étagère.
 - **Ma collection (`collection.html`)** : page dédiée (estimation, répartition par série, pièces les plus cotées, exemplaires, import et export, inventaire guidé). Elle est générée par `pipeline/construire_pages.py`, et `app.js` s'adapte à la page (`data-page`). Le menu du haut et la barre du bas y mènent ; la pastille indique le nombre d'exemplaires.
 - **Pages annexes** : Le projet, Confidentialité, Mentions légales (voir plus haut).
+
+## Inventaire guidé : gestes rapides
+
+- **Éditions** : sous chaque colonne V1 à V5, un bouton « Tout » (devient « Aucun ») coche cette édition pour toutes les séries choisies ; « Tout sélectionner » et « Tout désélectionner » valent pour l'ensemble du tableau.
+- **Couvertures** : sous chaque jaquette, trois boutons C, BE, TBE (convenable, bon état, très bon état). Toucher l'état déjà choisi retire le livre. Toucher la couverture garde l'état par défaut de la liste.
+- **Autres éditions** : au-dessus de la liste, des onglets V1 à V5 permettent d'ajouter une édition non cochée (utile après le chargement d'un fichier). Le petit chiffre indique les livres déjà cochés.

@@ -1059,13 +1059,31 @@
     const legende = VERSIONS.map((v) => `<b>${v}</b> vers ${anneeMediane(v)}`).join(' · ');
     $('#parcours-corps').innerHTML = `<p>Pour chaque série, touchez les éditions que vous avez. <strong>V1</strong> désigne les poches d'origine ; les suivantes, les rééditions.</p>
       <p class="sous">${legende}</p>
-      <table class="matrice"><thead><tr><th>Série</th>${VERSIONS.map((v) => `<th scope="col">${v}<small>vers ${anneeMediane(v)}</small></th>`).join('')}</tr></thead>
+      <div class="boutons-liste">${bouton('cells-tout', 'Tout sélectionner')}${bouton('cells-rien', 'Tout désélectionner', 'bouton-clair')}</div>
+      <p class="sous">Vous avez toutes les séries d'une édition ? Touchez « Tout » sous son nom, dans l'en-tête de la colonne.</p>
+      <table class="matrice"><thead><tr><th>Série</th>${VERSIONS.map((v) => `<th scope="col">${v}<small>vers ${anneeMediane(v)}</small><button type="button" class="col-tout" data-col="${v}"></button></th>`).join('')}</tr></thead>
       <tbody>${noms.map((e) => `<tr><td>${esc(e.nom)}</td>${VERSIONS.map((v) => {
         const n = (e.edit.get(v) || []).length;
         if (!n) return '<td><button type="button" class="cellule" disabled aria-label="Pas d\'édition ' + v + ' pour cette série">—</button></td>';
         return `<td><button type="button" class="cellule" data-cell="${esc(cleCell(e.nom, v))}" aria-pressed="${P.cellules.has(cleCell(e.nom, v))}" aria-label="${esc(e.nom)}, édition ${v}, ${pl(n, 'livre')}">${v}<small>${n}</small></button></td>`;
       }).join('')}</tr>`).join('')}</tbody></table>`;
+    majMatrice();
     majPiedEditions();
+  }
+  // cellules d'une colonne (une série ne propose pas toutes les éditions)
+  const cellulesDe = (v) => [...INFO.values()].filter((e) => P.series.has(e.nom) && e.edit.has(v)).map((e) => cleCell(e.nom, v));
+  function majMatrice() {
+    document.querySelectorAll('#parcours-corps .cellule[data-cell]').forEach((el) => el.setAttribute('aria-pressed', String(P.cellules.has(el.dataset.cell))));
+    document.querySelectorAll('#parcours-corps .col-tout').forEach((el) => {
+      const cs = cellulesDe(el.dataset.col);
+      const tout = cs.length > 0 && cs.every((c) => P.cellules.has(c));
+      el.disabled = !cs.length;
+      el.textContent = tout ? 'Aucun' : 'Tout';
+      el.setAttribute('aria-label', `${tout ? 'Tout décocher' : 'Tout cocher'} : édition ${el.dataset.col} de toutes les séries`);
+    });
+  }
+  function toutesCellules(oui) {
+    VERSIONS.forEach((v) => cellulesDe(v).forEach((c) => { if (oui) P.cellules.add(c); else P.cellules.delete(c); }));
   }
   function cellulesValides() {
     return [...P.cellules].filter((c) => P.series.has(c.split('|')[0]));
@@ -1087,7 +1105,11 @@
     const liste = livresDe(serie, v);
     tete(`Étape 3 sur 3 · Liste ${P.i + 1} sur ${P.file.length}`, `${serie} · édition ${v}`, 40 + (P.i / P.file.length) * 55);
     const avecNum = liste.some((b) => numDe(b) > 0);
-    $('#parcours-corps').innerHTML = `
+    const editions = [...INFO.get(serie).edit.keys()].sort();
+    const onglets = editions.length > 1 ? `<div class="onglets-ed" role="group" aria-label="Éditions de ${esc(serie)}">${editions.map((x) =>
+      `<button type="button" data-ongl="${x}" aria-pressed="${x === v}" class="${P.cellules.has(cleCell(serie, x)) ? 'choisie' : ''}">${x}<small>${INFO.get(serie).edit.get(x).filter((l) => COLL[l.id]).length || ''}</small></button>`).join('')}</div>
+      <p class="sous">Une autre édition de cette série ? Touchez-la : elle s'ajoute à votre inventaire. Le petit chiffre indique les livres déjà cochés.</p>` : '';
+    $('#parcours-corps').innerHTML = `${onglets}
       <p class="liste-aide">Touchez les couvertures que vous avez. Vous avez <strong>toute l'édition</strong> ? « Tout cocher ». Il en manque quelques-uns ? « Tout cocher », puis touchez ceux qui manquent.</p>
       <div class="liste-outils">
         <div class="champ"><label for="pl-etat">État des livres cochés</label>
@@ -1098,10 +1120,12 @@
       </div>
       <p class="retour" id="pl-retour" role="status" aria-live="polite"></p>
       <p class="compteur" id="pl-compteur"></p>
-      <div class="tuiles-livres" id="pa-livres">${liste.map((b) => `<button type="button" class="tuile-livre" data-livre="${esc(b.id)}" aria-pressed="${!!COLL[b.id]}">
+      <div class="tuiles-livres" id="pa-livres">${liste.map((b) => `<div class="bloc-livre"><button type="button" class="tuile-livre" data-livre="${esc(b.id)}" aria-pressed="${!!COLL[b.id]}">
         ${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
         <span class="coche" aria-hidden="true"></span>
-        <span class="t">${esc(b.titre)}</span><span class="n">${numDe(b) ? `n° ${esc(b.numero)} · ` : ''}${b.annee ?? ''}</span></button>`).join('')}</div>`;
+        <span class="t">${esc(b.titre)}</span><span class="n">${numDe(b) ? `n° ${esc(b.numero)} · ` : ''}${b.annee ?? ''}</span></button>
+        <div class="etats-rapides" role="group" aria-label="État de ${esc(b.titre)}">${ETATS.map((e) =>
+          `<button type="button" data-etat-livre="${esc(b.id)}" data-e="${e.k}" aria-pressed="${!!COLL[b.id] && COLL[b.id].etat === e.k}" title="${e.long}" aria-label="${e.long} : ${esc(b.titre)}">${ABREGE[e.k]}</button>`).join('')}</div></div>`).join('')}</div>`;
     majCompteur(liste);
     const dernier = P.i === P.file.length - 1;
     pied(bouton('prec', '← Précédent', 'bouton-clair'), bouton('suiv', dernier ? 'Terminer →' : 'Liste suivante →'), '');
@@ -1110,11 +1134,23 @@
     const n = liste.filter((b) => COLL[b.id]).length;
     $('#pl-compteur').innerHTML = `${n} <span class="sur">coché${n > 1 ? 's' : ''} sur ${liste.length}</span>`;
   }
+  const ABREGE = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+  // met à jour une couverture et ses trois boutons d'état d'après la collection
+  function majTuile(b) {
+    const t = document.querySelector(`.tuile-livre[data-livre="${CSS.escape(b.id)}"]`);
+    if (t) t.setAttribute('aria-pressed', String(!!COLL[b.id]));
+    document.querySelectorAll(`[data-etat-livre="${CSS.escape(b.id)}"]`).forEach((el) => el.setAttribute('aria-pressed', String(!!COLL[b.id] && COLL[b.id].etat === el.dataset.e)));
+  }
   function cocher(b, oui) {
     if (oui) COLL[b.id] = { etat: P.etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1 };
     else delete COLL[b.id];
-    const t = document.querySelector(`.tuile-livre[data-livre="${CSS.escape(b.id)}"]`);
-    if (t) t.setAttribute('aria-pressed', String(!!oui));
+    majTuile(b);
+  }
+  // C / BE / TBE : choisit l'état d'un livre ; retoucher l'état déjà choisi retire le livre
+  function etatRapide(b, etat) {
+    if (COLL[b.id] && COLL[b.id].etat === etat) delete COLL[b.id];
+    else COLL[b.id] = { etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1 };
+    majTuile(b);
   }
   function parseNumeros(txt) {
     const set = new Set();
@@ -1178,7 +1214,7 @@
       if (e.target.id === 'pl-etat') {
         P.etat = e.target.value;
         const { serie, v } = P.file[P.i];
-        livresDe(serie, v).forEach((b) => { if (COLL[b.id]) COLL[b.id].etat = P.etat; });
+        livresDe(serie, v).forEach((b) => { if (COLL[b.id]) COLL[b.id].etat = P.etat; majTuile(b); });
         sauverColl();
         const r = $('#pl-retour'); if (r) r.textContent = `État « ${etatDe(P.etat).long.toLowerCase()} » appliqué aux livres cochés de cette liste.`;
       }
@@ -1197,6 +1233,25 @@
         t.setAttribute('aria-pressed', String(on));
         if (on) P.cellules.add(t.dataset.cell); else P.cellules.delete(t.dataset.cell);
         majPiedEditions(); memoriser(); return;
+      }
+      if (t.dataset.col) {                                     // « Tout » d'une colonne d'édition
+        const cs = cellulesDe(t.dataset.col);
+        const tout = cs.length > 0 && cs.every((c) => P.cellules.has(c));
+        cs.forEach((c) => { if (tout) P.cellules.delete(c); else P.cellules.add(c); });
+        majMatrice(); majPiedEditions(); memoriser(); return;
+      }
+      if (t.dataset.ongl) {                                    // autre édition de la série, depuis la liste
+        const { serie } = P.file[P.i];
+        P.cellules.add(cleCell(serie, t.dataset.ongl));
+        construireFile();
+        const k = P.file.findIndex((x) => x.serie === serie && x.v === t.dataset.ongl);
+        P.i = Math.max(0, k); rendre(); return;
+      }
+      if (t.dataset.etatLivre) {                               // C / BE / TBE
+        const b = livreDe(t.dataset.etatLivre);
+        etatRapide(b, t.dataset.e);
+        sauverColl(); memoriser();
+        const { serie, v } = P.file[P.i]; majCompteur(livresDe(serie, v)); return;
       }
       if (t.dataset.livre) {                                   // couverture
         const b = livreDe(t.dataset.livre);
@@ -1225,6 +1280,10 @@
         const manquants = [...voulus].filter((k) => !trouves.has(k));
         $('#pl-retour').textContent = `${pl(n, 'livre')} coché${n > 1 ? 's' : ''}` + (manquants.length ? ` · numéros absents de cette liste : ${manquants.slice(0, 6).join(', ')}${manquants.length > 6 ? '…' : ''}` : '') + '.';
         return;
+      }
+      if (act === 'cells-tout' || act === 'cells-rien') {
+        toutesCellules(act === 'cells-tout');
+        majMatrice(); majPiedEditions(); memoriser(); return;
       }
       if (act === 'series-tout' || act === 'series-rien') {
         const tout = act === 'series-tout';
