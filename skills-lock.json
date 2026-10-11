@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "aesthetic-application": {
+      "source": "alexiseverage/aesthetic-frontend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/aesthetic-application/SKILL.md",
+      "computedHash": "d02835ee2e9be6d43c3f5122bb05f408ebf6dcd79cf88bf6ab8b7eec048179f1"
+    },
+    "aesthetic-literacy": {
+      "source": "alexiseverage/aesthetic-frontend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/aesthetic-literacy/SKILL.md",
+      "computedHash": "dfed047b5e1c8312dd7e672128cb802801bb521d852e6b1c1de20daf71b49269"
+    }
+  }
+}
