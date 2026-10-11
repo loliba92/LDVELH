@@ -55,19 +55,11 @@ def main():
     brut = {}
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
-    # Deux séries : les particuliers (et archives) d'un côté, les professionnels de l'autre
-    prix, prix_pro = {}, {}
-    for cle, par_etat in brut.items():
-        for e, obs in par_etat.items():
-            prix.setdefault(cle, {})[e] = estimer([o for o in obs if o.type != "prix_pro"], args.aujourdhui)
-            pro = estimer([o for o in obs if o.type == "prix_pro"], args.aujourdhui)
-            if pro:
-                prix_pro.setdefault(cle, {})[e] = pro
+    prix = {cle: {e: estimer(obs, args.aujourdhui) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
 
     versions = []
     for r in cx.execute(REQUETE):
         p = prix.get(r["version_key"], {})
-        pp = prix_pro.get(r["version_key"], {})
         isbn = r["isbn13"]
         petite = f"covers/small/{isbn}.webp" if isbn and (COVERS / "small" / f"{isbn}.webp").exists() else None
         grande = f"covers/medium/{isbn}.webp" if isbn and (COVERS / "medium" / f"{isbn}.webp").exists() else None
@@ -81,11 +73,9 @@ def main():
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
-            "nb_obs": {e: sum(1 for o in brut.get(r["version_key"], {}).get(e, []) if o.type != "prix_pro") for e in ETATS},
+            "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
             "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance")}
                           for e in ETATS if p.get(e)},
-            "prix_pro": {e: pp[e]["prix"] for e in ETATS if e in pp},
-            "prix_pro_info": {e: {k: pp[e][k] for k in ("nb", "date", "confiance")} for e in ETATS if e in pp},
         })
     meta = {
         "genere_le": args.aujourdhui.isoformat(),

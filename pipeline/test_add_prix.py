@@ -17,10 +17,6 @@ class TestAddPrix(unittest.TestCase):
         self.assertEqual((rows[0]["source"], rows[0]["type_prix"], rows[0]["prix"]), ("vente_perso", "vente_reelle", "12.50"))
         self.assertEqual(rows[1]["isbn"], "9782070583805")
 
-    def test_prix_professionnel(self):
-        r = add_prix.ligne("9782070583805", 75, "bon", "pro", date(2026, 10, 11))
-        self.assertEqual((r["source"], r["type_prix"]), ("releve_manuel", "prix_pro"))
-
     def test_refus(self):
         for args in (("9782070583805", 5, "mauvais", "vente"), ("9782070583805", -1, "bon", "vente"),
                      ("9782070583805", 5, "bon", "inconnu")):

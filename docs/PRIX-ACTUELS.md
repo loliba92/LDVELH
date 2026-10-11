@@ -12,19 +12,6 @@ Aucun site n'est « scrapé » (Vinted, Leboncoin, chasse-aux-livres : non).
 - La bannière de l'accueil, la fiche d'une édition, le pied de page et l'estimation de la collection
   s'adaptent d'eux-mêmes dès qu'un prix actuel existe.
 
-## Deux séries : particuliers et professionnels
-
-Les boutiques et reconditionneurs (Recyclivre, Fnac, etc.) fixent des prix de vente plus élevés que les particuliers.
-Les deux séries sont donc **estimées séparément** : la cote affichée est celle des particuliers (et des archives),
-et la fiche ajoute une ligne « Chez les professionnels » avec son propre prix, sa date et son nombre de relevés.
-Un prix professionnel ne modifie jamais la cote des particuliers.
-
-Saisie : `python pipeline/add_prix.py ISBN PRIX --etat bon --type pro`. La lecture automatique de chasse-aux-livres.fr
-reste exclue (son `robots.txt` l'interdit) ; seuls quelques relevés à la main, pour contrôler les cotes, sont envisagés.
-
-Point à vérifier : l'API d'eBay permet peut-être de distinguer vendeur professionnel et particulier. Ce n'est pas
-confirmé ; tant que ce n'est pas, les relevés eBay restent classés avec les particuliers.
-
 ## Comment l'estimation choisit un prix
 
 Médiane pondérée (`pipeline/estimation.py`, 14 tests). Le poids d'une observation dépend de :
