@@ -224,3 +224,25 @@ tr.courant { background: var(--accent-fond); }
 abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
 
 .nowrap { white-space: nowrap; }
+
+/* Histogramme */
+.histo { width: 100%; }
+.histo svg { display: block; width: 100%; height: auto; overflow: visible; }
+.h-axe { stroke: var(--ligne); stroke-width: 1; }
+.h-grille { stroke: var(--ligne); stroke-width: 1; stroke-dasharray: 2 3; }
+.h-txt { fill: var(--discret); font: 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.h-n { fill: var(--texte); font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; paint-order: stroke; stroke: var(--carte); stroke-width: 4px; stroke-linejoin: round; }
+.h-bar { fill: var(--barre); }
+.h-bar-plus { fill: var(--or); opacity: .55; }
+.h-bar:hover, .h-bar-plus:hover { opacity: .8; }
+.h-med { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 5 4; }
+.h-moy { stroke: var(--texte); stroke-width: 2; }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 10px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.legende .leg { display: inline-flex; align-items: center; gap: 8px; }
+.legende .trait { display: inline-block; width: 22px; height: 0; border-top: 2px solid var(--texte); }
+.legende .trait.med { border-top: 2px dashed var(--accent); }
+.chiffres { margin-top: 12px; }
+.chiffres summary { cursor: pointer; color: var(--accent); font-size: .9rem; padding: 6px 0; }
+.chiffres table { max-width: 420px; margin-top: 6px; }
+.vide-histo { padding: 24px 8px; text-align: center; color: var(--discret); }
+.chiffres[hidden] { display: none; }

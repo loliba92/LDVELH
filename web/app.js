@@ -31,7 +31,7 @@
 
   const ETAT_VIDE = () => ({
     q: '', serie: '', ed: '', amin: '', amax: '', vente: false,
-    versions: new Set(VERSIONS), g: 'liste', tri: 'serie',
+    versions: new Set(VERSIONS), g: 'liste', tri: 'serie', h: 'bon',
   });
   let S = {};
 
@@ -90,6 +90,11 @@
     $('#f-versions').innerHTML = VERSIONS.map((v) =>
       `<label class="puce"><input type="checkbox" value="${esc(v)}"><span>${esc(v)} <small>&nbsp;(${vers.get(v)})</small></span></label>`).join('');
 
+    $('#h-etats').innerHTML = ETATS.map((e) =>
+      `<label class="puce"><input type="radio" name="h-etat" value="${e.k}"><span>${e.label}</span></label>`).join('');
+    $('#h-etats').addEventListener('change', (e) => { S.h = e.target.value; ecrireAdresse(); afficherHisto(filtrer()); });
+    let attente;
+    window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(() => afficherHisto(filtrer()), 150); });
     $('#f-q').addEventListener('input', (e) => { S.q = e.target.value; changer(); });
     $('#f-serie').addEventListener('change', (e) => { S.serie = e.target.value; changer(); });
     $('#f-ed').addEventListener('change', (e) => { S.ed = e.target.value; changer(); });
@@ -117,6 +122,7 @@
     $('#f-vente').checked = S.vente;
     $('#f-groupe').value = S.g;
     $('#f-tri').value = S.tri;
+    document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
     document.querySelectorAll('#f-versions input').forEach((i) => { i.checked = S.versions.has(i.value); });
   }
 
@@ -167,6 +173,7 @@
     if (S.versions.size !== d.versions.size) p.set('v', [...S.versions].join(','));
     if (S.g !== 'liste') p.set('g', S.g);
     if (S.tri !== 'serie') p.set('tri', S.tri);
+    if (S.h !== 'bon') p.set('h', S.h);
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
@@ -183,6 +190,7 @@
     if (p.has('v')) S.versions = new Set(p.get('v').split(',').filter((v) => VERSIONS.includes(v)));
     if (['liste', 'serie', 'version', 'annee', 'decennie', 'editeur'].includes(p.get('g'))) S.g = p.get('g');
     if (p.get('tri')) S.tri = p.get('tri');
+    if (ETATS.some((e) => e.k === p.get('h'))) S.h = p.get('h');
   }
 
   /* ---------- Calculs ---------- */
@@ -216,6 +224,7 @@
     $('#nb-filtres').textContent = nf ? `· ${nf} actif${nf > 1 ? 's' : ''}` : '';
     $('#compte').textContent = `· ${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     afficherKpis(liste);
+    afficherHisto(liste);
     $('#alerte').innerHTML = avertissement();
     $('#alerte').hidden = !avertissement();
     $('#bloc-tri').hidden = S.g !== 'liste';
@@ -338,6 +347,111 @@
     synchroniserControles();
     changer();
     window.scrollTo({ top: $('#titre-moyenne').getBoundingClientRect().top + window.scrollY - 12, behavior: 'smooth' });
+  }
+
+
+  /* ---------- Histogramme des fréquences ---------- */
+  const LARGEURS = [0.5, 1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200];
+  const fmtN = (x) => (Number.isInteger(x) ? String(x) : x.toLocaleString('fr-FR'));
+
+  function percentile(tri, q) { return tri[Math.floor(q * (tri.length - 1))]; }
+
+  // Tranches « rondes » de 0 jusqu'au 95e centile ; une dernière tranche regroupe les prix plus élevés.
+  function tranches(valeurs) {
+    const tri = [...valeurs].sort((a, b) => a - b);
+    const max = tri[tri.length - 1];
+    let plafond = percentile(tri, 0.95);
+    if (max <= plafond * 1.15) plafond = max;
+    if (plafond <= 0) plafond = 1;
+    const cible = Math.min(14, Math.max(6, Math.round(Math.sqrt(valeurs.length))));
+    const largeur = LARGEURS.find((l) => l >= plafond / cible) || LARGEURS[LARGEURS.length - 1];
+    const nb = Math.floor(plafond / largeur) + 1;
+    const limite = nb * largeur;
+    const comptes = new Array(nb).fill(0);
+    let plus = 0;
+    valeurs.forEach((v) => { if (v >= limite) plus += 1; else comptes[Math.floor(v / largeur)] += 1; });
+    return { largeur, nb, limite, comptes, plus };
+  }
+
+  function pasAxe(maxi) {
+    return [1, 2, 5, 10, 20, 25, 50, 100, 200, 500].find((p) => maxi / p <= 4) || 500;
+  }
+
+  function afficherHisto(liste) {
+    const etat = ETATS.find((e) => e.k === S.h) || ETATS[1];
+    const valeurs = liste.map((b) => b.prix[etat.k]).filter((x) => x != null);
+    const zone = $('#histo');
+    const nom = etat.long || etat.label;
+    $('#titre-histo').textContent = `Répartition des prix · ${nom}`;
+    $('#histo-chiffres').hidden = !valeurs.length;
+    if (!valeurs.length) {
+      zone.innerHTML = '<p class="vide-histo">Aucun prix pour cette sélection.</p>';
+      $('#histo-legende').innerHTML = '';
+      $('#histo-table').innerHTML = '';
+      $('#histo-note').textContent = '';
+      return;
+    }
+    const st = stat(liste, etat.k);
+    const t = tranches(valeurs);
+    const avecPlus = t.plus > 0;
+    const nbBarres = t.nb + (avecPlus ? 1 : 0);
+    const toutes = [...t.comptes, ...(avecPlus ? [t.plus] : [])];
+    const W = Math.max(280, zone.clientWidth || 600);
+    const H = W < 500 ? 210 : 250;
+    const m = { g: 34, d: 8, h: 20, b: 30 };
+    const pw = W - m.g - m.d;
+    const ph = H - m.h - m.b;
+    const bw = pw / nbBarres;
+    const pas = pasAxe(Math.max(...toutes));
+    const ymax = Math.ceil(Math.max(...toutes) / pas) * pas;
+    const y = (n) => m.h + ph - (n / ymax) * ph;
+    const xPrix = (v) => (v < t.limite ? m.g + (v / t.limite) * (t.nb * bw) : m.g + t.nb * bw + bw / 2);
+
+    let svg = '';
+    for (let g = 0; g <= ymax; g += pas) {
+      svg += `<line class="${g === 0 ? 'h-axe' : 'h-grille'}" x1="${m.g}" x2="${W - m.d}" y1="${y(g)}" y2="${y(g)}"/>` +
+             `<text class="h-txt" x="${m.g - 6}" y="${y(g) + 4}" text-anchor="end">${g}</text>`;
+    }
+    let nombres = '';
+    toutes.forEach((n, i) => {
+      const plus = avecPlus && i === t.nb;
+      const debut = i * t.largeur;
+      const lib = plus ? `à partir de ${fmtN(t.limite)} €` : `de ${fmtN(debut)} à ${fmtN(debut + t.largeur)} €`;
+      const x = m.g + i * bw + 1.5;
+      const h = (n / ymax) * ph;
+      svg += `<rect class="${plus ? 'h-bar-plus' : 'h-bar'}" x="${x}" y="${y(n)}" width="${Math.max(1, bw - 3)}" height="${h}" rx="2">` +
+             `<title>${lib} : ${n} livre${n > 1 ? 's' : ''}</title></rect>`;
+      if (n > 0 && bw >= 17) nombres += `<text class="h-n" x="${x + (bw - 3) / 2}" y="${y(n) - 4}" text-anchor="middle">${n}</text>`;
+    });
+    // repères sur l'axe des prix : une étiquette tous les k intervalles pour éviter les chevauchements
+    const pasEtiquette = Math.max(1, Math.ceil(36 / bw));
+    for (let i = 0; i <= t.nb; i += pasEtiquette) {
+      svg += `<text class="h-txt" x="${m.g + i * bw}" y="${H - 10}" text-anchor="${i === 0 ? 'start' : 'middle'}">${fmtN(i * t.largeur)}${i === 0 ? ' €' : ''}</text>`;
+    }
+    if (avecPlus) svg += `<text class="h-txt" x="${m.g + t.nb * bw + bw / 2}" y="${H - 10}" text-anchor="middle">+</text>`;
+    svg += `<line class="h-med" x1="${xPrix(st.med)}" x2="${xPrix(st.med)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
+    svg += `<line class="h-moy" x1="${xPrix(st.avg)}" x2="${xPrix(st.avg)}" y1="${m.h - 6}" y2="${m.h + ph}"/>`;
+    svg += nombres;
+
+    zone.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" ` +
+      `aria-label="Histogramme des prix en ${esc(nom.toLowerCase())} : ${valeurs.length} livres, médiane ${fmt(st.med)}, moyenne ${fmt(st.avg)}">${svg}</svg>`;
+
+    $('#histo-note').textContent =
+      `Chaque barre compte les livres dont le prix est dans la tranche (${fmtN(t.largeur)} € de large). ` +
+      `${valeurs.length} livre${valeurs.length > 1 ? 's' : ''} chiffré${valeurs.length > 1 ? 's' : ''}` +
+      `${avecPlus ? `, dont ${t.plus} à partir de ${fmtN(t.limite)} € regroupés dans la dernière barre` : ''}.`;
+    $('#histo-legende').innerHTML =
+      `<span class="leg"><i class="trait med"></i>Médiane ${fmt(st.med)}</span>` +
+      `<span class="leg"><i class="trait"></i>Moyenne ${fmt(st.avg)}</span>` +
+      (st.avg >= t.limite ? '<span class="leg sous">La moyenne dépasse la dernière tranche affichée.</span>' : '');
+    const lignes = toutes.map((n, i) => {
+      const plus = avecPlus && i === t.nb;
+      const debut = i * t.largeur;
+      return `<tr><td>${plus ? `À partir de ${fmtN(t.limite)} €` : `${fmtN(debut)} à ${fmtN(debut + t.largeur)} €`}</td>` +
+             `<td class="num">${n}</td><td class="num">${Math.round((n / valeurs.length) * 100)} %</td></tr>`;
+    }).join('');
+    $('#histo-table').innerHTML =
+      `<table><thead><tr><th>Tranche de prix</th><th class="num">Livres</th><th class="num">Part</th></tr></thead><tbody>${lignes}</tbody></table>`;
   }
 
   /* ---------- Fiche d'un livre ---------- */

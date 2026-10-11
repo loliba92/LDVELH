@@ -26,6 +26,7 @@ python pipeline/export_site.py
 
 - **Filtres** : recherche (titre, auteur, ISBN), série, éditeur, période d'édition, versions V1 à V5, encore en vente.
 - **Moyenne du filtre** : pour chaque état (convenable, bon, très bon), moyenne, médiane, minimum, maximum et nombre de livres chiffrés. Un livre sans prix pour un état est ignoré dans la moyenne de cet état.
+- **Répartition des prix** : histogramme des fréquences pour la sélection en cours, au choix pour l'état convenable, bon état ou TBE. Chaque barre compte les livres d'une tranche de prix ; la dernière regroupe les prix les plus élevés ; médiane et moyenne sont tracées ; le tableau « Voir les chiffres » donne les valeurs exactes.
 - **Regrouper par** série, version, année, décennie ou éditeur : une ligne par groupe avec sa moyenne ; un clic sur une ligne applique le groupe comme filtre.
 - **Fiche d'un livre** : informations, prix par état, et toutes les versions du même livre côte à côte.
 - Les filtres sont dans l'adresse de la page : on peut la copier pour partager une vue.
