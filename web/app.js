@@ -56,6 +56,10 @@
     synchroniser();
     basculerSelecteur(!window.matchMedia('(max-width: 1000px)').matches);
     afficher();
+    if (new URLSearchParams(location.search).has('inventaire')) {   // lien « Inventaire » des pages annexes
+      history.replaceState(null, '', location.pathname + location.hash);
+      ouvrirParcours();
+    }
   }
 
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */

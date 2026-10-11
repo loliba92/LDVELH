@@ -37,6 +37,7 @@
       <a href="#collection">Ma collection <span class="nb-coll" id="nb-coll"></span></a>
       <a href="#etagere">L'étagère</a>
       <a href="#apropos">À propos</a>
+      <a href="le-projet.html">Le projet</a>
       <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
         <span class="lampe-ico" aria-hidden="true"></span><span class="lampe-txt">Éclairage</span>
       </button>
@@ -208,6 +209,11 @@
         <p class="sous" id="aide-install"><strong>Application.</strong> Le guide s'installe comme une application et fonctionne sans réseau. Sur iPhone : Partager, puis « Sur l'écran d'accueil ». Sur Android ou ordinateur : le bouton « Installer l'application » en haut de page, ou le menu du navigateur.</p>
       </section>
     </div>
+    <nav class="pied-liens" aria-label="Informations">
+      <a href="le-projet.html">Le projet</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+    </nav>
   </div>
 </footer>
 
@@ -216,8 +222,19 @@
   <a href="#etagere" data-sec="etagere"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
   <button type="button" class="barre-centre" data-parcours aria-label="Inventaire guidé de ma collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Inventaire</span></button>
   <a href="#collection" data-sec="collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span><b class="nb-coll" id="nb-coll-bas"></b></a>
-  <a href="#apropos" data-sec="apropos"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></svg><span>À propos</span></a>
+  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg><span>Plus</span></button>
 </nav>
+
+<dialog class="feuille" id="plus" aria-labelledby="plus-titre">
+  <div class="feuille-poignee" aria-hidden="true"></div>
+  <div class="feuille-tete"><h2 id="plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <ul class="feuille-liste">
+    <li><a href="le-projet.html"><b>Le projet</b><small>Pourquoi ce guide, d'où viennent les prix</small></a></li>
+    <li><a href="#apropos"><b>À propos de la cote</b><small>Ce qu'est la cote, les éditions V1 à V5</small></a></li>
+    <li><a href="confidentialite.html"><b>Confidentialité</b><small>Vos données restent dans votre navigateur</small></a></li>
+    <li><a href="mentions-legales.html"><b>Mentions légales</b><small>Éditeur, hébergeur, conditions d'utilisation</small></a></li>
+  </ul>
+</dialog>
 
 <div class="sr-only" id="annonce" role="status" aria-live="polite"></div>
 
@@ -240,6 +257,7 @@
   <div class="fiche-contenu" id="fiche-contenu"></div>
 </dialog>
 
+<script src="plus.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

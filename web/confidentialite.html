@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confidentialité · La Cote du Héros</title>
+<meta name="description" content="Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2a1c13">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/cormorant-garamond.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/source-sans-3.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="stylesheet" href="style.css">
+<script>
+  try { var t = localStorage.getItem('cote-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body class="annexe">
+<a class="evitement" href="#main">Aller au contenu</a>
+
+<header class="bandeau">
+  <div class="cadre bandeau-in">
+    <a class="marque" href="./" aria-label="La Cote du Héros, accueil">
+      <span class="marque-sceau" aria-hidden="true"></span>
+      <span class="marque-nom">La Cote du Héros</span>
+    </a>
+    <nav class="menu" aria-label="Navigation">
+      <a href="./#cote">La cote</a>
+      <a href="./#collection">Ma collection</a>
+      <a href="./#etagere">L'étagère</a>
+      <a href="le-projet.html">Le projet</a>
+      <button type="button" class="lampe" id="lampe" aria-pressed="false" title="Changer l'éclairage">
+        <span class="lampe-ico" aria-hidden="true"></span><span class="lampe-txt">Éclairage</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="cadre page">
+<p class="surtitre">Vos données</p>
+<h1>Confidentialité</h1>
+<p class="chapeau">En bref : <strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.</p>
+
+<h2>Ce qui est enregistré sur votre appareil</h2>
+<p>Pour fonctionner comme vous le demandez, le guide écrit trois réglages dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.</p>
+<div class="tableau-page">
+<table>
+  <thead><tr><th scope="col">Nom</th><th scope="col">Contenu</th><th scope="col">Pourquoi</th></tr></thead>
+  <tbody>
+    <tr><td data-label="Nom"><code>cote-theme</code></td><td data-label="Contenu">Votre choix d'éclairage (clair ou sombre)</td><td data-label="Pourquoi">Retrouver l'éclairage choisi</td></tr>
+    <tr><td data-label="Nom"><code>cote-collection-v1</code></td><td data-label="Contenu">Les livres de « Ma collection », leur état, leur quantité</td><td data-label="Pourquoi">Conserver votre collection d'une visite à l'autre</td></tr>
+    <tr><td data-label="Nom"><code>cote-parcours-v1</code></td><td data-label="Contenu">L'avancement de l'inventaire guidé</td><td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Le guide garde aussi des copies de ses propres pages et images dans la mémoire de votre navigateur (cache), pour s'ouvrir sans réseau. Elles ne contiennent aucune donnée sur vous.</p>
+<p><strong>Aucun cookie</strong> n'est déposé. Ces enregistrements sont nécessaires à des fonctions que vous demandez vous-même ; ils ne demandent donc pas de consentement et il n'y a pas de bandeau.</p>
+
+<h2>Comment les effacer</h2>
+<ul>
+  <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
+  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
+</ul>
+
+<h2>Fichiers de sauvegarde</h2>
+<p>Le fichier que vous téléchargez (JSON ou CSV) est créé dans votre navigateur et enregistré chez vous. Quand vous chargez un fichier pour le retrouver, il est lu dans votre navigateur, sans être envoyé nulle part. Vous en restez seul responsable : il contient la liste de vos livres.</p>
+
+<h2>Hébergement et journaux techniques</h2>
+<p>Le site est hébergé par GitHub Pages (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub peut enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de l'hébergeur et non de l'éditeur, qui n'y a pas accès. GitHub est établi aux États-Unis ; son traitement des données est décrit dans sa <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité</a>.</p>
+
+<h2>Ressources et liens externes</h2>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, Pexels, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
+
+<h2>Vos droits</h2>
+<p>Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="https://github.com/loliba92/LDVELH/issues" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+
+<h2>Si cela change</h2>
+<p>Si le guide devait un jour mesurer sa fréquentation, proposer des dons ou ouvrir des comptes, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : 11 octobre 2026.</p>
+
+</main>
+
+<footer class="pied">
+  <div class="cadre pied-in">
+    <nav class="pied-liens" aria-label="Informations">
+      <a href="le-projet.html">Le projet</a>
+      <a href="confidentialite.html">Confidentialité</a>
+      <a href="mentions-legales.html">Mentions légales</a>
+    </nav>
+    <p class="sous">La Cote du Héros · guide indépendant, sans publicité · mise à jour de cette page : 11 octobre 2026.</p>
+  </div>
+</footer>
+
+<nav class="barre-bas" id="barre-bas" aria-label="Menu du bas">
+  <a href="./#cote"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-7"/></svg><span>La cote</span></a>
+  <a href="./#etagere"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
+  <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Inventaire</span></a>
+  <a href="./#collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span></a>
+  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg><span>Plus</span></button>
+</nav>
+
+<dialog class="feuille" id="plus" aria-labelledby="plus-titre">
+  <div class="feuille-poignee" aria-hidden="true"></div>
+  <div class="feuille-tete"><h2 id="plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <ul class="feuille-liste">
+    <li><a href="le-projet.html"><b>Le projet</b><small>Pourquoi ce guide, d'où viennent les prix</small></a></li>
+    <li><a href="./#apropos"><b>À propos de la cote</b><small>Ce qu'est la cote, les éditions V1 à V5</small></a></li>
+    <li><a href="confidentialite.html" aria-current="page"><b>Confidentialité</b><small>Vos données restent dans votre navigateur</small></a></li>
+    <li><a href="mentions-legales.html"><b>Mentions légales</b><small>Éditeur, hébergeur, conditions d'utilisation</small></a></li>
+  </ul>
+</dialog>
+
+<script src="plus.js"></script>
+<script src="pages.js"></script>
+</body>
+</html>
