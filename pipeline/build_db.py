@@ -120,7 +120,7 @@ def load_livres_versions(cx):
     for r in rows:
         if (r.get("livre") or "").strip():
             nom = r["livre"].strip()
-            cle = "livre-" + slug(nom)
+            cle = "livre-" + slug(r.get("serie") or "") + "-" + slug(nom)  # même nom dans deux séries : deux livres
         else:
             nom = r["titre"].strip()
             cle = f"{slug(nom)}-{r['id'].lower()}"

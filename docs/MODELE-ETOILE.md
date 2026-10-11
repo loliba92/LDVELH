@@ -23,7 +23,7 @@ Mesures : `prix` (hors port), `frais_port`, `est_lot`. Une clé naturelle unique
 |---|---|---|
 | **DimLivre** | Le livre au sens du texte, toutes éditions confondues | *Down Among the Dead Men* |
 | **DimSerie** | La série de livres-jeux, avec son nombre de titres, ses années extrêmes et son éditeur principal | Défis Fantastiques, Loup Solitaire, Sherlock Holmes, Super Sherlock… (23 séries) |
-| **DimVersion** | Une édition précise : V1, V2… V5, autre éditeur | V1 = Défis Fantastiques n° 43 (1991) ; V2 = Folio Junior n° 731 (1994) ; V5 = réédition Alkonost (2024) |
+| **DimVersion** | Une édition précise : V1, V2… V5, autre éditeur | V1 à V5 : les cinq générations d'éditions du site collection-ldvelh.fr |
 | **DimEtat** | État du livre | Convenable, Bon, Très bon, Neuf, Non précisé |
 | **DimDate** | Calendrier de l'observation | année, trimestre, mois, semaine, jour |
 | **DimSource** | D'où vient le prix | historique, eBay (API), mes ventes, relevé manuel… avec un indice de fiabilité |
@@ -34,7 +34,7 @@ L'éditeur (Gallimard, Alkonost…) et la collection de l'éditeur (Folio Junior
 ## Les versions
 
 - Une version appartient à un seul livre. Deux versions sont regroupées **uniquement** si la colonne `livre` de `editions.csv` est renseignée à l'identique. Aucun regroupement automatique par titre : deux titres identiques peuvent désigner des jeux différents (ex. « Le Livre des Règles » existe pour L'Œil Noir et pour Terres de Légende).
-- Le numéro de version est celui indiqué dans la colonne `version` (V1, V5…). À défaut, il est calculé par ordre d'année d'édition.
+- Le numéro de version est celui de la colonne `version` (V1 à V5, tiré des « univers » du site collection-ldvelh.fr). À défaut, il est calculé par ordre d'année d'édition.
 - `est_derniere_version` vaut 1 pour la version la plus récente du livre ; `en_vente` (1/0) se renseigne à la main.
 
 ```
@@ -59,5 +59,5 @@ Le script contrôle chaque ligne (ISBN valide, codes connus, prix lisible), sign
 ## Limites actuelles
 
 - Les prix historiques sont datés du jour de leur extraction (2026-10-11), mais leur date réelle est inconnue (le site n'est plus mis à jour). Ils portent le type « historique » et un faible poids.
-- Aucun livre n'a encore de `livre` renseigné : chaque version est donc un livre à part. Le regroupement se fait au fil de l'eau.
+- Les versions sont reliées par le titre dans la même série (voir `docs/BASE-LIVRES.md`) ; quelques rapprochements sont à relire dans `rapport_liens_versions.csv`.
 - Les 5 ouvrages « L'Œil Noir » ajoutés à la main n'ont pas de prix.

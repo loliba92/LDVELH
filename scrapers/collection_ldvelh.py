@@ -1,47 +1,25 @@
+"""Extrait le catalogue et les prix de collection-ldvelh.fr pour les 5 versions (univers V1 à V5).
+
+Le site est « calé » sur la version 1 ; le menu « Changer d'Univers » bascule vers /version/V2, etc.
+Le choix est mémorisé par la session : on utilise donc une session par version.
+
+    python scrapers/collection_ldvelh.py
+"""
+import csv
+import time
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
-import csv
-from pathlib import Path
-from datetime import datetime
-from collections import Counter
 
+BASE_URL = 'https://www.collection-ldvelh.fr'
+VERSIONS = ['V1', 'V2', 'V3', 'V4', 'V5']  # « univers » du site (menu « Changer d'Univers »)
+PAUSE = 1.0  # secondes entre deux requêtes, pour ne pas surcharger le site
+HEADERS = {'User-Agent': 'LDVELH-catalogue/0.1 (projet personnel de cote de livres-jeux)'}
 
-def get_prices_by_condition_bundle():
-    url = 'https://www.collection-ldvelh.fr/stats/bundle'
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    prices_by_book = {}
-    for book_element in soup.find_all('input', {'class': 'livre-input'}):
-        parent_element = book_element.find_parent()  # Trouver l'élément parent
-        title = parent_element.text.strip()  # Titre du livre à partir de l'élément parent
-        prices = {
-            'prix_convenable': book_element['data-price'],
-            'prix_bon_etat': book_element['data-beprice'],
-            'prix_tres_bon_etat': book_element['data-tbeprice']
-        }
-        prices_by_book[title] = prices
-
-    return prices_by_book
-
-
-# Obtenir les prix par état depuis la page bundle
-prices_by_condition = get_prices_by_condition_bundle()
-
-# URL de la page à scraper
-url = 'https://www.collection-ldvelh.fr/books'
-
-# Effectuer une requête HTTP pour obtenir le contenu de la page
-response = requests.get(url)
-content = response.content
-
-# Utiliser BeautifulSoup pour parser le contenu HTML
-soup = BeautifulSoup(content, 'html.parser')
-
-# Trouver tous les éléments qui contiennent les informations des livres
-books = soup.find_all('div', {'data-titre': True})
-
-# Liste des numéros de livres possédés avec doublons possibles
+# Liste des numéros de livres possédés (version 1 uniquement), avec doublons possibles
 owned_book_numbers = [
     # --- 200 ---
     '252', '268', '270', '271', '285', '288', '289', '290', '291', '293',
@@ -64,100 +42,115 @@ owned_book_numbers = [
     '679', '681', '698', '699',
     # --- 700 ---
     '706', '749']
-
-# Compter le nombre de fois que chaque numéro apparaît
 owned_count = Counter(owned_book_numbers)
 
-# Préparer une liste pour stocker les données des livres
-books_data = []
-
-# Obtenir la date actuelle
-current_date = datetime.now().strftime("%Y-%m-%d")
-
-# Boucle pour extraire les informations de chaque livre
-for book in books:
-    # Trouver la balise 'a' qui contient le lien vers la page du livre
-    book_link = book.find('a', href=True)
-
-    # Extraire l'ISBN à partir de l'URL (le dernier élément après '/')
-    isbn = book_link['href'].split('/')[-1] if book_link else None
-    book_link = book_link['href'] if book_link else None
-    serie_cut = book['data-serie'].split("-")[0].strip() if 'data-serie' in book.attrs else None
-    book_info = {
-        'titre': book['data-titre'],
-        'prix': book['data-prix'],
-        'serie': serie_cut,
-        'note': book['data-note'],
-        'numero': book['data-numero'],
-        'own': owned_count[book['data-numero']],
-        'date': book['data-date'],
-        'isbn': isbn,
-        'last_date': current_date,
-        'link': book_link
-    }
-    # Ajouter les prix par état du livre
-    title = book['data-titre']
-    if title in prices_by_condition:
-        book_info.update(prices_by_condition[title])
-    else:
-        book_info['prix_convenable'] = None
-        book_info['prix_bon_etat'] = None
-        book_info['prix_tres_bon_etat'] = None
-    books_data.append(book_info)
-
-
-# URL pour les statistiques
-stats_url = 'https://www.collection-ldvelh.fr/stats'
-
-# Effectuer une requête HTTP pour obtenir le contenu de la page des stats
-stats_response = requests.get(stats_url)
-stats_content = stats_response.content
-
-# Utiliser BeautifulSoup pour parser le contenu HTML de la page des stats
-stats_soup = BeautifulSoup(stats_content, 'html.parser')
-
-# Pourcentages de collectionneurs possédant chaque livre
-collection_percentages = {}
-for li in stats_soup.find_all('li', class_='d-flex space-between w-100'):
-    book_title = li.find('a', class_='dark-grey').text.strip()
-    percentage = li.find('span', class_='col-xs-2 small p-0 right').text.strip().replace('%', '')
-    collection_percentages[book_title] = percentage
-
-# Mise à jour avec les pourcentages de collectionneurs
-for book in books_data:
-    book_title = book['titre']
-    if book_title in collection_percentages:
-        book['collection_percentage'] = collection_percentages[book_title]
-    else:
-        book['collection_percentage'] = 'N/A'
-
-# Données des nouveaux livres hors système à ajouter
+# Livres hors système du site, ajoutés à la main (version 1)
 nouveaux_livres = [
-    {'titre': "L'Aventurie", 'prix': 15, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "001", 'own': 2, 'date': None, 'last_date': current_date},
-    {'titre': "Le Livre des Règles", 'prix': 15, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "002", 'own': 2, 'date': None, 'last_date': current_date},
-    {'titre': "Le Livre des Règles 2", 'prix': 15, 'serie': "L'Œil Noir ", 'note': "5", 'numero': "003", 'own': 2, 'date': None, 'last_date': current_date},
-    {'titre': 'Le Livre des Aventures', 'prix': 15, 'serie': "L'Œil Noir    ", 'note': "5", 'numero': "004", 'own': 2, 'date': None, 'last_date': current_date},
-    {'titre': 'Héros, Monstres et Forces Obscures', 'prix': 20, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "005", 'own': 1, 'date': None, 'last_date': current_date}
+    {'titre': "L'Aventurie", 'prix': 15, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "001", 'own': 2, 'date': None},
+    {'titre': "Le Livre des Règles", 'prix': 15, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "002", 'own': 2, 'date': None},
+    {'titre': "Le Livre des Règles 2", 'prix': 15, 'serie': "L'Œil Noir ", 'note': "5", 'numero': "003", 'own': 2, 'date': None},
+    {'titre': 'Le Livre des Aventures', 'prix': 15, 'serie': "L'Œil Noir    ", 'note': "5", 'numero': "004", 'own': 2, 'date': None},
+    {'titre': 'Héros, Monstres et Forces Obscures', 'prix': 20, 'serie': "L'Œil Noir   ", 'note': "5", 'numero': "005", 'own': 1, 'date': None},
 ]
 
-for livre in nouveaux_livres:
-    books_data.append(livre)
+FIELDNAMES = ['version', 'titre', 'prix', 'serie', 'rang_serie', 'note', 'numero', 'own', 'date', 'isbn',
+              'last_date', 'link', 'collection_percentage', 'prix_convenable', 'prix_bon_etat',
+              'prix_tres_bon_etat']
 
 
-# Nom du fichier CSV
-# Dossier de sortie : data/raw/collection-ldvelh/ (à la racine du dépôt)
-output_dir = Path(__file__).resolve().parent.parent / 'data' / 'raw' / 'collection-ldvelh'
-output_dir.mkdir(parents=True, exist_ok=True)
-filename = output_dir / f'books_data-{current_date}.csv'
+def get(session, url):
+    time.sleep(PAUSE)
+    response = session.get(url, timeout=60)
+    response.raise_for_status()
+    return response
 
-# Écriture du CSV en UTF-8
-with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-    fieldnames = ['titre', 'prix', 'serie', 'note', 'numero', 'own', 'date', 'isbn', 'last_date', 'link',
-                  'collection_percentage', 'prix_convenable', 'prix_bon_etat', 'prix_tres_bon_etat']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-    writer.writeheader()
-    for book in books_data:
-        writer.writerow(book)
+def choisir_version(session, version):
+    """Bascule la session sur l'univers demandé et vérifie que le site l'a bien pris en compte."""
+    get(session, f'{BASE_URL}/version/{version}')
+    page = BeautifulSoup(get(session, f'{BASE_URL}/books').content, 'html.parser')
+    entete = page.find('p', class_='header-font')
+    if entete is None or entete.text.strip() != f'Univers Version {version[1:]}':
+        raise RuntimeError(f"Le site n'a pas basculé sur {version} (en-tête : "
+                           f"{entete.text.strip() if entete else 'absent'})")
+    return page
 
-print(f"Les données ont été exportées avec succès dans {filename}")
+
+def get_prices_by_condition_bundle(session):
+    soup = BeautifulSoup(get(session, f'{BASE_URL}/stats/bundle').content, 'html.parser')
+    prices_by_book = {}
+    for book_element in soup.find_all('input', {'class': 'livre-input'}):
+        title = book_element.find_parent().text.strip()
+        prices_by_book[title] = {
+            'prix_convenable': book_element['data-price'],
+            'prix_bon_etat': book_element['data-beprice'],
+            'prix_tres_bon_etat': book_element['data-tbeprice'],
+        }
+    return prices_by_book
+
+
+def get_collection_percentages(session):
+    soup = BeautifulSoup(get(session, f'{BASE_URL}/stats').content, 'html.parser')
+    percentages = {}
+    for li in soup.find_all('li', class_='d-flex space-between w-100'):
+        titre = li.find('a', class_='dark-grey').text.strip()
+        percentages[titre] = li.find('span', class_='col-xs-2 small p-0 right').text.strip().replace('%', '')
+    return percentages
+
+
+def scrape_version(version, current_date):
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    page = choisir_version(session, version)
+    prices_by_condition = get_prices_by_condition_bundle(session)
+    percentages = get_collection_percentages(session)
+
+    livres = []
+    for book in page.find_all('div', {'data-titre': True}):
+        lien = book.find('a', href=True)
+        href = lien['href'] if lien else None
+        serie_brute = book.get('data-serie', '')
+        serie, _, rang = serie_brute.partition('-')  # « Défis Fantastiques-01 » : série et rang dans la série
+        titre = book['data-titre']
+        info = {
+            'version': version,
+            'titre': titre,
+            'prix': book['data-prix'],
+            'serie': serie.strip() or None,
+            'rang_serie': rang.strip() or None,
+            'note': book['data-note'],
+            'numero': book['data-numero'],
+            'own': owned_count[book['data-numero']] if version == 'V1' else 0,
+            'date': book['data-date'],
+            'isbn': href.split('/')[-1] if href else None,
+            'last_date': current_date,
+            'link': href,
+            'collection_percentage': percentages.get(titre, 'N/A'),
+        }
+        info.update(prices_by_condition.get(titre, {'prix_convenable': None, 'prix_bon_etat': None,
+                                                    'prix_tres_bon_etat': None}))
+        livres.append(info)
+    print(f'  {version} : {len(livres)} livres')
+    return livres
+
+
+def main():
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    books_data = []
+    for version in VERSIONS:
+        books_data += scrape_version(version, current_date)
+    for livre in nouveaux_livres:
+        books_data.append({**livre, 'version': 'V1', 'last_date': current_date})
+
+    output_dir = Path(__file__).resolve().parent.parent / 'data' / 'raw' / 'collection-ldvelh'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = output_dir / f'books_data-{current_date}.csv'
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(books_data)
+    print(f"{len(books_data)} lignes exportées avec succès dans {filename}")
+
+
+if __name__ == '__main__':
+    main()

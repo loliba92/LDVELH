@@ -59,12 +59,22 @@ Aucune source ne suffira seule. La BnF est la plus fiable pour les livres franç
 - Périmètre : seulement les collections françaises, ou aussi les éditions étrangères et les rééditions récentes ?
 - Où commencer le contrôle manuel : par les livres les plus chers ou par les plus courants ?
 
-## 6. Les versions (V1, V2… V5) et la BnF
+## 6. Les versions (V1 à V5)
 
-Constaté le 2026-10-11 :
-- La BnF liste les éditions d'un titre (éditeur, année, collection, numéro dans la collection, ISBN). Elle a parfois plusieurs notices pour le même ISBN (une par tirage), ce qui explique des écarts d'année avec collection-ldvelh.fr (champ `annee_bnf`).
-- Elle ne donne **pas** de numéro de version et **pas** de lien explicite entre les éditions d'un même livre. « V1, V2… » est une convention de la communauté : elle se fixe à la main.
-- Sa notice porte la mention « Un Livre dont vous êtes le héros » dans la collection : test fiable pour confirmer qu'un ISBN est un livre-jeu.
-- Les rééditions changent souvent de numérotation (ex. *Le Sorcier de la Montagne de Feu* : Folio Junior n° 252, puis Défis fantastiques n° 1 en 2007 et 2018).
+**Origine.** La numérotation vient de collection-ldvelh.fr, qui range les livres en cinq « univers » (menu « Changer d'Univers », adresses `/version/V1` à `/version/V5`). Chaque version est une génération d'éditions françaises :
 
-Convention retenue : les livres issus de collection-ldvelh.fr sont la **V1**. Les rééditions sont proposées par `pipeline/find_versions.py` dans `data/processed/versions_candidates.csv` (classées par année), puis validées une à une avec `add_book.py --livre ... --version Vn`.
+| Version | Livres | Exemple d'époque |
+|---|---|---|
+| V1 | 190 (+5 ajouts manuels) | Folio Junior, années 80-90 |
+| V2 | 111 | 1996 à 2003 |
+| V3 | 38 | 2007 |
+| V4 | 50 | 2012 (« nouvelle édition ») |
+| V5 | 36 | 2018, versions encore en vente |
+
+Le script `scrapers/collection_ldvelh.py` parcourt les cinq versions (une session par version, une seconde entre deux requêtes) et ajoute les colonnes `version` et `rang_serie`.
+
+**Relier les versions d'un même livre.** Le « rang dans la série » donné par le site n'est pas fiable d'une version à l'autre (chaque version réordonne sa série : le n° 4 n'est pas le même livre en V1 et en V3). `pipeline/import_catalogue.py` relie donc les versions par le **titre**, dans la même série, avec une comparaison tolérante aux majuscules et aux accents mais stricte sur les chiffres (« Livre des règles » ≠ « Livre des règles 2 »). Les rapprochements un peu moins sûrs sont listés dans `data/processed/rapport_liens_versions.csv`.
+
+**Apport de la BnF.** Elle confirme les éditions (éditeur, année, ISBN, collection) et recoupe les ISBN du site, mais ne fournit ni numéro de version ni lien entre éditions. `pipeline/find_versions.py` reste utile pour repérer des éditions absentes du site (autres éditeurs, par exemple).
+
+**Indicateur « en vente ».** Les livres de la V5 sont marqués en vente (indication du propriétaire du projet). Les autres versions sont à renseigner.
