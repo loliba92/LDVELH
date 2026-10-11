@@ -11,7 +11,8 @@ import requests
 ROOT = Path(__file__).resolve().parent.parent
 BASE = ROOT / "data" / "processed" / "editions.csv"
 
-COLUMNS = ["id", "isbn13", "isbn10", "titre", "serie", "numero", "auteurs", "traducteur",
+COLUMNS = ["id", "isbn13", "isbn10", "livre", "titre", "version", "en_vente", "serie", "numero",
+           "auteurs", "traducteur",
            "illustrateur", "editeur", "collection_editeur", "annee", "pages", "notice_bnf",
            "statut", "source", "date_maj"]
 
@@ -58,16 +59,16 @@ def normalize_isbn(raw):
 
 # --- Lecture / écriture de la base -------------------------------------------
 
-def load(path=BASE):
-    path = Path(path)
+def load(path=None):
+    path = Path(path or BASE)
     if not path.exists():
         return []
     with open(path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
-def save(rows, path=BASE):
-    path = Path(path)
+def save(rows, path=None):
+    path = Path(path or BASE)
     path.parent.mkdir(parents=True, exist_ok=True)
     rows = sorted(rows, key=lambda r: (r.get("serie", ""), r.get("numero", "").zfill(5), r["id"]))
     with open(path, "w", newline="", encoding="utf-8") as f:

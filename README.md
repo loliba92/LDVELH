@@ -18,7 +18,9 @@ data/
   raw/               Données brutes datées, jamais modifiées à la main
     collection-ldvelh/
     occasion/        Prix d'occasion relevés (une sous-source par site)
-  processed/         Données nettoyées et fusionnées
+  processed/         Données nettoyées : editions.csv (dimension des versions)
+  manual/            Vos ventes et relevés à la main (observations.csv)
+  warehouse/         Base SQLite en étoile (générée, non versionnée)
 pipeline/            Phase 2 : nettoyage, rapprochement par ISBN, indicateurs
 web/                 Phase 3 : site web (lit data/processed)
 docs/                Choix techniques, schéma des données, indice de liquidité
@@ -28,7 +30,9 @@ docs/                Choix techniques, schéma des données, indice de liquidit�
 
 ```
 pip install -r requirements.txt
-python scrapers/collection_ldvelh.py
+python scrapers/collection_ldvelh.py      # extraction du catalogue
+python pipeline/add_book.py ISBN          # ajouter un livre
+python pipeline/build_db.py               # (re)construire la base en étoile
 ```
 
 Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv`.
@@ -40,4 +44,4 @@ Le fichier est écrit dans `data/raw/collection-ldvelh/books_data-AAAA-MM-JJ.csv
 - [ ] Pipeline et indicateurs (fourchettes, liquidité)
 - [ ] Site web
 
-Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).
+Documents : `docs/ARCHITECTURE.md` (vue d'ensemble), `docs/STRATEGIE-EXTRACTION.md` (sources et règles), `docs/MODELE-PRICING.md` (estimation des prix et liquidité), `docs/BASE-LIVRES.md` (définition de la base des livres), `docs/MODELE-ETOILE.md` (tables de dimensions et de faits), `docs/ANALYSE-CHASSE-AUX-LIVRES.md` (étude du concurrent).

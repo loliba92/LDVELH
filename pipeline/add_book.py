@@ -23,6 +23,9 @@ def main():
     p.add_argument("--file", help="fichier texte contenant un ISBN par ligne")
     p.add_argument("--serie", default="", help="série du livre-jeu (ex. Défis Fantastiques)")
     p.add_argument("--numero", default="", help="numéro dans la série")
+    p.add_argument("--livre", default="", help="nom du livre commun à toutes ses versions (ex. Down Among the Dead Men)")
+    p.add_argument("--version", default="", help="libellé de version (V1, V2... V5) ; sinon calculé par ordre d'année")
+    p.add_argument("--en-vente", default="", choices=["", "0", "1"], help="1 si cette version est encore vendue neuve")
     p.add_argument("--titre", default="", help="titre, utile si la BnF ne trouve pas le livre")
     p.add_argument("--base", default=str(editions.BASE), help="fichier de la base (par défaut : la vraie)")
     a = p.parse_args()
@@ -33,8 +36,8 @@ def main():
                   if l.strip() and not l.startswith("#")]
     if not isbns:
         p.error("indiquez au moins un ISBN")
-    if len(isbns) > 1 and (a.serie or a.numero or a.titre):
-        p.error("--serie, --numero et --titre ne s'utilisent qu'avec un seul ISBN")
+    if len(isbns) > 1 and (a.serie or a.numero or a.titre or a.livre or a.version or a.en_vente):
+        p.error("--serie, --numero, --titre, --livre, --version et --en-vente ne s'utilisent qu'avec un seul ISBN")
 
     rows = editions.load(a.base)
     known = {r["id"] for r in rows}
@@ -54,7 +57,8 @@ def main():
         except Exception as e:  # réseau, BnF indisponible
             print(f"! BnF injoignable pour {isbn13} ({e}) : ajout sans enrichissement")
         row = {"id": isbn13, "isbn13": isbn13, "isbn10": isbn10, "serie": a.serie,
-               "numero": a.numero, "titre": a.titre, "source": "manuel",
+               "numero": a.numero, "titre": a.titre,
+               "livre": a.livre, "version": a.version, "en_vente": a.en_vente, "source": "manuel",
                "statut": "brut", "date_maj": editions.today()}
         if fiche:
             row.update({k: v for k, v in fiche.items() if v and not (k == "titre" and a.titre)})

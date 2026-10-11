@@ -19,7 +19,7 @@ Règles : respecter `robots.txt` et les conditions d'utilisation de chaque site,
 2. Rapprocher les sources par ISBN, à défaut par série et numéro.
 3. Calculer par livre et par état : bas, médian, haut, nombre de ventes observées, indice de confiance.
 4. Calculer l'indice de liquidité.
-5. Écrire `data/processed/books.json` et `data/processed/prices.json`.
+5. Charger la base en étoile (voir `docs/MODELE-ETOILE.md`), puis exporter les résultats pour le site.
 
 ### Schéma de `books.json` (proposition)
 
