@@ -614,7 +614,7 @@ dialog.parcours[open] { display: flex; }
   background:
     linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
     linear-gradient(90deg, rgba(0, 0, 0, .92) 0, rgba(0, 0, 0, .82) 36%, rgba(0, 0, 0, .3) 62%, rgba(0, 0, 0, 0) 82%),
-    var(--img) var(--pos, 80% 26%) / cover no-repeat,
+    var(--img) var(--pos, 80% 26%) / var(--taille, cover) no-repeat,
     #000000; }
 .hero-in { grid-template-columns: 1fr; }
 .hero-texte { max-width: 620px; }
@@ -646,10 +646,17 @@ dialog.parcours[open] { display: flex; }
 .etats-rapides button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .etats-rapides button:focus-visible, .onglets-ed button:focus-visible, .col-tout:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
-/* Trois illustrations, tirées au hasard à chaque visite (choix dans l'en-tête de la page) ; cadrage propre à chacune */
+/* Quatre illustrations, tirées au hasard à chaque visite (choix dans l'en-tête de la page) ; cadrage propre à chacune */
 html[data-accueil="1"] .hero { --img: url("images/accueil-1.webp"); --pos: 72% 22%; }
 html[data-accueil="2"] .hero { --img: url("images/accueil-2.webp"); --pos: 80% 26%; }
 html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 30%; }
+html[data-accueil="4"] .hero { --img: url("images/accueil-4.webp"); --pos: 100% 100%; --taille: auto 100%; }
+@media (min-width: 901px) { html[data-accueil="4"] .hero { background:
+  linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
+  linear-gradient(90deg, #000000 0, #000000 calc(100% - 760px), rgba(0, 0, 0, 0) calc(100% - 500px)),
+  linear-gradient(90deg, rgba(0, 0, 0, .92) 0, rgba(0, 0, 0, .82) 36%, rgba(0, 0, 0, .3) 62%, rgba(0, 0, 0, 0) 82%),
+  var(--img) var(--pos) / var(--taille) no-repeat, #000000; } }
+@media (max-width: 900px) { html[data-accueil="4"] .hero { --taille: 100% auto; } }
 
 /* Bandeau illustré de la page « Ma collection » */
 .banniere { position: relative; display: flex; align-items: flex-end; min-height: clamp(210px, 26vw, 300px); padding: 28px 0 30px; border-bottom: 3px double var(--brass);

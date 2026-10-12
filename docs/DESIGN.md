@@ -167,3 +167,6 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 
 ## Fiche : jaquette en fond
 Dans la fiche d'une édition, la jaquette sert de fond : floue (30 px), saturée, fondue vers le bas par un masque et assombrie par un voile (`.fiche-fond`, variable `--fond`). Contrôle de lisibilité fait sur les couvertures les plus claires (contraste du texte ≥ 4,5 ; mesuré à 5,6 au pire). Les lignes de la rubrique « Dans ma collection » (état, exemplaires, prix payé) sont en mise en page flexible avec un espace de 14 px entre l'intitulé et son champ.
+
+## Quatre illustrations d'accueil
+Tirage au hasard à chaque visite parmi quatre images (`accueil-1` à `accueil-4`, choix dans l'en-tête de `index.html`). La quatrième (duel entre un elfe et un orque, `docs/images-accueil/4-elfe-et-orque.webp`, 561 × 557 px à l'origine) est agrandie ×2 pour le site ; sur ordinateur elle s'affiche à la hauteur de l'en-tête, collée à droite, avec un fondu vers le noir à gauche (`--taille`). Une source plus grande donnerait un rendu plus net. Les variables `--taille` et `--pos` règlent le cadrage de chaque image.
