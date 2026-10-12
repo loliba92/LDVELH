@@ -699,18 +699,22 @@
     afficher();
   }
   const valeurLigne = (b, c) => (b.prix[c.etat] == null ? null : b.prix[c.etat] * c.qte);
+  // Prix payé (facultatif, par exemplaire) : un nombre entre 0,01 et 2000 €, virgule ou point acceptés
+  const lirePrix = (t) => { const n = parseFloat(String(t ?? '').replace(',', '.')); return Number.isFinite(n) && n > 0 && n <= 2000 ? Math.round(n * 100) / 100 : null; };
+  const prixSaisi = (p) => (p == null ? '' : String(p).replace('.', ','));
 
   function bilan() {
     const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b);
-    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0;
+    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0, investiCote = 0, valeurCote = 0;
     lignes.forEach(({ b, c }) => {
       exemplaires += c.qte;
       const v = valeurLigne(b, c);
+      if (c.prix != null) { investi += c.prix * c.qte; nbPayes += c.qte; if (v != null) { investiCote += c.prix * c.qte; valeurCote += v; } }
       if (v == null) sansCote += c.qte; else { total += v; if (estActuel(infoPrix(b, c.etat))) actuels += c.qte; }
       bas += (b.prix.convenable ?? 0) * c.qte;
       haut += (b.prix.tres_bon ?? 0) * c.qte;
     });
-    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
+    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, gain: valeurCote - investiCote, avecCote: investiCote > 0, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
   }
 
   function afficherCollection() {
@@ -764,6 +768,7 @@
         <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div></td>
         <td data-label="État"><select data-etat="${esc(b.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === c.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
         <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${c.qte}" data-qte="${esc(b.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
+        <td data-label="Prix payé (par exemplaire)"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
         <td class="num" data-label="Valeur estimée"><span class="prix-c${v == null ? ' nul' : ''}">${v == null ? 'sans cote' : fmt(v)}</span></td>
         <td class="num"><button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}">Retirer</button></td></tr>`;
     }).join('');
@@ -772,10 +777,11 @@
       <div class="coll-haut">
         <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
         <div>
-          <dl class="stats">
+          <dl class="stats${bl.nbPayes ? ' stats-4' : ''}">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
             <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
+            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.avecCote ? `${bl.gain >= 0 ? 'gain' : 'perte'} estimé${bl.gain >= 0 ? '' : 'e'} : ${bl.gain >= 0 ? '+' : '−'}${fmtE(Math.abs(bl.gain))}` : `${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}`}</small></dd></div>` : ''}
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
@@ -796,7 +802,7 @@
       <table class="cartes groupes"><thead><tr><th>Série</th><th class="num">Titres possédés</th><th class="num">Exemplaires</th><th class="num">Valeur estimée</th></tr></thead><tbody>${lignesSerie}</tbody></table>
       ${pieces.length ? `<h3>Vos pièces les plus cotées</h3><div class="pieces">${htmlPieces}</div>` : ''}
       <h3>Vos exemplaires</h3>
-      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody>${lignesEx}</tbody></table>
+      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody>${lignesEx}</tbody></table>
       ${reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : ''}`;
     // répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état
     const valeursColl = [];
@@ -823,8 +829,9 @@
   function brancherCollection() {
     // actions de la carte (déléguées : la carte est redessinée à chaque changement)
     $('#collection').addEventListener('change', (e) => {
-      const id = e.target.dataset.etat || e.target.dataset.qte;
+      const id = e.target.dataset.etat || e.target.dataset.qte || e.target.dataset.prix;
       if (!id || !COLL[id]) return;
+      if (e.target.dataset.prix !== undefined) { const pp = lirePrix(e.target.value); if (pp == null) delete COLL[id].prix; else COLL[id].prix = pp; }
       if (e.target.dataset.etat) COLL[id].etat = e.target.value;
       if (e.target.dataset.qte) COLL[id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1));
       sauverColl(); afficher();
@@ -873,13 +880,13 @@
           ? 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.'
           : 'Estimation mêlant prix actuels (annonces, ventes) et cotes d\'archives : un ordre de grandeur, pas un prix de vente.',
         estimation: { total: Math.round(bl.total * 100) / 100, exemplaires: bl.exemplaires, titres: bl.titres },
-        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat] })),
+        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null })),
       }, null, 2), 'application/json');
     } else {
       const q = (t) => `"${String(t ?? '').replace(/"/g, '""')}"`;
-      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee'].join(';')]
+      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee', 'prix_paye'].join(';')]
         .concat(bl.lignes.map(({ b, c }) => [q(b.isbn13 || b.id), q(b.titre), b.version, q(b.serie), q(b.numero), c.etat, c.qte,
-          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ',')].join(';')));
+          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ','), prixSaisi(c.prix)].join(';')));
       telecharger(`ma-collection-${jour}.csv`, '﻿' + lignes.join('\r\n'), 'text/csv;charset=utf-8');
     }
     annonce('Export prêt : le fichier a été téléchargé.');
@@ -919,11 +926,24 @@
         const liste = Array.isArray(j) ? j : (Array.isArray(j.exemplaires) ? j.exemplaires : []);
         liste.forEach((x) => {
           if (typeof x === 'string') entrees.push({ cle: x });
-          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1 });
+          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye) });
         });
         if (!entrees.length) return { erreur: 'Ce fichier ne contient aucun livre exploitable.' };
       }
     } catch (e) { return { erreur: 'Le JSON est illisible.' }; }
+    if (!entrees.length) {
+      // CSV issu de l'export du site : lecture par colonnes (les titres peuvent contenir « ; »)
+      const coupe = (l) => { const o = []; let t = '', g = false; for (let i = 0; i < l.length; i++) { const ch = l[i]; if (g) { if (ch === '"' && l[i + 1] === '"') { t += '"'; i++; } else if (ch === '"') g = false; else t += ch; } else if (ch === '"') g = true; else if (ch === ';') { o.push(t); t = ''; } else t += ch; } o.push(t); return o; };
+      const brutes = brut.replace(/^\uFEFF/, '').split(/\r?\n/).filter((l) => l.trim());
+      const tete = coupe(brutes[0] || '').map((x) => x.trim().toLowerCase());
+      if (tete.includes('isbn13') && tete.includes('quantite')) {
+        const col = (n) => tete.indexOf(n);
+        brutes.slice(1).forEach((l) => {
+          const v = coupe(l);
+          entrees.push({ cle: v[col('isbn13')], etat: etatDepuis(v[col('etat')] || ''), qte: parseInt(v[col('quantite')], 10) || 1, prix: col('prix_paye') >= 0 ? lirePrix(v[col('prix_paye')]) : null });
+        });
+      }
+    }
     if (!entrees.length) {
       brut.split(/\r?\n/).forEach((ligne, i) => {
         if (!ligne.trim() || (i === 0 && /isbn/i.test(ligne) && /;|,|\t/.test(ligne))) return;
@@ -949,6 +969,8 @@
       if (!b) { inconnus.push(en.cle); return; }
       const avant = COLL[b.id];
       COLL[b.id] = { etat: en.etat || (avant && avant.etat) || S.h, qte: Math.min(99, Math.max(1, en.qte || (avant && avant.qte) || 1)) };
+      const pp = en.prix != null ? en.prix : (avant && avant.prix != null ? avant.prix : null);
+      if (pp != null) COLL[b.id].prix = pp;
       if (avant) maj += 1; else ajoutes += 1;
     });
     sauverColl(); afficher();
@@ -968,7 +990,7 @@
     const index = parId();
     const texte = Object.entries(COLL).filter(([id]) => index.has(id)).map(([id, c]) => {
       const b = index.get(id);
-      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}`;
+      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}${c.prix != null ? '@' + c.prix : ''}`;
     }).join(',');
     let octets = new TextEncoder().encode(texte), z = '';
     if (typeof CompressionStream === 'function') {
@@ -985,8 +1007,8 @@
       if (m[2]) octets = await fluxOctets(octets, DecompressionStream, 'deflate-raw');
       const entrees = [];
       new TextDecoder().decode(octets).split(',').filter(Boolean).forEach((part) => {
-        const x = /^(.+?)([cbt])(\d{0,2})$/.exec(part);
-        if (x) entrees.push({ cle: x[1], etat: DEPUIS_LETTRE[x[2]], qte: parseInt(x[3], 10) || 1 });
+        const x = /^(.+?)([cbt])(\d{0,2})(?:@(\d+(?:\.\d{1,2})?))?$/.exec(part);
+        if (x) entrees.push({ cle: x[1], etat: DEPUIS_LETTRE[x[2]], qte: parseInt(x[3], 10) || 1, prix: lirePrix(x[4]) });
       });
       return { entrees };
     } catch (e) { return { erreur: 'Ce lien de transfert est incomplet ou abîmé.' }; }
@@ -1046,21 +1068,23 @@
       <label class="case"><input type="checkbox" id="c-poss"${c ? ' checked' : ''}><span>Je possède ce livre</span></label>
       <div class="champ-ligne"><label for="c-etat">État</label><select id="c-etat"${c ? '' : ' disabled'}>${ETATS.map((x) => `<option value="${x.k}"${(c ? c.etat : S.h) === x.k ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></div>
       <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
+      <div class="champ-ligne"><label for="c-prix">Prix payé, par exemplaire (facultatif)</label><input type="text" id="c-prix" inputmode="decimal" autocomplete="off" placeholder="en €" value="${c ? prixSaisi(c.prix) : ''}"${c ? '' : ' disabled'}></div>
       <p class="valeur-ex" id="c-val"></p></div></div>`;
   }
   function brancherFicheCollection(b) {
     const maj = () => {
       const c = COLL[b.id];
-      $('#c-etat').disabled = !c; $('#c-qte').disabled = !c;
+      $('#c-etat').disabled = !c; $('#c-qte').disabled = !c; $('#c-prix').disabled = !c;
       const v = c ? valeurLigne(b, c) : null;
       $('#c-val').textContent = c ? (v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`) : '';
     };
     $('#c-poss').addEventListener('change', (e) => {
-      if (e.target.checked) COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) };
+      if (e.target.checked) { COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) }; const pp = lirePrix($('#c-prix').value); if (pp != null) COLL[b.id].prix = pp; }
       else delete COLL[b.id];
       sauverColl(); maj(); afficher();
     });
     $('#c-etat').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].etat = e.target.value; sauverColl(); maj(); afficher(); } });
+    $('#c-prix').addEventListener('change', (e) => { if (COLL[b.id]) { const pp = lirePrix(e.target.value); if (pp == null) { delete COLL[b.id].prix; e.target.value = ''; } else { COLL[b.id].prix = pp; e.target.value = prixSaisi(pp); } sauverColl(); maj(); afficher(); } });
     $('#c-qte').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); e.target.value = COLL[b.id].qte; sauverColl(); maj(); afficher(); } });
     maj();
   }

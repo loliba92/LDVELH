@@ -152,3 +152,9 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 - **Étagère d'abord** : onglet « Sur l'étagère » par défaut (les couvertures se reconnaissent), « Cote de la sélection » en second (`#onglet=cote`).
 - **Un seul avertissement de cote** (`#avis-prix`), sous les onglets, valable pour les deux vues ; bandeau rouge réduit à une ligne : « Site en construction. Prix en cours de vérification. »
 - Accroche courte ; les chiffres (éditions, livres, séries) tiennent sur une ligne discrète.
+
+## Prix payé (collection)
+- Champ **facultatif**, par exemplaire, dans le tableau « Vos exemplaires » et dans la fiche (`COLL[id].prix`, 0,01 à 2000 €, virgule ou point). Saisie invalide ou absurde : ignorée.
+- Bloc « Investi » (somme payée) avec « gain estimé » ou « perte estimée » par rapport à la cote, seulement sur les exemplaires qui ont à la fois un prix payé et une cote.
+- Export JSON (`prix_paye`, format toujours 1 : champ ajouté), export CSV (colonne `prix_paye` en dernière position), import JSON et CSV (lecture par colonnes pour notre propre CSV), lien de transfert (`…b2@12.5`). Un ancien fichier sans prix reste accepté.
+- Pour l'instant **rien n'est envoyé** : le prix reste dans le navigateur. L'envoi automatique à la cote (relais en ligne, anonyme, avec avis clair avant saisie) est la prochaine étape ; il exige un compte Cloudflare.

@@ -346,6 +346,8 @@ dialog::backdrop { background: rgba(0, 0, 0, .72); }
 .piece span { color: var(--muted); font-size: .85rem; }
 .piece .p { color: var(--accent); font: 700 1.1rem var(--f-display); }
 .coll-table input[type="number"] { width: 70px; min-height: 40px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.coll-table input[type="text"] { width: 96px; min-height: 40px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.coll-table input[type="text"]::placeholder { color: var(--muted); font-size: .85rem; }
 .coll-table select { min-height: 40px; width: auto; padding: 6px 8px; }
 .coll-table .retirer { min-height: 40px; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--accent); font: 600 .9rem var(--f-ui); cursor: pointer; }
 .coll-table .retirer:hover { background: var(--accent-soft); border-color: var(--accent); }
@@ -382,7 +384,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .72); }
   .importer-actions .bouton { flex: 1 1 100%; }
   table.coll-table td:last-child { grid-column: 1 / -1; }
   table.coll-table .retirer { width: 100%; min-height: 44px; }
-  .coll-table input[type="number"], .coll-table select { min-height: 44px; width: 100%; }
+  .coll-table input[type="number"], .coll-table input[type="text"], .coll-table select { min-height: 44px; width: 100%; }
 }
 
 /* Appel à l'action de l'en-tête */
@@ -731,3 +733,6 @@ html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 3
   .hero-recherche .bouton { flex: 1 1 100%; }
   .hero-series > span { flex: 1 0 100%; }
 }
+
+.stats.stats-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 700px) { .stats.stats-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
