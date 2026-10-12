@@ -750,3 +750,15 @@ dialog.lot { width: min(820px, calc(100vw - 16px)); height: fit-content; max-hei
 .lot-res button em { grid-column: 2; grid-row: 1 / span 2; font-style: normal; color: var(--accent); font-weight: 700; }
 .lot-prix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 700px) { .lot-prix { grid-template-columns: 1fr; } .lot-cadre { padding: 0 14px 18px; } .lot-res button { grid-template-columns: 1fr; } .lot-res button em { grid-column: 1; grid-row: auto; } }
+
+/* ---------- Fiche : jaquette en fond, floue et fondue, pour la profondeur ---------- */
+.fiche-contenu { position: relative; isolation: isolate; }
+.fiche-fond { position: absolute; inset: 0 0 auto 0; height: min(620px, 100%); overflow: hidden; z-index: -1; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%); }
+.fiche-fond::before { content: ""; position: absolute; inset: -70px; background: var(--fond) center 25% / cover no-repeat; filter: blur(30px) saturate(1.2); opacity: .55; }
+.fiche-fond::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(14, 14, 14, .58), rgba(14, 14, 14, .82)); }
+.coll-ligne { gap: 12px 26px; }
+.coll-ligne .champ-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+.coll-ligne .champ-ligne label { margin: 0; }
+.coll-ligne .champ-ligne input[type="text"] { width: 110px; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 400 1rem var(--f-ui); }
+@media (max-width: 700px) { .coll-ligne .champ-ligne { flex-direction: row; align-items: center; width: auto; } .coll-ligne .champ-ligne select { width: auto; min-width: 150px; } }

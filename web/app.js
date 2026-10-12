@@ -607,7 +607,12 @@
     const ligne = (nom, val) => (val ? `<div><dt>${nom}</dt><dd>${val}</dd></div>` : '');
     const annee = b.annee ? (b.annee_bnf && b.annee_bnf !== b.annee ? `${b.annee} <span class="sous">(notice BnF : ${b.annee_bnf})</span>` : b.annee) : '';
     const notice = b.notice ? `<a href="${esc(b.notice)}" target="_blank" rel="noopener">Notice de la BnF</a>` : '';
+    const fond = b.couverture_grande || b.couverture;
+    const zoneFiche = $('#fiche-contenu');
+    zoneFiche.classList.toggle('a-fond', !!fond);
+    if (fond) zoneFiche.style.setProperty('--fond', `url("${racine(fond)}")`); else zoneFiche.style.removeProperty('--fond');
     $('#fiche-contenu').innerHTML = `
+      ${fond ? '<div class="fiche-fond" aria-hidden="true"></div>' : ''}
       <div class="fiche">
         <div class="fiche-haut">
           <div class="fiche-couv">${b.couverture_grande

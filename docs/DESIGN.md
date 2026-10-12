@@ -164,3 +164,6 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 - Le prix à répartir = total − port, réparti sur les livres **au prorata de leur cote** (à défaut de cote, part moyenne). Chaque prix reste modifiable ; les autres se rééquilibrent. « Répartir de nouveau » annule les corrections.
 - À l'ajout : chaque livre reçoit son prix par exemplaire et un repère `lot` (exporté en JSON). Un livre déjà possédé gagne un exemplaire, avec un prix moyen pondéré.
 - **Ces prix sont une répartition, pas des prix réels livre par livre** : le site le dit, et les lots ne devront jamais alimenter la cote publique comme prix individuels (indicateur de tendance seulement).
+
+## Fiche : jaquette en fond
+Dans la fiche d'une édition, la jaquette sert de fond : floue (30 px), saturée, fondue vers le bas par un masque et assombrie par un voile (`.fiche-fond`, variable `--fond`). Contrôle de lisibilité fait sur les couvertures les plus claires (contraste du texte ≥ 4,5 ; mesuré à 5,6 au pire). Les lignes de la rubrique « Dans ma collection » (état, exemplaires, prix payé) sont en mise en page flexible avec un espace de 14 px entre l'intitulé et son champ.
