@@ -733,7 +733,7 @@
     if (!n) {
       zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
-        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>`;
+        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>`;
       return;
     }
     // par série
@@ -787,6 +787,7 @@
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
           <div class="coll-actions">
             <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
+            <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button>
             <button type="button" class="bouton bouton-clair" id="exp-json">Exporter (JSON)</button>
             <button type="button" class="bouton bouton-clair" id="exp-csv">Exporter (CSV)</button>
             <button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button>
@@ -880,7 +881,7 @@
           ? 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.'
           : 'Estimation mêlant prix actuels (annonces, ventes) et cotes d\'archives : un ordre de grandeur, pas un prix de vente.',
         estimation: { total: Math.round(bl.total * 100) / 100, exemplaires: bl.exemplaires, titres: bl.titres },
-        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null })),
+        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null, lot: c.lot ?? null })),
       }, null, 2), 'application/json');
     } else {
       const q = (t) => `"${String(t ?? '').replace(/"/g, '""')}"`;
@@ -926,7 +927,7 @@
         const liste = Array.isArray(j) ? j : (Array.isArray(j.exemplaires) ? j.exemplaires : []);
         liste.forEach((x) => {
           if (typeof x === 'string') entrees.push({ cle: x });
-          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye) });
+          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye), lot: typeof x.lot === 'string' ? x.lot.slice(0, 20) : null });
         });
         if (!entrees.length) return { erreur: 'Ce fichier ne contient aucun livre exploitable.' };
       }
@@ -971,6 +972,8 @@
       COLL[b.id] = { etat: en.etat || (avant && avant.etat) || S.h, qte: Math.min(99, Math.max(1, en.qte || (avant && avant.qte) || 1)) };
       const pp = en.prix != null ? en.prix : (avant && avant.prix != null ? avant.prix : null);
       if (pp != null) COLL[b.id].prix = pp;
+      const lotId = en.lot || (avant && avant.lot);
+      if (lotId) COLL[b.id].lot = lotId;
       if (avant) maj += 1; else ajoutes += 1;
     });
     sauverColl(); afficher();
@@ -1088,6 +1091,146 @@
     $('#c-qte').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); e.target.value = COLL[b.id].qte; sauverColl(); maj(); afficher(); } });
     maj();
   }
+
+
+  /* ---------- Lot acheté : plusieurs livres pour un seul prix, réparti d'après les cotes ---------- */
+  const LOT = { lignes: [], total: '', port: '' };
+  // Répartit (total payé − port) sur les lignes non corrigées à la main, au prorata de la cote de chaque ligne.
+  // Ce ne sont pas des prix réels livre par livre : c'est une répartition, et le site le dit.
+  function repartirLot() {
+    const base = (lirePrix(LOT.total) || 0) - (lirePrix(LOT.port) || 0);
+    const fixes = LOT.lignes.filter((l) => l.manuel && l.prix != null);
+    const libres = LOT.lignes.filter((l) => !(l.manuel && l.prix != null));
+    if (!(base > 0)) { libres.forEach((l) => { l.prix = null; }); return; }
+    if (!libres.length) return;
+    const poids = libres.map((l) => { const b = livreDe(l.id), c = b && b.prix[l.etat]; return { l, w: c ? c * l.qte : null }; });
+    const connus = poids.filter((x) => x.w != null);
+    const moyenne = connus.length ? connus.reduce((t, x) => t + x.w, 0) / connus.length : 1;
+    poids.forEach((x) => { if (x.w == null) x.w = moyenne; });
+    const somme = poids.reduce((t, x) => t + x.w, 0);
+    const cible = Math.max(base - fixes.reduce((t, l) => t + l.prix * l.qte, 0), 0);
+    let attribue = 0;
+    poids.forEach((x, i) => {
+      const ligne = i === poids.length - 1 ? Math.max(cible - attribue, 0) : Math.round((cible * x.w / somme) * 100) / 100;
+      attribue += ligne;
+      x.l.prix = Math.max(0.01, Math.round((ligne / x.l.qte) * 100) / 100);
+    });
+  }
+  const sommeLot = () => LOT.lignes.reduce((t, l) => t + (l.prix || 0) * l.qte, 0);
+
+  function ouvrirLot() {
+    let dlg = $('#lot');
+    if (!dlg) {
+      dlg = document.createElement('dialog');
+      dlg.id = 'lot'; dlg.className = 'lot'; dlg.setAttribute('aria-labelledby', 'lot-titre');
+      dlg.innerHTML = `<div class="lot-cadre">
+        <div class="parcours-tete"><h2 id="lot-titre">Ajouter un lot acheté</h2><button type="button" class="bouton bouton-clair" id="lot-fermer">Fermer</button></div>
+        <p class="sous">Vous avez acheté plusieurs livres pour un seul prix, par exemple sur un site de vente en ligne ? Choisissez-les, indiquez le prix total : le site répartit ce prix d'après les cotes. Vous pouvez corriger chaque prix.</p>
+        <div class="champ"><label for="lot-q">Chercher un livre (titre, auteur ou ISBN)</label><input type="search" id="lot-q" autocomplete="off" placeholder="Par exemple : sorcier, Dever, 978…"></div>
+        <ul class="lot-res" id="lot-res" aria-live="polite"></ul>
+        <h3 id="lot-h">Dans le lot</h3>
+        <div id="lot-lignes"></div>
+        <div class="lot-prix">
+          <div class="champ"><label for="lot-total">Prix total payé (€)</label><input type="text" id="lot-total" inputmode="decimal" autocomplete="off" placeholder="par exemple 45"></div>
+          <div class="champ"><label for="lot-port">dont frais de port (€, facultatif)</label><input type="text" id="lot-port" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        </div>
+        <p class="statut" id="lot-verif" role="status" aria-live="polite"></p>
+        <p class="sous">Les prix du lot sont une répartition d'après les cotes, pas des prix réels livre par livre : le site n'en fait pas des prix de référence.</p>
+        <div class="importer-actions">
+          <button type="button" class="bouton" id="lot-valider">Ajouter à ma collection</button>
+          <button type="button" class="bouton bouton-clair" id="lot-repartir">Répartir de nouveau</button>
+        </div></div>`;
+      document.body.appendChild(dlg);
+      brancherLot(dlg);
+    }
+    dlg.showModal();
+    rendreLot();
+    $('#lot-q').focus();
+  }
+  function rechercheLot(v) {
+    const q = norm(v).trim(), liste = $('#lot-res');
+    if (q.length < 2) { liste.innerHTML = ''; return; }
+    const isbn = versIsbn13(v);
+    const mots = q.split(/\s+/);
+    const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
+      .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
+    liste.innerHTML = trouves.slice(0, 8).map((b) => `<li><button type="button" data-lot-add="${esc(b.id)}"><strong>${esc(b.titre)}</strong><span>${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${b.annee ? ` · ${b.annee}` : ''}${COLL[b.id] ? ' · déjà dans votre collection' : ''}</span><em>Ajouter au lot</em></button></li>`).join('') +
+      (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') + (!trouves.length ? '<li class="sous">Aucun livre trouvé.</li>' : '');
+  }
+  function rendreLot() {
+    $('#lot-h').textContent = `Dans le lot (${LOT.lignes.reduce((t, l) => t + l.qte, 0)} exemplaire${LOT.lignes.reduce((t, l) => t + l.qte, 0) > 1 ? 's' : ''})`;
+    $('#lot-lignes').innerHTML = !LOT.lignes.length ? '<p class="sous">Aucun livre pour l\'instant : cherchez-les ci-dessus.</p>' :
+      `<table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix par exemplaire</th><th class="num">Retirer</th></tr></thead><tbody>${LOT.lignes.map((l) => {
+        const b = livreDe(l.id);
+        return `<tr><td class="principal"><div><strong>${esc(b.titre)}</strong><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${COLL[b.id] ? ' · déjà possédé : l\'exemplaire s\'ajoute' : ''}</span></div></td>
+          <td data-label="État"><select data-lot-etat="${esc(l.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === l.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
+          <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${l.qte}" data-lot-qte="${esc(l.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
+          <td data-label="Prix par exemplaire"><input type="text" inputmode="decimal" autocomplete="off" value="${prixSaisi(l.prix)}" placeholder="après le prix total" data-lot-prix="${esc(l.id)}" aria-label="Prix par exemplaire de ${esc(b.titre)}, édition ${esc(b.version)}">${l.manuel ? '<small class="sous">corrigé à la main</small>' : ''}</td>
+          <td class="num"><button type="button" class="retirer" data-lot-retirer="${esc(l.id)}" aria-label="Retirer ${esc(b.titre)} du lot">Retirer</button></td></tr>`;
+      }).join('')}</tbody></table>`;
+    const base = (lirePrix(LOT.total) || 0) - (lirePrix(LOT.port) || 0);
+    const v = $('#lot-verif');
+    if (!LOT.lignes.length) v.textContent = '';
+    else if (!(base > 0)) v.textContent = 'Indiquez le prix total payé : le site répartira ce prix sur les livres.';
+    else {
+      const ecart = Math.abs(sommeLot() - base);
+      v.textContent = ecart <= 0.05 * Math.max(1, LOT.lignes.reduce((t, l) => t + l.qte, 0))
+        ? `Total réparti : ${fmt(sommeLot())} pour ${fmt(base)} à répartir.`
+        : `Attention : les prix saisis font ${fmt(sommeLot())}, pour ${fmt(base)} à répartir. Corrigez, ou répartissez de nouveau.`;
+    }
+    v.classList.remove('erreur');
+  }
+  function brancherLot(dlg) {
+    $('#lot-fermer').addEventListener('click', () => dlg.close());
+    $('#lot-q').addEventListener('input', (e) => rechercheLot(e.target.value));
+    const relire = () => { LOT.total = $('#lot-total').value; LOT.port = $('#lot-port').value; repartirLot(); rendreLot(); };
+    $('#lot-total').addEventListener('change', relire);
+    $('#lot-port').addEventListener('change', relire);
+    dlg.addEventListener('click', (e) => {
+      const t = e.target.closest('button');
+      if (!t) return;
+      if (t.dataset.lotAdd) {
+        const l = LOT.lignes.find((x) => x.id === t.dataset.lotAdd);
+        if (l) l.qte = Math.min(99, l.qte + 1); else LOT.lignes.push({ id: t.dataset.lotAdd, etat: S.h, qte: 1, prix: null, manuel: false });
+        $('#lot-q').value = ''; $('#lot-res').innerHTML = ''; repartirLot(); rendreLot(); $('#lot-q').focus();
+        annonce('Livre ajouté au lot.');
+      } else if (t.dataset.lotRetirer) {
+        LOT.lignes = LOT.lignes.filter((x) => x.id !== t.dataset.lotRetirer); repartirLot(); rendreLot();
+      } else if (t.id === 'lot-repartir') {
+        LOT.lignes.forEach((l) => { l.manuel = false; }); relire();
+      } else if (t.id === 'lot-valider') validerLot(dlg);
+    });
+    dlg.addEventListener('change', (e) => {
+      const d = e.target.dataset;
+      const l = LOT.lignes.find((x) => x.id === (d.lotEtat || d.lotQte || d.lotPrix));
+      if (!l) return;
+      if (d.lotEtat) { l.etat = e.target.value; repartirLot(); }
+      if (d.lotQte) { l.qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); repartirLot(); }
+      if (d.lotPrix !== undefined) { const pp = lirePrix(e.target.value); if (pp == null) { l.manuel = false; } else { l.prix = pp; l.manuel = true; } repartirLot(); }
+      rendreLot();
+    });
+  }
+  function validerLot(dlg) {
+    LOT.total = $('#lot-total').value; LOT.port = $('#lot-port').value; repartirLot();
+    const v = $('#lot-verif');
+    const echec = (m) => { rendreLot(); v.textContent = m; v.classList.add('erreur'); };
+    if (!LOT.lignes.length) return echec('Ajoutez au moins un livre au lot.');
+    if (!(lirePrix(LOT.total) > 0)) return echec('Indiquez le prix total payé.');
+    if (LOT.lignes.some((l) => l.prix == null)) return echec('Un prix manque : vérifiez le prix total et les frais de port.');
+    const idLot = 'L' + Date.now().toString(36);
+    let n = 0;
+    LOT.lignes.forEach((l) => {
+      const avant = COLL[l.id], qn = Math.min(99, (avant ? avant.qte : 0) + l.qte);
+      const pm = avant && avant.prix != null ? Math.round(((avant.prix * avant.qte + l.prix * l.qte) / (avant.qte + l.qte)) * 100) / 100 : l.prix;
+      COLL[l.id] = { etat: l.etat, qte: qn, prix: pm, lot: idLot };
+      n += l.qte;
+    });
+    const total = sommeLot();
+    LOT.lignes = []; LOT.total = ''; LOT.port = ''; $('#lot-total').value = ''; $('#lot-port').value = '';
+    sauverColl(); dlg.close(); afficher();
+    annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)} au total.`);
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-lot]')) ouvrirLot(); });
 
 
   /* ---------- Inventaire guidé : séries → éditions → listes → bilan ---------- */

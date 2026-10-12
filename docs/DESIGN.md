@@ -158,3 +158,9 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 - Bloc « Investi » : la somme payée, rien d'autre. **Pas de « gain » ni de « perte »** : une cote est une estimation, pas un prix de vente, et le site ne promet pas de plus-value.
 - Export JSON (`prix_paye`, format toujours 1 : champ ajouté), export CSV (colonne `prix_paye` en dernière position), import JSON et CSV (lecture par colonnes pour notre propre CSV), lien de transfert (`…b2@12.5`). Un ancien fichier sans prix reste accepté.
 - Pour l'instant **rien n'est envoyé** : le prix reste dans le navigateur. L'envoi automatique à la cote (relais en ligne, anonyme, avec avis clair avant saisie) est la prochaine étape ; il exige un compte Cloudflare.
+
+## Lot acheté (collection)
+- Bouton « Ajouter un lot acheté » (collection vide et collection remplie) : fenêtre avec recherche (titre, auteur ou ISBN), livres du lot (état, exemplaires), **prix total payé** et **frais de port** facultatifs.
+- Le prix à répartir = total − port, réparti sur les livres **au prorata de leur cote** (à défaut de cote, part moyenne). Chaque prix reste modifiable ; les autres se rééquilibrent. « Répartir de nouveau » annule les corrections.
+- À l'ajout : chaque livre reçoit son prix par exemplaire et un repère `lot` (exporté en JSON). Un livre déjà possédé gagne un exemplaire, avec un prix moyen pondéré.
+- **Ces prix sont une répartition, pas des prix réels livre par livre** : le site le dit, et les lots ne devront jamais alimenter la cote publique comme prix individuels (indicateur de tendance seulement).

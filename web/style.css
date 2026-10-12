@@ -736,3 +736,17 @@ html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 3
 
 .stats.stats-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 700px) { .stats.stats-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ---------- Ajout d'un lot acheté ---------- */
+dialog.lot { width: min(820px, calc(100vw - 16px)); height: fit-content; max-height: min(94vh, 920px); overflow: auto; }
+.lot-cadre { display: grid; gap: 12px; padding: 0 22px 22px; }
+.lot-cadre .parcours-tete { padding: 18px 0 0; }
+.lot-cadre h3 { font-size: 1.3rem; margin: 6px 0 0; }
+.lot-cadre .champ input[type="search"], .lot-cadre .champ input[type="text"] { width: 100%; padding: 10px; min-height: 44px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.lot-res { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lot-res button { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; text-align: left; padding: 8px 12px; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface-2); color: var(--text); font: 400 .98rem var(--f-ui); cursor: pointer; }
+.lot-res button:hover { border-color: var(--accent); }
+.lot-res button span { grid-column: 1; color: var(--muted); font-size: .88rem; }
+.lot-res button em { grid-column: 2; grid-row: 1 / span 2; font-style: normal; color: var(--accent); font-weight: 700; }
+.lot-prix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .lot-prix { grid-template-columns: 1fr; } .lot-cadre { padding: 0 14px 18px; } .lot-res button { grid-template-columns: 1fr; } .lot-res button em { grid-column: 1; grid-row: auto; } }
