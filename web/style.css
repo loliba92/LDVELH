@@ -355,6 +355,11 @@ dialog::backdrop { background: rgba(0, 0, 0, .72); }
 .importer summary { cursor: pointer; color: var(--accent); font-weight: 700; padding: 8px 0; min-height: 44px; display: flex; align-items: center; }
 .importer-corps { display: grid; gap: 10px; max-width: 640px; }
 .importer textarea { width: 100%; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 .98rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; resize: vertical; }
+.importer + .importer { margin-top: 0; border-top: 1px solid var(--line); }
+.importer input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 .9rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.lien-recu { margin: 0 0 18px; padding: 16px 18px; border: 1px solid var(--accent); border-left-width: 4px; border-radius: var(--r); background: var(--surface); display: grid; gap: 12px; }
+.lien-recu p { margin: 0; }
+.lien-recu .erreur { color: #f2a0a8; }
 .importer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .statut { min-height: 1.4em; margin: 0; font-weight: 600; }
 .statut.erreur { color: var(--accent); }

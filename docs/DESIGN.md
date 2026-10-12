@@ -131,3 +131,18 @@ Sous 700 px de large, une barre fixe en bas remplace les liens de l'en-tête (qu
 ## Style unique : fond noir
 
 Le site n'a plus de thème clair ni de bouton d'éclairage : un seul style, **fond noir** (`#000`), cartes en gris très sombre (`#0e0e0e`, `#181818`), texte crème, accent jaune doré foncé, bandeau « site en construction » en bordeaux. Plus aucun brun : le grain de papier a été supprimé, les icônes sont refaites sur fond noir (`python pipeline/icones.py`). `color-scheme: dark` rend aussi les champs, listes et barres de défilement du navigateur sombres.
+
+## Format de sauvegarde et lien de transfert (règle de compatibilité)
+
+Le fichier JSON exporté porte `application` et `version` (constante `FORMAT_FICHIER` dans `web/app.js`, actuellement 1).
+Le lien de transfert (`collection.html#c=1z.…`) porte le même numéro de format ; la collection y est compressée
+(`deflate-raw`, repli sans compression `1.…`) et reste après le « # » : elle n'est jamais envoyée à un serveur.
+
+Règles à respecter à chaque modification, pour ne jamais rendre inutilisable le fichier d'un visiteur :
+1. Le livre est identifié par son **ISBN** (stable) ; titre, série, prix du fichier ne servent qu'à l'affichage.
+2. On peut **ajouter** des champs librement. Renommer ou retirer un champ impose de passer au format suivant
+   **et** d'écrire dans `importer()` / `lireCode()` la conversion depuis l'ancien format. On ne supprime jamais un lecteur.
+3. Un champ ou un livre inconnu est **ignoré et signalé** (« n non reconnus »), il ne fait pas échouer l'import.
+4. Un fichier ou un lien d'un format **plus récent** que le site est refusé avec un message clair (« actualisez la page »).
+5. Le lien reçu n'écrit rien tant que le visiteur n'a pas choisi (Ajouter / Remplacer / Ignorer) ; l'adresse est nettoyée.
+À chaque évolution du format, vérifier à l'écran : ancien fichier v1 accepté, format futur refusé, liste simple, lien compressé ou non, lien abîmé.

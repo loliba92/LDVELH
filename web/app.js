@@ -655,6 +655,13 @@
 
   /* ---------- Ma collection : stockage local, estimation, import / export ---------- */
   const CLE = 'cote-collection-v1';
+  /* Format du fichier de sauvegarde (JSON) et du lien de transfert.
+     Règles pour ne jamais casser le fichier d'un visiteur :
+     1. le livre est identifié par son ISBN (stable), le reste n'est que de l'affichage ;
+     2. on peut AJOUTER des champs librement ; renommer ou retirer un champ impose de passer au format suivant
+        ET d'écrire ici la conversion de l'ancien format, que l'on ne supprime jamais ;
+     3. un champ ou un livre inconnu est ignoré et signalé, il ne fait jamais échouer l'import. */
+  const FORMAT_FICHIER = 1;
   let COLL = {};
   let stockageOk = true;
   const chargerColl = () => {
@@ -705,7 +712,7 @@
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
     $('#coll-prive').innerHTML = (stockageOk
-      ? 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder ou la retrouver sur un autre appareil.'
+      ? 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder, ou créez un lien de transfert pour la retrouver sur un autre appareil.'
       : '<strong>Le stockage local est indisponible</strong> (navigation privée ?) : votre collection sera perdue à la fermeture. Exportez-la pour la conserver.');
     const zone = $('#coll-corps');
     if (!n) {
@@ -795,6 +802,7 @@
     let attente;
     window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
     afficher();
+    recevoirLien();
     if (new URLSearchParams(location.search).has('inventaire')) {
       history.replaceState(null, '', location.pathname + location.hash);
       ouvrirParcours();
@@ -821,6 +829,12 @@
           COLL = {}; sauverColl(); afficher(); annonce('Collection effacée.');
         }
       }
+    });
+    $('#partage-go').addEventListener('click', creerLien);
+    $('#partage-copier').addEventListener('click', async () => {
+      const st = $('#partage-statut');
+      try { await navigator.clipboard.writeText($('#partage-lien').value); st.textContent = 'Lien copié.'; st.classList.remove('erreur'); }
+      catch (e) { $('#partage-lien').select(); st.textContent = 'Copie impossible ici : le lien est sélectionné, copiez-le à la main.'; }
     });
     brancherParcours();                 // l'inventaire guidé est ouvert depuis la page collection
     $('#imp-go').addEventListener('click', () => importerTexte($('#imp-texte').value));
@@ -888,11 +902,15 @@
     try {
       if (brut.startsWith('{') || brut.startsWith('[')) {
         const j = JSON.parse(brut);
-        const liste = Array.isArray(j) ? j : (j.exemplaires || []);
+        const v = Array.isArray(j) ? 0 : Number(j.version ?? 1);
+        if (v > FORMAT_FICHIER) return { erreur: `Ce fichier a été créé avec une version plus récente du site (format ${v}). Actualisez la page, puis recommencez.` };
+        // formats 0 (simple liste) et 1 : même lecture. Un futur format 2 ajoutera ici sa conversion vers cette forme.
+        const liste = Array.isArray(j) ? j : (Array.isArray(j.exemplaires) ? j.exemplaires : []);
         liste.forEach((x) => {
           if (typeof x === 'string') entrees.push({ cle: x });
-          else entrees.push({ cle: x.isbn13 || x.isbn || x.id, etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1 });
+          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1 });
         });
+        if (!entrees.length) return { erreur: 'Ce fichier ne contient aucun livre exploitable.' };
       }
     } catch (e) { return { erreur: 'Le JSON est illisible.' }; }
     if (!entrees.length) {
@@ -909,6 +927,10 @@
         else if (ligne.trim()) entrees.push({ cle: ligne.trim().slice(0, 40), inconnu: true });
       });
     }
+    return appliquerEntrees(entrees, false);
+  }
+  function appliquerEntrees(entrees, remplacer) {
+    if (remplacer) COLL = {};
     let ajoutes = 0, maj = 0; const inconnus = [];
     entrees.forEach((en) => {
       const isbn = en.inconnu ? null : versIsbn13(en.cle);
@@ -920,6 +942,78 @@
     });
     sauverColl(); afficher();
     return { ajoutes, maj, inconnus };
+  }
+
+  /* ---------- Lien de transfert : la collection est dans l'adresse, après le « # » (jamais envoyée à un serveur) ---------- */
+  const LETTRE = { convenable: 'c', bon: 'b', tres_bon: 't' };
+  const DEPUIS_LETTRE = { c: 'convenable', b: 'bon', t: 'tres_bon' };
+  const versB64 = (octets) => btoa(String.fromCharCode(...octets)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const depuisB64 = (t) => Uint8Array.from(atob(t.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
+  async function fluxOctets(octets, Classe, mode) {
+    const f = new Blob([octets]).stream().pipeThrough(new Classe(mode));
+    return new Uint8Array(await new Response(f).arrayBuffer());
+  }
+  async function codeCollection() {
+    const index = parId();
+    const texte = Object.entries(COLL).filter(([id]) => index.has(id)).map(([id, c]) => {
+      const b = index.get(id);
+      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}`;
+    }).join(',');
+    let octets = new TextEncoder().encode(texte), z = '';
+    if (typeof CompressionStream === 'function') {
+      try { octets = await fluxOctets(octets, CompressionStream, 'deflate-raw'); z = 'z'; } catch (e) { octets = new TextEncoder().encode(texte); }
+    }
+    return `${FORMAT_FICHIER}${z}.${versB64(octets)}`;
+  }
+  async function lireCode(code) {
+    const m = /^(\d+)(z?)\.([A-Za-z0-9_-]*)$/.exec(code || '');
+    if (!m) return { erreur: 'Ce lien de transfert est incomplet ou abîmé.' };
+    if (+m[1] > FORMAT_FICHIER) return { erreur: 'Ce lien a été créé avec une version plus récente du site. Actualisez la page, puis rouvrez-le.' };
+    try {
+      let octets = depuisB64(m[3]);
+      if (m[2]) octets = await fluxOctets(octets, DecompressionStream, 'deflate-raw');
+      const entrees = [];
+      new TextDecoder().decode(octets).split(',').filter(Boolean).forEach((part) => {
+        const x = /^(.+?)([cbt])(\d{0,2})$/.exec(part);
+        if (x) entrees.push({ cle: x[1], etat: DEPUIS_LETTRE[x[2]], qte: parseInt(x[3], 10) || 1 });
+      });
+      return { entrees };
+    } catch (e) { return { erreur: 'Ce lien de transfert est incomplet ou abîmé.' }; }
+  }
+  async function recevoirLien() {
+    const code = new URLSearchParams(location.hash.slice(1)).get('c');
+    if (code == null) return;
+    history.replaceState(null, '', location.pathname + location.search);   // l'adresse ne garde pas la collection
+    const r = await lireCode(code);
+    const bloc = document.createElement('div');
+    bloc.className = 'lien-recu'; bloc.setAttribute('role', 'region'); bloc.setAttribute('aria-label', 'Collection reçue par lien');
+    $('#collection').before(bloc);
+    if (r.erreur || !r.entrees.length) { bloc.innerHTML = `<p class="erreur">${esc(r.erreur || 'Ce lien ne contient aucun livre.')}</p><button type="button" class="bouton bouton-clair" data-lien="ignorer">Fermer</button>`; }
+    else {
+      const n = r.entrees.reduce((t, e2) => t + (e2.qte || 1), 0);
+      const vide = !Object.keys(COLL).length;
+      bloc.innerHTML = `<p><strong>Une collection vous a été transmise :</strong> ${r.entrees.length} titre${r.entrees.length > 1 ? 's' : ''}, ${n} exemplaire${n > 1 ? 's' : ''}. Rien n'est enregistré tant que vous n'avez pas choisi.</p>
+        <div class="coll-actions"><button type="button" class="bouton" data-lien="ajouter">${vide ? 'Charger cette collection' : 'Ajouter à ma collection'}</button>
+        ${vide ? '' : '<button type="button" class="bouton bouton-clair" data-lien="remplacer">Remplacer ma collection</button>'}
+        <button type="button" class="bouton bouton-clair" data-lien="ignorer">Ignorer</button></div>`;
+    }
+    bloc.addEventListener('click', (e) => {
+      const a = e.target.dataset.lien;
+      if (!a) return;
+      if (a === 'remplacer' && !window.confirm('Remplacer toute votre collection actuelle par celle de ce lien ? Pensez à l\'exporter avant.')) return;
+      if (a !== 'ignorer' && r.entrees) {
+        const res = appliquerEntrees(r.entrees, a === 'remplacer');
+        annonce(resumeImport(res));
+      }
+      bloc.remove();
+    });
+  }
+  async function creerLien() {
+    const sortie = $('#partage-lien'), st = $('#partage-statut');
+    if (!Object.keys(COLL).length) { st.textContent = 'Votre collection est vide : il n\'y a rien à transférer.'; st.classList.add('erreur'); return; }
+    const url = `${location.origin}${location.pathname}#c=${await codeCollection()}`;
+    sortie.value = url; sortie.hidden = false; $('#partage-copier').hidden = false; sortie.select();
+    st.classList.remove('erreur'); st.textContent = `Lien prêt (${Object.keys(COLL).length} titres). Ouvrez-le sur l'autre appareil.`;
   }
   function resumeImport(r) {
     const morceaux = [`${r.ajoutes} ajouté${r.ajoutes > 1 ? 's' : ''}`];
