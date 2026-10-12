@@ -705,16 +705,16 @@
 
   function bilan() {
     const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b);
-    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0, investiCote = 0, valeurCote = 0;
+    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0;
     lignes.forEach(({ b, c }) => {
       exemplaires += c.qte;
       const v = valeurLigne(b, c);
-      if (c.prix != null) { investi += c.prix * c.qte; nbPayes += c.qte; if (v != null) { investiCote += c.prix * c.qte; valeurCote += v; } }
+      if (c.prix != null) { investi += c.prix * c.qte; nbPayes += c.qte; }
       if (v == null) sansCote += c.qte; else { total += v; if (estActuel(infoPrix(b, c.etat))) actuels += c.qte; }
       bas += (b.prix.convenable ?? 0) * c.qte;
       haut += (b.prix.tres_bon ?? 0) * c.qte;
     });
-    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, gain: valeurCote - investiCote, avecCote: investiCote > 0, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
+    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
   }
 
   function afficherCollection() {
@@ -781,7 +781,7 @@
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
             <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
-            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.avecCote ? `${bl.gain >= 0 ? 'gain' : 'perte'} estimé${bl.gain >= 0 ? '' : 'e'} : ${bl.gain >= 0 ? '+' : '−'}${fmtE(Math.abs(bl.gain))}` : `${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}`}</small></dd></div>` : ''}
+            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}</small></dd></div>` : ''}
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
