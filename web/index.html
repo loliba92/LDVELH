@@ -26,7 +26,7 @@
 <body data-page="accueil">
 <a class="evitement" href="#main">Aller au contenu</a>
 
-<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Les prix sont en cours d'ajustement et de vérification.</p>
+<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Prix en cours de vérification.</p>
 
 <header class="bandeau">
   <div class="cadre bandeau-in">
@@ -49,11 +49,16 @@
     <div class="hero-texte">
       <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
       <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
-      <p class="chapeau">Choisissez une série, une édition, une époque. Le guide calcule aussitôt la cote moyenne de votre sélection, de l'exemplaire convenable au très bon état, et montre où se répartissent les prix.</p>
-      <ul class="chiffres-hero" id="chiffres-hero" aria-label="Contenu du guide"></ul>
-      <p class="hero-cta"><button type="button" class="bouton" data-parcours id="hero-parcours">Constituer ma collection pas à pas</button>
+      <p class="chapeau">Combien vaut votre livre-jeu ? Trouvez sa cote, par édition et par état.</p>
+      <form class="hero-recherche" id="hero-recherche" role="search">
+        <label class="sr-only" for="h-q">Titre, auteur ou ISBN</label>
+        <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN : sorcier, Dever, 978…" autocomplete="off" enterkeyhint="search">
+        <button type="submit" class="bouton">Chercher</button>
+      </form>
+      <div class="hero-series" id="hero-series" role="group" aria-label="Séries les plus fournies"></div>
+      <p class="hero-compte" id="chiffres-hero"></p>
+      <p class="hero-cta"><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Constituer ma collection pas à pas</button>
         <button type="button" class="bouton bouton-clair" id="installer" hidden>Installer l'application</button></p>
-      <p class="avis" id="avis-prix"><strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour.</p>
     </div>
   </div>
 </section>
@@ -108,11 +113,12 @@
   <main id="main" class="contenu">
 
     <div class="onglets-vue" role="tablist" aria-label="Affichage de la sélection">
-      <button type="button" role="tab" id="onglet-cote" aria-controls="cote" aria-selected="true">Cote de la sélection</button>
-      <button type="button" role="tab" id="onglet-etagere" aria-controls="etagere" aria-selected="false" tabindex="-1">Sur l'étagère <span class="nb-onglet" id="nb-onglet"></span></button>
+      <button type="button" role="tab" id="onglet-etagere" aria-controls="etagere" aria-selected="true">Sur l'étagère <span class="nb-onglet" id="nb-onglet"></span></button>
+      <button type="button" role="tab" id="onglet-cote" aria-controls="cote" aria-selected="false" tabindex="-1">Cote de la sélection</button>
     </div>
+    <p class="avis" id="avis-prix"><strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour.</p>
 
-    <section class="cote" id="cote" role="tabpanel" aria-labelledby="onglet-cote">
+    <section class="cote" id="cote" role="tabpanel" aria-labelledby="onglet-cote" hidden>
       <div class="cote-tete">
         <h2 id="titre-cote">Cote de la sélection</h2>
         <p class="compte" id="compte"></p>
@@ -138,7 +144,7 @@
       </div>
     </section>
 
-    <section class="etagere" id="etagere" role="tabpanel" aria-labelledby="onglet-etagere" hidden>
+    <section class="etagere" id="etagere" role="tabpanel" aria-labelledby="onglet-etagere">
       <div class="etagere-tete">
         <h2 id="titre-etagere">Sur l'étagère</h2>
         <div class="outils">

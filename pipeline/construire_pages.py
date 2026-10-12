@@ -73,7 +73,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
 </dialog>'''
 
 
-BANDEAU = '<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Les prix sont en cours d\'ajustement et de vérification.</p>'
+BANDEAU = '<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Prix en cours de vérification.</p>'
 
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="le-projet.html">Le projet</a>

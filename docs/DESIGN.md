@@ -146,3 +146,9 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 4. Un fichier ou un lien d'un format **plus récent** que le site est refusé avec un message clair (« actualisez la page »).
 5. Le lien reçu n'écrit rien tant que le visiteur n'a pas choisi (Ajouter / Remplacer / Ignorer) ; l'adresse est nettoyée.
 À chaque évolution du format, vérifier à l'écran : ancien fichier v1 accepté, format futur refusé, liste simple, lien compressé ou non, lien abîmé.
+
+## Accueil simplifié (octobre)
+- **Première action = chercher** : champ « Titre, auteur ou ISBN » dans l'en-tête (formulaire de recherche, bouton « Chercher »), puis 4 raccourcis de séries (les plus fournies). Les deux envoient à `#recherche` avec le filtre appliqué.
+- **Étagère d'abord** : onglet « Sur l'étagère » par défaut (les couvertures se reconnaissent), « Cote de la sélection » en second (`#onglet=cote`).
+- **Un seul avertissement de cote** (`#avis-prix`), sous les onglets, valable pour les deux vues ; bandeau rouge réduit à une ligne : « Site en construction. Prix en cours de vérification. »
+- Accroche courte ; les chiffres (éditions, livres, séries) tiennent sur une ligne discrète.

@@ -32,7 +32,7 @@
   let S = {};
 
   const defaut = () => ({
-    q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'cote', versions: new Set(VERSIONS),
+    q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'etagere', versions: new Set(VERSIONS),
     h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false,
   });
 
@@ -70,11 +70,22 @@
 
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
-    $('#chiffres-hero').innerHTML =
-      `<li><b>${META.nb_versions}</b><span>éditions</span></li>` +
-      `<li><b>${META.nb_livres}</b><span>livres</span></li>` +
-      `<li><b>${META.nb_series}</b><span>séries</span></li>` +
-      `<li><b>${VERSIONS.length}</b><span>générations d'éditions</span></li>`;
+    $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
+    const top = [...compter('serie').entries()].filter(([k]) => k).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], 'fr')).slice(0, 4);
+    $('#hero-series').innerHTML = '<span>Séries :</span>' + top.map(([k, n]) =>
+      `<button type="button" class="pastille" data-serie="${esc(k)}" title="${n} éditions">${esc(k)}</button>`).join('');
+    const aller = () => $('#recherche').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    $('#hero-recherche').addEventListener('submit', (e) => {
+      e.preventDefault();
+      S.q = $('#h-q').value.trim(); S.onglet = 'etagere';
+      synchroniser(); changer(); aller();
+    });
+    $('#hero-series').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-serie]');
+      if (!b) return;
+      S.serie = b.dataset.serie; S.onglet = 'etagere';
+      synchroniser(); changer(); aller();
+    });
   }
 
   /* ---------- Contrôles ---------- */
@@ -144,7 +155,7 @@
   }
 
   function synchroniser() {
-    $('#f-q').value = S.q; $('#f-serie').value = S.serie; $('#f-ed').value = S.ed;
+    $('#f-q').value = S.q; if ($('#h-q')) $('#h-q').value = S.q; $('#f-serie').value = S.serie; $('#f-ed').value = S.ed;
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
@@ -203,7 +214,7 @@
     if (S.vue !== 'etagere') p.set('vue', S.vue);
     if (S.tri !== 'serie') p.set('tri', S.tri);
     if (S.g !== 'serie') p.set('g', S.g);
-    if (S.onglet !== 'cote') p.set('onglet', S.onglet);
+    if (S.onglet !== 'etagere') p.set('onglet', S.onglet);
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
@@ -282,7 +293,7 @@
     if (focus) $('#onglet-' + n).focus();
   }
   function brancherOnglets() {
-    const ordre = ['cote', 'etagere'];
+    const ordre = ['etagere', 'cote'];
     ordre.forEach((n) => $('#onglet-' + n).addEventListener('click', () => choisirOnglet(n)));
     $('.onglets-vue').addEventListener('keydown', (e) => {
       const i = ordre.indexOf(S.onglet);

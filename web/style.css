@@ -707,3 +707,27 @@ html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 3
 .onglets-vue [role="tab"]:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .nb-onglet { margin-left: 6px; padding: 1px 9px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 .8rem var(--f-ui); vertical-align: middle; }
 @media (max-width: 700px) { .onglets-vue [role="tab"] { font-size: 1.02rem; padding: 8px 8px; } }
+
+/* ---------- Accueil simplifié : recherche en tête, raccourcis de séries ---------- */
+.hero-recherche { display: flex; gap: 8px; margin: 18px 0 0; max-width: 560px; }
+.hero-recherche input { flex: 1 1 auto; min-width: 0; min-height: 52px; padding: 0 16px; border: 1px solid rgba(243, 233, 210, .45); border-radius: var(--r); background: rgba(0, 0, 0, .72); color: var(--text); font: 400 1.05rem/1.2 var(--f-ui); }
+.hero-recherche input::placeholder { color: #cdbf9f; opacity: 1; }
+.hero-recherche input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.hero-recherche .bouton { flex: 0 0 auto; min-height: 52px; padding-inline: 22px; }
+.hero-series { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; max-width: 620px; }
+.hero-series > span { color: var(--muted); font-size: .92rem; margin-right: 2px; }
+.pastille { min-height: 40px; padding: 0 14px; border: 1px solid rgba(243, 233, 210, .4); border-radius: 999px; background: rgba(0, 0, 0, .6); color: var(--text); font: 600 .92rem/1 var(--f-ui); cursor: pointer; }
+.pastille:hover { border-color: var(--accent); color: var(--accent); }
+.pastille:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.hero-texte { min-width: 0; }
+.hero-compte { margin: 16px 0 0; color: var(--muted); font-size: .92rem; }
+.hero .hero-cta { margin-top: 14px; }
+.contenu > .avis { margin: 0 0 14px; max-width: none; padding: 8px 14px; font-size: .92rem; box-shadow: none; }
+.contenu > .avis strong { font-size: 1rem; }
+.bandeau-chantier { padding: 6px 16px; font-size: .88rem; }
+@media (max-width: 700px) {
+  .hero-recherche { flex-wrap: wrap; }
+  .hero-recherche input { flex: 1 1 100%; }
+  .hero-recherche .bouton { flex: 1 1 100%; }
+  .hero-series > span { flex: 1 0 100%; }
+}
