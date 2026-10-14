@@ -30,8 +30,8 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(mediane_ponderee([(10, 0.2), (50, 0.8)]), 50)
 
     def test_annonces_actuelles_l_emportent_sur_l_archive(self):
-        r = estimer([Obs(10, "historique", AUJ, 1), Obs(50, "prix_demande", AUJ, 5)], AUJ)
-        self.assertEqual(r["prix"], 50)
+        r = estimer([Obs(10, "historique", AUJ, 1), Obs(20, "prix_demande", AUJ, 5)], AUJ)
+        self.assertTrue(15 < r["prix"] < 20, r["prix"])        # lissé, mais plus près des annonces (n = 5)
         self.assertEqual((r["source"], r["nature"], r["nb"]), ("actuel", "annonces", 5))
 
     def test_trois_annonces_ne_suffisent_pas_a_faire_oublier_l_archive_en_confiance(self):
@@ -48,7 +48,7 @@ class TestEstimation(unittest.TestCase):
 
     def test_vente_reelle_pese_plus_qu_une_annonce(self):
         r = estimer([Obs(40, "prix_demande", AUJ, 3), Obs(20, "vente_reelle", AUJ, 1)], AUJ)
-        self.assertEqual(r["prix"], 20)
+        self.assertTrue(20 <= r["prix"] < 30, r["prix"])        # plus près de la vente réelle que de l'annonce
         self.assertEqual(r["nature"], "ventes")
 
     def test_fraicheur_poids_divise_par_deux_tous_les_90_jours(self):
@@ -58,7 +58,27 @@ class TestEstimation(unittest.TestCase):
 
     def test_une_vieille_annonce_cede_a_une_recente(self):
         r = estimer([Obs(100, "prix_demande", AUJ - timedelta(days=360), 3), Obs(30, "prix_demande", AUJ, 3)], AUJ)
-        self.assertEqual(r["prix"], 30)
+        self.assertAlmostEqual(r["prix"], 30, delta=3)
+
+    def test_le_lissage_evolue_sans_sauter(self):
+        """Des relevés hebdomadaires qui montent régulièrement donnent un prix qui monte régulièrement."""
+        suite, prix = [Obs(20, "historique", date(2026, 9, 1), 1)], []
+        for k, v in enumerate([22, 23, 25, 26]):
+            suite.append(Obs(v, "prix_demande", date(2026, 9, 8) + timedelta(days=7 * k), 5))
+            prix.append(estimer(suite, date(2026, 9, 8) + timedelta(days=7 * k))["prix"])
+        self.assertEqual(prix, sorted(prix))
+        self.assertTrue(all(b - a < 3 for a, b in zip(prix, prix[1:])), prix)
+
+    def test_valeur_extreme_amortie(self):
+        normal = estimer([Obs(20, "historique", AUJ - timedelta(days=7), 1), Obs(22, "prix_demande", AUJ, 5)], AUJ)["prix"]
+        extreme = estimer([Obs(20, "historique", AUJ - timedelta(days=7), 1), Obs(200, "prix_demande", AUJ, 5)], AUJ)["prix"]
+        self.assertLess(extreme, 200 * 0.6)                 # n'adopte pas aveuglément 200
+        self.assertGreater(extreme, normal)
+
+    def test_plus_d_annonces_plus_de_poids(self):
+        peu = estimer([Obs(20, "historique", AUJ, 1), Obs(40, "prix_demande", AUJ, 3)], AUJ)["prix"]
+        beaucoup = estimer([Obs(20, "historique", AUJ, 1), Obs(40, "prix_demande", AUJ, 9)], AUJ)["prix"]
+        self.assertGreater(beaucoup, peu)
 
     def test_nombre_d_annonces_plafonne(self):
         self.assertAlmostEqual(poids(Obs(1, "prix_demande", AUJ, 500), AUJ), poids(Obs(1, "prix_demande", AUJ, 9), AUJ))

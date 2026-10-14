@@ -1,6 +1,7 @@
 """Estimation du prix d'une édition, pour un état, à partir de ses observations.
 
-Principe (voir docs/MODELE-PRICING.md) : médiane pondérée. Chaque observation pèse selon
+Principe (voir docs/MODELE-PRICING.md) : prix lissé observation après observation (voir `lisser`). Les poids
+ci-dessous servent à qualifier le résultat (source, nature, confiance). Chaque observation pèse selon
   - sa nature (une vente réelle compte plus qu'une annonce, qui compte plus qu'un ancien relevé) ;
   - sa fraîcheur (le poids est divisé par deux tous les 90 jours ; 365 jours pour l'ancien relevé) ;
   - le nombre d'annonces qu'elle résume (racine carrée, plafonnée à 9 annonces).
@@ -10,7 +11,7 @@ entre prix demandé et prix payé. Le résultat l'indique (« annonces »).
 """
 from collections import namedtuple
 from datetime import date
-from math import sqrt
+from math import exp, log, sqrt
 
 Obs = namedtuple("Obs", "prix type date nb")
 
@@ -21,6 +22,13 @@ DEMI_VIE = {"historique": 365}
 DEMI_VIE_DEFAUT = 90
 PLAFOND_ANNONCES = 9
 MIN_ANNONCES = 3        # en dessous, un relevé d'annonces est trop mince pour fonder une cote (une annonce isolée peut être absurde)
+# Lissage : le prix est mis à jour observation après observation (filtre de Kalman en logarithme).
+# Chaque observation a une incertitude (écart-type du logarithme du prix) selon sa nature, divisée par le nombre
+# d'annonces qu'elle résume ; le prix dérive avec le temps (BRUIT_SEMAINE), donc une donnée ancienne perd du poids
+# toute seule ; une valeur très éloignée de l'estimation en cours est amortie (ECART_ALERTE).
+SIGMA = {"vente_reelle": 0.15, "vente_probable": 0.22, "rachat": 0.30, "prix_demande": 0.35, "historique": 0.25}
+BRUIT_SEMAINE = 0.02    # variance de dérive du log du prix par semaine
+ECART_ALERTE = 3.0      # au-delà de 3 écarts-types, l'observation est jugée suspecte et son poids divisé par 4
 SEUIL_ACTUEL = 0.7      # part du poids venant d'observations actuelles pour parler de cote « actuelle »
 
 
@@ -28,6 +36,28 @@ def poids(o, aujourdhui):
     age = max(0, (aujourdhui - o.date).days)
     demi_vie = DEMI_VIE.get(o.type, DEMI_VIE_DEFAUT)
     return POIDS_TYPE[o.type] * 0.5 ** (age / demi_vie) * sqrt(min(max(o.nb, 1), PLAFOND_ANNONCES))
+
+
+def lisser(observations, aujourdhui):
+    """Prix lissé (filtre de Kalman en log) : renvoie (prix, incertitude). Les observations sont lues dans l'ordre
+    des dates ; chaque nouvelle valeur corrige l'estimation d'une part (le « gain ») d'autant plus grande qu'elle
+    est précise (nature, nombre d'annonces) et que l'estimation précédente est ancienne."""
+    m = var = derniere = None
+    for o in sorted(observations, key=lambda x: x.date):
+        r = SIGMA[o.type] ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
+        y = log(o.prix)
+        if m is None:
+            m, var = y, r
+        else:
+            var += BRUIT_SEMAINE * max(0, (o.date - derniere).days) / 7
+            if abs(y - m) > ECART_ALERTE * sqrt(var + r):
+                r *= 4
+            gain = var / (var + r)
+            m += gain * (y - m)
+            var *= 1 - gain
+        derniere = o.date
+    var += BRUIT_SEMAINE * max(0, (aujourdhui - derniere).days) / 7
+    return exp(m), sqrt(var)
 
 
 def mediane_ponderee(points):
@@ -56,7 +86,7 @@ def estimer(observations, aujourdhui=None):
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]
-    prix = mediane_ponderee([(o.prix, w) for o, w in poids_obs])
+    prix, _incertitude = lisser(obs, aujourdhui)
     actuelles = [(o, w) for o, w in poids_obs if o.type in ACTUELS]
     w_actuel = sum(w for _, w in actuelles)
     w_total = sum(w for _, w in poids_obs)

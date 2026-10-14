@@ -68,3 +68,15 @@ Essai sur 20 éditions : 19 ont au moins une annonce, 43 lignes (édition × ét
 - Des annonces isolées sont parfois aberrantes (104,69 € en bon état pour une édition archivée à 8,27 €).
 - **Règle ajoutée** (`MIN_ANNONCES = 3` dans `pipeline/estimation.py`) : un relevé de moins de 3 annonces n'entre pas dans la cote. Sur ce premier relevé, 10 lignes sur 43 comptent ; les autres restent aux archives.
 - À vérifier : la recherche par ISBN se fait par mot-clé, elle peut ramener d'autres éditions du même titre.
+
+## Mise à jour lissée et auto-apprentissage (14 octobre 2026)
+**Lissage** (`lisser` dans `pipeline/estimation.py`, filtre de Kalman en logarithme). Chaque nouveau relevé corrige le prix d'une part variable, au lieu de le remplacer :
+- plus un relevé résume d'annonces, plus il pèse (incertitude divisée par leur nombre, plafonnée à 9) ;
+- plus la nature est fiable (vente réelle > rachat > annonce > archive), plus il pèse ;
+- plus l'estimation précédente est ancienne, moins elle pèse (dérive de 0,02 par semaine en variance du log) : l'archive s'efface d'elle-même ;
+- une valeur à plus de 3 écarts-types de l'estimation est jugée suspecte et son poids est divisé par 4.
+Exemple (premier relevé) : archive 6,98 €, médiane eBay 23,58 € sur 3 annonces → affiché 10,10 €. Un relevé de 5 annonces (12,90 € contre 7,30 €) donne 11,15 €.
+
+**Auto-apprentissage** (`pipeline/calibration.py`). Les archives mesurent autre chose que les annonces actuelles (moyenne des prix les plus bas, relevée en 2024). Le modèle apprend le rapport actuel / archive par état, se contrôle par validation croisée et ne s'active que s'il bat les archives d'au moins 15 % sur au moins 20 éditions comparables. Actif, il remet à niveau les archives des éditions sans relevé (mention « estimation », confiance faible). Il est recalculé à chaque publication et son état est écrit dans `data/processed/calibration.json` et `web/data/meta.json`. Inactif au 14 octobre (10 éditions comparables sur 20).
+
+**Contrôle du rattachement** : le workflow a une entrée « controle » (N éditions) qui n'enregistre rien et n'affiche que des comptages (annonces concordantes avec le titre, lots, états inconnus). La recherche se fait par ISBN, et aussi par titre pour les 120 éditions dont le titre n'existe qu'en une édition ; les annonces dont le titre ne correspond pas sont écartées.
