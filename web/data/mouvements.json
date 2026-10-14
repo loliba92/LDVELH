@@ -2,7 +2,7 @@
  "date": "2026-10-14",
  "precedent": "2026-10-11",
  "nb_comparees": 1266,
- "nb_modifiees": 30,
+ "nb_modifiees": 33,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -189,6 +189,36 @@
  ],
  "baisses": [
   {
+   "id": "9782070332687",
+   "isbn13": "9782070332687",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 29.79,
+   "apres": 7.85,
+   "pct": -0.736,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332687",
+   "isbn13": "9782070332687",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.77,
+   "apres": 3.14,
+   "pct": -0.536,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
+  },
+  {
    "id": "9782075084598",
    "isbn13": "9782075084598",
    "titre": "Le Sang des Zombies",
@@ -264,6 +294,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070332687",
+   "isbn13": "9782070332687",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 6.98,
+   "apres": 4.71,
+   "pct": -0.325,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782075084598",
    "isbn13": "9782075084598",
    "titre": "Le Sang des Zombies",
@@ -324,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 28,
+ "nb_grands_mouvements": 31,
  "modele": {
   "actif": false,
-  "n_paires": 4,
+  "n_paires": 5,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (4 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (5 sur 20 nécessaires)",
   "rapport_global": null
  }
 }
