@@ -61,3 +61,10 @@ Le workflow `.github/workflows/prix-ebay.yml` le lance chaque lundi, reconstruit
 ## Suites possibles
 
 Classements « plus chers / moins chers », « prix qui évoluent vite » (il faut plusieurs relevés datés), partage d'une collection par lien.
+
+## Premier relevé eBay (14 octobre 2026) et règle des 3 annonces
+Essai sur 20 éditions : 19 ont au moins une annonce, 43 lignes (édition × état), 78 annonces au total. Constats :
+- Les prix demandés sur eBay sont nettement plus élevés que les archives : rapport médian 1,95 sur la médiane des annonces, 1,4 sur le minimum (les archives sont une moyenne des prix les plus bas, pas une médiane : les deux mesures ne sont pas identiques).
+- Des annonces isolées sont parfois aberrantes (104,69 € en bon état pour une édition archivée à 8,27 €).
+- **Règle ajoutée** (`MIN_ANNONCES = 3` dans `pipeline/estimation.py`) : un relevé de moins de 3 annonces n'entre pas dans la cote. Sur ce premier relevé, 10 lignes sur 43 comptent ; les autres restent aux archives.
+- À vérifier : la recherche par ISBN se fait par mot-clé, elle peut ramener d'autres éditions du même titre.

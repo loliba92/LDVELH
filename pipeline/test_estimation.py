@@ -34,13 +34,20 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(r["prix"], 50)
         self.assertEqual((r["source"], r["nature"], r["nb"]), ("actuel", "annonces", 5))
 
-    def test_une_seule_annonce_ne_suffit_pas_a_faire_oublier_l_archive_en_confiance(self):
-        r = estimer([Obs(10, "historique", AUJ, 1), Obs(50, "prix_demande", AUJ, 1)], AUJ)
-        self.assertEqual(r["source"], "mixte")          # annonce 0,3 contre archive 0,2 : 60 % < 70 %
-        self.assertEqual(r["confiance"], "faible")
+    def test_trois_annonces_ne_suffisent_pas_a_faire_oublier_l_archive_en_confiance(self):
+        r = estimer([Obs(10, "historique", AUJ - timedelta(days=300), 1), Obs(50, "prix_demande", AUJ, 3)], AUJ)
+        self.assertEqual(r["source"], "actuel")         # une annonce récente pèse plus qu'une archive de dix mois
+        self.assertEqual(r["confiance"], "moyenne")
+
+    def test_une_annonce_isolee_est_ignoree(self):
+        r = estimer([Obs(10, "historique", AUJ, 1), Obs(104.69, "prix_demande", AUJ, 1), Obs(90, "prix_demande", AUJ, 2)], AUJ)
+        self.assertEqual((r["prix"], r["source"]), (10, "archives"))
+
+    def test_sans_autre_observation_un_releve_trop_mince_ne_donne_rien(self):
+        self.assertIsNone(estimer([Obs(30, "prix_demande", AUJ, 2)], AUJ))
 
     def test_vente_reelle_pese_plus_qu_une_annonce(self):
-        r = estimer([Obs(40, "prix_demande", AUJ, 1), Obs(20, "vente_reelle", AUJ, 1)], AUJ)
+        r = estimer([Obs(40, "prix_demande", AUJ, 3), Obs(20, "vente_reelle", AUJ, 1)], AUJ)
         self.assertEqual(r["prix"], 20)
         self.assertEqual(r["nature"], "ventes")
 
@@ -50,22 +57,22 @@ class TestEstimation(unittest.TestCase):
         self.assertAlmostEqual(vieux, frais / 2)
 
     def test_une_vieille_annonce_cede_a_une_recente(self):
-        r = estimer([Obs(100, "prix_demande", AUJ - timedelta(days=360), 1), Obs(30, "prix_demande", AUJ, 1)], AUJ)
+        r = estimer([Obs(100, "prix_demande", AUJ - timedelta(days=360), 3), Obs(30, "prix_demande", AUJ, 3)], AUJ)
         self.assertEqual(r["prix"], 30)
 
     def test_nombre_d_annonces_plafonne(self):
         self.assertAlmostEqual(poids(Obs(1, "prix_demande", AUJ, 500), AUJ), poids(Obs(1, "prix_demande", AUJ, 9), AUJ))
 
     def test_confiance_croit_avec_le_nombre_d_annonces(self):
-        faible = estimer([Obs(10, "prix_demande", AUJ, 1)], AUJ)["confiance"]
+        faible = estimer([Obs(10, "prix_demande", AUJ - timedelta(days=90), 3)], AUJ)["confiance"]
         moyenne = estimer([Obs(10, "prix_demande", AUJ, 4)], AUJ)["confiance"]
         elevee = estimer([Obs(10, "prix_demande", AUJ, 9)], AUJ)["confiance"]
         self.assertEqual((faible, moyenne, elevee), ("faible", "moyenne", "élevée"))
 
     def test_date_et_nombre_portent_sur_les_observations_actuelles(self):
         r = estimer([Obs(10, "historique", date(2026, 1, 1), 1),
-                     Obs(20, "prix_demande", date(2026, 10, 1), 3), Obs(22, "prix_demande", date(2026, 10, 8), 2)], AUJ)
-        self.assertEqual((r["date"], r["nb"]), ("2026-10-08", 5))
+                     Obs(20, "prix_demande", date(2026, 10, 1), 3), Obs(22, "prix_demande", date(2026, 10, 8), 4)], AUJ)
+        self.assertEqual((r["date"], r["nb"]), ("2026-10-08", 7))
 
     def test_le_nombre_ne_melange_pas_ventes_et_annonces(self):
         r = estimer([Obs(25, "vente_reelle", date(2026, 10, 5), 1), Obs(30, "prix_demande", date(2026, 10, 10), 6)], AUJ)

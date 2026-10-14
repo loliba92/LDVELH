@@ -4,6 +4,7 @@ Principe (voir docs/MODELE-PRICING.md) : médiane pondérée. Chaque observation
   - sa nature (une vente réelle compte plus qu'une annonce, qui compte plus qu'un ancien relevé) ;
   - sa fraîcheur (le poids est divisé par deux tous les 90 jours ; 365 jours pour l'ancien relevé) ;
   - le nombre d'annonces qu'elle résume (racine carrée, plafonnée à 9 annonces).
+Un relevé de moins de 3 annonces n'est pas pris en compte : une annonce isolée peut être absurde.
 Les prix demandés ne sont pas corrigés : faute de ventes réelles, on ne sait pas mesurer l'écart
 entre prix demandé et prix payé. Le résultat l'indique (« annonces »).
 """
@@ -19,6 +20,7 @@ NATURE = {"vente_reelle": "ventes", "vente_probable": "ventes", "rachat": "racha
 DEMI_VIE = {"historique": 365}
 DEMI_VIE_DEFAUT = 90
 PLAFOND_ANNONCES = 9
+MIN_ANNONCES = 3        # en dessous, un relevé d'annonces est trop mince pour fonder une cote (une annonce isolée peut être absurde)
 SEUIL_ACTUEL = 0.7      # part du poids venant d'observations actuelles pour parler de cote « actuelle »
 
 
@@ -50,7 +52,7 @@ def estimer(observations, aujourdhui=None):
     confiance : « ancienne » pour les archives ; « faible », « moyenne » ou « élevée » pour le reste.
     """
     aujourdhui = aujourdhui or date.today()
-    obs = list(observations)
+    obs = [o for o in observations if not (o.type == "prix_demande" and o.nb < MIN_ANNONCES)]
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]
