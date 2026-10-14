@@ -11,14 +11,14 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 10,
+  "nb_prix_actuels": 43,
   "calibration": {
     "actif": false,
-    "n_paires": 10,
-    "gain": null,
-    "raison": "pas assez d'éditions comparables (10 sur 20 nécessaires)",
+    "n_paires": 43,
+    "gain": 0.123,
+    "raison": "rapport appris hors des bornes de sécurité",
     "calcule_le": "2026-10-14",
-    "rapport_global": null,
+    "rapport_global": 0.623,
     "nb_recalibres": 0
   }
 }

@@ -1,11 +1,41 @@
 {
   "actif": false,
-  "n_paires": 10,
+  "n_paires": 43,
   "calcule_le": "2026-10-14",
-  "par_etat": {},
-  "erreur_modele": null,
-  "erreur_archives": null,
-  "gain": null,
-  "raison": "pas assez d'éditions comparables (10 sur 20 nécessaires)",
-  "fraicheur": {}
+  "par_etat": {
+    "tres_bon": {
+      "rapport": 0.316,
+      "ecart": 0.838,
+      "n": 15
+    },
+    "convenable": {
+      "rapport": 0.623,
+      "ecart": 0.0,
+      "n": 1
+    },
+    "bon": {
+      "rapport": 0.87,
+      "ecart": 0.757,
+      "n": 27
+    }
+  },
+  "erreur_modele": 0.775,
+  "erreur_archives": 0.884,
+  "gain": 0.123,
+  "raison": "rapport appris hors des bornes de sécurité",
+  "rapport_global": 0.623,
+  "fraicheur": {
+    "bon": {
+      "rapport": 0.987,
+      "n": 20
+    },
+    "tres_bon": {
+      "rapport": 0.969,
+      "n": 12
+    },
+    "convenable": {
+      "rapport": 1.498,
+      "n": 1
+    }
+  }
 }
