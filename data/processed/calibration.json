@@ -6,5 +6,6 @@
   "erreur_modele": null,
   "erreur_archives": null,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (10 sur 20 nécessaires)"
+  "raison": "pas assez d'éditions comparables (10 sur 20 nécessaires)",
+  "fraicheur": {}
 }

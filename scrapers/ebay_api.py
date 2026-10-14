@@ -36,7 +36,7 @@ MAX_AGE_JOURS = 90
 # Codes d'état d'eBay -> états du projet. Les codes absents (neuf, « d'occasion » sans précision) sont ignorés.
 ETATS = {"2750": "tres_bon", "4000": "tres_bon", "5000": "bon", "6000": "convenable"}
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes)\b", re.I)
-CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
+CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 
 
 MOTS_VIDES = {"les", "des", "dans", "avec", "pour", "livre", "dont", "vous", "etes", "heros", "poche", "folio", "junior", "gallimard", "jeunesse"}
@@ -97,8 +97,7 @@ def agreger(items, isbn13, jour, titre=None):
         if titre and not concorde(it.get("title", ""), titre):
             continue
         age = age_jours(it, jour)
-        if age is not None and age > MAX_AGE_JOURS:
-            continue                      # annonce trop ancienne : invendue, prix probablement trop haut
+        ancienne = age is not None and age > MAX_AGE_JOURS     # invendue depuis longtemps : prix probablement trop haut
         etat = ETATS.get(str(it.get("conditionId", "")))
         prix = it.get("price") or {}
         if etat is None or prix.get("currency") != "EUR" or LOT.search(it.get("title", "")):
@@ -108,10 +107,16 @@ def agreger(items, isbn13, jour, titre=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            par_etat.setdefault(etat, []).append(valeur)
-    return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v),
-             "prix_min": f"{min(v):.2f}", "prix_median": f"{statistics.median(v):.2f}", "prix_max": f"{max(v):.2f}"}
-            for etat, v in sorted(par_etat.items())]
+            par_etat.setdefault(etat, {"frais": [], "toutes": []})
+            par_etat[etat]["toutes"].append(valeur)
+            if not ancienne:
+                par_etat[etat]["frais"].append(valeur)
+    # La cote n'utilise que les annonces récentes. Les statistiques de toutes les annonces sont gardées à côté :
+    # le modèle d'auto-apprentissage en tire de combien les annonces anciennes surestiment les prix.
+    return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v["frais"]),
+             "prix_min": f"{min(v['frais']):.2f}", "prix_median": f"{statistics.median(v['frais']):.2f}", "prix_max": f"{max(v['frais']):.2f}",
+             "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}"}
+            for etat, v in sorted(par_etat.items()) if v["frais"]]
 
 
 def catalogue():

@@ -6,6 +6,7 @@ observations hors lots : natures, fraîcheur, nombre d'annonces). Sans relevé a
     python pipeline/build_db.py && python pipeline/export_site.py
 """
 import argparse
+import csv
 import json
 import sqlite3
 import sys
@@ -76,6 +77,11 @@ def main():
     # Auto-apprentissage : si le modèle bat les archives (validation croisée), il remet à niveau les archives
     # des éditions sans relevé actuel. Inactif, il ne change rien.
     modele = calibration.apprendre(brut, args.aujourdhui)
+    releves = []
+    for f in sorted((DB.parent.parent / "raw" / "occasion").glob("ebay-*.csv")):
+        with open(f, newline="", encoding="utf-8") as fh:
+            releves += list(csv.DictReader(fh))
+    modele["fraicheur"] = calibration.fraicheur(releves)
     nb_recalibres = 0
     if modele["actif"]:
         for par_etat in prix.values():

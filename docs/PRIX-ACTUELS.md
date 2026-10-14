@@ -94,3 +94,7 @@ Exemple (premier relevé) : archive 6,98 €, médiane eBay 23,58 € sur 3 anno
 - Le **résumé de l'exécution GitHub** (onglet Actions, bas de la page de l'exécution) donne : nombre de prix comparés et modifiés, variation médiane, plus fortes hausses et baisses, état du modèle.
 - La page publique `evolutions.html` (lien dans le pied de page) affiche les mêmes mouvements et se régénère avec `pipeline/construire_pages.py`.
 Pistes : courbe d'évolution dans la fiche de chaque édition (les instantanés l'alimentent déjà), alerte quand beaucoup de prix bougent d'un coup.
+
+## Contrôle du 14 octobre sur 30 éditions (sans enregistrement)
+188 annonces trouvées : 151 concordent avec le titre attendu (80 %), 37 concernent un autre livre (écartées), 5 lots, 1 édition sans annonce. La date de création est toujours fournie. **63 % des annonces ont plus de 90 jours** (14 % moins de 30 jours, 22 % de 30 à 90 jours) : les livres restent longtemps en vente. Au final 45 annonces sur 188 sont retenues (récentes, concordantes, hors lots, état connu, en euros).
+Conséquence : avec le minimum de 3 annonces récentes par édition et par état, peu d'éditions ont une cote actuelle. Plutôt que de choisir un seuil à la main, chaque relevé enregistre aussi les statistiques de toutes les annonces (`nb_toutes`, `prix_median_toutes`) ; `calibration.fraicheur()` en tire de combien les annonces anciennes surestiment les prix, par état (`fraicheur` dans `calibration.json`). Information seulement pour l'instant : à utiliser une fois le rapport mesuré sur assez d'éditions.

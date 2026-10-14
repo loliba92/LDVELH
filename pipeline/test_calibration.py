@@ -54,6 +54,15 @@ class TestCalibration(unittest.TestCase):
         self.assertFalse(m["actif"])
         self.assertIn("bornes", m["raison"])
 
+    def test_fraicheur_apprise(self):
+        lignes = [{"etat": "bon", "nb_annonces": "3", "nb_toutes": "8", "prix_median": "10", "prix_median_toutes": "14"},
+                  {"etat": "bon", "nb_annonces": "4", "nb_toutes": "9", "prix_median": "12", "prix_median_toutes": "16"},
+                  {"etat": "bon", "nb_annonces": "5", "nb_toutes": "6", "prix_median": "12", "prix_median_toutes": "13"},   # < 3 anciennes : écartée
+                  {"etat": "bon", "nb_annonces": "3", "prix_median": "10"}]                                              # ancien format : écartée
+        f = calibration.fraicheur(lignes)
+        self.assertEqual(f["bon"]["n"], 2)
+        self.assertTrue(0.7 < f["bon"]["rapport"] < 0.8, f)
+
     def test_remise_a_niveau(self):
         m = calibration.apprendre(jeu(30, 1.5, 0.1), AUJ)
         self.assertAlmostEqual(calibration.remettre_a_niveau(m, 10, "bon"), 15, delta=1.5)

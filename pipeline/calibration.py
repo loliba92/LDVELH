@@ -96,6 +96,21 @@ def apprendre(brut, aujourdhui=None):
     return base
 
 
+def fraicheur(releves):
+    """Apprend de combien les annonces anciennes surestiment les prix : rapport médian (annonces récentes / toutes les
+    annonces), par état, sur les relevés qui contiennent les deux. Information seulement pour l'instant."""
+    par_etat = {}
+    for r in releves:
+        try:
+            nb, nb_t = int(r["nb_annonces"]), int(r["nb_toutes"])
+            frais, toutes = float(r["prix_median"]), float(r["prix_median_toutes"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        if nb >= MIN_NB and nb_t >= nb + MIN_NB and frais > 0 and toutes > 0:      # au moins 3 annonces anciennes en plus
+            par_etat.setdefault(r["etat"], []).append(math.log(frais / toutes))
+    return {e: {"rapport": round(math.exp(statistics.median(v)), 3), "n": len(v)} for e, v in par_etat.items()}
+
+
 def remettre_a_niveau(modele, archive, etat):
     """Prix d'archive remis à niveau avec le rapport appris pour l'état."""
     r = (modele["par_etat"].get(etat) or {}).get("rapport") or modele.get("rapport_global") or 1.0

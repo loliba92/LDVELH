@@ -46,6 +46,11 @@ class TestFraicheur(unittest.TestCase):
         sans_date = item(12, "5000")
         l = ebay_api.agreger([recente, ancienne, sans_date], "9782070583805", self.JOUR)
         self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 2, "12.00")])
+        self.assertEqual((l[0]["nb_toutes"], l[0]["prix_median_toutes"]), (3, "12.00"))     # toutes les annonces, anciennes comprises
+
+    def test_etat_sans_annonce_recente_pas_de_ligne(self):
+        ancienne = {**item(40, "5000"), "itemCreationDate": "2025-06-01T00:00:00.000Z"}
+        self.assertEqual(ebay_api.agreger([ancienne], "9782070583805", self.JOUR), [])
 
 
 class Refus:
