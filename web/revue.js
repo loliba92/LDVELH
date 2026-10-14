@@ -44,10 +44,11 @@
   }
 
   function carte(ed) {
-    return `<article class="rv-edition"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
+    const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
+    return `<article class="rv-edition${jaq ? ' avec-jaq' : ''}">${jaq}<div class="rv-corps"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` +
       `<a class="rv-ebay" href="https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(ed.titre + ' ' + (ed.isbn || '')).replace(/%20/g, '+')}" target="_blank" rel="noopener noreferrer">Voir les annonces sur eBay ↗</a></header>` +
-      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></article>`;
+      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></div></article>`;
   }
 
   const lignes = (ed) => Object.values(ed.etats);
@@ -81,7 +82,9 @@
     a.download = 'verification-des-prix.csv'; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  fetch('data/revue.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
+  const JAQ = {};
+  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})
+    .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
     d.forEach((l) => { if (!par.has(l.id)) par.set(l.id, { id: l.id, isbn: l.isbn, titre: l.titre, serie: l.serie, numero: l.numero, version: l.version, etats: {} }); par.get(l.id).etats[l.etat] = l; });
     EDITIONS = [...par.values()];
