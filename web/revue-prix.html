@@ -38,38 +38,27 @@
 </header>
 
 <main id="main" class="cadre page">
-<h1>Revue des prix</h1>
-<p class="chapeau">Outil pour valider les cotes : pour chaque édition et chaque état, l'archive, le dernier relevé eBay et le prix publié, côte à côte. Cette page n'est pas référencée et n'est liée depuis aucune autre.</p>
-<form class="revue-filtres" id="revue-filtres" onsubmit="return false">
-  <div class="champ"><label for="r-q">Chercher (titre, série)</label><input type="search" id="r-q" autocomplete="off"></div>
-  <div class="champ"><label for="r-serie">Série</label><select id="r-serie"></select></div>
-  <div class="champ"><label for="r-etat">État</label><select id="r-etat"><option value="">Tous</option><option value="convenable">C</option><option value="bon">BE</option><option value="tres_bon">TBE</option></select></div>
-  <div class="champ"><label for="r-filtre">Afficher</label><select id="r-filtre">
-    <option value="">Tout</option>
-    <option value="ecart">Écart important (au moins ×2 ou au plus ×0,5)</option>
-    <option value="ebay">Prix issu du relevé eBay</option>
-    <option value="sans">Pas de relevé eBay</option>
-    <option value="aligne">Prix remontés (C ≤ BE ≤ TBE)</option>
-    <option value="recalibre">Remis à niveau par le modèle</option>
-    <option value="deduit">Déduits des autres états (C 40 %, BE 60 % du TBE)</option>
-  </select></div>
-  <div class="champ"><label for="r-tri">Trier par</label><select id="r-tri">
-    <option value="ecart">Écart (du plus grand au plus petit)</option>
-    <option value="titre">Titre</option>
-    <option value="serie">Série et numéro</option>
-    <option value="publie">Prix publié</option>
-    <option value="annonces">Nombre d'annonces</option>
-  </select></div>
-</form>
-<p class="sous" id="r-compte" role="status" aria-live="polite"></p>
-<p><button type="button" class="bouton bouton-clair" id="r-csv">Télécharger cette vue (CSV)</button></p>
-<div id="r-zone"><p>Chargement…</p></div>
-<h2>Comment lire</h2>
+<h1>Vérifier les prix</h1>
+<p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ».</p>
+<div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
+  <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
+  <button type="button" data-vue="change" aria-pressed="false">Tout ce qui a changé <span class="nb-onglet" id="rv-n-change"></span></button>
+  <button type="button" data-vue="tous" aria-pressed="false">Tous les livres <span class="nb-onglet" id="rv-n-tous"></span></button>
+</div>
+<div class="rv-outils">
+  <div class="champ"><label for="rv-q">Chercher un livre</label><input type="search" id="rv-q" autocomplete="off" placeholder="titre ou série"></div>
+  <div class="champ"><label for="rv-serie">Série</label><select id="rv-serie"></select></div>
+</div>
+<p class="sous" id="rv-compte" role="status" aria-live="polite"></p>
+<div id="rv-liste"><p>Chargement…</p></div>
+<p><button type="button" class="bouton bouton-clair" id="rv-plus" hidden>Voir la suite</button>
+<button type="button" class="bouton bouton-clair" id="rv-csv">Télécharger cette liste (tableur)</button></p>
+<h2>Comment lire cette page</h2>
 <ul>
-  <li><strong>Archive</strong> : ancien relevé (prix demandés, jusqu'à fin 2024).</li>
-  <li><strong>eBay</strong> : médiane des annonces récentes (moins de 90 jours), nombre d'annonces et fourchette ; entre parenthèses, la médiane de toutes les annonces, anciennes comprises.</li>
-  <li><strong>Publié</strong> : le prix affiché sur le site, après lissage et alignement des états. <strong>Écart</strong> : publié divisé par archive.</li>
-  <li>Source : « archives » (aucun relevé retenu), « actuel » ou « mixte ». « Déduit » : état sans prix, estimé d'après les autres états de l'édition (rapports réglables dans <code>data/manual/ratios_etats.json</code>).</li>
+  <li><strong>Le gros prix</strong> est celui affiché sur le site. <strong>Le prix barré</strong> est l'ancienne cote (ancien relevé de 2024). Le pourcentage montre le changement.</li>
+  <li><strong>« À vérifier »</strong> : le prix a au moins doublé ou a été divisé par près de deux. Une raison est écrite en dessous.</li>
+  <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
+  <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
 </ul>
 </main>
 
