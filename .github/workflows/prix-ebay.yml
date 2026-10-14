@@ -14,6 +14,9 @@ on:
       controle:
         description: "Contrôle SANS enregistrement sur N éditions (comptages seulement) : vérifie le rattachement aux éditions"
         required: false
+      diagnostic:
+        description: "ISBN : liste les annonces trouvées avec leur lien dans le journal (aucun enregistrement)"
+        required: false
 
 permissions:
   contents: write
@@ -52,17 +55,20 @@ jobs:
       - name: Contrôle (sans enregistrement)
         if: ${{ inputs.controle != '' }}
         run: python scrapers/ebay_api.py --controle ${{ inputs.controle }}
+      - name: Diagnostic d'une édition
+        if: ${{ inputs.diagnostic != '' }}
+        run: python scrapers/ebay_api.py --diagnostic "${{ inputs.diagnostic }}" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Relevé eBay
-        if: ${{ inputs.controle == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
       - name: Base et données du site
-        if: ${{ inputs.controle == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
         run: |
           python pipeline/build_db.py
           python pipeline/export_site.py
           python pipeline/construire_pages.py
       - name: Enregistrer et republier
-        if: ${{ inputs.controle == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"

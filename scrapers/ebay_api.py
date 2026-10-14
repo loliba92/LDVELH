@@ -219,10 +219,35 @@ def controler(a, token):
           f"lots {tot['lot']}, retenues {tot['retenues']}, éditions sans annonce {tot['isbn_sans_annonce']}")
 
 
+def diagnostiquer(isbn, token):
+    """Montre, pour un ISBN, les annonces de la recherche par ISBN puis de la recherche par titre seul, avec leur lien,
+    pour que le propriétaire les ouvre et vérifie. Rien n'est enregistré dans les données du site."""
+    import editions
+    ed = next((r for r in editions.load() if r.get("isbn13") == isbn), None)
+    titre = ed["titre"] if ed else ""
+    annees = tuple(sorted({str(a) for a in ((ed or {}).get("annee"), (ed or {}).get("annee_bnf")) if a}))
+    print(f"Édition {isbn} : « {titre} », parution {', '.join(annees) or 'inconnue'}")
+    for nom, q in (("Recherche par ISBN", isbn), ("Recherche par le seul titre (ancienne méthode de repli)", titre)):
+        items = annonces(q, token)
+        print(f"\n### {nom} : {len(items)} annonces")
+        for it in items:
+            etat, suppose = etat_de(it)
+            age = age_jours(it, date.today())
+            motif = ("autre livre" if not concorde(it.get("title", ""), titre) else
+                     "autre année" if not annee_compatible(it.get("title", ""), annees) else
+                     "lot" if LOT.search(it.get("title", "")) else
+                     "état écarté (neuf, pièces…)" if etat is None else
+                     "plus de 90 jours" if age is not None and age > MAX_AGE_JOURS else "retenue")
+            p = it.get("price") or {}
+            print(f"- {p.get('value')} {p.get('currency')} | {it.get('title', '')} | état {it.get('condition', '?')} | "
+                  f"âge {age if age is not None else '?'} j | {motif} | {it.get('itemWebUrl', '')}")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
+    p.add_argument("--diagnostic", help="ISBN : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
     cid, secret = (os.environ.get("EBAY_CLIENT_ID") or "").strip(), (os.environ.get("EBAY_CLIENT_SECRET") or "").strip()
@@ -233,6 +258,9 @@ def main():
         token = jeton(cid, secret)
     except RuntimeError as e:
         sys.exit(str(e))
+    if a.diagnostic:
+        diagnostiquer(a.diagnostic.strip(), token)
+        return
     if a.controle:
         controler(a, token)
         return
