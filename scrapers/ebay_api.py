@@ -35,6 +35,20 @@ PAUSE = 0.5
 MAX_AGE_JOURS = 90
 # Codes d'état d'eBay -> états du projet. Les codes absents (neuf, « d'occasion » sans précision) sont ignorés.
 ETATS = {"2750": "tres_bon", "4000": "tres_bon", "5000": "bon", "6000": "convenable"}
+# État non précisé (« d'occasion » sans détail, 3000, ou aucun état dans l'annonce) : on suppose le bon état (règle du propriétaire).
+# Les annonces « neuf » (1000, 1500…) et « pour pièces » (7000) restent écartées.
+ETAT_SUPPOSE = "bon"
+CODES_NON_PRECISES = {"", "3000"}
+
+
+def etat_de(item):
+    """État du projet pour une annonce, ou None. Renvoie (état, supposé)."""
+    code = str(item.get("conditionId") or "")
+    if code in ETATS:
+        return ETATS[code], False
+    if code in CODES_NON_PRECISES:
+        return ETAT_SUPPOSE, True
+    return None, False
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes)\b", re.I)
 CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 
@@ -98,7 +112,7 @@ def agreger(items, isbn13, jour, titre=None):
             continue
         age = age_jours(it, jour)
         ancienne = age is not None and age > MAX_AGE_JOURS     # invendue depuis longtemps : prix probablement trop haut
-        etat = ETATS.get(str(it.get("conditionId", "")))
+        etat, _suppose = etat_de(it)
         prix = it.get("price") or {}
         if etat is None or prix.get("currency") != "EUR" or LOT.search(it.get("title", "")):
             continue
@@ -147,14 +161,17 @@ def controler(a, token):
             c["concordant" if conc else "autre_livre"] += 1
             if LOT.search(it.get("title", "")):
                 c["lot"] += 1
-            if str(it.get("conditionId", "")) not in ETATS:
+            etat_it, suppose = etat_de(it)
+            if suppose:
+                c["etat_suppose"] += 1
+            elif etat_it is None:
                 c["etat_inconnu"] += 1
             age = age_jours(it, date.today())
             c["age_inconnu" if age is None else ("age_30" if age <= 30 else ("age_90" if age <= MAX_AGE_JOURS else "age_plus"))] += 1
         retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
         par_titre = len(annonces(titre, token)) if nb_ed == 1 else None
         print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
-              f"autre livre {c['autre_livre']}, lots {c['lot']}, état inconnu {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
+              f"autre livre {c['autre_livre']}, lots {c['lot']}, état supposé BE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
               + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
         tot.update(c); tot["retenues"] += retenues; tot["isbn"] += 1; tot["isbn_sans_annonce"] += (c["total"] == 0)
         time.sleep(PAUSE)
