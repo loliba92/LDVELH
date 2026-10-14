@@ -72,6 +72,16 @@ class TestEtats(unittest.TestCase):
         self.assertEqual(etats.completer({}, R), 0)
         self.assertEqual(etats.completer({"convenable": est(1), "bon": est(2), "tres_bon": est(3)}, R), 0)
 
+    def test_ecart_etat_superieur(self):
+        import tempfile, json
+        self.assertEqual(etats.charger_ecart("/n/existe/pas.json"), 1.2)
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "r.json"
+            f.write_text(json.dumps({"ecart_etat_superieur": 1.1}))
+            self.assertEqual(etats.charger_ecart(f), 1.1)
+            f.write_text(json.dumps({"ecart_etat_superieur": 5}))                  # hors limites : valeur par défaut
+            self.assertEqual(etats.charger_ecart(f), 1.2)
+
     def test_ratios_par_defaut_si_fichier_absent_ou_incoherent(self):
         self.assertEqual(etats.charger_ratios("/n/existe/pas.json"), etats.DEFAUT)
         import tempfile, json

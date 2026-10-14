@@ -12,6 +12,7 @@ import statistics
 from pathlib import Path
 
 ETATS = ("convenable", "bon", "tres_bon")
+ECART_DEFAUT = 1.20      # état supérieur au moins 20 % au-dessus de l'état inférieur quand les prix se contredisent
 DEFAUT = {"convenable": 0.40, "bon": 0.60, "tres_bon": 1.0}
 
 
@@ -24,6 +25,17 @@ def charger_ratios(chemin):
     except (OSError, ValueError, KeyError, TypeError):
         pass
     return dict(DEFAUT)
+
+
+def charger_ecart(chemin):
+    """Écart appliqué quand un état supérieur est en dessous d'un état inférieur (clé « ecart_etat_superieur »)."""
+    try:
+        v = float(json.loads(Path(chemin).read_text(encoding="utf-8"))["ecart_etat_superieur"])
+        if 1.0 <= v <= 2.0:
+            return v
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return ECART_DEFAUT
 
 
 def repartir(par_etat, ratios):

@@ -47,12 +47,13 @@ WHERE f.est_lot = 0
 ETATS = ("convenable", "bon", "tres_bon")
 
 
-def aligner(par_etat):
-    """Cohérence : un état supérieur ne vaut jamais moins qu'un état inférieur (convenable <= bon <= très bon).
-    Règle générale : le prix de l'état supérieur est remonté au niveau de l'état inférieur, et marqué « ajusté ».
+def aligner(par_etat, ecart=etats.ECART_DEFAUT):
+    """Cohérence : un état supérieur vaut toujours plus qu'un état inférieur (convenable < bon < très bon).
+    Règle générale : si l'état supérieur est en dessous de l'état inférieur, il est relevé à `ecart` fois l'état inférieur
+    (+20 % par défaut, réglable dans data/manual/ratios_etats.json), et marqué « ajusté ». Deux états égaux ne sont pas touchés.
     Exception : si l'état inférieur n'est qu'une archive alors que l'état supérieur vient d'un relevé actuel, c'est
-    l'archive qu'on ramène à la donnée actuelle (sinon une archive gonflée tirerait vers le haut un prix actuel).
-    Renvoie le nombre de prix modifiés."""
+    l'archive qu'on ramène (état supérieur ÷ `ecart`) à la donnée actuelle, sinon une archive gonflée tirerait vers le haut
+    un prix actuel. Renvoie le nombre de prix modifiés."""
     ordre = [e for e in ETATS if par_etat.get(e)]
     fiables = {e for e in ordre if par_etat[e]["source"] != "archives"}      # valeur issue d'un relevé actuel
     for _ in range(3):
@@ -61,10 +62,10 @@ def aligner(par_etat):
             b, h = par_etat[bas], par_etat[haut]
             if h["prix"] < b["prix"] - 1e-9:
                 if haut in fiables and bas not in fiables:
-                    par_etat[bas] = {**b, "prix": h["prix"], "ajuste": True}
+                    par_etat[bas] = {**b, "prix": round(h["prix"] / ecart, 2), "ajuste": True}
                     fiables.add(bas)
                 else:
-                    par_etat[haut] = {**h, "prix": b["prix"], "ajuste": True}
+                    par_etat[haut] = {**h, "prix": round(b["prix"] * ecart, 2), "ajuste": True}
                     if bas in fiables:
                         fiables.add(haut)
                 change = True
@@ -88,6 +89,7 @@ def main():
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
     valides = validations.lire()                                                          # prix validés par le propriétaire
+    ecart = etats.charger_ecart(DB.parent.parent / "manual" / "ratios_etats.json")                  # écart minimal entre deux états
     ratios = etats.charger_ratios(DB.parent.parent / "manual" / "ratios_etats.json")      # rapports entre états (propriétaire)
     # Relevés eBay déjà enregistrés : le modèle y mesure la décote des annonces anciennes, puis étend la cote aux
     # éditions qui n'ont pas 3 annonces récentes mais en ont 3 en tout (voir calibration.ajouter_toutes_annonces).
@@ -128,7 +130,7 @@ def main():
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
     nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
-    nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
+    nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
 
     versions = []
     cle_de = {}
@@ -160,7 +162,7 @@ def main():
         archives_seules = {cle: {e: estimer([o for o in obs if o.type == "historique"], args.aujourdhui) for e, obs in par_etat.items()}
                            for cle, par_etat in brut.items()}
         for par_etat in archives_seules.values():
-            aligner(par_etat)
+            aligner(par_etat, ecart)
         dates_arch = [o.date for par in brut.values() for obs in par.values() for o in obs if o.type == "historique"]
         base_versions = [{"id": v["id"], "prix": {e: (archives_seules.get(r_cle, {}).get(e) or {}).get("prix") for e in ETATS}}
                          for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]

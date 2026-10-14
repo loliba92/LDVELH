@@ -1,6 +1,7 @@
 {
-  "convenable": 0.40,
-  "bon": 0.60,
-  "tres_bon": 1.00,
-  "note": "Rapports entre états, relatifs au très bon état (règle du propriétaire : convenable 40 %, bon 60 %). Servent à déduire un état sans prix à partir des autres états de la même édition. Modifier ces valeurs puis relancer le workflow ou pipeline/export_site.py."
+  "convenable": 0.4,
+  "bon": 0.6,
+  "tres_bon": 1.0,
+  "ecart_etat_superieur": 1.2,
+  "note": "Rapports entre états, relatifs au très bon état (règle du propriétaire : convenable 40 %, bon 60 %). Servent à déduire un état sans prix à partir des autres états de la même édition. Modifier ces valeurs puis relancer le workflow ou pipeline/export_site.py. « ecart_etat_superieur » : quand les prix d'un état supérieur sont en dessous de l'état inférieur (archives contradictoires), il est relevé à ce multiple de l'état inférieur (1,2 = +20 %)."
 }
