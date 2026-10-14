@@ -33,21 +33,21 @@ class TestConcordance(unittest.TestCase):
 
 
 class TestEtatNonPrecise(unittest.TestCase):
-    def test_etat_suppose_bon_quand_non_precise(self):
+    def test_etat_suppose_tres_bon_quand_non_precise(self):
         self.assertEqual(ebay_api.etat_de({"conditionId": "5000"}), ("bon", False))
-        self.assertEqual(ebay_api.etat_de({"conditionId": "3000"}), ("bon", True))          # d'occasion sans détail
-        self.assertEqual(ebay_api.etat_de({}), ("bon", True))                                 # aucun état dans l'annonce
-        self.assertEqual(ebay_api.etat_de({"conditionId": ""}), ("bon", True))
+        self.assertEqual(ebay_api.etat_de({"conditionId": "3000"}), ("tres_bon", True))     # d'occasion sans détail
+        self.assertEqual(ebay_api.etat_de({}), ("tres_bon", True))                            # aucun état dans l'annonce
+        self.assertEqual(ebay_api.etat_de({"conditionId": ""}), ("tres_bon", True))
         self.assertEqual(ebay_api.etat_de({"conditionId": "4000"}), ("tres_bon", False))
 
     def test_neuf_et_pieces_restent_ecartes(self):
         for code in ("1000", "1500", "7000"):
             self.assertEqual(ebay_api.etat_de({"conditionId": code}), (None, False))
 
-    def test_agreger_compte_les_annonces_sans_etat_en_bon_etat(self):
+    def test_agreger_compte_les_annonces_sans_etat_en_tres_bon_etat(self):
         sans_etat = {"title": "Le Sorcier de la montagne de feu", "price": {"value": "14", "currency": "EUR"}}
         l = ebay_api.agreger([sans_etat, item(10, "5000"), item(30, "1000")], "9782070583805", date(2026, 10, 14))
-        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_median"]) for x in l], [("bon", 2, "12.00")])    # le neuf (30 €) reste écarté
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_median"]) for x in l], [("bon", 1, "10.00"), ("tres_bon", 1, "14.00")])    # le neuf (30 €) reste écarté
 
 
 class TestFraicheur(unittest.TestCase):
@@ -99,8 +99,8 @@ class TestEbay(unittest.TestCase):
         items = [item(50, "5000", "Lot de 10 livres dont vous êtes le héros"), item(9, "5000", devise="USD"),
                  item(9, "1000"), item(9, "3000"), item(15, "5000", "Collection complète"), item(11, "5000")]
         lignes = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11))
-        # 11 € (état précisé) + 9 € (« d'occasion » sans détail, 3000, supposé BE) ; neuf (1000), lot, collection et dollars écartés
-        self.assertEqual([(l["etat"], l["nb_annonces"], l["prix_median"]) for l in lignes], [("bon", 2, "10.00")])
+        # 11 € (état précisé) + 9 € (« d'occasion » sans détail, 3000, supposé TBE) ; neuf (1000), lot, collection et dollars écartés
+        self.assertEqual([(l["etat"], l["nb_annonces"], l["prix_median"]) for l in lignes], [("bon", 1, "11.00"), ("tres_bon", 1, "9.00")])
 
     def test_appels_http(self):
         faux = Faux({"itemSummaries": [item(10, "5000")]})

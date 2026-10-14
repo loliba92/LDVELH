@@ -35,9 +35,10 @@ PAUSE = 0.5
 MAX_AGE_JOURS = 90
 # Codes d'état d'eBay -> états du projet. Les codes absents (neuf, « d'occasion » sans précision) sont ignorés.
 ETATS = {"2750": "tres_bon", "4000": "tres_bon", "5000": "bon", "6000": "convenable"}
-# État non précisé (« d'occasion » sans détail, 3000, ou aucun état dans l'annonce) : on suppose le bon état (règle du propriétaire).
+# État non précisé (« d'occasion » sans détail, 3000, ou aucun état dans l'annonce) : on suppose le très bon état (règle du
+# propriétaire, qui préfère tirer les prix vers le bas plutôt que de les gonfler).
 # Les annonces « neuf » (1000, 1500…) et « pour pièces » (7000) restent écartées.
-ETAT_SUPPOSE = "bon"
+ETAT_SUPPOSE = "tres_bon"
 CODES_NON_PRECISES = {"", "3000"}
 
 
@@ -171,7 +172,7 @@ def controler(a, token):
         retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
         par_titre = len(annonces(titre, token)) if nb_ed == 1 else None
         print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
-              f"autre livre {c['autre_livre']}, lots {c['lot']}, état supposé BE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
+              f"autre livre {c['autre_livre']}, lots {c['lot']}, état supposé TBE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
               + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
         tot.update(c); tot["retenues"] += retenues; tot["isbn"] += 1; tot["isbn_sans_annonce"] += (c["total"] == 0)
         time.sleep(PAUSE)
