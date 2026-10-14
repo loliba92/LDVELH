@@ -1,13 +1,15 @@
 {
-  "genere_le": "2026-10-11",
+  "genere_le": "2026-10-14",
   "nb_versions": 430,
   "nb_livres": 226,
   "nb_series": 24,
   "sources_prix": [
-    "Relevé d'archives (historique)"
+    "Relevé d'archives (historique)",
+    "eBay (interface officielle)"
   ],
   "types_prix": [
+    "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 0
+  "nb_prix_actuels": 43
 }
