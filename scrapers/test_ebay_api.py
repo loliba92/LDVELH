@@ -109,17 +109,28 @@ class TestEbay(unittest.TestCase):
         self.assertEqual((t, len(res)), ("T", 1))
         self.assertEqual(faux.appels[1][1]["headers"]["X-EBAY-C-MARKETPLACE-ID"], "EBAY_FR")
 
-    def test_chercher_reunit_titre_isbn_et_isbn_sans_doublon_ni_recherche_par_titre_seul(self):
-        a, b = {**item(27, "5000"), "itemId": "A"}, {**item(32, "5000"), "itemId": "B"}
-        reponses = iter([{"itemSummaries": [a, b]}, {"itemSummaries": [b, {**item(50, "5000"), "itemId": "C"}]}])
-        class H(Faux):
-            def get(self, url, **kw):
-                self.appels.append((url, kw))
-                return type("R", (), {"status_code": 200, "raise_for_status": lambda s: None, "json": lambda s, r=next(reponses): r})()
-        faux = H({})
+    def test_chercher_par_isbn_seul_sans_repli_par_le_titre(self):
+        faux = Faux({"itemSummaries": [item(27, "5000")]})
         res = ebay_api.chercher("9782070335749", "La Forêt du Dragon", "T", faux)
-        self.assertEqual([x["itemId"] for x in res], ["A", "B", "C"])
-        self.assertEqual([c[1]["params"]["q"] for c in faux.appels], ["La Forêt du Dragon 9782070335749", "9782070335749"])
+        self.assertEqual(len(res), 1)
+        self.assertEqual([c[1]["params"]["q"] for c in faux.appels], ["9782070335749"])
+
+    def test_annee_de_parution(self):
+        self.assertTrue(ebay_api.annee_compatible("La Forêt du Dragon Folio junior 1989", ("1989",)))
+        self.assertFalse(ebay_api.annee_compatible("La Forêt du Dragon réédition 2005", ("1989",)))
+        self.assertTrue(ebay_api.annee_compatible("La Forêt du Dragon", ("1989",)))        # pas d'année : on ne tranche pas
+        self.assertTrue(ebay_api.annee_compatible("La Forêt du Dragon 2005", ()))          # année de l'édition inconnue
+        lignes = ebay_api.agreger([item(10, "5000", "La Forêt du Dragon 1989"), item(40, "5000", "La Forêt du Dragon 2005")],
+                                  "9782070335749", date(2026, 10, 14), "La Forêt du Dragon", ("1989",))
+        self.assertEqual([(l["nb_annonces"], l["prix_median"]) for l in lignes], [(1, "10.00")])
+
+    def test_annonce_trouvee_sous_deux_editions_du_meme_livre_est_ecartee(self):
+        a, b = {**item(10, "5000"), "itemId": "A"}, {**item(12, "5000"), "itemId": "B"}
+        res = ebay_api.ecarter_ambigues({"V1": [a, b], "V2": [b], "AUTRE": [a]},
+                                        {"V1": "Livre X", "V2": "Livre X", "AUTRE": "Livre Y"})
+        self.assertEqual([x["itemId"] for x in res["V1"]], ["A"])          # B est sous V1 et V2 : ambiguë
+        self.assertEqual(res["V2"], [])
+        self.assertEqual([x["itemId"] for x in res["AUTRE"]], ["A"])      # autre livre : pas de conflit
 
     def test_aucune_annonce(self):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])

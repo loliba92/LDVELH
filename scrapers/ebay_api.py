@@ -107,26 +107,44 @@ def annonces(isbn, token, http=requests):
 
 
 def chercher(isbn, titre, token, http=requests, pause=0):
-    """Annonces d'une édition : on cherche comme le ferait un acheteur, « titre ISBN », puis l'ISBN seul, et on réunit
-    les résultats sans doublon. Une recherche par le seul titre est abandonnée : elle ramenait d'autres objets dont le
-    titre ressemble (ex. 14 annonces à 6 € pour un livre qui se vend 27 à 50 €, constaté sur « La Forêt du Dragon »)."""
-    vues, tout = set(), []
-    for q in (f"{titre} {isbn}", isbn):
-        for it in annonces(q, token, http):
-            cle = it.get("itemId") or id(it)
-            if cle not in vues:
-                vues.add(cle)
-                tout.append(it)
-        if pause:
-            time.sleep(pause)
-    return tout
+    """Annonces d'une édition : recherche par ISBN seul, comme un acheteur qui colle l'ISBN dans eBay (vérifié par le
+    propriétaire sur « La Forêt du Dragon » : 3 annonces, les mêmes qu'avec le titre). Pas de recherche de repli par le
+    titre : elle remplaçait ces 3 annonces (27 à 50 €) par 14 annonces à 6 € d'autres objets au titre voisin."""
+    items = annonces(isbn, token, http)
+    if pause:
+        time.sleep(pause)
+    return items
 
 
-def agreger(items, isbn13, jour, titre=None):
+ANNEE = re.compile(r"\b(19[5-9]\d|20[0-3]\d)\b")
+
+
+def annee_compatible(titre_annonce, annees):
+    """Faux si le titre de l'annonce donne une année de parution qui n'est celle d'aucune année connue de l'édition
+    (même titre, autre édition). Sans année dans le titre, ou sans année connue, on ne tranche pas."""
+    vues = set(ANNEE.findall(str(titre_annonce or "")))
+    return not vues or not annees or bool(vues & set(annees))
+
+
+def ecarter_ambigues(par_isbn, livres):
+    """par_isbn : {isbn: [annonces]} ; livres : {isbn: livre}. Une annonce trouvée sous plusieurs éditions d'un même
+    livre (le vendeur cite plusieurs ISBN, ou la recherche déborde) ne peut pas être attribuée : on la retire de toutes."""
+    vues = {}
+    for isbn, items in par_isbn.items():
+        for it in items:
+            if it.get("itemId"):
+                vues.setdefault((livres.get(isbn), it["itemId"]), set()).add(isbn)
+    return {isbn: [it for it in items if len(vues.get((livres.get(isbn), it.get("itemId")), ())) < 2]
+            for isbn, items in par_isbn.items()}
+
+
+def agreger(items, isbn13, jour, titre=None, annees=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for it in items:
         if titre and not concorde(it.get("title", ""), titre):
+            continue
+        if not annee_compatible(it.get("title", ""), annees):
             continue
         age = age_jours(it, jour)
         ancienne = age is not None and age > MAX_AGE_JOURS     # invendue depuis longtemps : prix probablement trop haut
@@ -152,13 +170,14 @@ def agreger(items, isbn13, jour, titre=None):
 
 
 def catalogue():
-    """[(isbn13, titre, nb d'éditions du livre)] : le titre sert à vérifier la concordance et, pour un livre
-    qui n'a qu'une édition, à chercher aussi par titre (un titre ne distingue pas les éditions entre elles)."""
+    """[(isbn13, titre, nb d'éditions du livre, livre, années de parution)] : le titre sert à vérifier la concordance ;
+    le nombre d'éditions, le livre et l'année servent à ne pas confondre les éditions d'un même titre."""
     import collections
     import editions
     lignes = [r for r in editions.load() if r.get("isbn13")]
     nb = collections.Counter(r["livre"] for r in lignes)
-    return sorted({(r["isbn13"], r["titre"], nb[r["livre"]]) for r in lignes})
+    return sorted({(r["isbn13"], r["titre"], nb[r["livre"]], r["livre"],
+                    tuple(sorted({str(a) for a in (r.get("annee"), r.get("annee_bnf")) if a}))) for r in lignes})
 
 
 def isbns_catalogue():
@@ -171,12 +190,14 @@ def controler(a, token):
     import collections
     cat = catalogue()[: a.controle]
     tot = collections.Counter()
-    for isbn, titre, nb_ed in cat:
+    for isbn, titre, nb_ed, livre, annees in cat:
         items = chercher(isbn, titre, token, pause=PAUSE)
         c = collections.Counter(total=len(items))
         for it in items:
             conc = concorde(it.get("title", ""), titre)
             c["concordant" if conc else "autre_livre"] += 1
+            if not annee_compatible(it.get("title", ""), annees):
+                c["autre_annee"] += 1
             if LOT.search(it.get("title", "")):
                 c["lot"] += 1
             etat_it, suppose = etat_de(it)
@@ -186,10 +207,10 @@ def controler(a, token):
                 c["etat_inconnu"] += 1
             age = age_jours(it, date.today())
             c["age_inconnu" if age is None else ("age_30" if age <= 30 else ("age_90" if age <= MAX_AGE_JOURS else "age_plus"))] += 1
-        retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
+        retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre, annees))
         par_titre = None
         print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
-              f"autre livre {c['autre_livre']}, lots {c['lot']}, état supposé TBE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
+              f"autre livre {c['autre_livre']}, autre année {c['autre_annee']}, lots {c['lot']}, état supposé TBE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
               + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
         tot.update(c); tot["retenues"] += retenues; tot["isbn"] += 1; tot["isbn_sans_annonce"] += (c["total"] == 0)
         time.sleep(PAUSE)
@@ -217,9 +238,12 @@ def main():
         return
     cat = catalogue()[: a.limite]
     isbns = [c[0] for c in cat]
-    lignes = []
-    for isbn, titre, nb_ed in cat:
-        lignes += agreger(chercher(isbn, titre, token, pause=PAUSE), isbn, jour, titre)
+    lignes, par_isbn = [], {}
+    for isbn, titre, nb_ed, livre, annees in cat:
+        par_isbn[isbn] = chercher(isbn, titre, token, pause=PAUSE)
+    par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
+    for isbn, titre, nb_ed, livre, annees in cat:
+        lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees)
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
