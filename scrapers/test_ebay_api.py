@@ -109,6 +109,18 @@ class TestEbay(unittest.TestCase):
         self.assertEqual((t, len(res)), ("T", 1))
         self.assertEqual(faux.appels[1][1]["headers"]["X-EBAY-C-MARKETPLACE-ID"], "EBAY_FR")
 
+    def test_chercher_reunit_titre_isbn_et_isbn_sans_doublon_ni_recherche_par_titre_seul(self):
+        a, b = {**item(27, "5000"), "itemId": "A"}, {**item(32, "5000"), "itemId": "B"}
+        reponses = iter([{"itemSummaries": [a, b]}, {"itemSummaries": [b, {**item(50, "5000"), "itemId": "C"}]}])
+        class H(Faux):
+            def get(self, url, **kw):
+                self.appels.append((url, kw))
+                return type("R", (), {"status_code": 200, "raise_for_status": lambda s: None, "json": lambda s, r=next(reponses): r})()
+        faux = H({})
+        res = ebay_api.chercher("9782070335749", "La Forêt du Dragon", "T", faux)
+        self.assertEqual([x["itemId"] for x in res], ["A", "B", "C"])
+        self.assertEqual([c[1]["params"]["q"] for c in faux.appels], ["La Forêt du Dragon 9782070335749", "9782070335749"])
+
     def test_aucune_annonce(self):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])
 

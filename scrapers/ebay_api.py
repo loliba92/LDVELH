@@ -99,10 +99,27 @@ def jeton(client_id, secret, http=requests):
 
 
 def annonces(isbn, token, http=requests):
+    """Annonces à prix fixe pour une requête (un ISBN, ou un titre suivi de l'ISBN)."""
     r = http.get(URL_RECHERCHE, params={"q": isbn, "limit": 50, "filter": "buyingOptions:{FIXED_PRICE}"},
                  headers={"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_FR"}, timeout=30)
     r.raise_for_status()
     return r.json().get("itemSummaries", [])
+
+
+def chercher(isbn, titre, token, http=requests, pause=0):
+    """Annonces d'une édition : on cherche comme le ferait un acheteur, « titre ISBN », puis l'ISBN seul, et on réunit
+    les résultats sans doublon. Une recherche par le seul titre est abandonnée : elle ramenait d'autres objets dont le
+    titre ressemble (ex. 14 annonces à 6 € pour un livre qui se vend 27 à 50 €, constaté sur « La Forêt du Dragon »)."""
+    vues, tout = set(), []
+    for q in (f"{titre} {isbn}", isbn):
+        for it in annonces(q, token, http):
+            cle = it.get("itemId") or id(it)
+            if cle not in vues:
+                vues.add(cle)
+                tout.append(it)
+        if pause:
+            time.sleep(pause)
+    return tout
 
 
 def agreger(items, isbn13, jour, titre=None):
@@ -155,7 +172,7 @@ def controler(a, token):
     cat = catalogue()[: a.controle]
     tot = collections.Counter()
     for isbn, titre, nb_ed in cat:
-        items = annonces(isbn, token)
+        items = chercher(isbn, titre, token, pause=PAUSE)
         c = collections.Counter(total=len(items))
         for it in items:
             conc = concorde(it.get("title", ""), titre)
@@ -170,7 +187,7 @@ def controler(a, token):
             age = age_jours(it, date.today())
             c["age_inconnu" if age is None else ("age_30" if age <= 30 else ("age_90" if age <= MAX_AGE_JOURS else "age_plus"))] += 1
         retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
-        par_titre = len(annonces(titre, token)) if nb_ed == 1 else None
+        par_titre = None
         print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
               f"autre livre {c['autre_livre']}, lots {c['lot']}, état supposé TBE {c['etat_suppose']}, autre état écarté {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
               + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
@@ -202,13 +219,7 @@ def main():
     isbns = [c[0] for c in cat]
     lignes = []
     for isbn, titre, nb_ed in cat:
-        trouvees = agreger(annonces(isbn, token), isbn, jour, titre)
-        time.sleep(PAUSE)
-        if sum(l["nb_annonces"] for l in trouvees) < 3 and nb_ed == 1:
-            # titre à édition unique : la recherche par titre est sans ambiguïté et ramène plus d'annonces
-            trouvees = agreger(annonces(titre, token), isbn, jour, titre)
-            time.sleep(PAUSE)
-        lignes += trouvees
+        lignes += agreger(chercher(isbn, titre, token, pause=PAUSE), isbn, jour, titre)
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
