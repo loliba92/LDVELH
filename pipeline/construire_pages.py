@@ -152,6 +152,7 @@ REVUE = '''<h1>Revue des prix</h1>
     <option value="sans">Pas de relevé eBay</option>
     <option value="aligne">Prix remontés (C ≤ BE ≤ TBE)</option>
     <option value="recalibre">Remis à niveau par le modèle</option>
+    <option value="deduit">Déduits des autres états (C 40 %, BE 60 % du TBE)</option>
   </select></div>
   <div class="champ"><label for="r-tri">Trier par</label><select id="r-tri">
     <option value="ecart">Écart (du plus grand au plus petit)</option>
@@ -169,7 +170,7 @@ REVUE = '''<h1>Revue des prix</h1>
   <li><strong>Archive</strong> : ancien relevé (prix demandés, jusqu'à fin 2024).</li>
   <li><strong>eBay</strong> : médiane des annonces récentes (moins de 90 jours), nombre d'annonces et fourchette ; entre parenthèses, la médiane de toutes les annonces, anciennes comprises.</li>
   <li><strong>Publié</strong> : le prix affiché sur le site, après lissage et alignement des états. <strong>Écart</strong> : publié divisé par archive.</li>
-  <li>Source : « archives » (aucun relevé retenu), « actuel » ou « mixte ».</li>
+  <li>Source : « archives » (aucun relevé retenu), « actuel » ou « mixte ». « Déduit » : état sans prix, estimé d'après les autres états de l'édition (rapports réglables dans <code>data/manual/ratios_etats.json</code>).</li>
 </ul>'''
 
 

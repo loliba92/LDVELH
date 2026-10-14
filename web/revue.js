@@ -16,6 +16,7 @@
     sans: (l) => l.eb_nb == null,
     aligne: (l) => l.ajuste,
     recalibre: (l) => l.recalibre,
+    deduit: (l) => l.deduit,
   };
   const tris = {
     ecart: (a, b) => Math.abs(Math.log(ratio(b) || 1)) - Math.abs(Math.log(ratio(a) || 1)),
@@ -30,7 +31,7 @@
     const eb = l.eb_nb == null ? '<span class="sous">pas de relevé</span>'
       : `<strong>${eur(l.eb_med)}</strong> · ${l.eb_nb} annonce${l.eb_nb > 1 ? 's' : ''}<span class="sous" style="display:block">${eur(l.eb_min)} à ${eur(l.eb_max)}` +
         (l.eb_nb_toutes ? ` · toutes : ${eur(l.eb_med_toutes)} (${l.eb_nb_toutes})` : '') + '</span>';
-    const notes = [l.ajuste ? 'remonté' : '', l.recalibre ? 'modèle' : ''].filter(Boolean).join(', ');
+    const notes = [l.ajuste ? 'ajusté' : '', l.recalibre ? 'modèle' : '', l.deduit ? 'déduit des autres états' : ''].filter(Boolean).join(', ');
     return `<tr${ecartImportant(l) ? ' class="alerte"' : ''}><td class="principal"><a href="./#q=${encodeURIComponent(l.isbn || l.id)}">${esc(l.titre)}</a>` +
       `<span class="sous" style="display:block">${esc(l.serie)}${l.numero && l.numero !== '000' ? ' n° ' + esc(l.numero) : ''} · <span class="badge">${esc(l.version)}</span></span></td>` +
       `<td data-label="État">${ETAT[l.etat] || l.etat}</td><td class="num" data-label="Archive">${eur(l.archive)}</td>` +

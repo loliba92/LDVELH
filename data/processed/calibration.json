@@ -3,20 +3,20 @@
   "n_paires": 109,
   "calcule_le": "2026-10-14",
   "par_etat": {
-    "convenable": {
-      "rapport": 0.914,
-      "ecart": 0.889,
-      "n": 1
+    "tres_bon": {
+      "rapport": 0.524,
+      "ecart": 1.204,
+      "n": 44
     },
     "bon": {
       "rapport": 1.291,
       "ecart": 0.597,
       "n": 64
     },
-    "tres_bon": {
-      "rapport": 0.524,
-      "ecart": 1.204,
-      "n": 44
+    "convenable": {
+      "rapport": 0.914,
+      "ecart": 0.889,
+      "n": 1
     }
   },
   "erreur_modele": 0.792,
@@ -39,8 +39,18 @@
     }
   },
   "sigma_archive": {
-    "convenable": 0.889,
+    "tres_bon": 1.0,
     "bon": 0.597,
+    "convenable": 0.889
+  },
+  "rapports_etats_mesures_archives": {
+    "n": 421,
+    "convenable": 0.624,
+    "bon": 0.779
+  },
+  "rapports_etats_retenus": {
+    "convenable": 0.4,
+    "bon": 0.6,
     "tres_bon": 1.0
   },
   "toutes_annonces": {

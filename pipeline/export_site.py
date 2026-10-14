@@ -19,6 +19,7 @@ import editions
 from estimation import Obs, estimer
 import calibration
 import mouvements
+import etats
 
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
@@ -85,6 +86,7 @@ def main():
     brut = {}
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
+    ratios = etats.charger_ratios(DB.parent.parent / "manual" / "ratios_etats.json")      # rapports entre états (propriétaire)
     # Relevés eBay déjà enregistrés : le modèle y mesure la décote des annonces anciennes, puis étend la cote aux
     # éditions qui n'ont pas 3 annonces récentes mais en ont 3 en tout (voir calibration.ajouter_toutes_annonces).
     releves = []
@@ -104,6 +106,13 @@ def main():
     prix = {cle: {e: estimer(obs, args.aujourdhui, sig_arch.get(e)) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
     modele["fraicheur"] = fraicheur
     modele["sigma_archive"] = sig_arch
+    trip = []
+    for par in brut.values():
+        a = {et: [o.prix for o in obs if o.type == "historique" and o.prix > 0] for et, obs in par.items()}
+        if all(a.get(et) for et in ETATS):
+            trip.append(tuple(statistics.median(a[et]) for et in ETATS))
+    modele["rapports_etats_mesures_archives"] = etats.rapports_mesures(trip)
+    modele["rapports_etats_retenus"] = ratios
     modele["toutes_annonces"] = {"lignes_ajoutees": nb_toutes, "decotes_utilisees": decotes}
     nb_recalibres = 0
     if modele["actif"]:
@@ -114,6 +123,8 @@ def main():
                                    "confiance": "faible"}
                     nb_recalibres += 1
     calibration.ecrire(modele, DB.parent.parent / "processed" / "calibration.json") if args.db == DB else None
+    # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
+    nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())
     nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
 
     versions = []
@@ -135,7 +146,7 @@ def main():
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
@@ -150,6 +161,7 @@ def main():
                          for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]
         base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
         mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
+        print(f"États déduits des autres états ({ratios}) : {nb_deduits}")
         print(f"Annonces de toutes anciennetés ajoutées à la cote : {nb_toutes} lignes (décotes : {decotes}) ; incertitude de l'archive apprise : {sig_arch}")
         print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "
               f"{mv.get('nb_grands_mouvements', 0)} grands mouvements")
@@ -182,7 +194,8 @@ def main():
             ligne = {"id": v["id"], "isbn": v["isbn13"], "titre": v["titre"], "serie": v["serie"], "numero": v["numero"],
                      "version": v["version"], "etat": e, "archive": round(statistics.median(arch), 2) if arch else None,
                      "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
-                     "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre"))}
+                     "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
+                     "deduit": bool(info.get("deduit"))}
             if eb:
                 ligne.update({"eb_date": eb["date"], "eb_nb": int(eb["nb_annonces"]), "eb_min": float(eb["prix_min"]),
                               "eb_med": float(eb["prix_median"]), "eb_max": float(eb["prix_max"])})

@@ -1,0 +1,6 @@
+{
+  "convenable": 0.40,
+  "bon": 0.60,
+  "tres_bon": 1.00,
+  "note": "Rapports entre états, relatifs au très bon état (règle du propriétaire : convenable 40 %, bon 60 %). Servent à déduire un état sans prix à partir des autres états de la même édition. Modifier ces valeurs puis relancer le workflow ou pipeline/export_site.py."
+}
