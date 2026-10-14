@@ -42,26 +42,31 @@ class TestEtats(unittest.TestCase):
 
     def test_repartir_un_seul_etat_actuel(self):
         p = {"bon": est(30, "actuel"), "convenable": est(99, "archives"), "tres_bon": est(7, "archives")}
-        self.assertEqual(etats.repartir(p, R), 3)
-        # plafond : le très bon état ne dépasse pas le prix actuel observé (30), le bon état en vaut 60 %
-        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (12.0, 18.0, 30.0))
-        self.assertTrue(p["bon"]["repartition"])
+        self.assertEqual(etats.repartir(p, R), 2)           # le bon état, observé, ne change pas ; les deux autres sont déduits
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (20.0, 30.0, 50.0))
+        self.assertNotIn("repartition", p["bon"])
         self.assertTrue(p["convenable"]["deduit"] and p["tres_bon"]["deduit"])        # états remplacés : déduits
         self.assertEqual(p["convenable"]["source"], "archives")                        # jamais comptés comme prix actuels
 
-    def test_repartir_plusieurs_etats_actuels_plats(self):
-        """Trois états au même prix (annonces non différenciées) : le niveau est la moyenne pondérée, l'ordre 40/60 est rétabli."""
-        p = {e: {**est(10, "actuel"), "incertitude": 0.2} for e in etats.ETATS}
+    def test_un_etat_observe_garde_son_prix(self):
+        """Convenable observé à 8,55 : il reste à 8,55 (et non 40 % du plus haut prix observé) ; bon et très bon sont déduits."""
+        p = {"convenable": est(8.55, "actuel"), "bon": est(6.98, "archives"), "tres_bon": est(29.79, "archives")}
         etats.repartir(p, R)
-        c, b, t = (p[e]["prix"] for e in etats.ETATS)
-        self.assertAlmostEqual(c / t, 0.4, places=2)
-        self.assertAlmostEqual(b / t, 0.6, places=2)
-        self.assertEqual(t, 10)                              # plafonné au prix actuel observé
+        self.assertEqual(p["convenable"]["prix"], 8.55)
+        self.assertEqual((p["bon"]["prix"], p["tres_bon"]["prix"]), (12.83, 21.38))
+        self.assertTrue(p["bon"]["deduit"] and p["tres_bon"]["deduit"])
 
-    def test_le_plus_fiable_pese_davantage(self):
+    def test_plusieurs_etats_observes_ne_changent_pas(self):
+        """Trois états observés : aucun n'est touché (la cohérence entre états relève de `aligner`)."""
+        p = {e: {**est(10, "actuel"), "incertitude": 0.2} for e in etats.ETATS}
+        self.assertEqual(etats.repartir(p, R), 0)
+        self.assertEqual([p[e]["prix"] for e in etats.ETATS], [10, 10, 10])
+
+    def test_etat_manquant_deduit_du_niveau_pondere(self):
         p = {"bon": {**est(30, "actuel"), "incertitude": 0.05}, "tres_bon": {**est(100, "actuel"), "incertitude": 0.9}}
         etats.repartir(p, R)
-        self.assertAlmostEqual(p["tres_bon"]["prix"], 50, delta=1.5)              # proche de BE/0,6 = 50
+        self.assertEqual((p["bon"]["prix"], p["tres_bon"]["prix"]), (30, 100))      # observés : inchangés
+        self.assertAlmostEqual(p["convenable"]["prix"], 20, delta=0.6)             # niveau ≈ BE ÷ 0,6 = 50 (le plus fiable pèse davantage)
 
     def test_edition_sans_prix_actuel_inchangee(self):
         p = {"convenable": est(5), "bon": est(8), "tres_bon": est(12)}

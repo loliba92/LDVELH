@@ -39,30 +39,26 @@ def charger_ecart(chemin):
 
 
 def repartir(par_etat, ratios):
-    """Édition qui a au moins un prix issu d'un relevé actuel : les trois états sont tirés d'un même niveau (en très bon
-    état), calculé à partir de tous les états actuels (moyenne géométrique pondérée par la fiabilité de chacun), puis
-    multiplié par les rapports (convenable 40 %, bon 60 %). Un état qui n'avait que son archive est remplacé (« déduit »).
-    Une édition sans aucun prix actuel n'est pas touchée. Renvoie le nombre d'états dont le prix a changé."""
+    """Édition qui a au moins un prix issu d'un relevé actuel : chaque état OBSERVÉ garde son prix (annonces récentes), les
+    états sans annonce récente sont déduits. Le niveau commun (en très bon état) est la moyenne géométrique, pondérée par
+    la fiabilité de chacun, des états observés (prix ÷ rapport de l'état) ; un état déduit vaut ce niveau multiplié par son
+    rapport (convenable 40 %, bon 60 %, très bon 100 %) et remplace l'éventuelle archive (« déduit », jamais compté comme prix
+    actuel). Une édition sans aucun prix actuel n'est pas touchée. Renvoie le nombre d'états dont le prix a changé."""
     actuels = {e: v for e, v in par_etat.items() if v and v.get("prix") and v.get("source") != "archives"}
     if not actuels:
         return 0
     poids = {e: 1 / max(v.get("incertitude") or 0.35, 0.05) ** 2 for e, v in actuels.items()}
     niveau = math.exp(sum(poids[e] * math.log(v["prix"] / ratios[e]) for e, v in actuels.items()) / sum(poids.values()))
-    # Plafond : l'édition n'est jamais cotée plus haut que le prix actuel le plus élevé réellement observé. Sans lui, un
-    # état observé (bon, convenable) dont les annonces sont presque aussi chères que le très bon état tirerait celui-ci
-    # trop haut (bon ÷ 0,6) : le très bon état ressortait au-dessus de ce qu'on voit sur eBay.
-    niveau = min(niveau, max(v["prix"] for v in actuels.values()))
     ref = max(actuels.values(), key=lambda v: v.get("date", ""))
     n = 0
     for e in ETATS:
-        nouveau = round(niveau * ratios[e], 2)
+        if e in actuels:
+            continue                                                  # état observé : son prix ne bouge pas
         v = par_etat.get(e)
         avant = v.get("prix") if v else None
-        if v and e in actuels:
-            par_etat[e] = {**v, "prix": nouveau, "repartition": True}
-        else:
-            par_etat[e] = {"prix": nouveau, "source": "archives", "nature": "archives", "nb": 0, "date": ref.get("date"),
-                           "confiance": "faible", "deduit": True}
+        nouveau = round(niveau * ratios[e], 2)
+        par_etat[e] = {"prix": nouveau, "source": "archives", "nature": "archives", "nb": 0, "date": ref.get("date"),
+                       "confiance": "faible", "deduit": True}
         n += avant is None or abs(avant - nouveau) > 0.005
     return n
 
