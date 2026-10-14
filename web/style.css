@@ -806,3 +806,17 @@ table.mouv .num { white-space: nowrap; }
 .rv-edition .rv-corps { flex: 1; min-width: 0; }
 .rv-edition .rv-jaq { flex: none; width: 88px; height: 124px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); }
 @media (max-width: 600px) { .rv-edition .rv-jaq { width: 64px; height: 90px; } .rv-edition.avec-jaq { gap: 10px; } }
+
+.rv-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.rv-b { min-height: 40px; padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 600 .9rem var(--f-ui); cursor: pointer; }
+.rv-b:hover { border-color: var(--accent); }
+.rv-b.rv-ok { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.rv-b.rv-retirer { color: var(--muted); }
+.rv-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; margin-top: 8px; }
+.rv-form[hidden], .rv-actions[hidden] { display: none; }
+.rv-form label { display: flex; flex-direction: column; gap: 3px; font: 600 .8rem var(--f-ui); color: var(--muted); }
+.rv-form input { width: 7.5rem; min-height: 40px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.rv-prix.valide { border-color: #5fae7a; box-shadow: inset 4px 0 0 #5fae7a; }
+.rv-quand { color: #8fd19e; }
+.rv-envoi { margin: 8px 0 12px; padding: 12px 14px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface); }
+.rv-envoi p { margin: 0 0 8px; }

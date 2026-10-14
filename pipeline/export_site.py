@@ -20,6 +20,7 @@ from estimation import Obs, estimer
 import calibration
 import mouvements
 import etats
+import validations
 
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
@@ -86,6 +87,7 @@ def main():
     brut = {}
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
+    valides = validations.lire()                                                          # prix validés par le propriétaire
     ratios = etats.charger_ratios(DB.parent.parent / "manual" / "ratios_etats.json")      # rapports entre états (propriétaire)
     # Relevés eBay déjà enregistrés : le modèle y mesure la décote des annonces anciennes, puis étend la cote aux
     # éditions qui n'ont pas 3 annonces récentes mais en ont 3 en tout (voir calibration.ajouter_toutes_annonces).
@@ -130,10 +132,12 @@ def main():
 
     versions = []
     cle_de = {}
+    nb_valides = 0
     for r in cx.execute(REQUETE):
         cle_de[r["id"]] = r["version_key"]
-        p = prix.get(r["version_key"], {})
+        p = dict(prix.get(r["version_key"], {}))
         isbn = r["isbn13"]
+        nb_valides += validations.appliquer(p, isbn, valides) if isbn else 0       # un prix validé prime sur tout le reste
         petite = f"covers/small/{isbn}.webp" if isbn and (COVERS / "small" / f"{isbn}.webp").exists() else None
         grande = f"covers/medium/{isbn}.webp" if isbn and (COVERS / "medium" / f"{isbn}.webp").exists() else None
         versions.append({
@@ -147,7 +151,7 @@ def main():
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
@@ -162,6 +166,7 @@ def main():
                          for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]
         base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
         mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
+        print(f"Prix validés par le propriétaire appliqués : {nb_valides}")
         print(f"États répartis 40/60 sur les éditions à prix actuel : {nb_repartis} prix modifiés ; états déduits pour les autres : {nb_deduits} ({ratios})")
         print(f"Annonces de toutes anciennetés ajoutées à la cote : {nb_toutes} lignes (décotes : {decotes}) ; incertitude de l'archive apprise : {sig_arch}")
         print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "
@@ -197,6 +202,8 @@ def main():
                      "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
                      "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
                      "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition"))}
+            if info.get("valide"):
+                ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision")})
             if eb:
                 ligne.update({"eb_date": eb["date"], "eb_nb": int(eb["nb_annonces"]), "eb_min": float(eb["prix_min"]),
                               "eb_med": float(eb["prix_median"]), "eb_max": float(eb["prix_max"])})

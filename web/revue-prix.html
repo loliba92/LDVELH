@@ -39,11 +39,16 @@
 
 <main id="main" class="cadre page">
 <h1>Vérifier les prix</h1>
-<p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ».</p>
+<p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
 <div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
   <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
   <button type="button" data-vue="change" aria-pressed="false">Tout ce qui a changé <span class="nb-onglet" id="rv-n-change"></span></button>
+  <button type="button" data-vue="valide" aria-pressed="false">Validés par vous <span class="nb-onglet" id="rv-n-valide"></span></button>
   <button type="button" data-vue="tous" aria-pressed="false">Tous les livres <span class="nb-onglet" id="rv-n-tous"></span></button>
+</div>
+<div class="rv-envoi" id="rv-envoi" hidden>
+  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. Téléchargez le fichier et envoyez-le moi : les prix seront alors enregistrés pour tous.</p>
+  <button type="button" class="bouton" id="rv-envoyer">Télécharger mes validations</button>
 </div>
 <div class="rv-outils">
   <div class="champ"><label for="rv-q">Chercher un livre</label><input type="search" id="rv-q" autocomplete="off" placeholder="titre ou série"></div>
@@ -58,6 +63,7 @@
   <li><strong>Le gros prix</strong> est celui affiché sur le site. <strong>Le prix barré</strong> est l'ancienne cote (ancien relevé de 2024). Le pourcentage montre le changement.</li>
   <li><strong>« À vérifier »</strong> : le prix a au moins doublé ou a été divisé par près de deux. Une raison est écrite en dessous.</li>
   <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
+  <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
   <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
 </ul>
 </main>

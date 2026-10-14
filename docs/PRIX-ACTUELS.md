@@ -119,3 +119,11 @@ Pour une édition qui a au moins un prix issu d'un relevé actuel, les trois ét
 
 **Plafond (15 octobre) :** le niveau commun ne dépasse jamais le prix actuel le plus élevé réellement observé pour l'édition. Constat : sur eBay, les annonces « bon état » sont presque aussi chères que les « très bon état » ; diviser un prix « bon » par 0,6 faisait ressortir le très bon état 15 % au-dessus de la médiane des annonces (médiane du rapport prix affiché / médiane eBay : 1,15 avant, 1,05 après). Conséquence assumée : le bon état vaut 60 % du plus haut prix observé, donc moins que ses propres annonces.
 Limite : cette règle n'est pas confirmée par les données (archives : 62 % et 78 % ; annonces eBay : états presque au même prix). Réglage dans `data/manual/ratios_etats.json`.
+
+
+## Prix validés par le propriétaire (Confirmer / Corriger)
+Sur la page « Vérifier les prix », chaque prix a deux boutons : **Confirmer** garde le prix affiché, **Corriger** en fixe un autre (on peut aussi saisir un prix pour un état qui n'en a pas). Un prix validé **prime sur tout** : archives, annonces eBay, règle 40/60, correctifs de cohérence. Il est affiché tel quel jusqu'à ce que le propriétaire le change, et le prix que le site aurait calculé est gardé à côté (« le site calculait… »).
+
+Fonctionnement : le site est statique, les validations sont d'abord gardées dans le navigateur (aucune donnée envoyée), puis le propriétaire télécharge un fichier (`prix-valides-AAAA-MM-JJ.json`) et le transmet. `python pipeline/validations.py <fichier>` le fusionne dans `data/manual/prix_valides.json` (entrées invalides refusées, la plus récente l'emporte) ; l'export (`export_site.py`) applique ces prix, champ `valide` dans `prix_info` et dans `revue.json`. Les prix validés ne sont plus « À vérifier ».
+
+« À vérifier » signale aussi les prix **remontés pour rester cohérents** (très bon état relevé au niveau du bon état parce que les archives se contredisaient) : 18 éditions au 14 octobre. Option retenue par le propriétaire : on ne devine pas leur prix, il le confirme ou le corrige.

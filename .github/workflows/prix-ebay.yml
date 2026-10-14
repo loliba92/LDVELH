@@ -51,6 +51,7 @@ jobs:
           python pipeline/test_calibration.py
           python pipeline/test_mouvements.py
           python pipeline/test_add_prix.py
+          python pipeline/test_validations.py
           python scrapers/test_ebay_api.py
       - name: Contrôle (sans enregistrement)
         if: ${{ inputs.controle != '' }}
