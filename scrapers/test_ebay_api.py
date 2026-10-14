@@ -20,6 +20,18 @@ class Faux:
         return R()
 
 
+class TestConcordance(unittest.TestCase):
+    def test_concorde(self):
+        self.assertTrue(ebay_api.concorde("LE SORCIER de la montagne de feu - Défis Fantastiques - Folio Junior", "Le Sorcier de la montagne de feu"))
+        self.assertFalse(ebay_api.concorde("Harry Potter à l'école des sorciers", "Le Sorcier de la montagne de feu"))
+        self.assertTrue(ebay_api.concorde("n'importe quoi", ""))      # rien à comparer : pas de filtre
+
+    def test_agreger_ecarte_un_autre_livre(self):
+        items = [item(10, "5000"), item(12, "5000", "Harry Potter à l'école des sorciers")]
+        l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11), "Le Sorcier de la montagne de feu")
+        self.assertEqual([(x["etat"], x["nb_annonces"]) for x in l], [("bon", 1)])
+
+
 class Refus:
     def post(self, url, **kw):
         class R:

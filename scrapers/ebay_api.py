@@ -35,6 +35,24 @@ LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+
 CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
 
 
+MOTS_VIDES = {"les", "des", "dans", "avec", "pour", "livre", "dont", "vous", "etes", "heros", "poche", "folio", "junior", "gallimard", "jeunesse"}
+
+
+def mots(texte):
+    import unicodedata
+    t = unicodedata.normalize("NFD", str(texte or "").lower())
+    t = "".join(c for c in t if not unicodedata.combining(c))
+    return {m for m in re.findall(r"[a-z0-9]+", t) if len(m) >= 3 and m not in MOTS_VIDES}
+
+
+def concorde(titre_annonce, titre_attendu, seuil=0.6):
+    """Vrai si l'annonce parle du bon livre : au moins `seuil` des mots du titre attendu figurent dans son titre."""
+    attendus = mots(titre_attendu)
+    if not attendus:
+        return True                      # rien à comparer : on ne filtre pas
+    return len(attendus & mots(titre_annonce)) / len(attendus) >= seuil
+
+
 def jeton(client_id, secret, http=requests):
     cle = base64.b64encode(f"{client_id}:{secret}".encode()).decode()
     r = http.post(URL_TOKEN, headers={"Authorization": f"Basic {cle}",
@@ -57,10 +75,12 @@ def annonces(isbn, token, http=requests):
     return r.json().get("itemSummaries", [])
 
 
-def agreger(items, isbn13, jour):
-    """Regroupe les annonces par état et renvoie une ligne par état (lots et devises étrangères écartés)."""
+def agreger(items, isbn13, jour, titre=None):
+    """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for it in items:
+        if titre and not concorde(it.get("title", ""), titre):
+            continue
         etat = ETATS.get(str(it.get("conditionId", "")))
         prix = it.get("price") or {}
         if etat is None or prix.get("currency") != "EUR" or LOT.search(it.get("title", "")):
@@ -76,14 +96,51 @@ def agreger(items, isbn13, jour):
             for etat, v in sorted(par_etat.items())]
 
 
-def isbns_catalogue():
+def catalogue():
+    """[(isbn13, titre, nb d'éditions du livre)] : le titre sert à vérifier la concordance et, pour un livre
+    qui n'a qu'une édition, à chercher aussi par titre (un titre ne distingue pas les éditions entre elles)."""
+    import collections
     import editions
-    return sorted({r["isbn13"] for r in editions.load() if r.get("isbn13")})
+    lignes = [r for r in editions.load() if r.get("isbn13")]
+    nb = collections.Counter(r["livre"] for r in lignes)
+    return sorted({(r["isbn13"], r["titre"], nb[r["livre"]]) for r in lignes})
+
+
+def isbns_catalogue():
+    return [c[0] for c in catalogue()]
+
+
+def controler(a, token):
+    """Contrôle sans enregistrement : ne montre que des comptages (jamais de titre ni de vendeur), pour juger
+    la fiabilité du rattachement aux éditions. Le journal d'un dépôt public est public."""
+    import collections
+    cat = catalogue()[: a.controle]
+    tot = collections.Counter()
+    for isbn, titre, nb_ed in cat:
+        items = annonces(isbn, token)
+        c = collections.Counter(total=len(items))
+        for it in items:
+            conc = concorde(it.get("title", ""), titre)
+            c["concordant" if conc else "autre_livre"] += 1
+            if LOT.search(it.get("title", "")):
+                c["lot"] += 1
+            if str(it.get("conditionId", "")) not in ETATS:
+                c["etat_inconnu"] += 1
+        retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
+        par_titre = len(annonces(titre, token)) if nb_ed == 1 else None
+        print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
+              f"autre livre {c['autre_livre']}, lots {c['lot']}, état inconnu {c['etat_inconnu']}) | retenues : {retenues}"
+              + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
+        tot.update(c); tot["retenues"] += retenues; tot["isbn"] += 1; tot["isbn_sans_annonce"] += (c["total"] == 0)
+        time.sleep(PAUSE)
+    print(f"Bilan : {tot['isbn']} éditions, {tot['total']} annonces, concordantes {tot['concordant']}, autre livre {tot['autre_livre']}, "
+          f"lots {tot['lot']}, retenues {tot['retenues']}, éditions sans annonce {tot['isbn_sans_annonce']}")
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
+    p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
     cid, secret = (os.environ.get("EBAY_CLIENT_ID") or "").strip(), (os.environ.get("EBAY_CLIENT_SECRET") or "").strip()
@@ -94,11 +151,20 @@ def main():
         token = jeton(cid, secret)
     except RuntimeError as e:
         sys.exit(str(e))
-    isbns = isbns_catalogue()[: a.limite]
+    if a.controle:
+        controler(a, token)
+        return
+    cat = catalogue()[: a.limite]
+    isbns = [c[0] for c in cat]
     lignes = []
-    for i, isbn in enumerate(isbns, 1):
-        lignes += agreger(annonces(isbn, token), isbn, jour)
+    for isbn, titre, nb_ed in cat:
+        trouvees = agreger(annonces(isbn, token), isbn, jour, titre)
         time.sleep(PAUSE)
+        if sum(l["nb_annonces"] for l in trouvees) < 3 and nb_ed == 1:
+            # titre à édition unique : la recherche par titre est sans ambiguïté et ramène plus d'annonces
+            trouvees = agreger(annonces(titre, token), isbn, jour, titre)
+            time.sleep(PAUSE)
+        lignes += trouvees
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"

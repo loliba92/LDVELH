@@ -11,6 +11,9 @@ on:
       limite:
         description: "Nombre maximal d'éditions interrogées (vide = toutes ; 20 pour un essai)"
         required: false
+      controle:
+        description: "Contrôle SANS enregistrement sur N éditions (comptages seulement) : vérifie le rattachement aux éditions"
+        required: false
 
 permissions:
   contents: write
@@ -42,19 +45,26 @@ jobs:
       - name: Tests
         run: |
           python pipeline/test_estimation.py
+          python pipeline/test_calibration.py
           python pipeline/test_add_prix.py
           python scrapers/test_ebay_api.py
+      - name: Contrôle (sans enregistrement)
+        if: ${{ inputs.controle != '' }}
+        run: python scrapers/ebay_api.py --controle ${{ inputs.controle }}
       - name: Relevé eBay
+        if: ${{ inputs.controle == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
       - name: Base et données du site
+        if: ${{ inputs.controle == '' }}
         run: |
           python pipeline/build_db.py
           python pipeline/export_site.py
       - name: Enregistrer et republier
+        if: ${{ inputs.controle == '' }}
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"
-          git add data/raw/occasion web/data
+          git add data/raw/occasion data/processed/calibration.json web/data
           if git diff --cached --quiet; then echo "Rien de nouveau."; exit 0; fi
           git commit -m "Relevé des prix actuels du $(date +%F)"
           git push

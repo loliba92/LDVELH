@@ -1,0 +1,10 @@
+{
+  "actif": false,
+  "n_paires": 10,
+  "calcule_le": "2026-10-14",
+  "par_etat": {},
+  "erreur_modele": null,
+  "erreur_archives": null,
+  "gain": null,
+  "raison": "pas assez d'éditions comparables (10 sur 20 nécessaires)"
+}

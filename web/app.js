@@ -265,6 +265,7 @@
     const i = infoPrix(b, k);
     if (b.prix[k] == null) return '';
     const aligne = i && i.ajuste ? ' Alignée sur l\'état inférieur : un état supérieur ne vaut jamais moins qu\'un état inférieur.' : '';
+    if (i && i.recalibre) return `Cote d'archives remise à niveau : le modèle a appris l'écart entre les archives et les annonces actuelles. C'est une estimation, pas un relevé.${aligne}`;
     if (!estActuel(i)) return `Cote d'archives (ancien relevé) : un ordre de grandeur.${aligne}`;
     const mot = NATURES[i.nature] || 'observation';
     const base = `${i.nb} ${mot}${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}`;

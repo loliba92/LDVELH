@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
+import calibration
 
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
@@ -71,6 +72,18 @@ def main():
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
     prix = {cle: {e: estimer(obs, args.aujourdhui) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
+    # Auto-apprentissage : si le modèle bat les archives (validation croisée), il remet à niveau les archives
+    # des éditions sans relevé actuel. Inactif, il ne change rien.
+    modele = calibration.apprendre(brut, args.aujourdhui)
+    nb_recalibres = 0
+    if modele["actif"]:
+        for par_etat in prix.values():
+            for e, est in par_etat.items():
+                if est and est["source"] == "archives":
+                    par_etat[e] = {**est, "prix": calibration.remettre_a_niveau(modele, est["prix"], e), "recalibre": True,
+                                   "confiance": "faible"}
+                    nb_recalibres += 1
+    calibration.ecrire(modele, DB.parent.parent / "processed" / "calibration.json") if args.db == DB else None
     nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
 
     versions = []
@@ -90,7 +103,7 @@ def main():
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     meta = {
@@ -105,6 +118,8 @@ def main():
     }
     nb_actuels = sum(1 for v in versions for i in v["prix_info"].values() if i["source"] != "archives")
     meta["nb_prix_actuels"] = nb_actuels
+    meta["calibration"] = {k: modele.get(k) for k in ("actif", "n_paires", "gain", "raison", "calcule_le", "rapport_global")}
+    meta["calibration"]["nb_recalibres"] = nb_recalibres
     sortie.mkdir(parents=True, exist_ok=True)
     (sortie / "versions.json").write_text(json.dumps(versions, ensure_ascii=False, separators=(",", ":")),
                                           encoding="utf-8")
@@ -113,7 +128,7 @@ def main():
     sans_prix = sum(1 for v in versions if all(x is None for x in v["prix"].values()))
     taille = (sortie / "versions.json").stat().st_size // 1024
     print(f"{len(versions)} versions, {meta['nb_livres']} livres, {meta['nb_series']} séries exportés "
-          f"({taille} Ko) ; {nb_ajustes} prix remonté(s) pour rester cohérents (C ≤ BE ≤ TBE) ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette")
+          f"({taille} Ko) ; {nb_ajustes} prix remonté(s) pour rester cohérents (C ≤ BE ≤ TBE) ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette ; modèle d'auto-apprentissage : {'ACTIF (' + str(nb_recalibres) + ' prix remis à niveau)' if modele['actif'] else 'inactif (' + modele['raison'] + ')'}")
 
 
 if __name__ == "__main__":
