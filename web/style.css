@@ -820,3 +820,11 @@ table.mouv .num { white-space: nowrap; }
 .rv-quand { color: #8fd19e; }
 .rv-envoi { margin: 8px 0 12px; padding: 12px 14px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface); }
 .rv-envoi p { margin: 0 0 8px; }
+
+/* Accueil : résumé de la collection et lien vers la page collection */
+.hero-coll { margin: 18px 0 0; padding: 12px 16px 14px; max-width: 60ch; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.hero-coll .hc-titre { margin: 0; font: 700 1.1rem var(--f-display); color: var(--brass); letter-spacing: .02em; }
+.hero-coll .hc-etat { margin: 2px 0 0; color: var(--text); }
+.hero-coll .hc-chiffres { margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
+.hero-coll .hc-chiffres strong { color: var(--text); }
+.hero-coll .hero-cta { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }

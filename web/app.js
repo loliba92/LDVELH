@@ -714,16 +714,17 @@
 
   function bilan() {
     const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b);
-    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0;
+    let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0, fraisPort = 0;
     lignes.forEach(({ b, c }) => {
       exemplaires += c.qte;
       const v = valeurLigne(b, c);
       if (c.prix != null) { investi += c.prix * c.qte; nbPayes += c.qte; }
+      if (c.port > 0) { investi += c.port; fraisPort += c.port; }      // frais de port d'un lot : réellement dépensés, comptés dans « Investi »
       if (v == null) sansCote += c.qte; else { total += v; if (estActuel(infoPrix(b, c.etat))) actuels += c.qte; }
       bas += (b.prix.convenable ?? 0) * c.qte;
       haut += (b.prix.tres_bon ?? 0) * c.qte;
     });
-    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
+    return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, fraisPort, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
   }
 
   function afficherCollection() {
@@ -733,6 +734,13 @@
       $(sel).textContent = n ? String(n) : '';
       $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
     });
+    if ($('#hero-coll')) {              // accueil : résumé de la collection et lien vers la page collection
+      $('#hc-etat').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : "vide pour l'instant";
+      const ch = $('#hc-chiffres');
+      ch.hidden = !n;
+      ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
+      $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
+    }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
     $('#coll-prive').innerHTML = (stockageOk
@@ -790,7 +798,7 @@
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
             <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
-            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}</small></dd></div>` : ''}
+            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}${bl.fraisPort ? `, dont ${bl.fraisPort.toFixed(2).replace('.', ',')} € de frais de port` : ''}</small></dd></div>` : ''}
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
@@ -890,13 +898,13 @@
           ? 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.'
           : 'Estimation mêlant prix actuels (annonces, ventes) et cotes d\'archives : un ordre de grandeur, pas un prix de vente.',
         estimation: { total: Math.round(bl.total * 100) / 100, exemplaires: bl.exemplaires, titres: bl.titres },
-        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null, lot: c.lot ?? null })),
+        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null, frais_port: c.port ?? null, lot: c.lot ?? null })),
       }, null, 2), 'application/json');
     } else {
       const q = (t) => `"${String(t ?? '').replace(/"/g, '""')}"`;
-      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee', 'prix_paye'].join(';')]
+      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee', 'prix_paye', 'frais_port'].join(';')]
         .concat(bl.lignes.map(({ b, c }) => [q(b.isbn13 || b.id), q(b.titre), b.version, q(b.serie), q(b.numero), c.etat, c.qte,
-          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ','), prixSaisi(c.prix)].join(';')));
+          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ','), prixSaisi(c.prix), prixSaisi(c.port)].join(';')));
       telecharger(`ma-collection-${jour}.csv`, '﻿' + lignes.join('\r\n'), 'text/csv;charset=utf-8');
     }
     annonce('Export prêt : le fichier a été téléchargé.');
@@ -936,7 +944,7 @@
         const liste = Array.isArray(j) ? j : (Array.isArray(j.exemplaires) ? j.exemplaires : []);
         liste.forEach((x) => {
           if (typeof x === 'string') entrees.push({ cle: x });
-          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye), lot: typeof x.lot === 'string' ? x.lot.slice(0, 20) : null });
+          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye), port: lirePrix(x.frais_port), lot: typeof x.lot === 'string' ? x.lot.slice(0, 20) : null });
         });
         if (!entrees.length) return { erreur: 'Ce fichier ne contient aucun livre exploitable.' };
       }
@@ -950,7 +958,7 @@
         const col = (n) => tete.indexOf(n);
         brutes.slice(1).forEach((l) => {
           const v = coupe(l);
-          entrees.push({ cle: v[col('isbn13')], etat: etatDepuis(v[col('etat')] || ''), qte: parseInt(v[col('quantite')], 10) || 1, prix: col('prix_paye') >= 0 ? lirePrix(v[col('prix_paye')]) : null });
+          entrees.push({ cle: v[col('isbn13')], etat: etatDepuis(v[col('etat')] || ''), qte: parseInt(v[col('quantite')], 10) || 1, prix: col('prix_paye') >= 0 ? lirePrix(v[col('prix_paye')]) : null, port: col('frais_port') >= 0 ? lirePrix(v[col('frais_port')]) : null });
         });
       }
     }
@@ -981,6 +989,8 @@
       COLL[b.id] = { etat: en.etat || (avant && avant.etat) || S.h, qte: Math.min(99, Math.max(1, en.qte || (avant && avant.qte) || 1)) };
       const pp = en.prix != null ? en.prix : (avant && avant.prix != null ? avant.prix : null);
       if (pp != null) COLL[b.id].prix = pp;
+      const pt = en.port != null ? en.port : (avant && avant.port > 0 ? avant.port : null);
+      if (pt != null) COLL[b.id].port = pt;
       const lotId = en.lot || (avant && avant.lot);
       if (lotId) COLL[b.id].lot = lotId;
       if (avant) maj += 1; else ajoutes += 1;
@@ -1002,7 +1012,7 @@
     const index = parId();
     const texte = Object.entries(COLL).filter(([id]) => index.has(id)).map(([id, c]) => {
       const b = index.get(id);
-      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}${c.prix != null ? '@' + c.prix : ''}`;
+      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}${c.prix != null ? '@' + c.prix : ''}${c.port > 0 ? '+' + c.port : ''}`;
     }).join(',');
     let octets = new TextEncoder().encode(texte), z = '';
     if (typeof CompressionStream === 'function') {
@@ -1019,8 +1029,8 @@
       if (m[2]) octets = await fluxOctets(octets, DecompressionStream, 'deflate-raw');
       const entrees = [];
       new TextDecoder().decode(octets).split(',').filter(Boolean).forEach((part) => {
-        const x = /^(.+?)([cbt])(\d{0,2})(?:@(\d+(?:\.\d{1,2})?))?$/.exec(part);
-        if (x) entrees.push({ cle: x[1], etat: DEPUIS_LETTRE[x[2]], qte: parseInt(x[3], 10) || 1, prix: lirePrix(x[4]) });
+        const x = /^(.+?)([cbt])(\d{0,2})(?:@(\d+(?:\.\d{1,2})?))?(?:\+(\d+(?:\.\d{1,2})?))?$/.exec(part);
+        if (x) entrees.push({ cle: x[1], etat: DEPUIS_LETTRE[x[2]], qte: parseInt(x[3], 10) || 1, prix: lirePrix(x[4]), port: lirePrix(x[5]) });
       });
       return { entrees };
     } catch (e) { return { erreur: 'Ce lien de transfert est incomplet ou abîmé.' }; }
@@ -1228,16 +1238,24 @@
     if (LOT.lignes.some((l) => l.prix == null)) return echec('Un prix manque : vérifiez le prix total et les frais de port.');
     const idLot = 'L' + Date.now().toString(36);
     let n = 0;
-    LOT.lignes.forEach((l) => {
+    // Les frais de port ne sont pas dans le prix de chaque livre (qui doit rester comparable à la cote) : on les garde à part,
+    // répartis au prorata du montant de chaque ligne, et ils sont comptés dans « Investi ».
+    const somme = sommeLot(), portTotal = lirePrix(LOT.port) || 0;
+    let portDonne = 0;
+    LOT.lignes.forEach((l, i) => {
       const avant = COLL[l.id], qn = Math.min(99, (avant ? avant.qte : 0) + l.qte);
       const pm = avant && avant.prix != null ? Math.round(((avant.prix * avant.qte + l.prix * l.qte) / (avant.qte + l.qte)) * 100) / 100 : l.prix;
+      const part = !portTotal ? 0 : (i === LOT.lignes.length - 1 ? Math.max(Math.round((portTotal - portDonne) * 100) / 100, 0) : Math.round((portTotal * (l.prix * l.qte) / somme) * 100) / 100);
+      portDonne += part;
+      const port = Math.round((((avant && avant.port) || 0) + part) * 100) / 100;
       COLL[l.id] = { etat: l.etat, qte: qn, prix: pm, lot: idLot };
+      if (port > 0) COLL[l.id].port = port;
       n += l.qte;
     });
     const total = sommeLot();
     LOT.lignes = []; LOT.total = ''; LOT.port = ''; $('#lot-total').value = ''; $('#lot-port').value = '';
     sauverColl(); dlg.close(); afficher();
-    annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)} au total.`);
+    annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)}${portTotal ? ` plus ${portTotal.toFixed(2).replace('.', ',')} € de frais de port` : ''}.`);
   }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-lot]')) ouvrirLot(); });
 
