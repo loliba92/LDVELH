@@ -1,29 +1,29 @@
 {
   "actif": false,
-  "n_paires": 43,
+  "n_paires": 109,
   "calcule_le": "2026-10-14",
   "par_etat": {
+    "convenable": {
+      "rapport": 0.914,
+      "ecart": 0.889,
+      "n": 1
+    },
     "bon": {
-      "rapport": 0.87,
-      "ecart": 0.757,
-      "n": 27
+      "rapport": 1.291,
+      "ecart": 0.597,
+      "n": 64
     },
     "tres_bon": {
-      "rapport": 0.316,
-      "ecart": 0.838,
-      "n": 15
-    },
-    "convenable": {
-      "rapport": 0.623,
-      "ecart": 0.0,
-      "n": 1
+      "rapport": 0.524,
+      "ecart": 1.204,
+      "n": 44
     }
   },
-  "erreur_modele": 0.775,
-  "erreur_archives": 0.884,
-  "gain": 0.123,
-  "raison": "rapport appris hors des bornes de sécurité",
-  "rapport_global": 0.623,
+  "erreur_modele": 0.792,
+  "erreur_archives": 0.841,
+  "gain": 0.058,
+  "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
+  "rapport_global": 0.914,
   "fraicheur": {
     "bon": {
       "rapport": 0.987,
@@ -36,6 +36,18 @@
     "convenable": {
       "rapport": 1.498,
       "n": 1
+    }
+  },
+  "sigma_archive": {
+    "convenable": 0.889,
+    "bon": 0.597,
+    "tres_bon": 1.0
+  },
+  "toutes_annonces": {
+    "lignes_ajoutees": 66,
+    "decotes_utilisees": {
+      "bon": 0.987,
+      "tres_bon": 0.969
     }
   }
 }

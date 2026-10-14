@@ -38,13 +38,14 @@ def poids(o, aujourdhui):
     return POIDS_TYPE[o.type] * 0.5 ** (age / demi_vie) * sqrt(min(max(o.nb, 1), PLAFOND_ANNONCES))
 
 
-def lisser(observations, aujourdhui):
+def lisser(observations, aujourdhui, sigma_hist=None):
     """Prix lissé (filtre de Kalman en log) : renvoie (prix, incertitude). Les observations sont lues dans l'ordre
     des dates ; chaque nouvelle valeur corrige l'estimation d'une part (le « gain ») d'autant plus grande qu'elle
     est précise (nature, nombre d'annonces) et que l'estimation précédente est ancienne."""
     m = var = derniere = None
     for o in sorted(observations, key=lambda x: x.date):
-        r = SIGMA[o.type] ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
+        sigma = sigma_hist if (o.type == "historique" and sigma_hist) else SIGMA[o.type]
+        r = sigma ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
         y = log(o.prix)
         if m is None:
             m, var = y, r
@@ -74,11 +75,12 @@ def mediane_ponderee(points):
     return pts[-1][0]
 
 
-def estimer(observations, aujourdhui=None):
+def estimer(observations, aujourdhui=None, sigma_hist=None):
     """Renvoie un dict {prix, source, nature, nb, date, confiance} ou None s'il n'y a aucune observation.
 
     source : « archives » (aucune observation actuelle), « actuel » ou « mixte ».
     nature : « annonces », « ventes », « rachats » (observation actuelle dominante) ou « archives ».
+    sigma_hist : incertitude de l'archive (écart-type du log du prix), apprise par le modèle ; défaut SIGMA["historique"].
     confiance : « ancienne » pour les archives ; « faible », « moyenne » ou « élevée » pour le reste.
     """
     aujourdhui = aujourdhui or date.today()
@@ -86,7 +88,7 @@ def estimer(observations, aujourdhui=None):
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]
-    prix, _incertitude = lisser(obs, aujourdhui)
+    prix, _incertitude = lisser(obs, aujourdhui, sigma_hist)
     actuelles = [(o, w) for o, w in poids_obs if o.type in ACTUELS]
     w_actuel = sum(w for _, w in actuelles)
     w_total = sum(w for _, w in poids_obs)

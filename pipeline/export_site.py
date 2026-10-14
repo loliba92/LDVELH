@@ -47,17 +47,28 @@ ETATS = ("convenable", "bon", "tres_bon")
 
 def aligner(par_etat):
     """Cohérence : un état supérieur ne vaut jamais moins qu'un état inférieur (convenable <= bon <= très bon).
-    Sinon le prix est remonté au niveau de l'état inférieur, et marqué « ajusté ». Renvoie le nombre de prix remontés."""
-    plancher, n = None, 0
-    for e in ETATS:
-        est = par_etat.get(e)
-        if not est:
-            continue
-        if plancher is not None and est["prix"] < plancher:
-            par_etat[e] = {**est, "prix": plancher, "ajuste": True}
-            n += 1
-        plancher = max(plancher or 0, par_etat[e]["prix"])
-    return n
+    Règle générale : le prix de l'état supérieur est remonté au niveau de l'état inférieur, et marqué « ajusté ».
+    Exception : si l'état inférieur n'est qu'une archive alors que l'état supérieur vient d'un relevé actuel, c'est
+    l'archive qu'on ramène à la donnée actuelle (sinon une archive gonflée tirerait vers le haut un prix actuel).
+    Renvoie le nombre de prix modifiés."""
+    ordre = [e for e in ETATS if par_etat.get(e)]
+    fiables = {e for e in ordre if par_etat[e]["source"] != "archives"}      # valeur issue d'un relevé actuel
+    for _ in range(3):
+        change = False
+        for bas, haut in zip(ordre, ordre[1:]):
+            b, h = par_etat[bas], par_etat[haut]
+            if h["prix"] < b["prix"] - 1e-9:
+                if haut in fiables and bas not in fiables:
+                    par_etat[bas] = {**b, "prix": h["prix"], "ajuste": True}
+                    fiables.add(bas)
+                else:
+                    par_etat[haut] = {**h, "prix": b["prix"], "ajuste": True}
+                    if bas in fiables:
+                        fiables.add(haut)
+                change = True
+        if not change:
+            break
+    return sum(1 for e in ordre if par_etat[e].get("ajuste"))
 
 
 def main():
@@ -74,15 +85,26 @@ def main():
     brut = {}
     for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
-    prix = {cle: {e: estimer(obs, args.aujourdhui) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
-    # Auto-apprentissage : si le modèle bat les archives (validation croisée), il remet à niveau les archives
-    # des éditions sans relevé actuel. Inactif, il ne change rien.
-    modele = calibration.apprendre(brut, args.aujourdhui)
+    # Relevés eBay déjà enregistrés : le modèle y mesure la décote des annonces anciennes, puis étend la cote aux
+    # éditions qui n'ont pas 3 annonces récentes mais en ont 3 en tout (voir calibration.ajouter_toutes_annonces).
     releves = []
     for f in sorted((DB.parent.parent / "raw" / "occasion").glob("ebay-*.csv")):
         with open(f, newline="", encoding="utf-8") as fh:
             releves += list(csv.DictReader(fh))
-    modele["fraicheur"] = calibration.fraicheur(releves)
+    fraicheur = calibration.fraicheur(releves)
+    nb_toutes, decotes = 0, {}
+    if args.db == DB:
+        cle_isbn = {r["isbn13"]: r["version_key"] for r in cx.execute(REQUETE) if r["isbn13"]}
+        nb_toutes, decotes = calibration.ajouter_toutes_annonces(brut, releves, cle_isbn, fraicheur)
+    # Auto-apprentissage : le modèle apprend l'écart entre archives et annonces actuelles, et s'en sert de deux façons :
+    # 1. l'incertitude de l'archive (par état) règle la confiance que le lissage lui accorde ;
+    # 2. s'il bat les archives (validation croisée), il remet à niveau celles des éditions sans relevé actuel.
+    modele = calibration.apprendre(brut, args.aujourdhui)
+    sig_arch = calibration.sigma_archive(modele)
+    prix = {cle: {e: estimer(obs, args.aujourdhui, sig_arch.get(e)) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
+    modele["fraicheur"] = fraicheur
+    modele["sigma_archive"] = sig_arch
+    modele["toutes_annonces"] = {"lignes_ajoutees": nb_toutes, "decotes_utilisees": decotes}
     nb_recalibres = 0
     if modele["actif"]:
         for par_etat in prix.values():
@@ -128,6 +150,7 @@ def main():
                          for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]
         base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
         mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
+        print(f"Annonces de toutes anciennetés ajoutées à la cote : {nb_toutes} lignes (décotes : {decotes}) ; incertitude de l'archive apprise : {sig_arch}")
         print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "
               f"{mv.get('nb_grands_mouvements', 0)} grands mouvements")
     meta = {

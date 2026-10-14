@@ -69,6 +69,14 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(prix, sorted(prix))
         self.assertTrue(all(b - a < 3 for a, b in zip(prix, prix[1:])), prix)
 
+    def test_incertitude_de_l_archive_apprise(self):
+        """Si l'archive est jugée peu fiable (sigma élevé), le relevé actuel l'emporte davantage."""
+        obs = [Obs(100, "historique", AUJ, 1), Obs(10, "prix_demande", AUJ, 5)]
+        confiante = estimer(obs, AUJ)["prix"]
+        mefiante = estimer(obs, AUJ, 0.8)["prix"]
+        self.assertLess(mefiante, confiante)
+        self.assertLess(mefiante, 25)                        # proche du relevé, pas de l'archive
+
     def test_valeur_extreme_amortie(self):
         normal = estimer([Obs(20, "historique", AUJ - timedelta(days=7), 1), Obs(22, "prix_demande", AUJ, 5)], AUJ)["prix"]
         extreme = estimer([Obs(20, "historique", AUJ - timedelta(days=7), 1), Obs(200, "prix_demande", AUJ, 5)], AUJ)["prix"]

@@ -63,6 +63,34 @@ class TestCalibration(unittest.TestCase):
         self.assertEqual(f["bon"]["n"], 2)
         self.assertTrue(0.7 < f["bon"]["rapport"] < 0.8, f)
 
+    def test_toutes_annonces_avec_decote_mesuree(self):
+        # 12 éditions où la décote est mesurée (récentes = 0,95 × toutes), puis une édition sans 3 annonces récentes
+        mesure = [{"etat": "bon", "nb_annonces": "3", "nb_toutes": "8", "prix_median": "9.5", "prix_median_toutes": "10", "isbn13": f"m{i}", "date": "2026-10-14"} for i in range(12)]
+        fr = calibration.fraicheur(mesure)
+        lignes = [{"etat": "bon", "nb_annonces": "1", "nb_toutes": "5", "prix_median": "20", "prix_median_toutes": "20", "isbn13": "x", "date": "2026-10-14"},
+                  {"etat": "bon", "nb_annonces": "1", "nb_toutes": "2", "prix_median": "20", "prix_median_toutes": "20", "isbn13": "y", "date": "2026-10-14"},     # < 3 en tout
+                  {"etat": "bon", "nb_annonces": "4", "nb_toutes": "6", "prix_median": "20", "prix_median_toutes": "20", "isbn13": "z", "date": "2026-10-14"}]     # déjà ≥ 3 récentes
+        brut = {}
+        n, util = calibration.ajouter_toutes_annonces(brut, lignes, {"x": "kx", "y": "ky", "z": "kz"}, fr)
+        self.assertEqual(n, 1)
+        self.assertEqual(list(brut), ["kx"])
+        self.assertAlmostEqual(brut["kx"]["bon"][0].prix, 19.0, delta=0.1)
+        self.assertEqual(brut["kx"]["bon"][0].nb, 5)
+
+    def test_toutes_annonces_refusees_si_decote_mal_mesuree(self):
+        fr = {"bon": {"rapport": 0.95, "n": 4}, "tres_bon": {"rapport": 0.5, "n": 40}}      # trop peu d'éditions / hors bornes
+        lignes = [{"etat": e, "nb_annonces": "1", "nb_toutes": "5", "prix_median": "20", "prix_median_toutes": "20", "isbn13": "x", "date": "2026-10-14"} for e in ("bon", "tres_bon")]
+        brut = {}
+        n, util = calibration.ajouter_toutes_annonces(brut, lignes, {"x": "kx"}, fr)
+        self.assertEqual((n, util), (0, {}))
+
+    def test_sigma_archive_apprise(self):
+        m = calibration.apprendre(jeu(30, 1.5, 0.5), AUJ)         # archive très imprécise : dispersion ≈ 0,5
+        sig = calibration.sigma_archive(m)
+        self.assertTrue(all(0.25 <= v <= 1.0 for v in sig.values()))
+        self.assertGreater(max(sig.values()), 0.35)
+        self.assertEqual(calibration.sigma_archive(calibration.apprendre(jeu(3, 1.5, 0.5), AUJ)), {})   # pas assez de données
+
     def test_remise_a_niveau(self):
         m = calibration.apprendre(jeu(30, 1.5, 0.1), AUJ)
         self.assertAlmostEqual(calibration.remettre_a_niveau(m, 10, "bon"), 15, delta=1.5)

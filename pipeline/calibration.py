@@ -15,10 +15,14 @@ import math
 import statistics
 from datetime import date
 
+from estimation import Obs
+
 MIN_NB = 3            # annonces minimum pour qu'un relevé serve à apprendre
 MIN_PAIRES = 20       # couples (édition, état) minimum pour oser apprendre
 MIN_PAR_ETAT = 8      # en dessous, l'état emprunte le rapport de l'ensemble
 GAIN_MIN = 0.15       # l'erreur doit baisser d'au moins 15 % par rapport aux archives seules
+FRAICHEUR_MIN_N = 10        # éditions minimum pour fier la décote des annonces anciennes à une mesure
+FRAICHEUR_BORNES = (0.8, 1.05)
 RATIO_BORNES = (0.4, 4.0)   # garde-fou : un rapport appris hors de ces bornes est refusé
 
 
@@ -44,14 +48,18 @@ def _loc(logs):
 
 
 def _ajuster(couples):
-    """Rapport (log) par état, avec repli sur l'ensemble pour les états trop peu fournis."""
+    """Rapport (log) et dispersion par état, avec repli sur l'ensemble pour les états trop peu fournis."""
     tous = [math.log(a / b) for _, _, b, a in couples]
     glob = _loc(tous)
+    mad_glob = statistics.median([abs(x - glob) for x in tous]) * 1.4826 if len(tous) > 1 else 0.0
     par_etat = {}
     for etat in {c[1] for c in couples}:
         logs = [math.log(a / b) for _, e, b, a in couples if e == etat]
-        loc = _loc(logs) if len(logs) >= MIN_PAR_ETAT else glob
-        mad = statistics.median([abs(x - loc) for x in logs]) * 1.4826 if len(logs) > 1 else 0.0
+        if len(logs) >= MIN_PAR_ETAT:
+            loc = _loc(logs)
+            mad = statistics.median([abs(x - loc) for x in logs]) * 1.4826
+        else:
+            loc, mad = glob, mad_glob
         par_etat[etat] = {"log_rapport": loc, "ecart": mad, "n": len(logs)}
     return glob, par_etat
 
@@ -96,6 +104,18 @@ def apprendre(brut, aujourdhui=None):
     return base
 
 
+SIGMA_ARCHIVE_BORNES = (0.25, 1.0)
+
+
+def sigma_archive(modele):
+    """Incertitude de l'archive par état, apprise de la dispersion archive / annonces actuelles. Vide tant que le modèle
+    n'a pas assez d'éditions comparables : l'estimation garde alors son réglage par défaut."""
+    if modele.get("n_paires", 0) < MIN_PAIRES:
+        return {}
+    lo, hi = SIGMA_ARCHIVE_BORNES
+    return {e: round(min(max(v["ecart"], lo), hi), 3) for e, v in modele["par_etat"].items() if v.get("ecart")}
+
+
 def fraicheur(releves):
     """Apprend de combien les annonces anciennes surestiment les prix : rapport médian (annonces récentes / toutes les
     annonces), par état, sur les relevés qui contiennent les deux. Information seulement pour l'instant."""
@@ -109,6 +129,28 @@ def fraicheur(releves):
         if nb >= MIN_NB and nb_t >= nb + MIN_NB and frais > 0 and toutes > 0:      # au moins 3 annonces anciennes en plus
             par_etat.setdefault(r["etat"], []).append(math.log(frais / toutes))
     return {e: {"rapport": round(math.exp(statistics.median(v)), 3), "n": len(v)} for e, v in par_etat.items()}
+
+
+def ajouter_toutes_annonces(brut, releves, cle_isbn, fr):
+    """Étend la cote aux éditions qui n'ont pas 3 annonces récentes mais en ont au moins 3 en tout : leur prix est la
+    médiane de toutes les annonces, multipliée par la décote mesurée (annonces récentes / toutes). Appliqué seulement
+    pour un état dont la décote est mesurée sur FRAICHEUR_MIN_N éditions au moins et reste dans FRAICHEUR_BORNES.
+    Modifie `brut` ; renvoie (nombre de lignes ajoutées, {état: décote utilisée})."""
+    utilisables = {e: v["rapport"] for e, v in fr.items()
+                   if v["n"] >= FRAICHEUR_MIN_N and FRAICHEUR_BORNES[0] <= v["rapport"] <= FRAICHEUR_BORNES[1]}
+    nb = 0
+    for r in releves:
+        try:
+            nb_f, nb_t, med_t = int(r["nb_annonces"]), int(r["nb_toutes"]), float(r["prix_median_toutes"])
+            jour = date.fromisoformat(r["date"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        cle, coef = cle_isbn.get(r["isbn13"]), utilisables.get(r["etat"])
+        if cle is None or coef is None or nb_f >= MIN_NB or nb_t < MIN_NB or med_t <= 0:
+            continue
+        brut.setdefault(cle, {}).setdefault(r["etat"], []).append(Obs(round(med_t * coef, 2), "prix_demande", jour, nb_t))
+        nb += 1
+    return nb, utilisables
 
 
 def remettre_a_niveau(modele, archive, etat):
