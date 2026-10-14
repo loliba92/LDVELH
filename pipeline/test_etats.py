@@ -42,8 +42,9 @@ class TestEtats(unittest.TestCase):
 
     def test_repartir_un_seul_etat_actuel(self):
         p = {"bon": est(30, "actuel"), "convenable": est(99, "archives"), "tres_bon": est(7, "archives")}
-        self.assertEqual(etats.repartir(p, R), 2)           # le bon état, qui fixe le niveau, ne change pas
-        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (20.0, 30.0, 50.0))
+        self.assertEqual(etats.repartir(p, R), 3)
+        # plafond : le très bon état ne dépasse pas le prix actuel observé (30), le bon état en vaut 60 %
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (12.0, 18.0, 30.0))
         self.assertTrue(p["bon"]["repartition"])
         self.assertTrue(p["convenable"]["deduit"] and p["tres_bon"]["deduit"])        # états remplacés : déduits
         self.assertEqual(p["convenable"]["source"], "archives")                        # jamais comptés comme prix actuels
@@ -55,7 +56,7 @@ class TestEtats(unittest.TestCase):
         c, b, t = (p[e]["prix"] for e in etats.ETATS)
         self.assertAlmostEqual(c / t, 0.4, places=2)
         self.assertAlmostEqual(b / t, 0.6, places=2)
-        self.assertTrue(10 < t < 20, t)
+        self.assertEqual(t, 10)                              # plafonné au prix actuel observé
 
     def test_le_plus_fiable_pese_davantage(self):
         p = {"bon": {**est(30, "actuel"), "incertitude": 0.05}, "tres_bon": {**est(100, "actuel"), "incertitude": 0.9}}

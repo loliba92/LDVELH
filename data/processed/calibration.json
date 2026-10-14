@@ -8,15 +8,15 @@
       "ecart": 0.627,
       "n": 81
     },
-    "convenable": {
-      "rapport": 0.887,
-      "ecart": 0.652,
-      "n": 1
-    },
     "bon": {
       "rapport": 1.284,
       "ecart": 0.612,
       "n": 63
+    },
+    "convenable": {
+      "rapport": 0.887,
+      "ecart": 0.652,
+      "n": 1
     }
   },
   "erreur_modele": 0.669,
@@ -40,8 +40,8 @@
   },
   "sigma_archive": {
     "tres_bon": 0.627,
-    "convenable": 0.652,
-    "bon": 0.612
+    "bon": 0.612,
+    "convenable": 0.652
   },
   "rapports_etats_mesures_archives": {
     "n": 421,

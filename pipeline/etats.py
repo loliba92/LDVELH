@@ -36,6 +36,10 @@ def repartir(par_etat, ratios):
         return 0
     poids = {e: 1 / max(v.get("incertitude") or 0.35, 0.05) ** 2 for e, v in actuels.items()}
     niveau = math.exp(sum(poids[e] * math.log(v["prix"] / ratios[e]) for e, v in actuels.items()) / sum(poids.values()))
+    # Plafond : l'édition n'est jamais cotée plus haut que le prix actuel le plus élevé réellement observé. Sans lui, un
+    # état observé (bon, convenable) dont les annonces sont presque aussi chères que le très bon état tirerait celui-ci
+    # trop haut (bon ÷ 0,6) : le très bon état ressortait au-dessus de ce qu'on voit sur eBay.
+    niveau = min(niveau, max(v["prix"] for v in actuels.values()))
     ref = max(actuels.values(), key=lambda v: v.get("date", ""))
     n = 0
     for e in ETATS:
