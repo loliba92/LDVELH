@@ -40,6 +40,12 @@ def jeton(client_id, secret, http=requests):
     r = http.post(URL_TOKEN, headers={"Authorization": f"Basic {cle}",
                                       "Content-Type": "application/x-www-form-urlencoded"},
                   data={"grant_type": "client_credentials", "scope": PORTEE}, timeout=30)
+    if getattr(r, "status_code", 200) in (400, 401):
+        # La réponse d'eBay décrit l'erreur (jamais les clés) : on la montre pour savoir quoi corriger.
+        raise RuntimeError(f"eBay a refusé les clés (HTTP {r.status_code} : {str(getattr(r, 'text', ''))[:200]}). "
+                           "Vérifiez : clés de PRODUCTION (App ID contenant PRD), jeu de clés activé "
+                           "(déclaration de suppression de compte faite), App ID dans EBAY_CLIENT_ID et "
+                           "Cert ID dans EBAY_CLIENT_SECRET, sans espace ni retour à la ligne.")
     r.raise_for_status()
     return r.json()["access_token"]
 
@@ -80,10 +86,14 @@ def main():
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
-    cid, secret = os.environ.get("EBAY_CLIENT_ID"), os.environ.get("EBAY_CLIENT_SECRET")
+    cid, secret = (os.environ.get("EBAY_CLIENT_ID") or "").strip(), (os.environ.get("EBAY_CLIENT_SECRET") or "").strip()
     if not cid or not secret:
         sys.exit("Identifiants absents : définissez EBAY_CLIENT_ID et EBAY_CLIENT_SECRET.")
-    jour, token = date.today(), jeton(cid, secret)
+    jour = date.today()
+    try:
+        token = jeton(cid, secret)
+    except RuntimeError as e:
+        sys.exit(str(e))
     isbns = isbns_catalogue()[: a.limite]
     lignes = []
     for i, isbn in enumerate(isbns, 1):

@@ -20,7 +20,22 @@ class Faux:
         return R()
 
 
+class Refus:
+    def post(self, url, **kw):
+        class R:
+            status_code = 401
+            text = '{"error":"invalid_client","error_description":"client authentication failed"}'
+        return R()
+
+
 class TestEbay(unittest.TestCase):
+    def test_refus_des_cles_est_explique(self):
+        with self.assertRaises(RuntimeError) as c:
+            ebay_api.jeton("id", "secret", Refus())
+        self.assertIn("invalid_client", str(c.exception))
+        self.assertIn("PRD", str(c.exception))
+        self.assertNotIn("secret", str(c.exception).replace("EBAY_CLIENT_SECRET", ""))
+
     def test_agregation_par_etat(self):
         items = [item(10, "5000"), item(12, "5000"), item(20, "5000"), item(30, "4000"), item(8, "6000")]
         lignes = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11))
