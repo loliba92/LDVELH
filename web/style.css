@@ -773,3 +773,11 @@ dialog.lot { width: min(820px, calc(100vw - 16px)); height: fit-content; max-hei
 table.mouv td a { color: var(--text); font-weight: 700; text-decoration: none; }
 table.mouv td a:hover { color: var(--accent); text-decoration: underline; }
 table.mouv .num { white-space: nowrap; }
+
+/* ---------- Page « Revue des prix » (outil du propriétaire) ---------- */
+.revue-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 14px 0; }
+.revue-filtres input, .revue-filtres select { width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+table.revue td a { color: var(--text); font-weight: 700; text-decoration: none; }
+table.revue td a:hover { color: var(--accent); text-decoration: underline; }
+table.revue tr.alerte { box-shadow: inset 4px 0 0 #b3414f; }
+table.revue .num { white-space: nowrap; }

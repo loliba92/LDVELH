@@ -9,6 +9,7 @@ import argparse
 import csv
 import json
 import sqlite3
+import statistics
 import sys
 from datetime import date
 from pathlib import Path
@@ -139,6 +140,33 @@ def main():
         "types_prix": [r[0] for r in cx.execute(
             "SELECT DISTINCT t.libelle FROM FaitPrix f JOIN DimTypePrix t ON t.type_key = f.type_key")],
     }
+    # Page de revue des prix (outil du propriétaire) : archive, dernier relevé eBay et prix publié, côte à côte
+    derniers = {}
+    for r in releves:
+        k = (r["isbn13"], r["etat"])
+        if k not in derniers or r["date"] >= derniers[k]["date"]:
+            derniers[k] = r
+    revue = []
+    for v in versions:
+        cle = cle_de[v["id"]]
+        for e in ETATS:
+            obs_e = brut.get(cle, {}).get(e, [])
+            if v["prix"][e] is None and not obs_e:
+                continue
+            arch = [o.prix for o in obs_e if o.type == "historique" and o.prix > 0]
+            eb = derniers.get((v["isbn13"], e))
+            info = v["prix_info"].get(e, {})
+            ligne = {"id": v["id"], "isbn": v["isbn13"], "titre": v["titre"], "serie": v["serie"], "numero": v["numero"],
+                     "version": v["version"], "etat": e, "archive": round(statistics.median(arch), 2) if arch else None,
+                     "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
+                     "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre"))}
+            if eb:
+                ligne.update({"eb_date": eb["date"], "eb_nb": int(eb["nb_annonces"]), "eb_min": float(eb["prix_min"]),
+                              "eb_med": float(eb["prix_median"]), "eb_max": float(eb["prix_max"])})
+                if eb.get("nb_toutes"):
+                    ligne.update({"eb_nb_toutes": int(eb["nb_toutes"]), "eb_med_toutes": float(eb["prix_median_toutes"])})
+            revue.append(ligne)
+    (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     nb_actuels = sum(1 for v in versions for i in v["prix_info"].values() if i["source"] != "archives")
     meta["nb_prix_actuels"] = nb_actuels
     meta["calibration"] = {k: modele.get(k) for k in ("actif", "n_paires", "gain", "raison", "calcule_le", "rapport_global")}

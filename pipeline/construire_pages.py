@@ -19,6 +19,8 @@ def ico(d):
 
 
 PAGES = {
+    "revue-prix.html": ("Revue des prix", "Revue des prix · La Cote du Héros",
+                        "Outil de revue : archive, relevé eBay et prix publié, côte à côte, pour valider les cotes."),
     "evolutions.html": ("Évolutions", "Évolutions des prix · La Cote du Héros",
                         "Ce qui a bougé dans la cote : plus fortes hausses et baisses depuis la dernière mise à jour, et état du modèle d'auto-apprentissage."),
     "le-projet.html": ("Le projet", "Le projet · La Cote du Héros",
@@ -87,7 +89,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
-    noindex = '\n<meta name="robots" content="noindex">' if nom == "mentions-legales.html" else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -129,10 +131,46 @@ def page(nom, corps):
 {feuille(nom)}
 
 <script src="plus.js"></script>
-<script src="pages.js"></script>
+<script src="pages.js"></script>{SCRIPT_PAGE.get(nom, "")}
 </body>
 </html>
 '''
+
+
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="revue.js"></script>'}
+
+REVUE = '''<h1>Revue des prix</h1>
+<p class="chapeau">Outil pour valider les cotes : pour chaque édition et chaque état, l'archive, le dernier relevé eBay et le prix publié, côte à côte. Cette page n'est pas référencée et n'est liée depuis aucune autre.</p>
+<form class="revue-filtres" id="revue-filtres" onsubmit="return false">
+  <div class="champ"><label for="r-q">Chercher (titre, série)</label><input type="search" id="r-q" autocomplete="off"></div>
+  <div class="champ"><label for="r-serie">Série</label><select id="r-serie"></select></div>
+  <div class="champ"><label for="r-etat">État</label><select id="r-etat"><option value="">Tous</option><option value="convenable">C</option><option value="bon">BE</option><option value="tres_bon">TBE</option></select></div>
+  <div class="champ"><label for="r-filtre">Afficher</label><select id="r-filtre">
+    <option value="">Tout</option>
+    <option value="ecart">Écart important (au moins ×2 ou au plus ×0,5)</option>
+    <option value="ebay">Prix issu du relevé eBay</option>
+    <option value="sans">Pas de relevé eBay</option>
+    <option value="aligne">Prix remontés (C ≤ BE ≤ TBE)</option>
+    <option value="recalibre">Remis à niveau par le modèle</option>
+  </select></div>
+  <div class="champ"><label for="r-tri">Trier par</label><select id="r-tri">
+    <option value="ecart">Écart (du plus grand au plus petit)</option>
+    <option value="titre">Titre</option>
+    <option value="serie">Série et numéro</option>
+    <option value="publie">Prix publié</option>
+    <option value="annonces">Nombre d'annonces</option>
+  </select></div>
+</form>
+<p class="sous" id="r-compte" role="status" aria-live="polite"></p>
+<p><button type="button" class="bouton bouton-clair" id="r-csv">Télécharger cette vue (CSV)</button></p>
+<div id="r-zone"><p>Chargement…</p></div>
+<h2>Comment lire</h2>
+<ul>
+  <li><strong>Archive</strong> : ancien relevé (prix demandés, jusqu'à fin 2024).</li>
+  <li><strong>eBay</strong> : médiane des annonces récentes (moins de 90 jours), nombre d'annonces et fourchette ; entre parenthèses, la médiane de toutes les annonces, anciennes comprises.</li>
+  <li><strong>Publié</strong> : le prix affiché sur le site, après lissage et alignement des états. <strong>Écart</strong> : publié divisé par archive.</li>
+  <li>Source : « archives » (aucun relevé retenu), « actuel » ou « mixte ».</li>
+</ul>'''
 
 
 LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
@@ -399,7 +437,7 @@ def main():
     (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions())):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE)):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)
 
