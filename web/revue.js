@@ -45,7 +45,8 @@
 
   function carte(ed) {
     return `<article class="rv-edition"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
-      `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span></header>` +
+      `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` +
+      `<a class="rv-ebay" href="https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(ed.titre + ' ' + (ed.isbn || '')).replace(/%20/g, '+')}" target="_blank" rel="noopener noreferrer">Voir les annonces sur eBay ↗</a></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></article>`;
   }
 

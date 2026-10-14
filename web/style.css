@@ -798,3 +798,6 @@ table.mouv .num { white-space: nowrap; }
 .rv-raison { font: 700 .9rem var(--f-ui); color: #f2b3b9; }
 .rv-note { font-size: .85rem; color: var(--muted); }
 @media (max-width: 700px) { .rv-trois { grid-template-columns: 1fr; } .rv-prix { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; } .rv-lib { flex: 1 0 100%; } }
+
+.rv-edition > header a.rv-ebay { margin-left: auto; font: 600 .85rem var(--f-body, inherit); color: var(--accent); }
+@media (max-width: 600px) { .rv-edition > header a.rv-ebay { margin-left: 0; flex-basis: 100%; } }
