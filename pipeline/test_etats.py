@@ -40,6 +40,33 @@ class TestEtats(unittest.TestCase):
         etats.completer(p, R)
         self.assertEqual(p["convenable"]["prix"], 4.0)
 
+    def test_repartir_un_seul_etat_actuel(self):
+        p = {"bon": est(30, "actuel"), "convenable": est(99, "archives"), "tres_bon": est(7, "archives")}
+        self.assertEqual(etats.repartir(p, R), 2)           # le bon état, qui fixe le niveau, ne change pas
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (20.0, 30.0, 50.0))
+        self.assertTrue(p["bon"]["repartition"])
+        self.assertTrue(p["convenable"]["deduit"] and p["tres_bon"]["deduit"])        # états remplacés : déduits
+        self.assertEqual(p["convenable"]["source"], "archives")                        # jamais comptés comme prix actuels
+
+    def test_repartir_plusieurs_etats_actuels_plats(self):
+        """Trois états au même prix (annonces non différenciées) : le niveau est la moyenne pondérée, l'ordre 40/60 est rétabli."""
+        p = {e: {**est(10, "actuel"), "incertitude": 0.2} for e in etats.ETATS}
+        etats.repartir(p, R)
+        c, b, t = (p[e]["prix"] for e in etats.ETATS)
+        self.assertAlmostEqual(c / t, 0.4, places=2)
+        self.assertAlmostEqual(b / t, 0.6, places=2)
+        self.assertTrue(10 < t < 20, t)
+
+    def test_le_plus_fiable_pese_davantage(self):
+        p = {"bon": {**est(30, "actuel"), "incertitude": 0.05}, "tres_bon": {**est(100, "actuel"), "incertitude": 0.9}}
+        etats.repartir(p, R)
+        self.assertAlmostEqual(p["tres_bon"]["prix"], 50, delta=1.5)              # proche de BE/0,6 = 50
+
+    def test_edition_sans_prix_actuel_inchangee(self):
+        p = {"convenable": est(5), "bon": est(8), "tres_bon": est(12)}
+        self.assertEqual(etats.repartir(p, R), 0)
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (5, 8, 12))
+
     def test_rien_a_deduire(self):
         self.assertEqual(etats.completer({}, R), 0)
         self.assertEqual(etats.completer({"convenable": est(1), "bon": est(2), "tres_bon": est(3)}, R), 0)

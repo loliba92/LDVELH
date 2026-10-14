@@ -88,7 +88,7 @@ def estimer(observations, aujourdhui=None, sigma_hist=None):
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]
-    prix, _incertitude = lisser(obs, aujourdhui, sigma_hist)
+    prix, incertitude = lisser(obs, aujourdhui, sigma_hist)
     actuelles = [(o, w) for o, w in poids_obs if o.type in ACTUELS]
     w_actuel = sum(w for _, w in actuelles)
     w_total = sum(w for _, w in poids_obs)
@@ -103,4 +103,4 @@ def estimer(observations, aujourdhui=None, sigma_hist=None):
         d = max(o.date for o, _ in actuelles)
         confiance = "faible" if w_actuel < 0.5 else ("moyenne" if w_actuel < 0.85 else "élevée")
     return {"prix": round(prix, 2), "source": source, "nature": nature, "nb": nb,
-            "date": d.isoformat(), "confiance": confiance}
+            "date": d.isoformat(), "confiance": confiance, "incertitude": round(incertitude, 3)}

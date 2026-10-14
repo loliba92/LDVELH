@@ -113,3 +113,7 @@ Rapports **mesurés** à titre d'information (`calibration.json`) : archives (42
 
 ## Annonces sans état précisé
 Règle du propriétaire : quand l'état n'est pas précisé dans l'annonce (« d'occasion » sans détail, code 3000, ou aucun état), on suppose le **bon état** (`etat_de` dans `scrapers/ebay_api.py`). Les annonces « neuf » (1000, 1500…) et « pour pièces » (7000) restent écartées. Le mode contrôle compte les annonces à état supposé. Ces annonces étaient jusqu'ici écartées (le premier contrôle en signalait beaucoup).
+
+## Répartition 40/60 sur les trois états (règle du propriétaire)
+Pour une édition qui a au moins un prix issu d'un relevé actuel, les trois états sont tirés d'un même niveau (en très bon état) : moyenne géométrique des niveaux de chaque état actuel (prix ÷ rapport de l'état), pondérée par la fiabilité de chacun ; puis convenable = 40 %, bon état = 60 %, très bon état = 100 % du niveau (`etats.repartir`). Un état qui n'avait que son archive est remplacé (« déduit », jamais compté comme prix actuel). Une édition sans prix actuel n'est pas touchée (archives conservées). Conséquence : l'ordre C ≤ BE ≤ TBE est garanti sur ces éditions, l'alignement automatique ne sert presque plus, et un état dont les annonces ne sont pas différenciées (ex. trois états à 9 €) retrouve les rapports 40/60.
+Limite : cette règle n'est pas confirmée par les données (archives : 62 % et 78 % ; annonces eBay : états presque au même prix). Réglage dans `data/manual/ratios_etats.json`.

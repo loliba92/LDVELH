@@ -124,7 +124,8 @@ def main():
                     nb_recalibres += 1
     calibration.ecrire(modele, DB.parent.parent / "processed" / "calibration.json") if args.db == DB else None
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
-    nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())
+    nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
+    nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
     nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
 
     versions = []
@@ -146,7 +147,7 @@ def main():
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
@@ -161,7 +162,7 @@ def main():
                          for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]
         base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
         mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
-        print(f"États déduits des autres états ({ratios}) : {nb_deduits}")
+        print(f"États répartis 40/60 sur les éditions à prix actuel : {nb_repartis} prix modifiés ; états déduits pour les autres : {nb_deduits} ({ratios})")
         print(f"Annonces de toutes anciennetés ajoutées à la cote : {nb_toutes} lignes (décotes : {decotes}) ; incertitude de l'archive apprise : {sig_arch}")
         print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "
               f"{mv.get('nb_grands_mouvements', 0)} grands mouvements")
@@ -195,7 +196,7 @@ def main():
                      "version": v["version"], "etat": e, "archive": round(statistics.median(arch), 2) if arch else None,
                      "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
                      "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
-                     "deduit": bool(info.get("deduit"))}
+                     "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition"))}
             if eb:
                 ligne.update({"eb_date": eb["date"], "eb_nb": int(eb["nb_annonces"]), "eb_min": float(eb["prix_min"]),
                               "eb_med": float(eb["prix_median"]), "eb_max": float(eb["prix_max"])})

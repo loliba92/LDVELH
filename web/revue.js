@@ -25,6 +25,7 @@
 
   function origine(l) {
     if (l.deduit) return 'déduit des autres états';
+    if (l.repartition) { const n = l.eb_nb_toutes || l.eb_nb; return `annonces eBay${n ? ' (' + n + ')' : ''}, réparti 40/60`; }
     if (l.source && l.source !== 'archives') {
       const n = l.eb_nb_toutes || l.eb_nb;
       return n ? `d'après ${n} annonce${n > 1 ? 's' : ''} eBay` : "d'après les annonces eBay";
