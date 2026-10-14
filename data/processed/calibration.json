@@ -1,48 +1,14 @@
 {
   "actif": false,
-  "n_paires": 145,
+  "n_paires": 4,
   "calcule_le": "2026-10-14",
-  "par_etat": {
-    "tres_bon": {
-      "rapport": 0.735,
-      "ecart": 0.627,
-      "n": 81
-    },
-    "bon": {
-      "rapport": 1.284,
-      "ecart": 0.612,
-      "n": 63
-    },
-    "convenable": {
-      "rapport": 0.887,
-      "ecart": 0.652,
-      "n": 1
-    }
-  },
-  "erreur_modele": 0.669,
-  "erreur_archives": 0.699,
-  "gain": 0.042,
-  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
-  "rapport_global": 0.887,
-  "fraicheur": {
-    "bon": {
-      "rapport": 0.987,
-      "n": 20
-    },
-    "tres_bon": {
-      "rapport": 0.925,
-      "n": 20
-    },
-    "convenable": {
-      "rapport": 1.498,
-      "n": 1
-    }
-  },
-  "sigma_archive": {
-    "tres_bon": 0.627,
-    "bon": 0.612,
-    "convenable": 0.652
-  },
+  "par_etat": {},
+  "erreur_modele": null,
+  "erreur_archives": null,
+  "gain": null,
+  "raison": "pas assez d'éditions comparables (4 sur 20 nécessaires)",
+  "fraicheur": {},
+  "sigma_archive": {},
   "rapports_etats_mesures_archives": {
     "n": 421,
     "convenable": 0.624,
@@ -54,10 +20,7 @@
     "tres_bon": 1.0
   },
   "toutes_annonces": {
-    "lignes_ajoutees": 93,
-    "decotes_utilisees": {
-      "bon": 0.987,
-      "tres_bon": 0.925
-    }
+    "lignes_ajoutees": 0,
+    "decotes_utilisees": {}
   }
 }
