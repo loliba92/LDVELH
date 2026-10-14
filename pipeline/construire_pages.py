@@ -19,6 +19,8 @@ def ico(d):
 
 
 PAGES = {
+    "evolutions.html": ("Évolutions", "Évolutions des prix · La Cote du Héros",
+                        "Ce qui a bougé dans la cote : plus fortes hausses et baisses depuis la dernière mise à jour, et état du modèle d'auto-apprentissage."),
     "le-projet.html": ("Le projet", "Le projet · La Cote du Héros",
                        "Pourquoi ce guide existe, d'où viennent ses données, comment les prix sont estimés, et ce qu'il ne fait pas."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
@@ -76,6 +78,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
 BANDEAU = '<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Prix en cours de vérification.</p>'
 
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
+      <a href="evolutions.html">Évolutions des prix</a>
       <a href="le-projet.html">Le projet</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
@@ -333,11 +336,70 @@ def page_collection(index_html):
 '''
 
 
+def corps_evolutions():
+    """Corps de la page « Évolutions des prix », construit à partir de web/data/mouvements.json."""
+    import json
+    from html import escape as h
+    try:
+        mv = json.loads((WEB / "data" / "mouvements.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return "<h1>Évolutions des prix</h1>\n<p>Les premières évolutions apparaîtront après la prochaine mise à jour des prix.</p>"
+    mois = ("janvier février mars avril mai juin juillet août septembre octobre novembre décembre").split()
+    def jour(iso):
+        a, m_, j = iso.split("-")
+        return f"{int(j)} {mois[int(m_) - 1]} {a}"
+    euros = lambda v: f"{v:.2f}".replace(".", ",") + "\u00a0€"
+    etat = {"convenable": "C", "bon": "BE", "tres_bon": "TBE"}
+    def tableau(liste, vide):
+        if not liste:
+            return f"<p>{vide}</p>"
+        lignes = "".join(
+            f'<tr><td class="principal"><a href="./#q={h(str(m["isbn13"] or m["id"]))}">{h(m["titre"])}</a>'
+            f'<span class="sous" style="display:block">{h(m["serie"])} · <span class="badge">{h(m["version"])}</span></span></td>'
+            f'<td data-label="État">{etat.get(m["etat"], m["etat"])}</td>'
+            f'<td class="num" data-label="Avant">{euros(m["avant"])}</td><td class="num" data-label="Après">{euros(m["apres"])}</td>'
+            f'<td class="num" data-label="Variation"><strong>{("+" if m["pct"] > 0 else "−")}{abs(m["pct"]):.0%}</strong></td></tr>'
+            for m in liste)
+        return ('<table class="cartes mouv"><thead><tr><th>Livre</th><th>État</th><th class="num">Avant</th>'
+                '<th class="num">Après</th><th class="num">Variation</th></tr></thead><tbody>' + lignes + "</tbody></table>")
+    if mv["precedent"]:
+        med = mv["mediane_variation"]
+        bref = (f'<p>Comparaison de la mise à jour du <strong>{jour(mv["date"])}</strong> avec celle du {jour(mv["precedent"])}.</p>'
+                f'<dl class="stats"><div><dt>Prix comparés</dt><dd>{mv["nb_comparees"]}</dd></div>'
+                f'<div><dt>Prix modifiés</dt><dd>{mv["nb_modifiees"]}</dd></div>'
+                f'<div><dt>Grands mouvements</dt><dd>{mv.get("nb_grands_mouvements", 0)}<small>au moins 10 % et 0,50 €</small></dd></div></dl>'
+                + (f'<p class="sous">Variation médiane de l\'ensemble : {("+" if med >= 0 else "−")}{abs(med):.1%}'.replace(".", ",") + ".</p>" if med is not None else ""))
+    else:
+        bref = "<p>Première mise à jour : la comparaison commencera à la suivante.</p>"
+    mo = mv["modele"]
+    modele = (f'<p>Le modèle apprend l\'écart entre les cotes d\'archives et les prix actuels, et se contrôle lui-même : '
+              f'il ne s\'active que s\'il prédit mieux que les archives seules. '
+              f'<strong>État : {"actif" if mo["actif"] else "inactif"}</strong> ({h(mo["raison"])}).</p>')
+    return f'''<h1>Évolutions des prix</h1>
+<p class="chapeau">Ce que la cote a changé à la dernière mise à jour. Ces prix sont des prix demandés, pas des prix de vente.</p>
+<h2>En bref</h2>
+{bref}
+<h2>Plus fortes hausses</h2>
+{tableau(mv["hausses"], "Aucune hausse importante depuis la mise à jour précédente.")}
+<h2>Plus fortes baisses</h2>
+{tableau(mv["baisses"], "Aucune baisse importante depuis la mise à jour précédente.")}
+<h2>Le modèle d'auto-apprentissage</h2>
+{modele}
+<h2>Comment lire cette page</h2>
+<ul>
+  <li>Un prix n'est mis à jour qu'avec au moins 3 annonces récentes (moins de 90 jours) pour l'édition et l'état concernés : une annonce isolée peut être absurde.</li>
+  <li>La cote ne saute pas : chaque nouveau relevé corrige le prix précédent d'une part qui dépend du nombre d'annonces et de l'ancienneté.</li>
+  <li>Un grand mouvement sur une seule semaine peut être du bruit ; c'est la répétition d'une semaine à l'autre qui compte.</li>
+</ul>
+<p class="sous">Mise à jour automatique chaque semaine. Les prix viennent d'annonces publiques et d'un ancien relevé, voir <a href="le-projet.html">Le projet</a>.</p>'''
+
+
 def main():
     index_html = (WEB / "index.html").read_text(encoding="utf-8")
     (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
     print("écrit : collection.html")
-    for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS)):
+    for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
+                       ("evolutions.html", corps_evolutions())):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)
 

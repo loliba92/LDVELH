@@ -768,3 +768,8 @@ dialog.lot { width: min(820px, calc(100vw - 16px)); height: fit-content; max-hei
 .coll-ligne .champ-ligne label { margin: 0; }
 .coll-ligne .champ-ligne input[type="text"] { width: 110px; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 400 1rem var(--f-ui); }
 @media (max-width: 700px) { .coll-ligne .champ-ligne { flex-direction: row; align-items: center; width: auto; } .coll-ligne .champ-ligne select { width: auto; min-width: 150px; } }
+
+/* ---------- Page « Évolutions des prix » ---------- */
+table.mouv td a { color: var(--text); font-weight: 700; text-decoration: none; }
+table.mouv td a:hover { color: var(--accent); text-decoration: underline; }
+table.mouv .num { white-space: nowrap; }

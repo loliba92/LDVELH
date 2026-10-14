@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
 import calibration
+import mouvements
 
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
@@ -87,7 +88,9 @@ def main():
     nb_ajustes = sum(aligner(par_etat) for par_etat in prix.values())
 
     versions = []
+    cle_de = {}
     for r in cx.execute(REQUETE):
+        cle_de[r["id"]] = r["version_key"]
         p = prix.get(r["version_key"], {})
         isbn = r["isbn13"]
         petite = f"covers/small/{isbn}.webp" if isbn and (COVERS / "small" / f"{isbn}.webp").exists() else None
@@ -106,6 +109,20 @@ def main():
             "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
+    # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
+    hist_chemin = DB.parent.parent / "processed" / "cotes-historique.json"
+    if args.db == DB:
+        archives_seules = {cle: {e: estimer([o for o in obs if o.type == "historique"], args.aujourdhui) for e, obs in par_etat.items()}
+                           for cle, par_etat in brut.items()}
+        for par_etat in archives_seules.values():
+            aligner(par_etat)
+        dates_arch = [o.date for par in brut.values() for obs in par.values() for o in obs if o.type == "historique"]
+        base_versions = [{"id": v["id"], "prix": {e: (archives_seules.get(r_cle, {}).get(e) or {}).get("prix") for e in ETATS}}
+                         for v, r_cle in ((v, cle_de[v["id"]]) for v in versions)]
+        base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
+        mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
+        print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "
+              f"{mv.get('nb_grands_mouvements', 0)} grands mouvements")
     meta = {
         "genere_le": args.aujourdhui.isoformat(),
         "nb_versions": len(versions),

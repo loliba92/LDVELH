@@ -86,3 +86,11 @@ Exemple (premier relevé) : archive 6,98 €, médiane eBay 23,58 € sur 3 anno
 - Une annonce restée en ligne longtemps n'a pas trouvé preneur : son prix est probablement trop haut. Le programme écarte donc les annonces créées il y a plus de `MAX_AGE_JOURS` (90 jours), d'après `itemCreationDate`. 30 jours laisseraient trop peu d'annonces sur des livres rares, qui restent longtemps en vente. Les annonces sans date lisible sont conservées (le mode « contrôle » en donne le nombre).
 - Les relevés successifs sont ensuite lissés (voir plus haut) : un relevé ancien perd son poids de lui-même.
 - Piste, non faite : suivre les annonces qui **disparaissent** entre deux relevés (vendues ou retirées) donnerait un signal proche d'un prix de vente. Cela demande de conserver un identifiant d'annonce, ce que nous évitons tant que les conditions d'utilisation de l'API n'ont pas été lues.
+
+## Suivi des évolutions (page « Évolutions des prix »)
+À chaque exécution du workflow :
+- `pipeline/mouvements.py` compare les prix publiés avec ceux de la publication précédente (instantanés conservés dans `data/processed/cotes-historique.json`, 60 derniers) ; à défaut d'instantané, la référence est la cote d'archives seule.
+- Un « grand mouvement » = au moins 10 % **et** 0,50 €. Le résultat est écrit dans `web/data/mouvements.json`.
+- Le **résumé de l'exécution GitHub** (onglet Actions, bas de la page de l'exécution) donne : nombre de prix comparés et modifiés, variation médiane, plus fortes hausses et baisses, état du modèle.
+- La page publique `evolutions.html` (lien dans le pied de page) affiche les mêmes mouvements et se régénère avec `pipeline/construire_pages.py`.
+Pistes : courbe d'évolution dans la fiche de chaque édition (les instantanés l'alimentent déjà), alerte quand beaucoup de prix bougent d'un coup.
