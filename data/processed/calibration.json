@@ -1,37 +1,37 @@
 {
   "actif": false,
-  "n_paires": 109,
+  "n_paires": 145,
   "calcule_le": "2026-10-14",
   "par_etat": {
     "tres_bon": {
-      "rapport": 0.524,
-      "ecart": 1.204,
-      "n": 44
-    },
-    "bon": {
-      "rapport": 1.291,
-      "ecart": 0.597,
-      "n": 64
+      "rapport": 0.735,
+      "ecart": 0.627,
+      "n": 81
     },
     "convenable": {
-      "rapport": 0.914,
-      "ecart": 0.889,
+      "rapport": 0.887,
+      "ecart": 0.652,
       "n": 1
+    },
+    "bon": {
+      "rapport": 1.284,
+      "ecart": 0.612,
+      "n": 63
     }
   },
-  "erreur_modele": 0.792,
-  "erreur_archives": 0.841,
-  "gain": 0.058,
-  "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
-  "rapport_global": 0.914,
+  "erreur_modele": 0.669,
+  "erreur_archives": 0.699,
+  "gain": 0.042,
+  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+  "rapport_global": 0.887,
   "fraicheur": {
     "bon": {
       "rapport": 0.987,
       "n": 20
     },
     "tres_bon": {
-      "rapport": 0.969,
-      "n": 12
+      "rapport": 0.925,
+      "n": 20
     },
     "convenable": {
       "rapport": 1.498,
@@ -39,9 +39,9 @@
     }
   },
   "sigma_archive": {
-    "tres_bon": 1.0,
-    "bon": 0.597,
-    "convenable": 0.889
+    "tres_bon": 0.627,
+    "convenable": 0.652,
+    "bon": 0.612
   },
   "rapports_etats_mesures_archives": {
     "n": 421,
@@ -54,10 +54,10 @@
     "tres_bon": 1.0
   },
   "toutes_annonces": {
-    "lignes_ajoutees": 66,
+    "lignes_ajoutees": 93,
     "decotes_utilisees": {
       "bon": 0.987,
-      "tres_bon": 0.969
+      "tres_bon": 0.925
     }
   }
 }
