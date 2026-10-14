@@ -3,6 +3,11 @@
   "n_paires": 43,
   "calcule_le": "2026-10-14",
   "par_etat": {
+    "bon": {
+      "rapport": 0.87,
+      "ecart": 0.757,
+      "n": 27
+    },
     "tres_bon": {
       "rapport": 0.316,
       "ecart": 0.838,
@@ -12,11 +17,6 @@
       "rapport": 0.623,
       "ecart": 0.0,
       "n": 1
-    },
-    "bon": {
-      "rapport": 0.87,
-      "ecart": 0.757,
-      "n": 27
     }
   },
   "erreur_modele": 0.775,
