@@ -17,7 +17,7 @@ import re
 import statistics
 import sys
 import time
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import requests
@@ -29,6 +29,10 @@ URL_TOKEN = "https://api.ebay.com/identity/v1/oauth2/token"
 URL_RECHERCHE = "https://api.ebay.com/buy/browse/v1/item_summary/search"
 PORTEE = "https://api.ebay.com/oauth/api_scope"
 PAUSE = 0.5
+# Fraîcheur : une annonce encore en ligne après longtemps n'a pas trouvé preneur, son prix est probablement trop haut.
+# On n'en tient compte que si elle a été créée il y a moins de MAX_AGE_JOURS jours (90 : 30 jours laisseraient trop peu
+# d'annonces sur des livres rares, qui restent en vente longtemps).
+MAX_AGE_JOURS = 90
 # Codes d'état d'eBay -> états du projet. Les codes absents (neuf, « d'occasion » sans précision) sont ignorés.
 ETATS = {"2750": "tres_bon", "4000": "tres_bon", "5000": "bon", "6000": "convenable"}
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes)\b", re.I)
@@ -51,6 +55,17 @@ def concorde(titre_annonce, titre_attendu, seuil=0.6):
     if not attendus:
         return True                      # rien à comparer : on ne filtre pas
     return len(attendus & mots(titre_annonce)) / len(attendus) >= seuil
+
+
+def age_jours(item, jour):
+    """Âge de l'annonce en jours d'après `itemCreationDate`, ou None si la date est absente ou illisible."""
+    brut = item.get("itemCreationDate")
+    if not brut:
+        return None
+    try:
+        return (jour - datetime.fromisoformat(str(brut).replace("Z", "+00:00")).date()).days
+    except ValueError:
+        return None
 
 
 def jeton(client_id, secret, http=requests):
@@ -81,6 +96,9 @@ def agreger(items, isbn13, jour, titre=None):
     for it in items:
         if titre and not concorde(it.get("title", ""), titre):
             continue
+        age = age_jours(it, jour)
+        if age is not None and age > MAX_AGE_JOURS:
+            continue                      # annonce trop ancienne : invendue, prix probablement trop haut
         etat = ETATS.get(str(it.get("conditionId", "")))
         prix = it.get("price") or {}
         if etat is None or prix.get("currency") != "EUR" or LOT.search(it.get("title", "")):
@@ -126,13 +144,16 @@ def controler(a, token):
                 c["lot"] += 1
             if str(it.get("conditionId", "")) not in ETATS:
                 c["etat_inconnu"] += 1
+            age = age_jours(it, date.today())
+            c["age_inconnu" if age is None else ("age_30" if age <= 30 else ("age_90" if age <= MAX_AGE_JOURS else "age_plus"))] += 1
         retenues = sum(l["nb_annonces"] for l in agreger(items, isbn, date.today(), titre))
         par_titre = len(annonces(titre, token)) if nb_ed == 1 else None
         print(f"{isbn} | éditions du titre : {nb_ed} | annonces ISBN : {c['total']} (concordantes {c['concordant']}, "
-              f"autre livre {c['autre_livre']}, lots {c['lot']}, état inconnu {c['etat_inconnu']}) | retenues : {retenues}"
+              f"autre livre {c['autre_livre']}, lots {c['lot']}, état inconnu {c['etat_inconnu']}) | âge : ≤30 j {c['age_30']}, ≤{MAX_AGE_JOURS} j {c['age_90']}, plus ancien {c['age_plus']}, date absente {c['age_inconnu']} | retenues : {retenues}"
               + (f" | annonces par titre : {par_titre}" if par_titre is not None else ""))
         tot.update(c); tot["retenues"] += retenues; tot["isbn"] += 1; tot["isbn_sans_annonce"] += (c["total"] == 0)
         time.sleep(PAUSE)
+    print(f"Âges : ≤30 jours {tot['age_30']}, ≤{MAX_AGE_JOURS} jours {tot['age_90']}, plus anciennes {tot['age_plus']} (écartées), date absente {tot['age_inconnu']}")
     print(f"Bilan : {tot['isbn']} éditions, {tot['total']} annonces, concordantes {tot['concordant']}, autre livre {tot['autre_livre']}, "
           f"lots {tot['lot']}, retenues {tot['retenues']}, éditions sans annonce {tot['isbn_sans_annonce']}")
 

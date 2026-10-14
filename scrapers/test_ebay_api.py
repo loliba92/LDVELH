@@ -32,6 +32,22 @@ class TestConcordance(unittest.TestCase):
         self.assertEqual([(x["etat"], x["nb_annonces"]) for x in l], [("bon", 1)])
 
 
+class TestFraicheur(unittest.TestCase):
+    JOUR = date(2026, 10, 14)
+
+    def test_age(self):
+        self.assertEqual(ebay_api.age_jours({"itemCreationDate": "2026-10-04T08:00:00.000Z"}, self.JOUR), 10)
+        self.assertIsNone(ebay_api.age_jours({}, self.JOUR))
+        self.assertIsNone(ebay_api.age_jours({"itemCreationDate": "n'importe quoi"}, self.JOUR))
+
+    def test_les_annonces_trop_anciennes_sont_ecartees(self):
+        recente = {**item(10, "5000"), "itemCreationDate": "2026-10-01T00:00:00.000Z"}
+        ancienne = {**item(40, "5000"), "itemCreationDate": "2025-06-01T00:00:00.000Z"}
+        sans_date = item(12, "5000")
+        l = ebay_api.agreger([recente, ancienne, sans_date], "9782070583805", self.JOUR)
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 2, "12.00")])
+
+
 class Refus:
     def post(self, url, **kw):
         class R:
