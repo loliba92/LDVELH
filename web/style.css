@@ -609,11 +609,12 @@ dialog.parcours[open] { display: flex; }
 #prix-etat { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); }
 
 /* Haut de page : fondu noir (icône, nom, textes) puis l'illustration, sur un fond toujours sombre */
-.hero { --text: #f3e9d2; --muted: #d6c8a8; --accent: #cf9a2e; --on-accent: #0a0a0a; --brass-text: #d9b45f; --surface: rgba(10, 10, 10, .85); --line: rgba(243, 233, 210, .24);
+.hero { --img: url("images/accueil-2.webp"); --text: #f3e9d2; --muted: #d6c8a8; --accent: #cf9a2e; --on-accent: #0a0a0a; --brass-text: #d9b45f; --surface: rgba(10, 10, 10, .85); --line: rgba(243, 233, 210, .24);
   position: relative; overflow: clip; min-height: 760px; padding: 34px 0 56px; color: var(--text); border-bottom: 3px double var(--brass);
   background:
     linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
     linear-gradient(90deg, rgba(0, 0, 0, .92) 0, rgba(0, 0, 0, .82) 36%, rgba(0, 0, 0, .3) 62%, rgba(0, 0, 0, 0) 82%),
+    var(--img) var(--pos, 80% 26%) / var(--taille, cover) no-repeat,
     #000000; }
 .hero-in { grid-template-columns: 1fr; }
 .hero-texte { max-width: 620px; }
@@ -625,6 +626,7 @@ dialog.parcours[open] { display: flex; }
   .hero { min-height: 0; padding: 26px 0 clamp(340px, 94vw, 640px);
     background:
       linear-gradient(180deg, #000000 0, #000000 50%, rgba(0, 0, 0, .8) 58%, rgba(0, 0, 0, 0) 68%),
+      var(--img) center bottom / 100% auto no-repeat,
       #000000; }
 }
 
@@ -644,12 +646,23 @@ dialog.parcours[open] { display: flex; }
 .etats-rapides button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .etats-rapides button:focus-visible, .onglets-ed button:focus-visible, .col-tout:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
+/* Cinq illustrations, tirées au hasard à chaque visite (choix dans l'en-tête de la page) ; cadrage propre à chacune */
+html[data-accueil="1"] .hero { --img: url("images/accueil-1.webp"); --pos: 72% 22%; }
+html[data-accueil="2"] .hero { --img: url("images/accueil-2.webp"); --pos: 80% 26%; }
+html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 30%; }
+html[data-accueil="4"] .hero { --img: url("images/accueil-4.webp"); --pos: 50% 45%; }
+html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 28%; }
+@media (min-width: 901px) { html[data-accueil="4"] .hero, html[data-accueil="5"] .hero { background:
+  linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
+  linear-gradient(90deg, rgba(0, 0, 0, .86) 0, rgba(0, 0, 0, .72) 34%, rgba(0, 0, 0, .28) 60%, rgba(0, 0, 0, 0) 80%),
+  var(--img) var(--pos) / cover no-repeat, #000000; } }
 
 /* Bandeau illustré de la page « Ma collection » */
 .banniere { position: relative; display: flex; align-items: flex-end; min-height: clamp(210px, 26vw, 300px); padding: 28px 0 30px; border-bottom: 3px double var(--brass);
   background:
     linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .2) 34%, rgba(0, 0, 0, .1) 62%, rgba(0, 0, 0, .7) 100%),
     linear-gradient(90deg, rgba(0, 0, 0, .94) 0, rgba(0, 0, 0, .86) 46%, rgba(0, 0, 0, 0) 80%),
+    url("images/accueil-3.webp") 78% 44% / cover no-repeat,
     #000000; }
 .banniere-in { width: 100%; }
 .banniere h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 3.8rem); letter-spacing: -0.03em; color: var(--text); }
@@ -688,6 +701,7 @@ dialog.parcours[open] { display: flex; }
 @media (max-width: 700px) {
   .banniere { background:
     linear-gradient(180deg, rgba(0, 0, 0, .86), rgba(0, 0, 0, .74)),
+    url("images/accueil-3.webp") 72% 40% / cover no-repeat,
     #000000; }
 }
 
@@ -916,3 +930,4 @@ table.mouv .num { white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .mur { transform: none; } }
 .hero.avec-mur, .banniere.avec-mur { background: #000000; }
 .banniere { overflow: clip; }
+html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaquettes » : pas d'illustration le temps que le mur se construise */
