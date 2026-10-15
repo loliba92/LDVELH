@@ -1720,15 +1720,6 @@
   })();
 
   /* ---------- Application installable (PWA) ---------- */
-  let invite = null;
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); invite = e; const b = $('#installer'); if (b) b.hidden = false; });
-  window.addEventListener('appinstalled', () => { invite = null; const b = $('#installer'); if (b) b.hidden = true; });
-  if ($('#installer')) $('#installer').addEventListener('click', async () => {
-    if (!invite) return;
-    invite.prompt();
-    await invite.userChoice.catch(() => null);
-    invite = null; $('#installer').hidden = true;
-  });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* hors ligne indisponible, sans conséquence */ }));
   }

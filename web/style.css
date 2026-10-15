@@ -864,3 +864,21 @@ table.mouv .num { white-space: nowrap; }
 .rv-ajout .aj-exemple { display: inline-block; max-width: 100%; padding: 6px 10px; border-radius: var(--r); background: var(--bg); overflow-wrap: anywhere; }
 .rv-ajout .aj-liste { padding-left: 0; margin-left: 0; }
 .rv-ajout .rv-ajout-bilan { margin-top: 22px; }
+
+/* Bandeau d'installation de l'application (installer.js) */
+.bandeau-install { position: fixed; z-index: 60; left: 16px; right: 16px; bottom: -160px; max-width: 440px; margin: 0 auto; display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 12px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--r); box-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+  opacity: 0; transition: bottom .35s ease, opacity .35s ease; }
+.bandeau-install.visible { bottom: 16px; opacity: 1; }
+.bi-icone { flex: none; width: 40px; height: 40px; border-radius: 9px; display: block; }
+.bi-corps { flex: 1; min-width: 0; }
+.bi-titre { margin: 0 0 3px; font: 700 1.1rem/1.2 var(--f-display); color: var(--text); }
+.bi-texte { margin: 0; font: 400 .92rem/1.4 var(--f-ui); color: var(--muted); }
+.bi-texte strong { color: var(--text); font-weight: 700; }
+.bi-actions { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bi-installer { min-height: 44px; padding: 8px 18px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 .95rem var(--f-ui); cursor: pointer; white-space: nowrap; }
+.bi-installer:hover { opacity: .9; }
+.bi-fermer { min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--muted); font-size: 1.5rem; line-height: 1; cursor: pointer; }
+.bi-fermer:hover { color: var(--text); }
+@media (max-width: 700px) { .bandeau-install { left: 10px; right: 10px; } .bandeau-install.visible { bottom: calc(72px + env(safe-area-inset-bottom)); } }
+@media (prefers-reduced-motion: reduce) { .bandeau-install { transition: none; } }

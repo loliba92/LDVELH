@@ -133,6 +133,7 @@ def page(nom, corps):
 {feuille(nom)}
 
 <script src="plus.js"></script>
+<script src="installer.js"></script>
 <script src="pages.js"></script>{SCRIPT_PAGE.get(nom, "")}
 </body>
 </html>
@@ -397,6 +398,7 @@ def page_collection(index_html):
 {dlg("fiche")}
 
 <script src="plus.js"></script>
+<script src="installer.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

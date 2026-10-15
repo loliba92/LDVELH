@@ -164,6 +164,13 @@ def main():
             prix.setdefault(r["version_key"], {})["tres_bon"] = {
                 "prix": e_ed["prix"], "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
                 "confiance": "élevée", "incertitude": 0.05, "neuf": True}
+    # Prix validés par le propriétaire : ils servent aussi de base pour déduire les états qu'il n'a pas chiffrés (60 % / 40 %)
+    for r in cx.execute(REQUETE):
+        for e in validations.ETATS:
+            v = valides.get((r["isbn13"], e)) if r["isbn13"] else None
+            if v:
+                prix.setdefault(r["version_key"], {})[e] = {"prix": v["prix"], "source": "validé", "nature": "validé", "nb": 0, "date": v["le"],
+                                                          "confiance": "validée", "incertitude": 0.03}
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
     nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
