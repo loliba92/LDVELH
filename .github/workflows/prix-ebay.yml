@@ -52,6 +52,8 @@ jobs:
           python pipeline/test_mouvements.py
           python pipeline/test_add_prix.py
           python pipeline/test_validations.py
+          python pipeline/test_prix_neuf.py
+          python pipeline/test_prix_editeur.py
           python scrapers/test_ebay_api.py
       - name: Contrôle (sans enregistrement)
         if: ${{ inputs.controle != '' }}
@@ -62,6 +64,10 @@ jobs:
       - name: Relevé eBay
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
+      - name: Prix du neuf et disponibilité des éditions en vente
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
+        continue-on-error: true
+        run: python pipeline/prix_neuf.py
       - name: Base et données du site
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' }}
         run: |
@@ -73,7 +79,7 @@ jobs:
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"
-          git add data/raw/occasion data/processed/calibration.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+          git add data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
           if git diff --cached --quiet; then echo "Rien de nouveau."; exit 0; fi
           git commit -m "Relevé des prix actuels du $(date +%F)"
           git push

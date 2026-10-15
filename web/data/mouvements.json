@@ -2,7 +2,7 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 105,
+ "nb_modifiees": 102,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -67,21 +67,6 @@
    "recalibre": false
   },
   {
-   "id": "9782075100694",
-   "isbn13": "9782075100694",
-   "titre": "La Citadelle du Chaos",
-   "serie": "Défis Fantastiques",
-   "numero": "000",
-   "version": "V5",
-   "etat": "tres_bon",
-   "avant": 9.87,
-   "apres": 13.5,
-   "pct": 0.368,
-   "nature": "prix éditeur",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782075166805",
    "isbn13": "9782075166805",
    "titre": "Le Gouffre maudit",
@@ -90,8 +75,8 @@
    "version": "V5",
    "etat": "convenable",
    "avant": 4.32,
-   "apres": 5.8,
-   "pct": 0.343,
+   "apres": 5.98,
+   "pct": 0.384,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -105,8 +90,8 @@
    "version": "V5",
    "etat": "bon",
    "avant": 6.48,
-   "apres": 8.7,
-   "pct": 0.343,
+   "apres": 8.97,
+   "pct": 0.384,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,8 +105,23 @@
    "version": "V5",
    "etat": "tres_bon",
    "avant": 10.8,
-   "apres": 14.5,
-   "pct": 0.343,
+   "apres": 14.95,
+   "pct": 0.384,
+   "nature": "prix éditeur",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782075100694",
+   "isbn13": "9782075100694",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V5",
+   "etat": "tres_bon",
+   "avant": 9.87,
+   "apres": 13.5,
+   "pct": 0.368,
    "nature": "prix éditeur",
    "nb": 0,
    "recalibre": false
@@ -204,6 +204,21 @@
    "recalibre": false
   },
   {
+   "id": "9782075179492",
+   "isbn13": "9782075179492",
+   "titre": "La Forteresse maudite",
+   "serie": "Loup Solitaire",
+   "numero": "000",
+   "version": "V5",
+   "etat": "convenable",
+   "avant": 13.01,
+   "apres": 5.2,
+   "pct": -0.6,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782075191005",
    "isbn13": "9782075191005",
    "titre": "La Métropole de la peur",
@@ -264,21 +279,6 @@
    "recalibre": false
   },
   {
-   "id": "9782075179492",
-   "isbn13": "9782075179492",
-   "titre": "La Forteresse maudite",
-   "serie": "Loup Solitaire",
-   "numero": "000",
-   "version": "V5",
-   "etat": "convenable",
-   "avant": 13.01,
-   "apres": 5.98,
-   "pct": -0.54,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782075203470",
    "isbn13": "9782075203470",
    "titre": "Dans l'enfer de la jungle",
@@ -324,21 +324,6 @@
    "recalibre": false
   },
   {
-   "id": "9782075123150",
-   "isbn13": "9782075123150",
-   "titre": "Les Maîtres des ténèbres",
-   "serie": "Loup Solitaire",
-   "numero": "000",
-   "version": "V5",
-   "etat": "convenable",
-   "avant": 9.71,
-   "apres": 4.8,
-   "pct": -0.506,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782075191005",
    "isbn13": "9782075191005",
    "titre": "La Métropole de la peur",
@@ -367,9 +352,24 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782075179461",
+   "isbn13": "9782075179461",
+   "titre": "La Pierre de la sagesse",
+   "serie": "Loup Solitaire",
+   "numero": "000",
+   "version": "V5",
+   "etat": "convenable",
+   "avant": 9.88,
+   "apres": 5.2,
+   "pct": -0.474,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 86,
+ "nb_grands_mouvements": 84,
  "modele": {
   "actif": false,
   "n_paires": 5,

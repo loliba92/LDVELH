@@ -282,7 +282,7 @@
   function blocNeuf(b) {
     const e = b.prix_editeur;
     if (!e) return '';
-    if (e.source === 'editeur') return `<p class="sous prix-neuf">Prix du neuf : <strong>${fmt(e.prix)}</strong> (fiche du livre chez Gallimard Jeunesse, au ${dateCourte(e.date)})${e.parution ? `. À la parution : ${fmt(e.parution)} (notice de la BnF)` : ''}.</p>`;
+    if (e.source === 'editeur') return `<p class="sous prix-neuf">Prix du neuf : <strong>${fmt(e.prix)}</strong> (prix éditeur en librairie, relevé au ${dateCourte(e.date)})${e.parution ? `. À la parution : ${fmt(e.parution)} (notice de la BnF)` : ''}.</p>`;
     return `<p class="sous prix-neuf">Prix éditeur à la parution : <strong>${e.devise === 'EUR' ? fmt(e.prix) : String(e.prix).replace('.', ',') + ' F'}</strong> (notice de la BnF).</p>`;
   }
   function texteEstimation(bl) {
