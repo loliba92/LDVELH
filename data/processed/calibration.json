@@ -1,12 +1,12 @@
 {
   "actif": false,
-  "n_paires": 8,
+  "n_paires": 7,
   "calcule_le": "2026-10-15",
   "par_etat": {},
   "erreur_modele": null,
   "erreur_archives": null,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (8 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (7 sur 20 nécessaires)",
   "fraicheur": {},
   "sigma_archive": {},
   "rapports_etats_mesures_archives": {
