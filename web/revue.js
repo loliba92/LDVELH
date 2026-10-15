@@ -5,6 +5,7 @@
   const ETATS = [['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']];
   const PAGE = 60;
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const requete = (t) => encodeURIComponent(t.replace(/\s+/g, ' ').trim()).replace(/%20/g, '+');
   const eur = (v) => (v == null ? '—' : v.toFixed(2).replace('.', ',') + ' €');
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   let EDITIONS = [], VUE = [], vue = 'verif', limite = PAGE;
@@ -85,9 +86,14 @@
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
     return `<article class="rv-edition${jaq ? ' avec-jaq' : ''}">${jaq}<div class="rv-corps"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` +
-      `<a class="rv-ebay" href="https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(ed.titre + ' ' + (ed.isbn || '')).replace(/%20/g, '+')}" target="_blank" rel="noopener noreferrer">Voir les annonces sur eBay ↗</a></header>` +
+      `<span class="rv-liens"><span>Voir les annonces :</span>${[
+        ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
+        ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
+        ['Vinted', `https://www.vinted.fr/catalog?search_text=${requete(ed.titre + ' ldvelh')}`]]
+        .map(([nom, url]) => `<a class="rv-ebay" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(ed.titre)} sur ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></header>` +
       `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>Fourchette observée : de</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
       `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
+      `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Tout confirmer</button>` +
       `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></div></article>`;
   }
@@ -119,6 +125,14 @@
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
   }
 
+  function toutConfirmerListe() {
+    const eds = VUE.filter((ed) => ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); }));
+    const nb = eds.reduce((t, ed) => t + ETATS.filter(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); }).length, 0);
+    if (!nb) { window.alert('Tous les prix de cette liste sont déjà validés.'); return; }
+    if (!window.confirm(`Confirmer ${nb} prix de ${eds.length} livre${eds.length > 1 ? 's' : ''} tels qu'ils sont affichés, sans les regarder un par un ?`)) return;
+    eds.forEach(confirmerEdition); sauver(); afficher();
+  }
+
   function csv() {
     const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const cols = ['Titre', 'Série', 'Numéro', 'Édition', 'État', 'Prix affiché', 'Ancien prix', 'Origine', 'À vérifier'];
@@ -137,10 +151,25 @@
     sauver(); afficher();
   }
 
+  // Confirmer d'un coup les prix affichés d'une édition (ceux qui ne sont pas déjà validés)
+  function confirmerEdition(ed) {
+    let n = 0;
+    ETATS.forEach(([cle]) => {
+      const l = ed.etats[cle];
+      if (l && l.publie != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(l.publie * 100) / 100, decision: 'confirme', le: aujourdhui() }; n++; }
+    });
+    return n;
+  }
+
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
     const edId = b.dataset.ed, cle = b.dataset.e, cell = b.closest('.rv-prix');
+    if (b.dataset.act === 'tout-ok') {
+      const ed = EDITIONS.find((x) => x.id === edId);
+      if (ed && confirmerEdition(ed)) { sauver(); afficher(); }
+      return;
+    }
     if (b.dataset.act === 'ok') {
       const ed = EDITIONS.find((x) => x.id === edId), l = ed && ed.etats[cle];
       if (l && l.publie != null) enregistrer(edId, cle, l.publie, 'confirme');
@@ -178,8 +207,8 @@
   async function envoyer() {
     if (jeton()) {                                   // administrateur : envoi direct au lot « Corriger des cotes »
       const par = {};
-      Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'); (par[isbn] = par[isbn] || {})[etat] = v.prix; });
-      const lignes = Object.entries(par).map(([isbn, p]) => `${isbn} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}`);
+      Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
+      const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
       const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
       $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
       try {
@@ -303,6 +332,7 @@
     ['#rv-q', '#rv-serie'].forEach((s) => $(s).addEventListener('input', () => { limite = PAGE; afficher(); }));
     $('#rv-plus').addEventListener('click', () => { limite += PAGE; afficher(); });
     $('#rv-csv').addEventListener('click', csv);
+    $('#rv-tout-confirmer').addEventListener('click', toutConfirmerListe);
     $('#rv-envoyer').addEventListener('click', envoyer);
     afficher();
   }).catch(() => { $('#rv-liste').innerHTML = '<p class="erreur">Les données n\'ont pas pu être chargées.</p>'; });

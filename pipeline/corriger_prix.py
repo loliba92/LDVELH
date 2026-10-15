@@ -1,8 +1,8 @@
 """Corrections de cotes saisies sur le site (formulaire « Corriger les cotes » de la fiche, réservé au propriétaire).
 
 Une correction par ligne, ou plusieurs séparées par « | » (les champs d'un lancement GitHub tiennent sur une ligne) :
-    ISBN ; convenable ; bon état ; très bon état
-Une case vide ne change pas cet état. Les prix acceptent la virgule. Exemple :
+    ISBN ; convenable ; bon état ; très bon état [; confirme]
+Le mot « confirme » en dernier champ marque ces prix comme confirmés (et non corrigés). Une case vide ne change pas cet état. Les prix acceptent la virgule. Exemple :
     9782070585168 ; 25 ; ; 60
 Chaque prix saisi devient un prix validé (data/manual/prix_valides.json) : il prime sur eBay, les archives et la règle 40/60 ;
 les états non saisis en sont déduits (voir pipeline/export_site.py).
@@ -28,7 +28,7 @@ def lire(texte):
         ligne = ligne.strip()
         if not ligne or ligne.startswith("#"):
             continue
-        champs = [c.strip() for c in ligne.split(";")] + ["", "", "", ""]
+        champs = [c.strip() for c in ligne.split(";")] + ["", "", "", "", ""]
         prix = {}
         for etat, brut in zip(ORDRE, champs[1:4]):
             if brut:
@@ -36,7 +36,7 @@ def lire(texte):
                     prix[etat] = float(brut.replace(",", ".").replace("€", "").replace(" ", ""))
                 except ValueError:
                     prix[etat] = None
-        out.append({"brut": champs[0], "prix": prix})
+        out.append({"brut": champs[0], "prix": prix, "decision": "confirme" if champs[4].lower().startswith("confirm") else "corrige"})
     return out
 
 
@@ -62,7 +62,7 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None):
             bilan.append(("refuse", isbn, f"prix incorrect ({', '.join(mauvais)})"))
             continue
         for etat, p in e["prix"].items():
-            envoi[f"{isbn}|{etat}"] = {"prix": p, "decision": "corrige", "le": jour}
+            envoi[f"{isbn}|{etat}"] = {"prix": p, "decision": e["decision"], "le": jour}
         detail = " · ".join(f"{k.replace('tres_bon', 'très bon état').replace('bon', 'bon état') if k != 'convenable' else 'convenable'} {p:g} €" for k, p in e["prix"].items())
         bilan.append(("ok", isbn, f"{connus[isbn]['titre']} ({connus[isbn]['version']}) : {detail}"))
     if envoi:

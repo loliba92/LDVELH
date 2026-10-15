@@ -202,6 +202,7 @@ REVUE = '''<h1>Vérifier les prix</h1>
   <div class="champ"><label for="rv-serie">Série</label><select id="rv-serie"></select></div>
 </div>
 <p class="sous" id="rv-compte" role="status" aria-live="polite"></p>
+<p><button type="button" class="bouton bouton-clair" id="rv-tout-confirmer">Tout confirmer dans cette liste</button></p>
 <div id="rv-liste"><p>Chargement…</p></div>
 <p><button type="button" class="bouton bouton-clair" id="rv-plus" hidden>Voir la suite</button>
 <button type="button" class="bouton bouton-clair" id="rv-csv">Télécharger cette liste (tableur)</button></p>

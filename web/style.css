@@ -903,3 +903,8 @@ table.mouv .num { white-space: nowrap; }
 .rv-fourchette input { width: 5.5em; min-height: 40px; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
 .rv-fourchette.erreur input { border-color: #ffb4a8; }
 .rv-aide-fourchette { flex-basis: 100%; font-size: .85rem; color: var(--muted); }
+.rv-fourchette .rv-tout { margin-left: auto; }
+.rv-liens { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; font-size: .95rem; color: var(--muted); }
+.rv-liens .rv-ebay { min-height: 44px; display: inline-flex; align-items: center; }
+.rv-edition header .rv-liens a.rv-ebay { margin-left: 0; flex-basis: auto; }
+@media (max-width: 600px) { .rv-liens > span { flex-basis: 100%; } .rv-liens { gap: 0 18px; } }

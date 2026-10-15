@@ -40,6 +40,12 @@ class TestCorrections(unittest.TestCase):
         c.appliquer("9782070585168 ; 30", chemin, base)
         self.assertEqual(validations.lire(chemin)[("9782070585168", "convenable")]["prix"], 30.0)
 
+    def test_prix_confirmes(self):
+        base, chemin = self.base()
+        c.appliquer("9782070585168 ; 25 ; 40 ; 60 ; confirme", chemin, base)
+        v = validations.lire(chemin)
+        self.assertEqual({k[1]: x["decision"] for k, x in v.items()}, {"convenable": "confirme", "bon": "confirme", "tres_bon": "confirme"})
+
     def test_meme_empreinte_pour_la_porte_et_la_fiche(self):
         h = lambda f: re.search(r"[0-9a-f]{64}", (RACINE / "web" / f).read_text(encoding="utf-8")).group(0)
         self.assertEqual(h("acces.js"), h("app.js"))
