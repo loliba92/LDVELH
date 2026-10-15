@@ -822,7 +822,7 @@ table.mouv .num { white-space: nowrap; }
 .rv-envoi p { margin: 0 0 8px; }
 
 /* Accueil : résumé de la collection et lien vers la page collection */
-.hero-coll, .hero-cat { margin: 0; padding: 12px 16px 14px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
+.hero-coll { margin: 0; padding: 12px 16px 14px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow); }
 .hero-coll .hc-titre { margin: 0; font: 700 1.1rem var(--f-display); color: var(--brass); letter-spacing: .02em; }
 .hero-coll .hc-etat { margin: 2px 0 0; color: var(--text); }
 .hero-coll .hc-chiffres { margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
@@ -1000,12 +1000,7 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 /* Deux cartes côte à côte sous la recherche : « Ma collection » et « Le catalogue » */
 .hero-cartes { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; margin-top: 20px; }
 .hero-cartes .hero-coll { flex: 1 1 420px; max-width: 60ch; }
-.hero-cartes .hero-cat { flex: 0 1 300px; max-width: 340px; }
-.hero-cat .hero-compte { margin: 4px 0 0; color: var(--text); font-size: 1rem; }
-.hero-cat .hero-compte strong { color: var(--accent); font: 700 1.25rem var(--f-display); }
-.hero-cat .hero-series { margin: 10px 0 0; max-width: none; }
-.hero-cat .hero-series > span { flex: 1 0 100%; margin: 0; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em; }
-@media (max-width: 900px) { .hero-cartes .hero-coll, .hero-cartes .hero-cat { flex: 1 1 100%; max-width: none; } }
+@media (max-width: 900px) { .hero-cartes .hero-coll { flex: 1 1 100%; max-width: none; } }
 
 /* Bloc « Ma collection » de l'accueil : version compacte */
 .hero-coll .hc-visuel { gap: 6px 14px; margin: 8px 0 0; }
@@ -1023,7 +1018,6 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 @media (max-width: 480px) { .hero-coll .hc-eventail { width: 100px; } .hero-coll .hc-eventail img { width: 42px; height: 63px; left: calc(var(--i) * 17px); } }
 .hero .hero-in { row-gap: 18px; }
 .hero-cartes { margin-top: 0; }
-.hero-cat .pastille { min-height: 34px; padding: 0 12px; font-size: .85rem; }
-.hero-cat .hero-series { gap: 6px; }
-.hero-cat .hc-titre { margin: 0; font: 700 1.1rem var(--f-display); color: var(--brass); letter-spacing: .02em; }
-.hero-cat .hero-compte strong { font-variant-numeric: lining-nums; }
+.hc-anneau-u { fill: var(--muted); font: 400 9px var(--f-ui); }
+.hc-anneau-n { font-size: 17px; }
+.hc-series li { grid-template-columns: 1fr auto; }

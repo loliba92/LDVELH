@@ -87,7 +87,7 @@
 
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
-    $('#chiffres-hero').innerHTML = `<strong>${META.nb_versions}</strong> éditions · <strong>${META.nb_livres}</strong> livres · <strong>${META.nb_series}</strong> séries`;
+    $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
     const top = [...compter('serie').entries()].filter(([k]) => k).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], 'fr')).slice(0, 4);
     $('#hero-series').innerHTML = '<span>Séries :</span>' + top.map(([k, n]) =>
       `<button type="button" class="pastille" data-serie="${esc(k)}" title="${n} éditions">${esc(k)}</button>`).join('');
@@ -100,7 +100,7 @@
     $('#hero-series').addEventListener('click', (e) => {
       const b = e.target.closest('[data-serie]');
       if (!b) return;
-      S.serie = b.dataset.serie; S.onglet = 'etagere';
+      S.serie = b.dataset.serie; accorderEditeur(); S.onglet = 'etagere';
       synchroniser(); changer(); aller();
     });
   }
@@ -116,10 +116,23 @@
     return a.length ? a[Math.floor(a.length / 2)] : null;
   };
 
-  function construireControles() {
+  // Quand on choisit une série (pastille, groupe) qui n'est pas de l'éditeur déjà choisi, l'éditeur est retiré
+  function accorderEditeur() {
+    if (S.ed && S.serie && !DATA.some((b) => b.serie === S.serie && (b.editeur || 'Non renseigné') === S.ed)) S.ed = '';
+  }
+
+  // Les séries proposées sont celles de l'éditeur choisi (toutes si aucun éditeur) ; la série choisie reste si elle en fait partie
+  function remplirSeries() {
+    const m = new Map();
+    DATA.forEach((b) => { if (!S.ed || (b.editeur || 'Non renseigné') === S.ed) m.set(b.serie, (m.get(b.serie) || 0) + 1); });
+    if (S.serie && !m.has(S.serie)) S.serie = '';
     $('#f-serie').innerHTML = '<option value="">Toutes les séries</option>' +
-      [...compter('serie')].sort((a, b) => a[0].localeCompare(b[0], 'fr'))
-        .map(([k, n]) => `<option value="${esc(k)}">${esc(k)} (${n})</option>`).join('');
+      [...m].sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([k, n]) => `<option value="${esc(k)}">${esc(k)} (${n})</option>`).join('');
+    $('#f-serie').value = S.serie;
+  }
+
+  function construireControles() {
+    remplirSeries();
     $('#f-ed').innerHTML = '<option value="">Tous les éditeurs</option>' +
       [...compter('editeur', 'Non renseigné')].sort((a, b) => b[1] - a[1])
         .map(([k, n]) => `<option value="${esc(k)}">${esc(k)} (${n})</option>`).join('');
@@ -141,7 +154,7 @@
 
     $('#f-q').addEventListener('input', (e) => { S.q = e.target.value; changer(); });
     $('#f-serie').addEventListener('change', (e) => { S.serie = e.target.value; changer(); });
-    $('#f-ed').addEventListener('change', (e) => { S.ed = e.target.value; changer(); });
+    $('#f-ed').addEventListener('change', (e) => { S.ed = e.target.value; remplirSeries(); changer(); });
     $('#f-amin').addEventListener('change', (e) => { S.amin = e.target.value; changer(); });
     $('#f-amax').addEventListener('change', (e) => { S.amax = e.target.value; changer(); });
     $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
@@ -173,7 +186,7 @@
   }
 
   function synchroniser() {
-    $('#f-q').value = S.q; if ($('#h-q')) $('#h-q').value = S.q; $('#f-serie').value = S.serie; $('#f-ed').value = S.ed;
+    $('#f-q').value = S.q; if ($('#h-q')) $('#h-q').value = S.q; $('#f-ed').value = S.ed; remplirSeries();
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
@@ -603,7 +616,7 @@
     $('#resultats').querySelectorAll('tr.cliquable').forEach((tr) => tr.addEventListener('click', () => appliquerGroupe(tr.dataset.groupe)));
   }
   function appliquerGroupe(k) {
-    if (S.g === 'serie') S.serie = k;
+    if (S.g === 'serie') { S.serie = k; accorderEditeur(); }
     else if (S.g === 'version') S.versions = new Set([k]);
     else if (S.g === 'annee' && k !== 'Année inconnue') { S.amin = k; S.amax = k; }
     else if (S.g === 'decennie' && k !== 'Année inconnue') { S.amin = k; S.amax = String(+k + 9); }
@@ -824,7 +837,7 @@
   }
 
   // Analyses du portefeuille (accueil) : où est la valeur, par série, éditions d'origine, fiabilité des cotes, répartition par état
-  function analysesPortefeuille(bl, page = false) {
+  function analysesPortefeuille(bl, page = false, avant = '') {
     const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
     if (!L.length || !bl.total) return '';
     const somme = (liste) => liste.reduce((t, x) => t + x.v, 0);
@@ -840,7 +853,7 @@
     const mediane = unitaires.length % 2 ? unitaires[(unitaires.length - 1) / 2] : (unitaires[unitaires.length / 2 - 1] + unitaires[unitaires.length / 2]) / 2;
     const barre = (v) => `<span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * v) / bl.total))}%"></i></span>`;
     const entete = page ? `<details class="hc-analyses" id="titre-analyses"><summary>Comprendre mon portefeuille${filtresActifs() ? ' <span class="sous">· selon vos filtres</span>' : ''}</summary><div class="hc-grille hc-grille-page">`
-      : '<details class="hc-analyses"><summary>Comprendre mon portefeuille</summary><div class="hc-grille">';
+      : `<details class="hc-analyses"><summary>${avant ? 'Comprendre ma collection' : 'Comprendre mon portefeuille'}</summary><div class="hc-grille">${avant}`;
     return `${entete}
       <div><h3>Où se trouve la valeur</h3>
         <p>Vos 5 exemplaires les plus chers pèsent <strong>${pc(somme(top))}</strong> de la valeur.</p>
@@ -858,35 +871,59 @@
     </div></details>`;
   }
 
-  // Visuel de l'accueil : éventail des couvertures les plus précieuses, anneau de la répartition par série, progression de la série principale
+  // Accueil, vue collectionneur : séries commencées (titres possédés / titres du catalogue), sans aucun montant
+  function seriesCollection(bl) {
+    const poss = new Map(), tot = new Map();
+    bl.lignes.forEach(({ b }) => { (poss.get(b.serie) || poss.set(b.serie, new Set()).get(b.serie)).add(b.livre_id); });
+    DATA.forEach((b) => { (tot.get(b.serie) || tot.set(b.serie, new Set()).get(b.serie)).add(b.livre_id); });
+    return [...poss].map(([nom, set]) => ({ nom, possedes: set.size, total: tot.get(nom).size })).sort((x, y) => y.possedes - x.possedes || x.nom.localeCompare(y.nom, 'fr'));
+  }
+
+  // Éventail de quelques couvertures de la collection (tirées au hasard), anneau des titres par série, série la plus proche d'être complète
   const COULEURS_ANNEAU = ['#d9b45f', '#7f9fc4', '#8fb08a', '#c98a6b', '#8a8478'];
   function apercuVisuel(bl) {
-    const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
-    if (!L.length || !bl.total) return '';
+    const series = seriesCollection(bl);
+    if (!series.length) return '';
     const vus = new Set(), tops = [];
-    L.forEach((x) => { if (x.b.couverture && !vus.has(x.b.livre_id) && tops.length < 4) { vus.add(x.b.livre_id); tops.push(x); } });
-    const parSerie = new Map();
-    L.forEach((x) => parSerie.set(x.b.serie, (parSerie.get(x.b.serie) || 0) + x.v));
-    const rang = [...parSerie.entries()].sort((x, y) => y[1] - x[1]);
-    const parts = rang.slice(0, 3).concat(rang.length > 3 ? [['Autres', rang.slice(3).reduce((t, x) => t + x[1], 0)]] : []);
+    bl.lignes.filter((x) => x.b.couverture).sort(() => Math.random() - 0.5).forEach((x) => { if (tops.length < 4 && !vus.has(x.b.livre_id)) { vus.add(x.b.livre_id); tops.push(x); } });
+    const nbTitres = series.reduce((t, x) => t + x.possedes, 0);
+    const parts = series.slice(0, 3).map((x) => [x.nom, x.possedes]).concat(series.length > 3 ? [['Autres séries', series.slice(3).reduce((t, x) => t + x.possedes, 0)]] : []);
     const r = 32, C = 2 * Math.PI * r;
     let decal = 0;
-    const arcs = parts.map(([nom, v], i) => {
-      const long = (v / bl.total) * C, a = `<circle cx="42" cy="42" r="${r}" fill="none" stroke="${COULEURS_ANNEAU[i]}" stroke-width="14" stroke-dasharray="${Math.max(0, long - 1.5)} ${C}" stroke-dashoffset="${-decal}" transform="rotate(-90 42 42)"><title>${esc(nom)} : ${Math.round((100 * v) / bl.total)} %</title></circle>`;
+    const arcs = parts.map(([nom, n], i) => {
+      const long = (n / nbTitres) * C, a = `<circle cx="42" cy="42" r="${r}" fill="none" stroke="${COULEURS_ANNEAU[i]}" stroke-width="14" stroke-dasharray="${Math.max(0, long - 1.5)} ${C}" stroke-dashoffset="${-decal}" transform="rotate(-90 42 42)"><title>${esc(nom)} : ${n} titre${n > 1 ? 's' : ''}</title></circle>`;
       decal += long; return a;
     }).join('');
-    const legende = parts.map(([nom, v], i) => `<li><i style="background:${COULEURS_ANNEAU[i]}"></i><span>${esc(nom)}</span><b>${Math.round((100 * v) / bl.total)} %</b></li>`).join('');
-    const principale = rang[0][0];
-    const possedes = new Set(bl.lignes.filter((x) => x.b.serie === principale).map((x) => x.b.livre_id)).size;
-    const total = new Set(DATA.filter((b) => b.serie === principale).map((b) => b.livre_id)).size;
-    const manque = Math.max(0, total - possedes);
+    const legende = parts.map(([nom, n], i) => `<li><i style="background:${COULEURS_ANNEAU[i]}"></i><span>${esc(nom)}</span><b>${n}</b></li>`).join('');
+    // la série commencée la plus proche d'être complète (au moins 6 titres au catalogue)
+    const encours = series.filter((x) => x.total >= 6 && x.possedes < x.total).sort((x, y) => y.possedes / y.total - x.possedes / x.total || y.total - x.total)[0];
     return `<div class="hc-visuel">
       <div class="hc-eventail" aria-hidden="true">${tops.map((x, i) => `<img style="--i:${i}" src="${esc(racine(x.b.couverture))}" alt="" width="64" height="96" loading="lazy" decoding="async">`).join('')}</div>
-      <div class="hc-anneau"><svg viewBox="0 0 84 84" width="84" height="84" role="img" aria-label="Répartition de la valeur par série">${arcs}<text x="42" y="46" text-anchor="middle" class="hc-anneau-n">${rang.length}</text></svg>
-        <ul class="hc-legende">${legende}</ul></div>
-      ${manque ? `<div class="hc-progres"><span>${esc(principale)} <b>${possedes}</b>/${total}</span><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * possedes) / total))}%"></i></span>
-        <button type="button" class="bouton-lien" data-parcours>Il en manque ${manque} →</button></div>` : ''}
+      <div class="hc-anneau"><svg viewBox="0 0 84 84" width="84" height="84" role="img" aria-label="Titres possédés par série"><text x="42" y="40" text-anchor="middle" class="hc-anneau-n">${nbTitres}</text><text x="42" y="54" text-anchor="middle" class="hc-anneau-u">titres</text>${arcs}</svg>
+        <ul class="hc-legende" aria-label="Titres possédés par série">${legende}</ul></div>
+      ${encours ? `<div class="hc-progres"><span>${esc(encours.nom)} <b>${encours.possedes}</b>/${encours.total}</span><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * encours.possedes) / encours.total))}%"></i></span>
+        <button type="button" class="bouton-lien" data-parcours>${encours.total - encours.possedes === 1 ? 'Il en manque 1' : `Il en manque ${encours.total - encours.possedes}`} →</button></div>` : ''}
     </div>`;
+  }
+
+  // Détail repliable de l'accueil : où en est la collection, sans aucun montant
+  function contenuCollecteur(bl) {
+    const series = seriesCollection(bl);
+    if (!series.length) return '';
+    const etats = { convenable: 0, bon: 0, tres_bon: 0 };
+    let origine = 0, rees = 0, plusAncien = null;
+    bl.lignes.forEach(({ b, c }) => {
+      if (etats[c.etat] !== undefined) etats[c.etat] += c.qte;
+      if (b.version_n === 1) origine += 1; else rees += 1;
+      if (b.annee && (!plusAncien || b.annee < plusAncien.b.annee)) plusAncien = { b };
+    });
+    const completes = series.filter((x) => x.possedes === x.total).length;
+    return `
+      <div><h3>Vos séries</h3><ul class="hc-series">${series.slice(0, 5).map((x) => `<li><span>${esc(x.nom)}</span><strong>${x.possedes}/${x.total}</strong><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * x.possedes) / x.total))}%"></i></span></li>`).join('')}</ul>
+        <p class="sous">${series.length} série${series.length > 1 ? 's' : ''} commencée${series.length > 1 ? 's' : ''}${completes ? `, dont ${completes} complète${completes > 1 ? 's' : ''}` : ''}.</p></div>
+      <div><h3>Vos éditions</h3><p><strong>${origine}</strong> en première édition (V1), <strong>${rees}</strong> en réédition.</p>
+        ${plusAncien ? `<p>Le plus ancien : <strong>${esc(plusAncien.b.titre)}</strong> (${plusAncien.b.annee}).</p>` : ''}</div>
+      <div><h3>État de vos exemplaires</h3><p>${etats.convenable} en convenable · ${etats.bon} en bon état · ${etats.tres_bon} en très bon état.</p></div>`;
   }
 
   // Ligne discrète de chiffres clés, toujours visible (le détail est dans « Comprendre mon portefeuille »)
@@ -955,6 +992,14 @@
     : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
   const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
 
+  // Séries de la collection proposées : celles de l'éditeur choisi (toutes si aucun)
+  function optsSerieColl(bl) {
+    const m = new Map();
+    bl.lignes.forEach(({ b, c }) => { if (!FC.editeur || b.editeur === FC.editeur) m.set(b.serie, (m.get(b.serie) || 0) + c.qte); });
+    return '<option value="">Toutes les séries</option>' + [...m].sort((x, y) => x[0].localeCompare(y[0], 'fr'))
+      .map(([k, n]) => `<option value="${esc(k)}"${k === FC.serie ? ' selected' : ''}>${esc(k)} (${n})</option>`).join('');
+  }
+
   function barreFiltres(bl) {
     if (bl.lignes.length < 2) return '';
     const compte = (cle) => { const m = new Map(); bl.lignes.forEach(({ b, c }) => { const k = cle(b, c); if (k) m.set(k, (m.get(k) || 0) + c.qte); }); return [...m].sort((x, y) => String(x[0]).localeCompare(String(y[0]), 'fr', { numeric: true })); };
@@ -963,8 +1008,8 @@
     const champ = (id, nom, html) => `<label for="${id}">${nom}${html}</label>`;
     return `<div class="coll-filtres" role="group" aria-label="Filtrer et trier vos exemplaires">
       ${champ('cf-q', 'Chercher', `<input type="search" id="cf-q" value="${esc(FC.q)}" placeholder="Titre, auteur ou ISBN" autocomplete="off">`)}
-      ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${opts(compte((b) => b.serie), FC.serie, 'Toutes les séries')}</select>`)}
       ${champ('cf-editeur', 'Éditeur', `<select id="cf-editeur">${opts(compte((b) => b.editeur), FC.editeur, 'Tous les éditeurs')}</select>`)}
+      ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${optsSerieColl(bl)}</select>`)}
       ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes les éditions')}</select>`)}
       ${champ('cf-etat', 'État', `<select id="cf-etat"><option value="">Tous les états</option>${ETATS.map((x) => `<option value="${x.k}"${x.k === FC.etat ? ' selected' : ''}>${esc(x.nom || x.court)} (${nbEtat(x.k)})</option>`).join('')}</select>`)}
       ${champ('cf-cote', 'Cote', `<select id="cf-cote"><option value="">Avec ou sans cote</option><option value="avec"${FC.cote === 'avec' ? ' selected' : ''}>Avec cote</option><option value="sans"${FC.cote === 'sans' ? ' selected' : ''}>Sans cote</option></select>`)}
@@ -1013,6 +1058,12 @@
       hz.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('h-clic')) { e.preventDefault(); choisir(e.target); } });
       $('#coll-histo-legende').addEventListener('click', (e) => { if (e.target.closest('[data-effacer-prix]')) { FC.pmin = ''; FC.pmax = ''; limiteColl = 30; majListe(); } });
     }
+    const ed = $('#cf-editeur');
+    if (ed) ed.addEventListener('change', () => {          // la série choisie reste si elle appartient à cet éditeur, sinon elle est retirée
+      const bl = bilan();
+      if (FC.serie && !bl.lignes.some(({ b }) => (!FC.editeur || b.editeur === FC.editeur) && b.serie === FC.serie)) FC.serie = '';
+      $('#cf-serie').innerHTML = optsSerieColl(bl); majListe();
+    });
     const raz = $('#cf-raz');
     if (raz) raz.addEventListener('click', () => { FC = { ...FC0 }; limiteColl = 30; afficherCollection(); });
     document.querySelectorAll('tr.filtrable').forEach((tr) => {
@@ -1031,13 +1082,14 @@
     });
     if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = n ? `(${n})` : '';
     if ($('#hero-coll')) {              // accueil : résumé de la collection et lien vers la page collection
-      $('#hc-etat').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : "vide pour l'instant";
+      const nbSeries = n ? seriesCollection(bl).length : 0;
+      $('#hc-etat').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''} · ${nbSeries} série${nbSeries > 1 ? 's' : ''}` : "vide pour l'instant";
       const ch = $('#hc-chiffres');
       ch.hidden = !n;
       ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
       $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
       const an = $('#hc-analyses');
-      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
+      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + analysesPortefeuille(bl, false, contenuCollecteur(bl)) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';

@@ -56,6 +56,8 @@
         <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN : sorcier, Dever, 978…" autocomplete="off" enterkeyhint="search">
         <button type="submit" class="bouton">Chercher</button>
       </form>
+      <div class="hero-series" id="hero-series" role="group" aria-label="Séries les plus fournies"></div>
+      <p class="hero-compte" id="chiffres-hero"></p>
     </div>
     <div class="hero-cartes">
       <section class="hero-coll" id="hero-coll" aria-labelledby="hc-titre">
@@ -65,11 +67,6 @@
         <div class="hc-analyses-zone" id="hc-analyses"></div>
         <p class="hero-cta"><a class="bouton" href="collection.html" id="hc-lien">Voir ma collection</a>
           <button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Constituer pas à pas</button></p>
-      </section>
-      <section class="hero-cat" id="hero-cat" aria-labelledby="hcat-titre">
-        <h2 class="hc-titre" id="hcat-titre">Le catalogue</h2>
-        <p class="hero-compte" id="chiffres-hero"></p>
-        <div class="hero-series" id="hero-series" role="group" aria-label="Séries les plus fournies"></div>
       </section>
     </div>
   </div>
@@ -89,12 +86,12 @@
         <input type="search" id="f-q" placeholder="Par exemple : sorcier, Dever, 978…" autocomplete="off">
       </div>
       <div class="champ">
-        <label for="f-serie">Série</label>
-        <select id="f-serie"></select>
-      </div>
-      <div class="champ">
         <label for="f-ed">Éditeur</label>
         <select id="f-ed"></select>
+      </div>
+      <div class="champ">
+        <label for="f-serie">Série</label>
+        <select id="f-serie"></select>
       </div>
       <div class="champ">
         <label for="f-amin">Années d'édition</label>
