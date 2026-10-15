@@ -601,11 +601,13 @@
   // Recherche de cette édition sur trois sites d'annonces (liens simples, ouverts dans un nouvel onglet)
   const requete = (t) => encodeURIComponent(t).replace(/%20/g, '+');
   function blocRecherche(b) {
-    const q = requete(`${b.titre} ${b.version || ''} livre héros`.replace(/\s+/g, ' '));      // l'édition (V1, V2…) aide à cerner la recherche
+    // Titre + « ldvelh » : ces sites exigent tous les mots, et les vendeurs écrivent « ldvelh » (livre dont vous êtes le héros),
+    // presque jamais « V1 » ni « livre héros » (recherche vide constatée avec ces mots)
+    const q = requete(`${b.titre} ldvelh`.replace(/\s+/g, ' '));
     const ebay = requete(`${b.titre} ${b.isbn13 || 'livre héros'}`);
     const liens = [
       ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
-      ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&shippable=1&owner_type=all&sort=time`],
+      ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
     ];
     return `<h3>Chercher cette édition en vente</h3>
