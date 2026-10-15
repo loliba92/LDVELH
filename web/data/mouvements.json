@@ -2,9 +2,9 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 192,
+ "nb_modifiees": 204,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 102,
+ "nouvelles_cotes": 105,
  "hausses": [
   {
    "id": "9782070585168",
@@ -214,7 +214,7 @@
    "avant": 202.65,
    "apres": 48.8,
    "pct": -0.759,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -229,7 +229,7 @@
    "avant": 133.01,
    "apres": 36.74,
    "pct": -0.724,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -259,7 +259,7 @@
    "avant": 18.01,
    "apres": 7.2,
    "pct": -0.6,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -274,7 +274,7 @@
    "avant": 13.01,
    "apres": 5.2,
    "pct": -0.6,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -304,7 +304,7 @@
    "avant": 11.7,
    "apres": 5.2,
    "pct": -0.556,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -319,7 +319,7 @@
    "avant": 13.46,
    "apres": 5.98,
    "pct": -0.556,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -334,7 +334,7 @@
    "avant": 13.26,
    "apres": 5.98,
    "pct": -0.549,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -349,7 +349,7 @@
    "avant": 14.56,
    "apres": 6.6,
    "pct": -0.547,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -364,12 +364,12 @@
    "avant": 12.48,
    "apres": 5.8,
    "pct": -0.535,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 158,
+ "nb_grands_mouvements": 166,
  "modele": {
   "actif": false,
   "n_paires": 8,
