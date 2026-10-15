@@ -197,8 +197,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 202.65,
-   "apres": 47.62,
-   "pct": -0.765,
+   "apres": 48.8,
+   "pct": -0.759,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -212,8 +212,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 207.71,
-   "apres": 60.0,
-   "pct": -0.711,
+   "apres": 63.0,
+   "pct": -0.697,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
