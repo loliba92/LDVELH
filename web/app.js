@@ -277,6 +277,12 @@
     const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
     return `${base} · confiance ${i.confiance}.${reserve}${aligne}`;
   }
+  // Prix neuf constaté (éditions encore en vente) : médiane des annonces eBay en état neuf
+  function blocNeuf(b) {
+    const n = b.prix_neuf;
+    if (!n) return '';
+    return `<p class="sous prix-neuf">Prix neuf constaté : <strong>${fmt(n.prix)}</strong> (${n.nb} annonce${n.nb > 1 ? 's' : ''} eBay${n.nb > 1 ? `, de ${fmt(n.min)} à ${fmt(n.max)}` : ''}, au ${dateCourte(n.date)}). Prix demandés, hors livraison : un repère, pas le prix éditeur.</p>`;
+  }
   function texteEstimation(bl) {
     if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";
     return `Estimation d'après les cotes de la sélection et l'état que vous indiquez : ${bl.actuels} exemplaire${bl.actuels > 1 ? 's' : ''} sur ${bl.exemplaires - bl.sansCote} ` +
@@ -638,6 +644,7 @@
         <h3>Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+        ${blocNeuf(b)}
         ${blocRecherche(b)}
         ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>

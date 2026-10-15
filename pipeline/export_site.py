@@ -132,6 +132,12 @@ def main():
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
     nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
 
+    # Prix neuf constaté (éditions encore en vente) : dernier relevé eBay « neuf » de chaque édition
+    neufs = {}
+    for f in sorted((DB.parent.parent / "raw" / "neuf").glob("ebay-neuf-*.csv")):
+        with open(f, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                neufs[r["isbn13"]] = r
     versions = []
     cle_de = {}
     nb_valides = 0
@@ -152,6 +158,8 @@ def main():
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
+            **({"prix_neuf": {"prix": float(neufs[isbn]["prix_median"]), "min": float(neufs[isbn]["prix_min"]), "max": float(neufs[isbn]["prix_max"]),
+                              "nb": int(neufs[isbn]["nb_annonces"]), "date": neufs[isbn]["date"]}} if isbn and isbn in neufs else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
             "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision") if k in p[e]}
                           for e in ETATS if p.get(e)},
