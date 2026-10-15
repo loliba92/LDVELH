@@ -52,6 +52,24 @@
 <main id="main" class="cadre page" hidden>
 <h1>Vérifier les prix</h1>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
+<section class="rv-ajout" aria-labelledby="aj-titre">
+  <h2 id="aj-titre">Ajouter des livres</h2>
+  <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
+  <p><code class="aj-exemple">9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré</code></p>
+  <label class="sr-only" for="aj-texte">Liste d'ISBN</label>
+  <textarea id="aj-texte" rows="6" spellcheck="false" autocomplete="off" placeholder="9791097577025&#10;2-07-033370-1&#10;9782070583805 ; Destins ; 731 ; Le Pirate des Sept Mers"></textarea>
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="aj-verifier">Vérifier la liste</button></div>
+  <div id="aj-resultat" hidden>
+    <p id="aj-bilan" class="rv-ajout-bilan" role="status"></p>
+    <ul id="aj-liste" class="aj-liste"></ul>
+    <p class="rv-ajout-etapes"><strong>Pour les enregistrer</strong> : <span id="aj-etapes"></span></p>
+    <div class="rv-ajout-actions">
+      <button type="button" class="bouton" id="aj-copier">Copier la liste à ajouter</button>
+      <a class="bouton-lien" id="aj-github" href="https://github.com/loliba92/LDVELH/actions/workflows/ajout-isbn.yml" target="_blank" rel="noopener">Ajouter à la base sur GitHub</a>
+      <button type="button" class="bouton-lien" id="aj-telecharger">Télécharger la liste</button>
+    </div>
+  </div>
+</section>
 <div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
   <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
   <button type="button" data-vue="change" aria-pressed="false">Tout ce qui a changé <span class="nb-onglet" id="rv-n-change"></span></button>

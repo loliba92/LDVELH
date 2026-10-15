@@ -166,6 +166,63 @@
     a.download = `prix-valides-${aujourdhui()}.json`; document.body.appendChild(a); a.click(); a.remove();
   }
 
+  // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) » sur GitHub
+  const isbn13De = (brut) => {
+    const c = String(brut).replace(/[\s-]/g, '').toUpperCase();
+    if (/^\d{13}$/.test(c)) return [...c].reduce((t, d, i) => t + d * (i % 2 ? 3 : 1), 0) % 10 === 0 ? c : null;
+    if (/^\d{9}[\dX]$/.test(c)) {
+      if ([...c].reduce((t, d, i) => t + (d === 'X' ? 10 : +d) * (10 - i), 0) % 11 !== 0) return null;
+      const b = '978' + c.slice(0, 9), cle = (10 - [...b].reduce((t, d, i) => t + d * (i % 2 ? 3 : 1), 0) % 10) % 10;
+      return b + cle;
+    }
+    return null;
+  };
+  const lireListe = (texte) => texte.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).flatMap((l) => {
+    if (/[;\t]/.test(l)) { const [brut, serie = '', numero = '', titre = ''] = l.split(/[;\t]/).map((x) => x.trim()); return [{ brut, serie, numero, titre }]; }
+    return l.split(/[,\s]+/).filter(Boolean).map((brut) => ({ brut, serie: '', numero: '', titre: '' }));
+  });
+  let AJOUT = [];
+  function verifierListe(catalogue) {
+    const vus = new Set();
+    AJOUT = lireListe($('#aj-texte').value).map((e) => {
+      const isbn = isbn13De(e.brut);
+      if (!isbn) return { ...e, statut: 'invalide', texte: 'ISBN invalide (vérifiez les chiffres)' };
+      if (catalogue.has(isbn)) return { ...e, isbn, statut: 'deja', texte: `déjà dans la base : ${catalogue.get(isbn)}` };
+      if (vus.has(isbn)) return { ...e, isbn, statut: 'doublon', texte: 'écrit deux fois dans la liste' };
+      vus.add(isbn);
+      return { ...e, isbn, statut: 'nouveau', texte: [e.serie, e.numero && 'n° ' + e.numero, e.titre].filter(Boolean).join(' · ') || 'la fiche sera complétée automatiquement' };
+    });
+    const nb = (st) => AJOUT.filter((a) => a.statut === st).length;
+    const marque = { nouveau: '＋ À ajouter', deja: '= Déjà là', doublon: '= Doublon', invalide: '✗ Invalide' };
+    $('#aj-liste').innerHTML = AJOUT.map((a) => `<li class="aj-${a.statut}"><strong>${esc(marque[a.statut])}</strong> <code>${esc(a.isbn || a.brut)}</code> <span>${esc(a.texte)}</span></li>`).join('');
+    const n = nb('nouveau');
+    $('#aj-bilan').textContent = AJOUT.length
+      ? `${n} livre${n > 1 ? 's' : ''} à ajouter · ${nb('deja')} déjà dans la base · ${nb('doublon')} doublon${nb('doublon') > 1 ? 's' : ''} · ${nb('invalide')} invalide${nb('invalide') > 1 ? 's' : ''}`
+      : 'Aucun ISBN dans la liste.';
+    $('#aj-etapes').textContent = n ? '1) copiez la liste ; 2) ouvrez « Ajouter à la base sur GitHub », cliquez « Run workflow » et collez la liste dans la case ; 3) comptez environ 2 minutes, puis le livre apparaît sur le site (les prix suivent au relevé). Vous pouvez aussi me transmettre le fichier téléchargé.' : 'Rien à enregistrer.';
+    ['#aj-copier', '#aj-telecharger'].forEach((s) => { $(s).disabled = !n; });
+    $('#aj-github').hidden = !n;
+    $('#aj-resultat').hidden = false;
+  }
+  const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => [a.isbn, a.serie, a.numero, a.titre].join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
+  function initAjout() {
+    $('#aj-verifier').addEventListener('click', () => {
+      fetch('data/versions.json').then((r) => r.json()).then((v) => new Map(v.map((b) => [b.isbn13, `${b.titre} (${b.serie}${b.version ? ', ' + b.version : ''})`])))
+        .catch(() => new Map()).then(verifierListe);
+    });
+    $('#aj-copier').addEventListener('click', () => {
+      const t = texteAjout(), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => { $('#aj-texte').value = t; $('#aj-texte').select(); });
+      else { $('#aj-texte').value = t; $('#aj-texte').select(); }
+    });
+    $('#aj-telecharger').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([texteAjout() + '\n'], { type: 'text/plain;charset=utf-8' }));
+      a.download = `isbn-a-ajouter-${aujourdhui()}.txt`; document.body.appendChild(a); a.click(); a.remove();
+    });
+  }
+  initAjout();
+
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {

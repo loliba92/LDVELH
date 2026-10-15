@@ -845,3 +845,22 @@ table.mouv .num { white-space: nowrap; }
 .porte-boite input { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 11px 12px; font: inherit; font-size: 1rem; border-radius: var(--r); border: 1px solid var(--walnut-muted); background: #fff; color: #1d1710; }
 .porte-boite .bouton { width: 100%; min-height: 44px; }
 .porte-erreur { margin: 12px 0 0; color: #ffb4a8; font-size: .9rem; }
+
+/* Page privée : ajouter des livres par ISBN */
+.rv-ajout { margin: 0 0 28px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.rv-ajout h2 { margin: 0 0 8px; }
+.rv-ajout code { overflow-wrap: anywhere; }
+.rv-ajout textarea { width: 100%; box-sizing: border-box; min-height: 120px; margin: 4px 0 10px; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem/1.5 var(--f-ui); resize: vertical; }
+.rv-ajout-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 10px 0 0; }
+.rv-ajout-actions .bouton:disabled { opacity: .45; cursor: not-allowed; }
+.rv-ajout-actions a.bouton-lien { display: inline-flex; align-items: center; min-height: 44px; }
+.rv-ajout-bilan { margin: 16px 0 6px; font-weight: 700; }
+.aj-liste { list-style: none; margin: 0 0 6px; padding: 0; }
+.aj-liste li { display: flex; flex-wrap: wrap; gap: 2px 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.aj-liste strong { min-width: 8.5em; }
+.aj-nouveau strong { color: var(--gold); }
+.aj-invalide strong { color: #ffb4a8; }
+.rv-ajout-etapes { margin: 12px 0 0; }
+.rv-ajout .aj-exemple { display: inline-block; max-width: 100%; padding: 6px 10px; border-radius: var(--r); background: var(--bg); overflow-wrap: anywhere; }
+.rv-ajout .aj-liste { padding-left: 0; margin-left: 0; }
+.rv-ajout .rv-ajout-bilan { margin-top: 22px; }
