@@ -87,7 +87,7 @@
 
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
-    $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
+    $('#chiffres-hero').innerHTML = `<strong>${META.nb_versions}</strong> éditions · <strong>${META.nb_livres}</strong> livres · <strong>${META.nb_series}</strong> séries`;
     const top = [...compter('serie').entries()].filter(([k]) => k).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], 'fr')).slice(0, 4);
     $('#hero-series').innerHTML = '<span>Séries :</span>' + top.map(([k, n]) =>
       `<button type="button" class="pastille" data-serie="${esc(k)}" title="${n} éditions">${esc(k)}</button>`).join('');
@@ -865,11 +865,11 @@
     const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
     if (!L.length || !bl.total) return '';
     const vus = new Set(), tops = [];
-    L.forEach((x) => { if (x.b.couverture && !vus.has(x.b.livre_id) && tops.length < 5) { vus.add(x.b.livre_id); tops.push(x); } });
+    L.forEach((x) => { if (x.b.couverture && !vus.has(x.b.livre_id) && tops.length < 4) { vus.add(x.b.livre_id); tops.push(x); } });
     const parSerie = new Map();
     L.forEach((x) => parSerie.set(x.b.serie, (parSerie.get(x.b.serie) || 0) + x.v));
     const rang = [...parSerie.entries()].sort((x, y) => y[1] - x[1]);
-    const parts = rang.slice(0, 4).concat(rang.length > 4 ? [['Autres', rang.slice(4).reduce((t, x) => t + x[1], 0)]] : []);
+    const parts = rang.slice(0, 3).concat(rang.length > 3 ? [['Autres', rang.slice(3).reduce((t, x) => t + x[1], 0)]] : []);
     const r = 32, C = 2 * Math.PI * r;
     let decal = 0;
     const arcs = parts.map(([nom, v], i) => {
@@ -885,8 +885,8 @@
       <div class="hc-eventail" aria-hidden="true">${tops.map((x, i) => `<img style="--i:${i}" src="${esc(racine(x.b.couverture))}" alt="" width="64" height="96" loading="lazy" decoding="async">`).join('')}</div>
       <div class="hc-anneau"><svg viewBox="0 0 84 84" width="84" height="84" role="img" aria-label="Répartition de la valeur par série">${arcs}<text x="42" y="46" text-anchor="middle" class="hc-anneau-n">${rang.length}</text></svg>
         <ul class="hc-legende">${legende}</ul></div>
-      ${manque ? `<div class="hc-progres"><span>${esc(principale)} : <b>${possedes}</b> titres sur ${total}</span><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * possedes) / total))}%"></i></span>
-        <button type="button" class="bouton-lien" data-parcours>Il en manque ${manque} : compléter pas à pas →</button></div>` : ''}
+      ${manque ? `<div class="hc-progres"><span>${esc(principale)} <b>${possedes}</b>/${total}</span><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * possedes) / total))}%"></i></span>
+        <button type="button" class="bouton-lien" data-parcours>Il en manque ${manque} →</button></div>` : ''}
     </div>`;
   }
 
@@ -1038,7 +1038,7 @@
       ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
       $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
       const an = $('#hc-analyses');
-      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + infosRapides(bl, false) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
+      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
