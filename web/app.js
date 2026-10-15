@@ -39,6 +39,20 @@
   /* ---------- Chargement ---------- */
   const PAGE = document.body.dataset.page || 'accueil';   // « accueil » ou « collection »
 
+  // Mur de jaquettes : des couvertures du catalogue tirées au hasard à chaque visite (un seul exemplaire par livre), derrière le voile du haut de page
+  function murJaquettes(selecteur, n) {
+    const zone = $(selecteur);
+    if (!zone) return;
+    const vues = new Set(), choix = [];
+    DATA.filter((b) => b.couverture).sort(() => Math.random() - 0.5).forEach((b) => { if (choix.length < n && !vues.has(b.livre_id)) { vues.add(b.livre_id); choix.push(b); } });
+    if (!choix.length) return;
+    const mur = document.createElement('div');
+    mur.className = 'mur'; mur.setAttribute('aria-hidden', 'true');
+    mur.innerHTML = choix.map((b) => `<img src="${esc(racine(b.couverture))}" alt="" width="160" height="240" decoding="async">`).join('');
+    zone.classList.add('avec-mur');
+    zone.prepend(mur);
+  }
+
   async function charger() {
     try {
       const [v, m] = await Promise.all([
@@ -51,6 +65,8 @@
         'Ouvrez le guide depuis un serveur (par exemple <code>python -m http.server</code> dans le dossier <code>web</code>).</p>';
       return;
     }
+    murJaquettes('.hero', matchMedia('(max-width: 900px)').matches ? 12 : 30);
+    murJaquettes('.banniere', matchMedia('(max-width: 700px)').matches ? 8 : 18);
     DATA.forEach((b) => { b._txt = norm([b.titre, b.livre, b.auteurs, b.isbn13, b.serie, b.editeur].join(' ')); });
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
     S = defaut();
