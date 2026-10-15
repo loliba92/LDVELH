@@ -950,3 +950,13 @@ html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaqu
 .hc-vignettes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 8px; }
 .hc-vignettes li { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0; font-size: .8rem; }
 .hc-sans-img { display: block; border-radius: 3px; background: var(--surface-2); }
+
+/* Filtres de la liste « Vos exemplaires » (page collection) */
+#titre-exemplaires { scroll-margin-top: 84px; }
+.coll-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; margin: 8px 0 10px; align-items: end; }
+.coll-filtres label { display: flex; flex-direction: column; gap: 4px; font: 700 .8rem var(--f-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.coll-filtres input, .coll-filtres select { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); text-transform: none; letter-spacing: 0; }
+.coll-filtre-compte { margin: 0 0 10px; font-weight: 700; }
+tr.filtrable { cursor: pointer; }
+tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface-2); }
+@media (max-width: 640px) { .coll-filtres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; } .coll-filtres label:first-child, .coll-filtres #cf-raz { grid-column: 1 / -1; } .coll-filtres select, .coll-filtres input { padding: 8px 6px; font-size: .95rem; } }

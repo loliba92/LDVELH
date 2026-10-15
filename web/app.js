@@ -857,6 +857,112 @@
     </div></details>`;
   }
 
+  /* ---------- Filtres de la liste « Vos exemplaires » (page collection) ---------- */
+  const FC0 = { q: '', serie: '', editeur: '', version: '', etat: '', cote: '', pmin: '', pmax: '', tri: 'serie' };
+  let FC = { ...FC0 };
+  const triSerie = (x, y) => x.b.serie.localeCompare(y.b.serie, 'fr') || (parseInt(x.b.numero, 10) || 0) - (parseInt(y.b.numero, 10) || 0) || x.b.version_n - y.b.version_n;
+  const valeurTri = (x) => valeurLigne(x.b, x.c) ?? -1;
+  const TRIS = {
+    serie: ['Série et numéro', triSerie],
+    valeur: ['Valeur décroissante', (x, y) => valeurTri(y) - valeurTri(x) || triSerie(x, y)],
+    valeur_asc: ['Valeur croissante', (x, y) => valeurTri(x) - valeurTri(y) || triSerie(x, y)],
+    titre: ['Titre (A à Z)', (x, y) => x.b.titre.localeCompare(y.b.titre, 'fr') || triSerie(x, y)],
+    annee: ['Année croissante', (x, y) => (x.b.annee || 9999) - (y.b.annee || 9999) || triSerie(x, y)],
+  };
+  const filtresActifs = () => Object.keys(FC0).some((k) => k !== 'tri' && FC[k] !== FC0[k]);
+
+  // Un exemplaire est retenu s'il passe tous les filtres ; « avecTranche » : y compris la tranche de prix cliquée sur l'histogramme
+  // (l'histogramme lui-même ignore la tranche, pour que toutes ses barres restent visibles)
+  function retenue({ b, c }, avecTranche = true) {
+    const q = norm(FC.q).trim();
+    if (q && !b._txt.includes(q)) return false;
+    if ((FC.serie && b.serie !== FC.serie) || (FC.editeur && b.editeur !== FC.editeur) || (FC.version && b.version !== FC.version) || (FC.etat && c.etat !== FC.etat)) return false;
+    if (FC.cote && (FC.cote === 'avec') !== (valeurLigne(b, c) != null)) return false;
+    if (avecTranche && (FC.pmin !== '' || FC.pmax !== '')) {
+      const p = b.prix[c.etat];
+      if (p == null || (FC.pmin !== '' && p < +FC.pmin) || (FC.pmax !== '' && p >= +FC.pmax)) return false;
+    }
+    return true;
+  }
+
+  function listeExemplaires(bl) {
+    const triees = bl.lignes.filter((x) => retenue(x)).sort((TRIS[FC.tri] || TRIS.serie)[1]);
+    const vus = triees.slice(0, limiteColl);
+    const html = vus.map(({ b, c }) => {
+      const v = valeurLigne(b, c);
+      return `<tr data-ligne="${esc(b.id)}"><td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div></td>
+        <td data-label="État"><select data-etat="${esc(b.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === c.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
+        <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${c.qte}" data-qte="${esc(b.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
+        <td data-label="Prix payé (par exemplaire)"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
+        <td class="num" data-label="Valeur estimée"><span class="prix-c${v == null ? ' nul' : ''}">${v == null ? 'sans cote' : fmt(v)}</span></td>
+        <td class="num"><button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}">Retirer</button></td></tr>`;
+    }).join('');
+    return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
+  }
+  const texteFiltre = (lst, bl) => (!lst.nb ? 'Aucun exemplaire ne correspond à ces filtres.'
+    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
+  const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
+
+  function barreFiltres(bl) {
+    if (bl.lignes.length < 2) return '';
+    const compte = (cle) => { const m = new Map(); bl.lignes.forEach(({ b, c }) => { const k = cle(b, c); if (k) m.set(k, (m.get(k) || 0) + c.qte); }); return [...m].sort((x, y) => String(x[0]).localeCompare(String(y[0]), 'fr', { numeric: true })); };
+    const opts = (liste, val, tous) => `<option value="">${tous}</option>` + liste.map(([k, n]) => `<option value="${esc(k)}"${k === val ? ' selected' : ''}>${esc(k)} (${n})</option>`).join('');
+    const nbEtat = (k) => bl.lignes.filter((x) => x.c.etat === k).reduce((t, x) => t + x.c.qte, 0);
+    const champ = (id, nom, html) => `<label for="${id}">${nom}${html}</label>`;
+    return `<div class="coll-filtres" role="group" aria-label="Filtrer et trier vos exemplaires">
+      ${champ('cf-q', 'Chercher', `<input type="search" id="cf-q" value="${esc(FC.q)}" placeholder="Titre, auteur ou ISBN" autocomplete="off">`)}
+      ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${opts(compte((b) => b.serie), FC.serie, 'Toutes les séries')}</select>`)}
+      ${champ('cf-editeur', 'Éditeur', `<select id="cf-editeur">${opts(compte((b) => b.editeur), FC.editeur, 'Tous les éditeurs')}</select>`)}
+      ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes les éditions')}</select>`)}
+      ${champ('cf-etat', 'État', `<select id="cf-etat"><option value="">Tous les états</option>${ETATS.map((x) => `<option value="${x.k}"${x.k === FC.etat ? ' selected' : ''}>${esc(x.nom || x.court)} (${nbEtat(x.k)})</option>`).join('')}</select>`)}
+      ${champ('cf-cote', 'Cote', `<select id="cf-cote"><option value="">Avec ou sans cote</option><option value="avec"${FC.cote === 'avec' ? ' selected' : ''}>Avec cote</option><option value="sans"${FC.cote === 'sans' ? ' selected' : ''}>Sans cote</option></select>`)}
+      ${champ('cf-tri', 'Trier par', `<select id="cf-tri">${Object.entries(TRIS).map(([k, [nom]]) => `<option value="${k}"${k === FC.tri ? ' selected' : ''}>${nom}</option>`).join('')}</select>`)}
+      <button type="button" class="bouton bouton-clair" id="cf-raz"${filtresActifs() ? '' : ' hidden'}>Réinitialiser</button></div>`;
+  }
+
+  // Répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état ; une barre cliquée filtre la liste
+  function afficherHistoColl(bl) {
+    const valeursColl = [];
+    bl.lignes.filter((x) => retenue(x, false)).forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
+    const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
+      valeurs: valeursColl, etat: 'l\'état de chaque exemplaire', nom: { s: 'exemplaire', p: 'exemplaires' }, choix: true, sel: { mini: FC.pmin, maxi: FC.pmax }, vide: 'Aucun exemplaire n\'a de cote pour ces filtres.' });
+    $('#coll-histo-chiffres').hidden = !okH;
+  }
+
+  function majListe() {
+    const bl = bilan(), lst = listeExemplaires(bl);
+    $('#coll-lignes').innerHTML = lst.html;
+    $('#coll-filtre-compte').textContent = texteFiltre(lst, bl);
+    $('#coll-plus-zone').innerHTML = boutonPlus(lst.reste);
+    if ($('#cf-raz')) $('#cf-raz').hidden = !filtresActifs();
+    afficherHistoColl(bl);
+  }
+
+  function brancherFiltresColl() {
+    const lie = (id, cle, evt) => { const el = $(id); if (el) el.addEventListener(evt, () => { FC[cle] = el.value; limiteColl = 30; majListe(); }); };
+    lie('#cf-q', 'q', 'input');
+    [['#cf-serie', 'serie'], ['#cf-editeur', 'editeur'], ['#cf-version', 'version'], ['#cf-etat', 'etat'], ['#cf-cote', 'cote'], ['#cf-tri', 'tri']].forEach(([id, cle]) => lie(id, cle, 'change'));
+    const hz = $('#coll-histo');
+    if (hz) {
+      const choisir = (el) => {
+        const deja = FC.pmin === el.dataset.mini && FC.pmax === el.dataset.maxi;
+        FC.pmin = deja ? '' : el.dataset.mini; FC.pmax = deja ? '' : el.dataset.maxi; limiteColl = 30; majListe();
+        if (!deja) $('#titre-exemplaires').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      hz.addEventListener('click', (e) => { const el = e.target.closest('.h-clic'); if (el) choisir(el); });
+      hz.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('h-clic')) { e.preventDefault(); choisir(e.target); } });
+      $('#coll-histo-legende').addEventListener('click', (e) => { if (e.target.closest('[data-effacer-prix]')) { FC.pmin = ''; FC.pmax = ''; limiteColl = 30; majListe(); } });
+    }
+    const raz = $('#cf-raz');
+    if (raz) raz.addEventListener('click', () => { FC = { ...FC0 }; limiteColl = 30; afficherCollection(); });
+    document.querySelectorAll('tr.filtrable').forEach((tr) => {
+      const go = () => { FC = { ...FC0, serie: tr.dataset.serie }; limiteColl = 30; afficherCollection(); $('#titre-exemplaires').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      tr.addEventListener('click', go);
+      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+  }
+
   function afficherCollection() {
     const bl = bilan();
     const n = bl.exemplaires;
@@ -899,7 +1005,7 @@
     const maxVal = Math.max(...series.map((x) => x[1].val), 1);
     const lignesSerie = series.map(([nom, e]) => {
       const tot = totalTitres.get(nom).size;
-      return `<tr><td class="principal"><div class="l-livre"><b style="font:700 1.1rem var(--f-display)">${esc(nom)}</b></div></td>
+      return `<tr class="filtrable" data-serie="${esc(nom)}" tabindex="0" title="Afficher seulement cette série dans la liste"><td class="principal"><div class="l-livre"><b style="font:700 1.1rem var(--f-display)">${esc(nom)}</b></div></td>
         <td class="num" data-label="Titres"><span class="prix-c">${e.titres.size}</span> <span class="sous">sur ${tot}</span><span class="progres"><i style="width:${Math.round((e.titres.size / tot) * 100)}%"></i></span></td>
         <td class="num" data-label="Exemplaires"><span class="prix-c">${e.ex}</span></td>
         <td class="num" data-label="Valeur estimée"><span class="prix-c">${fmtE(e.val)}</span><span class="barre" style="width:${Math.max(4, (e.val / maxVal) * 100)}%"></span></td></tr>`;
@@ -909,20 +1015,9 @@
     const htmlPieces = pieces.map(({ b, c }) => `<button type="button" class="piece" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}, ${fmt(b.prix[c.etat])}">
       ${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
       <b>${esc(b.titre)}</b><span>${esc(b.version)} · ${esc(etatDe(c.etat).court)}</span><span class="p">${fmt(b.prix[c.etat])}</span></button>`).join('');
-    // exemplaires, modifiables
-    const triees = [...bl.lignes].sort((x, y) => x.b.serie.localeCompare(y.b.serie, 'fr') || (parseInt(x.b.numero, 10) || 0) - (parseInt(y.b.numero, 10) || 0) || x.b.version_n - y.b.version_n);
-    const vus = triees.slice(0, limiteColl);
-    const lignesEx = vus.map(({ b, c }) => {
-      const v = valeurLigne(b, c);
-      return `<tr data-ligne="${esc(b.id)}"><td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-        <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div></td>
-        <td data-label="État"><select data-etat="${esc(b.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === c.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
-        <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${c.qte}" data-qte="${esc(b.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
-        <td data-label="Prix payé (par exemplaire)"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
-        <td class="num" data-label="Valeur estimée"><span class="prix-c${v == null ? ' nul' : ''}">${v == null ? 'sans cote' : fmt(v)}</span></td>
-        <td class="num"><button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}">Retirer</button></td></tr>`;
-    }).join('');
-    const reste = triees.length - vus.length;
+    // exemplaires, modifiables, filtrés et triés (filtres : FC)
+    const lst = listeExemplaires(bl);
+    const lignesEx = lst.html, reste = lst.reste;
     zone.innerHTML = `
       <div class="coll-haut">
         <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
@@ -952,15 +1047,13 @@
       <h3>Par série</h3>
       <table class="cartes groupes"><thead><tr><th>Série</th><th class="num">Titres possédés</th><th class="num">Exemplaires</th><th class="num">Valeur estimée</th></tr></thead><tbody>${lignesSerie}</tbody></table>
       ${pieces.length ? `<h3>Vos pièces les plus cotées</h3><div class="pieces">${htmlPieces}</div>` : ''}
-      <h3>Vos exemplaires</h3>
-      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody>${lignesEx}</tbody></table>
-      ${reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : ''}`;
-    // répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état
-    const valeursColl = [];
-    bl.lignes.forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
-    const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
-      valeurs: valeursColl, etat: 'l\'état de chaque exemplaire', nom: { s: 'exemplaire', p: 'exemplaires' }, choix: false, vide: 'Aucun exemplaire n\'a de cote.' });
-    $('#coll-histo-chiffres').hidden = !okH;
+      <h3 id="titre-exemplaires">Vos exemplaires</h3>
+      ${barreFiltres(bl)}
+      <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
+      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody id="coll-lignes">${lignesEx}</tbody></table>
+      <div id="coll-plus-zone">${boutonPlus(reste)}</div>`;
+    afficherHistoColl(bl);
+    brancherFiltresColl();
   }
   let limiteColl = 30;
 
