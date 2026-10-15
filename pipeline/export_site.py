@@ -227,6 +227,12 @@ def main():
         k = (r["isbn13"], r["etat"])
         if k not in derniers or r["date"] >= derniers[k]["date"]:
             derniers[k] = r
+    # Exemplaires d'occasion proposés par les librairies (dernier relevé de chaque édition), pour la page de vérification
+    libraires = {}
+    for f in sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv")):
+        with open(f, newline="", encoding="utf-8") as fh:
+            for r in csv.DictReader(fh):
+                libraires[(r["isbn13"], r["etat"])] = float(r["prix_median"])
     revue = []
     for v in versions:
         cle = cle_de[v["id"]]
@@ -242,6 +248,8 @@ def main():
                      "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
                      "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
                      "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition")), "neuf": bool(info.get("neuf"))}
+            if (v["isbn13"], e) in libraires:
+                ligne["lib_prix"] = libraires[(v["isbn13"], e)]
             if info.get("valide"):
                 ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision")})
             if eb:

@@ -37,6 +37,7 @@ ETATS = [  # code, libellé, rang, description
 SOURCES = [  # code, nom, famille, accès, fiabilité
     ("collection_ldvelh", "Relevé d'archives (historique)", "historique", "fichier", 0.3),
     ("ebay_api", "eBay (interface officielle)", "marketplace", "api", 0.8),
+    ("libraires", "Librairies indépendantes (leslibraires.fr)", "marketplace", "web", 0.7),
     ("vente_perso", "Mes ventes", "perso", "saisie", 1.0),
     ("achat_perso", "Mes achats", "perso", "saisie", 0.9),
     ("releve_manuel", "Relevé manuel (Vinted, Leboncoin, comparateurs)", "marketplace", "saisie", 0.6),
@@ -227,13 +228,14 @@ def load_manuel(cx, chemin):
     return n, doublons, erreurs
 
 
-def load_ebay(cx, dossier):
-    """Relevés d'annonces eBay agrégés : data/raw/occasion/ebay-AAAA-MM-JJ.csv.
+def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api"):
+    """Relevés d'annonces agrégés : data/raw/occasion/ebay-AAAA-MM-JJ.csv (eBay) et libraires-AAAA-MM-JJ.csv (exemplaires d'occasion
+    des librairies, même format, une annonce par ligne).
 
     Une ligne par livre et par état : isbn13, date, etat, nb_annonces, prix_min, prix_median, prix_max.
     Seule la médiane entre dans la base (nature « prix demandé », nombre d'annonces conservé).
     """
-    n, doublons, erreurs, fichiers = 0, 0, [], sorted(Path(dossier).glob("ebay-*.csv"))
+    n, doublons, erreurs, fichiers = 0, 0, [], sorted(Path(dossier).glob(motif))
     for fichier in fichiers:
         with open(fichier, newline="", encoding="utf-8") as f:
             for i, r in enumerate(csv.DictReader(f), start=2):
@@ -242,7 +244,7 @@ def load_ebay(cx, dossier):
                     prix, nb = to_float(r["prix_median"]), int(r["nb_annonces"])
                     if prix is None or prix <= 0 or nb < 1:
                         raise ValueError(f"valeurs invalides (prix {r['prix_median']}, annonces {r['nb_annonces']})")
-                    ajoute = insert_fait(cx, ident, date.fromisoformat(r["date"]), "ebay_api", "prix_demande",
+                    ajoute = insert_fait(cx, ident, date.fromisoformat(r["date"]), source, "prix_demande",
                                          r["etat"], round(prix, 2), nb=nb)
                     n += ajoute
                     doublons += 1 - ajoute
@@ -269,8 +271,11 @@ def main():
         n_hist, ignores, orphelins = load_historique(cx)
         n_man, doublons, erreurs = load_manuel(cx, a.manual)
         n_ebay, dbl_ebay, err_ebay, nb_fichiers = load_ebay(cx, a.occasion)
-        doublons += dbl_ebay
-        erreurs += err_ebay
+        n_lib, dbl_lib, err_lib, nb_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires")
+        n_ebay += n_lib
+        nb_fichiers += nb_lib
+        doublons += dbl_ebay + dbl_lib
+        erreurs += err_ebay + err_lib
     cx.execute("PRAGMA foreign_keys = ON")
     problemes = cx.execute("PRAGMA foreign_key_check").fetchall()
 

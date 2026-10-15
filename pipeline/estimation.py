@@ -84,7 +84,13 @@ def estimer(observations, aujourdhui=None, sigma_hist=None):
     confiance : « ancienne » pour les archives ; « faible », « moyenne » ou « élevée » pour le reste.
     """
     aujourdhui = aujourdhui or date.today()
-    obs = [o for o in observations if not (o.type == "prix_demande" and o.nb < MIN_ANNONCES)]
+    # Un relevé d'annonces trop mince (moins de MIN_ANNONCES) n'est pas pris en compte. Les annonces d'un même jour venant de plusieurs
+    # sources (eBay, librairies) se comptent ensemble : 2 annonces eBay et 1 exemplaire de librairie font 3 annonces.
+    par_jour = {}
+    for o in observations:
+        if o.type == "prix_demande":
+            par_jour[o.date] = par_jour.get(o.date, 0) + o.nb
+    obs = [o for o in observations if not (o.type == "prix_demande" and par_jour[o.date] < MIN_ANNONCES)]
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]

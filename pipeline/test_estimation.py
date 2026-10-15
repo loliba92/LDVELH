@@ -40,8 +40,17 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(r["confiance"], "moyenne")
 
     def test_une_annonce_isolee_est_ignoree(self):
-        r = estimer([Obs(10, "historique", AUJ, 1), Obs(104.69, "prix_demande", AUJ, 1), Obs(90, "prix_demande", AUJ, 2)], AUJ)
-        self.assertEqual((r["prix"], r["source"]), (10, "archives"))
+        r = estimer([Obs(10, "historique", AUJ, 1), Obs(104.69, "prix_demande", AUJ, 1), Obs(90, "prix_demande", AUJ - timedelta(days=7), 2)], AUJ)
+        self.assertEqual((r["prix"], r["source"]), (10, "archives"))          # 1 annonce un jour, 2 une autre : aucun relevé n'atteint 3
+
+    def test_les_annonces_d_un_meme_jour_de_plusieurs_sources_se_comptent_ensemble(self):
+        """2 annonces eBay + 1 exemplaire de librairie le même jour : 3 annonces, le relevé compte (et l'archive cède)."""
+        r = estimer([Obs(40, "historique", AUJ, 1), Obs(20, "prix_demande", AUJ, 2), Obs(17, "prix_demande", AUJ, 1)], AUJ)
+        self.assertEqual(r["source"], "actuel")
+        self.assertEqual(r["nb"], 3)
+        self.assertLess(r["prix"], 30)                                       # tiré vers les annonces (17-20 €), pas vers l'archive (40 €)
+        seul = estimer([Obs(40, "historique", AUJ, 1), Obs(17, "prix_demande", AUJ, 1)], AUJ)           # une offre seule ne suffit pas
+        self.assertEqual((seul["prix"], seul["source"]), (40, "archives"))
 
     def test_sans_autre_observation_un_releve_trop_mince_ne_donne_rien(self):
         self.assertIsNone(estimer([Obs(30, "prix_demande", AUJ, 2)], AUJ))
