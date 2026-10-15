@@ -810,8 +810,8 @@
   const lirePrix = (t) => { const n = parseFloat(String(t ?? '').replace(',', '.')); return Number.isFinite(n) && n > 0 && n <= 2000 ? Math.round(n * 100) / 100 : null; };
   const prixSaisi = (p) => (p == null ? '' : String(p).replace('.', ','));
 
-  function bilan() {
-    const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b);
+  function bilan(garder = () => true) {
+    const lignes = Object.entries(COLL).map(([id, c]) => ({ b: livreDe(id), c })).filter((x) => x.b).filter((x) => garder(x));
     let total = 0, bas = 0, haut = 0, exemplaires = 0, sansCote = 0, actuels = 0, investi = 0, nbPayes = 0;
     lignes.forEach(({ b, c }) => {
       exemplaires += c.qte;
@@ -825,7 +825,7 @@
   }
 
   // Analyses du portefeuille (accueil) : où est la valeur, par série, éditions d'origine, fiabilité des cotes, répartition par état
-  function analysesPortefeuille(bl) {
+  function analysesPortefeuille(bl, page = false) {
     const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
     if (!L.length || !bl.total) return '';
     const somme = (liste) => liste.reduce((t, x) => t + x.v, 0);
@@ -840,7 +840,9 @@
     const unitaires = L.flatMap((x) => Array(x.c.qte).fill(x.v / x.c.qte)).sort((x, y) => x - y);
     const mediane = unitaires.length % 2 ? unitaires[(unitaires.length - 1) / 2] : (unitaires[unitaires.length / 2 - 1] + unitaires[unitaires.length / 2]) / 2;
     const barre = (v) => `<span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * v) / bl.total))}%"></i></span>`;
-    return `<details class="hc-analyses"><summary>Comprendre mon portefeuille</summary><div class="hc-grille">
+    const entete = page ? `<details class="hc-analyses" id="titre-analyses"><summary>Comprendre mon portefeuille${filtresActifs() ? ' <span class="sous">· selon vos filtres</span>' : ''}</summary><div class="hc-grille hc-grille-page">`
+      : '<details class="hc-analyses"><summary>Comprendre mon portefeuille</summary><div class="hc-grille">';
+    return `${entete}
       <div><h3>Où se trouve la valeur</h3>
         <p>Vos 5 exemplaires les plus chers pèsent <strong>${pc(somme(top))}</strong> de la valeur.</p>
         ${(() => { const [p1, ...reste] = L.slice(0, 7); const img = (x, l, h) => (x.b.couverture ? `<img src="${esc(racine(x.b.couverture))}" alt="" width="${l}" height="${h}" loading="lazy" decoding="async">` : `<span class="hc-sans-img" style="width:${l}px;height:${h}px"></span>`);
@@ -856,6 +858,25 @@
         <p>Valeur médiane d'un exemplaire : <strong>${fmtE(mediane)}</strong>. Selon l'état réel, la collection vaut de <strong>${fmtE(bl.bas)}</strong> (tout en convenable) à <strong>${fmtE(bl.haut)}</strong> (tout en très bon état).</p></div>
     </div></details>`;
   }
+
+  // Ligne discrète de chiffres clés, toujours visible (le détail est dans « Comprendre mon portefeuille »)
+  function infosRapides(bl) {
+    const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
+    if (!L.length || !bl.total) return '';
+    const pc = (v) => `${Math.round((100 * v) / bl.total)} %`;
+    const somme = (liste) => liste.reduce((t, x) => t + x.v, 0);
+    const parSerie = new Map();
+    L.forEach((x) => parSerie.set(x.b.serie, (parSerie.get(x.b.serie) || 0) + x.v));
+    const [serie, vSerie] = [...parSerie.entries()].sort((x, y) => y[1] - x[1])[0];
+    const p1 = L[0], recent = somme(L.filter((x) => estActuel(infoPrix(x.b, x.c.etat))));
+    const puce = (html, titre) => `<li title="${esc(titre)}">${html}</li>`;
+    return `<ul class="hc-rapide" aria-label="Chiffres clés de la collection">` +
+      puce(`${p1.b.couverture ? `<img src="${esc(racine(p1.b.couverture))}" alt="" width="20" height="30" loading="lazy" decoding="async">` : ''}<span>Le plus précieux <b>${esc(p1.b.titre)}</b> ${fmtE(p1.v)}</span>`, 'Exemplaire le plus cher de la sélection') +
+      puce(`<span>${esc(serie)} <b>${pc(vSerie)}</b></span>`, 'Série qui pèse le plus dans la valeur') +
+      puce(`<span>Premières éditions <b>${pc(somme(L.filter((x) => x.b.version_n === 1)))}</b></span>`, 'Part de la valeur en première édition (V1)') +
+      puce(`<span>Cotes récentes <b>${pc(recent)}</b></span>`, 'Part de la valeur fondée sur des prix récents (le reste vient d\'archives)') + '</ul>';
+  }
+
 
   /* ---------- Filtres de la liste « Vos exemplaires » (page collection) ---------- */
   const FC0 = { q: '', serie: '', editeur: '', version: '', etat: '', cote: '', pmin: '', pmax: '', tri: 'serie' };
@@ -930,6 +951,13 @@
     $('#coll-histo-chiffres').hidden = !okH;
   }
 
+  const analysesPage = () => { const sel = bilan(retenue); return infosRapides(sel) + analysesPortefeuille(sel, true); };
+  function majAnalysesPage() {
+    const z = $('#coll-analyses'), d = z.querySelector('details'), ouvert = d && d.open;
+    z.innerHTML = analysesPage();
+    if (ouvert && z.querySelector('details')) z.querySelector('details').open = true;
+  }
+
   function majListe() {
     const bl = bilan(), lst = listeExemplaires(bl);
     $('#coll-lignes').innerHTML = lst.html;
@@ -937,6 +965,7 @@
     $('#coll-plus-zone').innerHTML = boutonPlus(lst.reste);
     if ($('#cf-raz')) $('#cf-raz').hidden = !filtresActifs();
     afficherHistoColl(bl);
+    majAnalysesPage();
   }
 
   function brancherFiltresColl() {
@@ -978,7 +1007,7 @@
       ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
       $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
       const an = $('#hc-analyses');
-      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
+      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? infosRapides(bl) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
@@ -1039,6 +1068,7 @@
           </div>
         </div>
       </div>
+      <div id="coll-analyses" class="coll-analyses">${analysesPage()}</div>
       <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
       <p class="sous" id="coll-histo-note"></p>
       <div id="coll-histo" class="histo"></div>
