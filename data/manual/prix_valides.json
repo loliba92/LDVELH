@@ -15,6 +15,26 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070333714|bon": {
+   "prix": 16.58,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070333714|convenable": {
+   "prix": 11.05,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070333714|tres_bon": {
+   "prix": 27.63,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070333745|bon": {
+   "prix": 48.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
   "9782070333745|convenable": {
    "prix": 42.0,
    "decision": "corrige",
@@ -22,6 +42,41 @@
   },
   "9782070333745|tres_bon": {
    "prix": 63.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070334254|bon": {
+   "prix": 31.31,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070334254|convenable": {
+   "prix": 27.23,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070334254|tres_bon": {
+   "prix": 37.57,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070336098|convenable": {
+   "prix": 38.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070336098|tres_bon": {
+   "prix": 50.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070336234|convenable": {
+   "prix": 16.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070336234|tres_bon": {
+   "prix": 25.0,
    "decision": "corrige",
    "le": "2026-10-15"
   },
@@ -35,9 +90,104 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070336326|bon": {
+   "prix": 22.54,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070336326|convenable": {
+   "prix": 19.6,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070336326|tres_bon": {
+   "prix": 27.05,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070506767|convenable": {
+   "prix": 4.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070506767|tres_bon": {
+   "prix": 7.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070507030|bon": {
+   "prix": 14.38,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070507030|convenable": {
+   "prix": 12.5,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070507030|tres_bon": {
+   "prix": 17.26,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070509294|bon": {
+   "prix": 13.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070509294|convenable": {
+   "prix": 12.0,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070509294|tres_bon": {
+   "prix": 16.56,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
   "9782070520343|bon": {
    "prix": 60.0,
    "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070541805|bon": {
+   "prix": 14.27,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070541805|convenable": {
+   "prix": 12.41,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070541805|tres_bon": {
+   "prix": 17.12,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070567539|convenable": {
+   "prix": 20.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070567539|tres_bon": {
+   "prix": 30.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070567898|bon": {
+   "prix": 23.41,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070567898|convenable": {
+   "prix": 20.35,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070567898|tres_bon": {
+   "prix": 28.09,
+   "decision": "confirme",
    "le": "2026-10-15"
   },
   "9782070568734|convenable": {
@@ -50,6 +200,41 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070569410|bon": {
+   "prix": 57.81,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070569410|convenable": {
+   "prix": 50.27,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070569410|tres_bon": {
+   "prix": 69.37,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070575183|bon": {
+   "prix": 7.84,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070575183|convenable": {
+   "prix": 6.82,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070575183|tres_bon": {
+   "prix": 9.41,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070585168|bon": {
+   "prix": 36.74,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
   "9782070585168|convenable": {
    "prix": 25.0,
    "decision": "corrige",
@@ -57,6 +242,76 @@
   },
   "9782070585168|tres_bon": {
    "prix": 60.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070649525|bon": {
+   "prix": 8.95,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070649525|convenable": {
+   "prix": 7.78,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070649525|tres_bon": {
+   "prix": 10.74,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070651351|convenable": {
+   "prix": 10.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070651351|tres_bon": {
+   "prix": 19.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070660797|convenable": {
+   "prix": 4.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070660797|tres_bon": {
+   "prix": 9.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070662234|bon": {
+   "prix": 5.34,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070662234|convenable": {
+   "prix": 3.56,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070662234|tres_bon": {
+   "prix": 8.9,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782070662258|convenable": {
+   "prix": 4.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070662258|tres_bon": {
+   "prix": 9.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070662302|convenable": {
+   "prix": 4.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070662302|tres_bon": {
+   "prix": 9.0,
    "decision": "corrige",
    "le": "2026-10-15"
   },
@@ -68,6 +323,186 @@
   "9782070665815|tres_bon": {
    "prix": 70.0,
    "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782075084444|bon": {
+   "prix": 5.34,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075084444|convenable": {
+   "prix": 3.56,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075084444|tres_bon": {
+   "prix": 8.9,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075097314|bon": {
+   "prix": 8.7,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075097314|convenable": {
+   "prix": 5.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075097314|tres_bon": {
+   "prix": 14.5,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075123211|bon": {
+   "prix": 9.9,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075123211|convenable": {
+   "prix": 6.6,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075123211|tres_bon": {
+   "prix": 16.5,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075150620|bon": {
+   "prix": 73.98,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075150620|convenable": {
+   "prix": 26.58,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075150620|tres_bon": {
+   "prix": 88.78,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075179461|bon": {
+   "prix": 7.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075179461|convenable": {
+   "prix": 5.2,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075179461|tres_bon": {
+   "prix": 13.0,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075179492|bon": {
+   "prix": 7.8,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782075179492|convenable": {
+   "prix": 5.2,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075179492|tres_bon": {
+   "prix": 13.0,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075190800|bon": {
+   "prix": 10.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075190800|convenable": {
+   "prix": 7.2,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075190800|tres_bon": {
+   "prix": 18.0,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075191005|bon": {
+   "prix": 7.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075191005|convenable": {
+   "prix": 5.2,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075191005|tres_bon": {
+   "prix": 13.0,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075203470|bon": {
+   "prix": 8.7,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075203470|convenable": {
+   "prix": 5.8,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075203470|tres_bon": {
+   "prix": 14.5,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208604|bon": {
+   "prix": 8.97,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208604|convenable": {
+   "prix": 5.98,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208604|tres_bon": {
+   "prix": 14.95,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208635|bon": {
+   "prix": 8.97,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208635|convenable": {
+   "prix": 5.98,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208635|tres_bon": {
+   "prix": 14.95,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208666|bon": {
+   "prix": 8.97,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208666|convenable": {
+   "prix": 5.98,
+   "decision": "confirme",
+   "le": "2026-10-15"
+  },
+  "9782075208666|tres_bon": {
+   "prix": 14.95,
+   "decision": "confirme",
    "le": "2026-10-15"
   }
  }
