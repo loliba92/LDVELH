@@ -2,10 +2,25 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 189,
+ "nb_modifiees": 192,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 102,
  "hausses": [
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.7,
+   "apres": 25.0,
+   "pct": 2.731,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782075100748",
    "isbn13": "9782075100748",
@@ -170,24 +185,24 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782075097321",
-   "isbn13": "9782075097321",
-   "titre": "Le Voyage de l'Effroi",
-   "serie": "Quête du Graal",
-   "numero": "000",
-   "version": "V5",
-   "etat": "tres_bon",
-   "avant": 10.8,
-   "apres": 14.5,
-   "pct": 0.343,
-   "nature": "prix éditeur",
-   "nb": 0,
-   "recalibre": false
   }
  ],
  "baisses": [
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 257.02,
+   "apres": 60.0,
+   "pct": -0.767,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070333745",
    "isbn13": "9782070333745",
@@ -199,6 +214,21 @@
    "avant": 202.65,
    "apres": 48.8,
    "pct": -0.759,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 133.01,
+   "apres": 36.74,
+   "pct": -0.724,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -337,39 +367,9 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782075097314",
-   "isbn13": "9782075097314",
-   "titre": "Les Portes de l'Au-delà",
-   "serie": "Quête du Graal",
-   "numero": "000",
-   "version": "V5",
-   "etat": "convenable",
-   "avant": 12.25,
-   "apres": 5.8,
-   "pct": -0.527,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782075208666",
-   "isbn13": "9782075208666",
-   "titre": "Le Crépuscule des Maîtres",
-   "serie": "Loup Solitaire",
-   "numero": "000",
-   "version": "V5",
-   "etat": "convenable",
-   "avant": 12.24,
-   "apres": 5.98,
-   "pct": -0.511,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 155,
+ "nb_grands_mouvements": 158,
  "modele": {
   "actif": false,
   "n_paires": 8,

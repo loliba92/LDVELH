@@ -50,6 +50,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070585168|convenable": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070585168|tres_bon": {
+   "prix": 60.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
   "9782070665815|convenable": {
    "prix": 39.0,
    "decision": "corrige",
