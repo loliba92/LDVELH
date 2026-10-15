@@ -629,8 +629,12 @@
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
     return `<h3>Corriger les cotes</h3>
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
-          <p class="sous">Indiquez seulement les prix à changer, en euros : votre prix prime ensuite sur tout le reste, et l'état laissé vide en est déduit.</p>
-          <div class="corriger-champs">${[['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']].map(champ).join('')}</div>
+          <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
+          <div class="corriger-fourchette"><label>De<input type="text" inputmode="decimal" name="mini" autocomplete="off" placeholder="€"></label>
+            <label>à<input type="text" inputmode="decimal" name="maxi" autocomplete="off" placeholder="€"></label></div>
+          <details class="corriger-detail"><summary>Ou fixer chaque état</summary>
+          <p class="sous">Les états laissés vides en sont déduits ; votre prix prime ensuite sur tout le reste.</p>
+          <div class="corriger-champs">${[['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']].map(champ).join('')}</div></details>
           <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer ces prix</button></div>
           <p class="corriger-msg" id="corriger-msg" role="status" hidden></p>
         </form>`;
@@ -641,8 +645,15 @@
     f.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const msg = $('#corriger-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const nb = (x) => parseFloat(String(x).replace(',', '.'));
       const v = ['convenable', 'bon', 'tres_bon'].map((k) => f.elements[k].value.trim());
-      if (v.some((x) => x && !(parseFloat(x.replace(',', '.')) > 0))) return dire('Un des prix n\'est pas un nombre : corrigez-le.');
+      const mini = f.elements.mini.value.trim(), maxi = f.elements.maxi.value.trim();
+      if (mini || maxi) {                                   // fourchette : le bas en convenable, le haut en très bon état, un seul prix en très bon état
+        if ([mini, maxi].some((x) => x && !(nb(x) > 0))) return dire('Un des prix de la fourchette n\'est pas un nombre : corrigez-le.');
+        if (mini && maxi && nb(mini) > nb(maxi)) return dire('Le prix le plus bas doit venir en premier.');
+        if (mini && maxi) { v[0] = mini; v[2] = maxi; } else v[2] = mini || maxi;
+      }
+      if (v.some((x) => x && !(nb(x) > 0))) return dire('Un des prix n\'est pas un nombre : corrigez-le.');
       if (!v.some(Boolean)) return dire('Indiquez au moins un prix.');
       const ligne = `${f.dataset.isbn} ; ${v.join(' ; ')}`;
       const jeton = lireLoc(CLE_JETON);

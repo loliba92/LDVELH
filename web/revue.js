@@ -86,6 +86,9 @@
     return `<article class="rv-edition${jaq ? ' avec-jaq' : ''}">${jaq}<div class="rv-corps"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` +
       `<a class="rv-ebay" href="https://www.ebay.fr/sch/i.html?_nkw=${encodeURIComponent(ed.titre + ' ' + (ed.isbn || '')).replace(/%20/g, '+')}" target="_blank" rel="noopener noreferrer">Voir les annonces sur eBay ↗</a></header>` +
+      `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>Fourchette observée : de</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
+      `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
+      `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></div></article>`;
   }
 
@@ -110,6 +113,7 @@
     const nbAttente = Object.keys(LOC).length;
     $('#rv-envoi').hidden = !nbAttente;
     $('#rv-n-attente').textContent = nbAttente;
+    $('#rv-envoyer').textContent = jeton() ? 'Envoyer mes validations' : 'Télécharger mes validations';
     $('#rv-liste').innerHTML = VUE.length ? VUE.slice(0, limite).map(carte).join('') : '<p>Aucun livre dans cette liste.</p>';
     $('#rv-plus').hidden = VUE.length <= limite;
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
@@ -158,8 +162,35 @@
     if (prix > 0 && prix < 10000) enregistrer(f.dataset.ed, f.dataset.e, prix, 'corrige');
   });
 
+  document.addEventListener('submit', (e) => {
+    const f = e.target.closest('.rv-fourchette');
+    if (!f) return;
+    e.preventDefault();
+    const nb = (x) => parseFloat(String(x).replace(',', '.'));
+    const mini = f.elements.mini.value.trim(), maxi = f.elements.maxi.value.trim();
+    if (!mini && !maxi) return;
+    if ([mini, maxi].some((x) => x && !(nb(x) > 0 && nb(x) < 10000)) || (mini && maxi && nb(mini) > nb(maxi))) { f.classList.add('erreur'); return; }
+    if (mini && maxi) { enregistrer(f.dataset.ed, 'convenable', nb(mini), 'corrige'); enregistrer(f.dataset.ed, 'tres_bon', nb(maxi), 'corrige'); }
+    else enregistrer(f.dataset.ed, 'tres_bon', nb(mini || maxi), 'corrige');          // un seul prix : très bon état
+  });
+
   // Fichier à transmettre : mêmes validations, dans le format lu par pipeline/validations.py
-  function envoyer() {
+  async function envoyer() {
+    if (jeton()) {                                   // administrateur : envoi direct au lot « Corriger des cotes »
+      const par = {};
+      Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'); (par[isbn] = par[isbn] || {})[etat] = v.prix; });
+      const lignes = Object.entries(par).map(([isbn, p]) => `${isbn} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}`);
+      const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
+      try {
+        const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | ') });
+        dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
+          : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau en haut de la page.'
+          : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
+      } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
+      $('#rv-envoyer').disabled = false;
+      return;
+    }
     const fichier = { valides: LOC };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(fichier, null, 1)], { type: 'application/json' }));

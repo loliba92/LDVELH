@@ -894,3 +894,12 @@ table.mouv .num { white-space: nowrap; }
 .rg-aide ol { margin: 6px 0 0; padding-left: 1.3em; }
 .rg-aide li { margin: 0 0 6px; }
 @media (max-width: 420px) { .corriger-champs { grid-template-columns: 1fr; } }
+.corriger-fourchette { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0 4px; max-width: 360px; }
+.corriger-fourchette label { display: flex; flex-direction: column; gap: 4px; font: 700 .85rem var(--f-ui); color: var(--muted); }
+.corriger-fourchette input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.corriger-detail { margin: 8px 0 0; }
+.corriger-detail summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+.rv-fourchette { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 12px; padding: 8px 10px; border: 1px dashed var(--line-strong); border-radius: var(--r); }
+.rv-fourchette input { width: 5.5em; min-height: 40px; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.rv-fourchette.erreur input { border-color: #ffb4a8; }
+.rv-aide-fourchette { flex-basis: 100%; font-size: .85rem; color: var(--muted); }

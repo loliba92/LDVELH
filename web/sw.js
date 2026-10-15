@@ -1,7 +1,7 @@
 /* Service worker de La Cote du Héros : l'application s'ouvre sans réseau.
    - pages, scripts, styles, données : réseau d'abord (toujours la version à jour), copie locale en secours ;
    - jaquettes, polices, icônes : copie locale d'abord (elles ne changent pas). */
-const VERSION = 'cdh-v49';
+const VERSION = 'cdh-v51';
 const COEUR = ['./', 'index.html', 'app.js', 'plus.js', 'installer.js', 'pages.js', 'collection.html', 'le-projet.html', 'confidentialite.html', 'mentions-legales.html', 'evolutions.html', 'style.css', 'manifest.webmanifest', 'data/versions.json', 'data/meta.json', 'data/mouvements.json',
   'fonts/cormorant-garamond.woff2', 'fonts/cormorant-garamond-italic.woff2', 'fonts/source-sans-3.woff2',
   'icons/icon-192.png', 'icons/apple-touch-icon.png', 'favicon-32.png'];

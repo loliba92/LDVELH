@@ -96,8 +96,9 @@
   <button type="button" data-vue="tous" aria-pressed="false">Tous les livres <span class="nb-onglet" id="rv-n-tous"></span></button>
 </div>
 <div class="rv-envoi" id="rv-envoi" hidden>
-  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. Téléchargez le fichier et envoyez-le moi : les prix seront alors enregistrés pour tous.</p>
+  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. Avec le jeton enregistré plus haut, « Envoyer » les enregistre pour tous en un clic ; sans jeton, téléchargez le fichier et envoyez-le moi.</p>
   <button type="button" class="bouton" id="rv-envoyer">Télécharger mes validations</button>
+  <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
 </div>
 <div class="rv-outils">
   <div class="champ"><label for="rv-q">Chercher un livre</label><input type="search" id="rv-q" autocomplete="off" placeholder="titre ou série"></div>
