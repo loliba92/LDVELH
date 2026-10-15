@@ -603,8 +603,9 @@
   function blocRecherche(b) {
     // Titre + « ldvelh » : ces sites exigent tous les mots, et les vendeurs écrivent « ldvelh » (livre dont vous êtes le héros),
     // presque jamais « V1 » ni « livre héros » (recherche vide constatée avec ces mots)
-    const q = requete(`${b.titre} ldvelh`.replace(/\s+/g, ' '));
-    const ebay = requete(`${b.titre} ${b.isbn13 || 'livre héros'}`);
+    const titre = b.titre.replace(/\s*\([^)]*\)/g, '').trim();                          // « (Grand format) » et autres parenthèses : absents des annonces
+    const q = requete(`${titre} ldvelh`.replace(/\s+/g, ' '));
+    const ebay = requete(`${titre} ${b.isbn13 || 'livre héros'}`);
     const liens = [
       ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
       ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],

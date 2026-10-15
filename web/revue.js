@@ -5,7 +5,8 @@
   const ETATS = [['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']];
   const PAGE = 60;
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const requete = (t) => encodeURIComponent(t.replace(/\s+/g, ' ').trim()).replace(/%20/g, '+');
+  // Titre de recherche : sans parenthèses (« (Grand format) »…), absentes des annonces
+  const requete = (t) => encodeURIComponent(t.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()).replace(/%20/g, '+');
   const eur = (v) => (v == null ? '—' : v.toFixed(2).replace('.', ',') + ' €');
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   let EDITIONS = [], VUE = [], vue = 'verif', limite = PAGE;
