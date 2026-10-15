@@ -74,6 +74,14 @@ def normaliser_editeur(nom):
     return EDITEURS.get(cle, propre)
 
 
+def cle_image(ident, isbn13=""):
+    """Nom des fichiers de jaquette : l'ISBN-13, ou, pour une fiche sans ISBN (« LOCAL-… »), l'identifiant simplifié (local-oeil-noir-002)."""
+    if isbn13:
+        return isbn13
+    t = unicodedata.normalize("NFKD", str(ident).replace("œ", "oe").replace("Œ", "Oe")).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+
+
 # --- Lecture / écriture de la base -------------------------------------------
 
 def load(path=None):

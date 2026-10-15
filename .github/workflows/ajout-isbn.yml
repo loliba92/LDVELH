@@ -50,7 +50,7 @@ jobs:
         run: |
           git config user.name "ajout-isbn"
           git config user.email "ajout-isbn@users.noreply.github.com"
-          git add data/processed/editions.csv web/data web/revue-prix.html web/evolutions.html
+          git add data/processed/editions.csv web/covers web/data web/revue-prix.html web/evolutions.html
           if git diff --cached --quiet; then echo "Rien de nouveau."; exit 0; fi
           git commit -m "Livres ajoutés par liste d'ISBN du $(date +%F)"
           git push

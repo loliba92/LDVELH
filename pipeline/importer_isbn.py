@@ -6,7 +6,8 @@ Une ligne par livre. On peut ajouter après l'ISBN, séparés par un point-virgu
 Une ligne sans point-virgule peut aussi contenir plusieurs ISBN séparés par des espaces ou des virgules. Les tirets sont acceptés.
 
 La fiche vient de la BnF ; à défaut (livre récent), de la fiche de leslibraires.fr (titre, année, pages, éditeur, collection).
-Un ISBN déjà dans la base est ignoré. Le numéro de version (V1, V2…) suit les éditions déjà connues du même livre, par année.
+Un ISBN déjà dans la base est ignoré. Si la série et le numéro désignent une fiche sans ISBN (identifiant « LOCAL-… »), l'ISBN complète
+cette fiche au lieu d'en créer une seconde. Le numéro de version (V1, V2…) suit les éditions déjà connues du même livre, par année.
 Le prix du neuf et la disponibilité sont relevés ensuite par le lot hebdomadaire (pipeline/prix_neuf.py).
 """
 import argparse
@@ -20,6 +21,8 @@ import requests
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from prix_neuf import AGENT, URL
+
+COVERS = editions.ROOT / "web" / "covers"
 
 
 def lire_liste(texte):
@@ -62,6 +65,24 @@ def _cle(t):
     return re.sub(r"\W+", " ", (t or "").casefold()).strip()
 
 
+def _fiche_sans_isbn(rows, serie, numero):
+    """La fiche de cette série et de ce numéro qui n'a pas encore d'ISBN (identifiant LOCAL-…), ou None."""
+    if not serie or not numero:
+        return None
+    for r in rows:
+        if str(r["id"]).startswith("LOCAL-") and _cle(r.get("serie")) == _cle(serie) and str(r.get("numero")).lstrip("0") == str(numero).lstrip("0"):
+            return r
+    return None
+
+
+def _renommer_jaquette(ancien_id, isbn13):
+    """La jaquette enregistrée sous l'identifiant de la fiche sans ISBN passe sous l'ISBN."""
+    for taille in ("small", "medium"):
+        src = COVERS / taille / f"{editions.cle_image(ancien_id)}.webp"
+        if src.exists():
+            src.rename(src.with_name(f"{isbn13}.webp"))
+
+
 def numero_version(rows, livre, annee):
     """1 + nombre d'éditions déjà connues de ce livre publiées au plus tard la même année (toutes, si l'année est inconnue)."""
     memes = [r for r in rows if _cle(r.get("livre") or r.get("titre")) == _cle(livre)]
@@ -84,6 +105,7 @@ def importer(texte, base=None, bnf=editions.lookup_bnf, librairie=fiche_librairi
         if isbn13 in connus:
             bilan.append(("deja", isbn13, "déjà dans la base"))
             continue
+        local = _fiche_sans_isbn(rows, e["serie"], e["numero"])
         fiche = None
         try:
             fiche = bnf(isbn13, isbn10)
@@ -96,6 +118,15 @@ def importer(texte, base=None, bnf=editions.lookup_bnf, librairie=fiche_librairi
             except requests.RequestException:
                 fiche = None
         fiche = fiche or {}
+        if local is not None:                                   # l'ISBN complète la fiche existante
+            for k, v in fiche.items():
+                if k in local and v and not local[k] and k not in ("titre", "livre"):
+                    local[k] = v
+            _renommer_jaquette(local["id"], isbn13)
+            local.update({"id": isbn13, "isbn13": isbn13, "isbn10": isbn10, "statut": "enrichi", "date_maj": editions.today()})
+            connus.add(isbn13)
+            bilan.append(("complete", isbn13, f"complète la fiche n° {local['numero']} : {local['titre']}"))
+            continue
         titre = e["titre"] or fiche.get("titre") or ""
         annee = str(fiche.get("annee") or "")
         row = {c: "" for c in editions.COLUMNS}
@@ -109,7 +140,7 @@ def importer(texte, base=None, bnf=editions.lookup_bnf, librairie=fiche_librairi
         connus.add(isbn13)
         manque = [n_ for n_ in ("titre", "serie", "numero") if not row[n_]]
         bilan.append(("ajoute", isbn13, f"{titre or '(titre inconnu)'} · {row['version']}" + (f" · à compléter : {', '.join(manque)}" if manque else "")))
-    if any(s == "ajoute" for s, _, _ in bilan):
+    if any(s in ("ajoute", "complete") for s, _, _ in bilan):
         editions.save(rows, base)
     return bilan
 
@@ -124,11 +155,12 @@ def main():
     if not texte.strip():
         ap.error("indiquez un fichier ou --texte")
     bilan = importer(texte, a.base)
-    icone = {"ajoute": "+", "deja": "=", "invalide": "✗"}
+    icone = {"ajoute": "+", "complete": "~", "deja": "=", "invalide": "✗"}
     for s, isbn, t in bilan:
         print(f"{icone[s]} {isbn}  {t}")
     n = sum(1 for s, _, _ in bilan if s == "ajoute")
-    print(f"{n} livre(s) ajouté(s) sur {len(bilan)} ISBN lus.")
+    c = sum(1 for s, _, _ in bilan if s == "complete")
+    print(f"{n} livre(s) ajouté(s), {c} fiche(s) complétée(s), sur {len(bilan)} ISBN lus.")
 
 
 if __name__ == "__main__":

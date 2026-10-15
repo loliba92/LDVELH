@@ -177,8 +177,9 @@ def main():
         p = dict(prix.get(r["version_key"], {}))
         isbn = r["isbn13"]
         nb_valides += validations.appliquer(p, isbn, valides) if isbn else 0       # un prix validé prime sur tout le reste
-        petite = f"covers/small/{isbn}.webp" if isbn and (COVERS / "small" / f"{isbn}.webp").exists() else None
-        grande = f"covers/medium/{isbn}.webp" if isbn and (COVERS / "medium" / f"{isbn}.webp").exists() else None
+        image = editions.cle_image(r["id"], isbn)                  # ISBN, ou identifiant simplifié pour une fiche sans ISBN
+        petite = f"covers/small/{image}.webp" if (COVERS / "small" / f"{image}.webp").exists() else None
+        grande = f"covers/medium/{image}.webp" if (COVERS / "medium" / f"{image}.webp").exists() else None
         versions.append({
             "id": r["id"], "isbn13": r["isbn13"], "titre": r["titre_version"], "livre_id": r["livre_id"],
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],

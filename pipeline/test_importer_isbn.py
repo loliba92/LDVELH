@@ -50,6 +50,20 @@ class TestImport(unittest.TestCase):
         bilan = imp.importer("9791097577025\n979-10-97577-02-5", b, SANS_BNF, LIBRAIRIE)
         self.assertEqual([s for s, _, _ in bilan], ["ajoute", "deja"])
 
+    def test_un_isbn_complete_la_fiche_sans_isbn(self):
+        b = self.base([("LOCAL-Oeil-002", "Le Livre des Règles", "")])
+        rows = editions.load(b)
+        rows[0].update({"serie": "L'Œil Noir", "numero": "002", "version": "V1"})
+        editions.save(rows, b)
+        bilan = imp.importer("2-07-033370-1 ; L'Œil Noir ; 2", b, SANS_BNF, lambda i: None)
+        self.assertEqual(bilan[0][0], "complete")
+        r = editions.load(b)
+        self.assertEqual((len(r), r[0]["id"], r[0]["isbn13"], r[0]["titre"], r[0]["version"]), (1, "9782070333707", "9782070333707", "Le Livre des Règles", "V1"))
+
+    def test_nom_de_jaquette_sans_isbn(self):
+        self.assertEqual(editions.cle_image("LOCAL-L'Œil_Noir-002"), "local-l-oeil-noir-002")
+        self.assertEqual(editions.cle_image("LOCAL-x", "9782070333707"), "9782070333707")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
