@@ -227,7 +227,7 @@
     a.download = `prix-valides-${aujourdhui()}.json`; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) » sur GitHub
+  // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) »
   const isbn13De = (brut) => {
     const c = String(brut).replace(/[\s-]/g, '').toUpperCase();
     if (/^\d{13}$/.test(c)) return [...c].reduce((t, d, i) => t + d * (i % 2 ? 3 : 1), 0) % 10 === 0 ? c : null;
@@ -260,9 +260,8 @@
     $('#aj-bilan').textContent = AJOUT.length
       ? `${n} livre${n > 1 ? 's' : ''} à ajouter · ${nb('deja')} déjà dans la base · ${nb('doublon')} doublon${nb('doublon') > 1 ? 's' : ''} · ${nb('invalide')} invalide${nb('invalide') > 1 ? 's' : ''}`
       : 'Aucun ISBN dans la liste.';
-    $('#aj-etapes').textContent = n ? '1) copiez la liste ; 2) ouvrez « Ajouter à la base sur GitHub », cliquez « Run workflow » et collez la liste dans la case ; 3) comptez environ 2 minutes, puis le livre apparaît sur le site (les prix suivent au relevé). Vous pouvez aussi me transmettre le fichier téléchargé.' : 'Rien à enregistrer.';
+    $('#aj-etapes').textContent = !n ? 'Rien à enregistrer.' : jeton() ? 'cliquez sur « Ajouter maintenant » : comptez environ 2 minutes, puis les livres apparaissent sur le site (les prix suivent au relevé).' : 'enregistrez votre jeton d\'accès dans « Envoi automatique » (plus haut) pour ajouter en un clic ; sinon copiez ou téléchargez la liste et transmettez-la moi.';
     ['#aj-copier', '#aj-telecharger'].forEach((s) => { $(s).disabled = !n; });
-    $('#aj-github').hidden = !n;
     $('#aj-lancer').hidden = !jeton() || !n;
     $('#aj-resultat').hidden = false;
   }
@@ -291,7 +290,7 @@
     method: 'POST', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton()}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
     body: JSON.stringify({ ref: 'main', inputs }) });
   function etatJeton() {
-    $('#rg-etat').textContent = jeton() ? 'Jeton enregistré sur cet appareil : l\'envoi en un clic est actif.' : 'Aucun jeton : les boutons vous donnent la ligne à coller sur GitHub.';
+    $('#rg-etat').textContent = jeton() ? 'Jeton enregistré sur cet appareil : l\'envoi en un clic est actif.' : 'Aucun jeton : les boutons vous donnent la ligne à transmettre.';
     $('#rg-retirer').hidden = !jeton();
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }

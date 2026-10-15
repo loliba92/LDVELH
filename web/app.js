@@ -635,12 +635,11 @@
 
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
   // Visible seulement si la porte de la page privée a été ouverte sur cet appareil (même empreinte que acces.js).
-  // L'envoi lance le lot « Corriger des cotes » sur GitHub avec un jeton enregistré dans la page privée (jamais dans le dépôt).
+  // L'envoi lance le lot « Corriger des cotes » avec un jeton enregistré dans la page privée (jamais dans le dépôt).
   const CLE_ACCES = 'cdh-acces', CLE_JETON = 'cdh-jeton';
   const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const estProprietaire = () => lireLoc(CLE_ACCES) === EMPREINTE;
-  const LIEN_CORRIGER = 'https://github.com/loliba92/LDVELH/actions/workflows/corriger-prix.yml';
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
     if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
@@ -677,7 +676,7 @@
       const jeton = lireLoc(CLE_JETON);
       if (!jeton) {
         try { await navigator.clipboard.writeText(ligne); } catch (e) { /* copie impossible : la ligne reste affichée */ }
-        msg.innerHTML = `Pas de jeton enregistré : la ligne <code>${esc(ligne)}</code> est copiée. Ouvrez <a href="${LIEN_CORRIGER}" target="_blank" rel="noopener">le lot « Corriger des cotes »</a>, « Run workflow », collez-la. Pour l'envoi en un clic, enregistrez votre jeton dans la page privée « Vérifier les prix ».`;
+        msg.innerHTML = `Pas de jeton d'accès enregistré : la ligne <code>${esc(ligne)}</code> est copiée, transmettez-la. Pour l'envoi en un clic, enregistrez votre jeton dans la page « Vérifier les prix » (Accès admin).`;
         msg.hidden = false;
         return;
       }

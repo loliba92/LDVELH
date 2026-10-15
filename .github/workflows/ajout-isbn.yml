@@ -1,6 +1,6 @@
 name: Ajouter des livres (ISBN)
 
-# Lancé depuis la page « Vérifier les prix » (bouton « Ajouter à la base sur GitHub ») : Actions > Run workflow > coller la liste.
+# Lancé depuis la page « Vérifier les prix » (bouton « Ajouter maintenant ») ou, à la main : Actions > Run workflow > coller la liste.
 on:
   workflow_dispatch:
     inputs:
