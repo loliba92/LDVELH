@@ -833,3 +833,15 @@ table.mouv .num { white-space: nowrap; }
 .segments input:checked + span .nb-coll-seg { color: inherit; }
 #f-coll span { white-space: nowrap; }
 @media (max-width: 600px) { #f-coll { display: inline-flex; flex-wrap: nowrap; } #f-coll span { padding: 10px 14px; } }
+
+/* Accès privé (page « Vérifier les prix ») : lien à cadenas et porte à code */
+.lien-prive { display: inline-flex; align-items: center; gap: 6px; }
+.lien-prive svg { flex: none; }
+@media (max-width: 1000px) { .menu .lien-prive span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+.porte[hidden], main[hidden] { display: none !important; }
+.porte { display: flex; justify-content: center; padding: 56px 14px 72px; }
+.porte-boite { width: 100%; max-width: 340px; padding: 26px 24px; text-align: center; background: var(--walnut); border: 1px solid var(--walnut-muted); border-radius: var(--r); }
+.porte-etiquette { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 16px; color: var(--gold); font: 700 .85rem/1.2 var(--f-ui); text-transform: uppercase; letter-spacing: .1em; }
+.porte-boite input { width: 100%; box-sizing: border-box; margin-bottom: 12px; padding: 11px 12px; font: inherit; font-size: 1rem; border-radius: var(--r); border: 1px solid var(--walnut-muted); background: #fff; color: #1d1710; }
+.porte-boite .bouton { width: 100%; min-height: 44px; }
+.porte-erreur { margin: 12px 0 0; color: #ffb4a8; font-size: .9rem; }
