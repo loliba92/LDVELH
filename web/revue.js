@@ -43,6 +43,7 @@
   const pct = (r) => (r >= 1 ? '+' : '−') + Math.abs(Math.round((r - 1) * 100)) + ' %';
 
   function origine(l) {
+    if (l.neuf) return 'prix du neuf (prix éditeur)';
     if (l.valide) return `validé le ${jour(l.valide_le)}`;
     if (l.deduit) return 'déduit des autres états';
     if (l.repartition) { const n = l.eb_nb_toutes || l.eb_nb; return `annonces eBay${n ? ' (' + n + ')' : ''}, réparti 40/60`; }

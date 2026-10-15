@@ -127,6 +127,59 @@ def main():
                                    "confiance": "faible"}
                     nb_recalibres += 1
     calibration.ecrire(modele, DB.parent.parent / "processed" / "calibration.json") if args.db == DB else None
+    # Prix éditeur des éditions encore en vente : prix actuel relevé sur le site de l'éditeur (data/manual/prix_editeur.csv,
+    # prioritaire) ou, à défaut, prix à la parution de la notice BnF (data/processed/prix_editeur.csv)
+    bnf, manuel = {}, {}
+    for chemin, cible in ((DB.parent.parent / "processed" / "prix_editeur.csv", bnf), (DB.parent.parent / "manual" / "prix_editeur.csv", manuel)):
+        if chemin.exists():
+            with open(chemin, newline="", encoding="utf-8") as fh:
+                cible.update({r["isbn13"]: r for r in csv.DictReader(fh) if r.get("prix")})
+    editeur = {}
+    for isbn_e in set(bnf) | set(manuel):
+        if isbn_e in manuel:
+            editeur[isbn_e] = {"prix": float(manuel[isbn_e]["prix"]), "devise": "EUR", "source": "editeur", "date": manuel[isbn_e].get("date")}
+            if isbn_e in bnf and bnf[isbn_e].get("devise") == "EUR" and float(bnf[isbn_e]["prix"]) != editeur[isbn_e]["prix"]:
+                editeur[isbn_e]["parution"] = float(bnf[isbn_e]["prix"])
+        else:
+            editeur[isbn_e] = {"prix": float(bnf[isbn_e]["prix"]), "devise": bnf[isbn_e].get("devise") or "EUR", "source": "bnf"}
+    # Édition encore en vente neuve : un exemplaire en très bon état vaut le prix du neuf, donc le prix éditeur (décision du
+    # propriétaire). Ce prix compte comme un prix actuel : les autres états en sont déduits (60 % / 40 %), un état d'archive
+    # au-dessus est ramené sous lui par `aligner`.
+    for r in cx.execute(REQUETE):
+        e_ed = editeur.get(r["isbn13"]) if r["isbn13"] else None
+        if e_ed and e_ed["source"] == "editeur":            # prix actuel relevé chez l'éditeur ; la notice BnF (prix à la parution) ne suffit pas
+            prix.setdefault(r["version_key"], {})["tres_bon"] = {
+                "prix": e_ed["prix"], "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
+                "confiance": "élevée", "incertitude": 0.05, "neuf": True}
+    # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
+    nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
+    nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
+    nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
+
+    # Prix éditeur des éditions encore en vente : prix actuel relevé sur le site de l'éditeur (data/manual/prix_editeur.csv,
+    # prioritaire) ou, à défaut, prix à la parution de la notice BnF (data/processed/prix_editeur.csv)
+    bnf, manuel = {}, {}
+    for chemin, cible in ((DB.parent.parent / "processed" / "prix_editeur.csv", bnf), (DB.parent.parent / "manual" / "prix_editeur.csv", manuel)):
+        if chemin.exists():
+            with open(chemin, newline="", encoding="utf-8") as fh:
+                cible.update({r["isbn13"]: r for r in csv.DictReader(fh) if r.get("prix")})
+    editeur = {}
+    for isbn_e in set(bnf) | set(manuel):
+        if isbn_e in manuel:
+            editeur[isbn_e] = {"prix": float(manuel[isbn_e]["prix"]), "devise": "EUR", "source": "editeur", "date": manuel[isbn_e].get("date")}
+            if isbn_e in bnf and bnf[isbn_e].get("devise") == "EUR" and float(bnf[isbn_e]["prix"]) != editeur[isbn_e]["prix"]:
+                editeur[isbn_e]["parution"] = float(bnf[isbn_e]["prix"])
+        else:
+            editeur[isbn_e] = {"prix": float(bnf[isbn_e]["prix"]), "devise": bnf[isbn_e].get("devise") or "EUR", "source": "bnf"}
+    # Édition encore en vente neuve : un exemplaire en très bon état vaut le prix du neuf, donc le prix éditeur (décision du
+    # propriétaire). Ce prix compte comme un prix actuel : les autres états en sont déduits (60 % / 40 %), un état d'archive
+    # au-dessus est ramené sous lui par `aligner`.
+    for r in cx.execute(REQUETE):
+        e_ed = editeur.get(r["isbn13"]) if r["isbn13"] else None
+        if e_ed and e_ed["source"] == "editeur":            # prix actuel relevé chez l'éditeur ; la notice BnF (prix à la parution) ne suffit pas
+            prix.setdefault(r["version_key"], {})["tres_bon"] = {
+                "prix": e_ed["prix"], "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
+                "confiance": "élevée", "incertitude": 0.05, "neuf": True}
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
     nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
@@ -158,10 +211,9 @@ def main():
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
-            **({"prix_neuf": {"prix": float(neufs[isbn]["prix_median"]), "min": float(neufs[isbn]["prix_min"]), "max": float(neufs[isbn]["prix_max"]),
-                              "nb": int(neufs[isbn]["nb_annonces"]), "date": neufs[isbn]["date"]}} if isbn and isbn in neufs else {}),
+            **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "neuf") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
@@ -211,7 +263,7 @@ def main():
                      "version": v["version"], "etat": e, "archive": round(statistics.median(arch), 2) if arch else None,
                      "publie": v["prix"][e], "source": info.get("source"), "nature": info.get("nature"),
                      "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
-                     "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition"))}
+                     "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition")), "neuf": bool(info.get("neuf"))}
             if info.get("valide"):
                 ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision")})
             if eb:

@@ -50,8 +50,6 @@ def etat_de(item):
     if code in CODES_NON_PRECISES:
         return ETAT_SUPPOSE, True
     return None, False
-CODES_NEUF = {"1000", "1500"}      # « neuf » et « neuf, autre » : prix neuf constaté des éditions encore en vente
-CHAMPS_NEUF = ["isbn13", "date", "nb_annonces", "prix_min", "prix_median", "prix_max"]
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes)\b", re.I)
 CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 
@@ -186,36 +184,6 @@ def isbns_catalogue():
     return [c[0] for c in catalogue()]
 
 
-def agreger_neuf(items, isbn13, jour, titre=None, annees=None):
-    """Prix neuf constaté d'une édition : annonces à prix fixe en état neuf, en euros, hors lots (prix de l'article, sans la
-    livraison). Une ligne (nombre, minimum, médiane, maximum) ou None s'il n'y en a aucune."""
-    prix = []
-    for it in items:
-        if str(it.get("conditionId") or "") not in CODES_NEUF:
-            continue
-        if (titre and not concorde(it.get("title", ""), titre)) or not annee_compatible(it.get("title", ""), annees):
-            continue
-        p = it.get("price") or {}
-        if p.get("currency") != "EUR" or LOT.search(it.get("title", "")):
-            continue
-        try:
-            v = float(p["value"])
-        except (KeyError, ValueError):
-            continue
-        if v > 0:
-            prix.append(v)
-    if not prix:
-        return None
-    return {"isbn13": isbn13, "date": jour.isoformat(), "nb_annonces": len(prix), "prix_min": f"{min(prix):.2f}",
-            "prix_median": f"{statistics.median(prix):.2f}", "prix_max": f"{max(prix):.2f}"}
-
-
-def isbns_en_vente():
-    """ISBN des éditions encore en vente neuve (colonne « en_vente » du catalogue)."""
-    import editions
-    return {r["isbn13"] for r in editions.load() if r.get("isbn13") and str(r.get("en_vente") or "").strip() not in ("", "0")}
-
-
 def controler(a, token):
     """Contrôle sans enregistrement : ne montre que des comptages (jamais de titre ni de vendeur), pour juger
     la fiabilité du rattachement aux éditions. Le journal d'un dépôt public est public."""
@@ -302,12 +270,8 @@ def main():
     for isbn, titre, nb_ed, livre, annees in cat:
         par_isbn[isbn] = chercher(isbn, titre, token, pause=PAUSE)
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
-    neufs, en_vente = [], isbns_en_vente()
     for isbn, titre, nb_ed, livre, annees in cat:
         lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees)
-        ligne_neuve = agreger_neuf(par_isbn[isbn], isbn, jour, titre, annees) if isbn in en_vente else None
-        if ligne_neuve:
-            neufs.append(ligne_neuve)
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
@@ -316,13 +280,6 @@ def main():
         w.writeheader()
         w.writerows(lignes)
     print(f"{len(isbns)} éditions interrogées, {len(lignes)} lignes écrites dans {fichier}")
-    dossier_neuf = sortie.parent / "neuf"                       # prix neuf des éditions encore en vente
-    dossier_neuf.mkdir(parents=True, exist_ok=True)
-    with open(dossier_neuf / f"ebay-neuf-{jour.isoformat()}.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=CHAMPS_NEUF)
-        w.writeheader()
-        w.writerows(neufs)
-    print(f"Prix neuf : {len(neufs)} éditions sur {len(en_vente)} encore en vente")
 
 
 if __name__ == "__main__":

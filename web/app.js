@@ -267,6 +267,7 @@
     const i = infoPrix(b, k);
     if (b.prix[k] == null) return '';
     const aligne = i && i.ajuste ? ' Alignée sur l\'état inférieur : un état supérieur ne vaut jamais moins qu\'un état inférieur.' : '';
+    if (i && i.neuf) return `Édition encore en vente neuve : un exemplaire en très bon état est coté au prix du neuf, le prix éditeur. Les autres états en sont déduits (bon état ≈ 60 %, convenable ≈ 40 %).`;
     if (i && i.valide) return `Prix validé par le guide le ${dateCourte(i.date)}${i.decision === 'corrige' ? ' (corrigé à la main)' : ' (confirmé)'} : il prime sur les annonces et les archives.`;
     if (i && i.repartition) return `Prix réparti entre les trois états d'après les annonces actuelles de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état), ${i.nb} annonce${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)} · confiance ${i.confiance}. Prix demandés, souvent supérieurs aux prix réellement payés.${aligne}`;
     if (i && i.deduit) return `Prix estimé d'après les autres états de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état) : une estimation, pas un relevé.${aligne}`;
@@ -277,11 +278,12 @@
     const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
     return `${base} · confiance ${i.confiance}.${reserve}${aligne}`;
   }
-  // Prix neuf constaté (éditions encore en vente) : médiane des annonces eBay en état neuf
+  // Prix éditeur des éditions encore en vente (fiche du livre chez Gallimard Jeunesse) ou, à défaut, prix à la parution (notice BnF)
   function blocNeuf(b) {
-    const n = b.prix_neuf;
-    if (!n) return '';
-    return `<p class="sous prix-neuf">Prix neuf constaté : <strong>${fmt(n.prix)}</strong> (${n.nb} annonce${n.nb > 1 ? 's' : ''} eBay${n.nb > 1 ? `, de ${fmt(n.min)} à ${fmt(n.max)}` : ''}, au ${dateCourte(n.date)}). Prix demandés, hors livraison : un repère, pas le prix éditeur.</p>`;
+    const e = b.prix_editeur;
+    if (!e) return '';
+    if (e.source === 'editeur') return `<p class="sous prix-neuf">Prix du neuf : <strong>${fmt(e.prix)}</strong> (fiche du livre chez Gallimard Jeunesse, au ${dateCourte(e.date)})${e.parution ? `. À la parution : ${fmt(e.parution)} (notice de la BnF)` : ''}.</p>`;
+    return `<p class="sous prix-neuf">Prix éditeur à la parution : <strong>${e.devise === 'EUR' ? fmt(e.prix) : String(e.prix).replace('.', ',') + ' F'}</strong> (notice de la BnF).</p>`;
   }
   function texteEstimation(bl) {
     if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";

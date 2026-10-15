@@ -68,6 +68,13 @@ class TestEtats(unittest.TestCase):
         self.assertEqual((p["bon"]["prix"], p["tres_bon"]["prix"]), (30, 100))      # observés : inchangés
         self.assertAlmostEqual(p["convenable"]["prix"], 20, delta=0.6)             # niveau ≈ BE ÷ 0,6 = 50 (le plus fiable pèse davantage)
 
+    def test_tres_bon_etat_au_prix_du_neuf(self):
+        """Édition en vente : TBE = prix éditeur (source « neuf », compte comme actuel) ; bon et convenable en sont déduits."""
+        p = {"tres_bon": {**est(13.5, "neuf"), "incertitude": 0.05}, "bon": est(10.7, "archives"), "convenable": est(6.1, "archives")}
+        etats.repartir(p, R)
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (5.4, 8.1, 13.5))
+        self.assertTrue(p["bon"]["deduit"] and p["convenable"]["deduit"])
+
     def test_edition_sans_prix_actuel_inchangee(self):
         p = {"convenable": est(5), "bon": est(8), "tres_bon": est(12)}
         self.assertEqual(etats.repartir(p, R), 0)

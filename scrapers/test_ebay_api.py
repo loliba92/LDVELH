@@ -132,16 +132,6 @@ class TestEbay(unittest.TestCase):
         self.assertEqual(res["V2"], [])
         self.assertEqual([x["itemId"] for x in res["AUTRE"]], ["A"])      # autre livre : pas de conflit
 
-    def test_prix_neuf_constate(self):
-        items = [item(14.9, "1000", "L'Epreuve des champions"), item(13.5, "1000", "L'Epreuve des champions"), item(15.9, "1500", "L'Epreuve des champions"),
-                 item(8, "5000", "L'Epreuve des champions"),                                   # occasion : pas du neuf
-                 item(40, "1000", "Lot 3 livres L'Epreuve des champions"),                     # lot écarté
-                 item(30, "1000", "L'Epreuve des champions", devise="USD"),                    # autre devise écartée
-                 item(20, "1000", "Un tout autre objet")]                                      # autre livre écarté
-        l = ebay_api.agreger_neuf(items, "9782075148641", date(2026, 10, 15), "L'Epreuve des champions")
-        self.assertEqual((l["nb_annonces"], l["prix_min"], l["prix_median"], l["prix_max"]), (3, "13.50", "14.90", "15.90"))
-        self.assertIsNone(ebay_api.agreger_neuf([item(8, "5000", "L'Epreuve des champions")], "x", date(2026, 10, 15), "L'Epreuve des champions"))
-
     def test_aucune_annonce(self):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])
 
