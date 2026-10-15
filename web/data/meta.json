@@ -1,8 +1,8 @@
 {
   "genere_le": "2026-10-15",
   "nb_versions": 486,
-  "nb_livres": 264,
-  "nb_series": 33,
+  "nb_livres": 259,
+  "nb_series": 32,
   "sources_prix": [
     "Relevé d'archives (historique)",
     "eBay (interface officielle)",
@@ -12,7 +12,7 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 179,
+  "nb_prix_actuels": 184,
   "calibration": {
     "actif": false,
     "n_paires": 8,

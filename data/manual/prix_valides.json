@@ -514,6 +514,31 @@
    "prix": 14.0,
    "decision": "corrige",
    "le": "2026-10-15"
+  },
+  "9791097577612|tres_bon": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9791097577629|tres_bon": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9791097577636|tres_bon": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9791097577643|tres_bon": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9791097577650|tres_bon": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
   }
  }
 }
