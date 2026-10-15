@@ -129,6 +129,11 @@ def main():
     calibration.ecrire(modele, DB.parent.parent / "processed" / "calibration.json") if args.db == DB else None
     # Prix éditeur des éditions encore en vente : prix actuel relevé sur le site de l'éditeur (data/manual/prix_editeur.csv,
     # prioritaire) ou, à défaut, prix à la parution de la notice BnF (data/processed/prix_editeur.csv)
+    hors_vente = set()                       # éditions marquées V5 mais qui ne sont plus vendues neuves (data/manual/hors_vente.csv)
+    f_hv = DB.parent.parent / "manual" / "hors_vente.csv"
+    if f_hv.exists():
+        with open(f_hv, newline="", encoding="utf-8") as fh:
+            hors_vente = {r["isbn13"] for r in csv.DictReader(fh) if r.get("isbn13")}
     bnf, manuel = {}, {}
     for chemin, cible in ((DB.parent.parent / "processed" / "prix_editeur.csv", bnf), (DB.parent.parent / "manual" / "prix_editeur.csv", manuel)):
         if chemin.exists():
@@ -136,7 +141,7 @@ def main():
                 cible.update({r["isbn13"]: r for r in csv.DictReader(fh) if r.get("prix")})
     editeur = {}
     for isbn_e in set(bnf) | set(manuel):
-        if isbn_e in manuel:
+        if isbn_e in manuel and isbn_e not in hors_vente:
             editeur[isbn_e] = {"prix": float(manuel[isbn_e]["prix"]), "devise": "EUR", "source": "editeur", "date": manuel[isbn_e].get("date")}
             if isbn_e in bnf and bnf[isbn_e].get("devise") == "EUR" and float(bnf[isbn_e]["prix"]) != editeur[isbn_e]["prix"]:
                 editeur[isbn_e]["parution"] = float(bnf[isbn_e]["prix"])
@@ -206,7 +211,7 @@ def main():
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
             "version": r["libelle_version"], "version_n": r["numero_version"],
             "derniere": bool(r["est_derniere_version"]),
-            "en_vente": r["en_vente"], "annee": r["annee"], "annee_bnf": r["annee_bnf"],
+            "en_vente": None if r["isbn13"] in hors_vente else r["en_vente"], "annee": r["annee"], "annee_bnf": r["annee_bnf"],
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
