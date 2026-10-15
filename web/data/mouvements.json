@@ -2,9 +2,9 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 168,
+ "nb_modifiees": 177,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 96,
  "hausses": [
   {
    "id": "9782075100748",
@@ -48,6 +48,21 @@
    "apres": 13.5,
    "pct": 0.548,
    "nature": "prix éditeur",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332861",
+   "isbn13": "9782070332861",
+   "titre": "Le Manoir de l'Enfer",
+   "serie": "Défis Fantastiques",
+   "numero": "286",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 12.19,
+   "apres": 18.74,
+   "pct": 0.537,
+   "nature": "archives",
    "nb": 0,
    "recalibre": false
   },
@@ -142,6 +157,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070332984",
+   "isbn13": "9782070332984",
+   "titre": "Le Mercenaire de l'Espace",
+   "serie": "Défis Fantastiques",
+   "numero": "298",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 6.49,
+   "apres": 8.77,
+   "pct": 0.351,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782075097321",
    "isbn13": "9782075097321",
    "titre": "Le Voyage de l'Effroi",
@@ -153,36 +183,6 @@
    "apres": 14.5,
    "pct": 0.343,
    "nature": "prix éditeur",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070332960",
-   "isbn13": "9782070332960",
-   "titre": "Les Grottes de Kalte",
-   "serie": "Loup Solitaire",
-   "numero": "296",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 11.99,
-   "apres": 15.79,
-   "pct": 0.317,
-   "nature": "annonces",
-   "nb": 3,
-   "recalibre": false
-  },
-  {
-   "id": "9782070332960",
-   "isbn13": "9782070332960",
-   "titre": "Les Grottes de Kalte",
-   "serie": "Loup Solitaire",
-   "numero": "296",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 7.31,
-   "apres": 9.47,
-   "pct": 0.295,
-   "nature": "archives",
    "nb": 0,
    "recalibre": false
   }
@@ -369,7 +369,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 137,
+ "nb_grands_mouvements": 145,
  "modele": {
   "actif": false,
   "n_paires": 8,
