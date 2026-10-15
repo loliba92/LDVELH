@@ -3,7 +3,7 @@
    Protection légère : la page est statique, son contenu reste dans le code envoyé au navigateur. Elle écarte
    le passage par curiosité, pas une lecture déterminée du code source. */
 (function () {
-  var HASH = '2a2ff2efd81c831bc696b73b25e30b34bf4fa737c092d12afbb66652d84d15a2';
+  var HASH = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   var CLE = 'cdh-acces';
   var porte = document.getElementById('porte');
   var main = document.getElementById('main');
