@@ -1,0 +1,52 @@
+name: Corriger des cotes
+
+# Lancé depuis la fiche d'un livre (formulaire « Corriger les cotes », réservé au propriétaire) ou à la main :
+# Actions > Run workflow > une correction par ligne ou séparées par « | » : ISBN ; convenable ; bon état ; très bon état
+on:
+  workflow_dispatch:
+    inputs:
+      corrections:
+        description: "ISBN ; convenable ; bon ; très bon (case vide = inchangé). Plusieurs livres : les séparer par |"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: prix-ebay
+  cancel-in-progress: false
+
+jobs:
+  corriger:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CORRECTIONS: ${{ inputs.corrections }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - name: Tests
+        run: |
+          python pipeline/test_validations.py
+          python pipeline/test_corriger_prix.py
+      - name: Enregistrer les prix
+        run: python pipeline/corriger_prix.py "$CORRECTIONS" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Base et données du site
+        run: |
+          python pipeline/build_db.py
+          python pipeline/export_site.py
+          python pipeline/construire_pages.py
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "corriger-prix"
+          git config user.email "corriger-prix@users.noreply.github.com"
+          git add data/manual/prix_valides.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+          if git diff --cached --quiet; then echo "Rien de nouveau."; exit 0; fi
+          git commit -m "Cotes corrigées depuis le site ($(date +%F))"
+          git push
+          gh workflow run pages.yml

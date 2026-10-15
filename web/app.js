@@ -615,6 +615,58 @@
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
+  /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
+  // Visible seulement si la porte de la page privée a été ouverte sur cet appareil (même empreinte que acces.js).
+  // L'envoi lance le lot « Corriger des cotes » sur GitHub avec un jeton enregistré dans la page privée (jamais dans le dépôt).
+  const CLE_ACCES = 'cdh-acces', CLE_JETON = 'cdh-jeton';
+  const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
+  const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const estProprietaire = () => lireLoc(CLE_ACCES) === EMPREINTE;
+  const LIEN_CORRIGER = 'https://github.com/loliba92/LDVELH/actions/workflows/corriger-prix.yml';
+  function blocCorriger(b) {
+    if (!estProprietaire()) return '';
+    if (!b.isbn13) return '<h3>Corriger les cotes</h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
+    const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
+    return `<h3>Corriger les cotes</h3>
+        <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
+          <p class="sous">Indiquez seulement les prix à changer, en euros : votre prix prime ensuite sur tout le reste, et l'état laissé vide en est déduit.</p>
+          <div class="corriger-champs">${[['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']].map(champ).join('')}</div>
+          <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer ces prix</button></div>
+          <p class="corriger-msg" id="corriger-msg" role="status" hidden></p>
+        </form>`;
+  }
+  function brancherCorriger() {
+    const f = $('#corriger');
+    if (!f) return;
+    f.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const msg = $('#corriger-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const v = ['convenable', 'bon', 'tres_bon'].map((k) => f.elements[k].value.trim());
+      if (v.some((x) => x && !(parseFloat(x.replace(',', '.')) > 0))) return dire('Un des prix n\'est pas un nombre : corrigez-le.');
+      if (!v.some(Boolean)) return dire('Indiquez au moins un prix.');
+      const ligne = `${f.dataset.isbn} ; ${v.join(' ; ')}`;
+      const jeton = lireLoc(CLE_JETON);
+      if (!jeton) {
+        try { await navigator.clipboard.writeText(ligne); } catch (e) { /* copie impossible : la ligne reste affichée */ }
+        msg.innerHTML = `Pas de jeton enregistré : la ligne <code>${esc(ligne)}</code> est copiée. Ouvrez <a href="${LIEN_CORRIGER}" target="_blank" rel="noopener">le lot « Corriger des cotes »</a>, « Run workflow », collez-la. Pour l'envoi en un clic, enregistrez votre jeton dans la page privée « Vérifier les prix ».`;
+        msg.hidden = false;
+        return;
+      }
+      f.querySelector('button').disabled = true; dire('Envoi en cours…');
+      try {
+        const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/actions/workflows/corriger-prix.yml/dispatches', {
+          method: 'POST',
+          headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne } }) });
+        if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
+        else if (r.status === 401 || r.status === 403) dire('Le jeton est refusé ou expiré : enregistrez-en un nouveau dans la page privée.');
+        else if (r.status === 404) dire('Le jeton n\'a pas accès à ce dépôt (ou le lot est introuvable) : vérifiez ses droits.');
+        else dire(`Échec de l'envoi (code ${r.status}).`);
+      } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
+      f.querySelector('button').disabled = false;
+    });
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -650,6 +702,7 @@
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
         ${blocNeuf(b)}
         ${blocRecherche(b)}
+        ${blocCorriger(b)}
         ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
@@ -659,6 +712,7 @@
       </div>`;
     const dlg = $('#fiche');
     brancherFicheCollection(b);
+    brancherCorriger();
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));

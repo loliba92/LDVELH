@@ -202,6 +202,7 @@
     $('#aj-etapes').textContent = n ? '1) copiez la liste ; 2) ouvrez « Ajouter à la base sur GitHub », cliquez « Run workflow » et collez la liste dans la case ; 3) comptez environ 2 minutes, puis le livre apparaît sur le site (les prix suivent au relevé). Vous pouvez aussi me transmettre le fichier téléchargé.' : 'Rien à enregistrer.';
     ['#aj-copier', '#aj-telecharger'].forEach((s) => { $(s).disabled = !n; });
     $('#aj-github').hidden = !n;
+    $('#aj-lancer').hidden = !jeton() || !n;
     $('#aj-resultat').hidden = false;
   }
   const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => [a.isbn, a.serie, a.numero, a.titre].join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
@@ -211,7 +212,7 @@
         .catch(() => new Map()).then(verifierListe);
     });
     $('#aj-copier').addEventListener('click', () => {
-      const t = texteAjout(), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
+      const t = texteAjout().replace(/\n/g, ' | '), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
       if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => { $('#aj-texte').value = t; $('#aj-texte').select(); });
       else { $('#aj-texte').value = t; $('#aj-texte').select(); }
     });
@@ -221,7 +222,41 @@
       a.download = `isbn-a-ajouter-${aujourdhui()}.txt`; document.body.appendChild(a); a.click(); a.remove();
     });
   }
+
+  // Jeton GitHub (enregistré seulement dans ce navigateur) : permet de lancer les lots d'ajout et de correction en un clic
+  const CLE_JETON = 'cdh-jeton';
+  const jeton = () => { try { return localStorage.getItem(CLE_JETON); } catch (e) { return null; } };
+  const lancer = (lot, inputs) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${lot}/dispatches`, {
+    method: 'POST', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton()}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ref: 'main', inputs }) });
+  function etatJeton() {
+    $('#rg-etat').textContent = jeton() ? 'Jeton enregistré sur cet appareil : l\'envoi en un clic est actif.' : 'Aucun jeton : les boutons vous donnent la ligne à coller sur GitHub.';
+    $('#rg-retirer').hidden = !jeton();
+    $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
+  }
+  function initReglages() {
+    $('#rg-enregistrer').addEventListener('click', () => {
+      const v = $('#rg-jeton').value.trim();
+      if (!v) { $('#rg-etat').textContent = 'Collez d\'abord le jeton.'; return; }
+      try { localStorage.setItem(CLE_JETON, v); } catch (e) { $('#rg-etat').textContent = 'Ce navigateur ne permet pas d\'enregistrer le jeton.'; return; }
+      $('#rg-jeton').value = ''; etatJeton();
+    });
+    $('#rg-retirer').addEventListener('click', () => { try { localStorage.removeItem(CLE_JETON); } catch (e) { /* rien à retirer */ } etatJeton(); });
+    $('#aj-lancer').addEventListener('click', async () => {
+      const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      $('#aj-lancer').disabled = true; dire('Envoi en cours…');
+      try {
+        const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui' });
+        dire(r.status === 204 ? 'Envoyé. Les livres seront sur le site dans environ 2 minutes, les prix après le relevé qui suit.'
+          : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau ci-dessus.'
+          : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
+      } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
+      $('#aj-lancer').disabled = false;
+    });
+    etatJeton();
+  }
   initAjout();
+  initReglages();
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})

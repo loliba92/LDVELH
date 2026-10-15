@@ -28,7 +28,7 @@ COVERS = editions.ROOT / "web" / "covers"
 def lire_liste(texte):
     """[{brut, serie, numero, titre}] : une entrée par ISBN trouvé ; les lignes vides et les # sont ignorées."""
     out = []
-    for ligne in texte.splitlines():
+    for ligne in re.split(r"[\r\n|]+", texte):          # « | » : plusieurs lignes dans un champ de lancement GitHub
         ligne = ligne.strip()
         if not ligne or ligne.startswith("#"):
             continue

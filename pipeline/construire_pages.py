@@ -157,6 +157,23 @@ PORTE = '''<div class="porte" id="porte">
 
 REVUE = '''<h1>Vérifier les prix</h1>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
+<section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
+  <h2 id="rg-titre">Envoi automatique</h2>
+  <p>Avec un jeton GitHub enregistré sur cet appareil, les boutons « Enregistrer ces prix » (fiche d'un livre) et « Ajouter maintenant » (ci-dessous) agissent en un clic, sans passer par GitHub. Sans jeton, ils vous donnent la ligne à coller.</p>
+  <details class="rg-aide"><summary>Comment créer le jeton (une seule fois)</summary>
+    <ol>
+      <li>Ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création d'un jeton GitHub</a>.</li>
+      <li>Nom : « Cote du Héros ». Expiration : 1 an. « Repository access » : <strong>Only select repositories</strong>, puis le dépôt <strong>LDVELH</strong>.</li>
+      <li>« Permissions », « Repository permissions » : <strong>Actions : Read and write</strong>. Rien d'autre.</li>
+      <li>« Generate token », copiez-le, collez-le ci-dessous. Il reste dans ce navigateur : ne l'envoyez à personne.</li>
+    </ol>
+  </details>
+  <label class="sr-only" for="rg-jeton">Jeton GitHub</label>
+  <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez le jeton ici (github_pat_…)">
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer le jeton</button>
+    <button type="button" class="bouton-lien" id="rg-retirer">Retirer le jeton</button></div>
+  <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
+</section>
 <section class="rv-ajout" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Ajouter des livres</h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
@@ -168,7 +185,9 @@ REVUE = '''<h1>Vérifier les prix</h1>
     <p id="aj-bilan" class="rv-ajout-bilan" role="status"></p>
     <ul id="aj-liste" class="aj-liste"></ul>
     <p class="rv-ajout-etapes"><strong>Pour les enregistrer</strong> : <span id="aj-etapes"></span></p>
+    <p class="rv-ajout-bilan" id="aj-msg" role="status" hidden></p>
     <div class="rv-ajout-actions">
+      <button type="button" class="bouton" id="aj-lancer" hidden>Ajouter maintenant</button>
       <button type="button" class="bouton" id="aj-copier">Copier la liste à ajouter</button>
       <a class="bouton-lien" id="aj-github" href="https://github.com/loliba92/LDVELH/actions/workflows/ajout-isbn.yml" target="_blank" rel="noopener">Ajouter à la base sur GitHub</a>
       <button type="button" class="bouton-lien" id="aj-telecharger">Télécharger la liste</button>

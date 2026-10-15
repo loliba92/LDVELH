@@ -882,3 +882,15 @@ table.mouv .num { white-space: nowrap; }
 .bi-fermer:hover { color: var(--text); }
 @media (max-width: 700px) { .bandeau-install { left: 10px; right: 10px; } .bandeau-install.visible { bottom: calc(72px + env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion: reduce) { .bandeau-install { transition: none; } }
+
+/* Correction des cotes depuis la fiche, et envoi automatique */
+.corriger-champs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 10px 0 4px; }
+.corriger-champs label { display: flex; flex-direction: column; gap: 4px; font: 700 .85rem var(--f-ui); color: var(--muted); }
+.corriger-champs input, .rv-ajout #rg-jeton { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.corriger-actions { margin: 10px 0 0; }
+.corriger-msg { margin: 10px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.rg-aide { margin: 0 0 12px; }
+.rg-aide summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
+.rg-aide ol { margin: 6px 0 0; padding-left: 1.3em; }
+.rg-aide li { margin: 0 0 6px; }
+@media (max-width: 420px) { .corriger-champs { grid-template-columns: 1fr; } }
