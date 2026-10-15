@@ -160,14 +160,6 @@ REVUE = '''<h1>Vérifier les prix</h1>
 <section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
   <h2 id="rg-titre">Envoi automatique</h2>
   <p>Avec un jeton GitHub enregistré sur cet appareil, les boutons « Enregistrer ces prix » (fiche d'un livre) et « Ajouter maintenant » (ci-dessous) agissent en un clic, sans passer par GitHub. Sans jeton, ils vous donnent la ligne à coller.</p>
-  <details class="rg-aide"><summary>Comment créer le jeton (une seule fois)</summary>
-    <ol>
-      <li>Ouvrez <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création d'un jeton GitHub</a>.</li>
-      <li>Nom : « Cote du Héros ». Expiration : 1 an. « Repository access » : <strong>Only select repositories</strong>, puis le dépôt <strong>LDVELH</strong>.</li>
-      <li>« Permissions », « Repository permissions » : <strong>Actions : Read and write</strong>. Rien d'autre.</li>
-      <li>« Generate token », copiez-le, collez-le ci-dessous. Il reste dans ce navigateur : ne l'envoyez à personne.</li>
-    </ol>
-  </details>
   <label class="sr-only" for="rg-jeton">Jeton GitHub</label>
   <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez le jeton ici (github_pat_…)">
   <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer le jeton</button>
