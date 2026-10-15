@@ -1027,3 +1027,9 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .projet::before { content: ""; position: absolute; z-index: -1; top: 0; left: 0; right: 0; height: 640px; pointer-events: none;
   background: url("images/accueil-4.webp") center 35% / cover no-repeat; opacity: .2;
   -webkit-mask-image: linear-gradient(#000 0%, rgba(0,0,0,.6) 45%, transparent 100%); mask-image: linear-gradient(#000 0%, rgba(0,0,0,.6) 45%, transparent 100%); }
+
+/* Menu du haut : « Offrir un café », toujours visible (même sur téléphone) */
+.menu a.menu-cafe { display: inline-flex; align-items: center; gap: 7px; margin-left: 6px; padding: 7px 14px; border: 1.5px solid var(--gold); color: var(--gold); border-radius: 999px; }
+.menu a.menu-cafe:hover { background: var(--gold); color: #1a1205; }
+.menu a.menu-cafe svg { flex: none; }
+@media (max-width: 700px) { .menu a.menu-cafe { display: inline-flex; margin-left: 0; padding: 6px 12px; font-size: .88rem; } }
