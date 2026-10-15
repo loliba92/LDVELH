@@ -931,3 +931,22 @@ table.mouv .num { white-space: nowrap; }
 .hero.avec-mur, .banniere.avec-mur { background: #000000; }
 .banniere { overflow: clip; }
 html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaquettes » : pas d'illustration le temps que le mur se construise */
+
+/* Analyses du portefeuille (bloc « Ma collection » de l'accueil) */
+.hc-analyses summary { cursor: pointer; display: flex; align-items: center; min-height: 44px; margin-top: 4px; font-weight: 700; color: var(--brass-text, var(--accent)); }
+.hc-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 22px; padding: 4px 0 6px; }
+.hc-grille h3 { margin: 0 0 4px; font: 700 .85rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.hc-grille p { margin: 0 0 6px; font-size: .95rem; line-height: 1.4; }
+.hc-grille ol { margin: 0; padding-left: 1.2em; font-size: .95rem; }
+.hc-grille li { margin: 0 0 2px; }
+.hc-series { list-style: none; margin: 0; padding: 0; }
+.hc-series li { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; margin: 0 0 6px; font-size: .95rem; }
+.hc-barre { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: rgba(243, 233, 210, .16); overflow: hidden; }
+.hc-barre i { display: block; height: 100%; background: var(--accent); }
+@media (max-width: 640px) { .hc-grille { grid-template-columns: 1fr; } }
+.hc-premier { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; font-size: 1rem; line-height: 1.3; }
+.hc-premier img, .hc-vignettes img { flex: none; border-radius: 3px; object-fit: cover; box-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
+.hc-premier small { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--brass-text, var(--accent)); }
+.hc-vignettes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 8px; }
+.hc-vignettes li { display: flex; flex-direction: column; align-items: center; gap: 3px; margin: 0; font-size: .8rem; }
+.hc-sans-img { display: block; border-radius: 3px; background: var(--surface-2); }

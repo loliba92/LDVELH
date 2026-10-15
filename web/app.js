@@ -824,6 +824,39 @@
     return { lignes, total, bas, haut, exemplaires, sansCote, actuels, investi, nbPayes, titres: new Set(lignes.map((x) => x.b.livre_id)).size };
   }
 
+  // Analyses du portefeuille (accueil) : où est la valeur, par série, éditions d'origine, fiabilité des cotes, répartition par état
+  function analysesPortefeuille(bl) {
+    const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
+    if (!L.length || !bl.total) return '';
+    const somme = (liste) => liste.reduce((t, x) => t + x.v, 0);
+    const pc = (v) => `${Math.round((100 * v) / bl.total)} %`;
+    const top = L.slice(0, 5), parSerie = new Map();
+    L.forEach((x) => parSerie.set(x.b.serie, (parSerie.get(x.b.serie) || 0) + x.v));
+    const series = [...parSerie.entries()].sort((x, y) => y[1] - x[1]).slice(0, 4);
+    const origine = somme(L.filter((x) => x.b.version_n === 1)), recent = somme(L.filter((x) => estActuel(infoPrix(x.b, x.c.etat))));
+    const exNeufs = bl.lignes.filter((x) => x.b.en_vente === 1).reduce((t, x) => t + x.c.qte, 0);
+    const etats = { convenable: 0, bon: 0, tres_bon: 0 };
+    bl.lignes.forEach(({ c }) => { if (etats[c.etat] !== undefined) etats[c.etat] += c.qte; });
+    const unitaires = L.flatMap((x) => Array(x.c.qte).fill(x.v / x.c.qte)).sort((x, y) => x - y);
+    const mediane = unitaires.length % 2 ? unitaires[(unitaires.length - 1) / 2] : (unitaires[unitaires.length / 2 - 1] + unitaires[unitaires.length / 2]) / 2;
+    const barre = (v) => `<span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * v) / bl.total))}%"></i></span>`;
+    return `<details class="hc-analyses"><summary>Comprendre mon portefeuille</summary><div class="hc-grille">
+      <div><h3>Où se trouve la valeur</h3>
+        <p>Vos 5 exemplaires les plus chers pèsent <strong>${pc(somme(top))}</strong> de la valeur.</p>
+        ${(() => { const [p1, ...reste] = L.slice(0, 7); const img = (x, l, h) => (x.b.couverture ? `<img src="${esc(racine(x.b.couverture))}" alt="" width="${l}" height="${h}" loading="lazy" decoding="async">` : `<span class="hc-sans-img" style="width:${l}px;height:${h}px"></span>`);
+          return `<div class="hc-premier">${img(p1, 56, 84)}<span><small>Le plus précieux</small>${esc(p1.b.titre)} <span class="sous">${esc(p1.b.version)}</span><br><strong>${fmtE(p1.v)}</strong>${p1.c.qte > 1 ? ` <span class="sous">(${p1.c.qte} exemplaires)</span>` : ''}</span></div>
+          <ul class="hc-vignettes" aria-label="Les exemplaires suivants, du plus cher au moins cher">${reste.map((x) => `<li title="${esc(x.b.titre)} (${esc(x.b.version)}) : ${fmtE(x.v)}">${img(x, 44, 66)}<strong>${fmtE(x.v)}</strong></li>`).join('')}</ul>`; })()}
+      </div>
+      <div><h3>Par série</h3><ul class="hc-series">${series.map(([nom, v]) => `<li><span>${esc(nom)}</span><strong>${pc(v)}</strong>${barre(v)}</li>`).join('')}</ul></div>
+      <div><h3>Éditions d'origine</h3><p><strong>${pc(origine)}</strong> de la valeur est en première édition (V1). Le reste est en rééditions.</p>
+        ${exNeufs ? `<p>${exNeufs} exemplaire${exNeufs > 1 ? 's' : ''} encore vendu${exNeufs > 1 ? 's' : ''} neuf${exNeufs > 1 ? 's' : ''} : leur cote est le prix du neuf.</p>` : ''}</div>
+      <div><h3>Fiabilité des cotes</h3><p><strong>${pc(recent)}</strong> de la valeur repose sur des prix récents ; le reste, sur d'anciennes archives (un ordre de grandeur).</p>
+        ${bl.sansCote ? `<p>${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote, non compté${bl.sansCote > 1 ? 's' : ''}.</p>` : ''}</div>
+      <div><h3>Selon l'état</h3><p>${etats.convenable} en convenable · ${etats.bon} en bon état · ${etats.tres_bon} en très bon état.</p>
+        <p>Valeur médiane d'un exemplaire : <strong>${fmtE(mediane)}</strong>. Selon l'état réel, la collection vaut de <strong>${fmtE(bl.bas)}</strong> (tout en convenable) à <strong>${fmtE(bl.haut)}</strong> (tout en très bon état).</p></div>
+    </div></details>`;
+  }
+
   function afficherCollection() {
     const bl = bilan();
     const n = bl.exemplaires;
@@ -838,6 +871,8 @@
       ch.hidden = !n;
       ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
       $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
+      const an = $('#hc-analyses');
+      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
