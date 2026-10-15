@@ -115,9 +115,10 @@ def page(nom, corps):
 <body class="annexe{' projet' if nom == 'le-projet.html' else ''}">
 <a class="evitement" href="#main">Aller au contenu</a>
 
+<div class="haut">
 {BANDEAU}
-
 {entete(nom)}
+</div>
 
 {PORTE if nom == "revue-prix.html" else ""}<main id="main" class="cadre page"{" hidden" if nom == "revue-prix.html" else ""}>
 {corps}
@@ -388,9 +389,10 @@ def page_collection(index_html):
 <body class="annexe page-collection" data-page="collection">
 <a class="evitement" href="#main">Aller au contenu</a>
 
+<div class="haut">
 {BANDEAU}
-
 {nav}
+</div>
 
 <header class="banniere" aria-labelledby="titre-page">
   <div class="cadre banniere-in">
