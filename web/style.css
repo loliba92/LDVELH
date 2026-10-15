@@ -1021,3 +1021,9 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .hc-anneau-u { fill: var(--muted); font: 400 9px var(--f-ui); }
 .hc-anneau-n { font-size: 17px; }
 .hc-series li { grid-template-columns: 1fr auto; }
+
+/* Le projet : une illustration en fond, très fondue vers le bas de page */
+.projet { position: relative; }
+.projet::before { content: ""; position: absolute; z-index: -1; top: 0; left: 0; right: 0; height: 640px; pointer-events: none;
+  background: url("images/accueil-4.webp") center 35% / cover no-repeat; opacity: .2;
+  -webkit-mask-image: linear-gradient(#000 0%, rgba(0,0,0,.6) 45%, transparent 100%); mask-image: linear-gradient(#000 0%, rgba(0,0,0,.6) 45%, transparent 100%); }

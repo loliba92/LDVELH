@@ -110,7 +110,7 @@ def page(nom, corps):
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="annexe">
+<body class="annexe{' projet' if nom == 'le-projet.html' else ''}">
 <a class="evitement" href="#main">Aller au contenu</a>
 
 {BANDEAU}
