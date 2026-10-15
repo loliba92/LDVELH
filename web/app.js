@@ -130,7 +130,8 @@
     $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
-    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; changer(); });
+    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; synchroniser(); changer(); });
+    document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; synchroniser(); changer(); } }));
     brancherParcours();
     $('#f-versions').addEventListener('change', (e) => {
       if (e.target.checked) S.versions.add(e.target.value); else S.versions.delete(e.target.value);
@@ -159,6 +160,7 @@
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
+    document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = (r.value === 'mine') === S.mine; });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     document.querySelectorAll('#f-versions input').forEach((i) => { i.checked = S.versions.has(i.value); });
     document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
@@ -591,7 +593,7 @@
   // Recherche de cette édition sur trois sites d'annonces (liens simples, ouverts dans un nouvel onglet)
   const requete = (t) => encodeURIComponent(t).replace(/%20/g, '+');
   function blocRecherche(b) {
-    const q = requete(`${b.titre} livre héros`);
+    const q = requete(`${b.titre} ${b.version || ''} livre héros`.replace(/\s+/g, ' '));      // l'édition (V1, V2…) aide à cerner la recherche
     const ebay = requete(`${b.titre} ${b.isbn13 || 'livre héros'}`);
     const liens = [
       ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
@@ -735,6 +737,7 @@
       $(sel).textContent = n ? String(n) : '';
       $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
     });
+    if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = n ? `(${n})` : '';
     if ($('#hero-coll')) {              // accueil : résumé de la collection et lien vers la page collection
       $('#hc-etat').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : "vide pour l'instant";
       const ch = $('#hc-chiffres');

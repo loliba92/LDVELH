@@ -154,6 +154,10 @@
       <div class="etagere-tete">
         <h2 id="titre-etagere">Sur l'étagère</h2>
         <div class="outils">
+          <div class="segments segments-petits" id="f-coll" role="radiogroup" aria-label="Quels livres afficher ?">
+            <label><input type="radio" name="coll" value="tous"><span>Tous</span></label>
+            <label><input type="radio" name="coll" value="mine"><span>Ma collection <b class="nb-coll-seg" id="nb-coll-seg"></b></span></label>
+          </div>
           <div class="segments segments-petits" id="f-vue" role="radiogroup" aria-label="Présentation">
             <label><input type="radio" name="vue" value="etagere"><span>Étagère</span></label>
             <label><input type="radio" name="vue" value="liste"><span>Liste</span></label>
