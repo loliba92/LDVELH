@@ -41,7 +41,7 @@
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 16px; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 76px; }
 body {
   margin: 0; color: var(--text); background-color: var(--bg);
   font: 400 1rem/1.55 var(--f-ui);
@@ -60,7 +60,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; 
 .cote h2, .etagere h2, .collection h1, .collection h2, .pied h2 { letter-spacing: -0.015em; }
 
 /* Bandeau noyer */
-.bandeau { background: var(--walnut); color: var(--walnut-text); border-bottom: 3px double var(--brass); }
+.bandeau { position: sticky; top: 0; z-index: 45; background: var(--walnut); color: var(--walnut-text); border-bottom: 3px double var(--brass); }
 .bandeau-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; }
 .marque { display: inline-flex; align-items: center; gap: 12px; color: var(--walnut-text); text-decoration: none; }
 .marque-sceau { width: 38px; height: 38px; flex: none; border-radius: 50%; background: url("icons/icon-192.png") center / cover no-repeat; }
@@ -86,7 +86,7 @@ h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.1; 
 
 /* Disposition */
 .disposition { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 28px; align-items: start; padding-top: 28px; padding-bottom: 40px; }
-.selecteur { position: sticky; top: 14px; max-height: calc(100vh - 28px); overflow: auto; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brass); border-radius: var(--r); box-shadow: var(--shadow); }
+.selecteur { position: sticky; top: 78px; max-height: calc(100vh - 92px); overflow: auto; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--brass); border-radius: var(--r); box-shadow: var(--shadow); }
 .selecteur-tete { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
 .selecteur h2 { font-size: 1.45rem; }
 .actifs:not(:empty) { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; margin-left: 6px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 .78rem var(--f-ui); vertical-align: middle; }
@@ -952,7 +952,7 @@ html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaqu
 .hc-sans-img { display: block; border-radius: 3px; background: var(--surface-2); }
 
 /* Filtres de la liste « Vos exemplaires » (page collection) */
-#titre-exemplaires { scroll-margin-top: 84px; }
+#titre-exemplaires { scroll-margin-top: 8px; }
 .coll-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; margin: 8px 0 10px; align-items: end; }
 .coll-filtres label { display: flex; flex-direction: column; gap: 4px; font: 700 .8rem var(--f-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .coll-filtres input, .coll-filtres select { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); text-transform: none; letter-spacing: 0; }
