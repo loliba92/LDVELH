@@ -859,8 +859,39 @@
     </div></details>`;
   }
 
+  // Visuel de l'accueil : éventail des couvertures les plus précieuses, anneau de la répartition par série, progression de la série principale
+  const COULEURS_ANNEAU = ['#d9b45f', '#7f9fc4', '#8fb08a', '#c98a6b', '#8a8478'];
+  function apercuVisuel(bl) {
+    const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
+    if (!L.length || !bl.total) return '';
+    const vus = new Set(), tops = [];
+    L.forEach((x) => { if (x.b.couverture && !vus.has(x.b.livre_id) && tops.length < 5) { vus.add(x.b.livre_id); tops.push(x); } });
+    const parSerie = new Map();
+    L.forEach((x) => parSerie.set(x.b.serie, (parSerie.get(x.b.serie) || 0) + x.v));
+    const rang = [...parSerie.entries()].sort((x, y) => y[1] - x[1]);
+    const parts = rang.slice(0, 4).concat(rang.length > 4 ? [['Autres', rang.slice(4).reduce((t, x) => t + x[1], 0)]] : []);
+    const r = 32, C = 2 * Math.PI * r;
+    let decal = 0;
+    const arcs = parts.map(([nom, v], i) => {
+      const long = (v / bl.total) * C, a = `<circle cx="42" cy="42" r="${r}" fill="none" stroke="${COULEURS_ANNEAU[i]}" stroke-width="14" stroke-dasharray="${Math.max(0, long - 1.5)} ${C}" stroke-dashoffset="${-decal}" transform="rotate(-90 42 42)"><title>${esc(nom)} : ${Math.round((100 * v) / bl.total)} %</title></circle>`;
+      decal += long; return a;
+    }).join('');
+    const legende = parts.map(([nom, v], i) => `<li><i style="background:${COULEURS_ANNEAU[i]}"></i><span>${esc(nom)}</span><b>${Math.round((100 * v) / bl.total)} %</b></li>`).join('');
+    const principale = rang[0][0];
+    const possedes = new Set(bl.lignes.filter((x) => x.b.serie === principale).map((x) => x.b.livre_id)).size;
+    const total = new Set(DATA.filter((b) => b.serie === principale).map((b) => b.livre_id)).size;
+    const manque = Math.max(0, total - possedes);
+    return `<div class="hc-visuel">
+      <div class="hc-eventail" aria-hidden="true">${tops.map((x, i) => `<img style="--i:${i}" src="${esc(racine(x.b.couverture))}" alt="" width="64" height="96" loading="lazy" decoding="async">`).join('')}</div>
+      <div class="hc-anneau"><svg viewBox="0 0 84 84" width="84" height="84" role="img" aria-label="Répartition de la valeur par série">${arcs}<text x="42" y="46" text-anchor="middle" class="hc-anneau-n">${rang.length}</text></svg>
+        <ul class="hc-legende">${legende}</ul></div>
+      ${manque ? `<div class="hc-progres"><span>${esc(principale)} : <b>${possedes}</b> titres sur ${total}</span><span class="hc-barre"><i style="width:${Math.max(3, Math.round((100 * possedes) / total))}%"></i></span>
+        <button type="button" class="bouton-lien" data-parcours>Il en manque ${manque} : compléter pas à pas →</button></div>` : ''}
+    </div>`;
+  }
+
   // Ligne discrète de chiffres clés, toujours visible (le détail est dans « Comprendre mon portefeuille »)
-  function infosRapides(bl) {
+  function infosRapides(bl, avecSerie = true) {
     const L = bl.lignes.map(({ b, c }) => ({ b, c, v: valeurLigne(b, c) })).filter((x) => x.v != null).sort((x, y) => y.v - x.v);
     if (!L.length || !bl.total) return '';
     const pc = (v) => `${Math.round((100 * v) / bl.total)} %`;
@@ -872,7 +903,7 @@
     const puce = (html, titre) => `<li title="${esc(titre)}">${html}</li>`;
     return `<ul class="hc-rapide" aria-label="Chiffres clés de la collection">` +
       puce(`${p1.b.couverture ? `<img src="${esc(racine(p1.b.couverture))}" alt="" width="20" height="30" loading="lazy" decoding="async">` : ''}<span>Le plus précieux <b>${esc(p1.b.titre)}</b> ${fmtE(p1.v)}</span>`, 'Exemplaire le plus cher de la sélection') +
-      puce(`<span>${esc(serie)} <b>${pc(vSerie)}</b></span>`, 'Série qui pèse le plus dans la valeur') +
+      (avecSerie ? puce(`<span>${esc(serie)} <b>${pc(vSerie)}</b></span>`, 'Série qui pèse le plus dans la valeur') : '') +
       puce(`<span>Premières éditions <b>${pc(somme(L.filter((x) => x.b.version_n === 1)))}</b></span>`, 'Part de la valeur en première édition (V1)') +
       puce(`<span>Cotes récentes <b>${pc(recent)}</b></span>`, 'Part de la valeur fondée sur des prix récents (le reste vient d\'archives)') + '</ul>';
   }
@@ -1007,7 +1038,7 @@
       ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
       $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
       const an = $('#hc-analyses');
-      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? infosRapides(bl) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
+      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + infosRapides(bl, false) + analysesPortefeuille(bl) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';

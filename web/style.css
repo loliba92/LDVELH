@@ -977,3 +977,22 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .hc-rapide img { border-radius: 2px; object-fit: cover; box-shadow: 0 1px 3px rgba(0, 0, 0, .5); }
 .coll-analyses .hc-rapide { margin: 14px 0 0; font-size: .9rem; }
 .coll-analyses .hc-analyses summary { min-height: 40px; }
+
+/* Visuel de l'accueil : éventail de couvertures, anneau par série, progression */
+.hc-visuel { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin: 10px 0 2px; }
+.hc-eventail { position: relative; flex: none; width: 168px; height: 112px; }
+.hc-eventail img { position: absolute; bottom: 0; left: calc(var(--i) * 24px); width: 64px; height: 96px; object-fit: cover; border-radius: 3px; box-shadow: 0 3px 10px rgba(0, 0, 0, .65); transform-origin: bottom center; transform: rotate(calc((var(--i) - 2) * 7deg)) translateY(calc(var(--i) * -1px)); z-index: calc(10 - var(--i)); }
+.hc-eventail img:first-child { z-index: 12; }
+.hc-anneau { display: flex; align-items: center; gap: 10px; }
+.hc-anneau svg { flex: none; }
+.hc-anneau-n { fill: var(--text); font: 700 20px var(--f-display); }
+.hc-legende { list-style: none; margin: 0; padding: 0; font-size: .8rem; color: var(--muted); }
+.hc-legende li { display: flex; align-items: center; gap: 6px; margin: 0 0 2px; }
+.hc-legende i { flex: none; width: 9px; height: 9px; border-radius: 50%; }
+.hc-legende b { color: var(--text); font-weight: 600; margin-left: auto; padding-left: 6px; }
+.hc-progres { flex-basis: 100%; display: grid; gap: 4px; font-size: .88rem; color: var(--muted); }
+.hc-progres b { color: var(--text); }
+.hc-progres .hc-barre { height: 6px; }
+.hc-progres .bouton-lien { justify-self: start; min-height: 40px; }
+@media (max-width: 480px) { .hc-eventail { width: 150px; height: 100px; } .hc-eventail img { width: 56px; height: 84px; left: calc(var(--i) * 21px); } }
+.hc-eventail { margin-left: 12px; }
