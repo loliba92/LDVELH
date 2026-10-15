@@ -15,6 +15,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070333745|convenable": {
+   "prix": 42.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070333745|tres_bon": {
+   "prix": 60.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
   "9782070520343|bon": {
    "prix": 60.0,
    "decision": "corrige",
