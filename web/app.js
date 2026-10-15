@@ -88,19 +88,10 @@
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
     $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
-    const top = [...compter('serie').entries()].filter(([k]) => k).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0], 'fr')).slice(0, 4);
-    $('#hero-series').innerHTML = '<span>Séries :</span>' + top.map(([k, n]) =>
-      `<button type="button" class="pastille" data-serie="${esc(k)}" title="${n} éditions">${esc(k)}</button>`).join('');
     const aller = () => $('#recherche').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     $('#hero-recherche').addEventListener('submit', (e) => {
       e.preventDefault();
       S.q = $('#h-q').value.trim(); S.onglet = 'etagere';
-      synchroniser(); changer(); aller();
-    });
-    $('#hero-series').addEventListener('click', (e) => {
-      const b = e.target.closest('[data-serie]');
-      if (!b) return;
-      S.serie = b.dataset.serie; accorderEditeur(); S.onglet = 'etagere';
       synchroniser(); changer(); aller();
     });
   }
