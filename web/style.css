@@ -960,3 +960,7 @@ html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaqu
 tr.filtrable { cursor: pointer; }
 tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface-2); }
 @media (max-width: 640px) { .coll-filtres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; } .coll-filtres label:first-child, .coll-filtres #cf-raz { grid-column: 1 / -1; } .coll-filtres select, .coll-filtres input { padding: 8px 6px; font-size: .95rem; } }
+
+/* Fonctions réservées aux administrateurs : pastille « Admin » */
+.badge-admin { display: inline-block; vertical-align: middle; margin-left: 8px; padding: 2px 9px; border: 1px solid var(--accent); border-radius: 999px; background: var(--accent-soft, transparent); color: var(--accent); font: 700 .72rem/1.4 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; }
+.admin-note { margin: -4px 0 12px; }

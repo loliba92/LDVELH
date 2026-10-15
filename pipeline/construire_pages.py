@@ -45,7 +45,7 @@ def entete(courante):
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
       {lien("le-projet.html", "Le projet", "le-projet.html")}
-      <a class="lien-prive" href="revue-prix.html" aria-label="Accès privé : vérifier les prix"{" aria-current=\"page\"" if courante == "revue-prix.html" else ""}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Accès privé</span></a>
+      <a class="lien-prive" href="revue-prix.html" aria-label="Accès admin : vérifier les prix"{" aria-current=\"page\"" if courante == "revue-prix.html" else ""}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Accès admin</span></a>
     </nav>
   </div>
 </header>'''
@@ -85,7 +85,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="le-projet.html">Le projet</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
-      <a class="lien-prive" href="revue-prix.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Accès privé</a>
+      <a class="lien-prive" href="revue-prix.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Accès admin</a>
     </nav>'''
 
 
@@ -143,7 +143,7 @@ def page(nom, corps):
 SCRIPT_PAGE = {"revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
-    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès privé</p>
+    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
     <form id="porte-form">
       <label class="sr-only" for="porte-code">Code d'accès</label>
       <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off" autofocus>
@@ -155,10 +155,11 @@ PORTE = '''<div class="porte" id="porte">
 '''
 
 
-REVUE = '''<h1>Vérifier les prix</h1>
+REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
+<p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
 <section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
-  <h2 id="rg-titre">Envoi automatique</h2>
+  <h2 id="rg-titre">Envoi automatique <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Avec un jeton GitHub enregistré sur cet appareil, les boutons « Enregistrer ces prix » (fiche d'un livre) et « Ajouter maintenant » (ci-dessous) agissent en un clic, sans passer par GitHub. Sans jeton, ils vous donnent la ligne à coller.</p>
   <label class="sr-only" for="rg-jeton">Jeton GitHub</label>
   <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez le jeton ici (github_pat_…)">
@@ -167,7 +168,7 @@ REVUE = '''<h1>Vérifier les prix</h1>
   <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
 </section>
 <section class="rv-ajout" aria-labelledby="aj-titre">
-  <h2 id="aj-titre">Ajouter des livres</h2>
+  <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
   <p><code class="aj-exemple">9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré</code></p>
   <label class="sr-only" for="aj-texte">Liste d'ISBN</label>

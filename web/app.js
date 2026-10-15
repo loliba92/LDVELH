@@ -643,9 +643,9 @@
   const LIEN_CORRIGER = 'https://github.com/loliba92/LDVELH/actions/workflows/corriger-prix.yml';
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
-    if (!b.isbn13) return '<h3>Corriger les cotes</h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
+    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
-    return `<h3>Corriger les cotes</h3>
+    return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3>
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
           <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
           <div class="corriger-fourchette"><label>De<input type="text" inputmode="decimal" name="mini" autocomplete="off" placeholder="€"></label>
