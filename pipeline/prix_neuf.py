@@ -1,12 +1,20 @@
-"""Prix du neuf et disponibilité des éditions encore en vente, lus sur la fiche de chaque livre du site leslibraires.fr.
+"""Prix du neuf et disponibilité d'un livre à partir de son ISBN : `prix_neuf(isbn)`.
 
-Pourquoi ce site : le livre y a un prix unique en France (le prix éditeur, loi sur le prix unique du livre), la fiche donne la
-disponibilité (en stock ou non) dans un balisage standard (schema.org), son robots.txt autorise la lecture des fiches
-(`/livre/`), et il répond à un programme. Le site de l'éditeur, lui, rejette les programmes.
-Une requête par ISBN, une seconde d'écart, un nom de programme explicite : une lecture légère, une fois par semaine.
-Écrit `data/processed/prix_neuf.csv` (isbn13, prix, disponibilite, date, source). Une édition dont la fiche n'existe plus ou
-n'est pas « en stock » est notée « indisponible » : l'export la considère hors vente.
-Usage : python pipeline/prix_neuf.py [--limite N]
+    >>> prix_neuf("9782075148641")
+    {'isbn13': '9782075148641', 'prix': 13.5, 'disponibilite': 'en_stock', 'source': 'leslibraires.fr', 'date': '2026-10-15'}
+
+Sources essayées dans l'ordre (liste SOURCES) : la première qui répond donne le résultat. Aujourd'hui une seule répond à un
+programme : leslibraires.fr (réseau de librairies indépendantes ; prix unique du livre en France, donc le prix éditeur ; fiche
+`/livre/<isbn>` avec prix et disponibilité en balisage schema.org ; `robots.txt` favorable). Les autres grands vendeurs ont été
+essayés le 15 octobre 2026 et refusent tous les programmes : Amazon (captcha), Cultura, Fnac, Furet du Nord, Momox, Rakuten
+(HTTP 403 ou défi anti-robot), Decitre et Chapitre (erreur ou 429), le site de l'éditeur (« Request Rejected »). Pour ajouter une source,
+écrire une fonction `(isbn, http) -> (prix, disponibilite)` et l'ajouter à SOURCES.
+
+Une requête par ISBN, 2 secondes d'écart, nom de programme explicite, réessais après une erreur passagère.
+Lot hebdomadaire (workflow `prix-ebay.yml`) : toutes les éditions récentes (parues depuis 2010) ou marquées « en vente » du catalogue,
+donc aussi les nouvelles éditions dès qu'elles entrent au catalogue. Écrit `data/processed/prix_neuf.csv` (isbn13, prix,
+disponibilite, date, source). « indisponible » = fiche absente ou livre pas en stock neuf : l'export le considère hors vente.
+Usage : python pipeline/prix_neuf.py [--isbn ISBN] [--limite N]
 """
 import argparse
 import csv
@@ -23,6 +31,7 @@ import editions
 
 SORTIE = Path(__file__).resolve().parent.parent / "data" / "processed" / "prix_neuf.csv"
 URL = "https://www.leslibraires.fr/livre/{isbn}"
+ANNEE_MIN = 2010            # les éditions plus anciennes ne sont plus au catalogue des éditeurs (sauf marquage « en vente »)
 CHAMPS = ["isbn13", "prix", "disponibilite", "date", "source"]
 PAUSE = 2.0
 ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
@@ -39,7 +48,7 @@ def lire_fiche(html):
     return prix, ("en_stock" if en_stock else "indisponible")
 
 
-def interroger(isbn, http=requests, attentes=ESSAIS):
+def source_leslibraires(isbn, http=requests, attentes=ESSAIS):
     """(prix, disponibilité) ; 404 = fiche absente = indisponible ; erreur passagère : on réessaie, puis on lève l'erreur."""
     dernier = None
     for attente in (0,) + tuple(attentes):
@@ -58,20 +67,48 @@ def interroger(isbn, http=requests, attentes=ESSAIS):
     raise dernier
 
 
+SOURCES = [("leslibraires.fr", source_leslibraires)]
+
+
+def prix_neuf(isbn, http=requests, attentes=ESSAIS):
+    """{isbn13, prix, disponibilite, source, date} pour un ISBN, ou None si aucune source n'a pu répondre."""
+    isbn = re.sub(r"[^0-9X]", "", str(isbn).upper())
+    for nom, source in SOURCES:
+        try:
+            prix, dispo = source(isbn, http, attentes)
+        except requests.RequestException:
+            continue
+        return {"isbn13": isbn, "prix": prix, "disponibilite": dispo, "source": nom, "date": date.today().isoformat()}
+    return None
+
+
+def a_interroger(lignes):
+    """ISBN du lot : éditions parues depuis ANNEE_MIN ou marquées « en vente »."""
+    def annee(r):
+        try:
+            return int(r.get("annee") or r.get("annee_bnf") or 0)
+        except ValueError:
+            return 0
+    return sorted({r["isbn13"] for r in lignes if r.get("isbn13") and (annee(r) >= ANNEE_MIN or str(r.get("en_vente") or "").strip() not in ("", "0"))})
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--limite", type=int)
+    ap.add_argument("--isbn", help="un seul ISBN : affiche le résultat, n'écrit rien")
     a = ap.parse_args()
-    isbns = sorted({r["isbn13"] for r in editions.load() if r.get("isbn13") and str(r.get("en_vente") or "").strip() not in ("", "0")})[: a.limite]
+    if a.isbn:
+        print(prix_neuf(a.isbn) or "Aucune source n'a répondu.")
+        return
+    isbns = a_interroger(editions.load())[: a.limite]
     lignes, erreurs = [], 0
     for n, isbn in enumerate(isbns, 1):
-        try:
-            prix, dispo = interroger(isbn)
-        except requests.RequestException as e:
+        r = prix_neuf(isbn)
+        if r is None:
             erreurs += 1
-            print(f"  {isbn} : erreur réseau ({e.__class__.__name__}), ignoré")
+            print(f"  {isbn} : aucune source n'a répondu, ignoré")
             continue
-        lignes.append({"isbn13": isbn, "prix": "" if prix is None else prix, "disponibilite": dispo, "date": date.today().isoformat(), "source": "leslibraires.fr"})
+        lignes.append({"isbn13": isbn, "prix": "" if r["prix"] is None else r["prix"], "disponibilite": r["disponibilite"], "date": r["date"], "source": r["source"]})
         time.sleep(PAUSE)
     if erreurs > len(isbns) / 2:
         sys.exit("Trop d'erreurs réseau : le fichier précédent est conservé.")

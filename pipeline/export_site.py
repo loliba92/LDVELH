@@ -141,6 +141,7 @@ def main():
     manuel = {k: v for k, v in lire_csv(racine_donnees / "manual" / "prix_editeur.csv").items() if v.get("prix")}
     bnf = {k: v for k, v in lire_csv(racine_donnees / "processed" / "prix_editeur.csv").items() if v.get("prix")}
     hors_vente = set(lire_csv(racine_donnees / "manual" / "hors_vente.csv")) | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible"}
+    en_stock = {k for k, v in auto.items() if v.get("disponibilite") == "en_stock" and v.get("prix")}      # en vente neuve, constaté ce jour
     editeur = {}
     for isbn_e in set(bnf) | set(manuel) | set(auto):
         if isbn_e not in hors_vente and auto.get(isbn_e, {}).get("prix"):
@@ -183,7 +184,7 @@ def main():
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
             "version": r["libelle_version"], "version_n": r["numero_version"],
             "derniere": bool(r["est_derniere_version"]),
-            "en_vente": None if r["isbn13"] in hors_vente else r["en_vente"], "annee": r["annee"], "annee_bnf": r["annee_bnf"],
+            "en_vente": 1 if r["isbn13"] in en_stock else (None if r["isbn13"] in hors_vente else r["en_vente"]), "annee": r["annee"], "annee_bnf": r["annee_bnf"],
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],

@@ -27,16 +27,29 @@ class TestPrixNeuf(unittest.TestCase):
         self.assertEqual(p.lire_fiche("<html>rien</html>"), (None, "indisponible"))
 
     def test_fiche_absente(self):
-        self.assertEqual(p.interroger("9782075123150", Faux(Rep(404)), attentes=()), (None, "indisponible"))
+        self.assertEqual(p.source_leslibraires("9782075123150", Faux(Rep(404)), attentes=()), (None, "indisponible"))
 
     def test_erreur_passagere_puis_succes(self):
         h = Faux(Rep(429), Rep(503), Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
-        self.assertEqual(p.interroger("x", h, attentes=(0, 0)), (13.5, "en_stock"))
+        self.assertEqual(p.source_leslibraires("x", h, attentes=(0, 0)), (13.5, "en_stock"))
         self.assertEqual(h.n, 3)
+
+    def test_fonction_prix_neuf_par_isbn(self):
+        h = Faux(Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
+        r = p.prix_neuf("978-2-07-514864-1", h)
+        self.assertEqual((r["isbn13"], r["prix"], r["disponibilite"], r["source"]), ("9782075148641", 13.5, "en_stock", "leslibraires.fr"))
+
+    def test_aucune_source_ne_repond(self):
+        self.assertIsNone(p.prix_neuf("9782075148641", Faux(Rep(503), Rep(503)), attentes=(0,)))
+
+    def test_lot_hebdomadaire(self):
+        lignes = [{"isbn13": "1", "annee": "1987", "en_vente": ""}, {"isbn13": "2", "annee": "2014", "en_vente": ""},
+                  {"isbn13": "3", "annee": "1999", "en_vente": "1"}, {"isbn13": "4", "annee": "", "annee_bnf": "2021"}, {"isbn13": "", "annee": "2024"}]
+        self.assertEqual(p.a_interroger(lignes), ["2", "3", "4"])
 
     def test_erreur_persistante_levee(self):
         with self.assertRaises(Exception):
-            p.interroger("x", Faux(Rep(503), Rep(503)), attentes=(0,))
+            p.source_leslibraires("x", Faux(Rep(503), Rep(503)), attentes=(0,))
 
 
 if __name__ == "__main__":
