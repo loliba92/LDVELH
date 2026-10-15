@@ -5,13 +5,14 @@
   "nb_series": 32,
   "sources_prix": [
     "Relevé d'archives (historique)",
-    "eBay (interface officielle)"
+    "eBay (interface officielle)",
+    "Librairies indépendantes (leslibraires.fr)"
   ],
   "types_prix": [
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 57,
+  "nb_prix_actuels": 92,
   "calibration": {
     "actif": false,
     "n_paires": 8,
