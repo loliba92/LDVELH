@@ -2,7 +2,7 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 183,
+ "nb_modifiees": 186,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 102,
  "hausses": [
@@ -369,7 +369,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 150,
+ "nb_grands_mouvements": 152,
  "modele": {
   "actif": false,
   "n_paires": 8,

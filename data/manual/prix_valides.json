@@ -30,6 +30,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070568734|convenable": {
+   "prix": 40.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9782070568734|tres_bon": {
+   "prix": 70.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
   "9782070665815|convenable": {
    "prix": 39.0,
    "decision": "corrige",
