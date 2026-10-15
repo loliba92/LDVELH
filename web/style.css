@@ -582,7 +582,7 @@ dialog.parcours[open] { display: flex; }
 
 /* Liens d'information du pied de page */
 .pied-liens { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--walnut-muted); }
-.pied-liens a { display: inline-flex; align-items: center; min-height: 44px; color: var(--gold); font-weight: 600; text-underline-offset: 3px; }
+.pied-liens a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--gold); font-weight: 600; text-underline-offset: 3px; }
 .annexe .pied { margin-top: 12px; }
 .annexe .pied-liens { margin-top: 0; border-top: 0; padding-top: 0; }
 .menu a[aria-current="page"] { color: var(--gold); }
