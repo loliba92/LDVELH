@@ -2,7 +2,7 @@
  "date": "2026-10-15",
  "precedent": "2026-10-14",
  "nb_comparees": 1272,
- "nb_modifiees": 102,
+ "nb_modifiees": 126,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -127,6 +127,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070333196",
+   "isbn13": "9782070333196",
+   "titre": "Les Cryptes de la Terreur",
+   "serie": "Loup*Ardent",
+   "numero": "319",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 6.16,
+   "apres": 8.35,
+   "pct": 0.356,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
+  },
+  {
    "id": "9782075097321",
    "isbn13": "9782075097321",
    "titre": "Le Voyage de l'Effroi",
@@ -142,47 +157,32 @@
    "recalibre": false
   },
   {
-   "id": "9782075166881",
-   "isbn13": "9782075166881",
-   "titre": "Le Pirate de l'Au-delà",
-   "serie": "Défis Fantastiques",
-   "numero": "000",
-   "version": "V5",
+   "id": "9782070332960",
+   "isbn13": "9782070332960",
+   "titre": "Les Grottes de Kalte",
+   "serie": "Loup Solitaire",
+   "numero": "296",
+   "version": "V1",
    "etat": "tres_bon",
-   "avant": 11.32,
-   "apres": 14.5,
-   "pct": 0.281,
-   "nature": "prix éditeur",
-   "nb": 0,
+   "avant": 11.99,
+   "apres": 15.79,
+   "pct": 0.317,
+   "nature": "annonces",
+   "nb": 3,
    "recalibre": false
   },
   {
-   "id": "9782075132299",
-   "isbn13": "9782075132299",
-   "titre": "Le Labyrinthe de la mort",
-   "serie": "Défis Fantastiques",
-   "numero": "000",
-   "version": "V5",
-   "etat": "tres_bon",
-   "avant": 10.78,
-   "apres": 13.5,
-   "pct": 0.252,
-   "nature": "prix éditeur",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782075097284",
-   "isbn13": "9782075097284",
-   "titre": "L'Antre des Dragons",
-   "serie": "Quête du Graal",
-   "numero": "000",
-   "version": "V5",
-   "etat": "tres_bon",
-   "avant": 10.8,
-   "apres": 13.5,
-   "pct": 0.25,
-   "nature": "prix éditeur",
+   "id": "9782070332960",
+   "isbn13": "9782070332960",
+   "titre": "Les Grottes de Kalte",
+   "serie": "Loup Solitaire",
+   "numero": "296",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 7.31,
+   "apres": 9.47,
+   "pct": 0.295,
+   "nature": "archives",
    "nb": 0,
    "recalibre": false
   }
@@ -369,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 84,
+ "nb_grands_mouvements": 96,
  "modele": {
   "actif": false,
-  "n_paires": 5,
+  "n_paires": 8,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (5 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (8 sur 20 nécessaires)",
   "rapport_global": null
  }
 }
