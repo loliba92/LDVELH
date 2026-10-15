@@ -504,6 +504,16 @@
    "prix": 14.95,
    "decision": "confirme",
    "le": "2026-10-15"
+  },
+  "9791097577254|convenable": {
+   "prix": 5.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
+  },
+  "9791097577254|tres_bon": {
+   "prix": 14.0,
+   "decision": "corrige",
+   "le": "2026-10-15"
   }
  }
 }
