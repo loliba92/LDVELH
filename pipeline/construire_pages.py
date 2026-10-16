@@ -77,6 +77,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
     {e("confidentialite.html", "Confidentialité", "Vos données restent dans votre navigateur", "confidentialite.html")}
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
+    {e("revue-prix.html", "Accès admin", "Réservé aux administrateurs : revue des prix, ajout de livres", "revue-prix.html")}
   </ul>
 </dialog>'''
 
