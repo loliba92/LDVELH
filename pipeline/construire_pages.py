@@ -200,18 +200,6 @@ COFFRE = '''<h1>Accès commun <span class="badge-admin" title="Réservé aux adm
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
 <p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
-<section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
-  <h2 id="rg-titre">Envoi automatique <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
-  <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
-  <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="rg-retirer">Retirer la clé de cet appareil</button></div>
-  <details class="corriger-detail">
-    <summary>Utiliser une autre clé</summary>
-    <label class="sr-only" for="rg-jeton">Clé d'envoi</label>
-    <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez la clé d'envoi ici">
-    <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer la clé</button></div>
-    <p class="sous"><a href="coffre.html">Préparer l'accès commun</a> (un seul mot de passe pour toutes les personnes de confiance).</p>
-  </details>
-</section>
 <section class="rv-ajout" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
@@ -258,7 +246,17 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
   <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
   <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
-</ul>'''
+</ul><details class="rv-appareil" id="rv-reglages">
+  <summary>Cet appareil</summary>
+  <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
+  <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="rg-retirer">Retirer la clé de cet appareil</button></div>
+  <p class="sous">Utiliser une autre clé :</p>
+  <label class="sr-only" for="rg-jeton">Clé d'envoi</label>
+  <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez la clé d'envoi ici">
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer la clé</button></div>
+  <p class="sous"><a href="coffre.html">Préparer l'accès commun</a> (un seul mot de passe pour toutes les personnes de confiance).</p>
+</details>
+'''
 
 
 LE_PROJET = f'''<p class="surtitre">À propos du guide</p>

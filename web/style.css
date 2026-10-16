@@ -1039,3 +1039,8 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .cf-champ { display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin: 4px 0 8px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
 #cf-sortie { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; overflow-wrap: anywhere; }
 #rg-retirer[hidden] { display: none; }
+
+/* Page admin : réglages de l'appareil, discrets en bas de page */
+.rv-appareil { margin: 28px 0 0; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--r); }
+.rv-appareil summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--muted); font-weight: 600; }
+.rv-appareil input { display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin: 4px 0 8px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
