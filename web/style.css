@@ -1034,3 +1034,7 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .menu a.menu-cafe:hover { background: var(--gold); color: #1a1205; }
 .menu a.menu-cafe svg { flex: none; }
 @media (max-width: 700px) { .menu a.menu-cafe { display: inline-flex; margin-left: 0; padding: 6px 12px; font-size: .88rem; } }
+
+/* Page « Accès commun » */
+.cf-champ { display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin: 4px 0 8px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+#cf-sortie { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; overflow-wrap: anywhere; }

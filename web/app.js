@@ -643,7 +643,7 @@
   const CLE_ACCES = 'cdh-acces', CLE_JETON = 'cdh-jeton';
   const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const estProprietaire = () => lireLoc(CLE_ACCES) === EMPREINTE;
+  const estProprietaire = () => [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES));
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
     if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';

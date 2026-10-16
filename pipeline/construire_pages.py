@@ -27,6 +27,8 @@ PAGES = {
                        "Pourquoi ce guide existe, d'où viennent ses données, comment les prix sont estimés, et ce qu'il ne fait pas."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
                              "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
+    "coffre.html": ("Accès commun", "Accès commun · La Cote du Héros",
+                    "Page d'administration : chiffrer la clé d'envoi avec le mot de passe de la page admin."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
                               "Éditeur, hébergeur et conditions d'utilisation de La Cote du Héros."),
 }
@@ -93,7 +95,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "coffre.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -143,7 +145,8 @@ def page(nom, corps):
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>'}
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+               "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
@@ -158,12 +161,48 @@ PORTE = '''<div class="porte" id="porte">
 '''
 
 
+COFFRE = '''<h1>Accès commun <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
+<p class="chapeau">Un seul mot de passe pour toutes les personnes de confiance : il ouvre la page de revue des prix <strong>et</strong> enregistre sur leur appareil la clé qui permet d'envoyer les prix en un clic.</p>
+<section class="rv-ajout" aria-labelledby="cf-titre">
+  <h2 id="cf-titre">Préparer le coffre</h2>
+  <ol>
+    <li>Choisissez un mot de passe long, ou demandez-en un solide.</li>
+    <li>Collez la clé d'envoi.</li>
+    <li>Le site la chiffre avec ce mot de passe, <strong>dans votre navigateur</strong> : ni la clé ni le mot de passe ne sont envoyés ailleurs, et rien n'est enregistré sur cette page.</li>
+    <li>Transmettez le texte obtenu pour qu'il soit publié. Il est inutilisable sans le mot de passe.</li>
+  </ol>
+  <form id="cf-form">
+    <label for="cf-mdp"><strong>Mot de passe commun</strong> (14 caractères au minimum)</label>
+    <input id="cf-mdp" class="cf-champ" type="password" autocomplete="new-password" spellcheck="false">
+    <p><button type="button" class="bouton-lien" id="cf-proposer">Proposer un mot de passe solide</button></p>
+    <label for="cf-jeton"><strong>Clé d'envoi</strong></label>
+    <input id="cf-jeton" class="cf-champ" type="password" autocomplete="off" spellcheck="false">
+    <div class="rv-ajout-actions"><button type="submit" class="bouton">Chiffrer</button></div>
+  </form>
+  <p class="rv-ajout-bilan" id="cf-etat" role="status"></p>
+  <label class="sr-only" for="cf-sortie">Texte chiffré</label>
+  <textarea id="cf-sortie" readonly hidden rows="6"></textarea>
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="cf-copier" hidden>Copier le texte chiffré</button></div>
+</section>
+<section class="rv-ajout" aria-labelledby="cf-bon">
+  <h2 id="cf-bon">À savoir</h2>
+  <ul>
+    <li>Le texte chiffré est public : seul un mot de passe long et aléatoire résiste aux essais automatiques. Évitez les mots courants et les suites de touches.</li>
+    <li>Toute personne qui connaît le mot de passe peut envoyer des prix en votre nom.</li>
+    <li>En cas de souci, générez une nouvelle clé, refaites cette page avec un nouveau mot de passe, puis communiquez-le : chaque appareil redemande alors le mot de passe.</li>
+  </ul>
+  <p><a href="revue-prix.html">Retour à la revue des prix</a></p>
+</section>
+'''
+
+
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
 <p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
 <section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
   <h2 id="rg-titre">Envoi automatique <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Avec un jeton d'accès enregistré sur cet appareil, les boutons « Enregistrer ces prix » (fiche d'un livre), « Envoyer mes validations » et « Ajouter maintenant » (ci-dessous) agissent en un clic. Sans jeton, ils vous donnent la ligne à transmettre.</p>
+  <p class="sous">Un seul mot de passe pour tous : <a href="coffre.html">préparer l'accès commun</a>. Le mot de passe de cette page enregistre alors la clé automatiquement sur l'appareil.</p>
   <label class="sr-only" for="rg-jeton">Jeton d'accès</label>
   <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez le jeton d'accès ici">
   <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer le jeton</button>
@@ -493,7 +532,7 @@ def main():
     (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE)):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE)):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)
 

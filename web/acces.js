@@ -1,17 +1,19 @@
-/* Porte d'accès de la page « Vérifier les prix » (même principe que le tableau de bord de Scénario).
-   Le code saisi est comparé à une empreinte SHA-256 : le mot de passe n'est écrit nulle part dans le dépôt.
+/* Porte d'accès de la page « Vérifier les prix » : un seul mot de passe.
+   Il ouvre la page et déchiffre la clé d'envoi publiée (data/coffre.json, voir coffre.js), qui est alors enregistrée
+   sur cet appareil. Le mot de passe n'est écrit nulle part ; une saisie fausse ne déchiffre rien.
+   Tant que data/coffre.json n'existe pas, l'ancienne comparaison d'empreinte reste en place.
    Protection légère : la page est statique, son contenu reste dans le code envoyé au navigateur. Elle écarte
    le passage par curiosité, pas une lecture déterminée du code source. */
 (function () {
   var HASH = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
-  var CLE = 'cdh-acces';
+  var CLE = 'cdh-acces', CLE_JETON = 'cdh-jeton', CLE_REV = 'cdh-coffre-rev';
   var porte = document.getElementById('porte');
   var main = document.getElementById('main');
   if (!porte || !main) return;
 
   function ouvrir() { porte.hidden = true; main.hidden = false; }
-
-  try { if (localStorage.getItem(CLE) === HASH) ouvrir(); } catch (e) {}
+  function lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function ecrire(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
 
   function sha256(texte) {
     return crypto.subtle.digest('SHA-256', new TextEncoder().encode(texte)).then(function (b) {
@@ -19,16 +21,32 @@
     });
   }
 
+  var coffre = null;
+  fetch('data/coffre.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }).then(function (c) {
+    coffre = c && c.ct ? c : null;
+    var rev = coffre ? coffre.ct.slice(0, 16) : null;
+    if (coffre) {
+      if (lire(CLE) === 'coffre' && lire(CLE_REV) === rev) ouvrir();
+      else if (lire(CLE) === 'coffre') { var e = document.getElementById('porte-erreur'); e.textContent = 'L\'accès a été renouvelé : saisissez à nouveau le mot de passe.'; e.hidden = false; }
+    } else if (lire(CLE) === HASH) ouvrir();
+  });
+
   document.getElementById('porte-form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var erreur = document.getElementById('porte-erreur');
-    sha256(document.getElementById('porte-code').value).then(function (h) {
-      if (h === HASH) {
-        try { localStorage.setItem(CLE, HASH); } catch (e) {}
+    var saisi = document.getElementById('porte-code').value.trim();
+    var refus = function () { erreur.textContent = 'Code incorrect.'; erreur.hidden = false; };
+    if (coffre) {
+      window.Coffre.dechiffrer(saisi, coffre).then(function (jeton) {
+        if (jeton === null) return refus();
+        ecrire(CLE, 'coffre'); ecrire(CLE_REV, coffre.ct.slice(0, 16)); ecrire(CLE_JETON, jeton);
         ouvrir();
-      } else {
-        erreur.hidden = false;
-      }
-    });
+        document.dispatchEvent(new Event('cdh-jeton'));
+      });
+    } else {
+      sha256(document.getElementById('porte-code').value).then(function (h) {
+        if (h === HASH) { ecrire(CLE, HASH); ouvrir(); } else refus();
+      });
+    }
   });
 })();

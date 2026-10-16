@@ -317,6 +317,7 @@
   }
   initAjout();
   initReglages();
+  document.addEventListener('cdh-jeton', etatJeton);
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})
