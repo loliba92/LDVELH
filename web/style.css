@@ -1038,3 +1038,4 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 /* Page « Accès commun » */
 .cf-champ { display: block; width: 100%; box-sizing: border-box; min-height: 44px; margin: 4px 0 8px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
 #cf-sortie { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; overflow-wrap: anywhere; }
+#rg-retirer[hidden] { display: none; }

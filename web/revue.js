@@ -290,14 +290,14 @@
     method: 'POST', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton()}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
     body: JSON.stringify({ ref: 'main', inputs }) });
   function etatJeton() {
-    $('#rg-etat').textContent = jeton() ? 'Jeton enregistré sur cet appareil : l\'envoi en un clic est actif.' : 'Aucun jeton : les boutons vous donnent la ligne à transmettre.';
+    $('#rg-etat').textContent = jeton() ? 'Clé enregistrée sur cet appareil : l\'envoi en un clic est actif.' : 'Aucune clé sur cet appareil : les boutons vous donnent la ligne à transmettre.';
     $('#rg-retirer').hidden = !jeton();
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }
   function initReglages() {
     $('#rg-enregistrer').addEventListener('click', () => {
       const v = $('#rg-jeton').value.trim();
-      if (!v) { $('#rg-etat').textContent = 'Collez d\'abord le jeton.'; return; }
+      if (!v) { $('#rg-etat').textContent = 'Collez d\'abord la clé.'; return; }
       try { localStorage.setItem(CLE_JETON, v); } catch (e) { $('#rg-etat').textContent = 'Ce navigateur ne permet pas d\'enregistrer le jeton.'; return; }
       $('#rg-jeton').value = ''; etatJeton();
     });

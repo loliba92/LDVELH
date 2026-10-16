@@ -202,13 +202,15 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
 <section class="rv-ajout" id="rv-reglages" aria-labelledby="rg-titre">
   <h2 id="rg-titre">Envoi automatique <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
-  <p>Avec un jeton d'accès enregistré sur cet appareil, les boutons « Enregistrer ces prix » (fiche d'un livre), « Envoyer mes validations » et « Ajouter maintenant » (ci-dessous) agissent en un clic. Sans jeton, ils vous donnent la ligne à transmettre.</p>
-  <p class="sous">Un seul mot de passe pour tous : <a href="coffre.html">préparer l'accès commun</a>. Le mot de passe de cette page enregistre alors la clé automatiquement sur l'appareil.</p>
-  <label class="sr-only" for="rg-jeton">Jeton d'accès</label>
-  <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez le jeton d'accès ici">
-  <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer le jeton</button>
-    <button type="button" class="bouton-lien" id="rg-retirer">Retirer le jeton</button></div>
   <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
+  <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="rg-retirer">Retirer la clé de cet appareil</button></div>
+  <details class="corriger-detail">
+    <summary>Utiliser une autre clé</summary>
+    <label class="sr-only" for="rg-jeton">Clé d'envoi</label>
+    <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez la clé d'envoi ici">
+    <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer la clé</button></div>
+    <p class="sous"><a href="coffre.html">Préparer l'accès commun</a> (un seul mot de passe pour toutes les personnes de confiance).</p>
+  </details>
 </section>
 <section class="rv-ajout" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
