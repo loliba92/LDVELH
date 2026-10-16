@@ -1,4 +1,4 @@
-/* Feuille « Plus » de la barre du bas : Le projet, À propos, Confidentialité, Mentions légales. */
+/* Feuille « Infos » de la barre du bas : Le projet, À propos, Confidentialité, Mentions légales. */
 (function () {
   var feuille = document.getElementById('feuille-plus');
   if (!feuille || !feuille.showModal) return;

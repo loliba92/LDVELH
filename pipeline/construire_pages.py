@@ -59,7 +59,7 @@ def barre(courante):
   <a href="./#recherche">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">{ico('<path d="M12 5v14M5 12h14"/>')}<span>Inventaire</span></a>
   <a href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
-  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>')}<span>Plus</span></button>
+  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.2"/>')}<span>Infos</span></button>
 </nav>'''
 
 
@@ -69,12 +69,12 @@ def feuille(courante, racine_a_propos="./#apropos"):
         return f'<li><a href="{href}"{cur}><b>{titre}</b><small>{detail}</small></a></li>'
     return f'''<dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="feuille-plus-titre">Plus</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Infos et mentions</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
   <ul class="feuille-liste">
     {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
-    {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
     {e("confidentialite.html", "Confidentialité", "Vos données restent dans votre navigateur", "confidentialite.html")}
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
+    {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
   </ul>
 </dialog>'''
 
