@@ -17,8 +17,10 @@ permissions:
   contents: write
   actions: write
 
+# File d'attente à part du relevé eBay (une demi-heure) : un envoi du site ne reste plus bloqué derrière lui, ni annulé en silence quand un
+# autre arrive. Les écritures simultanées sont sans risque : .github/scripts/publier.sh reprend depuis la dernière version si main a avancé.
 concurrency:
-  group: prix-ebay
+  group: ecriture-donnees
   cancel-in-progress: false
 
 jobs:
