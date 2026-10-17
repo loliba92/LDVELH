@@ -79,8 +79,10 @@ jobs:
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"
-          git add data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
-          if git diff --cached --quiet; then echo "Rien de nouveau."; exit 0; fi
-          git commit -m "Relevé des prix actuels du $(date +%F)"
-          git push
+          AVANT="$(git rev-parse HEAD)"
+          # Si main a avancé pendant le relevé (une demi-heure), on repart de sa dernière version, on y remet les fichiers du relevé et on reconstruit
+          # le site (voir .github/scripts/publier.sh)
+          REJOUER='git checkout "$MON_COMMIT" -- data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
+            .github/scripts/publier.sh "Relevé des prix actuels du $(date +%F)" data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
