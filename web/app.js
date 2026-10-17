@@ -659,7 +659,9 @@
   const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   // Mot de passe de la page admin ET connexion Google (quand le site en demande une) : sans les deux, aucune fonction admin n'apparaît
-  const estProprietaire = () => [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES)) && !!window.Identite && window.Identite.accesAutorise();
+  const estProprietaire = () => (window.Relais && window.Relais.configure()
+    ? !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role())      // relais : niveau Admin ou SuperAdmin
+    : [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES)) && !!window.Identite && window.Identite.accesAutorise());
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -710,7 +712,7 @@
         msg.hidden = false;
         return;
       }
-      const id = window.Identite ? await window.Identite.pourEnvoi() : { ok: true, jeton: '' };
+      const id = relais || !window.Identite ? { ok: true, jeton: '' } : await window.Identite.pourEnvoi();
       if (!id.ok) return dire('Connectez-vous d\'abord avec Google dans la page « Vérifier les prix » (la connexion dure environ une heure).');
       f.querySelector('button').disabled = true; dire('Envoi en cours…');
       try {

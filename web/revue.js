@@ -226,7 +226,7 @@
       Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
       const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
       const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
-      const id = await window.Identite.pourEnvoi();
+      const id = window.Relais && window.Relais.actif() ? { ok: true, jeton: '' } : await window.Identite.pourEnvoi();   // avec le relais, la connexion du site suffit
       if (!id.ok) return dire(id.message);
       $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
       try {
@@ -339,7 +339,7 @@
     $('#rg-retirer').addEventListener('click', () => { try { localStorage.removeItem(CLE_JETON); } catch (e) { /* rien à retirer */ } etatJeton(); });
     $('#aj-lancer').addEventListener('click', async () => {
       const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
-      const id = await window.Identite.pourEnvoi();
+      const id = window.Relais && window.Relais.actif() ? { ok: true, jeton: '' } : await window.Identite.pourEnvoi();
       if (!id.ok) return dire(id.message);
       $('#aj-lancer').disabled = true; dire('Envoi en cours…');
       try {
@@ -418,7 +418,11 @@
   }
   initTendances();
   document.addEventListener('cdh-jeton', etatJeton);
-  window.Identite.afficher($('#rv-identite'), () => { if (!window.Identite.connecte()) location.reload(); afficher(); });   // déconnexion : la porte se referme
+  // Avec le relais, la connexion se fait par le compte du site (en-tête) : le bloc de l'ancienne porte n'a plus lieu d'être
+  window.Identite.config().then((c) => {
+    if (c && c.relais_url) { $('#rv-identite').hidden = true; return; }
+    window.Identite.afficher($('#rv-identite'), () => { if (!window.Identite.connecte()) location.reload(); afficher(); });
+  });   // déconnexion : la porte se referme
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})
