@@ -317,16 +317,7 @@
     return `${base} · confiance ${i.confiance}.${reserve}${aligne}`;
   }
   // Prix éditeur des éditions encore en vente (fiche du livre chez Gallimard Jeunesse) ou, à défaut, prix à la parution (notice BnF)
-  // Livre encore vendu neuf : lien simple vers Amazon (recherche par ISBN), sans affiliation
-  function lienNeuf(b) {
-    if (b.en_vente !== 1 || !b.isbn13) return '';
-    return `<p class="liens-vente"><a class="bouton bouton-clair" href="https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}" target="_blank" rel="noopener noreferrer" aria-label="Voir ${esc(b.titre)} neuf sur Amazon (nouvel onglet)">Voir le livre neuf sur Amazon</a></p>
-        <p class="sous">Lien simple vers un site extérieur, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
-  }
   function blocNeuf(b) {
-    return blocPrixNeuf(b) + lienNeuf(b);
-  }
-  function blocPrixNeuf(b) {
     const e = b.prix_editeur;
     if (!e) return '';
     if (e.source === 'editeur') return `<p class="sous prix-neuf">Prix du neuf : <strong>${fmt(e.prix)}</strong> (prix éditeur en librairie, relevé au ${dateCourte(e.date)})${e.parution ? `. À la parution : ${fmt(e.parution)} (notice de la BnF)` : ''}.</p>`;
@@ -659,6 +650,7 @@
       ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
     ];
+    if (b.en_vente === 1 && b.isbn13) liens.push(['Amazon', `https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}`]);
     return `<h3>Chercher cette édition en vente</h3>
         <p class="liens-vente">${liens.map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('')}</p>
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
