@@ -1312,3 +1312,4 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .a-trouver .l-livre button { text-align: left; }
 .sur-ligne { display: block; }
 .coll-fiche .souhait { margin-top: 8px; }
+#seg-cherche[hidden] { display: none; }
