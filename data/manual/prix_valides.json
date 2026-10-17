@@ -506,14 +506,14 @@
    "le": "2026-10-15"
   },
   "9782075150620|convenable": {
-   "prix": 26.58,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 26.6,
+   "decision": "corrige",
+   "le": "2026-10-17"
   },
   "9782075150620|tres_bon": {
-   "prix": 88.78,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 75.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
   },
   "9782075179461|bon": {
    "prix": 7.8,
