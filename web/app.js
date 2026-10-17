@@ -1137,7 +1137,7 @@
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     const visiteur = sansCompte();       // compte demandé et pas connecté : écran d'invitation à la place de l'outil
-    ['#importer', '#partager', '#coll-prive', '#coll-compte'].forEach((s) => { if ($(s)) $(s).hidden = visiteur; });
+    ['#importer', '#coll-prive', '#coll-compte'].forEach((s) => { if ($(s)) $(s).hidden = visiteur; });
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
     const comptePrevu = !!window.Compte && window.Compte.actif();
     $('#coll-prive').innerHTML = (stockageOk
@@ -1269,12 +1269,6 @@
         }
       }
     });
-    $('#partage-go').addEventListener('click', creerLien);
-    $('#partage-copier').addEventListener('click', async () => {
-      const st = $('#partage-statut');
-      try { await navigator.clipboard.writeText($('#partage-lien').value); st.textContent = 'Lien copié.'; st.classList.remove('erreur'); }
-      catch (e) { $('#partage-lien').select(); st.textContent = 'Copie impossible ici : le lien est sélectionné, copiez-le à la main.'; }
-    });
     brancherParcours();                 // l'inventaire guidé est ouvert depuis la page collection
     $('#imp-go').addEventListener('click', () => importerTexte($('#imp-texte').value));
     $('#imp-fichier').addEventListener('change', async (e) => {
@@ -1402,25 +1396,12 @@
   }
 
   /* ---------- Lien de transfert : la collection est dans l'adresse, après le « # » (jamais envoyée à un serveur) ---------- */
-  const LETTRE = { convenable: 'c', bon: 'b', tres_bon: 't' };
   const DEPUIS_LETTRE = { c: 'convenable', b: 'bon', t: 'tres_bon' };
   const versB64 = (octets) => btoa(String.fromCharCode(...octets)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const depuisB64 = (t) => Uint8Array.from(atob(t.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
   async function fluxOctets(octets, Classe, mode) {
     const f = new Blob([octets]).stream().pipeThrough(new Classe(mode));
     return new Uint8Array(await new Response(f).arrayBuffer());
-  }
-  async function codeCollection() {
-    const index = parId();
-    const texte = Object.entries(COLL).filter(([id]) => index.has(id)).map(([id, c]) => {
-      const b = index.get(id);
-      return `${b.isbn13 || b.id}${LETTRE[c.etat] || 'b'}${c.qte > 1 ? c.qte : ''}${c.prix != null ? '@' + c.prix : ''}`;
-    }).join(',');
-    let octets = new TextEncoder().encode(texte), z = '';
-    if (typeof CompressionStream === 'function') {
-      try { octets = await fluxOctets(octets, CompressionStream, 'deflate-raw'); z = 'z'; } catch (e) { octets = new TextEncoder().encode(texte); }
-    }
-    return `${FORMAT_FICHIER}${z}.${versB64(octets)}`;
   }
   async function lireCode(code) {
     const m = /^(\d+)(z?)\.([A-Za-z0-9_-]*)$/.exec(code || '');
@@ -1464,13 +1445,6 @@
       }
       bloc.remove();
     });
-  }
-  async function creerLien() {
-    const sortie = $('#partage-lien'), st = $('#partage-statut');
-    if (!Object.keys(COLL).length) { st.textContent = 'Votre collection est vide : il n\'y a rien à transférer.'; st.classList.add('erreur'); return; }
-    const url = `${location.origin}${location.pathname}#c=${await codeCollection()}`;
-    sortie.value = url; sortie.hidden = false; $('#partage-copier').hidden = false; sortie.select();
-    st.classList.remove('erreur'); st.textContent = `Lien prêt (${Object.keys(COLL).length} titres). Ouvrez-le sur l'autre appareil.`;
   }
   function resumeImport(r) {
     const morceaux = [`${r.ajoutes} ajouté${r.ajoutes > 1 ? 's' : ''}`];
