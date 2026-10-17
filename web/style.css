@@ -341,7 +341,7 @@ dialog::backdrop { background: rgba(0, 0, 0, .72); }
 .coll-table input[type="text"] { width: 96px; min-height: 40px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
 .coll-table input[type="text"]::placeholder { color: var(--muted); font-size: .85rem; }
 .coll-table select { min-height: 40px; width: auto; padding: 6px 8px; }
-.coll-table .retirer { min-height: 40px; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--accent); font: 600 .9rem var(--f-ui); cursor: pointer; }
+.coll-table .retirer, .a-trouver .retirer { min-height: 40px; padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--accent); font: 600 .9rem var(--f-ui); cursor: pointer; }
 .coll-table .retirer:hover { background: var(--accent-soft); border-color: var(--accent); }
 .progres { display: block; width: 100%; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .progres i { display: block; height: 100%; background: var(--bar); }
@@ -1305,3 +1305,11 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 /* Colonne Note de la vue Liste */
 .note-liste { color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .note-liste small { color: var(--muted); font-weight: 400; }
+
+/* À trouver : livres recherchés (collection et fiche) */
+.a-trouver { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.a-trouver li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px 14px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+.a-trouver .liens-vente { margin: 0; }
+.a-trouver .l-livre button { text-align: left; }
+.coll-fiche .souhait { margin: 10px 0 0; }
+@media (max-width: 700px) { .a-trouver li { grid-template-columns: minmax(0, 1fr) auto; } .a-trouver .liens-vente { grid-column: 1 / -1; grid-row: 2; } }
