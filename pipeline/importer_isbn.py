@@ -4,6 +4,11 @@ Une ligne par livre. On peut ajouter après l'ISBN, séparés par un point-virgu
     9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré
     2-07-033370-1
 Une ligne sans point-virgule peut aussi contenir plusieurs ISBN séparés par des espaces ou des virgules. Les tirets sont acceptés.
+Un livre sans ISBN s'ajoute par son titre, puis éventuellement la série et le numéro, séparés par un point-virgule :
+    Cthulhu, le pacte d'Innsmouth
+    Le Royaume déchiré ; Fabled Lands ; 1
+Une ligne dont le premier élément n'est pas un nombre est un titre : la fiche reçoit un identifiant « LOCAL-… » et le statut « brut ».
+Un ISBN ajouté plus tard avec la même série et le même numéro complète cette fiche (voir plus bas).
 
 La fiche vient de la BnF ; à défaut (livre récent), de la fiche de leslibraires.fr (titre, année, pages, éditeur, collection).
 Un ISBN déjà dans la base est ignoré. Si la série et le numéro désignent une fiche sans ISBN (identifiant « LOCAL-… »), l'ISBN complète
@@ -25,8 +30,14 @@ from prix_neuf import AGENT, URL
 COVERS = editions.ROOT / "web" / "covers"
 
 
+def ressemble_isbn(brut):
+    """Vrai pour un nombre (tirets et espaces permis, X final permis) : un ISBN, même s'il est faux. Faux pour un titre."""
+    return bool(re.fullmatch(r"\d+X?", re.sub(r"[\s-]", "", str(brut)).upper()))
+
+
 def lire_liste(texte):
-    """[{brut, serie, numero, titre}] : une entrée par ISBN trouvé ; les lignes vides et les # sont ignorées."""
+    """[{brut, serie, numero, titre}] : une entrée par ISBN trouvé, ou par titre pour une ligne sans ISBN ;
+    les lignes vides et les # sont ignorées. Pour un titre, `brut` contient le titre (puis serie et numero)."""
     out = []
     for ligne in re.split(r"[\r\n|]+", texte):          # « | » : plusieurs lignes dans un champ de lancement GitHub
         ligne = ligne.strip()
@@ -36,7 +47,11 @@ def lire_liste(texte):
             p = [x.strip() for x in re.split(r"[;\t]", ligne)] + ["", "", ""]
             out.append({"brut": p[0], "serie": p[1], "numero": p[2], "titre": p[3]})
         else:
-            out += [{"brut": t, "serie": "", "numero": "", "titre": ""} for t in re.split(r"[,\s]+", ligne) if t]
+            mots = [t for t in re.split(r"[,\s]+", ligne) if t]
+            if not any(ressemble_isbn(m) for m in mots):        # aucun nombre sur la ligne : c'est un titre, pas une liste de mots
+                out.append({"brut": ligne, "serie": "", "numero": "", "titre": ""})
+            else:
+                out += [{"brut": t, "serie": "", "numero": "", "titre": ""} for t in mots]
     return out
 
 
@@ -91,12 +106,37 @@ def numero_version(rows, livre, annee):
     return 1 + sum(1 for r in memes if not str(r.get("annee") or "").isdigit() or int(r["annee"]) <= int(annee))
 
 
+def _ajouter_sans_isbn(rows, connus, e):
+    """Livre ajouté par son titre : fiche « LOCAL-… » en statut brut. Renvoie (statut, identifiant, texte)."""
+    titre, serie, numero = e["brut"].strip(), e["serie"], e["numero"]
+    ident = ("LOCAL-" + (f"{serie}-{numero}" if serie and numero else titre)).replace(" ", "_")
+
+    def meme_livre(r):
+        if r["id"] == ident:
+            return True
+        if _cle(r.get("titre")) != _cle(titre):
+            return False
+        return not (serie and numero) or (_cle(r.get("serie")) == _cle(serie) and str(r.get("numero")).lstrip("0") == numero.lstrip("0"))
+    deja = next((r for r in rows if meme_livre(r)), None)
+    if deja:
+        return "deja", ident, f"déjà dans la base : {deja.get('titre') or deja['id']}"
+    row = {c: "" for c in editions.COLUMNS}
+    row.update({"id": ident, "serie": serie, "numero": numero, "titre": titre, "livre": titre, "version": f"V{numero_version(rows, titre, '')}",
+                "statut": "brut", "source": "manuel", "date_maj": editions.today()})
+    rows.append(row)
+    connus.add(ident)
+    return "ajoute", ident, f"{titre} · {row['version']} · sans ISBN (à compléter plus tard avec l'ISBN)"
+
+
 def importer(texte, base=None, bnf=editions.lookup_bnf, librairie=fiche_librairie):
     """Ajoute à la base ce qui est nouveau. Renvoie [(statut, isbn, texte)] ; statut : ajoute | deja | invalide."""
     rows = editions.load(base)
     connus = {r["id"] for r in rows}
     bilan = []
     for e in lire_liste(texte):
+        if not ressemble_isbn(e["brut"]):                      # pas un ISBN : un titre, ajouté sans ISBN
+            bilan.append(_ajouter_sans_isbn(rows, connus, e))
+            continue
         try:
             isbn13, isbn10 = editions.normalize_isbn(e["brut"])
         except ValueError:
@@ -160,7 +200,7 @@ def main():
         print(f"{icone[s]} {isbn}  {t}")
     n = sum(1 for s, _, _ in bilan if s == "ajoute")
     c = sum(1 for s, _, _ in bilan if s == "complete")
-    print(f"{n} livre(s) ajouté(s), {c} fiche(s) complétée(s), sur {len(bilan)} ISBN lus.")
+    print(f"{n} livre(s) ajouté(s), {c} fiche(s) complétée(s), sur {len(bilan)} ligne(s) lue(s).")
 
 
 if __name__ == "__main__":

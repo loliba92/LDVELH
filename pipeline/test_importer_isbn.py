@@ -60,6 +60,37 @@ class TestImport(unittest.TestCase):
         r = editions.load(b)
         self.assertEqual((len(r), r[0]["id"], r[0]["isbn13"], r[0]["titre"], r[0]["version"]), (1, "9782070333707", "9782070333707", "Le Livre des Règles", "V1"))
 
+    def test_une_ligne_sans_isbn_est_un_titre(self):
+        """Signalé le 17 octobre 2026 : « Cthulhu le pacte d'innsmouth; » était rejeté comme ISBN invalide."""
+        l = imp.lire_liste("Cthulhu le pacte d'innsmouth;\nCthulhu, le pacte d'Innsmouth\n9791097577025, 2-07-033370-1")
+        self.assertEqual([x["brut"] for x in l], ["Cthulhu le pacte d'innsmouth", "Cthulhu, le pacte d'Innsmouth", "9791097577025", "2-07-033370-1"])
+        self.assertTrue(imp.ressemble_isbn("2-07-033370-1") and imp.ressemble_isbn("123") and not imp.ressemble_isbn("Cthulhu"))
+
+    def test_ajout_par_le_titre(self):
+        b = self.base()
+        bilan = imp.importer("Cthulhu, le pacte d'Innsmouth ; L'Appel de Cthulhu ; 3\nCthulhu le pacte d'innsmouth;", b, SANS_BNF, LIBRAIRIE)
+        self.assertEqual([s for s, _, _ in bilan], ["ajoute", "deja"])      # la 2e ligne est le même titre, sans série
+        rows = editions.load(b)
+        self.assertEqual(len(rows), 1)
+        r = rows[0]
+        self.assertEqual((r["id"], r["titre"], r["serie"], r["numero"], r["statut"], r["isbn13"]), ("LOCAL-L'Appel_de_Cthulhu-3", "Cthulhu, le pacte d'Innsmouth", "L'Appel de Cthulhu", "3", "brut", ""))
+
+    def test_titre_sans_serie_ni_numero(self):
+        b = self.base()
+        bilan = imp.importer("Cthulhu le pacte d'innsmouth;", b, SANS_BNF, LIBRAIRIE)
+        self.assertEqual(bilan[0][0], "ajoute")
+        r = editions.load(b)[0]
+        self.assertEqual((r["id"], r["titre"], r["version"]), ("LOCAL-Cthulhu_le_pacte_d'innsmouth", "Cthulhu le pacte d'innsmouth", "V1"))
+        self.assertEqual(imp.importer("Cthulhu le pacte d'innsmouth", b, SANS_BNF, LIBRAIRIE)[0][0], "deja")
+
+    def test_un_isbn_complete_ensuite_la_fiche_ajoutee_par_titre(self):
+        b = self.base()
+        imp.importer("Le Livre des Règles ; L'Œil Noir ; 2", b, SANS_BNF, LIBRAIRIE)
+        bilan = imp.importer("2-07-033370-1 ; L'Œil Noir ; 2", b, SANS_BNF, lambda i: None)
+        self.assertEqual(bilan[0][0], "complete")
+        rows = editions.load(b)
+        self.assertEqual((len(rows), rows[0]["id"], rows[0]["titre"]), (1, "9782070333707", "Le Livre des Règles"))
+
     def test_nom_de_jaquette_sans_isbn(self):
         self.assertEqual(editions.cle_image("LOCAL-L'Œil_Noir-002"), "local-l-oeil-noir-002")
         self.assertEqual(editions.cle_image("LOCAL-x", "9782070333707"), "9782070333707")

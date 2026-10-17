@@ -227,7 +227,10 @@
     a.download = `prix-valides-${aujourdhui()}.json`; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) »
+  // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) ».
+  // Une ligne dont le premier élément n'est pas un nombre est un titre : le livre est ajouté sans ISBN (« Titre ; série ; numéro »).
+  const ressembleIsbn = (brut) => /^\d+X?$/.test(String(brut).replace(/[\s-]/g, '').toUpperCase());
+  const cleTitre = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\W+/g, ' ').trim();
   const isbn13De = (brut) => {
     const c = String(brut).replace(/[\s-]/g, '').toUpperCase();
     if (/^\d{13}$/.test(c)) return [...c].reduce((t, d, i) => t + d * (i % 2 ? 3 : 1), 0) % 10 === 0 ? c : null;
@@ -240,15 +243,25 @@
   };
   const lireListe = (texte) => texte.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).flatMap((l) => {
     if (/[;\t]/.test(l)) { const [brut, serie = '', numero = '', titre = ''] = l.split(/[;\t]/).map((x) => x.trim()); return [{ brut, serie, numero, titre }]; }
-    return l.split(/[,\s]+/).filter(Boolean).map((brut) => ({ brut, serie: '', numero: '', titre: '' }));
+    const mots = l.split(/[,\s]+/).filter(Boolean);
+    if (!mots.some(ressembleIsbn)) return [{ brut: l, serie: '', numero: '', titre: '' }];     // aucun nombre sur la ligne : un titre
+    return mots.map((brut) => ({ brut, serie: '', numero: '', titre: '' }));
   });
   let AJOUT = [];
   function verifierListe(catalogue) {
     const vus = new Set();
     AJOUT = lireListe($('#aj-texte').value).map((e) => {
+      if (!ressembleIsbn(e.brut)) {                       // un titre : livre ajouté sans ISBN
+        const cle = [cleTitre(e.brut), cleTitre(e.serie), String(e.numero).replace(/^0+/, '')].join('|');
+        const connu = catalogue.titres.get(cleTitre(e.brut));
+        if (connu && (!(e.serie && e.numero) || connu.serie === cleTitre(e.serie) && connu.numero === String(e.numero).replace(/^0+/, ''))) return { ...e, statut: 'deja', texte: `déjà dans la base : ${connu.label}` };
+        if (vus.has(cle)) return { ...e, statut: 'doublon', texte: 'écrit deux fois dans la liste' };
+        vus.add(cle);
+        return { ...e, statut: 'nouveau', texte: ['sans ISBN', e.serie, e.numero && 'n° ' + e.numero].filter(Boolean).join(' · ') };
+      }
       const isbn = isbn13De(e.brut);
       if (!isbn) return { ...e, statut: 'invalide', texte: 'ISBN invalide (vérifiez les chiffres)' };
-      if (catalogue.has(isbn)) return { ...e, isbn, statut: 'deja', texte: `déjà dans la base : ${catalogue.get(isbn)}` };
+      if (catalogue.isbn.has(isbn)) return { ...e, isbn, statut: 'deja', texte: `déjà dans la base : ${catalogue.isbn.get(isbn)}` };
       if (vus.has(isbn)) return { ...e, isbn, statut: 'doublon', texte: 'écrit deux fois dans la liste' };
       vus.add(isbn);
       return { ...e, isbn, statut: 'nouveau', texte: [e.serie, e.numero && 'n° ' + e.numero, e.titre].filter(Boolean).join(' · ') || 'la fiche sera complétée automatiquement' };
@@ -265,11 +278,14 @@
     $('#aj-lancer').hidden = !jeton() || !n;
     $('#aj-resultat').hidden = false;
   }
-  const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => [a.isbn, a.serie, a.numero, a.titre].join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
+  const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => (a.isbn ? [a.isbn, a.serie, a.numero, a.titre] : [a.brut, a.serie, a.numero]).join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
   function initAjout() {
     $('#aj-verifier').addEventListener('click', () => {
-      fetch('data/versions.json').then((r) => r.json()).then((v) => new Map(v.map((b) => [b.isbn13, `${b.titre} (${b.serie}${b.version ? ', ' + b.version : ''})`])))
-        .catch(() => new Map()).then(verifierListe);
+      fetch('data/versions.json').then((r) => r.json()).then((v) => {
+        const label = (b) => `${b.titre} (${b.serie}${b.version ? ', ' + b.version : ''})`;
+        return { isbn: new Map(v.filter((b) => b.isbn13).map((b) => [b.isbn13, label(b)])),
+          titres: new Map(v.filter((b) => b.titre).map((b) => [cleTitre(b.titre), { label: label(b), serie: cleTitre(b.serie), numero: String(b.numero || '').replace(/^0+/, '') }])) };
+      }).catch(() => ({ isbn: new Map(), titres: new Map() })).then(verifierListe);
     });
     $('#aj-copier').addEventListener('click', () => {
       const t = texteAjout().replace(/\n/g, ' | '), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
