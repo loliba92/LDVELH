@@ -1133,7 +1133,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .compte-a-jour .compte-point { background: var(--gold); }
 .compte-synchro .compte-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
 .compte-reprendre .compte-point { background: #e0a030; }
-.compte-erreur .compte-point { background: #e0604f; }
+.compte-erreur .compte-point, .compte-choix .compte-point { background: #e0604f; }
 @keyframes compte-pouls { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .compte-synchro .compte-point { animation: none; } }
 @media (max-width: 1000px) and (min-width: 701px) { .menu .compte-bouton .compte-libelle { max-width: 7ch; overflow: hidden; text-overflow: ellipsis; } }
@@ -1154,7 +1154,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .barre-bas [data-plus].compte-a-jour::after, .barre-bas [data-plus].compte-synchro::after, .barre-bas [data-plus].compte-reprendre::after, .barre-bas [data-plus].compte-erreur::after { content: ""; position: absolute; top: 8px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--walnut); }
 .barre-bas [data-plus].compte-a-jour::after, .barre-bas [data-plus].compte-synchro::after { background: var(--gold); }
 .barre-bas [data-plus].compte-reprendre::after { background: #e0a030; }
-.barre-bas [data-plus].compte-erreur::after { background: #e0604f; }
+.barre-bas [data-plus].compte-erreur::after, .barre-bas [data-plus].compte-choix::after { background: #e0604f; }
 .compte-bandeau { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; padding: 8px 14px; background: #3a2a0d; border-bottom: 1px solid var(--gold); color: #fff6e0; font-size: .95rem; text-align: center; }
 .compte-bandeau[hidden] { display: none; }
 .compte-bandeau .bouton { min-height: 36px; padding: 4px 14px; }
@@ -1263,3 +1263,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .dm-demande input { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--surface, var(--bg)); color: var(--text); }
 .dm-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 700px) { .dm-actions .bouton { flex: 1 1 0; } }
+/* Message affiché quelques secondes (connexion annulée, demande envoyée, échec de sauvegarde…) */
+.compte-toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 60; width: max-content; max-width: min(92vw, 520px); padding: 12px 16px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); color: var(--text); box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+.compte-toast[hidden] { display: none; }
+@media (min-width: 701px) { .compte-toast { bottom: 24px; } }

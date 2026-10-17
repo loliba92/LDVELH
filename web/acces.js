@@ -17,7 +17,13 @@
     if (connecte && ok) return montrer();
     porte.hidden = false; main.hidden = true; zone.hidden = false;
     if (!connecte) zone.innerHTML = '<p class="sous">Connectez-vous avec votre compte Google pour accéder à cet espace.</p>' + bouton;
-    else if (!niveau) zone.innerHTML = '<p class="sous" role="status">Vérification de votre niveau…</p>';
+    else if (!niveau) {
+      var echec = window.Compte && window.Compte.echecRole ? window.Compte.echecRole() : '';
+      if (!echec) zone.innerHTML = '<p class="sous" role="status">Vérification de votre niveau…</p>';
+      else if (/bloqu/.test(echec)) zone.innerHTML = '<p class="sous" role="status">Ce compte est bloqué. Écrivez-nous depuis la <a href="contact.html">page Contact</a>.</p>';
+      else if (/expir|jeton/.test(echec)) zone.innerHTML = '<p class="sous" role="status">Votre connexion a expiré. Reconnectez-vous pour continuer.</p>' + '<button type="button" class="bouton" data-compte="connecter">Reconnecter</button>';
+      else zone.innerHTML = '<p class="sous" role="status">Impossible de vérifier votre niveau pour le moment. Vérifiez votre connexion, puis réessayez.</p><button type="button" class="bouton" data-compte="role">Réessayer</button>';
+    }
     else zone.innerHTML = '<p class="sous" role="status">Ce compte n\'a pas les droits nécessaires pour cette page. Demandez-les à la personne qui gère le site.</p>';
   }
   function demarrer() {
