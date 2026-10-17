@@ -2,10 +2,25 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 37,
+ "nb_modifiees": 40,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 27,
  "hausses": [
+  {
+   "id": "9782070584635",
+   "isbn13": "9782070584635",
+   "titre": "Le Dragon de la Nuit",
+   "serie": "Défis Fantastiques",
+   "numero": "787",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 92.21,
+   "apres": 120.0,
+   "pct": 0.301,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070567539",
    "isbn13": "9782070567539",
@@ -64,6 +79,21 @@
    "avant": 52.77,
    "apres": 22.0,
    "pct": -0.583,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070584635",
+   "isbn13": "9782070584635",
+   "titre": "Le Dragon de la Nuit",
+   "serie": "Défis Fantastiques",
+   "numero": "787",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 66.59,
+   "apres": 30.0,
+   "pct": -0.549,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -202,24 +232,9 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070656530",
-   "isbn13": "9782070656530",
-   "titre": "Le Maître des Tempêtes (Grand format)",
-   "serie": "Défis Fantastiques",
-   "numero": "000",
-   "version": "V4",
-   "etat": "bon",
-   "avant": 12.66,
-   "apres": 7.35,
-   "pct": -0.419,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 26,
+ "nb_grands_mouvements": 29,
  "modele": {
   "actif": false,
   "n_paires": 7,

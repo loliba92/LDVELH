@@ -320,6 +320,16 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070584635|convenable": {
+   "prix": 30.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070584635|tres_bon": {
+   "prix": 120.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070585168|bon": {
    "prix": 36.74,
    "decision": "confirme",
