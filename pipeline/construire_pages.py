@@ -29,6 +29,8 @@ PAGES = {
                              "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
     "coffre.html": ("Accès commun", "Accès commun · La Cote du Héros",
                     "Page d'administration : chiffrer la clé d'envoi avec le mot de passe de la page admin."),
+    "devenir-admin.html": ("Devenir admin", "Devenir administrateur · La Cote du Héros",
+                           "Comment obtenir l'accès administrateur : la demande, la première connexion avec Google et les bonnes pratiques."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
                               "Éditeur, hébergeur et conditions d'utilisation de La Cote du Héros."),
 }
@@ -96,7 +98,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "coffre.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "coffre.html", "devenir-admin.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -157,8 +159,66 @@ PORTE = '''<div class="porte" id="porte">
       <button type="submit" class="bouton">Entrer</button>
     </form>
     <p class="porte-erreur" id="porte-erreur" role="alert" hidden>Code incorrect.</p>
+    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
   </div>
 </div>
+'''
+
+
+DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
+<h1>Devenir administrateur</h1>
+<p class="chapeau">Les administrateurs tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir, étape par étape.</p>
+
+<h2>Ce que fait un administrateur</h2>
+<ul>
+  <li><strong>Vérifier les prix</strong> : confirmer ou corriger la cote d'un livre, d'après les annonces que vous observez.</li>
+  <li><strong>Ajouter des livres</strong> : par ISBN, ou par titre quand il n'y en a pas.</li>
+  <li><strong>Laisser une trace</strong> : chaque mise à jour est enregistrée à votre nom, ce qui permet de savoir qui a fait quoi.</li>
+</ul>
+
+<h2>Ce qu'il vous faut</h2>
+<ul>
+  <li>Un <strong>compte Google</strong> (une adresse Gmail, ou une autre adresse reliée à Google). Il sert à prouver que c'est bien vous qui envoyez une mise à jour.</li>
+  <li>Le <strong>mot de passe de la page admin</strong>, que vous recevez de la personne qui gère le site.</li>
+</ul>
+
+<h2>Faire la demande</h2>
+<ol>
+  <li>Contactez la personne qui gère le site, par le moyen qu'elle vous a indiqué. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</li>
+  <li>Donnez-lui l'<strong>adresse Google</strong> que vous utiliserez et le <strong>nom</strong> à afficher à côté de vos mises à jour (un prénom ou un pseudo).</li>
+  <li>Elle autorise votre adresse et vous confirme que c'est fait, avec le mot de passe.</li>
+</ol>
+
+<h2>Votre première connexion</h2>
+<ol>
+  <li>Ouvrez <a href="revue-prix.html">Accès admin</a> et saisissez le mot de passe.</li>
+  <li>Cliquez sur <strong>« Se connecter avec Google »</strong>, en haut de la page, et choisissez le compte dont vous avez donné l'adresse.</li>
+  <li>Vérifiez l'encadré : il doit afficher <em>« Connecté avec Google : »</em> suivi de votre nom. Si Google refuse la connexion, votre adresse n'est pas encore autorisée : prévenez la personne qui gère le site.</li>
+  <li>Travaillez normalement, puis cliquez sur <strong>« Envoyer mes validations »</strong>. Le site est à jour environ deux minutes plus tard.</li>
+</ol>
+<p class="sous">La connexion Google dure environ une heure. Si elle expire, la page vous le dit : reconnectez-vous, vos validations en attente sont conservées.</p>
+
+<h2>Les bonnes pratiques</h2>
+<ul>
+  <li><strong>Regardez la « Dernière révision »</strong> affichée sur chaque fiche avant de la revoir : si elle date d'aujourd'hui, un autre administrateur vient de s'en occuper.</li>
+  <li><strong>Ne confirmez que ce que vous avez vérifié.</strong> Confirmer un prix le fige : il prime ensuite sur les relevés automatiques.</li>
+  <li>Une erreur ? Corrigez le prix, ou utilisez « Retirer » tant que la validation n'est pas envoyée.</li>
+  <li><strong>Ne partagez ni le mot de passe, ni votre connexion Google.</strong> Chaque administrateur a la sienne.</li>
+</ul>
+
+<h2>Quitter ou changer d'appareil</h2>
+<p>Sur un nouvel appareil, recommencez la première connexion. Pour ne plus être administrateur, demandez simplement le retrait de votre adresse : il est immédiat pour les envois.</p>
+
+<details class="rv-appareil">
+  <summary>Pour la personne qui gère le site : ajouter un administrateur</summary>
+  <ol>
+    <li>Dans Google Cloud, ouvrez <em>Google Auth Platform</em>, puis <em>Audience</em>, puis <em>Utilisateurs test</em>, et ajoutez l'adresse de la personne.</li>
+    <li>Calculez l'empreinte de son adresse écrite en minuscules, par exemple avec la commande <code>printf '%s' "adresse@exemple.fr" | sha256sum</code>.</li>
+    <li>Dans le fichier <code>data/admins.json</code> du dépôt, ajoutez la ligne <code>"sha256:EMPREINTE": "Nom affiché"</code>. L'adresse n'est ainsi jamais écrite en clair dans un dépôt public.</li>
+    <li>Transmettez à la personne le mot de passe de la page admin.</li>
+  </ol>
+  <p class="sous">Pour retirer quelqu'un, supprimez sa ligne dans <code>data/admins.json</code>.</p>
+</details>
 '''
 
 
@@ -551,7 +611,8 @@ def main():
     (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE)):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE),
+                       ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)
 

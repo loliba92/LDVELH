@@ -1114,3 +1114,5 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .rv-identite[hidden] { display: none; }
 /* Le cadre du bouton Google prend le fond de la page : sans « light », il s'affiche sur un rectangle blanc dans la page sombre */
 .rv-identite .g-bouton { color-scheme: light; display: inline-block; }
+.porte-aide { margin: 14px 0 0; font-size: .9rem; }
+.porte-aide a { color: var(--gold); }
