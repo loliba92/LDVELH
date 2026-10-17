@@ -111,6 +111,31 @@ function doPost(e) {
       return reponse({ ok: false, erreur: 'décision inconnue' });
     }
 
+    if (action === 'noter') {
+      var nt = validerNote(q.livre, q.note);
+      if (!nt.ok) return reponse({ ok: false, erreur: nt.raison });
+      var verrou = LockService.getScriptLock(), resultatNote;
+      verrou.waitLock(10000);
+      try {
+        var ap = appliquerNote(lireVotes(nt.livre), votant(moi.empreinte), nt.note);
+        if (!ap.ok) return reponse({ ok: false, erreur: ap.raison });
+        if (Object.keys(ap.votes).length) PropertiesService.getScriptProperties().setProperty(cleNote(nt.livre), JSON.stringify(ap.votes));
+        else PropertiesService.getScriptProperties().deleteProperty(cleNote(nt.livre));
+        resultatNote = resumerNotes(ap.votes);
+      } finally { verrou.releaseLock(); }
+      CacheService.getScriptCache().remove('notes');
+      return reponse({ ok: true, moyenne: resultatNote[0], nombre: resultatNote[1], note: nt.note });
+    }
+
+    if (action === 'mes_notes') {                  // les notes données par la personne connectée : { livre: note }
+      var toutes = PropertiesService.getScriptProperties().getProperties(), qui = votant(moi.empreinte), miennes = {};
+      Object.keys(toutes).forEach(function (k) {
+        if (k.indexOf(PREFIXE_NOTE) !== 0) return;
+        try { var vv = JSON.parse(toutes[k]); if (vv[qui]) miennes[k.slice(PREFIXE_NOTE.length)] = vv[qui]; } catch (e) { /* propriété abîmée : ignorée */ }
+      });
+      return reponse({ ok: true, notes: miennes });
+    }
+
     if (action === 'equipe_lire') {
       var eq = v.admins.contenu.equipe || {};
       return reponse({ ok: true, equipe: Object.keys(eq).map(function (k) { return { empreinte: k, nom: eq[k].nom, role: eq[k].role }; }), bloques: v.admins.contenu.bloques || [] });
@@ -131,4 +156,27 @@ function doPost(e) {
   }
 }
 
-function doGet() { return reponse({ ok: true, service: 'relais La Cote du Héros' }); }
+/* ---------- Notes des livres ---------- */
+var PREFIXE_NOTE = 'n:';
+function cleNote(livre) { return PREFIXE_NOTE + livre; }
+function lireVotes(livre) {
+  var t = prop(cleNote(livre));
+  try { return t ? JSON.parse(t) : {}; } catch (e) { return {}; }
+}
+/* Moyennes publiques : { livre: [moyenne, nombre] }, gardées dix minutes en mémoire */
+function notesPubliques() {
+  var cache = CacheService.getScriptCache(), connu = cache.get('notes');
+  if (connu) return JSON.parse(connu);
+  var toutes = PropertiesService.getScriptProperties().getProperties(), resume = {};
+  Object.keys(toutes).forEach(function (k) {
+    if (k.indexOf(PREFIXE_NOTE) !== 0) return;
+    try { resume[k.slice(PREFIXE_NOTE.length)] = resumerNotes(JSON.parse(toutes[k])); } catch (e) { /* propriété abîmée : ignorée */ }
+  });
+  cache.put('notes', JSON.stringify(resume), 600);
+  return resume;
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.notes) return reponse({ ok: true, notes: notesPubliques() });      // lecture publique : pas de connexion
+  return reponse({ ok: true, service: 'relais La Cote du Héros' });
+}

@@ -116,4 +116,40 @@ test('demande : limite par personne', () => {
   const p = L('peutDemander');
   assert.ok(p(undefined)); assert.ok(p('2')); assert.ok(!p('3')); assert.ok(!p('10'));
 });
+test('notes : droits (tout compte connecté), pas les visiteurs', () => {
+  assert.ok(L('peut')('heros', 'noter')); assert.ok(L('peut')('admin', 'noter')); assert.ok(L('peut')('superadmin', 'mes_notes'));
+  assert.ok(!L('peut')('', 'noter')); assert.ok(!L('peut')(undefined, 'mes_notes'));
+});
+test('notes : validation du livre et de la note', () => {
+  const v = L('validerNote');
+  assert.deepStrictEqual(J(v('livre-astre-d-or-le-sorcier-majdar', 4)), { ok: true, livre: 'livre-astre-d-or-le-sorcier-majdar', note: 4 });
+  assert.strictEqual(v('livre-x', '5').note, 5);
+  assert.strictEqual(v('livre-x', 0).ok, true);                       // retirer sa note
+  [6, -1, 2.5, 'abc', null, undefined].forEach((n) => assert.strictEqual(v('livre-x', n).ok, false, 'note ' + n));
+  ['', 'ab', 'Livre X', '../x', 'a b c', 'x'.repeat(121), null].forEach((l) => assert.strictEqual(v(l, 3).ok, false, 'livre ' + l));
+});
+test('notes : une voix par compte, modifiable, retirable', () => {
+  const a = L('appliquerNote');
+  let r = J(a({}, 'aaa', 4)); assert.deepStrictEqual(r, { ok: true, votes: { aaa: 4 } });
+  r = J(a(r.votes, 'bbb', 2)); assert.deepStrictEqual(r.votes, { aaa: 4, bbb: 2 });
+  r = J(a(r.votes, 'aaa', 5)); assert.deepStrictEqual(r.votes, { aaa: 5, bbb: 2 });       // le même compte change sa note, il n'en ajoute pas
+  r = J(a(r.votes, 'aaa', 0)); assert.deepStrictEqual(r.votes, { bbb: 2 });
+  const avant = { aaa: 3 }; a(avant, 'ccc', 1); assert.deepStrictEqual(avant, { aaa: 3 });  // l'entrée n'est pas modifiée
+});
+test('notes : plafond de votes par livre', () => {
+  const votes = {}; for (let i = 0; i < 400; i++) votes['v' + i] = 3;
+  assert.strictEqual(L('appliquerNote')(votes, 'nouveau', 5).ok, false);
+  assert.strictEqual(L('appliquerNote')(votes, 'v7', 5).ok, true);                         // modifier sa propre note reste possible
+});
+test('notes : moyenne arrondie au dixième et nombre de votes', () => {
+  const r = L('resumerNotes');
+  assert.deepStrictEqual(J(r({})), [0, 0]); assert.deepStrictEqual(J(r(undefined)), [0, 0]);
+  assert.deepStrictEqual(J(r({ a: 5 })), [5, 1]);
+  assert.deepStrictEqual(J(r({ a: 5, b: 4, c: 4 })), [4.3, 3]);
+  assert.deepStrictEqual(J(r({ a: 1, b: 2 })), [1.5, 2]);
+});
+test('notes : le votant est une empreinte courte, sans adresse', () => {
+  const v = L('votant')(h('x@gmail.com'));
+  assert.ok(/^[0-9a-f]{16}$/.test(v)); assert.ok(!/@/.test(v));
+});
 console.log(n + ' tests passés');

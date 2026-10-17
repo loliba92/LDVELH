@@ -203,6 +203,9 @@
   }
 
   function changer() { limite = PAR_PAGE; ecrireAdresse(); afficher(); }
+  // Les notes des livres arrivent après le premier affichage (et changent quand quelqu'un note) : l'étagère se redessine
+  let minuteNotes = null;
+  document.addEventListener('cdh-notes', () => { clearTimeout(minuteNotes); minuteNotes = setTimeout(() => { if (PAGE !== 'collection') afficher(); }, 200); });
 
   function nbFiltres() {
     return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.versions.size !== VERSIONS.length].filter(Boolean).length;
@@ -549,7 +552,7 @@
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
             : tuile(b)}<span class="tampon-v">${esc(b.version)}</span></span>
-          <span class="infos"><span class="titre">${esc(b.titre)}</span><span class="meta" style="display:block">${esc(b.serie)}${esc(numero(b))}${b.annee ? ' · ' + b.annee : ''}</span></span>
+          <span class="infos"><span class="titre">${esc(b.titre)}</span><span class="meta" style="display:block">${esc(b.serie)}${esc(numero(b))}${b.annee ? ' · ' + b.annee : ''}</span>${window.Notes ? window.Notes.carte(b.livre_id) : ''}</span>
           <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
         </button>
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
@@ -736,6 +739,7 @@
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
+            <div class="note-livre" id="note-livre" hidden></div>
             <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
@@ -757,6 +761,7 @@
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
       </div>`;
     const dlg = $('#fiche');
+    if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
     brancherFicheCollection(b);
     brancherCorriger();
     $('#fermer').addEventListener('click', () => dlg.close());

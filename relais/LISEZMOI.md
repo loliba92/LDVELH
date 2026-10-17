@@ -7,9 +7,9 @@ Google, lit son niveau dans `data/admins.json` (Héros, Admin, SuperAdmin), puis
 
 | Niveau | Droits |
 |---|---|
-| Héros (tout compte Google) | consulter, construire sa collection |
-| Admin | corriger les prix, ajouter des livres, voir le journal |
-| SuperAdmin | tout cela, plus gérer l'équipe et lancer les relevés lourds |
+| Héros (tout compte Google) | consulter, construire sa collection, demander l'ajout d'un livre, noter les livres |
+| Admin | corriger les prix, ajouter des livres, traiter les demandes d'ajout |
+| SuperAdmin | tout cela, plus gérer l'équipe (ajouter, retirer, bloquer) |
 
 Les règles sont dans `logique.gs` (testées par `node pipeline/test_relais.js`), l'accès réseau dans `Code.gs`.
 
@@ -34,6 +34,14 @@ Les règles sont dans `logique.gs` (testées par `node pipeline/test_relais.js`)
 Tout compte connecté (Héros) peut demander l'ajout d'un livre : le relais en fait un signalement GitHub (étiquette `demande-ajout`) au nom de la personne
 (prénom et quatre signes, jamais l'adresse), avec une limite de trois demandes par personne toutes les six heures. Les admins les voient dans l'espace
 administrateur, corrigent la ligne si besoin, puis acceptent (le lot « Ajouter des livres » est lancé, le signalement est fermé) ou refusent (fermé avec la raison).
+
+## Notes des livres (1 à 5)
+
+Tout compte connecté peut noter un livre (action `noter`, note 0 pour retirer la sienne) et retrouver ses notes (`mes_notes`). Une voix par compte et par livre
+(le livre, toutes éditions confondues, identifié par son `livre_id`). Les votes sont rangés dans les propriétés du script (une propriété `n:<livre_id>` par livre,
+au plus 400 votes chacune), sous une empreinte courte du compte : ni adresse ni nom. Les moyennes sont publiques : `<adresse du relais>?notes=1` répond
+`{ ok, notes: { livre_id: [moyenne, nombre] } }` sans connexion, gardé dix minutes en mémoire. Un relais qui ne connaît pas encore les notes ne répond pas
+`notes` : le site n'affiche alors aucune étoile. Tests : `node pipeline/test_relais.js` et `node pipeline/test_relais_notes.js`.
 
 **Après une mise à jour de `Code.gs` ou `logique.gs`** : recopier les deux fichiers dans le projet Apps Script, puis *Déployer > Gérer les déploiements >
 modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'application web ne change pas.

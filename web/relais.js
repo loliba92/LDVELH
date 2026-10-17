@@ -3,7 +3,7 @@
    Actif quand web/data/admin-config.json contient « relais_url » ; sinon l'ancien envoi par clé continue de fonctionner. */
 window.Relais = (function () {
   var URL_RELAIS = '';
-  if (window.Identite) window.Identite.config().then(function (c) { URL_RELAIS = (c && c.relais_url) || ''; });
+  var pret = window.Identite ? window.Identite.config().then(function (c) { URL_RELAIS = (c && c.relais_url) || ''; }) : Promise.resolve();
 
   // Preuve de connexion : celle du compte Google du site (Cloud), à défaut celle de l'ancienne porte admin (Identite)
   function preuve() { return (window.Cloud && window.Cloud.preuve()) || (window.Identite ? window.Identite.jeton() : ''); }
@@ -26,5 +26,9 @@ window.Relais = (function () {
       return { status: 400, erreur: r.erreur };
     });
   }
-  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot };
+  // Moyennes des notes : lecture publique, sans connexion. Renvoie { ok, notes: { livre: [moyenne, nombre] } } ou null si le relais n'est pas configuré.
+  function lireNotes() {
+    return pret.then(function () { return URL_RELAIS ? fetch(URL_RELAIS + '?notes=1').then(function (r) { return r.json(); }) : null; });
+  }
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, pret: pret };
 })();
