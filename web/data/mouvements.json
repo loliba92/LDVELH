@@ -2,10 +2,26 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 22,
+ "nb_modifiees": 24,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9791097577414",
+   "isbn13": "9791097577414",
+   "titre": "Hadès, où demeurent les défunts",
+   "serie": "Forge divine",
+   "numero": null,
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 7.56,
+   "apres": 9.0,
+   "pct": 0.19,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070656530",
@@ -188,7 +204,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 16,
+ "nb_grands_mouvements": 17,
  "modele": {
   "actif": false,
   "n_paires": 7,
