@@ -2,7 +2,7 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 10,
+ "nb_modifiees": 13,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
@@ -38,6 +38,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070509638",
+   "isbn13": "9782070509638",
+   "titre": "La Légion des Morts",
+   "serie": "Quête du Graal",
+   "numero": "419",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 19.48,
+   "apres": 10.0,
+   "pct": -0.487,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070651412",
    "isbn13": "9782070651412",
    "titre": "La Nuit du Loup-Garou (Grand format)",
@@ -63,6 +78,21 @@
    "avant": 12.66,
    "apres": 7.35,
    "pct": -0.419,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070509638",
+   "isbn13": "9782070509638",
+   "titre": "La Légion des Morts",
+   "serie": "Quête du Graal",
+   "numero": "419",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 22.4,
+   "apres": 14.7,
+   "pct": -0.344,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -128,7 +158,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 7,
