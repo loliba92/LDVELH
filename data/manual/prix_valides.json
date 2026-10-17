@@ -1,5 +1,15 @@
 {
  "valides": {
+  "9782010117244|convenable": {
+   "prix": 6.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782010117244|tres_bon": {
+   "prix": 20.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782010119927|bon": {
    "prix": 102.0,
    "decision": "corrige",
