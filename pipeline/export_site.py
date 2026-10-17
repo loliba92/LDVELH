@@ -131,7 +131,8 @@ def main():
     # Éditions encore en vente neuve : le relevé hebdomadaire des fiches de librairie (data/processed/prix_neuf.csv) donne le prix du
     # neuf et la disponibilité. Repli, dans l'ordre : prix relevé à la main sur le site de l'éditeur (data/manual/prix_editeur.csv),
     # puis prix à la parution de la notice BnF (data/processed/prix_editeur.csv), qui ne dit rien de la disponibilité.
-    # data/manual/hors_vente.csv force une édition « plus en vente ».
+    # data/manual/hors_vente.csv force une édition « plus en vente ». Une fiche marquée en_vente = 1 dans le catalogue le reste même si
+    # le relevé de librairie ne la voit pas (livre vendu seulement chez l'éditeur ou sur Amazon).
     def lire_csv(chemin):
         if not chemin.exists():
             return {}
@@ -141,19 +142,9 @@ def main():
     auto = lire_csv(racine_donnees / "processed" / "prix_neuf.csv")
     manuel = {k: v for k, v in lire_csv(racine_donnees / "manual" / "prix_editeur.csv").items() if v.get("prix")}
     bnf = {k: v for k, v in lire_csv(racine_donnees / "processed" / "prix_editeur.csv").items() if v.get("prix")}
-    hors_vente = set(lire_csv(racine_donnees / "manual" / "hors_vente.csv")) | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible"}
+    hors_manuel = set(lire_csv(racine_donnees / "manual" / "hors_vente.csv"))      # décision du propriétaire : l'emporte toujours
+    hors_vente = hors_manuel | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible"}
     en_stock = {k for k, v in auto.items() if v.get("disponibilite") == "en_stock" and v.get("prix")}      # en vente neuve, constaté ce jour
-    # data/manual/en_vente.csv force une édition « encore en vente neuve » que le relevé de librairie ne voit pas (vendue seulement
-    # chez l'éditeur ou sur Amazon) ; elle l'emporte sur « indisponible » et sur hors_vente.csv.
-    forcees = set(lire_csv(racine_donnees / "manual" / "en_vente.csv"))
-    hors_vente -= forcees
-    en_stock |= forcees
-    # Éditeur manquant dans une fiche : repli sur l'éditeur de la série (data/manual/editeur_par_serie.csv, modifiable à la main).
-    editeur_serie = {}
-    chemin_ed = racine_donnees / "manual" / "editeur_par_serie.csv"
-    if chemin_ed.exists():
-        with open(chemin_ed, newline="", encoding="utf-8") as fh:
-            editeur_serie = {r["serie"]: r["editeur"] for r in csv.DictReader(fh) if r.get("serie") and r.get("editeur")}
     editeur = {}
     for isbn_e in set(bnf) | set(manuel) | set(auto):
         if isbn_e not in hors_vente and auto.get(isbn_e, {}).get("prix"):
@@ -206,8 +197,8 @@ def main():
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
             "version": r["libelle_version"], "version_n": r["numero_version"],
             "derniere": bool(r["est_derniere_version"]),
-            "en_vente": 1 if r["isbn13"] in en_stock else (None if r["isbn13"] in hors_vente else r["en_vente"]), "annee": r["annee"], "annee_bnf": r["annee_bnf"],
-            "editeur": r["editeur"] or editeur_serie.get(r["serie"]), "collection": r["collection_editeur"], "pages": r["pages"],
+            "en_vente": 1 if r["isbn13"] in en_stock else (None if (r["isbn13"] in hors_manuel or (r["isbn13"] in hors_vente and r["en_vente"] != 1)) else r["en_vente"]), "annee": r["annee"], "annee_bnf": r["annee_bnf"],
+            "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "maj": dates_maj.get(r["id"]),
