@@ -262,6 +262,7 @@ window.Compte = (function () {
       if (!configure) { ['#compte-haut', '#compte-feuille'].forEach(function (s) { var n = $(s); if (n) n.hidden = true; }); return; }
       role = lireSession(CLE_ROLE);
       bandeau(); dessiner();
+      if (window.Cloud.actif() && !role) chargerRole();      // connexion reprise sans nouvel onglet : le niveau est relu
       window.Cloud.surChangement(function () { dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
       document.addEventListener('cdh-collection', dessiner);
     });
