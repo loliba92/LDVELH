@@ -1133,11 +1133,9 @@
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
-      <p class="sous">Dès qu'un de ces livres entre dans votre collection, il quitte cette liste.</p>
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div>
-        <p class="liens-vente">${htmlLiens(b)}</p>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
   }
 
@@ -1513,7 +1511,7 @@
       <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
       <div class="champ-ligne"><label for="c-prix">Prix payé, par exemplaire (facultatif)</label><input type="text" id="c-prix" inputmode="decimal" autocomplete="off" placeholder="en €" value="${c ? prixSaisi(c.prix) : ''}"${c ? '' : ' disabled'}></div>
       <p class="valeur-ex" id="c-val"></p></div>
-      <p class="souhait"><button type="button" class="bouton-lien" id="c-souhait" aria-pressed="false"></button></p></div>`;
+      <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>Je le recherche</span></label></div>`;
   }
   function brancherFicheCollection(b) {
     if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
@@ -1521,10 +1519,7 @@
       const c = COLL[b.id];
       $('#c-etat').disabled = !c; $('#c-qte').disabled = !c; $('#c-prix').disabled = !c;
       const v = c ? valeurLigne(b, c) : null;
-      const sb = $('#c-souhait');
-      sb.hidden = !!c;
-      sb.setAttribute('aria-pressed', SOUH[b.id] ? 'true' : 'false');
-      sb.textContent = SOUH[b.id] ? 'Dans ma liste « À trouver » · Retirer' : 'Je cherche ce livre : l\'ajouter à ma liste « À trouver »';
+      $('#c-souhait-zone').hidden = !!c;
       $('#c-val').textContent = c ? (v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`) : '';
     };
     $('#c-poss').addEventListener('change', (e) => {
@@ -1532,8 +1527,8 @@
       else delete COLL[b.id];
       sauverColl(); maj(); afficher();
     });
-    $('#c-souhait').addEventListener('click', () => {
-      if (SOUH[b.id]) delete SOUH[b.id]; else SOUH[b.id] = {};
+    $('#c-souhait').addEventListener('change', (e) => {
+      if (e.target.checked) SOUH[b.id] = {}; else delete SOUH[b.id];
       sauverColl(); maj(); afficher();
     });
     $('#c-etat').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].etat = e.target.value; sauverColl(); maj(); afficher(); } });

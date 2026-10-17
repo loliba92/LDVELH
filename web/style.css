@@ -1307,9 +1307,8 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .note-liste small { color: var(--muted); font-weight: 400; }
 
 /* À trouver : livres recherchés (collection et fiche) */
-.a-trouver { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
-.a-trouver li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px 14px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
-.a-trouver .liens-vente { margin: 0; }
+.a-trouver { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.a-trouver li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
 .a-trouver .l-livre button { text-align: left; }
-.coll-fiche .souhait { margin: 10px 0 0; }
-@media (max-width: 700px) { .a-trouver li { grid-template-columns: minmax(0, 1fr) auto; } .a-trouver .liens-vente { grid-column: 1 / -1; grid-row: 2; } }
+.sur-ligne { display: block; }
+.coll-fiche .souhait { margin-top: 8px; }
