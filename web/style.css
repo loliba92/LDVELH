@@ -1191,3 +1191,57 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 /* Contact et soutien */
 .contact-mail { margin: 8px 0 14px; }
 .contact-mail a.bouton { color: #1a1205; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; text-decoration: none; }
+
+/* ---------- Accueil, refonte de l'intro : un bandeau (titre, recherche, compteurs) puis deux cartes alignées ---------- */
+.hero { min-height: 0; padding: 30px 0 30px; }
+.hero .hero-in { display: block; max-width: none; }
+.hero .hero-in > * { max-width: 720px; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 1.05; }
+.hero .chapeau { margin: 12px 0 0; max-width: 56ch; }
+.hero-recherche { max-width: 720px; margin: 20px 0 0; }
+.hero-recherche input { min-height: 56px; font-size: 1.1rem; }
+.hero-recherche .bouton { min-height: 56px; padding-inline: 28px; }
+.hero .hero-compte { margin: 14px 0 0; font-size: .95rem; }
+@media (max-width: 900px) {
+  .hero { padding: 24px 0 24px; }
+  .hero.avec-mur::before { background: linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .85) 100%); }
+  .mur { inset: 0 -20px -20px -20px; opacity: .35; }
+}
+.rang { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: stretch; padding-top: 24px; padding-bottom: 32px; }
+.rang > .carte[hidden] { display: none; }
+.rang > .carte-coll:only-child { grid-column: 1 / -1; }
+.carte { display: flex; flex-direction: column; padding: 18px 20px 20px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.carte-coll { border-left: 4px solid var(--brass); margin: 0; }
+.carte > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+.carte > header h2, .carte .hc-titre { margin: 0; color: var(--gold); font: 700 .8rem var(--f-ui); letter-spacing: .12em; text-transform: uppercase; }
+.grille-ajouts { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.grille-ajouts .ajout-mini { width: auto; height: auto; aspect-ratio: 2 / 3; min-width: 0; }
+.carte .gros { margin: 0; font: 600 1.7rem/1.15 var(--f-display); }
+.carte .texte { margin: 8px 0 0; color: var(--muted); text-wrap: pretty; }
+.carte .petit { font-size: .95rem; margin-top: 2px; }
+.carte .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: auto 0 0; padding-top: 16px; }
+.coll-haut { display: flex; align-items: center; gap: 18px; }
+.eventail { position: relative; flex: none; width: 118px; height: 84px; }
+.eventail img { position: absolute; top: 0; left: calc(var(--i) * 22px); width: 50px; height: 75px; object-fit: cover; border-radius: 3px; border: 1px solid var(--line-strong); box-shadow: 0 2px 6px rgba(0, 0, 0, .5); z-index: calc(10 - var(--i)); }
+.valeur { display: flex; flex-direction: column; margin: 0; }
+.valeur span { color: var(--muted); font-size: .9rem; }
+.valeur b { font: 700 2.2rem/1.05 var(--f-display); color: var(--text); }
+.coll-prog { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; color: var(--muted); font-size: .92rem; }
+.coll-prog .prog-barre { flex: 1 1 90px; min-width: 70px; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.coll-prog .prog-barre i { display: block; height: 100%; background: var(--accent); }
+@media (max-width: 900px) {
+  .rang { grid-template-columns: 1fr; padding-top: 18px; }
+  .rang > .carte-coll { order: -1; }
+  .grille-ajouts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .hero-recherche { flex-wrap: wrap; }
+  .hero-recherche input, .hero-recherche .bouton { flex: 1 1 100%; }
+  .carte .actions .bouton { flex: 1 1 100%; }
+  .rang { gap: 14px; }
+  .coll-haut { gap: 12px; }
+  .eventail { width: 92px; height: 72px; }
+  .eventail img { width: 40px; height: 60px; left: calc(var(--i) * 17px); }
+}
+.carte > header [hidden] { display: none; }
+.carte > header { min-height: 30px; }

@@ -49,34 +49,28 @@
 
 <section class="hero" id="haut">
   <div class="cadre hero-in">
-    <div class="hero-texte">
-      <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
-      <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
-      <p class="chapeau">Votre collection est une aventure. Complétez-la.</p>
-      <form class="hero-recherche" id="hero-recherche" role="search">
-        <label class="sr-only" for="h-q">Titre, auteur ou ISBN</label>
-        <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN : sorcier, Dever, 978…" autocomplete="off" enterkeyhint="search">
-        <button type="submit" class="bouton">Chercher</button>
-      </form>
-      <p class="hero-compte" id="chiffres-hero"></p>
-      <div class="hero-ajouts" id="hero-ajouts" hidden>
-        <span class="hero-ajouts-titre">Derniers ajouts</span>
-        <div class="hero-ajouts-liste" id="hero-ajouts-liste"></div>
-        <button type="button" class="bouton-lien" id="hero-ajouts-tous">Voir tous</button>
-      </div>
-    </div>
-    <div class="hero-cartes">
-      <section class="hero-coll" id="hero-coll" aria-labelledby="hc-titre">
-        <h2 class="hc-titre" id="hc-titre">Ma collection</h2>
-        <p class="hc-etat" id="hc-etat">vide pour l'instant</p>
-        <p class="hc-chiffres" id="hc-chiffres" hidden></p>
-        <div class="hc-analyses-zone" id="hc-analyses"></div>
-        <p class="hero-cta"><a class="bouton" href="collection.html" id="hc-lien">Voir ma collection</a>
-          <button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Constituer pas à pas</button></p>
-      </section>
-    </div>
+    <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
+    <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
+    <p class="chapeau" id="hero-chapeau">Retrouvez la cote de chaque édition des livres-jeux.</p>
+    <form class="hero-recherche" id="hero-recherche" role="search">
+      <label class="sr-only" for="h-q">Titre, auteur ou ISBN</label>
+      <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN" autocomplete="off" enterkeyhint="search">
+      <button type="submit" class="bouton">Chercher</button>
+    </form>
+    <p class="hero-compte" id="chiffres-hero"></p>
   </div>
 </section>
+
+<div class="cadre rang" id="rang-accueil">
+  <section class="carte carte-ajouts" id="hero-ajouts" aria-labelledby="ha-titre" hidden>
+    <header><h2 id="ha-titre">Derniers ajouts</h2><button type="button" class="bouton-lien" id="hero-ajouts-tous">Voir tous les ajouts</button></header>
+    <div class="grille-ajouts" id="hero-ajouts-liste"></div>
+  </section>
+  <section class="carte carte-coll hero-coll" id="hero-coll" aria-labelledby="hc-titre">
+    <header><h2 id="hc-titre">Ma collection</h2><a class="bouton-lien" href="collection.html" id="hc-lien" hidden>Tout voir</a></header>
+    <div id="hc-corps"></div>
+  </section>
+</div>
 
 <div class="cadre disposition" id="recherche">
 
