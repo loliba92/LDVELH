@@ -41,8 +41,8 @@ PAGES = {
                              "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
     "contact.html": ("Contact", "Contact · La Cote du Héros",
                      "Écrire à La Cote du Héros : une question, une erreur à signaler, un prix constaté, une idée ou un partenariat."),
-    "soutien.html": ("Collectionneurs et créateurs", "Collectionneurs et créateurs · La Cote du Héros",
-                     "La Cote du Héros s'intéresse aux collectionneurs, aux créateurs de contenu, aux boutiques et aux éditeurs du monde des livres-jeux : comment travailler ensemble."),
+    "communaute.html": ("Communauté", "Communauté · La Cote du Héros",
+                        "Des passionnés de livres dont vous êtes le héros : chaînes, sites, blogs, collectionneurs et boutiques à suivre."),
     "equipe.html": ("Équipe", "Équipe · La Cote du Héros",
                     "Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les administrateurs."),
     "devenir-admin.html": ("Devenir admin", "Devenir administrateur · La Cote du Héros",
@@ -143,7 +143,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
     {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
     {e("confidentialite.html", "Confidentialité", "Ce que le site garde, et où", "confidentialite.html")}
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
-    {e("soutien.html", "Collectionneurs et créateurs", "Travailler ensemble", "soutien.html")}
+    {e("communaute.html", "Communauté", "Chaînes, sites et collectionneurs à suivre", "communaute.html")}
     {e("contact.html", "Contact", "Écrire à La Cote du Héros", "contact.html")}
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
   </ul>
@@ -286,33 +286,50 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
 <h2>Vous voulez aider davantage</h2>
 <ul>
   <li><a href="devenir-admin.html">Devenir administrateur</a> : corriger les prix et ajouter des livres vous-même.</li>
-  <li><a href="soutien.html">Collectionneurs et créateurs</a> : travailler ensemble sur vos collections, vos contenus ou votre boutique.</li>
+  <li><a href="communaute.html">Communauté</a> : proposer une chaîne, un site ou une collection à faire connaître.</li>
 </ul>
 '''
 
-SOUTIEN = '''<p class="surtitre">Travailler ensemble</p>
-<h1>Collectionneurs et créateurs</h1>
-<p class="chapeau">La Cote du Héros est un guide indépendant, fait par un passionné pour les passionnés. Les personnes qui font vivre le monde des livres dont vous êtes le héros m'intéressent : collectionneurs, créateurs de contenu, associations, boutiques et éditeurs.</p>
+TYPES_COMMUNAUTE = [
+    ("chaine", "Chaînes vidéo"), ("podcast", "Podcasts"), ("site", "Sites et blogs"),
+    ("collection", "Collectionneurs"), ("boutique", "Boutiques et éditeurs"),
+]
 
-<h2>Qui est concerné</h2>
-<ul>
-  <li><strong>Collectionneurs</strong> : une collection remarquable, un projet de complétion, une expertise sur une série ou une édition.</li>
-  <li><strong>Créateurs de contenu</strong> : chaînes vidéo, blogs, podcasts, comptes sur les réseaux, qui parlent de livres-jeux.</li>
-  <li><strong>Associations, boutiques et éditeurs</strong> : projets, rééditions, nouveautés, ventes.</li>
-</ul>
 
-<h2>Ce que nous pouvons envisager ensemble</h2>
-<ul>
-  <li>Faire connaître votre travail, votre collection ou votre boutique à ceux qui consultent le guide.</li>
-  <li>Partager des repères de cote utiles à vos contenus, dans le respect des sources et de leurs conditions d'utilisation.</li>
-  <li>Compléter ou corriger le guide avec votre expertise, par exemple en devenant <a href="devenir-admin.html">administrateur</a>.</li>
-  <li>Toute autre idée : dites-moi ce que vous avez en tête.</li>
-</ul>
-<p>Il n'y a pas de formule toute faite : chaque projet se discute au cas par cas. Le guide reste gratuit et sans publicité, et son indépendance ne se négocie pas.</p>
+def liste_communaute(donnees):
+    """Sections HTML des liens de la communauté (données : web/data/communaute.json). Ne garde que les adresses https et échappe tout le texte."""
+    import html as _h
+    par_type = {k: [] for k, _ in TYPES_COMMUNAUTE}
+    for l in donnees.get("liens", []):
+        url = str(l.get("url", "")).strip()
+        nom = str(l.get("nom", "")).strip()
+        if not url.startswith("https://") or not nom or l.get("type") not in par_type:
+            continue
+        desc = str(l.get("description", "")).strip()
+        par_type[l["type"]].append(
+            f'<li class="comm-lien"><a href="{_h.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer"><strong>{_h.escape(nom)}</strong> <span aria-hidden="true">↗</span>'
+            f'<span class="sr-only"> (nouvel onglet)</span></a>' + (f'<span class="sous">{_h.escape(desc)}</span>' if desc else "") + "</li>")
+    sections = [f'<h2>{_h.escape(titre)}</h2>\n<ul class="comm-liste">\n' + "\n".join(par_type[k]) + "\n</ul>" for k, titre in TYPES_COMMUNAUTE if par_type[k]]
+    return "\n\n".join(sections) if sections else '<p class="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d\'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>'
 
-<h2>Prendre contact</h2>
-<p>Présentez-vous en quelques lignes, avec un lien vers votre collection, votre chaîne ou votre boutique, et ce que vous imaginez. Tout se passe sur la page <a href="contact.html">Contact</a>.</p>
-<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Écrire à La Cote du Héros</a></p>
+
+def _donnees_communaute():
+    try:
+        return json.loads((WEB / "data" / "communaute.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def corps_communaute():
+    return f'''<p class="surtitre">Passionnés</p>
+<h1>Communauté</h1>
+<p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
+
+{liste_communaute(_donnees_communaute())}
+
+<h2>Vous en faites partie ?</h2>
+<p>Vous tenez une chaîne, un site, un podcast, une boutique, ou vous avez une collection que vous aimez partager ? <a href="contact.html">Écrivez-moi</a> avec l'adresse et deux lignes de présentation. La sélection se fait au cas par cas, et le guide reste gratuit et sans publicité.</p>
+<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Proposer un lien</a></p>
 '''
 
 
@@ -418,50 +435,81 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
 '''
 
 
+def stats_catalogue():
+    """(éditions, livres, séries) d'après web/data/versions.json, pour que la page ne vieillisse pas."""
+    try:
+        v = json.loads((WEB / "data" / "versions.json").read_text(encoding="utf-8"))
+        return len(v), len({b["livre_id"] for b in v}), len({b["serie"] for b in v})
+    except (OSError, ValueError, KeyError):
+        return None
+
+
+def _nombres_catalogue():
+    st = stats_catalogue()
+    return f"{st[0]} éditions, rattachées à {st[1]} livres et à {st[2]} séries" if st else "Toutes les éditions que nous avons pu recenser"
+
+
 LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h1>Le projet</h1>
 <p class="chapeau">La Cote du Héros est un guide indépendant, gratuit et sans publicité. Il aide à estimer la valeur des livres dont vous êtes le héros, pour suivre une collection et la compléter.</p>
 
 <h2>À quoi sert ce site</h2>
-<p>C'est une <strong>application pour tenir à jour et gérer sa collection</strong>, faite pour les collectionneurs et pas pour les traders (c'est dit avec le sourire, mais c'est sérieux). Ce n'est pas un instrument pour acheter et vendre au bon moment : aucune cote ne vous dit « achetez » ou « vendez ».</p>
-<p>Elle sert d'abord à <strong>garder un œil sur votre collection</strong> : ce qu'elle contient, les titres et les éditions qu'il vous manque, et ce qu'elle vaut à peu près. Elle sert ensuite à <strong>progresser</strong> : voir ce qu'il reste à trouver pour finir une série, et ce que cela peut coûter, afin d'avancer à votre rythme sans mauvaise surprise sur le budget.</p>
-<p>Les prix sont des repères financiers et économiques, pas des promesses. Une cote donne un ordre de grandeur ; ce qui compte, c'est le plaisir de compléter sa collection.</p>
+<p>C'est un outil pour <strong>tenir sa collection à jour et la compléter</strong>, fait pour les collectionneurs et pas pour les traders (c'est dit avec le sourire, mais c'est sérieux). Aucune cote ne vous dit « achetez » ou « vendez » : les prix sont des repères, pas des promesses.</p>
+<p>Il sert d'abord à <strong>garder un œil sur ce que vous possédez</strong> : les titres et les éditions, ce qu'il vous manque, et ce que cela vaut à peu près. Il sert ensuite à <strong>progresser</strong> : voir ce qu'il reste à trouver pour finir une série, et ce que cela peut coûter, pour avancer à votre rythme sans mauvaise surprise sur le budget.</p>
 
 <h2>Pourquoi ce guide</h2>
 <p>Les livres-jeux ont paru en plusieurs éditions, chez plusieurs éditeurs, pendant près de quarante ans. Un même titre peut valoir quelques euros dans une édition et plusieurs dizaines dans une autre. Trouver le bon prix, c'est d'abord savoir de quelle édition on parle. Ce guide réunit toutes les éditions au même endroit, pour les comparer et pour estimer une collection entière.</p>
 
 <h2>Ce que vous y trouvez</h2>
 <ul>
-  <li>Plus de 400 éditions, rattachées à plus de 200 livres et à 24 séries, avec leur jaquette et leur fiche (éditeur, année, pages, auteurs).</li>
-  <li>Pour chaque édition, une cote par état : convenable, bon état, très bon état (TBE).</li>
-  <li>Des moyennes, médianes et répartitions des prix pour toute sélection : une série, une époque, un éditeur.</li>
-  <li>Un inventaire guidé, pour estimer le patrimoine d'une collection sans tout saisir à la main.</li>
+  <li>{_nombres_catalogue()}, avec leur jaquette et leur fiche (éditeur, année, pages, auteurs).</li>
+  <li>Pour chaque édition, une cote par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
+  <li>Une page <a href="evolutions.html">Évolutions des prix</a> : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
+  <li>Une <strong>collection</strong> qui s'estime toute seule, avec un inventaire guidé pour la constituer sans tout saisir à la main.</li>
 </ul>
 
 <h2>Comment les prix sont estimés</h2>
 <p><strong>Une cote est une estimation, jamais un prix fixé.</strong> Elle donne un ordre de grandeur, pas la somme qu'on obtiendra.</p>
-<ol>
-  <li><strong>Aujourd'hui, ce sont des cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour. Le guide le signale à l'accueil et sur chaque fiche d'édition.</li>
-  <li><strong>Des prix actuels sont en préparation.</strong> Ils viendront de ventes et d'achats réellement constatés, puis d'annonces en ligne lues par les interfaces officielles des plateformes, sous réserve de leurs conditions d'utilisation. De ces annonces, on ne garde que des chiffres d'ensemble (nombre, minimum, médiane, maximum) : ni titre d'annonce, ni vendeur.</li>
-  <li><strong>La méthode est une médiane pondérée.</strong> Une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive. Un prix récent compte plus qu'un prix ancien : le poids d'une observation est divisé par deux tous les 90 jours. Une annonce reste un prix demandé, pas un prix payé : le guide ne la corrige pas et le signale.</li>
-</ol>
-<p>Dès qu'une cote repose sur des prix actuels, la fiche de l'édition indique leur nature, leur nombre, leur date et un niveau de confiance.</p>
+<ul>
+  <li><strong>L'ancien relevé.</strong> Point de départ du guide : des cotes d'archives, qui ne sont plus tenues à jour. Quand rien de plus récent n'existe, c'est lui qui s'affiche, et la fiche le dit.</li>
+  <li><strong>Les annonces actuelles.</strong> Le guide relève régulièrement les annonces en ligne d'une plateforme, par son interface officielle et sous réserve de ses conditions d'utilisation. On n'en garde que des chiffres d'ensemble (nombre, minimum, médiane, maximum) : ni titre d'annonce, ni vendeur. Une annonce est un prix demandé, pas un prix payé : le guide ne la corrige pas et le signale.</li>
+  <li><strong>Les prix des éditeurs.</strong> Pour les nouveautés encore en vente neuve, le prix de l'éditeur sert de repère pour le très bon état.</li>
+  <li><strong>Les prix validés.</strong> Un administrateur peut confirmer ou corriger un prix après vérification : ce prix prime alors sur tout le reste, et la fiche indique qu'il a été validé, et quand.</li>
+</ul>
+<p>Quand plusieurs sources existent, la cote est une <strong>médiane pondérée</strong> : une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive, et un prix récent compte plus qu'un prix ancien (le poids est divisé par deux tous les 90 jours, tous les 365 jours pour l'ancien relevé). Un état sans prix est déduit des autres états de la même édition (le bon état vaut environ 60 % du très bon état, le convenable environ 40 %), et la fiche l'indique.</p>
+<p>La fiche de chaque édition précise la nature du prix, le nombre d'observations, leur date et un niveau de confiance.</p>
+
+<h2>Qui fait vivre le guide</h2>
+<p>Le guide est tenu par des passionnés, avec des niveaux simples :</p>
+<ul>
+  <li><strong>Tout le monde</strong> peut consulter les cotes, sans compte.</li>
+  <li>Les <strong>Héros</strong> sont les personnes connectées avec Google : elles construisent leur collection et peuvent demander l'ajout d'un livre.</li>
+  <li>Les <strong>Admins</strong> vérifient les prix et ajoutent les livres. Pour en faire partie, voir <a href="devenir-admin.html">Devenir administrateur</a>.</li>
+  <li>Les <strong>SuperAdmins</strong> gèrent l'équipe.</li>
+</ul>
+<p>Chaque mise à jour porte le nom de la personne qui l'a faite : le guide sait toujours qui a changé quoi.</p>
 
 <h2>D'où viennent les données</h2>
 <ul>
-  <li><strong>Catalogue et fiches</strong> : notices du catalogue général de la Bibliothèque nationale de France, complétées à partir de l'ancien relevé.</li>
-  <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration.</li>
-  <li><strong>Polices</strong> : Cormorant Garamond et Source Sans 3, sous licence SIL Open Font 1.1, hébergées avec le site.</li>
+  <li><strong>Catalogue et fiches :</strong> notices du catalogue général de la Bibliothèque nationale de France, complétées à partir de l'ancien relevé.</li>
+  <li><strong>Prix :</strong> voir « Comment les prix sont estimés » ci-dessus.</li>
+  <li><strong>Jaquettes :</strong> © leurs éditeurs, reproduites à titre d'illustration.</li>
+  <li><strong>Polices :</strong> Cormorant Garamond et Source Sans 3, sous licence SIL Open Font 1.1, hébergées avec le site.</li>
 </ul>
 
 <h2>Ce que le guide ne fait pas</h2>
 <p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin et eBay des fiches ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
-<h2>Votre collection reste chez vous</h2>
+<h2>Votre collection</h2>
 <p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
-<h2>Signaler une erreur, proposer un prix</h2>
-<p>Une édition manquante, une fiche erronée, un prix que vous avez constaté : écrivez-le dans un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> (un compte GitHub est nécessaire).</p>
+<h2>Contribuer</h2>
+<ul>
+  <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>, ou ouvrez un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> (un compte GitHub est nécessaire, et le signalement est public).</li>
+  <li><strong>Demander l'ajout d'un livre :</strong> connectez-vous avec Google, puis utilisez « Demander l'ajout d'un livre » dans le menu de votre compte.</li>
+  <li><strong>Aider à tenir les prix à jour :</strong> <a href="devenir-admin.html">devenez administrateur</a>.</li>
+  <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
+</ul>
 
 <h2>Soutenir le guide</h2>
 <p>Le guide reste gratuit et sans publicité. S'il vous est utile, vous pouvez <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer">offrir un café</a> : cela aide à couvrir les frais du site, notamment son adresse web. C'est libre et sans aucune obligation.</p>
@@ -696,7 +744,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("soutien.html", SOUTIEN),
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
                        ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
