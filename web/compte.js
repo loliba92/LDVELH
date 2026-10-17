@@ -65,8 +65,8 @@ window.Compte = (function () {
     if (ban) ban.hidden = !(e.cle === 'reprendre' && enCours());
     document.dispatchEvent(new CustomEvent('cdh-compte', { detail: { etat: e.cle, role: role } }));
   }
-  // Le bandeau « connexion expirée » n'apparaît que s'il y a du travail à envoyer
-  var enCours = function () { return window.AppCollection && window.AppCollection.nb() > 0; };
+  // Le bandeau « connexion expirée » n'apparaît que s'il y a des changements pas encore envoyés au Drive
+  var enCours = function () { return !!window.AppCollection && window.Cloud.enAttente(window.AppCollection.lire()); };
 
   function bandeau() {
     if ($('#compte-bandeau')) return;

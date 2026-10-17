@@ -59,12 +59,21 @@
   /* ---------- Connexion Google et Drive (navigateur) ---------- */
 
   var CLE_LIEN = 'cdh-cloud-lie', CLE_META = 'cdh-cloud-meta';
+  var CLE_JETON = 'cdh-cloud-jeton';
   var cfg = null, jeton = '', expire = 0, auClient = null, auDrive = null, minuterie = null, enCours = false, aRejouer = false, statut = 'hors-ligne';
   var ecouteurs = [];
   var lireLoc = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
   var ecrireLoc = function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } };
   var oterLoc = function (k) { try { localStorage.removeItem(k); } catch (e) { /* rien à retirer */ } };
   var lireMeta = function () { try { return JSON.parse(lireLoc(CLE_META) || '{}') || {}; } catch (e) { return {}; } };
+
+  // La connexion survit au changement de page : elle est gardée dans la mémoire de l'onglet (sessionStorage), jamais sur le disque,
+  // et disparaît à la fermeture de l'onglet ou au bout d'une heure.
+  function garderJeton() { try { sessionStorage.setItem(CLE_JETON, JSON.stringify({ j: jeton, e: expire })); } catch (e) { /* mémoire d'onglet indisponible */ } }
+  function oublierJeton() { try { sessionStorage.removeItem(CLE_JETON); } catch (e) { /* rien à oublier */ } }
+  (function reprendreJeton() {
+    try { var s = JSON.parse(sessionStorage.getItem(CLE_JETON) || 'null'); if (s && s.j && s.e > Date.now()) { jeton = s.j; expire = s.e; } else if (s) oublierJeton(); } catch (e) { /* rien à reprendre */ }
+  })();
 
   function config() {
     if (!cfg) cfg = fetch('data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
@@ -96,7 +105,7 @@
           scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.appdata',
           callback: function (rep) {
             if (rep.error || !rep.access_token) return ko(new Error(rep.error || 'refus'));
-            jeton = rep.access_token; expire = Date.now() + (Number(rep.expires_in) || 3600) * 1000 - 60000;
+            jeton = rep.access_token; expire = Date.now() + (Number(rep.expires_in) || 3600) * 1000 - 60000; garderJeton();
             fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + jeton } })
               .then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; })
               .then(function (u) {
@@ -113,14 +122,14 @@
   }
 
   function deconnecter() {
-    var j = jeton; jeton = ''; expire = 0; oterLoc(CLE_LIEN);
+    var j = jeton; jeton = ''; expire = 0; oterLoc(CLE_LIEN); oublierJeton();
     try { if (j && window.google && window.google.accounts) window.google.accounts.oauth2.revoke(j, function () {}); } catch (e) { /* sans effet */ }
     dire('hors-ligne');
   }
 
   var entetes = function () { return { Authorization: 'Bearer ' + jeton }; };
   var API = 'https://www.googleapis.com/drive/v3/files', UP = 'https://www.googleapis.com/upload/drive/v3/files';
-  function verifier(r) { if (r.status === 401 || r.status === 403) { jeton = ''; expire = 0; throw new Error('expire'); } if (!r.ok) throw new Error('drive-' + r.status); return r; }
+  function verifier(r) { if (r.status === 401 || r.status === 403) { jeton = ''; expire = 0; oublierJeton(); throw new Error('expire'); } if (!r.ok) throw new Error('drive-' + r.status); return r; }
 
   function lireDrive() {
     return fetch(API + '?spaces=appDataFolder&pageSize=1&fields=files(id)&q=' + encodeURIComponent("name='" + FICHIER + "'"), { headers: entetes() }).then(verifier).then(function (r) { return r.json(); }).then(function (l) {
@@ -174,6 +183,12 @@
     if (!actif()) return Promise.reject(new Error('expire'));
     return lireDrive().then(function (d) { return d && d.items ? { livres: Object.keys(d.items).length } : null; });
   }
+  // Y a-t-il des changements pas encore envoyés au Drive ? (collection différente de celle de la dernière synchronisation)
+  function enAttente(coll) {
+    var base = lireMeta().base || {}, ids = Object.keys(coll);
+    if (ids.length !== Object.keys(base).length) return true;
+    return ids.some(function (id) { return base[id] !== JSON.stringify(coll[id]); });
+  }
   function premiereFois() { return !lireLoc(CLE_META); }
   // Après chaque modification : synchronisation groupée (2 s sans nouvelle modification)
   function planifier(lireColl, adopter) {
@@ -184,7 +199,7 @@
 
   racine.Cloud = {
     config: config, lie: lie, nom: nom, actif: actif, preuve: preuve, connecter: connecter, deconnecter: deconnecter,
-    synchroniser: synchroniser, planifier: planifier, apercu: apercu, premiereFois: premiereFois, supprimerDrive: supprimerDrive, statut: function () { return statut; },
+    synchroniser: synchroniser, planifier: planifier, apercu: apercu, premiereFois: premiereFois, enAttente: enAttente, supprimerDrive: supprimerDrive, statut: function () { return statut; },
     surChangement: function (f) { ecouteurs.push(f); }
   };
 })(typeof window !== 'undefined' ? window : this);

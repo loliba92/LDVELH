@@ -1,6 +1,6 @@
 {
   "ouvert": true,
-  "relais": false,
+  "relais": true,
   "equipe": {
     "sha256:a368231a67eff380f08953cff1eb3e41813f86ceed64ebcd9911422ef8d533e6": {
       "nom": "loliba (superadmin)",
