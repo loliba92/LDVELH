@@ -1129,6 +1129,10 @@
   }
 
   // Livres recherchés : la liste ne garde que ceux qui ne sont pas (encore) dans la collection
+  const lienATrouver = () => {
+    const nb = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
+    return nb ? `<p class="sous lien-a-trouver"><a href="#titre-a-trouver">À trouver : ${nb} livre${nb > 1 ? 's' : ''} ↓</a></p>` : '';
+  };
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
@@ -1198,7 +1202,7 @@
       return;
     }
     if (!n) {
-      zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
+      zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>${htmlATrouver()}`;
       return;
@@ -1230,6 +1234,7 @@
     const lst = listeExemplaires(bl);
     const lignesEx = lst.html, reste = lst.reste;
     zone.innerHTML = `
+      ${lienATrouver()}
       <div class="coll-haut">
         <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
         <div>
