@@ -97,11 +97,14 @@
     // Derniers livres ajoutés à la base : petites couvertures cliquables, et accès au tri « Derniers ajouts »
     const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
     if (dates.length && dates[0] !== dates[dates.length - 1]) {
-      const recents = DATA.filter((b) => b.maj).sort(parRecence).slice(0, 8);      // aussi les livres sans jaquette : une tuile avec l'initiale de la série
-      $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}">${b.couverture ? `<img src="${esc(b.couverture)}" alt="" loading="lazy" width="44" height="66">` : `<span class="ajout-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button>`).join('');
-      $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
-      $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
-      $('#hero-ajouts').hidden = false;
+      const vus = new Set();
+      const recents = DATA.filter((b) => b.maj && b.couverture).sort(parRecence).filter((b) => (vus.has(b.livre_id) ? false : vus.add(b.livre_id))).slice(0, 8);      // une couverture par livre
+      if (recents.length) {
+        $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}"><img src="${esc(b.couverture)}" alt="" loading="lazy" width="80" height="120"></button>`).join('');
+        $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
+        $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
+        $('#hero-ajouts').hidden = false;
+      }
     }
     $('#hero-recherche').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -1107,15 +1110,30 @@
       $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
     });
     if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = n ? `(${n})` : '';
-    if ($('#hero-coll')) {              // accueil : résumé de la collection et lien vers la page collection
-      const nbSeries = n ? seriesCollection(bl).length : 0;
-      $('#hc-etat').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''} · ${nbSeries} série${nbSeries > 1 ? 's' : ''}` : "vide pour l'instant";
-      const ch = $('#hc-chiffres');
-      ch.hidden = !n;
-      ch.innerHTML = n ? `Valeur estimée <strong>${fmtE(bl.total)}</strong>${bl.nbPayes ? ` · Investi <strong>${fmtE(bl.investi)}</strong>` : ''}` : '';
-      $('#hero-parcours').textContent = n ? 'Compléter pas à pas' : 'Constituer pas à pas';
-      const an = $('#hc-analyses');
-      if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + analysesPortefeuille(bl, false, contenuCollecteur(bl)) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
+    if ($('#hero-coll')) {              // accueil : la carte « Ma collection » a trois états (visiteur, connecté sans livre, avec collection)
+      const visiteurAccueil = sansCompte();
+      const cha = $('#hero-chapeau');
+      if (cha) cha.textContent = visiteurAccueil ? 'Retrouvez la cote de chaque édition des livres-jeux.' : n ? 'Votre collection est une aventure. Complétez-la.' : 'Votre collection est une aventure. Commencez-la.';
+      $('#hc-lien').hidden = !n || visiteurAccueil;
+      let corps;
+      if (visiteurAccueil) {
+        corps = `<p class="gros">Gardez la trace de vos livres</p>
+          <p class="texte">Consulter les cotes est libre. Pour enregistrer vos livres et suivre leur valeur, connectez-vous avec Google.</p>
+          <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
+      } else if (!n) {
+        corps = `<p class="gros">Elle est encore vide</p>
+          <p class="texte">Indiquez les séries que vous possédez : le guide calcule la valeur pour vous.</p>
+          <p class="actions"><button type="button" class="bouton" data-parcours id="hero-parcours">Constituer pas à pas</button></p>`;
+      } else {
+        const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
+        const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
+        const pct = Math.max(2, Math.round(100 * bl.titres / (META.nb_versions || 1)));
+        corps = `<div class="coll-haut">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) : 'prix à venir'}</b></p>
+          <p class="texte petit">${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}</p></div></div>
+          <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.titres} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.titres} édition${bl.titres > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
+          <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Compléter pas à pas</button></p>`;
+      }
+      $('#hc-corps').innerHTML = corps;
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     const visiteur = sansCompte();       // compte demandé et pas connecté : écran d'invitation à la place de l'outil
