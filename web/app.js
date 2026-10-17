@@ -33,7 +33,7 @@
 
   const defaut = () => ({
     q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'etagere', versions: new Set(VERSIONS),
-    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false,
+    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false,
   });
 
   /* ---------- Chargement ---------- */
@@ -165,8 +165,8 @@
     $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
-    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; synchroniser(); changer(); });
-    document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; synchroniser(); changer(); } }));
+    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) S.cherche = false; synchroniser(); changer(); });
+    document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; synchroniser(); changer(); } }));
     brancherParcours();
     $('#f-versions').addEventListener('change', (e) => {
       S.versions = new Set(e.target.value ? [e.target.value] : VERSIONS);
@@ -195,7 +195,7 @@
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
-    document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = (r.value === 'mine') === S.mine; });
+    document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = r.value === (S.cherche ? 'cherche' : S.mine ? 'mine' : 'tous'); });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     $('#f-versions').value = S.versions.size === VERSIONS.length ? '' : S.versions.size === 1 ? [...S.versions][0] : 'multi';
     document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
@@ -208,7 +208,7 @@
   document.addEventListener('cdh-notes', () => { clearTimeout(minuteNotes); minuteNotes = setTimeout(() => { if (PAGE !== 'collection') afficher(); }, 200); });
 
   function nbFiltres() {
-    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.versions.size !== VERSIONS.length].filter(Boolean).length;
+    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.versions.size !== VERSIONS.length].filter(Boolean).length;
   }
   function resumeFiltres() {
     const t = [];
@@ -220,6 +220,7 @@
     if (S.versions.size !== VERSIONS.length) t.push([...S.versions].sort().join(', ') || 'aucune édition');
     if (S.vente) t.push('encore en vente');
     if (S.mine) t.push('ma collection');
+    if (S.cherche) t.push('à trouver');
     return t.join(' · ');
   }
   function basculerSelecteur(ouvert) {
@@ -249,6 +250,7 @@
     if (S.pmax !== '') p.set('pmax', S.pmax);
     if (S.vente) p.set('vente', '1');
     if (S.mine) p.set('mine', '1');
+    if (S.cherche) p.set('cherche', '1');
     if (S.versions.size !== d.versions.size) p.set('v', [...S.versions].join(','));
     if (S.h !== 'bon') p.set('h', S.h);
     if (S.vue !== 'etagere') p.set('vue', S.vue);
@@ -262,7 +264,7 @@
     const p = new URLSearchParams(location.hash.slice(1));
     S = defaut();
     S.q = p.get('q') || ''; S.serie = p.get('serie') || ''; S.ed = p.get('ed') || '';
-    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1';
+    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1'; S.cherche = p.get('cherche') === '1';
     if (p.has('v')) S.versions = new Set(p.get('v').split(',').filter((v) => VERSIONS.includes(v)));
     if (ETATS.some((e) => e.k === p.get('h'))) S.h = p.get('h');
     if (['etagere', 'liste', 'groupe'].includes(p.get('vue'))) S.vue = p.get('vue');
@@ -284,7 +286,7 @@
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) &&
+      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) &&
       ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
@@ -380,6 +382,9 @@
     }
     if (S.mine && !liste.length && !Object.keys(COLL).length) {
       $('#resultats').innerHTML = '<p class="vide-global">Votre collection est vide. Touchez C, BE ou TBE sous une jaquette pour y ajouter un livre.</p>';
+    }
+    if (S.cherche && !liste.length) {
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à trouver. Sur une fiche, cochez « Je le recherche » pour l\'ajouter ici.</p>';
     }
     afficherPied();
   }
@@ -1129,6 +1134,10 @@
   }
 
   // Livres recherchés : la liste ne garde que ceux qui ne sont pas (encore) dans la collection
+  const lienATrouver = () => {
+    const nb = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
+    return nb ? `<p class="sous lien-a-trouver"><a href="#titre-a-trouver">À trouver : ${nb} livre${nb > 1 ? 's' : ''} ↓</a></p>` : '';
+  };
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
@@ -1147,6 +1156,11 @@
       $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
     });
     if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = n ? `(${n})` : '';
+    if ($('#seg-cherche')) {
+      const nbS = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
+      $('#seg-cherche').hidden = !nbS && !S.cherche;
+      $('#nb-cherche-seg').textContent = nbS ? `(${nbS})` : '';
+    }
     if ($('#hero-coll')) {              // accueil : la carte « Ma collection » a trois états (visiteur, connecté sans livre, avec collection)
       const visiteurAccueil = sansCompte();
       const cha = $('#hero-chapeau');
@@ -1198,7 +1212,7 @@
       return;
     }
     if (!n) {
-      zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
+      zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>${htmlATrouver()}`;
       return;
@@ -1230,6 +1244,7 @@
     const lst = listeExemplaires(bl);
     const lignesEx = lst.html, reste = lst.reste;
     zone.innerHTML = `
+      ${lienATrouver()}
       <div class="coll-haut">
         <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
         <div>
