@@ -287,14 +287,36 @@
     $('#aj-resultat').hidden = false;
   }
   const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => (a.isbn ? [a.isbn, a.serie, a.numero, a.titre] : [a.brut, a.serie, a.numero]).join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
+  // Catalogue du site (ISBN et titres connus), chargé une fois : sert au formulaire d'ajout et au contrôle des demandes
+  let CATALOGUE = null;
+  function chargerCatalogue() {
+    if (!CATALOGUE) CATALOGUE = fetch('data/versions.json').then((r) => r.json()).then((v) => {
+      const label = (b) => `${b.titre} (${b.serie}${b.version ? ', ' + b.version : ''})`;
+      return { isbn: new Map(v.filter((b) => b.isbn13).map((b) => [b.isbn13, label(b)])),
+        titres: new Map(v.filter((b) => b.titre).map((b) => [cleTitre(b.titre), { label: label(b), serie: cleTitre(b.serie), numero: String(b.numero || '').replace(/^0+/, '') }])) };
+    }).catch(() => ({ isbn: new Map(), titres: new Map() }));
+    return CATALOGUE;
+  }
+  // Une ligne de demande est-elle bonne à ajouter ? ISBN valide (clé de contrôle), pas déjà dans la base, pas écrit deux fois
+  function evaluerLigne(cat, ligne) {
+    const elements = lireListe(ligne), vus = new Set();
+    if (!elements.length) return { ok: false, texte: 'La ligne est vide.' };
+    for (const e of elements) {
+      if (!ressembleIsbn(e.brut)) {
+        const connu = cat.titres.get(cleTitre(e.brut));
+        if (connu && (!(e.serie && e.numero) || connu.serie === cleTitre(e.serie) && connu.numero === String(e.numero).replace(/^0+/, ''))) return { ok: false, texte: `Déjà dans la base : ${connu.label}.` };
+        continue;
+      }
+      const isbn = isbn13De(e.brut);
+      if (!isbn) return { ok: false, texte: `ISBN invalide : ${e.brut}. Vérifiez les chiffres (la clé de contrôle ne correspond pas).` };
+      if (cat.isbn.has(isbn)) return { ok: false, texte: `Déjà dans la base : ${cat.isbn.get(isbn)}.` };
+      if (vus.has(isbn)) return { ok: false, texte: `ISBN écrit deux fois : ${e.brut}.` };
+      vus.add(isbn);
+    }
+    return { ok: true, texte: elements.length > 1 ? `${elements.length} livres à ajouter.` : 'Ligne correcte : le livre sera ajouté.' };
+  }
   function initAjout() {
-    $('#aj-verifier').addEventListener('click', () => {
-      fetch('data/versions.json').then((r) => r.json()).then((v) => {
-        const label = (b) => `${b.titre} (${b.serie}${b.version ? ', ' + b.version : ''})`;
-        return { isbn: new Map(v.filter((b) => b.isbn13).map((b) => [b.isbn13, label(b)])),
-          titres: new Map(v.filter((b) => b.titre).map((b) => [cleTitre(b.titre), { label: label(b), serie: cleTitre(b.serie), numero: String(b.numero || '').replace(/^0+/, '') }])) };
-      }).catch(() => ({ isbn: new Map(), titres: new Map() })).then(verifierListe);
-    });
+    $('#aj-verifier').addEventListener('click', () => { chargerCatalogue().then(verifierListe); });
     $('#aj-copier').addEventListener('click', () => {
       const t = texteAjout().replace(/\n/g, ' | '), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
       if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => { $('#aj-texte').value = t; $('#aj-texte').select(); });
@@ -353,22 +375,44 @@
           ${d.note ? `<p class="sous">${esc(d.note)}</p>` : ''}
           <label class="sr-only" for="dm-l-${d.numero}">Ligne à ajouter</label>
           <input id="dm-l-${d.numero}" type="text" value="${esc(d.texte)}" autocomplete="off">
+          <p class="sous dm-controle" data-controle role="status"></p>
           <div class="dm-actions"><button type="button" class="bouton" data-dm="accepter">Accepter</button><button type="button" class="bouton bouton-clair" data-dm="refuser">Refuser</button></div></li>`).join('');
+        liste.querySelectorAll('.dm-demande').forEach(controler);
       }).catch(() => {});
     }
+    // Indicateur sous le champ : ligne correcte, ISBN invalide ou déjà dans la base
+    function controler(li) {
+      const zone = li.querySelector('[data-controle]');
+      chargerCatalogue().then((cat) => {
+        const c = evaluerLigne(cat, li.querySelector('input').value);
+        zone.textContent = (c.ok ? '✓ ' : '✗ ') + c.texte; zone.classList.toggle('erreur', !c.ok);
+      });
+    }
+    liste.addEventListener('input', (e) => { const li = e.target.closest('.dm-demande'); if (li) controler(li); });
     liste.addEventListener('click', (e) => {
       const b = e.target.closest('[data-dm]');
       if (!b) return;
       const li = b.closest('.dm-demande'), numero = Number(li.dataset.n), decision = b.dataset.dm;
       const donnees = { numero, decision };
-      if (decision === 'accepter') donnees.ligne = li.querySelector('input').value;
-      else { const raison = window.prompt('Raison du refus (facultatif, visible publiquement) :', ''); if (raison === null) return; donnees.raison = raison; }
+      if (decision === 'accepter') {
+        donnees.ligne = li.querySelector('input').value;
+        chargerCatalogue().then((cat) => {
+          const c = evaluerLigne(cat, donnees.ligne);
+          if (!c.ok) { dire(c.texte + (/Déjà/.test(c.texte) ? ' Utilisez « Refuser » pour fermer la demande.' : ' Corrigez la ligne, puis acceptez de nouveau.'), true); return; }
+          envoyerDecision(li, numero, decision, donnees);
+        });
+        return;
+      }
+      const raison = window.prompt('Raison du refus (facultatif, visible publiquement) :', ''); if (raison === null) return; donnees.raison = raison;
+      envoyerDecision(li, numero, decision, donnees);
+    });
+    function envoyerDecision(li, numero, decision, donnees) {
       li.querySelectorAll('button').forEach((x) => { x.disabled = true; });
       dire('Enregistrement…');
       window.Relais.appeler('demande_traiter', donnees).then((r) => {
         if (r && r.ok) { dire(decision === 'accepter' ? 'Acceptée : le livre est en cours d\'ajout (environ 2 minutes).' : 'Demande refusée et fermée.'); charger(); } else { dire(lisible(r), true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); }
       }).catch(() => { dire('Le service ne répond pas : vérifiez votre connexion.', true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); });
-    });
+    }
     document.addEventListener('cdh-porte-ouverte', charger);
     if (!$('#main').hidden) charger();
   }
