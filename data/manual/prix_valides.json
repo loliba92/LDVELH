@@ -63,14 +63,16 @@
    "le": "2026-10-17"
   },
   "9782070333714|convenable": {
-   "prix": 6.28,
-   "decision": "confirme",
-   "le": "2026-10-17"
+   "prix": 6.3,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
   },
   "9782070333714|tres_bon": {
-   "prix": 15.7,
-   "decision": "confirme",
-   "le": "2026-10-17"
+   "prix": 15.8,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
   },
   "9782070333745|bon": {
    "prix": 48.8,
