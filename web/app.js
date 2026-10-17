@@ -89,6 +89,15 @@
   function construireHero() {
     $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
     const aller = () => $('#recherche').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    // Derniers livres ajoutés à la base : petites couvertures cliquables, et accès au tri « Derniers ajouts »
+    const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
+    if (dates.length && dates[0] !== dates[dates.length - 1]) {
+      const recents = DATA.filter((b) => b.maj && b.couverture).sort((a, b) => b.maj.localeCompare(a.maj) || a.titre.localeCompare(b.titre, 'fr')).slice(0, 8);
+      $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}"><img src="${esc(b.couverture)}" alt="" loading="lazy" width="44" height="66"></button>`).join('');
+      $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
+      $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
+      $('#hero-ajouts').hidden = false;
+    }
     $('#hero-recherche').addEventListener('submit', (e) => {
       e.preventDefault();
       S.q = $('#h-q').value.trim(); S.onglet = 'etagere';
@@ -249,7 +258,7 @@
     if (p.has('v')) S.versions = new Set(p.get('v').split(',').filter((v) => VERSIONS.includes(v)));
     if (ETATS.some((e) => e.k === p.get('h'))) S.h = p.get('h');
     if (['etagere', 'liste', 'groupe'].includes(p.get('vue'))) S.vue = p.get('vue');
-    if (['serie', 'titre', 'annee', 'cher', 'pascher'].includes(p.get('tri'))) S.tri = p.get('tri');
+    if (['serie', 'recent', 'titre', 'annee', 'cher', 'pascher'].includes(p.get('tri'))) S.tri = p.get('tri');
     if (['serie', 'version', 'annee', 'decennie', 'editeur'].includes(p.get('g'))) S.g = p.get('g');
     if (['cote', 'etagere'].includes(p.get('onglet'))) S.onglet = p.get('onglet');
   }
@@ -515,6 +524,7 @@
     const cmp = {
       serie: (a, b) => a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
       titre: (a, b) => a.titre.localeCompare(b.titre, 'fr') || a.version_n - b.version_n,
+      recent: (a, b) => (b.maj || '').localeCompare(a.maj || '') || a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
       annee: (a, b) => (a.annee || 9999) - (b.annee || 9999) || a.titre.localeCompare(b.titre, 'fr'),
       cher: (a, b) => (b.prix[k] ?? -1) - (a.prix[k] ?? -1),
       pascher: (a, b) => (a.prix[k] ?? 1e9) - (b.prix[k] ?? 1e9),

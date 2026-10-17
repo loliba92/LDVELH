@@ -176,6 +176,8 @@ def main():
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
     nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
 
+    dates_maj = {x["id"]: x["date_maj"] for x in editions.load(None)}      # date d'ajout (ou de dernière mise à jour) de la fiche
+
     versions = []
     cle_de = {}
     nb_valides = 0
@@ -196,6 +198,7 @@ def main():
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
+            "maj": dates_maj.get(r["id"]),
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},

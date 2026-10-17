@@ -59,6 +59,11 @@
         <button type="submit" class="bouton">Chercher</button>
       </form>
       <p class="hero-compte" id="chiffres-hero"></p>
+      <div class="hero-ajouts" id="hero-ajouts" hidden>
+        <span class="hero-ajouts-titre">Derniers ajouts</span>
+        <div class="hero-ajouts-liste" id="hero-ajouts-liste"></div>
+        <button type="button" class="bouton-lien" id="hero-ajouts-tous">Voir tous</button>
+      </div>
     </div>
     <div class="hero-cartes">
       <section class="hero-coll" id="hero-coll" aria-labelledby="hc-titre">
@@ -171,6 +176,7 @@
             <label for="f-tri">Trier</label>
             <select id="f-tri">
               <option value="serie">Série et numéro</option>
+              <option value="recent">Derniers ajouts</option>
               <option value="titre">Titre</option>
               <option value="annee">Année</option>
               <option value="cher">Du plus cher au moins cher</option>
