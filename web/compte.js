@@ -3,7 +3,7 @@
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
-  var configure = null, exigeCompte = false, role = '', intention = null, reprisEnCours = false;
+  var configure = null, exigeCompte = false, role = '', echecRole = '', intention = null, reprisEnCours = false;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -16,6 +16,7 @@ window.Compte = (function () {
     if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Consulter les cotes reste libre.' };
     var s = window.Cloud.statut();
     if (!window.Cloud.actif() || s === 'a-reprendre') return { cle: 'reprendre', ligne: 'Votre connexion a expiré. Vos changements sont gardés sur cet appareil.' };
+    if (s === 'connecte' && !reprisEnCours && window.Cloud.premiereFois()) return { cle: 'choix', ligne: 'Votre collection n\'est pas encore enregistrée dans votre compte : il reste un choix à faire.' };
     if (s === 'synchro' || s === 'connecte') return { cle: 'synchro', ligne: 'Enregistrement en cours…' };
     if (s === 'erreur') return { cle: 'erreur', ligne: 'La sauvegarde n\'a pas abouti. Vos changements sont gardés ici.' };
     return { cle: 'a-jour', ligne: 'Collection sauvegardée dans votre Google Drive.' };
@@ -33,6 +34,7 @@ window.Compte = (function () {
     var h = '<p class="compte-nom">' + esc(nom || 'Compte Google') + badge() + (role && !estAdmin() ? ' <span class="compte-niveau">Héros</span>' : '') + '</p><p class="compte-ligne" role="status">' + esc(e.ligne) + '</p>';
     if (e.cle === 'reprendre') h += '<button type="button" class="bouton" data-compte="connecter">Reconnecter</button>';
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
+    else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
     h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
@@ -58,8 +60,8 @@ window.Compte = (function () {
     var tab = $('[data-plus]');
     if (tab) {                       // onglet du bas : « Compte » (« Reconnexion » si la connexion a expiré)
       var span = tab.querySelector('span');
-      if (span) span.textContent = e.cle === 'reprendre' ? 'Reconnexion' : e.cle === 'erreur' ? 'Erreur' : 'Compte';
-      tab.classList.remove('compte-deconnecte', 'compte-reprendre', 'compte-synchro', 'compte-erreur', 'compte-a-jour');
+      if (span) span.textContent = e.cle === 'reprendre' ? 'Reconnexion' : e.cle === 'erreur' ? 'Erreur' : e.cle === 'choix' ? 'À finir' : 'Compte';
+      tab.classList.remove('compte-deconnecte', 'compte-reprendre', 'compte-synchro', 'compte-erreur', 'compte-a-jour', 'compte-choix');
       tab.classList.add('compte-' + e.cle);
     }
     var ban = $('#compte-bandeau');
@@ -80,11 +82,22 @@ window.Compte = (function () {
   /* ---------- Niveau (Héros, Admin, SuperAdmin) ---------- */
   function chargerRole() {
     if (!window.Relais || !window.Relais.configure() || !window.Cloud || !window.Cloud.actif()) return Promise.resolve();
-    return window.Relais.appeler('moi').then(function (r) { if (r && r.ok) { role = r.role; ecrireSession(CLE_ROLE, role); } }).catch(function () { /* niveau inchangé */ }).then(dessiner);
+    return window.Relais.appeler('moi').then(function (r) {
+      if (r && r.ok) { role = r.role; echecRole = ''; ecrireSession(CLE_ROLE, role); }
+      else echecRole = (r && r.erreur) || 'inconnu';
+    }).catch(function () { echecRole = 'relais'; }).then(dessiner);
   }
 
   /* ---------- Connexion et première reprise ---------- */
-  function annoncer(t) { var a = $('#annonce'); if (a) { a.textContent = ''; setTimeout(function () { a.textContent = t; }, 30); } }
+  // Message lu par les lecteurs d'écran (#annonce) et affiché quelques secondes à l'écran
+  var minuteToast = null;
+  function annoncer(t) {
+    var a = $('#annonce'); if (a) { a.textContent = ''; setTimeout(function () { a.textContent = t; }, 30); }
+    var z = $('#compte-toast');
+    if (!z) { z = document.createElement('div'); z.id = 'compte-toast'; z.className = 'compte-toast'; z.setAttribute('aria-hidden', 'true'); document.body.appendChild(z); }
+    z.textContent = t; z.hidden = false;
+    clearTimeout(minuteToast); minuteToast = setTimeout(function () { z.hidden = true; }, 6000);
+  }
 
   function connecter() {
     return window.Cloud.connecter().then(function () { dessiner(); return premiereReprise(); }).then(chargerRole).then(function () {
@@ -116,7 +129,11 @@ window.Compte = (function () {
         try { localStorage.removeItem(SAUVE); } catch (e) { /* rien à retirer */ }
         annoncer(choix.message || 'Terminé : votre collection est sauvegardée.');
       });
-    }).catch(function (e) { if (!e || e.message !== 'reporte') annoncer('La reprise n\'a pas abouti : vos livres sont toujours sur cet appareil.'); dessiner(); }).then(function () { reprisEnCours = false; });
+    }).catch(function (e) {
+      annoncer(e && e.message === 'reporte'
+        ? 'Vous n\'avez pas encore choisi : votre collection n\'est pas encore enregistrée dans votre compte.'
+        : 'La reprise n\'a pas abouti : vos livres sont toujours sur cet appareil.');
+    }).then(function () { reprisEnCours = false; dessiner(); });
   }
 
   function dialogue(html, classe) {
@@ -208,7 +225,8 @@ window.Compte = (function () {
     if (act) {
       var a = act.dataset.compte;
       if (a === 'connecter') { fermerMenu(); connecter(); }
-      else if (a === 'sync') { sync(); }
+      else if (a === 'sync') { premiereReprise(); }
+      else if (a === 'role') { echecRole = ''; dessiner(); chargerRole(); }
       else if (a === 'demande') { fermerMenu(); var feuille = $('#feuille-plus'); if (feuille && feuille.open) feuille.close(); demanderLivre(); }
       else if (a === 'supprimer') {
         fermerMenu();
@@ -250,5 +268,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, actif: actifGoogle, avecEquipe: true };
+  return { demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
 })();
