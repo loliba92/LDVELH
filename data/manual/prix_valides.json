@@ -190,6 +190,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070520435|convenable": {
+   "prix": 50.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070520435|tres_bon": {
+   "prix": 85.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070541805|bon": {
    "prix": 14.27,
    "decision": "confirme",
@@ -269,6 +279,16 @@
    "prix": 9.41,
    "decision": "confirme",
    "le": "2026-10-15"
+  },
+  "9782070582693|convenable": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070582693|tres_bon": {
+   "prix": 52.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
   },
   "9782070585168|bon": {
    "prix": 36.74,
