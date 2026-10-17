@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Confidentialité · La Cote du Héros</title>
-<meta name="description" content="Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur.">
+<meta name="description" content="Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
@@ -42,25 +42,32 @@
 <main id="main" class="cadre page">
 <p class="surtitre">Vos données</p>
 <h1>Confidentialité</h1>
-<p class="chapeau">En bref : <strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.</p>
+<p class="chapeau">En bref : <strong>consulter La Cote du Héros ne demande aucun compte et ne collecte aucune donnée personnelle.</strong> Pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Pour constituer une collection, vous vous connectez avec Google : elle est alors enregistrée dans votre propre Google Drive, pas chez l'éditeur.</p>
 
 <h2>Ce qui est enregistré sur votre appareil</h2>
-<p>Pour fonctionner comme vous le demandez, le guide écrit deux enregistrements dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.</p>
+<p>Pour fonctionner comme vous le demandez, le guide écrit quelques enregistrements dans le stockage local de votre navigateur. Ils ne quittent votre appareil que pour rejoindre votre propre Google Drive si vous êtes connecté, et l'éditeur n'y a pas accès.</p>
 <div class="tableau-page">
 <table>
   <thead><tr><th scope="col">Nom</th><th scope="col">Contenu</th><th scope="col">Pourquoi</th></tr></thead>
   <tbody>
     <tr><td data-label="Nom"><code>cote-collection-v1</code></td><td data-label="Contenu">Les livres de « Ma collection », leur état, leur quantité</td><td data-label="Pourquoi">Conserver votre collection d'une visite à l'autre</td></tr>
     <tr><td data-label="Nom"><code>cote-parcours-v1</code></td><td data-label="Contenu">L'avancement de l'inventaire guidé</td><td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>
+    <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>
+    <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
   </tbody>
 </table>
 </div>
 <p>Le guide garde aussi des copies de ses propres pages et images dans la mémoire de votre navigateur (cache), pour s'ouvrir sans réseau. Elles ne contiennent aucune donnée sur vous.</p>
 <p><strong>Aucun cookie</strong> n'est déposé. Ces enregistrements sont nécessaires à des fonctions que vous demandez vous-même ; ils ne demandent donc pas de consentement et il n'y a pas de bandeau.</p>
 
+<h2>Si vous vous connectez avec Google</h2>
+<p>Pour constituer une collection, vous vous connectez avec votre compte Google. Le site demande à Google deux choses : votre prénom, pour l'afficher, et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Le guide n'a pas de serveur : votre collection va directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit ni votre courriel ni vos autres fichiers. Le jeton de connexion reste dans la mémoire de la page et disparaît à sa fermeture.</p>
+<p>Google intervient alors à votre demande comme prestataire de stockage, selon <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">sa propre politique de confidentialité</a>. Le seul moment où votre navigateur contacte Google est le clic sur « Se connecter ».</p>
+
 <h2>Comment les effacer</h2>
 <ul>
   <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
+  <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com</a>.</li>
   <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
 </ul>
 
@@ -71,10 +78,10 @@
 <p>Le site est hébergé par GitHub Pages (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub peut enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de l'hébergeur et non de l'éditeur, qui n'y a pas accès. GitHub est établi aux États-Unis ; son traitement des données est décrit dans sa <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, recherches sur Vinted, Leboncoin ou eBay, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher : Google n'est contacté que si vous cliquez sur « Se connecter ». Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, recherches sur Vinted, Leboncoin ou eBay, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
 
 <h2>Vos droits</h2>
-<p>Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="https://github.com/loliba92/LDVELH/issues" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+<p>Le guide ne détient aucune donnée sur vous : votre collection est dans votre Drive, que vous pouvez consulter, corriger ou effacer vous-même, et il n'y a rien à demander à l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="https://github.com/loliba92/LDVELH/issues" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
 <p>Si le guide devait un jour mesurer sa fréquentation, proposer des dons ou ouvrir des comptes, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : 11 octobre 2026.</p>
