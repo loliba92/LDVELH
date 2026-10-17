@@ -13,6 +13,13 @@
       lien.appendChild(pastille);
     }
   } catch (e) { /* sans conséquence */ }
+  // Adresse de contact : assemblée ici plutôt qu'écrite dans la page, pour gêner les robots qui collectent les adresses
+  document.querySelectorAll('a.mail[data-u]').forEach(function (a) {
+    var adresse = a.dataset.u + '@' + a.dataset.d;
+    a.href = 'mailto:' + adresse;
+    if (!a.classList.contains('bouton')) a.textContent = adresse;
+    a.setAttribute('aria-label', a.classList.contains('bouton') ? 'Écrire à ' + adresse : 'Écrire à ' + adresse + ' (ouvre votre messagerie)');
+  });
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
   }

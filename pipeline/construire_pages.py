@@ -39,6 +39,10 @@ PAGES = {
                        "Pourquoi ce guide existe, d'où viennent ses données, comment les prix sont estimés, et ce qu'il ne fait pas."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
                              "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
+    "contact.html": ("Contact", "Contact · La Cote du Héros",
+                     "Écrire à La Cote du Héros : une question, une erreur à signaler, un prix constaté, une idée ou un partenariat."),
+    "soutien.html": ("Collectionneurs et créateurs", "Collectionneurs et créateurs · La Cote du Héros",
+                     "La Cote du Héros s'intéresse aux collectionneurs, aux créateurs de contenu, aux boutiques et aux éditeurs du monde des livres-jeux : comment travailler ensemble."),
     "equipe.html": ("Équipe", "Équipe · La Cote du Héros",
                     "Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les administrateurs."),
     "devenir-admin.html": ("Devenir admin", "Devenir administrateur · La Cote du Héros",
@@ -139,6 +143,8 @@ def feuille(courante, racine_a_propos="./#apropos"):
     {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
     {e("confidentialite.html", "Confidentialité", "Ce que le site garde, et où", "confidentialite.html")}
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
+    {e("soutien.html", "Collectionneurs et créateurs", "Travailler ensemble", "soutien.html")}
+    {e("contact.html", "Contact", "Écrire à La Cote du Héros", "contact.html")}
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
   </ul>
 </dialog>'''
@@ -151,6 +157,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="le-projet.html">Le projet</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
+      <a href="contact.html">Contact</a>
       <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg>Offrir un café</a>
     </nav>'''
 
@@ -260,6 +267,52 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
 
 <h2>Changer d'appareil ou quitter</h2>
 <p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être administrateur, demandez à un SuperAdmin de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
+'''
+
+
+CONTACT = '''<p class="surtitre">Nous écrire</p>
+<h1>Contact</h1>
+<p class="chapeau">Une question, une erreur à signaler, un prix que vous avez constaté, une idée ou une proposition de collaboration : écrivez-moi.</p>
+
+<h2>Par courriel</h2>
+<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Écrire à La Cote du Héros</a></p>
+<p>Adresse : <a class="mail" data-u="obertrand92" data-d="gmail.com" href="contact.html">(affichée avec JavaScript)</a><noscript> obertrand92 (arobase) gmail.com</noscript></p>
+<p class="sous">L'adresse s'affiche quand la page est chargée : cela évite qu'elle soit recopiée automatiquement. Elle ne sert qu'à vous répondre.</p>
+
+<h2>Pour signaler une erreur ou proposer un prix</h2>
+<p>Dites-moi quel livre (le titre ou l'ISBN) et ce que vous avez constaté. Pour un prix, il m'aide de connaître l'<strong>état</strong> du livre (convenable, bon état, très bon état), le <strong>prix</strong> et la <strong>source</strong> (une vente, une annonce, une boutique) avec sa date.</p>
+<p>Vous pouvez aussi passer par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>, qui demande un compte GitHub et reste public.</p>
+
+<h2>Vous voulez aider davantage</h2>
+<ul>
+  <li><a href="devenir-admin.html">Devenir administrateur</a> : corriger les prix et ajouter des livres vous-même.</li>
+  <li><a href="soutien.html">Collectionneurs et créateurs</a> : travailler ensemble sur vos collections, vos contenus ou votre boutique.</li>
+</ul>
+'''
+
+SOUTIEN = '''<p class="surtitre">Travailler ensemble</p>
+<h1>Collectionneurs et créateurs</h1>
+<p class="chapeau">La Cote du Héros est un guide indépendant, fait par un passionné pour les passionnés. Les personnes qui font vivre le monde des livres dont vous êtes le héros m'intéressent : collectionneurs, créateurs de contenu, associations, boutiques et éditeurs.</p>
+
+<h2>Qui est concerné</h2>
+<ul>
+  <li><strong>Collectionneurs</strong> : une collection remarquable, un projet de complétion, une expertise sur une série ou une édition.</li>
+  <li><strong>Créateurs de contenu</strong> : chaînes vidéo, blogs, podcasts, comptes sur les réseaux, qui parlent de livres-jeux.</li>
+  <li><strong>Associations, boutiques et éditeurs</strong> : projets, rééditions, nouveautés, ventes.</li>
+</ul>
+
+<h2>Ce que nous pouvons envisager ensemble</h2>
+<ul>
+  <li>Faire connaître votre travail, votre collection ou votre boutique à ceux qui consultent le guide.</li>
+  <li>Partager des repères de cote utiles à vos contenus, dans le respect des sources et de leurs conditions d'utilisation.</li>
+  <li>Compléter ou corriger le guide avec votre expertise, par exemple en devenant <a href="devenir-admin.html">administrateur</a>.</li>
+  <li>Toute autre idée : dites-moi ce que vous avez en tête.</li>
+</ul>
+<p>Il n'y a pas de formule toute faite : chaque projet se discute au cas par cas. Le guide reste gratuit et sans publicité, et son indépendance ne se négocie pas.</p>
+
+<h2>Prendre contact</h2>
+<p>Présentez-vous en quelques lignes, avec un lien vers votre collection, votre chaîne ou votre boutique, et ce que vous imaginez. Tout se passe sur la page <a href="contact.html">Contact</a>.</p>
+<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Écrire à La Cote du Héros</a></p>
 '''
 
 
@@ -462,7 +515,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 <p>La Cote du Héros est un site personnel, non commercial.</p>
 <ul>
   <li><strong>Éditeur et directeur de la publication</strong> : [À COMPLÉTER : nom et prénom, ou pseudonyme si l'hébergeur détient vos coordonnées]</li>
-  <li><strong>Contact</strong> : par <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> ; adresse électronique : [À COMPLÉTER]</li>
+  <li><strong>Contact</strong> : par <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> ; adresse électronique : <a class="mail" data-u="obertrand92" data-d="gmail.com" href="contact.html">afficher l'adresse</a><noscript> obertrand92 (arobase) gmail.com</noscript> (voir aussi la page <a href="contact.html">Contact</a>)</li>
 </ul>
 
 <h2>Hébergeur</h2>
@@ -643,7 +696,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("equipe.html", EQUIPE),
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("soutien.html", SOUTIEN),
                        ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
