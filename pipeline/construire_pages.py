@@ -148,7 +148,7 @@ def page(nom, corps):
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="identite.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="identite.js"></script>\n<script src="relais.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">

@@ -1,5 +1,6 @@
 """Tests de la vérification d'identité Google.   python pipeline/test_identite.py"""
 import json
+import os
 import sys
 import time
 import unittest
@@ -82,6 +83,46 @@ class TestIdentite(unittest.TestCase):
     def test_jeton_non_signe_refuse(self):
         j = jwt.encode({"iss": "accounts.google.com", "aud": CLIENT, "exp": int(time.time()) + 600, "email": "marc.dupont@gmail.com", "email_verified": True}, None, algorithm="none", headers={"kid": "k1"})
         self.assertIsNone(self.v(j)[0])
+
+
+class TestPrincipal(unittest.TestCase):
+    """Le programme complet, avec de faux fichiers de configuration."""
+    def lancer(self, admins, auteur_relais="", identite_jeton=""):
+        import os, tempfile
+        d = Path(tempfile.mkdtemp())
+        (d / "admins.json").write_text(json.dumps(admins), encoding="utf-8")
+        (d / "config.json").write_text(json.dumps({"client_id": CLIENT}), encoding="utf-8")
+        sortie = d / "env.txt"
+        avant = (identite.ADMINS, identite.CONFIG, dict(os.environ))
+        identite.ADMINS, identite.CONFIG = d / "admins.json", d / "config.json"
+        os.environ.update(AUTEUR_RELAIS=auteur_relais, IDENTITE=identite_jeton, GITHUB_ENV=str(sortie))
+        try:
+            code = identite.main()
+        finally:
+            identite.ADMINS, identite.CONFIG = avant[0], avant[1]
+            os.environ.clear(); os.environ.update(avant[2])
+        return code, (sortie.read_text(encoding="utf-8") if sortie.exists() else "")
+
+    def test_mode_relais_accepte_le_nom_transmis(self):
+        code, env = self.lancer({"relais": True, "equipe": {}}, auteur_relais="Marie | x")
+        self.assertEqual((code, env), (0, "AUTEUR=Marie x\n"))
+
+    def test_mode_relais_sans_nom_refuse(self):
+        self.assertEqual(self.lancer({"relais": True}, auteur_relais="")[0], 1)
+
+    def test_sans_relais_le_nom_transmis_est_ignore(self):
+        # tant que l'ancienne clé commune existe, n'importe qui pourrait écrire un faux nom : seule la connexion Google compte
+        self.assertEqual(self.lancer({"relais": False, "ouvert": True}, auteur_relais="Chef")[0], 1)
+
+    def test_equipe_donne_le_nom_en_mode_connexion(self):
+        cle, certs = fabrique()
+        h = "sha256:" + __import__("hashlib").sha256(b"marc.dupont@gmail.com").hexdigest()
+        orig = identite.certificats; identite.certificats = lambda: certs
+        try:
+            code, env = self.lancer({"relais": False, "equipe": {h: {"nom": "Marc (admin)", "role": "admin"}}}, identite_jeton=jeton(cle))
+        finally:
+            identite.certificats = orig
+        self.assertEqual((code, env), (0, "AUTEUR=Marc (admin)\n"))
 
 
 if __name__ == "__main__":

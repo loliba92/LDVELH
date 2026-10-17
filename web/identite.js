@@ -79,5 +79,5 @@ window.Identite = (function () {
     });
   }
   config();
-  return { afficher: afficher, pourEnvoi: pourEnvoi, nom: nom, jeton: jeton, actif: actif, connecte: connecte, accesAutorise: accesAutorise };
+  return { config: config, afficher: afficher, pourEnvoi: pourEnvoi, nom: nom, jeton: jeton, actif: actif, connecte: connecte, accesAutorise: accesAutorise };
 })();

@@ -5,7 +5,10 @@ Ce programme le vérifie avec les clés publiques de Google et contrôle qu'il a
 `client_id`). Il sert à savoir QUI envoie ; l'autorisation d'envoyer vient de la clé GitHub, que le propriétaire ne donne qu'aux personnes
 de son choix. Fichier data/admins.json :
   "ouvert"  : true = tout compte Google vérifié est accepté (le propriétaire reste maître de la clé) ; false = seules les adresses de "noms".
-  "noms"    : adresse (ou son empreinte) -> nom à afficher, qui prime sur le nom du compte Google. Ex. "sha256:<empreinte>": "Marie (admin)".
+  "equipe"  : adresse (ou son empreinte) -> {"nom": nom à afficher, "role": "admin" | "superadmin"}. Le nom prime sur celui du compte Google.
+              (l'ancienne rubrique "noms" : adresse -> nom, reste lue.)
+  "relais"  : true quand les envois passent par le relais (relais/) : le relais a déjà vérifié la personne et transmet son nom dans l'entrée
+              `auteur` du lot ; plus aucune connexion Google n'est alors jointe. À n'activer qu'après avoir supprimé l'ancienne clé commune.
   "bloques" : adresses (ou empreintes) refusées même avec la clé.
 L'adresse peut être remplacée par l'empreinte sha256 de l'adresse en minuscules : "sha256:<empreinte>", pour ne pas l'écrire en clair dans le dépôt.
 Sans entrée dans "noms", le nom est celui du compte Google suivi de quatre signes tirés de l'adresse (« Marie #3fa2 ») : il ne peut pas
@@ -90,7 +93,19 @@ def main():
     if not client_id:
         print("Connexion Google pas encore en service (client_id vide) : envoi accepté sans nom.")
         return 0
-    nom, raison = verifier(os.environ.get("IDENTITE", ""), client_id, fichier.get("noms", {}),
+    if fichier.get("relais"):
+        nom = validations.nom_propre(os.environ.get("AUTEUR_RELAIS", ""))
+        if not nom:
+            print("Envoi refusé : le relais n'a transmis aucun nom.", file=sys.stderr)
+            return 1
+        print(f"Envoi de {nom} (via le relais).")
+        if os.environ.get("GITHUB_ENV"):
+            with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
+                f.write(f"AUTEUR={nom}\n")
+        return 0
+    noms = dict(fichier.get("noms", {}))
+    noms.update({k: m.get("nom", "") for k, m in fichier.get("equipe", {}).items() if isinstance(m, dict) and m.get("nom")})
+    nom, raison = verifier(os.environ.get("IDENTITE", ""), client_id, noms,
                            ouvert=bool(fichier.get("ouvert")), bloques=fichier.get("bloques", []))
     if raison:
         print(f"Envoi refusé : {raison}.", file=sys.stderr)

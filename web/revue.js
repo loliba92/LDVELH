@@ -318,10 +318,12 @@
 
   // Jeton GitHub (enregistré seulement dans ce navigateur) : permet de lancer les lots d'ajout et de correction en un clic
   const CLE_JETON = 'cdh-jeton';
-  const jeton = () => { try { return localStorage.getItem(CLE_JETON); } catch (e) { return null; } };
-  const lancer = (lot, inputs) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${lot}/dispatches`, {
+  const cleGithub = () => { try { return localStorage.getItem(CLE_JETON); } catch (e) { return null; } };
+  // Avec le relais, l'envoi en un clic dépend de la connexion Google ; sinon de la clé GitHub enregistrée sur l'appareil
+  const jeton = () => (window.Relais && window.Relais.actif() ? 'relais' : cleGithub());
+  const lancer = (lot, inputs) => (window.Relais && window.Relais.actif() ? window.Relais.envoyerLot(lot, (({ identite, ...reste }) => reste)(inputs)) : fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${lot}/dispatches`, {
     method: 'POST', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton()}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ref: 'main', inputs }) });
+    body: JSON.stringify({ ref: 'main', inputs }) }) );
   function etatJeton() {
     $('#rg-etat').textContent = jeton() ? 'Clé enregistrée sur cet appareil : l\'envoi en un clic est actif.' : 'Aucune clé sur cet appareil : les boutons vous donnent la ligne à transmettre.';
     $('#rg-retirer').hidden = !jeton();
