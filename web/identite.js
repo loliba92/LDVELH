@@ -5,10 +5,10 @@
    rien n'est demandé. */
 window.Identite = (function () {
   var CLE = 'cdh-google';
-  var chargement = null;
+  var chargement = null, CFG = null;
 
   function config() {
-    if (!chargement) chargement = fetch('data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+    if (!chargement) chargement = fetch('data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (c) { CFG = c; return c; });
     return chargement;
   }
   function decoder(jwt) {
@@ -19,6 +19,10 @@ window.Identite = (function () {
   }
   function jeton() { var v = lire(); return v ? v.jwt : ''; }
   function nom() { var v = lire(); return v ? v.nom : ''; }
+  function connecte() { return !!lire(); }
+  // Les fonctions réservées aux admins (fiches, page de revue) exigent la connexion Google dès que le site en demande une.
+  // Tant que la configuration n'est pas lue, la réponse est « non » : on ne montre rien par défaut.
+  function accesAutorise() { return connecte() || (CFG !== null && !CFG.client_id); }
   function actif() { return config().then(function (c) { return !!c.client_id; }); }
   function sortir() { try { localStorage.removeItem(CLE); } catch (e) { /* rien à retirer */ } }
 
@@ -55,11 +59,12 @@ window.Identite = (function () {
         p.appendChild(b); zone.appendChild(p);
         return;
       }
-      p.textContent = 'Pour envoyer des mises à jour, connectez-vous avec votre compte Google : votre nom sera enregistré avec elles.';
+      p.textContent = 'Connectez-vous avec votre compte Google pour accéder aux fonctions admin : votre nom sera enregistré avec vos mises à jour.';
       var bouton = document.createElement('div'); bouton.className = 'g-bouton';
       zone.appendChild(p); zone.appendChild(bouton);
       Promise.all([config(), chargerGoogle()]).then(function (r) {
         window.google.accounts.id.initialize({ client_id: r[0].client_id, callback: function (rep) { recu(rep); afficher(zone, aChange); if (aChange) aChange(); }, auto_select: true });
+        try { window.google.accounts.id.prompt(); } catch (e) { /* reconnexion automatique indisponible : le bouton reste là */ }
         window.google.accounts.id.renderButton(bouton, { theme: 'filled_black', size: 'large', text: 'signin_with', locale: 'fr' });
       }).catch(function () { p.textContent = 'La connexion Google n\'a pas pu se charger : vérifiez votre connexion puis rechargez la page.'; });
     });
@@ -73,5 +78,6 @@ window.Identite = (function () {
       return j ? { ok: true, jeton: j } : { ok: false, jeton: '', message: 'Connectez-vous d\'abord avec Google (en haut de la page « Vérifier les prix ») : la connexion dure environ une heure.' };
     });
   }
-  return { afficher: afficher, pourEnvoi: pourEnvoi, nom: nom, jeton: jeton, actif: actif };
+  config();
+  return { afficher: afficher, pourEnvoi: pourEnvoi, nom: nom, jeton: jeton, actif: actif, connecte: connecte, accesAutorise: accesAutorise };
 })();

@@ -657,7 +657,8 @@
   const CLE_ACCES = 'cdh-acces', CLE_JETON = 'cdh-jeton';
   const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const estProprietaire = () => [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES));
+  // Mot de passe de la page admin ET connexion Google (quand le site en demande une) : sans les deux, aucune fonction admin n'apparaît
+  const estProprietaire = () => [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES)) && !!window.Identite && window.Identite.accesAutorise();
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));

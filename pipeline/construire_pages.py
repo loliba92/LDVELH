@@ -29,6 +29,8 @@ PAGES = {
                              "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
     "coffre.html": ("Accès commun", "Accès commun · La Cote du Héros",
                     "Page d'administration : chiffrer la clé d'envoi avec le mot de passe de la page admin."),
+    "devenir-admin.html": ("Devenir admin", "Devenir administrateur · La Cote du Héros",
+                           "Comment obtenir l'accès administrateur : la demande, la première connexion avec Google et les bonnes pratiques."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
                               "Éditeur, hébergeur et conditions d'utilisation de La Cote du Héros."),
 }
@@ -96,7 +98,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "coffre.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "coffre.html", "devenir-admin.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -146,7 +148,7 @@ def page(nom, corps):
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="identite.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="identite.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
@@ -156,9 +158,65 @@ PORTE = '''<div class="porte" id="porte">
       <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off" autofocus>
       <button type="submit" class="bouton">Entrer</button>
     </form>
+    <div class="porte-google" id="porte-google" hidden></div>
     <p class="porte-erreur" id="porte-erreur" role="alert" hidden>Code incorrect.</p>
+    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
   </div>
 </div>
+'''
+
+
+DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
+<h1>Devenir administrateur</h1>
+<p class="chapeau">Les administrateurs tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir, étape par étape.</p>
+
+<h2>Ce que fait un administrateur</h2>
+<ul>
+  <li><strong>Vérifier les prix</strong> : confirmer ou corriger la cote d'un livre, d'après les annonces que vous observez.</li>
+  <li><strong>Ajouter des livres</strong> : par ISBN, ou par titre quand il n'y en a pas.</li>
+  <li><strong>Laisser une trace</strong> : chaque mise à jour est enregistrée à votre nom, ce qui permet de savoir qui a fait quoi.</li>
+</ul>
+
+<h2>Comment ça marche</h2>
+<p>L'accès repose sur une <strong>clé</strong>, que la personne qui gère le site ne remet qu'aux personnes de son choix. Votre <strong>compte Google</strong> sert ensuite à prouver qui vous êtes, pour que chaque mise à jour porte votre nom. Aucune liste d'adresses à fournir à l'avance.</p>
+
+<h2>Ce qu'il vous faut</h2>
+<ul>
+  <li>Un <strong>compte Google</strong> (une adresse Gmail, ou une autre adresse reliée à Google).</li>
+  <li>Le <strong>mot de passe de la page admin</strong>, remis par la personne qui gère le site. Il ouvre la clé d'envoi : gardez-le pour vous.</li>
+</ul>
+<p>Pour l'obtenir, contactez la personne qui gère le site par le moyen qu'elle vous a indiqué. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</p>
+
+<h2>Votre première connexion</h2>
+<ol>
+  <li>Ouvrez <a href="revue-prix.html">Accès admin</a> et saisissez le mot de passe.</li>
+  <li>Cliquez sur <strong>« Se connecter avec Google »</strong>, en haut de la page, et choisissez votre compte.</li>
+  <li>Vérifiez l'encadré : il doit afficher <em>« Connecté avec Google : »</em> suivi de votre prénom. Vos mises à jour porteront ce prénom suivi de quatre signes (par exemple « Marie #3fa2 »), qui les distinguent de celles d'une personne du même prénom.</li>
+  <li>Travaillez normalement, puis cliquez sur <strong>« Envoyer mes validations »</strong>. Le site est à jour environ deux minutes plus tard.</li>
+</ol>
+<p class="sous">La connexion Google dure environ une heure. Si elle expire, la page vous le dit : reconnectez-vous, vos validations en attente sont conservées.</p>
+
+<h2>Les bonnes pratiques</h2>
+<ul>
+  <li><strong>Regardez la « Dernière révision »</strong> affichée sur chaque fiche avant de la revoir : si elle date d'aujourd'hui, un autre administrateur vient de s'en occuper.</li>
+  <li><strong>Ne confirmez que ce que vous avez vérifié.</strong> Confirmer un prix le fige : il prime ensuite sur les relevés automatiques.</li>
+  <li>Une erreur ? Corrigez le prix, ou utilisez « Retirer » tant que la validation n'est pas envoyée.</li>
+  <li><strong>Ne partagez ni le mot de passe, ni votre connexion Google.</strong> Chaque administrateur a la sienne.</li>
+</ul>
+
+<h2>Changer d'appareil ou quitter</h2>
+<p>Sur un nouvel appareil, recommencez la première connexion. Si vous ne devez plus avoir accès, la personne qui gère le site peut bloquer votre compte Google ou changer le mot de passe.</p>
+
+<details class="rv-appareil">
+  <summary>Pour la personne qui gère le site</summary>
+  <ol>
+    <li><strong>Une fois seulement</strong> : dans Google Cloud, ouvrez <em>Google Auth Platform</em>, puis <em>Audience</em>, et cliquez sur <em>Publier l'application</em>. Sans cela, Google ne laisse entrer que les « utilisateurs test » déclarés un par un.</li>
+    <li><strong>Donner l'accès</strong> : remettez le mot de passe de la page admin à la personne. Rien d'autre à faire.</li>
+    <li><strong>Donner un nom choisi</strong> (facultatif) : dans <code>data/admins.json</code>, rubrique <code>"noms"</code>, ajoutez <code>"sha256:EMPREINTE": "Nom affiché"</code>. L'empreinte est celle de l'adresse écrite en minuscules : <code>printf '%s' "adresse@exemple.fr" | sha256sum</code>. L'adresse n'est ainsi jamais écrite en clair dans un dépôt public.</li>
+    <li><strong>Bloquer un compte</strong> : ajoutez son empreinte dans <code>"bloques"</code>. Pour couper l'accès à tout le monde, changez le mot de passe (page « Accès commun »).</li>
+    <li><strong>Passer à une liste fermée</strong> : mettez <code>"ouvert": false</code> ; seules les adresses de <code>"noms"</code> sont alors acceptées.</li>
+  </ol>
+</details>
 '''
 
 
@@ -551,7 +609,8 @@ def main():
     (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE)):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE),
+                       ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
         print("écrit :", nom)
 
