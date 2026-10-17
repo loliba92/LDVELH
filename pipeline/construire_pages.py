@@ -73,8 +73,11 @@ VARIANTES = [
      "<h2>Si vous vous connectez avec Google</h2>\n"
      "<p>Pour constituer une collection, vous vous connectez avec votre compte Google. Le site demande à Google deux choses : votre prénom, pour l'afficher, et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Le guide n'a pas de serveur : votre collection va directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit ni votre courriel ni vos autres fichiers. Le jeton de connexion reste dans la mémoire de l'onglet, jamais sur le disque, et disparaît à la fermeture de l'onglet ou au bout d'une heure.</p>\n"
      "<p>Google intervient alors à votre demande comme prestataire de stockage, selon <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener\">sa propre politique de confidentialité</a>. Le seul moment où votre navigateur contacte Google est le clic sur « Se connecter ».</p>\n\n"
+     "<h2>Notes des livres</h2>\n"
+     "<p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée par le relais du site (un petit service hébergé chez Google, dans Google Apps Script), avec une <strong>empreinte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>\n\n"
      "<h2>Comment les effacer</h2>"),
     ("  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>",
+     "  <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>\n"
      "  <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href=\"https://myaccount.google.com/permissions\" target=\"_blank\" rel=\"noopener\">myaccount.google.com</a>.</li>\n"
      "  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>"),
     ("le guide n'appelle aucun service extérieur pour s'afficher.",
@@ -498,7 +501,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <p>Le guide est tenu par des passionnés, avec des niveaux simples :</p>
 <ul>
   <li><strong>Tout le monde</strong> peut consulter les cotes, sans compte.</li>
-  <li>Les <strong>Héros</strong> sont les personnes connectées avec Google : elles construisent leur collection et peuvent demander l'ajout d'un livre.</li>
+  <li>Les <strong>Héros</strong> sont les personnes connectées avec Google : elles construisent leur collection, peuvent demander l'ajout d'un livre et noter les livres de 1 à 5.</li>
   <li>Les <strong>Admins</strong> vérifient les prix et ajoutent les livres. Pour en faire partie, voir <a href="devenir-admin.html">Devenir administrateur</a>.</li>
   <li>Les <strong>SuperAdmins</strong> gèrent l'équipe.</li>
 </ul>
@@ -690,6 +693,7 @@ def page_collection(index_html):
 <script src="relais.js"></script>
 <script src="cloud.js"></script>
 <script src="compte.js"></script>
+<script src="notes.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

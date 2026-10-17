@@ -1270,3 +1270,20 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .menu-plus-liste { position: absolute; top: calc(100% + 6px); left: 0; z-index: 70; min-width: 220px; display: grid; gap: 2px; padding: 6px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); box-shadow: 0 10px 28px rgba(0, 0, 0, .55); }
 .menu-plus-liste a { display: block; padding: 10px 12px; }
 @media (max-width: 700px) { .menu-plus { display: none; } }
+/* Notes des livres (1 à 5) : étoiles sur la fiche, petite note sur les cartes */
+.etoiles { display: inline-block; letter-spacing: 2px; font-size: 1.15rem; line-height: 1; background: linear-gradient(90deg, var(--gold) var(--p, 0%), var(--line-strong) var(--p, 0%)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.note-livre { margin: 10px 0 14px; display: grid; gap: 8px; }
+.note-livre[hidden] { display: none; }
+.note-resume { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.note-resume strong { font-size: 1.1rem; }
+.note-vide, .note-sur, .note-nb { color: var(--muted); font-size: .92rem; }
+.note-saisie { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.note-etiquette { color: var(--muted); font-size: .9rem; }
+.note-boutons { display: inline-flex; gap: 2px; }
+.note-boutons button { min-width: 40px; min-height: 40px; padding: 0; border: 0; border-radius: var(--r); background: transparent; color: var(--line-strong); font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.note-boutons button.allumee { color: var(--gold); }
+.note-boutons button:hover, .note-boutons button:focus-visible { background: rgba(217, 180, 95, .2); color: var(--gold); }
+.note-boutons button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.note-msg { margin: 0; }
+.note-msg.erreur { color: #e0604f; }
+.note-carte { display: inline-block; margin-top: 2px; color: var(--gold); font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; }

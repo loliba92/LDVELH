@@ -14,7 +14,9 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   releve: 'superadmin',
   demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
   demandes_lire: 'admin',
-  demande_traiter: 'admin'
+  demande_traiter: 'admin',
+  noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
+  mes_notes: 'heros'
 };
 var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
@@ -127,3 +129,32 @@ function lireDemande(issue) {
   return { numero: issue.number, texte: issue.title.slice(PREFIXE_DEMANDE.length), par: par, note: note.slice(0, 300), date: String(issue.created_at || '').slice(0, 10) };
 }
 function peutDemander(compteur) { return (Number(compteur) || 0) < LIMITE_DEMANDES; }
+
+/* ---------- Notes des livres (1 à 5) ----------
+   Une voix par compte et par livre (le livre, pas l'édition). Les votes sont rangés sous une empreinte courte du compte : ni adresse ni nom.
+   La moyenne et le nombre de votes sont publics ; qui a voté quoi ne l'est pas. */
+var LIMITE_VOTES = 400;                // par livre (une propriété du script tient 9 Ko)
+function validerNote(livre, note) {
+  var l = String(livre == null ? '' : livre);
+  if (!/^[a-z0-9][a-z0-9_-]{2,119}$/.test(l)) return { ok: false, raison: 'livre inconnu' };
+  if (note === null || note === undefined || note === '' || typeof note === 'boolean') return { ok: false, raison: 'la note doit être un nombre entier de 1 à 5' };
+  var n = Number(note);
+  if (n !== 0 && !(n >= 1 && n <= 5 && n % 1 === 0)) return { ok: false, raison: 'la note doit être un nombre entier de 1 à 5' };
+  return { ok: true, livre: l, note: n };
+}
+function votant(empreinte) { return String(empreinte).replace('sha256:', '').slice(0, 16); }
+/* votes : { votant: note }. Note 0 = retirer sa note. Renvoie { ok, votes } ou { ok:false, raison }. */
+function appliquerNote(votes, qui, note) {
+  var v = copie(votes || {});
+  if (note === 0) { delete v[qui]; return { ok: true, votes: v }; }
+  if (v[qui] == null && Object.keys(v).length >= LIMITE_VOTES) return { ok: false, raison: 'ce livre a déjà reçu le maximum de notes' };
+  v[qui] = note;
+  return { ok: true, votes: v };
+}
+/* [moyenne arrondie au dixième, nombre de votes] */
+function resumerNotes(votes) {
+  var k = Object.keys(votes || {});
+  if (!k.length) return [0, 0];
+  var somme = 0; k.forEach(function (x) { somme += votes[x]; });
+  return [Math.round(somme / k.length * 10) / 10, k.length];
+}
