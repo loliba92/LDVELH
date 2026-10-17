@@ -1116,3 +1116,6 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .rv-identite .g-bouton { color-scheme: light; display: inline-block; }
 .porte-aide { margin: 14px 0 0; font-size: .9rem; }
 .porte-aide a { color: var(--gold); }
+.porte-google { margin: 4px 0 0; }
+.porte-google .sous { margin: 0 0 12px; }
+.porte-google .g-bouton { display: inline-block; }

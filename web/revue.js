@@ -416,7 +416,7 @@
   }
   initTendances();
   document.addEventListener('cdh-jeton', etatJeton);
-  window.Identite.afficher($('#rv-identite'), afficher);
+  window.Identite.afficher($('#rv-identite'), () => { if (!window.Identite.connecte()) location.reload(); afficher(); });   // déconnexion : la porte se referme
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})

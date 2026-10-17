@@ -148,7 +148,7 @@ def page(nom, corps):
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="identite.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="identite.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
@@ -158,6 +158,7 @@ PORTE = '''<div class="porte" id="porte">
       <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off" autofocus>
       <button type="submit" class="bouton">Entrer</button>
     </form>
+    <div class="porte-google" id="porte-google" hidden></div>
     <p class="porte-erreur" id="porte-erreur" role="alert" hidden>Code incorrect.</p>
     <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
   </div>

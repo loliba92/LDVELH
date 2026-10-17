@@ -11,7 +11,19 @@
   var main = document.getElementById('main');
   if (!porte || !main) return;
 
-  function ouvrir() { porte.hidden = true; main.hidden = false; }
+  function montrer() { porte.hidden = true; main.hidden = false; }
+  // Mot de passe accepté : si le site demande une connexion Google, la page reste fermée jusqu'à ce qu'elle soit faite
+  function ouvrir() {
+    var I = window.Identite, zone = document.getElementById('porte-google');
+    if (!I || !zone) return montrer();
+    I.actif().then(function (actif) {
+      if (!actif || I.connecte()) return montrer();
+      document.getElementById('porte-form').hidden = true;
+      var e = document.getElementById('porte-erreur'); e.hidden = true;
+      zone.hidden = false;
+      I.afficher(zone, function () { if (I.connecte()) montrer(); });
+    });
+  }
   function lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function ecrire(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
 
