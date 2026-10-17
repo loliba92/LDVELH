@@ -25,6 +25,16 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070333684|convenable": {
+   "prix": 7.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070333684|tres_bon": {
+   "prix": 28.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070333714|bon": {
    "prix": 16.58,
    "decision": "confirme",
