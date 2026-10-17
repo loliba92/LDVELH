@@ -463,12 +463,14 @@
   "9782070662302|convenable": {
    "prix": 4.0,
    "decision": "corrige",
-   "le": "2026-10-15"
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
   },
   "9782070662302|tres_bon": {
-   "prix": 9.0,
+   "prix": 8.9,
    "decision": "corrige",
-   "le": "2026-10-15"
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
   },
   "9782070665815|convenable": {
    "prix": 39.0,
