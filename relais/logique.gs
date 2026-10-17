@@ -11,7 +11,10 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   equipe_ajouter: 'superadmin',
   equipe_retirer: 'superadmin',
   equipe_bloquer: 'superadmin',
-  releve: 'superadmin'
+  releve: 'superadmin',
+  demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
+  demandes_lire: 'admin',
+  demande_traiter: 'admin'
 };
 var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
@@ -95,3 +98,32 @@ function bloquerCompte(fichier, empreinte, par) {
   if (f.bloques.map(minuscules).indexOf(empreinte) < 0) f.bloques.push(empreinte);
   return { ok: true, fichier: f };
 }
+
+/* ---------- Demandes d'ajout de livres ----------
+   Un Héros écrit un titre ou un ISBN ; le relais en fait un signalement GitHub (étiquette « demande-ajout ») au nom de la personne.
+   Les admins les lisent, corrigent la ligne si besoin, puis acceptent (le lot « Ajouter des livres » est lancé) ou refusent. */
+var PREFIXE_DEMANDE = "Demande d'ajout : ";
+var ETIQUETTE_DEMANDE = 'demande-ajout';
+var LIMITE_DEMANDES = 3;               // par personne et par fenêtre de six heures (mémoire du script)
+
+/* Texte sans retour à la ligne ni mise en forme : un signalement GitHub est public et interprète le markdown, les liens et les mentions. */
+function nettoyerTexteDemande(brut, max) {
+  return String(brut == null ? '' : brut).replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/[@<>`*_#\[\]|\\]/g, ' ').replace(/https?:\/\/\S+/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+}
+function validerDemande(texte, note) {
+  var t = nettoyerTexteDemande(texte, 150), n = nettoyerTexteDemande(note, 300);
+  if (t.length < 3) return { ok: false, raison: 'indiquez un titre ou un ISBN (3 caractères au moins)' };
+  return { ok: true, texte: t, note: n };
+}
+function formaterDemande(texte, note, nom) {
+  return { titre: PREFIXE_DEMANDE + texte, corps: 'Demandé par ' + nom + (note ? '\n\n' + note : '') + "\n\n_Demande faite depuis le site. Un administrateur peut l'accepter ou la refuser depuis l'espace administrateur._" };
+}
+/* Signalement GitHub -> demande lisible par la page des admins (null si ce n'est pas une de nos demandes) */
+function lireDemande(issue) {
+  if (!issue || issue.pull_request || String(issue.title || '').indexOf(PREFIXE_DEMANDE) !== 0) return null;
+  var lignes = String(issue.body || '').split('\n'), premiere = lignes[0] || '';
+  var par = premiere.indexOf('Demandé par ') === 0 ? premiere.slice('Demandé par '.length).trim() : '';
+  var note = lignes.slice(1).join('\n').split('\n\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && x.charAt(0) !== '_'; }).join(' ');
+  return { numero: issue.number, texte: issue.title.slice(PREFIXE_DEMANDE.length), par: par, note: note.slice(0, 300), date: String(issue.created_at || '').slice(0, 10) };
+}
+function peutDemander(compteur) { return (Number(compteur) || 0) < LIMITE_DEMANDES; }

@@ -370,7 +370,7 @@
     $('#bloc-tri').hidden = S.vue === 'groupe';
     $('#bloc-groupe').hidden = S.vue !== 'groupe';
     if (!liste.length) {
-      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.</p>';
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.' + (window.Relais && window.Relais.configure() ? ' Un livre manque au guide ? <button type="button" class="bouton-lien" data-demande>Demandez son ajout</button>.' : '') + '</p>';
     } else if (S.vue === 'etagere') {
       afficherEtagere(liste);
     } else if (S.vue === 'liste') {
@@ -1656,6 +1656,7 @@
     annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)} au total.`);
   }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-lot]')) ouvrirLot(); });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande]') && window.Compte) window.Compte.demanderLivre(S.q); });
 
 
   /* ---------- Inventaire guidé : séries → éditions → listes → bilan ---------- */

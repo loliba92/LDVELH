@@ -90,4 +90,30 @@ test('les modifications ne touchent pas au fichier d\'origine', () => {
   const f = fichier(), avant = JSON.stringify(f); L('ajouterMembre')(f, h('z@gmail.com'), 'Z', 'admin', SUPER); L('retirerMembre')(f, ADM, SUPER); L('bloquerCompte')(f, ADM, SUPER);
   assert.strictEqual(JSON.stringify(f), avant);
 });
+test('droits pour les demandes d\'ajout', () => {
+  const p = L('peut');
+  assert.ok(p('heros', 'demande')); assert.ok(!p('heros', 'demandes_lire')); assert.ok(!p('heros', 'demande_traiter'));
+  assert.ok(p('admin', 'demandes_lire')); assert.ok(p('admin', 'demande_traiter')); assert.ok(p('superadmin', 'demande_traiter'));
+});
+test('demande : texte nettoyé, trop court refusé', () => {
+  const v = L('validerDemande');
+  const ok = v('  Cthulhu @everyone <b>le pacte</b> http://spam.example/x \n ; 3 ', '`note` *forte* [lien](x)');
+  assert.strictEqual(ok.ok, true);
+  assert.ok(!/[@<>`*\[\]]|http/.test(ok.texte + ok.note), ok.texte + ' / ' + ok.note);
+  assert.strictEqual(v('ab', '').ok, false); assert.strictEqual(v('', 'x').ok, false); assert.strictEqual(v(null, null).ok, false);
+  assert.strictEqual(v('x'.repeat(500), '').texte.length, 150);
+  assert.strictEqual(v('978-2380240283', 'x'.repeat(900)).note.length, 300);
+});
+test('demande : le signalement se relit tel qu\'il a été écrit', () => {
+  const f = L('formaterDemande')('Cthulhu : Out There', 'Édition collector', 'Marie #3fa2');
+  assert.strictEqual(f.titre, "Demande d'ajout : Cthulhu : Out There");
+  const d = L('lireDemande')({ number: 42, title: f.titre, body: f.corps, created_at: '2026-10-17T10:00:00Z' });
+  assert.deepStrictEqual(J(d), { numero: 42, texte: 'Cthulhu : Out There', par: 'Marie #3fa2', note: 'Édition collector', date: '2026-10-17' });
+  assert.strictEqual(L('lireDemande')({ number: 1, title: 'Autre sujet', body: '' }), null);
+  assert.strictEqual(L('lireDemande')({ number: 1, title: f.titre, body: '', pull_request: {} }), null);
+});
+test('demande : limite par personne', () => {
+  const p = L('peutDemander');
+  assert.ok(p(undefined)); assert.ok(p('2')); assert.ok(!p('3')); assert.ok(!p('10'));
+});
 console.log(n + ' tests passés');
