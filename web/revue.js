@@ -20,7 +20,7 @@
   const cleDe = (ed, cle) => `${ed.isbn}|${cle}`;
   const aujourdhui = () => new Date().toISOString().slice(0, 10);
   // Nom de la personne connectée avec Google (affichage seulement) ; le nom enregistré est celui que le lot vérifie (pipeline/identite.py)
-  const nomAdmin = () => (window.Identite ? window.Identite.nom() : '');
+  const nomAdmin = () => (window.Cloud ? window.Cloud.nom() : '');
   // « aujourd'hui », « hier » ou la date : pour ne pas refaire une révision qui vient d'être faite
   function quand(iso) {
     if (!iso) return '';
@@ -135,7 +135,7 @@
     const nbAttente = Object.keys(LOC).length;
     $('#rv-envoi').hidden = !nbAttente;
     $('#rv-n-attente').textContent = nbAttente;
-    $('#rv-envoyer').textContent = jeton() ? 'Envoyer mes validations' : 'Télécharger mes validations';
+    $('#rv-envoyer').textContent = 'Envoyer mes validations';
     $('#rv-liste').innerHTML = VUE.length ? VUE.slice(0, limite).map(carte).join('') : '<p>Aucun livre dans cette liste.</p>';
     $('#rv-plus').hidden = VUE.length <= limite;
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
@@ -221,27 +221,18 @@
 
   // Fichier à transmettre : mêmes validations, dans le format lu par pipeline/validations.py
   async function envoyer() {
-    if (jeton()) {                                   // administrateur : envoi direct au lot « Corriger des cotes »
-      const par = {};
-      Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
-      const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
-      const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
-      const id = window.Relais && window.Relais.actif() ? { ok: true, jeton: '' } : await window.Identite.pourEnvoi();   // avec le relais, la connexion du site suffit
-      if (!id.ok) return dire(id.message);
-      $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
-      try {
-        const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | '), identite: id.jeton });
-        dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
-          : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau en haut de la page.'
-          : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
-      } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
-      $('#rv-envoyer').disabled = false;
-      return;
-    }
-    const fichier = { valides: LOC };
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(fichier, null, 1)], { type: 'application/json' }));
-    a.download = `prix-valides-${aujourdhui()}.json`; document.body.appendChild(a); a.click(); a.remove();
+    const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+    if (!jeton()) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page. Vos validations sont gardées.');
+    const par = {};
+    Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
+    const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
+    $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
+    try {
+      const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | ') });
+      dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
+        : r.status === 401 || r.status === 403 ? MSG_REFUS : `Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+    } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
+    $('#rv-envoyer').disabled = false;
   }
 
   // Ajouter des livres : liste d'ISBN contrôlée ici (clé de contrôle, doublons, déjà dans la base), enregistrée ensuite par le lot « Ajouter des livres (ISBN) ».
@@ -316,37 +307,23 @@
     });
   }
 
-  // Jeton GitHub (enregistré seulement dans ce navigateur) : permet de lancer les lots d'ajout et de correction en un clic
-  const CLE_JETON = 'cdh-jeton';
-  const cleGithub = () => { try { return localStorage.getItem(CLE_JETON); } catch (e) { return null; } };
-  // Avec le relais, l'envoi en un clic dépend de la connexion Google ; sinon de la clé GitHub enregistrée sur l'appareil
-  const jeton = () => (window.Relais && window.Relais.actif() ? 'relais' : cleGithub());
-  const lancer = (lot, inputs) => (window.Relais && window.Relais.actif() ? window.Relais.envoyerLot(lot, (({ identite, ...reste }) => reste)(inputs)) : fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${lot}/dispatches`, {
-    method: 'POST', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton()}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ref: 'main', inputs }) }) );
+  // Les envois passent par le relais (connexion Google du site, voir relais.js) : aucune clé GitHub sur l'appareil.
+  // « jeton() » dit seulement si l'envoi en un clic est possible maintenant : relais en service et connexion encore valable.
+  const jeton = () => (window.Relais && window.Relais.actif() ? 'relais' : null);
+  const lancer = (lot, inputs) => window.Relais.envoyerLot(lot, (({ identite, ...reste }) => reste)(inputs));
+  const MSG_REFUS = 'Ce compte n\'a pas les droits d\'administrateur, ou la connexion Google a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.';
   function etatJeton() {
-    $('#rg-etat').textContent = jeton() ? 'Clé enregistrée sur cet appareil : l\'envoi en un clic est actif.' : 'Aucune clé sur cet appareil : les boutons vous donnent la ligne à transmettre.';
-    $('#rg-retirer').hidden = !jeton();
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }
   function initReglages() {
-    $('#rg-enregistrer').addEventListener('click', () => {
-      const v = $('#rg-jeton').value.trim();
-      if (!v) { $('#rg-etat').textContent = 'Collez d\'abord la clé.'; return; }
-      try { localStorage.setItem(CLE_JETON, v); } catch (e) { $('#rg-etat').textContent = 'Ce navigateur ne permet pas d\'enregistrer le jeton.'; return; }
-      $('#rg-jeton').value = ''; etatJeton();
-    });
-    $('#rg-retirer').addEventListener('click', () => { try { localStorage.removeItem(CLE_JETON); } catch (e) { /* rien à retirer */ } etatJeton(); });
     $('#aj-lancer').addEventListener('click', async () => {
       const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
-      const id = window.Relais && window.Relais.actif() ? { ok: true, jeton: '' } : await window.Identite.pourEnvoi();
-      if (!id.ok) return dire(id.message);
+      if (!jeton()) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
       $('#aj-lancer').disabled = true; dire('Envoi en cours…');
       try {
-        const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui', identite: id.jeton });
+        const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui' });
         dire(r.status === 204 ? 'Envoyé. Les livres seront sur le site dans environ 2 minutes, les prix après le relevé qui suit.'
-          : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau ci-dessus.'
-          : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
+          : r.status === 401 || r.status === 403 ? MSG_REFUS : `Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
       $('#aj-lancer').disabled = false;
     });
@@ -417,12 +394,7 @@
     });
   }
   initTendances();
-  document.addEventListener('cdh-jeton', etatJeton);
-  // Avec le relais, la connexion se fait par le compte du site (en-tête) : le bloc de l'ancienne porte n'a plus lieu d'être
-  window.Identite.config().then((c) => {
-    if (c && c.relais_url) { $('#rv-identite').hidden = true; return; }
-    window.Identite.afficher($('#rv-identite'), () => { if (!window.Identite.connecte()) location.reload(); afficher(); });
-  });   // déconnexion : la porte se referme
+  document.addEventListener('cdh-compte', () => { etatJeton(); });   // déconnexion : la porte se referme
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})

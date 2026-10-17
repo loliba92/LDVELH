@@ -1176,3 +1176,15 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .coll-avantages span { color: var(--muted); font-size: .95rem; }
 @media (max-width: 700px) { .coll-avantages { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .compte { display: none; } }   /* sur téléphone, le compte est dans l'onglet « Compte » de la barre du bas */
+/* Page « Équipe » */
+.eq-bloc { margin: 0 0 28px; }
+.eq-form { display: grid; gap: 8px; max-width: 460px; }
+.eq-form label { font: 700 .85rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.eq-form input, .eq-form select { width: 100%; box-sizing: border-box; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); }
+.eq-form .bouton { margin-top: 6px; justify-self: start; }
+.eq-liste { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 640px; }
+.eq-membre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--bg); }
+.eq-empreinte { display: block; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; }
+.eq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.eq-actions .bouton { min-height: 40px; padding: 4px 14px; }
+@media (max-width: 700px) { .eq-actions { width: 100%; } .eq-actions .bouton { flex: 1 1 0; } }

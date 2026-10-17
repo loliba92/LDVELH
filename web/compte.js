@@ -220,5 +220,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, actif: actifGoogle, avecEquipe: false };
+  return { exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, actif: actifGoogle, avecEquipe: true };
 })();
