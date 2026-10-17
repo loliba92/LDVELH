@@ -635,6 +635,16 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9791097577117|convenable": {
+   "prix": 6.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9791097577117|tres_bon": {
+   "prix": 12.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9791097577254|convenable": {
    "prix": 5.0,
    "decision": "corrige",
