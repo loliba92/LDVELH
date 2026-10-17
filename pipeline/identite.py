@@ -3,11 +3,13 @@
 La page « Vérifier les prix » transmet au lot GitHub le jeton signé que Google remet à la personne connectée (champ `identite`).
 Ce programme le vérifie avec les clés publiques de Google, contrôle qu'il a été émis pour ce site (web/data/admin-config.json,
 `client_id`) et que l'adresse figure dans data/admins.json : {"admins": {"adresse@exemple.fr": "Prénom affiché"}}.
+L'adresse peut être remplacée par son empreinte, pour ne pas l'écrire en clair dans le dépôt : "sha256:<empreinte sha256 de l'adresse en minuscules>".
 Le nom affiché vient de cette liste, pas de la personne : c'est lui qui est enregistré avec la mise à jour.
 Sans `client_id`, la vérification n'est pas encore en service : l'envoi reste accepté, sans nom.
 
 Usage (lot GitHub) : IDENTITE=<jeton> python pipeline/identite.py   (écrit AUTEUR=<nom> dans $GITHUB_ENV ; code 1 si refusé)
 """
+import hashlib
 import json
 import os
 import sys
@@ -52,7 +54,9 @@ def verifier(jeton, client_id, admins, certs=None):
         return None, "émetteur inattendu"
     if not infos.get("email_verified"):
         return None, "adresse non vérifiée par Google"
-    nom = {str(k).strip().lower(): v for k, v in admins.items()}.get(str(infos.get("email", "")).strip().lower())
+    adresse = str(infos.get("email", "")).strip().lower()
+    liste = {str(k).strip().lower(): v for k, v in admins.items()}
+    nom = liste.get(adresse) or liste.get("sha256:" + hashlib.sha256(adresse.encode()).hexdigest())
     if not nom:
         return None, "adresse non autorisée"
     return str(nom), None

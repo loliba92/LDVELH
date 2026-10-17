@@ -38,6 +38,11 @@ class TestIdentite(unittest.TestCase):
     def test_admin_reconnu_sans_tenir_compte_de_la_casse(self):
         self.assertEqual(self.v(jeton(self.cle)), ("Marc", None))
 
+    def test_adresse_donnee_par_son_empreinte(self):
+        import hashlib
+        h = "sha256:" + hashlib.sha256(b"marc.dupont@gmail.com").hexdigest()
+        self.assertEqual(identite.verifier(jeton(self.cle), CLIENT, {h: "Marc"}, self.certs), ("Marc", None))
+
     def test_refus(self):
         autre, _ = fabrique()
         cas = {
