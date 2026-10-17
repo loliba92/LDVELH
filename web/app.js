@@ -707,12 +707,14 @@
         msg.hidden = false;
         return;
       }
+      const id = window.Identite ? await window.Identite.pourEnvoi() : { ok: true, jeton: '' };
+      if (!id.ok) return dire('Connectez-vous d\'abord avec Google dans la page « Vérifier les prix » (la connexion dure environ une heure).');
       f.querySelector('button').disabled = true; dire('Envoi en cours…');
       try {
         const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/actions/workflows/corriger-prix.yml/dispatches', {
           method: 'POST',
           headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne, auteur: lireLoc('cdh-admin-nom') || '' } }) });
+          body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne, identite: id.jeton } }) });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
         else if (r.status === 401 || r.status === 403) dire('Le jeton est refusé ou expiré : enregistrez-en un nouveau dans la page privée.');
         else if (r.status === 404) dire('Le jeton n\'a pas accès à ce dépôt (ou le lot est introuvable) : vérifiez ses droits.');

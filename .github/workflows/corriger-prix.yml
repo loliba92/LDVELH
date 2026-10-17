@@ -9,8 +9,8 @@ on:
         description: "ISBN ; convenable ; bon ; très bon (case vide = inchangé). Plusieurs livres : les séparer par |"
         required: true
         type: string
-      auteur:
-        description: "Nom d'admin de la personne qui envoie (facultatif, affiché sur la fiche)"
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
         required: false
         default: ""
         type: string
@@ -31,13 +31,15 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       CORRECTIONS: ${{ inputs.corrections }}
-      AUTEUR: ${{ inputs.auteur }}
+      IDENTITE: ${{ inputs.identite }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install requests pyjwt cryptography
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
       - name: Tests
         run: |
           python pipeline/test_validations.py
