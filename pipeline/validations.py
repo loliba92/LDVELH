@@ -2,7 +2,7 @@
 
 Un prix validé prime sur tout le reste (archives, annonces eBay, règle 40/60, correctifs de cohérence) : il est affiché
 tel quel jusqu'à ce que le propriétaire le change. Le fichier `data/manual/prix_valides.json` a la forme
-  {"valides": {"<isbn13>|<etat>": {"prix": 27.5, "decision": "confirme" | "corrige", "le": "2026-10-14"}}}
+  {"valides": {"<isbn13>|<etat>": {"prix": 27.5, "decision": "confirme" | "corrige", "le": "2026-10-14", "par": "Nom d'admin (facultatif)"}}}
 La page produit un fichier de même forme (« Envoyer mes validations ») ; `importer` le fusionne dans le fichier du dépôt.
 """
 import json
@@ -16,6 +16,11 @@ DECISIONS = ("confirme", "corrige")
 CHEMIN = Path(__file__).resolve().parent.parent / "data" / "manual" / "prix_valides.json"
 
 
+def nom_propre(brut):
+    """Nom d'administrateur nettoyé (30 caractères au plus, sans retour à la ligne ni séparateur de la ligne de correction)."""
+    return re.sub(r"[\x00-\x1f|;\s]+", " ", str(brut or "")).strip()[:30].strip()
+
+
 def _propre(cle, v):
     """Renvoie l'entrée nettoyée, ou None si elle est invalide."""
     try:
@@ -26,7 +31,11 @@ def _propre(cle, v):
         return None
     if not re.fullmatch(r"\d{13}", isbn) or etat not in ETATS or not 0 < prix < 10000 or v.get("decision") not in DECISIONS:
         return None
-    return {"prix": prix, "decision": v["decision"], "le": jour.isoformat()}
+    net = {"prix": prix, "decision": v["decision"], "le": jour.isoformat()}
+    par = nom_propre(v.get("par"))
+    if par:
+        net["par"] = par
+    return net
 
 
 def lire(chemin=CHEMIN):
@@ -70,6 +79,8 @@ def appliquer(par_etat, isbn, valides):
             avant = (par_etat.get(e) or {}).get("prix")
             par_etat[e] = {"prix": v["prix"], "source": "validé", "nature": "validé", "nb": 0, "date": v["le"],
                            "confiance": "validée", "valide": True, "decision": v["decision"], "calcule": avant}
+            if v.get("par"):
+                par_etat[e]["par"] = v["par"]
             n += 1
     return n
 

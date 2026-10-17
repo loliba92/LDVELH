@@ -658,11 +658,20 @@
   const EMPREINTE = '84542babc81672662f9b777a4bde6f7b72518fdb1e8bb704437a4fa4e6d34b4e';
   const lireLoc = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const estProprietaire = () => [EMPREINTE, 'coffre'].includes(lireLoc(CLE_ACCES));
+  // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
+  function derniereRevision(b) {
+    const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
+    if (!infos.length) return '<p class="sous corriger-revision">Pas encore révisée.</p>';
+    const i = infos[0], aujourdhui = new Date().toISOString().slice(0, 10), ecart = Math.round((Date.parse(aujourdhui) - Date.parse(i.date)) / 86400000);
+    const quand = ecart <= 0 ? 'aujourd\'hui' : ecart === 1 ? 'hier' : 'le ' + dateCourte(i.date);
+    return `<p class="sous corriger-revision">Dernière révision : <strong>${esc(quand)}</strong>${i.par ? ', par ' + esc(i.par) : ''}.</p>`;
+  }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
     if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
     return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3>
+        ${derniereRevision(b)}
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
           <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
           <div class="corriger-fourchette"><label>De<input type="text" inputmode="decimal" name="mini" autocomplete="off" placeholder="€"></label>
@@ -703,7 +712,7 @@
         const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/actions/workflows/corriger-prix.yml/dispatches', {
           method: 'POST',
           headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne } }) });
+          body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne, auteur: lireLoc('cdh-admin-nom') || '' } }) });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
         else if (r.status === 401 || r.status === 403) dire('Le jeton est refusé ou expiré : enregistrez-en un nouveau dans la page privée.');
         else if (r.status === 404) dire('Le jeton n\'a pas accès à ce dépôt (ou le lot est introuvable) : vérifiez ses droits.');

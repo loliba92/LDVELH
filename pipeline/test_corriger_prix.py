@@ -34,6 +34,18 @@ class TestCorrections(unittest.TestCase):
         self.assertEqual(v[("9782070585168", "tres_bon")]["prix"], 60.0)
         self.assertNotIn(("9782070585168", "bon"), v)                     # case vide : l'état n'est pas touché
 
+    def test_le_nom_d_admin_est_garde_et_nettoye(self):
+        base, chemin = self.base()
+        c.appliquer("9782070585168 ; 25", chemin, base, auteur="  Marc | \nDupont ; x  ")
+        v = validations.lire(chemin)[("9782070585168", "convenable")]
+        self.assertEqual(v["par"], "Marc Dupont x")
+        c.appliquer("9782070585168 ; bon", chemin, base)                    # sans nom : aucune clé « par »
+        c.appliquer("9782070585168 ; ; 40", chemin, base)
+        self.assertNotIn("par", validations.lire(chemin)[("9782070585168", "bon")])
+        d = {"bon": {"prix": 1}}
+        validations.appliquer(d, "9782070585168", validations.lire(chemin))
+        self.assertEqual(d["bon"]["prix"], 40.0)
+
     def test_la_derniere_correction_l_emporte(self):
         base, chemin = self.base()
         c.appliquer("9782070585168 ; 25", chemin, base)

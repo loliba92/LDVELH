@@ -44,8 +44,10 @@
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
     <form id="porte-form">
+      <label class="sr-only" for="porte-nom">Nom d'admin</label>
+      <input id="porte-nom" type="text" maxlength="30" placeholder="Votre nom d'admin (par exemple Marc)" autocomplete="nickname" spellcheck="false">
       <label class="sr-only" for="porte-code">Code d'accès</label>
-      <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off" autofocus>
+      <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off">
       <button type="submit" class="bouton">Entrer</button>
     </form>
     <p class="porte-erreur" id="porte-erreur" role="alert" hidden>Code incorrect.</p>
@@ -120,6 +122,10 @@
   <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
 </ul><details class="rv-appareil" id="rv-reglages">
   <summary>Cet appareil</summary>
+  <p class="rv-ajout-bilan" id="rg-nom-etat" role="status"></p>
+  <label class="sr-only" for="rg-nom">Nom d'admin</label>
+  <input id="rg-nom" type="text" maxlength="30" autocomplete="nickname" spellcheck="false" placeholder="Votre nom d'admin">
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-nom-ok">Enregistrer le nom</button></div>
   <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
   <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="rg-retirer">Retirer la clé de cet appareil</button></div>
   <p class="sous">Utiliser une autre clé :</p>

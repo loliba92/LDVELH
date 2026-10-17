@@ -9,6 +9,7 @@ les états non saisis en sont déduits (voir pipeline/export_site.py).
 Usage : python pipeline/corriger_prix.py "9782070585168 ; 25 ; ; 60"
 """
 import json
+import os
 import re
 import sys
 import tempfile
@@ -40,11 +41,12 @@ def lire(texte):
     return out
 
 
-def appliquer(texte, chemin=validations.CHEMIN, base=None):
+def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur=""):
     """Enregistre les corrections. Renvoie [(statut, isbn, texte)] ; statut : ok | refuse."""
     connus = {r["isbn13"]: r for r in editions.load(base) if r.get("isbn13")}
     jour = editions.today()
     bilan, envoi = [], {}
+    par = validations.nom_propre(auteur)
     for e in lire(texte):
         try:
             isbn = editions.normalize_isbn(e["brut"])[0]
@@ -62,7 +64,7 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None):
             bilan.append(("refuse", isbn, f"prix incorrect ({', '.join(mauvais)})"))
             continue
         for etat, p in e["prix"].items():
-            envoi[f"{isbn}|{etat}"] = {"prix": p, "decision": e["decision"], "le": jour}
+            envoi[f"{isbn}|{etat}"] = {"prix": p, "decision": e["decision"], "le": jour, **({"par": par} if par else {})}
         detail = " · ".join(f"{k.replace('tres_bon', 'très bon état').replace('bon', 'bon état') if k != 'convenable' else 'convenable'} {p:g} €" for k, p in e["prix"].items())
         bilan.append(("ok", isbn, f"{connus[isbn]['titre']} ({connus[isbn]['version']}) : {detail}"))
     if envoi:
@@ -76,7 +78,7 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None):
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    bilan = appliquer(" | ".join(sys.argv[1:]))
+    bilan = appliquer(" | ".join(sys.argv[1:]), auteur=os.environ.get("AUTEUR", ""))
     for s, isbn, t in bilan:
         print(f"{'+' if s == 'ok' else '✗'} {isbn}  {t}")
     ok = sum(1 for s, _, _ in bilan if s == "ok")
