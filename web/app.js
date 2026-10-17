@@ -85,6 +85,10 @@
     }
   }
 
+  // Du plus récent au plus ancien ; à date égale (un lot de livres ajouté le même jour), par titre. Les petites jaquettes de l'accueil
+  // et le tri « Derniers ajouts » (bouton « Voir tous ») utilisent ce même ordre : un livre vu parmi les derniers ajouts est le premier de la liste.
+  const parRecence = (a, b) => (b.maj || '').localeCompare(a.maj || '') || (a.titre || '').localeCompare(b.titre || '', 'fr');
+
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
     $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
@@ -92,7 +96,7 @@
     // Derniers livres ajoutés à la base : petites couvertures cliquables, et accès au tri « Derniers ajouts »
     const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
     if (dates.length && dates[0] !== dates[dates.length - 1]) {
-      const recents = DATA.filter((b) => b.maj && b.couverture).sort((a, b) => b.maj.localeCompare(a.maj) || a.titre.localeCompare(b.titre, 'fr')).slice(0, 8);
+      const recents = DATA.filter((b) => b.maj && b.couverture).sort(parRecence).slice(0, 8);
       $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}"><img src="${esc(b.couverture)}" alt="" loading="lazy" width="44" height="66"></button>`).join('');
       $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
       $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
@@ -524,7 +528,7 @@
     const cmp = {
       serie: (a, b) => a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
       titre: (a, b) => a.titre.localeCompare(b.titre, 'fr') || a.version_n - b.version_n,
-      recent: (a, b) => (b.maj || '').localeCompare(a.maj || '') || a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
+      recent: (a, b) => parRecence(a, b) || a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
       annee: (a, b) => (a.annee || 9999) - (b.annee || 9999) || a.titre.localeCompare(b.titre, 'fr'),
       cher: (a, b) => (b.prix[k] ?? -1) - (a.prix[k] ?? -1),
       pascher: (a, b) => (a.prix[k] ?? 1e9) - (b.prix[k] ?? 1e9),
