@@ -200,6 +200,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070520428|convenable": {
+   "prix": 30.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070520428|tres_bon": {
+   "prix": 70.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070520435|convenable": {
    "prix": 50.0,
    "decision": "corrige",
