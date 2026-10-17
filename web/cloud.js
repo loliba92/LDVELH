@@ -181,7 +181,7 @@
   // Première connexion : combien de livres le Drive contient-il déjà ? (null si la copie du Drive est absente)
   function apercu() {
     if (!actif()) return Promise.reject(new Error('expire'));
-    return lireDrive().then(function (d) { return d && d.items ? { livres: Object.keys(d.items).length } : null; })
+    return lireDrive().then(function (d) { return d && d.items ? { livres: Object.keys(d.items).filter(function (k) { return k.indexOf('souhait:') !== 0; }).length } : null; })
       .catch(function (e) { dire(e && e.message === 'expire' ? 'a-reprendre' : 'erreur'); throw e; });
   }
   // Y a-t-il des changements pas encore envoyés au Drive ? (collection différente de celle de la dernière synchronisation)

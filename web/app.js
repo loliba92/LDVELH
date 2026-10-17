@@ -71,7 +71,7 @@
     DATA.forEach((b) => { b._txt = norm([b.titre, b.livre, b.auteurs, b.isbn13, b.serie, b.editeur].join(' ')); });
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
     S = defaut();
-    chargerColl();
+    chargerColl(); chargerSouh();
     appPrete = true;
     if (PAGE === 'collection') { initPageCollection(); return; }
     construireHero();
@@ -641,7 +641,7 @@
   /* ---------- Fiche d'un livre ---------- */
   // Recherche de cette édition sur trois sites d'annonces (liens simples, ouverts dans un nouvel onglet)
   const requete = (t) => encodeURIComponent(t).replace(/%20/g, '+');
-  function blocRecherche(b) {
+  function liensRecherche(b) {
     // Titre + « ldvelh » : ces sites exigent tous les mots, et les vendeurs écrivent « ldvelh » (livre dont vous êtes le héros),
     // presque jamais « V1 » ni « livre héros » (recherche vide constatée avec ces mots)
     const titre = b.titre.replace(/\s*\([^)]*\)/g, '').trim();                          // « (Grand format) » et autres parenthèses : absents des annonces
@@ -653,8 +653,12 @@
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
     ];
     if (b.en_vente === 1 && b.isbn13) liens.push(['Amazon', `https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}`]);
+    return liens;
+  }
+  const htmlLiens = (b) => liensRecherche(b).map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('');
+  function blocRecherche(b) {
     return `<h3>Chercher cette édition en vente</h3>
-        <p class="liens-vente">${liens.map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('')}</p>
+        <p class="liens-vente">${htmlLiens(b)}</p>
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
@@ -809,17 +813,34 @@
     // Frais de port gardés à part par une version précédente : ils rejoignent le prix payé du livre (livraison comprise)
     Object.values(COLL).forEach((c) => { if (c && c.port > 0) { if (c.prix != null) c.prix = Math.round((c.prix + c.port / (c.qte || 1)) * 100) / 100; delete c.port; } else if (c) delete c.port; });
   };
+  // « À trouver » : livres recherchés, rangés dans le même fichier synchronisé sous la clé « souhait:<id> ».
+  // Un livre entré dans la collection quitte la liste tout seul.
+  const CLE_S = 'cote-souhaits-v1', PRE = 'souhait:';
+  let SOUH = {};
+  const chargerSouh = () => { try { SOUH = JSON.parse(localStorage.getItem(CLE_S) || '{}') || {}; } catch (e) { SOUH = {}; } };
+  const purgerSouh = () => { Object.keys(SOUH).forEach((id) => { if (COLL[id]) delete SOUH[id]; }); };
   const sauverLocal = () => {
-    try { localStorage.setItem(CLE, JSON.stringify(COLL)); stockageOk = true; } catch (e) { stockageOk = false; }
+    purgerSouh();
+    try { localStorage.setItem(CLE, JSON.stringify(COLL)); localStorage.setItem(CLE_S, JSON.stringify(SOUH)); stockageOk = true; } catch (e) { stockageOk = false; }
+  };
+  const toutSynchro = () => {
+    purgerSouh();
+    const t = Object.assign({}, COLL);
+    Object.keys(SOUH).forEach((id) => { t[PRE + id] = SOUH[id]; });
+    return t;
   };
   // Chaque modification est gardée sur l'appareil, puis envoyée au Drive de la personne connectée (groupée, voir cloud.js)
-  const adopterCloud = (c) => { COLL = c; sauverLocal(); afficher(); };
+  const adopterCloud = (c) => {
+    COLL = {}; SOUH = {};
+    Object.keys(c || {}).forEach((k) => { if (k.indexOf(PRE) === 0) SOUH[k.slice(PRE.length)] = c[k]; else COLL[k] = c[k]; });
+    sauverLocal(); afficher();
+  };
   const sauverColl = () => {
     sauverLocal();
-    if (window.Cloud) window.Cloud.planifier(() => COLL, adopterCloud);
+    if (window.Cloud) window.Cloud.planifier(toutSynchro, adopterCloud);
     document.dispatchEvent(new Event('cdh-collection'));
   };
-  window.AppCollection = { lire: () => COLL, adopter: adopterCloud, nb: () => Object.keys(COLL).length };
+  window.AppCollection = { lire: toutSynchro, adopter: adopterCloud, nb: () => Object.keys(COLL).length };
   // Construire sa collection exige un compte Google (consulter reste libre). `suite` est rejouée après la connexion.
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
@@ -1107,6 +1128,17 @@
     });
   }
 
+  // Livres recherchés : la liste ne garde que ceux qui ne sont pas (encore) dans la collection
+  function htmlATrouver() {
+    const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
+    if (!lignes.length) return '';
+    return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
+      <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div>
+        <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
+  }
+
   function afficherCollection() {
     const bl = bilan();
     const n = bl.exemplaires;
@@ -1168,7 +1200,7 @@
     if (!n) {
       zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
-        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>`;
+        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>${htmlATrouver()}`;
       return;
     }
     // par série
@@ -1231,7 +1263,8 @@
       ${barreFiltres(bl)}
       <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
       <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody id="coll-lignes">${lignesEx}</tbody></table>
-      <div id="coll-plus-zone">${boutonPlus(reste)}</div>`;
+      <div id="coll-plus-zone">${boutonPlus(reste)}</div>
+      ${htmlATrouver()}`;
     afficherHistoColl(bl);
     brancherFiltresColl();
   }
@@ -1264,7 +1297,8 @@
     $('#collection').addEventListener('click', (e) => {
       const t = e.target;
       if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
-      if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
+      if (t.dataset.souhaitRetirer) { if (!garde()) return; delete SOUH[t.dataset.souhaitRetirer]; sauverColl(); afficher(); annonce('Livre retiré de votre liste à trouver.'); }
+      else if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
       else if (t.id === 'exp-json') exporter('json');
       else if (t.id === 'exp-csv') exporter('csv');
       else if (t.id === 'coll-plus') { limiteColl += 30; afficherCollection(); }
@@ -1476,7 +1510,8 @@
       <div class="champ-ligne"><label for="c-etat">État</label><select id="c-etat"${c ? '' : ' disabled'}>${ETATS.map((x) => `<option value="${x.k}"${(c ? c.etat : S.h) === x.k ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></div>
       <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
       <div class="champ-ligne"><label for="c-prix">Prix payé, par exemplaire (facultatif)</label><input type="text" id="c-prix" inputmode="decimal" autocomplete="off" placeholder="en €" value="${c ? prixSaisi(c.prix) : ''}"${c ? '' : ' disabled'}></div>
-      <p class="valeur-ex" id="c-val"></p></div></div>`;
+      <p class="valeur-ex" id="c-val"></p></div>
+      <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>Je le recherche</span></label></div>`;
   }
   function brancherFicheCollection(b) {
     if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
@@ -1484,11 +1519,16 @@
       const c = COLL[b.id];
       $('#c-etat').disabled = !c; $('#c-qte').disabled = !c; $('#c-prix').disabled = !c;
       const v = c ? valeurLigne(b, c) : null;
+      $('#c-souhait-zone').hidden = !!c;
       $('#c-val').textContent = c ? (v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`) : '';
     };
     $('#c-poss').addEventListener('change', (e) => {
       if (e.target.checked) { COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) }; const pp = lirePrix($('#c-prix').value); if (pp != null) COLL[b.id].prix = pp; }
       else delete COLL[b.id];
+      sauverColl(); maj(); afficher();
+    });
+    $('#c-souhait').addEventListener('change', (e) => {
+      if (e.target.checked) SOUH[b.id] = {}; else delete SOUH[b.id];
       sauverColl(); maj(); afficher();
     });
     $('#c-etat').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].etat = e.target.value; sauverColl(); maj(); afficher(); } });
