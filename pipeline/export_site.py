@@ -143,6 +143,11 @@ def main():
     bnf = {k: v for k, v in lire_csv(racine_donnees / "processed" / "prix_editeur.csv").items() if v.get("prix")}
     hors_vente = set(lire_csv(racine_donnees / "manual" / "hors_vente.csv")) | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible"}
     en_stock = {k for k, v in auto.items() if v.get("disponibilite") == "en_stock" and v.get("prix")}      # en vente neuve, constaté ce jour
+    # data/manual/en_vente.csv force une édition « encore en vente neuve » que le relevé de librairie ne voit pas (vendue seulement
+    # chez l'éditeur ou sur Amazon) ; elle l'emporte sur « indisponible » et sur hors_vente.csv.
+    forcees = set(lire_csv(racine_donnees / "manual" / "en_vente.csv"))
+    hors_vente -= forcees
+    en_stock |= forcees
     # Éditeur manquant dans une fiche : repli sur l'éditeur de la série (data/manual/editeur_par_serie.csv, modifiable à la main).
     editeur_serie = {}
     chemin_ed = racine_donnees / "manual" / "editeur_par_serie.csv"
