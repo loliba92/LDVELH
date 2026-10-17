@@ -605,6 +605,16 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782380240252|convenable": {
+   "prix": 12.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782380240252|tres_bon": {
+   "prix": 30.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782380240276|convenable": {
    "prix": 20.0,
    "decision": "corrige",
