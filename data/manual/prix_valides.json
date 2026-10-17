@@ -157,6 +157,18 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070506781|convenable": {
+   "prix": 5.5,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
+  },
+  "9782070506781|tres_bon": {
+   "prix": 7.6,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
+  },
   "9782070507030|bon": {
    "prix": 14.38,
    "decision": "confirme",
