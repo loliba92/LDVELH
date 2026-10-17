@@ -13,3 +13,11 @@
     boutons.forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
   });
 })();
+
+/* Menu déroulant « À propos » : se ferme au clic ailleurs, à la touche Échap ou au choix d'un lien */
+(function () {
+  var m = document.querySelector('.menu-plus');
+  if (!m) return;
+  document.addEventListener('click', function (e) { if (m.open && !m.contains(e.target)) m.open = false; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && m.open) { m.open = false; var s = m.querySelector('summary'); if (s) s.focus(); } });
+})();
