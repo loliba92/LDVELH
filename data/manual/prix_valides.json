@@ -345,6 +345,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070587650|convenable": {
+   "prix": 53.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070587650|tres_bon": {
+   "prix": 148.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070649525|bon": {
    "prix": 8.95,
    "decision": "confirme",

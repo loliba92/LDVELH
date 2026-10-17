@@ -2,7 +2,7 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 42,
+ "nb_modifiees": 45,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 27,
  "hausses": [
@@ -159,6 +159,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070587650",
+   "isbn13": "9782070587650",
+   "titre": "Les Pirates de Shadaki",
+   "serie": "Loup Solitaire",
+   "numero": "765",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 102.99,
+   "apres": 53.0,
+   "pct": -0.485,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333684",
    "isbn13": "9782070333684",
    "titre": "Le Tombeau des Maléfices",
@@ -217,24 +232,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070651412",
-   "isbn13": "9782070651412",
-   "titre": "La Nuit du Loup-Garou (Grand format)",
-   "serie": "Défis Fantastiques",
-   "numero": "000",
-   "version": "V4",
-   "etat": "bon",
-   "avant": 52.99,
-   "apres": 30.3,
-   "pct": -0.428,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 30,
+ "nb_grands_mouvements": 32,
  "modele": {
   "actif": false,
   "n_paires": 7,
