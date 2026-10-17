@@ -1210,7 +1210,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .rang { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; align-items: stretch; padding-top: 24px; padding-bottom: 32px; }
 .rang > .carte[hidden] { display: none; }
 .rang > .carte-coll:only-child { grid-column: 1 / -1; }
-.carte { display: flex; flex-direction: column; padding: 18px 20px 20px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.carte { display: flex; flex-direction: column; padding: 18px 20px 20px; border: 1px solid var(--line-strong); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--surface); }
 .carte-coll { border-left: 4px solid var(--brass); margin: 0; }
 .carte > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
 .carte > header h2, .carte .hc-titre { margin: 0; color: var(--gold); font: 700 .8rem var(--f-ui); letter-spacing: .12em; text-transform: uppercase; }
