@@ -47,7 +47,7 @@ window.Notes = (function () {
     if (!actifRelais() || !chargees) return '';
     var m = MOY[livre], a = m && m[1], mienne = MIENNES[livre] || 0;
     var libelle = a ? 'Note de ce livre : ' + moy(m[0]) + ' sur 5, ' + m[1] + ' avis. ' : 'Pas encore noté. ';
-    return '<div class="note-zone" data-livre="' + esc(livre) + '"><button type="button" class="note-pastille' + (mienne ? ' a-moi' : '') + '" data-note-ouvrir aria-expanded="false" aria-label="' + esc(libelle + (connecte() ? 'Donner ma note' : 'Se connecter pour noter')) + '">' +
+    return '<div class="note-zone" data-livre="' + esc(livre) + '"><button type="button" class="note-pastille' + (mienne ? ' a-moi' : a ? '' : ' vide') + '" data-note-ouvrir aria-expanded="false" aria-label="' + esc(libelle + (connecte() ? 'Donner ma note' : 'Se connecter pour noter')) + '">' +
       '<span aria-hidden="true">' + (a ? '★ ' + moy(m[0]) : '☆') + '</span></button>' +
       '<div class="note-barre" hidden>' + barre(livre, mienne) + '</div></div>';
   }
