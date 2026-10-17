@@ -1128,7 +1128,7 @@
         const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
         const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
         const pct = Math.max(2, Math.round(100 * bl.titres / (META.nb_versions || 1)));
-        corps = `<div class="coll-haut">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) : 'prix à venir'}</b></p>
+        corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) : 'prix à venir'}</b></p>
           <p class="texte petit">${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}</p></div></div>
           <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.titres} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.titres} édition${bl.titres > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
           <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Compléter pas à pas</button></p>`;
