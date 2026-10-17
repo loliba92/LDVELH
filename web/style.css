@@ -1083,3 +1083,21 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .tr-axe { fill: var(--muted, #d6c8a8); font: 400 9px var(--f-ui); }
 .tr-option { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text); }
 .tr-liste { margin-top: 4px; }
+
+/* Tendances : détail d'un groupe au clic */
+.tr-item { margin: 0; }
+button.tr-ligne { width: 100%; padding: 6px 4px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+button.tr-ligne:hover, button.tr-ligne[aria-expanded="true"] { background: rgba(243, 233, 210, .07); }
+button.tr-ligne:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tr-nom::after { content: " ▾"; color: var(--muted); font-size: .75em; }
+button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
+.tr-detail { margin: 2px 0 10px; padding: 8px 10px 4px; border-left: 3px solid var(--accent); background: rgba(243, 233, 210, .04); border-radius: 0 6px 6px 0; }
+.tr-detail[hidden] { display: none; }
+.tr-eds { list-style: none; margin: 0; padding: 0; }
+.tr-ed { display: grid; gap: 2px; margin: 0 0 10px; padding: 0 0 10px; border-bottom: 1px solid var(--line); max-width: none; }
+.tr-ed:last-child { border-bottom: 0; margin-bottom: 4px; }
+.tr-ed-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.tr-ed-tete a { font-weight: 700; color: var(--text); text-underline-offset: 3px; overflow-wrap: anywhere; }
+.tr-ed small { color: var(--muted); font-size: .85rem; line-height: 1.35; }
+.tr-ed .tr-etats { color: var(--text); font-variant-numeric: tabular-nums; }
+.tr-ed .tr-src { font-style: italic; }

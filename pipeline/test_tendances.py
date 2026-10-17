@@ -10,9 +10,9 @@ def lig(id_, etat, archive, publie, nature="validé"):
     return {"id": id_, "etat": etat, "archive": archive, "publie": publie, "nature": nature}
 
 
-VERSIONS = [{"id": "a", "annee": 1985, "version": "V1", "serie": "S1", "editeur": "E"},
-            {"id": "b", "annee": 2015, "version": "V4", "serie": "S1", "editeur": "E"},
-            {"id": "c", "annee": 2022, "version": "V5", "serie": "S2", "editeur": "F"}]
+VERSIONS = [{"id": "a", "titre": "A", "annee": 1985, "version": "V1", "serie": "S1", "editeur": "E"},
+            {"id": "b", "titre": "B", "annee": 2015, "version": "V4", "serie": "S1", "editeur": "E"},
+            {"id": "c", "titre": "C", "annee": 2022, "version": "V5", "serie": "S2", "editeur": "F"}]
 
 
 class TestTendances(unittest.TestCase):
@@ -31,6 +31,14 @@ class TestTendances(unittest.TestCase):
         self.assertEqual([r["cle"] for r in g["decennie"]], ["Avant 1990", "2010–2019", "2020–2029"])
         self.assertEqual({r["cle"]: r["mediane"] for r in g["version"]}, {"V1": 0.1, "V4": -0.2, "V5": -0.4})
         self.assertTrue(all(r["peu"] for r in g["version"]))
+
+    def test_detail_et_ids_du_groupe(self):
+        revue = [lig("a", "bon", 10, 12), lig("a", "tres_bon", 20, 24), lig("b", "bon", 10, 5)]
+        d = t.detail(revue, VERSIONS, t.MARCHE)
+        self.assertAlmostEqual(d["a"]["var"], 0.2)
+        self.assertEqual(len(d["a"]["lignes"]), 2)
+        g = t.groupes(t.variations(revue, t.MARCHE), VERSIONS)
+        self.assertEqual([r["ids"] for r in g["version"]], [["a"], ["b"]])
 
     def test_indice_dans_le_temps(self):
         h = [{"date": "2026-10-11", "prix": {"a|bon": 10.0, "b|bon": 20.0}},

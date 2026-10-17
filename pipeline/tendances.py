@@ -35,6 +35,23 @@ def variations(revue, natures):
     return {i: statistics.median(v) for i, v in par.items()}
 
 
+def detail(revue, versions, natures):
+    """{id: infos de l'édition et lignes archive → publié} pour le détail d'un groupe (clic sur une barre)."""
+    info = {v["id"]: v for v in versions}
+    par = defaultdict(list)
+    for ligne in revue:
+        a, p = ligne.get("archive"), ligne.get("publie")
+        if a and p and ligne.get("nature") in natures and ligne["id"] in info:
+            par[ligne["id"]].append({"etat": ligne["etat"], "archive": a, "publie": p, "nature": ligne["nature"]})
+    sortie = {}
+    for i, lignes in par.items():
+        v = info[i]
+        sortie[i] = {"titre": v["titre"], "serie": v.get("serie"), "numero": v.get("numero"), "version": v.get("version"),
+                     "annee": v.get("annee"), "editeur": v.get("editeur"), "isbn": v.get("isbn13") or i,
+                     "var": round(statistics.median(x["publie"] / x["archive"] - 1 for x in lignes), 4), "lignes": lignes}
+    return sortie
+
+
 def _resume(valeurs):
     return {"n": len(valeurs), "mediane": round(statistics.median(valeurs), 4),
             "hausses": sum(1 for x in valeurs if x > SEUIL), "baisses": sum(1 for x in valeurs if x < -SEUIL),
@@ -51,7 +68,11 @@ def groupes(var, versions):
         for i, x in var.items():
             if i in info:
                 par[cle(info[i])].append(x)
-        lignes = [{"cle": k, **_resume(v)} for k, v in par.items()]
+        ids = defaultdict(list)
+        for i, x in var.items():
+            if i in info:
+                ids[cle(info[i])].append((x, i))
+        lignes = [{"cle": k, **_resume(v), "ids": [i for _, i in sorted(ids[k])]} for k, v in par.items()]
         if nom == "decennie":
             lignes.sort(key=lambda r: 0 if r["cle"].startswith("Avant") else (9999 if r["cle"].startswith("Année") else int(r["cle"][:4])))
         elif nom == "version":
@@ -88,6 +109,7 @@ def temps(historique):
 def calculer(revue, versions, historique, date):
     marche, avec = variations(revue, MARCHE), variations(revue, AVEC_EDITEUR)
     return {"date": date, "reference": "ancien relevé",
+            "detail": {"marche": detail(revue, versions, MARCHE), "avec_editeur": detail(revue, versions, AVEC_EDITEUR)},
             "global": {"marche": global_(marche), "avec_editeur": global_(avec)},
             "groupes": {"marche": groupes(marche, versions), "avec_editeur": groupes(avec, versions)},
             "temps": temps(sorted(historique, key=lambda h: h["date"]))}

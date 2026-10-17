@@ -324,26 +324,43 @@
     const NOMS = { decennie: 'année d\'édition', version: 'version', serie: 'série', editeur: 'éditeur' };
     fetch('data/tendances.json', { cache: 'no-store' }).then((x) => (x.ok ? x.json() : null)).catch(() => null).then((T) => {
       if (!T) return;
-      let dim = 'decennie', avec = false;
+      let dim = 'decennie', avec = false, ouvert = null;
+      const NAT = { 'validé': 'validé par vous', annonces: 'annonces', 'prix éditeur': 'prix éditeur' }, ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+      const detailGroupe = (l, cle) => {
+        const eds = l.ids.map((i) => ({ i, ...T.detail[cle][i] })).sort((a, b) => a.var - b.var);
+        return `<p class="sous">${l.n} édition${l.n > 1 ? 's' : ''}, de la plus forte baisse à la plus forte hausse. Chaque ligne montre l'ancienne cote et la cote publiée, par état.</p><ul class="tr-eds">` + eds.map((e) => {
+          const s = e.var > 0.005 ? 'haut' : e.var < -0.005 ? 'bas' : 'stable', sources = [...new Set(e.lignes.map((x) => NAT[x.nature] || x.nature))].join(', ');
+          return `<li class="tr-ed"><div class="tr-ed-tete"><a href="./#q=${encodeURIComponent(e.isbn)}">${esc(e.titre)}</a><b class="tr-val tr-v-${s}">${pct(e.var)}</b></div>
+            <small>${esc([e.serie, e.numero && e.numero !== '0' && e.numero !== '000' ? 'n° ' + parseInt(e.numero, 10) : '', e.version, e.annee, e.editeur].filter(Boolean).join(' · '))}</small>
+            <small class="tr-etats">${e.lignes.map((x) => `${ABR[x.etat]} ${eur(x.archive)} → ${eur(x.publie)}`).join(' · ')}</small><small class="tr-src">Source : ${esc(sources)}</small></li>`;
+        }).join('') + '</ul>';
+      };
       const dessiner = () => {
         const cle = avec ? 'avec_editeur' : 'marche', g = T.global[cle], lignes = T.groupes[cle][dim] || [];
         $('#tr-resume').innerHTML = g.n
           ? `Par rapport à l'ancien relevé : <strong>${pct(g.mediane)}</strong> en médiane sur ${g.n} éditions comparées (${g.hausses} en hausse, ${g.baisses} en baisse, ${g.stables} stables).`
           : 'Pas encore assez de prix récents pour comparer avec l\'ancien relevé.';
         const max = Math.max(0.3, ...lignes.map((l) => Math.abs(l.mediane)));
-        $('#tr-liste').innerHTML = lignes.map((l) => {
+        $('#tr-liste').innerHTML = lignes.map((l, k) => {
           const w = Math.min(50, Math.abs(l.mediane) / max * 50), s = l.mediane > 0.005 ? 'haut' : l.mediane < -0.005 ? 'bas' : 'stable';
-          return `<li class="tr-ligne${l.peu ? ' tr-peu' : ''}"><span class="tr-nom">${esc(l.cle)}</span>
+          return `<li class="tr-item"><button type="button" class="tr-ligne${l.peu ? ' tr-peu' : ''}" data-k="${k}" aria-expanded="${ouvert === l.cle}" aria-controls="tr-d${k}"><span class="tr-nom">${esc(l.cle)}</span>
             <span class="tr-piste" aria-hidden="true"><i class="tr-barre tr-${s}" style="width:${w}%"></i></span>
-            <b class="tr-val tr-v-${s}">${pct(l.mediane)}</b><small class="tr-n">${l.n} éd.${l.peu ? ' · peu de données' : ''}</small></li>`;
+            <b class="tr-val tr-v-${s}">${pct(l.mediane)}</b><small class="tr-n">${l.n} éd.${l.peu ? ' · peu de données' : ''}</small></button>
+            <div class="tr-detail" id="tr-d${k}"${ouvert === l.cle ? '' : ' hidden'}>${ouvert === l.cle ? detailGroupe(l, cle) : ''}</div></li>`;
         }).join('') || '<li class="sous">Rien à comparer pour l\'instant.</li>';
         $('#tr-note').textContent = `Médiane de la variation entre l'ancien relevé et la cote publiée, par ${NOMS[dim]}. Seules comptent les cotes appuyées sur un prix récent (validé ou annonces) ; les autres n'ont pas bougé. Mis à jour le ${jour(T.date)}.`;
       };
       $('#tr-onglets').addEventListener('click', (e) => {
         const b = e.target.closest('[data-dim]'); if (!b) return;
-        dim = b.dataset.dim; document.querySelectorAll('#tr-onglets button').forEach((x) => x.setAttribute('aria-selected', String(x === b))); dessiner();
+        dim = b.dataset.dim; ouvert = null; document.querySelectorAll('#tr-onglets button').forEach((x) => x.setAttribute('aria-selected', String(x === b))); dessiner();
       });
-      $('#tr-editeur').addEventListener('change', (e) => { avec = e.target.checked; dessiner(); });
+      $('#tr-editeur').addEventListener('change', (e) => { avec = e.target.checked; ouvert = null; dessiner(); });
+      $('#tr-liste').addEventListener('click', (e) => {
+        const b = e.target.closest('.tr-ligne'); if (!b) return;
+        const l = T.groupes[avec ? 'avec_editeur' : 'marche'][dim][+b.dataset.k];
+        ouvert = ouvert === l.cle ? null : l.cle; dessiner();
+        const nouveau = document.querySelector(`.tr-ligne[data-k="${b.dataset.k}"]`); if (ouvert && nouveau) nouveau.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
       // Courbe : indice des cotes publiées à chaque publication (100 à la première)
       const pts = T.temps || [];
       if (pts.length > 1) {
