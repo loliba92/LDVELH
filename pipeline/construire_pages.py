@@ -200,6 +200,21 @@ COFFRE = '''<h1>Accès commun <span class="badge-admin" title="Réservé aux adm
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
 <p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
+<section class="rv-ajout rv-tendances" id="rv-tendances" aria-labelledby="tr-titre" hidden>
+  <h2 id="tr-titre">Tendances des prix</h2>
+  <p class="sous" id="tr-resume"></p>
+  <div class="tr-onglets" id="tr-onglets" role="tablist" aria-label="Regrouper par">
+    <button type="button" role="tab" data-dim="decennie" aria-selected="true">Année d'édition</button>
+    <button type="button" role="tab" data-dim="version" aria-selected="false">Version</button>
+    <button type="button" role="tab" data-dim="serie" aria-selected="false">Série</button>
+    <button type="button" role="tab" data-dim="editeur" aria-selected="false">Éditeur</button>
+  </div>
+  <ul class="tr-liste" id="tr-liste"></ul>
+  <label class="tr-option"><input type="checkbox" id="tr-editeur"> Inclure les prix des éditeurs (nouveautés)</label>
+  <p class="sous" id="tr-note"></p>
+  <h3 class="tr-sous-titre">Évolution dans le temps</h3>
+  <div id="tr-temps"></div>
+</section>
 <section class="rv-ajout" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>

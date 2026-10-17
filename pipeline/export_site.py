@@ -19,6 +19,7 @@ import editions
 from estimation import Obs, estimer
 import calibration
 import mouvements
+import tendances
 import etats
 import validations
 
@@ -270,6 +271,8 @@ def main():
                     ligne.update({"eb_nb_toutes": int(eb["nb_toutes"]), "eb_med_toutes": float(eb["prix_median_toutes"])})
             revue.append(ligne)
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),
+                                                      ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     nb_actuels = sum(1 for v in versions for i in v["prix_info"].values() if i["source"] != "archives")
     meta["nb_prix_actuels"] = nb_actuels
     meta["calibration"] = {k: modele.get(k) for k in ("actif", "n_paires", "gain", "raison", "calcule_le", "rapport_global")}

@@ -1054,3 +1054,32 @@ tr.filtrable:hover td, tr.filtrable:focus-visible td { background: var(--surface
 .ajout-mini img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .ajout-mini:hover, .ajout-mini:focus-visible { outline: 2px solid var(--accent, #cf9a2e); outline-offset: 1px; }
 .ajout-mini .ajout-vide { display: grid; place-items: center; width: 100%; height: 100%; color: var(--muted, #d6c8a8); font: 700 1.1rem var(--f-display); }
+
+/* Page admin : tendances des prix */
+.rv-tendances[hidden] { display: none; }
+.tr-onglets { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 10px; }
+.tr-onglets button { min-height: 40px; padding: 6px 14px; border: 1px solid var(--line-strong); border-radius: 999px; background: transparent; color: var(--text); font: 600 .92rem var(--f-ui); cursor: pointer; }
+.tr-onglets button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent, #0a0a0a); }
+.tr-liste { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.tr-ligne { display: grid; grid-template-columns: minmax(78px, 30%) 1fr 54px; grid-template-areas: "nom piste val" "nom piste n"; align-items: center; gap: 0 10px; max-width: none; margin: 0; }
+.tr-nom { grid-area: nom; font-weight: 600; overflow-wrap: anywhere; line-height: 1.2; }
+.tr-piste { grid-area: piste; position: relative; height: 18px; background: rgba(243, 233, 210, .06); border-radius: 3px; }
+.tr-piste::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--muted, #d6c8a8); opacity: .6; }
+.tr-barre { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; }
+.tr-haut { left: 50%; background: #6fbf8a; }
+.tr-bas { right: 50%; background: #d9747b; }
+.tr-stable { left: calc(50% - 1px); width: 2px !important; background: var(--muted, #d6c8a8); }
+.tr-val { grid-area: val; text-align: right; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.tr-v-haut { color: #8fd6a8; } .tr-v-bas { color: #ef9aa0; }
+.tr-n { grid-area: n; text-align: right; color: var(--muted); font-size: .72rem; line-height: 1.1; }
+.tr-peu { opacity: .6; }
+.tr-peu .tr-n { grid-column: 1 / -1; grid-area: auto; }
+.tr-option { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: .95rem; }
+.tr-sous-titre { margin: 18px 0 6px; font-size: 1.25rem; }
+.tr-courbe { display: block; width: 100%; max-width: 520px; height: auto; }
+.tr-base { stroke: var(--muted, #d6c8a8); stroke-width: 1; stroke-dasharray: 3 3; opacity: .6; }
+.tr-trait { fill: none; stroke: var(--accent, #cf9a2e); stroke-width: 2.2; stroke-linejoin: round; }
+.tr-point { fill: var(--accent, #cf9a2e); }
+.tr-axe { fill: var(--muted, #d6c8a8); font: 400 9px var(--f-ui); }
+.tr-option { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--text); }
+.tr-liste { margin-top: 4px; }
