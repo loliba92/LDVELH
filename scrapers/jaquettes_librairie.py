@@ -70,15 +70,15 @@ def main():
                 sans.append((r["isbn13"], r["titre"]))
                 continue
             if est_maquette(img.content):
-                maquettes.append(r)
+                maquettes.append((r, img.content))
                 continue
             enregistrer(img.content, r["isbn13"])
             ok += 1
         except (requests.RequestException, OSError) as e:
             sans.append((r["isbn13"], f"{r['titre']} ({str(e)[:40]})"))
-    # Image en relief : on reprend la couverture à plat d'une autre édition du même livre (même illustration), si elle existe
+    # Image en relief : on reprend la couverture à plat d'une autre édition du même livre (même illustration), si elle existe ; sinon on garde l'image en relief
     tout = editions.load()
-    for r in maquettes:
+    for r, contenu in maquettes:
         autre = next((x for x in tout if x["isbn13"] != r["isbn13"] and x.get("livre") == r.get("livre") and x.get("serie") == r.get("serie")
                       and all((DOSSIER / t / f"{x['isbn13']}.webp").exists() for t in TAILLES)), None)
         if autre:
@@ -86,8 +86,10 @@ def main():
                 shutil.copy(DOSSIER / t / f"{autre['isbn13']}.webp", DOSSIER / t / f"{r['isbn13']}.webp")
             ok += 1
             print(f"  = {r['titre']} ({r['version']}) : couverture d'une autre édition du même livre ({autre['version']})", flush=True)
-        else:
-            sans.append((r["isbn13"], f"{r['titre']} (image en relief seulement)"))
+        else:                                                   # faute de mieux (accepté le 17 octobre 2026) : l'image en relief, plutôt qu'une tuile vide
+            enregistrer(contenu, r["isbn13"])
+            ok += 1
+            print(f"  ~ {r['titre']} ({r['version']}) : image en relief, faute de couverture à plat", flush=True)
     print(f"Jaquettes ajoutées : {ok} ; introuvables : {len(sans)}", flush=True)
     for x in sans[:60]:
         print("  ✗", x, flush=True)
