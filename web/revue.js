@@ -345,8 +345,9 @@
       if (!window.Relais.actif()) return;
       window.Relais.appeler('demandes_lire').then((r) => {
         if (!r || !r.ok) { bloc.hidden = false; dire(lisible(r), true); return; }
-        bloc.hidden = !r.demandes.length;
+        bloc.hidden = false;
         $('#dm-nb').textContent = r.demandes.length || '';
+        if (!r.demandes.length) { liste.innerHTML = '<li class="sous">Aucune demande en attente.</li>'; return; }
         liste.innerHTML = r.demandes.map((d) => `<li class="dm-demande" data-n="${d.numero}">
           <p><strong>${esc(d.texte)}</strong> <span class="sous">demandé par ${esc(d.par || 'une personne connectée')}${d.date ? ', le ' + esc(jour(d.date)) : ''}</span></p>
           ${d.note ? `<p class="sous">${esc(d.note)}</p>` : ''}
