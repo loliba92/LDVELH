@@ -1188,3 +1188,6 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .eq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .eq-actions .bouton { min-height: 40px; padding: 4px 14px; }
 @media (max-width: 700px) { .eq-actions { width: 100%; } .eq-actions .bouton { flex: 1 1 0; } }
+/* Contact et soutien */
+.contact-mail { margin: 8px 0 14px; }
+.contact-mail a.bouton { color: #1a1205; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; text-decoration: none; }
