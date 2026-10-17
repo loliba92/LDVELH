@@ -25,6 +25,18 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070332670|convenable": {
+   "prix": 4.0,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
+  },
+  "9782070332670|tres_bon": {
+   "prix": 16.0,
+   "decision": "corrige",
+   "le": "2026-10-17",
+   "par": "loliba (superadmin)"
+  },
   "9782070333516|convenable": {
    "prix": 5.0,
    "decision": "corrige",

@@ -2,7 +2,7 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 52,
+ "nb_modifiees": 54,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 27,
  "hausses": [
@@ -174,6 +174,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070332670",
+   "isbn13": "9782070332670",
+   "titre": "L'Île du Roi Lézard",
+   "serie": "Défis Fantastiques",
+   "numero": "267",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 7.42,
+   "apres": 4.0,
+   "pct": -0.461,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333684",
    "isbn13": "9782070333684",
    "titre": "Le Tombeau des Maléfices",
@@ -217,24 +232,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070333714",
-   "isbn13": "9782070333714",
-   "titre": "La Cité Interdite",
-   "serie": "Astre d'Or",
-   "numero": "371",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 27.63,
-   "apres": 15.8,
-   "pct": -0.428,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 33,
+ "nb_grands_mouvements": 35,
  "modele": {
   "actif": false,
   "n_paires": 7,
