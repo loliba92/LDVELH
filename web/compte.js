@@ -35,6 +35,7 @@ window.Compte = (function () {
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
+      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
       (estAdmin() ? '<li><a href="revue-prix.html">Espace administrateur</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
       (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
@@ -168,6 +169,34 @@ window.Compte = (function () {
     return false;
   }
 
+  /* ---------- Demande d'ajout d'un livre (Héros) : le relais en fait un signalement que les admins traitent ---------- */
+  function demanderLivre(texteInitial) {
+    if ($('.dlg-demande')) return;
+    if (!actifGoogle() || !window.Cloud.actif()) { intention = function () { demanderLivre(texteInitial); }; if (window.Cloud.lie()) { annoncer('Reconnectez-vous pour demander l\'ajout d\'un livre.'); } invitation(); return; }
+    var d = dialogue('<h2>Demander l\'ajout d\'un livre</h2>' +
+      '<p>Un livre manque au guide ? Indiquez son titre ou son ISBN. Un administrateur l\'examine, puis l\'ajoute avec sa jaquette.</p>' +
+      '<form id="dem-form" class="eq-form"><label for="dem-texte">Titre ou ISBN</label>' +
+      '<input id="dem-texte" type="text" maxlength="150" required autocomplete="off" placeholder="978-2380240283 ou un titre">' +
+      '<label for="dem-note">Un mot (facultatif) : série, numéro, édition</label>' +
+      '<input id="dem-note" type="text" maxlength="300" autocomplete="off" placeholder="Par exemple : édition collector">' +
+      '<p class="sous">Votre prénom est joint à la demande, jamais votre adresse. La demande est publique sur GitHub.</p>' +
+      '<p class="rv-ajout-bilan" id="dem-msg" role="status" hidden></p>' +
+      '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer la demande</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-demande');
+    if (texteInitial) $('#dem-texte', d).value = texteInitial;
+    d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
+    $('#dem-form', d).addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var msg = $('#dem-msg', d), bouton = d.querySelector('button[type=submit]');
+      bouton.disabled = true; msg.hidden = false; msg.textContent = 'Envoi en cours…';
+      window.Relais.appeler('demande', { texte: $('#dem-texte', d).value, note: $('#dem-note', d).value }).then(function (r) {
+        if (r && r.ok) { d.close(); annoncer('Votre demande est envoyée. Merci !'); return; }
+        var e = (r && r.erreur) || 'erreur inconnue';
+        msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+        bouton.disabled = false;
+      }).catch(function () { msg.textContent = 'Le service ne répond pas : vérifiez votre connexion.'; bouton.disabled = false; });
+    });
+  }
+
   /* ---------- Menu et clics ---------- */
   function fermerMenu(rendreFocus) {
     var m = $('#compte-menu'), b = $('#compte-btn');
@@ -180,6 +209,7 @@ window.Compte = (function () {
       var a = act.dataset.compte;
       if (a === 'connecter') { fermerMenu(); connecter(); }
       else if (a === 'sync') { sync(); }
+      else if (a === 'demande') { fermerMenu(); var feuille = $('#feuille-plus'); if (feuille && feuille.open) feuille.close(); demanderLivre(); }
       else if (a === 'supprimer') {
         fermerMenu();
         if (window.confirm('Supprimer définitivement votre collection du Drive ? Elle sera aussi effacée de cet appareil. Exportez-la d\'abord si vous voulez en garder une copie.')) {
@@ -220,5 +250,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, actif: actifGoogle, avecEquipe: true };
+  return { demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, actif: actifGoogle, avecEquipe: true };
 })();
