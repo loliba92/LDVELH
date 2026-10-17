@@ -280,6 +280,16 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070651412|convenable": {
+   "prix": 20.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070651412|tres_bon": {
+   "prix": 51.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070660797|convenable": {
    "prix": 4.0,
    "decision": "corrige",

@@ -2,11 +2,41 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 4,
+ "nb_modifiees": 7,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
  "baisses": [
+  {
+   "id": "9782070651412",
+   "isbn13": "9782070651412",
+   "titre": "La Nuit du Loup-Garou (Grand format)",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 42.55,
+   "apres": 20.0,
+   "pct": -0.53,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070651412",
+   "isbn13": "9782070651412",
+   "titre": "La Nuit du Loup-Garou (Grand format)",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 52.99,
+   "apres": 30.3,
+   "pct": -0.428,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070333516",
    "isbn13": "9782070333516",
@@ -51,9 +81,24 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070651412",
+   "isbn13": "9782070651412",
+   "titre": "La Nuit du Loup-Garou (Grand format)",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 61.88,
+   "apres": 51.0,
+   "pct": -0.176,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
   "n_paires": 7,
