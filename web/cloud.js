@@ -67,12 +67,12 @@
   var oterLoc = function (k) { try { localStorage.removeItem(k); } catch (e) { /* rien à retirer */ } };
   var lireMeta = function () { try { return JSON.parse(lireLoc(CLE_META) || '{}') || {}; } catch (e) { return {}; } };
 
-  // La connexion survit au changement de page : elle est gardée dans la mémoire de l'onglet (sessionStorage), jamais sur le disque,
-  // et disparaît à la fermeture de l'onglet ou au bout d'une heure.
-  function garderJeton() { try { sessionStorage.setItem(CLE_JETON, JSON.stringify({ j: jeton, e: expire })); } catch (e) { /* mémoire d'onglet indisponible */ } }
-  function oublierJeton() { try { sessionStorage.removeItem(CLE_JETON); } catch (e) { /* rien à oublier */ } }
+  // La connexion survit au changement de page et à la fermeture de l'onglet : le laissez-passer de Google (une heure au plus) reste sur l'appareil
+  // jusqu'à sa fin de validité, puis il est effacé. Il n'est jamais envoyé ailleurs qu'à Google.
+  function garderJeton() { try { localStorage.setItem(CLE_JETON, JSON.stringify({ j: jeton, e: expire })); } catch (e) { /* stockage indisponible */ } }
+  function oublierJeton() { try { localStorage.removeItem(CLE_JETON); sessionStorage.removeItem(CLE_JETON); } catch (e) { /* rien à oublier */ } }
   (function reprendreJeton() {
-    try { var s = JSON.parse(sessionStorage.getItem(CLE_JETON) || 'null'); if (s && s.j && s.e > Date.now()) { jeton = s.j; expire = s.e; } else if (s) oublierJeton(); } catch (e) { /* rien à reprendre */ }
+    try { var s = JSON.parse(localStorage.getItem(CLE_JETON) || 'null'); if (s && s.j && s.e > Date.now()) { jeton = s.j; expire = s.e; } else if (s) oublierJeton(); } catch (e) { /* rien à reprendre */ }
   })();
 
   function config() {
