@@ -145,7 +145,9 @@ def main():
     en_stock = {k for k, v in auto.items() if v.get("disponibilite") == "en_stock" and v.get("prix")}      # en vente neuve, constaté ce jour
     # data/manual/en_vente.csv force une édition « encore en vente neuve » que le relevé de librairie ne voit pas (vendue seulement
     # chez l'éditeur ou sur Amazon) ; elle l'emporte sur « indisponible » et sur hors_vente.csv.
-    forcees = set(lire_csv(racine_donnees / "manual" / "en_vente.csv"))
+    forcees_csv = lire_csv(racine_donnees / "manual" / "en_vente.csv")
+    forcees = set(forcees_csv)
+    asin = {k: v["asin"].strip() for k, v in forcees_csv.items() if (v.get("asin") or "").strip()}      # page Amazon exacte (colonne facultative)
     hors_vente -= forcees
     en_stock |= forcees
     # Éditeur manquant dans une fiche : repli sur l'éditeur de la série (data/manual/editeur_par_serie.csv, modifiable à la main).
@@ -207,7 +209,7 @@ def main():
             "version": r["libelle_version"], "version_n": r["numero_version"],
             "derniere": bool(r["est_derniere_version"]),
             "en_vente": 1 if r["isbn13"] in en_stock else (None if r["isbn13"] in hors_vente else r["en_vente"]), "annee": r["annee"], "annee_bnf": r["annee_bnf"],
-            "editeur": r["editeur"] or editeur_serie.get(r["serie"]), "collection": r["collection_editeur"], "pages": r["pages"],
+            "editeur": r["editeur"] or editeur_serie.get(r["serie"]), **({"amazon": asin[r["isbn13"]]} if r["isbn13"] in asin else {}), "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
             "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
             "maj": dates_maj.get(r["id"]),

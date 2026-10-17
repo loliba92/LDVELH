@@ -647,7 +647,7 @@
       ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
     ];
-    if (b.en_vente === 1 && b.isbn13) liens.push(['Amazon', `https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}`]);
+    if (b.en_vente === 1 && b.isbn13) liens.push(['Amazon', b.amazon ? `https://www.amazon.fr/dp/${encodeURIComponent(b.amazon)}` : `https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}`]);
     return `<h3>Chercher cette édition en vente</h3>
         <p class="liens-vente">${liens.map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('')}</p>
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
