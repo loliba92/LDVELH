@@ -701,7 +701,8 @@
       if (v.some((x) => x && !(nb(x) > 0))) return dire('Un des prix n\'est pas un nombre : corrigez-le.');
       if (!v.some(Boolean)) return dire('Indiquez au moins un prix.');
       const ligne = `${f.dataset.isbn} ; ${v.join(' ; ')}`;
-      const jeton = lireLoc(CLE_JETON);
+      const relais = window.Relais && window.Relais.actif();       // envoi par le relais : aucune clé GitHub sur l'appareil
+      const jeton = relais ? 'relais' : lireLoc(CLE_JETON);
       if (!jeton) {
         try { await navigator.clipboard.writeText(ligne); } catch (e) { /* copie impossible : la ligne reste affichée */ }
         msg.innerHTML = `Pas de jeton d'accès enregistré : la ligne <code>${esc(ligne)}</code> est copiée, transmettez-la. Pour l'envoi en un clic, enregistrez votre jeton dans la page « Vérifier les prix » (Accès admin).`;
@@ -712,12 +713,12 @@
       if (!id.ok) return dire('Connectez-vous d\'abord avec Google dans la page « Vérifier les prix » (la connexion dure environ une heure).');
       f.querySelector('button').disabled = true; dire('Envoi en cours…');
       try {
-        const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/actions/workflows/corriger-prix.yml/dispatches', {
+        const r = relais ? await window.Relais.envoyerLot('corriger-prix.yml', { corrections: ligne }) : await fetch('https://api.github.com/repos/loliba92/LDVELH/actions/workflows/corriger-prix.yml/dispatches', {
           method: 'POST',
           headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${jeton}`, 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
           body: JSON.stringify({ ref: 'main', inputs: { corrections: ligne, identite: id.jeton } }) });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire('Le jeton est refusé ou expiré : enregistrez-en un nouveau dans la page privée.');
+        else if (r.status === 401 || r.status === 403) dire(relais ? 'Ce compte n\'a pas les droits d\'administrateur, ou la connexion Google a expiré : reconnectez-vous.' : 'Le jeton est refusé ou expiré : enregistrez-en un nouveau dans la page privée.');
         else if (r.status === 404) dire('Le jeton n\'a pas accès à ce dépôt (ou le lot est introuvable) : vérifiez ses droits.');
         else dire(`Échec de l'envoi (code ${r.status}).`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }

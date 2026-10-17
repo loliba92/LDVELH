@@ -12,6 +12,11 @@ on:
         description: "Relever ensuite le prix du neuf et les annonces (oui/non)"
         required: false
         default: "oui"
+      auteur:
+        description: "Nom de la personne qui envoie, transmis par le relais (ne pas saisir)"
+        required: false
+        default: ""
+        type: string
       identite:
         description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
         required: false
@@ -36,6 +41,7 @@ jobs:
       LISTE: ${{ inputs.liste }}
       RELEVE: ${{ inputs.releve }}
       IDENTITE: ${{ inputs.identite }}
+      AUTEUR_RELAIS: ${{ inputs.auteur }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

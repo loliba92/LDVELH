@@ -1,7 +1,11 @@
 {
   "ouvert": true,
-  "noms": {
-    "sha256:a368231a67eff380f08953cff1eb3e41813f86ceed64ebcd9911422ef8d533e6": "loliba (superadmin)"
+  "relais": false,
+  "equipe": {
+    "sha256:a368231a67eff380f08953cff1eb3e41813f86ceed64ebcd9911422ef8d533e6": {
+      "nom": "loliba (superadmin)",
+      "role": "superadmin"
+    }
   },
   "bloques": []
 }

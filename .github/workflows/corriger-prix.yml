@@ -9,6 +9,11 @@ on:
         description: "ISBN ; convenable ; bon ; très bon (case vide = inchangé). Plusieurs livres : les séparer par |"
         required: true
         type: string
+      auteur:
+        description: "Nom de la personne qui envoie, transmis par le relais (ne pas saisir)"
+        required: false
+        default: ""
+        type: string
       identite:
         description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
         required: false
@@ -32,6 +37,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       CORRECTIONS: ${{ inputs.corrections }}
       IDENTITE: ${{ inputs.identite }}
+      AUTEUR_RELAIS: ${{ inputs.auteur }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
