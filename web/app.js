@@ -578,15 +578,14 @@
     const lignes = vus.map((b) => `
       <tr class="cliquable" data-id="${esc(b.id)}">
         <td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))}</span></div></div></td>
+          <div class="l-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))}</span></div>${avecNotes ? window.Notes.etiquette(b.livre_id) : ''}</div></td>
         <td data-label="Édition"><span class="badge">${esc(b.version)}</span></td>
         <td data-label="Année">${b.annee ?? '—'}</td>
         <td data-label="Éditeur">${esc(b.editeur || '—')}</td>
-        ${avecNotes ? `<td data-label="Note">${window.Notes.cellule(b.livre_id)}</td>` : ''}
         ${cellulesPrix(b)}
       </tr>`).join('');
     const reste = tri.length - vus.length;
-    $('#resultats').innerHTML = `<table class="cartes liste"><thead><tr><th>Livre</th><th>Édition</th><th>Année</th><th>Éditeur</th>${avecNotes ? '<th>Note</th>' : ''}
+    $('#resultats').innerHTML = `<table class="cartes liste"><thead><tr><th>Livre</th><th>Édition</th><th>Année</th><th>Éditeur</th>
       ${ETATS.map((e) => `<th class="num">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</th>`).join('')}</tr></thead><tbody>${lignes}</tbody></table>` +
       (reste > 0 ? `<button type="button" class="plus" id="plus">Voir ${Math.min(reste, PAR_PAGE)} livres de plus (${reste} restants)</button>` : '');
     const plus = $('#plus');
