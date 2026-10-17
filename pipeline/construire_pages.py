@@ -244,7 +244,7 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
 
 <h2>Comment le devenir</h2>
 <ol>
-  <li>Contactez la personne qui gère le site, par le moyen qu'elle vous a indiqué. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</li>
+  <li>Écrivez-nous depuis la <a href="contact.html">page Contact</a>. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</li>
   <li>Donnez-lui l'<strong>adresse Google</strong> avec laquelle vous vous connectez et le <strong>nom</strong> à afficher à côté de vos mises à jour (un prénom ou un pseudo).</li>
   <li>Un SuperAdmin vous ajoute à l'équipe. Il n'y a ni mot de passe ni clé à recevoir : votre compte Google suffit.</li>
 </ol>
