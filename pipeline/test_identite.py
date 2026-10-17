@@ -38,6 +38,25 @@ class TestIdentite(unittest.TestCase):
     def test_admin_reconnu_sans_tenir_compte_de_la_casse(self):
         self.assertEqual(self.v(jeton(self.cle)), ("Marc", None))
 
+    def test_mode_ouvert_nom_du_compte_avec_suffixe_et_blocage(self):
+        import hashlib
+        j = jeton(self.cle, email="nouvelle@gmail.com", given_name="Marie")
+        self.assertEqual(identite.verifier(j, CLIENT, ADMINS, self.certs)[0], None)                # liste seule : refus
+        nom, raison = identite.verifier(j, CLIENT, ADMINS, self.certs, ouvert=True)
+        h = hashlib.sha256(b"nouvelle@gmail.com").hexdigest()[:4]
+        self.assertEqual((nom, raison), (f"Marie #{h}", None))
+        # un nom de compte copié sur un nom de la liste ne donne jamais exactement ce nom
+        j2 = jeton(self.cle, email="faux@gmail.com", given_name="Marc")
+        self.assertNotEqual(identite.verifier(j2, CLIENT, ADMINS, self.certs, ouvert=True)[0], "Marc")
+        # la liste prime sur le nom du compte
+        self.assertEqual(identite.verifier(jeton(self.cle, given_name="Autre"), CLIENT, ADMINS, self.certs, ouvert=True)[0], "Marc")
+        # un compte bloqué est refusé, par adresse ou par empreinte
+        for bloque in ("nouvelle@gmail.com", "sha256:" + hashlib.sha256(b"nouvelle@gmail.com").hexdigest()):
+            self.assertEqual(identite.verifier(j, CLIENT, ADMINS, self.certs, ouvert=True, bloques=[bloque]), (None, "adresse bloquée"))
+        # le mode ouvert n'assouplit rien d'autre
+        autre, _ = fabrique()
+        self.assertIsNone(identite.verifier(jeton(autre, email="nouvelle@gmail.com"), CLIENT, ADMINS, self.certs, ouvert=True)[0])
+
     def test_adresse_donnee_par_son_empreinte(self):
         import hashlib
         h = "sha256:" + hashlib.sha256(b"marc.dupont@gmail.com").hexdigest()

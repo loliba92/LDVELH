@@ -1,10 +1,15 @@
 """Identité des administrateurs : vérifie la connexion Google jointe à un envoi depuis le site.
 
 La page « Vérifier les prix » transmet au lot GitHub le jeton signé que Google remet à la personne connectée (champ `identite`).
-Ce programme le vérifie avec les clés publiques de Google, contrôle qu'il a été émis pour ce site (web/data/admin-config.json,
-`client_id`) et que l'adresse figure dans data/admins.json : {"admins": {"adresse@exemple.fr": "Prénom affiché"}}.
-L'adresse peut être remplacée par son empreinte, pour ne pas l'écrire en clair dans le dépôt : "sha256:<empreinte sha256 de l'adresse en minuscules>".
-Le nom affiché vient de cette liste, pas de la personne : c'est lui qui est enregistré avec la mise à jour.
+Ce programme le vérifie avec les clés publiques de Google et contrôle qu'il a été émis pour ce site (web/data/admin-config.json,
+`client_id`). Il sert à savoir QUI envoie ; l'autorisation d'envoyer vient de la clé GitHub, que le propriétaire ne donne qu'aux personnes
+de son choix. Fichier data/admins.json :
+  "ouvert"  : true = tout compte Google vérifié est accepté (le propriétaire reste maître de la clé) ; false = seules les adresses de "noms".
+  "noms"    : adresse (ou son empreinte) -> nom à afficher, qui prime sur le nom du compte Google. Ex. "sha256:<empreinte>": "Marie (admin)".
+  "bloques" : adresses (ou empreintes) refusées même avec la clé.
+L'adresse peut être remplacée par l'empreinte sha256 de l'adresse en minuscules : "sha256:<empreinte>", pour ne pas l'écrire en clair dans le dépôt.
+Sans entrée dans "noms", le nom est celui du compte Google suivi de quatre signes tirés de l'adresse (« Marie #3fa2 ») : il ne peut pas
+se faire passer pour un nom de la liste.
 Sans `client_id`, la vérification n'est pas encore en service : l'envoi reste accepté, sans nom.
 
 Usage (lot GitHub) : IDENTITE=<jeton> python pipeline/identite.py   (écrit AUTEUR=<nom> dans $GITHUB_ENV ; code 1 si refusé)
@@ -15,6 +20,9 @@ import os
 import sys
 import urllib.request
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import validations
 
 RACINE = Path(__file__).resolve().parent.parent
 ADMINS = RACINE / "data" / "admins.json"
@@ -35,8 +43,16 @@ def certificats():
         return json.load(r)
 
 
-def verifier(jeton, client_id, admins, certs=None):
-    """(nom, None) si le jeton est valable et l'adresse autorisée ; sinon (None, raison)."""
+def _empreinte(adresse):
+    return "sha256:" + hashlib.sha256(adresse.encode()).hexdigest()
+
+
+def _cle(entree):
+    return str(entree).strip().lower()
+
+
+def verifier(jeton, client_id, noms, certs=None, ouvert=False, bloques=()):
+    """(nom, None) si le jeton est valable et la personne acceptée ; sinon (None, raison)."""
     import jwt
     if not jeton:
         return None, "aucune connexion Google jointe à l'envoi"
@@ -54,21 +70,28 @@ def verifier(jeton, client_id, admins, certs=None):
         return None, "émetteur inattendu"
     if not infos.get("email_verified"):
         return None, "adresse non vérifiée par Google"
-    adresse = str(infos.get("email", "")).strip().lower()
-    liste = {str(k).strip().lower(): v for k, v in admins.items()}
-    nom = liste.get(adresse) or liste.get("sha256:" + hashlib.sha256(adresse.encode()).hexdigest())
-    if not nom:
+    adresse = _cle(infos.get("email", ""))
+    empreinte = _empreinte(adresse)
+    if {adresse, empreinte} & {_cle(b) for b in bloques}:
+        return None, "adresse bloquée"
+    liste = {_cle(k): v for k, v in noms.items()}
+    nom = liste.get(adresse) or liste.get(empreinte)
+    if nom:
+        return str(nom), None
+    if not ouvert:
         return None, "adresse non autorisée"
-    return str(nom), None
+    prenom = validations.nom_propre(infos.get("given_name") or infos.get("name") or adresse.split("@")[0])[:20] or "Admin"
+    return f"{prenom} #{empreinte[7:11]}", None
 
 
 def main():
-    config, liste = _lire(CONFIG), _lire(ADMINS).get("admins", {})
+    config, fichier = _lire(CONFIG), _lire(ADMINS)
     client_id = config.get("client_id", "")
     if not client_id:
         print("Connexion Google pas encore en service (client_id vide) : envoi accepté sans nom.")
         return 0
-    nom, raison = verifier(os.environ.get("IDENTITE", ""), client_id, liste)
+    nom, raison = verifier(os.environ.get("IDENTITE", ""), client_id, fichier.get("noms", {}),
+                           ouvert=bool(fichier.get("ouvert")), bloques=fichier.get("bloques", []))
     if raison:
         print(f"Envoi refusé : {raison}.", file=sys.stderr)
         return 1
