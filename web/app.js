@@ -1270,6 +1270,7 @@
           <div class="coll-actions">
             <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
             <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button>
+            <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
             <button type="button" class="bouton bouton-clair" id="exp-json">Exporter (JSON)</button>
             <button type="button" class="bouton bouton-clair" id="exp-csv">Exporter (CSV)</button>
             <button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button>
@@ -1325,6 +1326,7 @@
       if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
       if (t.dataset.souhaitRetirer) { if (!garde()) return; delete SOUH[t.dataset.souhaitRetirer]; sauverColl(); afficher(); annonce('Livre retiré de votre liste à trouver.'); }
       else if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
+      else if (t.id === 'imp-ouvrir') { if (garde()) $('#imp-fichier').click(); }
       else if (t.id === 'exp-json') exporter('json');
       else if (t.id === 'exp-csv') exporter('csv');
       else if (t.id === 'coll-plus') { limiteColl += 30; afficherCollection(); }
@@ -1339,8 +1341,10 @@
     $('#imp-fichier').addEventListener('change', async (e) => {
       const f = e.target.files[0];
       if (!f) return;
+      $('#importer').open = true;
       try { importerTexte(await f.text()); } catch (err) { statut('Ce fichier n\'a pas pu être lu.', true); }
       e.target.value = '';
+      $('#imp-statut').scrollIntoView({ block: 'center' });
     });
   }
 
