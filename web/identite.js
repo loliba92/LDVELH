@@ -56,7 +56,7 @@ window.Identite = (function () {
         return;
       }
       p.textContent = 'Pour envoyer des mises à jour, connectez-vous avec votre compte Google : votre nom sera enregistré avec elles.';
-      var bouton = document.createElement('div');
+      var bouton = document.createElement('div'); bouton.className = 'g-bouton';
       zone.appendChild(p); zone.appendChild(bouton);
       Promise.all([config(), chargerGoogle()]).then(function (r) {
         window.google.accounts.id.initialize({ client_id: r[0].client_id, callback: function (rep) { recu(rep); afficher(zone, aChange); if (aChange) aChange(); }, auto_select: true });
