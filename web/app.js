@@ -96,8 +96,8 @@
     // Derniers livres ajoutés à la base : petites couvertures cliquables, et accès au tri « Derniers ajouts »
     const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
     if (dates.length && dates[0] !== dates[dates.length - 1]) {
-      const recents = DATA.filter((b) => b.maj && b.couverture).sort(parRecence).slice(0, 8);
-      $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}"><img src="${esc(b.couverture)}" alt="" loading="lazy" width="44" height="66"></button>`).join('');
+      const recents = DATA.filter((b) => b.maj).sort(parRecence).slice(0, 8);      // aussi les livres sans jaquette : une tuile avec l'initiale de la série
+      $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}">${b.couverture ? `<img src="${esc(b.couverture)}" alt="" loading="lazy" width="44" height="66">` : `<span class="ajout-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button>`).join('');
       $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
       $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
       $('#hero-ajouts').hidden = false;

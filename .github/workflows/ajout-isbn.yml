@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install requests pillow
       - name: Tests
         run: python pipeline/test_importer_isbn.py
       - name: Ajouter les livres
@@ -41,6 +41,11 @@ jobs:
           printf '%s\n' "$LISTE" > liste-isbn.txt
           python pipeline/importer_isbn.py liste-isbn.txt | tee -a "$GITHUB_STEP_SUMMARY"
           rm liste-isbn.txt
+      - name: Jaquettes des livres ajoutés
+        # Avant, les livres ajoutés ici n'avaient pas de jaquette (17 octobre 2026) : elle est cherchée sur la fiche de leslibraires.fr
+        # (une image en relief est écartée, voir scrapers/jaquettes_librairie.py). Un échec ici n'empêche pas l'ajout.
+        run: |
+          python scrapers/jaquettes_librairie.py | tee -a "$GITHUB_STEP_SUMMARY" || echo "Jaquettes non récupérées (erreur ignorée)."
       - name: Base et données du site
         run: |
           python pipeline/build_db.py
