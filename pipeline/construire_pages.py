@@ -146,7 +146,7 @@ def page(nom, corps):
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="identite.js"></script>\n<script src="revue.js"></script>',
                "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
@@ -199,6 +199,7 @@ COFFRE = '''<h1>Accès commun <span class="badge-admin" title="Réservé aux adm
 
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
 <p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
+<div class="rv-identite" id="rv-identite" hidden></div>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
 <section class="rv-ajout rv-tendances" id="rv-tendances" aria-labelledby="tr-titre" hidden>
   <h2 id="tr-titre">Tendances des prix</h2>

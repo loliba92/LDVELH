@@ -12,6 +12,11 @@ on:
         description: "Relever ensuite le prix du neuf et les annonces (oui/non)"
         required: false
         default: "oui"
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -30,12 +35,15 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       LISTE: ${{ inputs.liste }}
       RELEVE: ${{ inputs.releve }}
+      IDENTITE: ${{ inputs.identite }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests pillow
+      - run: pip install requests pillow pyjwt cryptography
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
       - name: Tests
         run: python pipeline/test_importer_isbn.py
       - name: Ajouter les livres
@@ -60,7 +68,7 @@ jobs:
           AVANT="$(git rev-parse HEAD)"
           # Si main a avancé pendant le lot, on repart de sa dernière version et on rejoue l'ajout (voir .github/scripts/publier.sh)
           REJOUER='printf "%s\n" "$LISTE" > liste-isbn.txt; python pipeline/importer_isbn.py liste-isbn.txt; rm liste-isbn.txt; python scrapers/jaquettes_librairie.py || true; python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Livres ajoutés par liste d'ISBN du $(date +%F)" data/processed/editions.csv web/covers web/data web/revue-prix.html web/evolutions.html
+            .github/scripts/publier.sh "Livres ajoutés par liste d'ISBN du $(date +%F)${AUTEUR:+ par $AUTEUR}" data/processed/editions.csv web/covers web/data web/revue-prix.html web/evolutions.html
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
           if [ "$RELEVE" != "non" ]; then gh workflow run prix-ebay.yml; fi

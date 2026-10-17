@@ -19,12 +19,20 @@
   const sauver = () => { try { localStorage.setItem(CLE_LOC, JSON.stringify(LOC)); } catch (e) { /* navigateur sans stockage : la validation reste valable tant que la page est ouverte */ } };
   const cleDe = (ed, cle) => `${ed.isbn}|${cle}`;
   const aujourdhui = () => new Date().toISOString().slice(0, 10);
+  // Nom de la personne connectée avec Google (affichage seulement) ; le nom enregistré est celui que le lot vérifie (pipeline/identite.py)
+  const nomAdmin = () => (window.Identite ? window.Identite.nom() : '');
+  // « aujourd'hui », « hier » ou la date : pour ne pas refaire une révision qui vient d'être faite
+  function quand(iso) {
+    if (!iso) return '';
+    const ecart = Math.round((Date.parse(aujourdhui()) - Date.parse(iso)) / 86400000);
+    return ecart <= 0 ? 'aujourd\'hui' : ecart === 1 ? 'hier' : 'le ' + new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', ...(ecart > 300 ? { year: 'numeric' } : {}) });
+  }
   const jour = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '');
   // Prix validé d'un état : validation de cette page (en attente d'envoi) ou déjà reprise dans les données du site
   function validation(ed, cle) {
     const loc = LOC[cleDe(ed, cle)], l = ed.etats[cle];
-    if (loc) return { prix: loc.prix, le: loc.le, decision: loc.decision, enAttente: true, calcule: l ? (l.valide ? l.calcule : l.publie) : null };
-    if (l && l.valide) return { prix: l.publie, le: l.valide_le, decision: l.decision, enAttente: false, calcule: l.calcule };
+    if (loc) return { prix: loc.prix, le: loc.le, par: loc.par, decision: loc.decision, enAttente: true, calcule: l ? (l.valide ? l.calcule : l.publie) : null };
+    if (l && l.valide) return { prix: l.publie, le: l.valide_le, par: l.valide_par, decision: l.decision, enAttente: false, calcule: l.calcule };
     return null;
   }
 
@@ -73,7 +81,7 @@
     }
     if (v) {
       const calc = v.calcule != null && Math.abs(v.calcule - v.prix) > 0.005 ? `<span class="rv-avant">le site calculait <s>${eur(v.calcule)}</s></span>` : '';
-      const quand = v.enAttente ? `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} ${jour(v.le)} : à transmettre` : `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} le ${jour(v.le)}`;
+      const quand = v.enAttente ? `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} ${jour(v.le)}${v.par ? ', par ' + v.par : ''} : à transmettre` : `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} le ${jour(v.le)}${v.par ? ', par ' + v.par : ''}`;
       return `<div class="rv-prix valide"><span class="rv-lib">${lib}</span><strong>${eur(v.prix)}</strong>${calc}<span class="rv-note rv-quand">✓ ${esc(quand)}</span>${boutons(ed, cle, v, l)}</div>`;
     }
     const r = ratio(l), alerte = raison(l, null);
@@ -83,10 +91,17 @@
       `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span>${boutons(ed, cle, null, l)}</div>`;
   }
 
+  // Dernière révision d'une édition : la validation la plus récente de l'un de ses états (y compris celles pas encore transmises)
+  function derniereRevision(ed) {
+    let best = null;
+    ETATS.forEach(([cle]) => { const v = validation(ed, cle); if (v && v.le && (!best || v.le >= best.le)) best = v; });
+    return best ? `<span class="rv-revision">Dernière révision : <strong>${esc(quand(best.le))}</strong>${best.par ? ', par ' + esc(best.par) : ''}</span>` : '<span class="rv-revision rien">Pas encore révisée</span>';
+  }
+
   function carte(ed) {
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
     return `<article class="rv-edition${jaq ? ' avec-jaq' : ''}">${jaq}<div class="rv-corps"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
-      `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` +
+      `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` + derniereRevision(ed) +
       `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Tout confirmer</button>` +
       `<span class="rv-liens"><span>Voir les annonces :</span>${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
@@ -148,7 +163,7 @@
   function enregistrer(edId, cle, prix, decision) {
     const ed = EDITIONS.find((x) => x.id === edId);
     if (!ed || !(prix > 0 && prix < 10000)) return;
-    LOC[cleDe(ed, cle)] = { prix: Math.round(prix * 100) / 100, decision, le: aujourdhui() };
+    LOC[cleDe(ed, cle)] = { prix: Math.round(prix * 100) / 100, decision, le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) };
     sauver(); afficher();
   }
 
@@ -157,7 +172,7 @@
     let n = 0;
     ETATS.forEach(([cle]) => {
       const l = ed.etats[cle];
-      if (l && l.publie != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(l.publie * 100) / 100, decision: 'confirme', le: aujourdhui() }; n++; }
+      if (l && l.publie != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(l.publie * 100) / 100, decision: 'confirme', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; n++; }
     });
     return n;
   }
@@ -211,9 +226,11 @@
       Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
       const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
       const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const id = await window.Identite.pourEnvoi();
+      if (!id.ok) return dire(id.message);
       $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
       try {
-        const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | ') });
+        const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | '), identite: id.jeton });
         dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
           : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau en haut de la page.'
           : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
@@ -320,9 +337,11 @@
     $('#rg-retirer').addEventListener('click', () => { try { localStorage.removeItem(CLE_JETON); } catch (e) { /* rien à retirer */ } etatJeton(); });
     $('#aj-lancer').addEventListener('click', async () => {
       const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const id = await window.Identite.pourEnvoi();
+      if (!id.ok) return dire(id.message);
       $('#aj-lancer').disabled = true; dire('Envoi en cours…');
       try {
-        const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui' });
+        const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui', identite: id.jeton });
         dire(r.status === 204 ? 'Envoyé. Les livres seront sur le site dans environ 2 minutes, les prix après le relevé qui suit.'
           : r.status === 401 || r.status === 403 ? 'Le jeton est refusé ou expiré : enregistrez-en un nouveau ci-dessus.'
           : r.status === 404 ? 'Le jeton n\'a pas accès à ce dépôt : vérifiez ses droits.' : `Échec de l'envoi (code ${r.status}).`);
@@ -397,6 +416,7 @@
   }
   initTendances();
   document.addEventListener('cdh-jeton', etatJeton);
+  window.Identite.afficher($('#rv-identite'), afficher);
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})

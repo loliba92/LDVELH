@@ -1101,3 +1101,14 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .tr-ed small { color: var(--muted); font-size: .85rem; line-height: 1.35; }
 .tr-ed .tr-etats { color: var(--text); font-variant-numeric: tabular-nums; }
 .tr-ed .tr-src { font-style: italic; }
+
+/* Nom d'admin et dernière révision (page « Vérifier les prix » et fiche admin) */
+.rv-revision { flex-basis: 100%; color: var(--muted, #6b6258); font: 600 .85rem/1.3 var(--f-ui, inherit); }
+.rv-revision strong { color: var(--text); }
+.rv-revision.rien { font-weight: 400; font-style: italic; }
+.corriger-revision { margin: 0 0 8px; }
+/* Connexion Google des administrateurs */
+.rv-identite { margin: 0 0 18px; padding: 12px 14px; border: 1px solid var(--line-strong, #444); border-radius: var(--r); background: var(--surface, transparent); }
+.rv-identite p { margin: 0 0 10px; }
+.rv-identite p:last-child { margin: 0; }
+.rv-identite[hidden] { display: none; }

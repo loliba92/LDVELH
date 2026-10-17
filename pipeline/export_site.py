@@ -203,7 +203,7 @@ def main():
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "neuf") if k in p[e]}
+            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "par", "neuf") if k in p[e]}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
@@ -263,7 +263,7 @@ def main():
             if (v["isbn13"], e) in libraires:
                 ligne["lib_prix"] = libraires[(v["isbn13"], e)]
             if info.get("valide"):
-                ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision")})
+                ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision"), "valide_par": info.get("par")})
             if eb:
                 ligne.update({"eb_date": eb["date"], "eb_nb": int(eb["nb_annonces"]), "eb_min": float(eb["prix_min"]),
                               "eb_med": float(eb["prix_median"]), "eb_max": float(eb["prix_max"])})

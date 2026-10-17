@@ -9,6 +9,11 @@ on:
         description: "ISBN ; convenable ; bon ; très bon (case vide = inchangé). Plusieurs livres : les séparer par |"
         required: true
         type: string
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -26,12 +31,15 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       CORRECTIONS: ${{ inputs.corrections }}
+      IDENTITE: ${{ inputs.identite }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - run: pip install requests pyjwt cryptography
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
       - name: Tests
         run: |
           python pipeline/test_validations.py
@@ -50,6 +58,6 @@ jobs:
           AVANT="$(git rev-parse HEAD)"
           # Si main a avancé pendant le lot, on repart de sa dernière version et on rejoue les corrections (voir .github/scripts/publier.sh)
           REJOUER='python pipeline/corriger_prix.py "$CORRECTIONS" && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Cotes corrigées depuis le site ($(date +%F))" data/manual/prix_valides.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+            .github/scripts/publier.sh "Cotes corrigées depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" data/manual/prix_valides.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
