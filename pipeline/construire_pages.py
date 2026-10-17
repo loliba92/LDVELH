@@ -6,11 +6,23 @@ L'en-tête, la barre du bas, la feuille « Plus » et le pied de page sont commu
 dans web/index.html, qui reste écrit à la main). Les textes juridiques décrivent ce que le site fait réellement :
 voir docs/CONFORMITE.md pour la vérification faite dans le code.
 """
+import json
 from pathlib import Path
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 MAJ = "11 octobre 2026"
 ISSUES = "https://github.com/loliba92/LDVELH/issues"
+
+
+def _compte_actif():
+    """Vrai quand la collection est liée au compte Google (web/data/admin-config.json : "collection": true) : les textes légaux changent alors."""
+    try:
+        return json.loads((WEB / "data" / "admin-config.json").read_text(encoding="utf-8")).get("collection") is True
+    except (OSError, ValueError):
+        return False
+
+
+COMPTE = _compte_actif()
 
 
 def ico(d):
@@ -36,6 +48,54 @@ PAGES = {
 }
 
 
+# Textes qui changent quand la collection est liée au compte Google (voir COMPTE). Chaque paire doit trouver sa phrase : le test
+# pipeline/test_textes_compte.py le vérifie, pour qu'une modification des textes ne fasse pas silencieusement manquer une variante.
+VARIANTES = [
+    ("Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur.",
+     "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive."),
+    ("Il ne demande aucun compte et ne mesure pas votre visite.",
+     "Il ne demande aucun compte pour consulter les cotes et ne mesure pas votre visite."),
+    ("La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur.",
+     "La collection que vous composez demande un compte Google : elle est enregistrée dans l'espace réservé de votre propre Google Drive, que seul ce site peut ouvrir, avec une copie sur votre appareil. Le guide n'a pas de serveur et ne la voit jamais."),
+    ("<strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.",
+     "<strong>consulter La Cote du Héros ne demande aucun compte et ne collecte aucune donnée personnelle.</strong> Pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Pour constituer une collection, vous vous connectez avec Google : elle est alors enregistrée dans votre propre Google Drive, pas chez l'éditeur."),
+    ("le guide écrit deux enregistrements dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.",
+     "le guide écrit quelques enregistrements dans le stockage local de votre navigateur. Ils ne quittent votre appareil que pour rejoindre votre propre Google Drive si vous êtes connecté, et l'éditeur n'y a pas accès."),
+    ('<td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>',
+     '<td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>\n'
+     '    <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l\'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>\n'
+     '    <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>'),
+    ("<h2>Comment les effacer</h2>",
+     "<h2>Si vous vous connectez avec Google</h2>\n"
+     "<p>Pour constituer une collection, vous vous connectez avec votre compte Google. Le site demande à Google deux choses : votre prénom, pour l'afficher, et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Le guide n'a pas de serveur : votre collection va directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit ni votre courriel ni vos autres fichiers. Le jeton de connexion reste dans la mémoire de la page et disparaît à sa fermeture.</p>\n"
+     "<p>Google intervient alors à votre demande comme prestataire de stockage, selon <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener\">sa propre politique de confidentialité</a>. Le seul moment où votre navigateur contacte Google est le clic sur « Se connecter ».</p>\n\n"
+     "<h2>Comment les effacer</h2>"),
+    ("  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>",
+     "  <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href=\"https://myaccount.google.com/permissions\" target=\"_blank\" rel=\"noopener\">myaccount.google.com</a>.</li>\n"
+     "  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>"),
+    ("le guide n'appelle aucun service extérieur pour s'afficher.",
+     "le guide n'appelle aucun service extérieur pour s'afficher : Google n'est contacté que si vous cliquez sur « Se connecter »."),
+    ("Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur.",
+     "Le guide ne détient aucune donnée sur vous : votre collection est dans votre Drive, que vous pouvez consulter, corriger ou effacer vous-même, et il n'y a rien à demander à l'éditeur."),
+    ("Le site ne collecte aucune donnée personnelle et ne dépose aucun cookie.",
+     "Le site ne dépose aucun cookie et ne collecte aucune donnée personnelle. Si vous vous connectez avec Google pour constituer une collection, Google stocke celle-ci pour vous, à votre demande."),
+    ("Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.",
+     "Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Elle est sauvegardée dans votre Google Drive."),
+    ("Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.",
+     "Vos livres, leur état et leur valeur estimée, sauvegardés dans votre Google Drive."),
+    ("Votre collection reste dans votre navigateur : voir",
+     "Votre collection est dans votre Google Drive : voir"),
+]
+
+
+def variante(html):
+    """Applique les textes du mode « collection liée au compte Google » quand il est actif."""
+    if COMPTE:
+        for ancien, nouveau in VARIANTES:
+            html = html.replace(ancien, nouveau)
+    return html
+
+
 def entete(courante):
     lien = lambda href, txt, page=None: f'<a href="{href}"{" aria-current=\"page\"" if page == courante else ""}>{txt}</a>'
     return f'''<header class="bandeau">
@@ -49,7 +109,7 @@ def entete(courante):
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
       {lien("le-projet.html", "Le projet", "le-projet.html")}
-      <a class="lien-prive" href="revue-prix.html" aria-label="Accès admin : vérifier les prix"{" aria-current=\"page\"" if courante == "revue-prix.html" else ""}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Accès admin</span></a>
+      <div class="compte" id="compte-haut"></div>
       <a class="menu-cafe" href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg><span>Offrir un café</span></a>
     </nav>
   </div>
@@ -63,7 +123,7 @@ def barre(courante):
   <a href="./#recherche">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">{ico('<path d="M12 5v14M5 12h14"/>')}<span>Inventaire</span></a>
   <a href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
-  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.2"/>')}<span>Infos</span></button>
+  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/>')}<span>Compte</span></button>
 </nav>'''
 
 
@@ -73,13 +133,13 @@ def feuille(courante, racine_a_propos="./#apropos"):
         return f'<li><a href="{href}"{cur}><b>{titre}</b><small>{detail}</small></a></li>'
     return f'''<dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="feuille-plus-titre">Infos et mentions</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Compte et infos</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="compte-feuille" id="compte-feuille"></div>
   <ul class="feuille-liste">
     {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
-    {e("confidentialite.html", "Confidentialité", "Vos données restent dans votre navigateur", "confidentialite.html")}
+    {e("confidentialite.html", "Confidentialité", "Ce que le site garde, et où", "confidentialite.html")}
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
-    {e("revue-prix.html", "Accès admin", "Réservé aux administrateurs : revue des prix, ajout de livres", "revue-prix.html")}
   </ul>
 </dialog>'''
 
@@ -92,7 +152,6 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
       <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg>Offrir un café</a>
-      <a class="lien-prive" href="revue-prix.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Accès admin</a>
     </nav>'''
 
 
@@ -142,13 +201,17 @@ def page(nom, corps):
 
 <script src="plus.js"></script>
 <script src="installer.js"></script>
+<script src="identite.js"></script>
+<script src="relais.js"></script>
+<script src="cloud.js"></script>
+<script src="compte.js"></script>
 <script src="pages.js"></script>{SCRIPT_PAGE.get(nom, "")}
 </body>
 </html>
 '''
 
 
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="identite.js"></script>\n<script src="relais.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"revue-prix.html": '\n<script src="coffre.js"></script>\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "coffre.html": '\n<script src="coffre.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
@@ -540,6 +603,10 @@ def page_collection(index_html):
 
 <script src="plus.js"></script>
 <script src="installer.js"></script>
+<script src="identite.js"></script>
+<script src="relais.js"></script>
+<script src="cloud.js"></script>
+<script src="compte.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
@@ -606,12 +673,12 @@ def corps_evolutions():
 
 def main():
     index_html = (WEB / "index.html").read_text(encoding="utf-8")
-    (WEB / "collection.html").write_text(page_collection(index_html), encoding="utf-8")
+    (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
                        ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("coffre.html", COFFRE),
                        ("devenir-admin.html", DEVENIR_ADMIN)):
-        (WEB / nom).write_text(page(nom, corps), encoding="utf-8")
+        (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
 
 

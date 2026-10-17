@@ -72,6 +72,7 @@
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
     S = defaut();
     chargerColl();
+    appPrete = true;
     if (PAGE === 'collection') { initPageCollection(); return; }
     construireHero();
     construireControles();
@@ -726,9 +727,11 @@
     });
   }
 
+  let ficheOuverte = null;
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
+    ficheOuverte = id;
     const sel = etatDe(S.h);
     const autres = DATA.filter((x) => x.livre_id === b.livre_id).sort((x, y) => x.version_n - y.version_n);
     const ligne = (nom, val) => (val ? `<div><dt>${nom}</dt><dd>${val}</dd></div>` : '');
@@ -815,9 +818,30 @@
     // Frais de port gardés à part par une version précédente : ils rejoignent le prix payé du livre (livraison comprise)
     Object.values(COLL).forEach((c) => { if (c && c.port > 0) { if (c.prix != null) c.prix = Math.round((c.prix + c.port / (c.qte || 1)) * 100) / 100; delete c.port; } else if (c) delete c.port; });
   };
-  const sauverColl = () => {
+  const sauverLocal = () => {
     try { localStorage.setItem(CLE, JSON.stringify(COLL)); stockageOk = true; } catch (e) { stockageOk = false; }
   };
+  // Chaque modification est gardée sur l'appareil, puis envoyée au Drive de la personne connectée (groupée, voir cloud.js)
+  const adopterCloud = (c) => { COLL = c; sauverLocal(); afficher(); };
+  const sauverColl = () => {
+    sauverLocal();
+    if (window.Cloud) window.Cloud.planifier(() => COLL, adopterCloud);
+    document.dispatchEvent(new Event('cdh-collection'));
+  };
+  window.AppCollection = { lire: () => COLL, adopter: adopterCloud, nb: () => Object.keys(COLL).length };
+  // Construire sa collection exige un compte Google (consulter reste libre). `suite` est rejouée après la connexion.
+  const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
+  const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
+  const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
+  // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
+  let etaitSansCompte = null, appPrete = false;
+  document.addEventListener('cdh-compte', () => {
+    if (!appPrete) return;
+    const sans = sansCompte();
+    afficher();
+    if (etaitSansCompte !== null && etaitSansCompte !== sans && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
+    etaitSansCompte = sans;
+  });
   const annonce = (t) => { $('#annonce').textContent = ''; setTimeout(() => { $('#annonce').textContent = t; }, 30); };
   const parId = () => new Map(DATA.map((b) => [b.id, b]));
   let INDEX = null;
@@ -827,6 +851,7 @@
   function basculerPossede(id, etat) {
     const b = livreDe(id);
     if (!b) return;
+    if (!garde(() => basculerPossede(id, etat))) return;
     if (COLL[id] && COLL[id].etat === etat) { delete COLL[id]; annonce(`${b.titre} retiré de votre collection.`); }
     else {
       COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1 };
@@ -1110,11 +1135,30 @@
       if (an) { const ouvert = an.querySelector('details') && an.querySelector('details').open; an.innerHTML = n ? apercuVisuel(bl) + analysesPortefeuille(bl, false, contenuCollecteur(bl)) : ''; if (ouvert && an.querySelector('details')) an.querySelector('details').open = true; }
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
+    const visiteur = sansCompte();       // compte demandé et pas connecté : écran d'invitation à la place de l'outil
+    ['#importer', '#partager', '#coll-prive', '#coll-compte'].forEach((s) => { if ($(s)) $(s).hidden = visiteur; });
     $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
+    const comptePrevu = !!window.Compte && window.Compte.actif();
     $('#coll-prive').innerHTML = (stockageOk
-      ? 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder, ou créez un lien de transfert pour la retrouver sur un autre appareil.'
+      ? (comptePrevu
+        ? 'Votre collection est sauvegardée dans l\'espace réservé de votre Google Drive, que seul ce site peut ouvrir ; une copie reste sur cet appareil. Exportez-la quand vous voulez : le fichier vous appartient.'
+        : 'Votre collection reste dans ce navigateur, sur cet appareil : rien n\'est envoyé et aucun compte n\'est nécessaire. Exportez-la pour la sauvegarder, ou créez un lien de transfert pour la retrouver sur un autre appareil.')
       : '<strong>Le stockage local est indisponible</strong> (navigation privée ?) : votre collection sera perdue à la fermeture. Exportez-la pour la conserver.');
     const zone = $('#coll-corps');
+    if (visiteur) {
+      zone.innerHTML = `<div class="coll-invite">
+        ${n ? `<p class="coll-reprise" role="status">Vous avez déjà <strong>${bl.titres} livre${bl.titres > 1 ? 's' : ''}</strong> sur cet appareil. Ils seront repris dans votre compte à la connexion. <button type="button" class="bouton-lien" id="exp-json">Exporter d'abord (JSON)</button> <button type="button" class="bouton-lien" id="exp-csv">Exporter (CSV)</button></p>` : ''}
+        <h3>Gardez votre collection, où que vous soyez</h3>
+        <ul class="coll-avantages">
+          <li><b>Sauvegardée</b><span>Vos exemplaires sont enregistrés dans votre Google Drive, pas chez nous.</span></li>
+          <li><b>Estimée</b><span>Sa valeur suit les cotes, livre par livre.</span></li>
+          <li><b>Partout</b><span>Retrouvée sur tous vos appareils, sans rien recopier.</span></li>
+        </ul>
+        <p><button type="button" class="bouton" data-compte="connecter">Continuer avec Google</button></p>
+        <p class="sous">Nous ne voyons ni votre courriel ni vos autres fichiers. Votre collection est stockée chez vous, dans votre Google Drive, et vous pouvez la supprimer à tout moment.</p>
+        <p class="sous"><a href="./#recherche">Continuer sans compte : consulter l'étagère</a></p></div>`;
+      return;
+    }
     if (!n) {
       zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
@@ -1205,6 +1249,7 @@
     $('#collection').addEventListener('change', (e) => {
       const id = e.target.dataset.etat || e.target.dataset.qte || e.target.dataset.prix;
       if (!id || !COLL[id]) return;
+      if (!garde()) { afficher(); return; }
       if (e.target.dataset.prix !== undefined) { const pp = lirePrix(e.target.value); if (pp == null) delete COLL[id].prix; else COLL[id].prix = pp; }
       if (e.target.dataset.etat) COLL[id].etat = e.target.value;
       if (e.target.dataset.qte) COLL[id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1));
@@ -1212,12 +1257,13 @@
     });
     $('#collection').addEventListener('click', (e) => {
       const t = e.target;
+      if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
       if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
       else if (t.id === 'exp-json') exporter('json');
       else if (t.id === 'exp-csv') exporter('csv');
       else if (t.id === 'coll-plus') { limiteColl += 30; afficherCollection(); }
       else if (t.id === 'coll-vider') {
-        if (window.confirm('Effacer toute votre collection de ce navigateur ? Pensez à l\'exporter avant : cette action est définitive.')) {
+        if (window.confirm(dansCompte() ? 'Effacer toute votre collection, y compris dans votre compte Google ? Pensez à l\'exporter avant : cette action est définitive.' : 'Effacer toute votre collection de ce navigateur ? Pensez à l\'exporter avant : cette action est définitive.')) {
           COLL = {}; sauverColl(); afficher(); annonce('Collection effacée.');
         }
       }
@@ -1335,6 +1381,7 @@
     return appliquerEntrees(entrees, false);
   }
   function appliquerEntrees(entrees, remplacer) {
+    if (!garde(() => appliquerEntrees(entrees, remplacer))) return;
     if (remplacer) COLL = {};
     let ajoutes = 0, maj = 0; const inconnus = [];
     entrees.forEach((en) => {
@@ -1439,6 +1486,10 @@
 
   // Fiche : bloc « dans ma collection »
   function blocCollectionFiche(b) {
+    if (sansCompte()) {
+      return `<div class="coll-fiche"><h3>Dans ma collection</h3><p class="sous">Les cotes restent consultables sans compte. Pour garder vos livres, connectez-vous : Google les enregistre dans un espace réservé de votre Drive.</p>
+        <button type="button" class="bouton" data-compte="connecter">Se connecter pour ajouter à ma collection</button></div>`;
+    }
     const c = COLL[b.id];
     return `<div class="coll-fiche"><h3>Dans ma collection</h3><div class="coll-ligne">
       <label class="case"><input type="checkbox" id="c-poss"${c ? ' checked' : ''}><span>Je possède ce livre</span></label>
@@ -1448,6 +1499,7 @@
       <p class="valeur-ex" id="c-val"></p></div></div>`;
   }
   function brancherFicheCollection(b) {
+    if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
     const maj = () => {
       const c = COLL[b.id];
       $('#c-etat').disabled = !c; $('#c-qte').disabled = !c; $('#c-prix').disabled = !c;
@@ -1492,6 +1544,7 @@
   const sommeLot = () => LOT.lignes.reduce((t, l) => t + (l.prix || 0) * l.qte, 0);
 
   function ouvrirLot() {
+    if (!garde(ouvrirLot)) return;
     let dlg = $('#lot');
     if (!dlg) {
       dlg = document.createElement('dialog');
@@ -1611,7 +1664,7 @@
   const heure = (d) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   function majIndicateur() {
     const el = $('#pa-save');
-    if (el) el.textContent = derniereSauvegarde ? `✓ Enregistré dans ce navigateur à ${heure(derniereSauvegarde)}` : '';
+    if (el) el.textContent = derniereSauvegarde ? `✓ Enregistré sur cet appareil à ${heure(derniereSauvegarde)}` : '';
   }
   /* Mémorise l'avancement (étape, séries, éditions, liste en cours) ; la collection l'est déjà à chaque clic */
   function memoriser() {
@@ -1650,6 +1703,7 @@
   const pl = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 
   function ouvrirParcours() {
+    if (!garde(ouvrirParcours)) return;
     INFO = INFO || infoSeries();
     P.phase = 'intro'; P.series = new Set(); P.cellules = new Set(); P.file = []; P.i = 0; P.message = '';
     REPRISE = lireParcours();
@@ -1688,7 +1742,7 @@
     const etapes = { series: 'les séries', editions: 'les éditions', liste: 'les listes de livres' };
     const reprendre = REPRISE
       ? bouton('reprendre', `Reprendre là où j'en étais<small>${etapes[REPRISE.phase]} · ${dejaN ? pl(dejaN, 'exemplaire') : 'aucun livre coché'}</small>`, 'bouton-choix')
-      : (dejaN ? bouton('reprendre', `Continuer avec ma collection<small>${pl(dejaN, 'exemplaire')} déjà enregistré${dejaN > 1 ? 's' : ''} dans ce navigateur</small>`, 'bouton-choix') : '');
+      : (dejaN ? bouton('reprendre', `Continuer avec ma collection<small>${pl(dejaN, 'exemplaire')} déjà enregistré${dejaN > 1 ? 's' : ''} sur cet appareil</small>`, 'bouton-choix') : '');
     $('#parcours-corps').innerHTML = `
       <section class="reprise" aria-labelledby="pe-reprise">
         <h3 id="pe-reprise">${reprendre ? 'Reprendre ou repartir ?' : 'Vous avez déjà un fichier ?'}</h3>
@@ -1696,7 +1750,7 @@
           ${reprendre}
           <label class="bouton bouton-clair bouton-choix" for="pe-fichier">Charger mon fichier<small>sauvegarde JSON, CSV ou liste d'ISBN : tout est coché pour vous</small></label>
           <input type="file" id="pe-fichier" accept=".json,.csv,.txt,text/plain,application/json" hidden>
-          ${dejaN ? bouton('zero', 'Repartir de zéro<small>efface la collection de ce navigateur</small>', 'bouton-clair bouton-choix') : ''}
+          ${dejaN ? bouton('zero', `Repartir de zéro<small>efface la collection${dansCompte() ? ' (aussi dans votre compte)' : ' de ce navigateur'}</small>`, 'bouton-clair bouton-choix') : ''}
         </div>
         <p class="statut" id="pe-statut" role="status" aria-live="polite"></p>
       </section>
@@ -1711,7 +1765,7 @@
       <div class="choix-etat" role="radiogroup" aria-label="État habituel">
         ${ETATS.map((e) => `<label><input type="radio" name="pe-etat" value="${e.k}"${e.k === P.etat ? ' checked' : ''}><span>${e.k === 'tres_bon' ? 'Très bon état (TBE)' : e.court}<small>${esc(e.def.replace(' TBE signifie « très bon état ».', ''))}</small></span></label>`).join('')}
       </div>
-      <p class="sous">Tout s'enregistre au fil de l'eau, dans ce navigateur uniquement. Vous pouvez fermer à tout moment et reprendre plus tard.</p>`;
+      <p class="sous">Tout s'enregistre au fil de l'eau, ${dansCompte() ? 'sur cet appareil et dans votre compte' : 'dans ce navigateur uniquement'}. Vous pouvez fermer à tout moment et reprendre plus tard.</p>`;
     pied(bouton('fermer', 'Plus tard', 'bouton-clair'), bouton('commencer', 'Commencer →'));
   }
 
@@ -1865,7 +1919,7 @@
           ${bl.sansCote ? `<p class="sans-cote">${pl(bl.sansCote, 'exemplaire')} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
         </div>
       </div>
-      <p><strong>Gardez votre fichier.</strong> Votre collection est enregistrée dans ce navigateur ; le fichier JSON en est la sauvegarde. Vous pourrez le recharger ici (« Importer une liste ») sur n'importe quel appareil.</p>
+      <p><strong>Gardez votre fichier.</strong> Votre collection est enregistrée ${dansCompte() ? 'dans votre compte et sur cet appareil' : 'dans ce navigateur'} ; le fichier JSON en est une copie que vous gardez chez vous. Vous pourrez le recharger ici (« Importer une liste ») sur n'importe quel appareil.</p>
       <div class="coll-actions">
         <button type="button" class="bouton" id="pa-json">Télécharger mon fichier (JSON)</button>
         <button type="button" class="bouton bouton-clair" id="pa-csv">Télécharger en CSV</button>
@@ -1990,7 +2044,7 @@
         rendre(); return;
       }
       if (act === 'zero') {
-        if (window.confirm('Effacer toute votre collection de ce navigateur ? Pensez à la sauvegarder avant : cette action est définitive.')) {
+        if (window.confirm(dansCompte() ? 'Effacer toute votre collection, y compris dans votre compte Google ? Pensez à la sauvegarder avant : cette action est définitive.' : 'Effacer toute votre collection de ce navigateur ? Pensez à la sauvegarder avant : cette action est définitive.')) {
           COLL = {}; sauverColl(); try { localStorage.removeItem(CLE_P); } catch (err) { /* sans effet */ }
           afficher(); ouvrirParcours();
         }

@@ -22,12 +22,15 @@ function nettoyerNom(brut) {
 }
 function minuscules(s) { return String(s == null ? '' : s).trim().toLowerCase(); }
 
-/* Réponse de https://oauth2.googleapis.com/tokeninfo : Google a déjà vérifié la signature ; on contrôle le reste. */
+/* Réponse de https://oauth2.googleapis.com/tokeninfo : Google a déjà vérifié la signature ; on contrôle le reste.
+   Deux formes : jeton d'identité (champs iss, exp) ou jeton d'accès (champs azp, expires_in, scope), que le site utilise. */
 function decider(infos, fichier, clientId, empreinteDe, maintenantSec) {
   if (!infos || infos.error_description || infos.error) return { ok: false, raison: 'jeton refusé par Google' };
-  if (infos.aud !== clientId) return { ok: false, raison: 'jeton émis pour un autre site' };
-  if (EMETTEURS.indexOf(infos.iss) < 0) return { ok: false, raison: 'émetteur inattendu' };
-  if (Number(infos.exp) < maintenantSec) return { ok: false, raison: 'connexion expirée' };
+  if (infos.aud !== clientId && infos.azp !== clientId) return { ok: false, raison: 'jeton émis pour un autre site' };
+  if (infos.iss != null && EMETTEURS.indexOf(infos.iss) < 0) return { ok: false, raison: 'émetteur inattendu' };
+  if (infos.iss == null && infos.expires_in == null) return { ok: false, raison: 'jeton incomplet' };
+  if (infos.iss != null && Number(infos.exp) < maintenantSec) return { ok: false, raison: 'connexion expirée' };
+  if (infos.iss == null && Number(infos.expires_in) <= 0) return { ok: false, raison: 'connexion expirée' };
   if (String(infos.email_verified) !== 'true') return { ok: false, raison: 'adresse non vérifiée par Google' };
   var adresse = minuscules(infos.email);
   var empreinte = empreinteDe(adresse);

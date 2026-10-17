@@ -41,7 +41,8 @@ function ecrireAdmins(contenu, sha, message) {
 }
 
 function verifierConnexion(jeton) {
-  var r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(jeton), { muteHttpExceptions: true });
+  var champ = /^ya29\./.test(jeton) ? 'access_token' : 'id_token';        // le site envoie un jeton d'accès (ya29.…)
+  var r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?' + champ + '=' + encodeURIComponent(jeton), { muteHttpExceptions: true });
   var infos = {}; try { infos = JSON.parse(r.getContentText()); } catch (e) { /* réponse illisible : refus plus bas */ }
   var admins = lireAdmins();
   return { identite: decider(infos, admins.contenu, prop('CLIENT_ID'), empreinteDe, Math.floor(Date.now() / 1000)), admins: admins };

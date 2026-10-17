@@ -5,12 +5,14 @@ window.Relais = (function () {
   var URL_RELAIS = '';
   if (window.Identite) window.Identite.config().then(function (c) { URL_RELAIS = (c && c.relais_url) || ''; });
 
-  function actif() { return !!URL_RELAIS && !!window.Identite && window.Identite.connecte(); }
+  // Preuve de connexion : celle du compte Google du site (Cloud), à défaut celle de l'ancienne porte admin (Identite)
+  function preuve() { return (window.Cloud && window.Cloud.preuve()) || (window.Identite ? window.Identite.jeton() : ''); }
+  function actif() { return !!URL_RELAIS && !!preuve(); }
   function configure() { return !!URL_RELAIS; }
 
   // Le corps part en « text/plain » : c'est ce qui évite la pré-vérification CORS, que les scripts Google n'acceptent pas.
   function appeler(action, params) {
-    var corps = Object.assign({ action: action, jeton: window.Identite ? window.Identite.jeton() : '' }, params || {});
+    var corps = Object.assign({ action: action, jeton: preuve() }, params || {});
     return fetch(URL_RELAIS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corps) })
       .then(function (r) { return r.json(); });
   }
@@ -24,5 +26,5 @@ window.Relais = (function () {
       return { status: 400, erreur: r.erreur };
     });
   }
-  return { actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot };
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot };
 })();

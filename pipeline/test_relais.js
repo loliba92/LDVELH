@@ -23,6 +23,15 @@ test('adresse en clair dans la liste : reconnue aussi', () => {
   const f = { equipe: { 'clair@gmail.com': { nom: 'Clair', role: 'admin' } } };
   assert.strictEqual(decider(infos({ email: 'clair@gmail.com' }), f).role, 'admin');
 });
+test('jeton d\'accès (celui du site) : mêmes règles', () => {
+  const acces = (sur = {}) => Object.assign({ azp: CLIENT, aud: CLIENT, expires_in: '3000', scope: 'openid', email: 'admin@gmail.com', email_verified: 'true' }, sur);
+  assert.strictEqual(decider(acces()).role, 'admin');
+  assert.strictEqual(decider(acces({ azp: 'autre', aud: 'autre' })).ok, false);
+  assert.strictEqual(decider(acces({ expires_in: '0' })).ok, false);
+  assert.strictEqual(decider(acces({ expires_in: undefined })).ok, false);
+  assert.strictEqual(decider(acces({ email_verified: 'false' })).ok, false);
+  assert.strictEqual(decider(acces({ email: 'nouveau@gmail.com', given_name: 'Paul' })).role, 'heros');
+});
 test('refus : autre site, expiré, adresse non vérifiée, autre émetteur, erreur Google, bloqué', () => {
   const cas = [infos({ aud: 'autre' }), infos({ exp: String(NOW - 5000) }), infos({ email_verified: 'false' }), infos({ iss: 'https://evil.example' }), { error_description: 'Invalid Value' }, null];
   cas.forEach((c) => assert.strictEqual(decider(c).ok, false));

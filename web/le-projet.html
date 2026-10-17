@@ -32,7 +32,7 @@
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
       <a href="le-projet.html" aria-current="page">Le projet</a>
-      <a class="lien-prive" href="revue-prix.html" aria-label="Accès admin : vérifier les prix"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Accès admin</span></a>
+      <div class="compte" id="compte-haut"></div>
       <a class="menu-cafe" href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg><span>Offrir un café</span></a>
     </nav>
   </div>
@@ -98,7 +98,6 @@
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
       <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg>Offrir un café</a>
-      <a class="lien-prive" href="revue-prix.html"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Accès admin</a>
     </nav>
     <p class="sous">La Cote du Héros · guide indépendant, sans publicité · mise à jour de cette page : 11 octobre 2026.</p>
   </div>
@@ -109,23 +108,27 @@
   <a href="./#recherche"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/></svg><span>L'étagère</span></a>
   <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Inventaire</span></a>
   <a href="collection.html"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/></svg><span>Ma collection</span></a>
-  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.2"/></svg><span>Infos</span></button>
+  <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span>Compte</span></button>
 </nav>
 
 <dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="feuille-plus-titre">Infos et mentions</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Compte et infos</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="compte-feuille" id="compte-feuille"></div>
   <ul class="feuille-liste">
     <li><a href="le-projet.html" aria-current="page"><b>Le projet</b><small>Pourquoi ce guide, d'où viennent les prix</small></a></li>
-    <li><a href="confidentialite.html"><b>Confidentialité</b><small>Vos données restent dans votre navigateur</small></a></li>
+    <li><a href="confidentialite.html"><b>Confidentialité</b><small>Ce que le site garde, et où</small></a></li>
     <li><a href="mentions-legales.html"><b>Mentions légales</b><small>Éditeur, hébergeur, conditions d'utilisation</small></a></li>
     <li><a href="./#apropos"><b>À propos de la cote</b><small>Ce qu'est la cote, les éditions V1 à V5</small></a></li>
-    <li><a href="revue-prix.html"><b>Accès admin</b><small>Réservé aux administrateurs : revue des prix, ajout de livres</small></a></li>
   </ul>
 </dialog>
 
 <script src="plus.js"></script>
 <script src="installer.js"></script>
+<script src="identite.js"></script>
+<script src="relais.js"></script>
+<script src="cloud.js"></script>
+<script src="compte.js"></script>
 <script src="pages.js"></script>
 </body>
 </html>
