@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accès commun · La Cote du Héros</title>
-<meta name="description" content="Page d'administration : chiffrer la clé d'envoi avec le mot de passe de la page admin.">
+<title>Équipe · La Cote du Héros</title>
+<meta name="description" content="Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les administrateurs.">
 <meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
@@ -40,38 +40,41 @@
 </header>
 </div>
 
-<main id="main" class="cadre page">
-<h1>Accès commun <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
-<p class="chapeau">Un seul mot de passe pour toutes les personnes de confiance : il ouvre la page de revue des prix <strong>et</strong> enregistre sur leur appareil la clé qui permet d'envoyer les prix en un clic.</p>
-<section class="rv-ajout" aria-labelledby="cf-titre">
-  <h2 id="cf-titre">Préparer le coffre</h2>
-  <ol>
-    <li>Choisissez un mot de passe long, ou demandez-en un solide.</li>
-    <li>Collez la clé d'envoi.</li>
-    <li>Le site la chiffre avec ce mot de passe, <strong>dans votre navigateur</strong> : ni la clé ni le mot de passe ne sont envoyés ailleurs, et rien n'est enregistré sur cette page.</li>
-    <li>Transmettez le texte obtenu pour qu'il soit publié. Il est inutilisable sans le mot de passe.</li>
-  </ol>
-  <form id="cf-form">
-    <label for="cf-mdp"><strong>Mot de passe commun</strong> (14 caractères au minimum)</label>
-    <input id="cf-mdp" class="cf-champ" type="password" autocomplete="new-password" spellcheck="false">
-    <p><button type="button" class="bouton-lien" id="cf-proposer">Proposer un mot de passe solide</button></p>
-    <label for="cf-jeton"><strong>Clé d'envoi</strong></label>
-    <input id="cf-jeton" class="cf-champ" type="password" autocomplete="off" spellcheck="false">
-    <div class="rv-ajout-actions"><button type="submit" class="bouton">Chiffrer</button></div>
+<div class="porte" id="porte">
+  <div class="porte-boite">
+    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
+    <div class="porte-google" id="porte-google"></div>
+    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
+  </div>
+</div>
+<main id="main" class="cadre page" hidden data-niveau="superadmin">
+<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmins">SuperAdmin</span></h1>
+<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Admin a accès à l'espace administrateur ; un SuperAdmin gère aussi l'équipe.</p>
+<p class="sous" id="eq-etat" role="status">Chargement…</p>
+
+<section class="eq-bloc" aria-labelledby="eq-t-ajout">
+  <h2 id="eq-t-ajout">Ajouter une personne</h2>
+  <form id="eq-ajout" class="eq-form">
+    <label for="eq-adresse">Adresse Google</label>
+    <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
+    <label for="eq-nom">Nom affiché sur ses mises à jour</label>
+    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (admin)">
+    <label for="eq-niveau">Niveau</label>
+    <select id="eq-niveau"><option value="admin">Admin : prix et livres</option><option value="superadmin">SuperAdmin : et gestion de l'équipe</option></select>
+    <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
-  <p class="rv-ajout-bilan" id="cf-etat" role="status"></p>
-  <label class="sr-only" for="cf-sortie">Texte chiffré</label>
-  <textarea id="cf-sortie" readonly hidden rows="6"></textarea>
-  <div class="rv-ajout-actions"><button type="button" class="bouton" id="cf-copier" hidden>Copier le texte chiffré</button></div>
+  <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
+  <p class="rv-ajout-bilan" id="eq-msg" role="status" hidden></p>
 </section>
-<section class="rv-ajout" aria-labelledby="cf-bon">
-  <h2 id="cf-bon">À savoir</h2>
-  <ul>
-    <li>Le texte chiffré est public : seul un mot de passe long et aléatoire résiste aux essais automatiques. Évitez les mots courants et les suites de touches.</li>
-    <li>Toute personne qui connaît le mot de passe peut envoyer des prix en votre nom.</li>
-    <li>En cas de souci, générez une nouvelle clé, refaites cette page avec un nouveau mot de passe, puis communiquez-le : chaque appareil redemande alors le mot de passe.</li>
-  </ul>
-  <p><a href="revue-prix.html">Retour à la revue des prix</a></p>
+
+<section class="eq-bloc" aria-labelledby="eq-t-liste">
+  <h2 id="eq-t-liste">Membres</h2>
+  <ul class="eq-liste" id="eq-liste"></ul>
+</section>
+
+<section class="eq-bloc" aria-labelledby="eq-t-bloques">
+  <h2 id="eq-t-bloques">Comptes bloqués</h2>
+  <p class="sous" id="eq-bloques"></p>
 </section>
 
 </main>
@@ -116,6 +119,7 @@
 <script src="cloud.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>
-<script src="coffre.js"></script>
+<script src="acces.js"></script>
+<script src="equipe.js"></script>
 </body>
 </html>

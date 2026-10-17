@@ -58,10 +58,6 @@ class TestCorrections(unittest.TestCase):
         v = validations.lire(chemin)
         self.assertEqual({k[1]: x["decision"] for k, x in v.items()}, {"convenable": "confirme", "bon": "confirme", "tres_bon": "confirme"})
 
-    def test_meme_empreinte_pour_la_porte_et_la_fiche(self):
-        h = lambda f: re.search(r"[0-9a-f]{64}", (RACINE / "web" / f).read_text(encoding="utf-8")).group(0)
-        self.assertEqual(h("acces.js"), h("app.js"))
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

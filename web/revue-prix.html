@@ -43,13 +43,7 @@
 <div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
-    <form id="porte-form">
-      <label class="sr-only" for="porte-code">Code d'accès</label>
-      <input id="porte-code" type="password" placeholder="Code d'accès" autocomplete="off" autofocus>
-      <button type="submit" class="bouton">Entrer</button>
-    </form>
-    <div class="porte-google" id="porte-google" hidden></div>
-    <p class="porte-erreur" id="porte-erreur" role="alert" hidden>Code incorrect.</p>
+    <div class="porte-google" id="porte-google"></div>
     <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
   </div>
 </div>
@@ -101,8 +95,8 @@
   <button type="button" data-vue="tous" aria-pressed="false">Tous les livres <span class="nb-onglet" id="rv-n-tous"></span></button>
 </div>
 <div class="rv-envoi" id="rv-envoi" hidden>
-  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. Avec le jeton enregistré plus haut, « Envoyer » les enregistre pour tous en un clic ; sans jeton, téléchargez le fichier et envoyez-le moi.</p>
-  <button type="button" class="bouton" id="rv-envoyer">Télécharger mes validations</button>
+  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
+  <button type="button" class="bouton" id="rv-envoyer">Envoyer mes validations</button>
   <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
 </div>
 <div class="rv-outils">
@@ -121,16 +115,7 @@
   <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
   <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
   <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
-</ul><details class="rv-appareil" id="rv-reglages">
-  <summary>Cet appareil</summary>
-  <p class="rv-ajout-bilan" id="rg-etat" role="status"></p>
-  <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="rg-retirer">Retirer la clé de cet appareil</button></div>
-  <p class="sous">Utiliser une autre clé :</p>
-  <label class="sr-only" for="rg-jeton">Clé d'envoi</label>
-  <input id="rg-jeton" type="password" autocomplete="off" spellcheck="false" placeholder="Collez la clé d'envoi ici">
-  <div class="rv-ajout-actions"><button type="button" class="bouton" id="rg-enregistrer">Enregistrer la clé</button></div>
-  <p class="sous"><a href="coffre.html">Préparer l'accès commun</a> (un seul mot de passe pour toutes les personnes de confiance).</p>
-</details>
+</ul>
 
 </main>
 
@@ -174,7 +159,6 @@
 <script src="cloud.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>
-<script src="coffre.js"></script>
 <script src="acces.js"></script>
 <script src="revue.js"></script>
 </body>
