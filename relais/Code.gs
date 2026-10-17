@@ -66,6 +66,51 @@ function doPost(e) {
       return reponse(r.code === 204 ? { ok: true } : { ok: false, erreur: 'GitHub a refusé le lancement (' + r.code + ')' });
     }
 
+    if (action === 'demande') {
+      var d = validerDemande(q.texte, q.note);
+      if (!d.ok) return reponse({ ok: false, erreur: d.raison });
+      var cache = CacheService.getScriptCache(), cle = 'dem:' + moi.empreinte;
+      if (!peutDemander(cache.get(cle))) return reponse({ ok: false, erreur: 'trop de demandes pour le moment : réessayez plus tard' });
+      var f = formaterDemande(d.texte, d.note, moi.nom);
+      var cree = github('/issues', { method: 'post', payload: { title: f.titre, body: f.corps, labels: [ETIQUETTE_DEMANDE] } });
+      if (cree.code !== 201) return reponse({ ok: false, erreur: 'la demande n\'a pas pu être enregistrée (' + cree.code + ')' });
+      cache.put(cle, String((Number(cache.get(cle)) || 0) + 1), 21600);
+      return reponse({ ok: true });
+    }
+
+    if (action === 'demandes_lire') {
+      var l = github('/issues?state=open&labels=' + ETIQUETTE_DEMANDE + '&per_page=50&sort=created&direction=asc');
+      if (l.code !== 200) return reponse({ ok: false, erreur: 'liste illisible (' + l.code + ')' });
+      var dem = JSON.parse(l.texte).map(lireDemande).filter(function (x) { return x; });
+      return reponse({ ok: true, demandes: dem });
+    }
+
+    if (action === 'demande_traiter') {
+      var num = Number(q.numero);
+      if (!(num > 0)) return reponse({ ok: false, erreur: 'numéro de demande invalide' });
+      var iss = github('/issues/' + num);
+      var dm = iss.code === 200 ? lireDemande(JSON.parse(iss.texte)) : null;
+      if (!dm) return reponse({ ok: false, erreur: 'demande introuvable' });
+      var decision = String(q.decision || '');
+      if (decision === 'accepter') {
+        var lot = validerEnvoi('ajout-isbn.yml', { liste: String(q.ligne || dm.texte), releve: 'oui' });
+        if (!lot.ok) return reponse({ ok: false, erreur: lot.raison });
+        lot.entrees.auteur = moi.nom;
+        var go = github('/actions/workflows/ajout-isbn.yml/dispatches', { method: 'post', payload: { ref: 'main', inputs: lot.entrees } });
+        if (go.code !== 204) return reponse({ ok: false, erreur: 'GitHub a refusé le lancement (' + go.code + ')' });
+        github('/issues/' + num + '/comments', { method: 'post', payload: { body: 'Acceptée par ' + moi.nom + ' : le livre est en cours d\'ajout.' } });
+        github('/issues/' + num, { method: 'patch', payload: { state: 'closed', state_reason: 'completed' } });
+        return reponse({ ok: true });
+      }
+      if (decision === 'refuser') {
+        var raison = nettoyerTexteDemande(q.raison, 200);
+        github('/issues/' + num + '/comments', { method: 'post', payload: { body: 'Refusée par ' + moi.nom + (raison ? ' : ' + raison : '.') } });
+        github('/issues/' + num, { method: 'patch', payload: { state: 'closed', state_reason: 'not_planned' } });
+        return reponse({ ok: true });
+      }
+      return reponse({ ok: false, erreur: 'décision inconnue' });
+    }
+
     if (action === 'equipe_lire') {
       var eq = v.admins.contenu.equipe || {};
       return reponse({ ok: true, equipe: Object.keys(eq).map(function (k) { return { empreinte: k, nom: eq[k].nom, role: eq[k].role }; }), bloques: v.admins.contenu.bloques || [] });

@@ -18,7 +18,7 @@ Les règles sont dans `logique.gs` (testées par `node pipeline/test_relais.js`)
 1. **Projet Apps Script.** Ouvrez script.google.com avec le compte propriétaire, créez un projet « Relais La Cote du Héros ».
    Remplacez le contenu de `Code.gs` par celui de ce dossier, puis ajoutez un fichier `logique` (type « Script ») avec le contenu de `logique.gs`.
 2. **Clé GitHub dédiée.** Sur GitHub : Settings > Developer settings > Fine-grained tokens > Generate new token.
-   Dépôt : `LDVELH` seulement. Droits : *Actions : Read and write* et *Contents : Read and write*. Durée : un an.
+   Dépôt : `LDVELH` seulement. Droits : *Actions : Read and write*, *Contents : Read and write* et *Issues : Read and write* (pour les demandes d'ajout de livres). Durée : un an.
 3. **Propriétés du script.** Dans le projet : Paramètres du projet > Propriétés du script, ajoutez :
    `CLIENT_ID` (l'identifiant client Google du site), `GITHUB_TOKEN` (la clé de l'étape 2), `DEPOT` (`loliba92/LDVELH`).
 4. **Publication.** Déployer > Nouveau déploiement > Application Web. Exécuter en tant que : *moi*. Accès : *Tout le monde*.
@@ -28,6 +28,15 @@ Les règles sont dans `logique.gs` (testées par `node pipeline/test_relais.js`)
 7. **Bascule définitive.** Quand tout fonctionne : dans `data/admins.json`, mettez `"relais": true` (le lot n'accepte plus que le nom
    transmis par le relais), puis **supprimez l'ancienne clé commune** et la page « Accès commun » : l'ancienne clé reste valable pour
    quiconque l'a déjà.
+
+## Demandes d'ajout de livres
+
+Tout compte connecté (Héros) peut demander l'ajout d'un livre : le relais en fait un signalement GitHub (étiquette `demande-ajout`) au nom de la personne
+(prénom et quatre signes, jamais l'adresse), avec une limite de trois demandes par personne toutes les six heures. Les admins les voient dans l'espace
+administrateur, corrigent la ligne si besoin, puis acceptent (le lot « Ajouter des livres » est lancé, le signalement est fermé) ou refusent (fermé avec la raison).
+
+**Après une mise à jour de `Code.gs` ou `logique.gs`** : recopier les deux fichiers dans le projet Apps Script, puis *Déployer > Gérer les déploiements >
+modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'application web ne change pas.
 
 ## Gérer l'équipe
 

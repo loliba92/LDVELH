@@ -1191,3 +1191,10 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 /* Contact et soutien */
 .contact-mail { margin: 8px 0 14px; }
 .contact-mail a.bouton { color: #1a1205; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; text-decoration: none; }
+/* Demandes d'ajout (espace administrateur) */
+.dm-liste { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 12px; }
+.dm-demande { padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--bg); }
+.dm-demande p { margin: 0 0 6px; }
+.dm-demande input { width: 100%; box-sizing: border-box; margin: 4px 0 8px; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--surface, var(--bg)); color: var(--text); }
+.dm-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 700px) { .dm-actions .bouton { flex: 1 1 0; } }
