@@ -562,7 +562,7 @@
         </button>
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
-          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>
+          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}${poss ? '' : `<button type="button" data-souhait-carte="${esc(b.id)}" aria-pressed="${!!SOUH[b.id]}" title="${SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}">T</button>`}</div>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -786,6 +786,8 @@
   document.addEventListener('click', (e) => {
     const etatBtn = e.target.closest('button[data-etat-possede]');
     if (etatBtn) { basculerPossede(etatBtn.dataset.etatPossede, etatBtn.dataset.e); return; }
+    const souhaitBtn = e.target.closest('button[data-souhait-carte]');
+    if (souhaitBtn) { basculerSouhait(souhaitBtn.dataset.souhaitCarte); return; }
     const carte = e.target.closest('button[data-id]');
     if (carte) ouvrirFiche(carte.dataset.id);
   });
@@ -874,6 +876,15 @@
       COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1 };
       annonce(`${b.titre} : en ${etatDe(etat).long.toLowerCase()} dans votre collection.`);
     }
+    sauverColl();
+    afficher();
+  }
+  // T sur une jaquette : le livre entre dans la liste « À trouver » ; retoucher T l'en retire
+  function basculerSouhait(id) {
+    const b = livreDe(id);
+    if (!b || !garde(() => basculerSouhait(id))) return;
+    if (SOUH[id]) { delete SOUH[id]; annonce(`${b.titre} retiré de votre liste à trouver.`); }
+    else { SOUH[id] = {}; annonce(`${b.titre} ajouté à votre liste à trouver.`); }
     sauverColl();
     afficher();
   }
@@ -2118,8 +2129,8 @@
       : `Prix : cotes d'archives (ancien relevé), complétées pour ${nbActuels()} cote${nbActuels() > 1 ? 's' : ''} par des prix actuels (annonces et ventes constatées). Une annonce est un prix demandé, pas un prix payé.`;
     const avis = $('#avis-prix');
     if (avis) avis.innerHTML = prixAnciens()
-      ? "<strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour. Pour ajouter un livre à votre collection, cliquez sur son état&nbsp;: <strong>C</strong>, <strong>BE</strong> ou <strong>TBE</strong>."
-      : `<strong>Prix actuels en cours d'ajout.</strong> ${nbActuels() > 1 ? `${nbActuels()} cotes reposent` : '1 cote repose'} sur des prix récents ; les autres restent des cotes d'archives, à lire comme un repère de grandeur. Pour ajouter un livre à votre collection, cliquez sur son état&nbsp;: <strong>C</strong>, <strong>BE</strong> ou <strong>TBE</strong>.`;
+      ? "<strong>Cotes d'archives.</strong> Les prix viennent d'un ancien relevé, qui n'est plus tenu à jour : lisez-les comme un repère de grandeur, pas comme la cote du jour. Pour ajouter un livre à votre collection, cliquez sur son état&nbsp;: <strong>C</strong>, <strong>BE</strong> ou <strong>TBE</strong>. <strong>T</strong> l'ajoute à votre liste à trouver."
+      : `<strong>Prix actuels en cours d'ajout.</strong> ${nbActuels() > 1 ? `${nbActuels()} cotes reposent` : '1 cote repose'} sur des prix récents ; les autres restent des cotes d'archives, à lire comme un repère de grandeur. Pour ajouter un livre à votre collection, cliquez sur son état&nbsp;: <strong>C</strong>, <strong>BE</strong> ou <strong>TBE</strong>. <strong>T</strong> l'ajoute à votre liste à trouver.`;
     $('#pied-meta').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries · données du ` +
       new Date(META.genere_le).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '.';
   }
