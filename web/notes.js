@@ -51,6 +51,13 @@ window.Notes = (function () {
       '<span aria-hidden="true">' + (a ? '★ ' + moy(m[0]) : '☆') + '</span></button>' +
       '<div class="note-barre" hidden>' + barre(livre, mienne) + '</div></div>';
   }
+  // Vue « Liste » : la colonne Note n'existe que si les notes sont en service
+  function disponible() { return actifRelais() && chargees; }
+  function cellule(livre) {
+    var m = MOY[livre];
+    if (!m || !m[1]) return '<span class="note-vide">—</span>';
+    return '<span class="note-liste" title="' + moy(m[0]) + ' sur 5, ' + m[1] + ' avis"><span aria-hidden="true">★</span> ' + moy(m[0]) + '<small> (' + m[1] + ')</small><span class="sr-only"> sur 5, ' + m[1] + ' avis</span></span>';
+  }
   function barre(livre, mienne) {
     if (connecte()) {
       return '<span class="note-boutons" role="radiogroup" aria-label="Votre note">' + [1, 2, 3, 4, 5].map(function (n) {
@@ -136,5 +143,5 @@ window.Notes = (function () {
     chargerMiennes(); dessiner();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', charger); else charger();
-  return { rendre: rendre, pastille: pastille };
+  return { rendre: rendre, pastille: pastille, disponible: disponible, cellule: cellule };
 })();

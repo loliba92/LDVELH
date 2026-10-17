@@ -1300,3 +1300,11 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .note-barre .note-boutons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; width: 100%; }
 .note-barre .note-boutons button { min-width: 0; width: 100%; min-height: 44px; font-size: 1.5rem; }
 .note-barre .bouton-lien { display: block; width: 100%; min-height: 44px; padding: 6px 8px; text-align: left; font-size: .8rem; }
+/* Colonne Note de la vue Liste */
+.note-liste { color: var(--gold); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.note-liste small { color: var(--muted); font-weight: 400; }
+/* Téléphone : la note occupe sa propre ligne, en une ligne (« Note ★ 4,5 (2) »), pour qu'aucune tuile ne reste seule */
+@media (max-width: 700px) {
+  table.liste td[data-label="Note"] { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; }
+  table.liste td[data-label="Note"]::before { display: inline; }
+}
