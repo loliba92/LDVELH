@@ -1286,4 +1286,14 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .note-boutons button:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 .note-msg { margin: 0; }
 .note-msg.erreur { color: #e0604f; }
-.note-carte { display: inline-block; margin-top: 2px; color: var(--gold); font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* Pastille de note sur la jaquette (en haut à droite, comme le tampon de version en haut à gauche) */
+.note-zone { position: absolute; z-index: 3; top: 6px; right: 6px; }
+.note-pastille { min-width: 34px; min-height: 30px; padding: 2px 8px; border: 1px solid rgba(217, 180, 95, .55); border-radius: 5px; background: rgba(0, 0, 0, .78); color: var(--gold); font: 700 .8rem var(--f-ui); font-variant-numeric: tabular-nums; cursor: pointer; backdrop-filter: blur(2px); }
+.note-pastille:hover, .note-pastille[aria-expanded="true"] { background: var(--surface-2); border-color: var(--gold); }
+.note-pastille.a-moi { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.note-pastille:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.note-barre { position: absolute; top: 0; right: 0; display: flex; align-items: center; padding: 2px; border: 1px solid var(--gold); border-radius: 6px; background: rgba(0, 0, 0, .92); }
+.note-barre[hidden] { display: none; }
+.note-barre .note-boutons { gap: 0; }
+.note-barre .note-boutons button { min-width: 26px; min-height: 34px; font-size: 1.3rem; }
+.note-barre .bouton-lien { padding: 6px 8px; width: max-content; max-width: 150px; text-align: left; font-size: .8rem; }

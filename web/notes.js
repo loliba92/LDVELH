@@ -5,6 +5,7 @@ window.Notes = (function () {
   var CLE = 'cdh-notes', DUREE = 10 * 60 * 1000;
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var virgule = function (x) { return String(x).replace('.', ','); };
+  var moy = function (x) { return Number(x).toFixed(1).replace('.', ','); };      // 4 s'écrit 4,0
   var actifRelais = function () { return !!window.Relais && window.Relais.configure(); };
   var connecte = function () { return !!window.Cloud && window.Cloud.actif() && !!window.Relais && window.Relais.actif(); };
   var signaler = function () { document.dispatchEvent(new CustomEvent('cdh-notes')); };
@@ -39,13 +40,47 @@ window.Notes = (function () {
   function resume(livre) {
     var m = MOY[livre];
     if (!m || !m[1]) return '<span class="note-vide">Pas encore noté</span>';
-    return etoiles(m[0]) + ' <strong>' + virgule(m[0]) + '</strong><span class="note-sur"> sur 5</span> <span class="note-nb">· ' + m[1] + ' avis</span>';
+    return etoiles(m[0]) + ' <strong>' + moy(m[0]) + '</strong><span class="note-sur"> sur 5</span> <span class="note-nb">· ' + m[1] + ' avis</span>';
   }
-  // Petite note sur la carte d'un livre dans l'étagère (rien tant que personne n'a noté)
-  function carte(livre) {
-    var m = MOY[livre];
-    return m && m[1] ? '<span class="note-carte" title="' + virgule(m[0]) + ' sur 5, ' + m[1] + ' avis"><span aria-hidden="true">★</span> ' + virgule(m[0]) + '<span class="sr-only"> sur 5, ' + m[1] + ' avis</span></span>' : '';
+  // Pastille sur la jaquette d'un livre de l'étagère : la moyenne (☆ tant que personne n'a noté) ; un clic ouvre les cinq étoiles
+  function pastille(livre) {
+    if (!actifRelais() || !chargees) return '';
+    var m = MOY[livre], a = m && m[1], mienne = MIENNES[livre] || 0;
+    var libelle = a ? 'Note de ce livre : ' + moy(m[0]) + ' sur 5, ' + m[1] + ' avis. ' : 'Pas encore noté. ';
+    return '<div class="note-zone" data-livre="' + esc(livre) + '"><button type="button" class="note-pastille' + (mienne ? ' a-moi' : '') + '" data-note-ouvrir aria-expanded="false" aria-label="' + esc(libelle + (connecte() ? 'Donner ma note' : 'Se connecter pour noter')) + '">' +
+      '<span aria-hidden="true">' + (a ? '★ ' + moy(m[0]) : '☆') + '</span></button>' +
+      '<div class="note-barre" hidden>' + barre(livre, mienne) + '</div></div>';
   }
+  function barre(livre, mienne) {
+    if (connecte()) {
+      return '<span class="note-boutons" role="radiogroup" aria-label="Votre note">' + [1, 2, 3, 4, 5].map(function (n) {
+        return '<button type="button" role="radio" aria-checked="' + (mienne === n) + '" data-note-carte="' + n + '" class="' + (n <= mienne ? 'allumee' : '') + '" aria-label="' + n + ' sur 5">★</button>';
+      }).join('') + '</span>';
+    }
+    return '<button type="button" class="bouton-lien" data-compte="connecter">' + (window.Cloud && window.Cloud.lie() ? 'Reconnectez-vous pour noter' : 'Se connecter pour noter') + '</button>';
+  }
+  function fermerBarres(sauf) {
+    document.querySelectorAll('.note-zone .note-barre:not([hidden])').forEach(function (b) {
+      if (sauf && sauf.contains(b)) return;
+      b.hidden = true; var p = b.parentNode.querySelector('.note-pastille'); if (p) p.setAttribute('aria-expanded', 'false');
+    });
+  }
+  document.addEventListener('click', function (e) {
+    var ouvrir = e.target.closest('[data-note-ouvrir]'), etoile = e.target.closest('[data-note-carte]');
+    if (ouvrir) {
+      var zoneCarte = ouvrir.closest('.note-zone'), barreCarte = zoneCarte.querySelector('.note-barre'), voulue = barreCarte.hidden;
+      fermerBarres(); barreCarte.hidden = !voulue; ouvrir.setAttribute('aria-expanded', String(voulue));
+      if (voulue) { var premier = barreCarte.querySelector('button'); if (premier) premier.focus(); }
+    } else if (etoile) {
+      var z = etoile.closest('.note-zone'); fermerBarres(); noter(z.dataset.livre, Number(etoile.dataset.noteCarte), false);
+    } else if (!e.target.closest('.note-barre')) fermerBarres();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var ouverte = document.querySelector('.note-zone .note-barre:not([hidden])');
+    if (!ouverte) return;
+    var p = ouverte.parentNode.querySelector('.note-pastille'); fermerBarres(); if (p) p.focus();
+  });
   function saisie(livre) {
     if (!actifRelais()) return '';
     if (connecte()) {
@@ -74,19 +109,21 @@ window.Notes = (function () {
     var e = (r && r.erreur) || 'erreur inconnue';
     return /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous avec le bouton du compte, puis recommencez.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
   }
-  function noter(note) {
-    var livre = livreOuvert, ancienne = MIENNES[livre] || 0;
+  // surFiche : la note est donnée depuis la fiche (message dans la fiche) ; sinon depuis la jaquette (message visible quelques secondes)
+  function noter(livre, note, surFiche) {
+    var ancienne = MIENNES[livre] || 0;
     if (note === ancienne) return;                                   // même note : rien à envoyer
+    var parler = function (texte, erreur) { if (surFiche) dire(texte, erreur); else if (window.Compte && window.Compte.annoncer) window.Compte.annoncer(texte); };
     if (note) MIENNES[livre] = note; else delete MIENNES[livre];     // affichage immédiat, annulé si le relais refuse
-    dessiner(); dire('Enregistrement…');
+    if (surFiche) { dessiner(); dire('Enregistrement…'); }
     window.Relais.appeler('noter', { livre: livre, note: note }).then(function (r) {
       if (r && r.ok) {
         if (r.nombre) MOY[livre] = [r.moyenne, r.nombre]; else delete MOY[livre];
-        ecrireCache(); dessiner(); dire(note ? 'Merci, votre note est enregistrée.' : 'Votre note est retirée.'); signaler();
-      } else { retour(livre, ancienne); dire(lisible(r), true); }
-    }).catch(function () { retour(livre, ancienne); dire('Le service ne répond pas : vérifiez votre connexion.', true); });
+        ecrireCache(); if (surFiche) dessiner(); parler(note ? 'Merci, votre note est enregistrée.' : 'Votre note est retirée.'); signaler();
+      } else { retour(livre, ancienne, surFiche); parler(lisible(r), true); }
+    }).catch(function () { retour(livre, ancienne, surFiche); parler('Le service ne répond pas : vérifiez votre connexion.', true); });
   }
-  function retour(livre, ancienne) { if (ancienne) MIENNES[livre] = ancienne; else delete MIENNES[livre]; dessiner(); }
+  function retour(livre, ancienne, surFiche) { if (ancienne) MIENNES[livre] = ancienne; else delete MIENNES[livre]; if (surFiche) dessiner(); else signaler(); }
 
   // Affiche le bloc de notes d'un livre dans la zone donnée (fiche ouverte)
   function rendre(z, livre) {
@@ -94,10 +131,10 @@ window.Notes = (function () {
     if (!z) return;
     z.onclick = function (e) {
       var b = e.target.closest('[data-note]'), r = e.target.closest('[data-note-retirer]');
-      if (b) noter(Number(b.dataset.note)); else if (r) noter(0);
+      if (b) noter(livreOuvert, Number(b.dataset.note), true); else if (r) noter(livreOuvert, 0, true);
     };
     chargerMiennes(); dessiner();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', charger); else charger();
-  return { rendre: rendre, carte: carte };
+  return { rendre: rendre, pastille: pastille };
 })();

@@ -268,5 +268,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
+  return { annoncer: annoncer, demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
 })();
