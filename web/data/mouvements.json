@@ -2,7 +2,7 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 19,
+ "nb_modifiees": 22,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
@@ -33,6 +33,21 @@
    "avant": 42.55,
    "apres": 20.0,
    "pct": -0.53,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070582693",
+   "isbn13": "9782070582693",
+   "titre": "Retour à la Montagne de Feu",
+   "serie": "Défis Fantastiques",
+   "numero": "717",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 50.99,
+   "apres": 25.0,
+   "pct": -0.51,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -113,6 +128,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070582693",
+   "isbn13": "9782070582693",
+   "titre": "Retour à la Montagne de Feu",
+   "serie": "Défis Fantastiques",
+   "numero": "717",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 56.98,
+   "apres": 34.21,
+   "pct": -0.4,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070509638",
    "isbn13": "9782070509638",
    "titre": "La Légion des Morts",
@@ -156,39 +186,9 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070333516",
-   "isbn13": "9782070333516",
-   "titre": "La Vengeance d'Althéos",
-   "serie": "Chroniques Crétoises",
-   "numero": "351",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 17.95,
-   "apres": 12.0,
-   "pct": -0.331,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070509614",
-   "isbn13": "9782070509614",
-   "titre": "Le Temps de la Malédiction",
-   "serie": "Quête du Graal",
-   "numero": "363",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 17.0,
-   "apres": 11.38,
-   "pct": -0.331,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 13,
+ "nb_grands_mouvements": 16,
  "modele": {
   "actif": false,
   "n_paires": 7,

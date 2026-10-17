@@ -280,6 +280,16 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070582693|convenable": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070582693|tres_bon": {
+   "prix": 52.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070585168|bon": {
    "prix": 36.74,
    "decision": "confirme",
