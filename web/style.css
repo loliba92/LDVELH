@@ -697,7 +697,9 @@ html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 2
 
 /* Fiche : boutons de recherche sur les sites d'annonces */
 .liens-vente { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
-.liens-vente .bouton { min-width: 96px; }
+.liens-vente .bouton { flex: 1 1 auto; min-width: 0; padding-inline: 10px; }
+@media (min-width: 701px) { .liens-vente .bouton { flex: 0 0 auto; min-width: 96px; padding-inline: 18px; } }
+@media (max-width: 380px) { .liens-vente { display: grid; grid-template-columns: 1fr 1fr; } }
 /* Bandeau de la page collection sur téléphone : voile plus dense, le texte occupe toute la largeur */
 @media (max-width: 700px) {
   .banniere { background:
