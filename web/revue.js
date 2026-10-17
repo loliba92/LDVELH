@@ -332,6 +332,47 @@
   initAjout();
   initReglages();
 
+  /* ---------- Demandes d'ajout faites par les personnes connectées (via le relais) ---------- */
+  function initDemandes() {
+    if (!window.Relais) return;
+    window.Identite.config().then((c) => { if (c && c.relais_url) brancherDemandes(); });
+  }
+  function brancherDemandes() {
+    const bloc = $('#rv-demandes'), liste = $('#dm-liste'), msg = $('#dm-msg');
+    const dire = (t, erreur) => { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
+    const lisible = (r) => { const e = (r && r.erreur) || 'erreur inconnue'; return /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : e.charAt(0).toUpperCase() + e.slice(1) + '.'; };
+    function charger() {
+      if (!window.Relais.actif()) return;
+      window.Relais.appeler('demandes_lire').then((r) => {
+        if (!r || !r.ok) { bloc.hidden = false; dire(lisible(r), true); return; }
+        bloc.hidden = !r.demandes.length;
+        $('#dm-nb').textContent = r.demandes.length || '';
+        liste.innerHTML = r.demandes.map((d) => `<li class="dm-demande" data-n="${d.numero}">
+          <p><strong>${esc(d.texte)}</strong> <span class="sous">demandé par ${esc(d.par || 'une personne connectée')}${d.date ? ', le ' + esc(jour(d.date)) : ''}</span></p>
+          ${d.note ? `<p class="sous">${esc(d.note)}</p>` : ''}
+          <label class="sr-only" for="dm-l-${d.numero}">Ligne à ajouter</label>
+          <input id="dm-l-${d.numero}" type="text" value="${esc(d.texte)}" autocomplete="off">
+          <div class="dm-actions"><button type="button" class="bouton" data-dm="accepter">Accepter</button><button type="button" class="bouton bouton-clair" data-dm="refuser">Refuser</button></div></li>`).join('');
+      }).catch(() => {});
+    }
+    liste.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-dm]');
+      if (!b) return;
+      const li = b.closest('.dm-demande'), numero = Number(li.dataset.n), decision = b.dataset.dm;
+      const donnees = { numero, decision };
+      if (decision === 'accepter') donnees.ligne = li.querySelector('input').value;
+      else { const raison = window.prompt('Raison du refus (facultatif, visible publiquement) :', ''); if (raison === null) return; donnees.raison = raison; }
+      li.querySelectorAll('button').forEach((x) => { x.disabled = true; });
+      dire('Enregistrement…');
+      window.Relais.appeler('demande_traiter', donnees).then((r) => {
+        if (r && r.ok) { dire(decision === 'accepter' ? 'Acceptée : le livre est en cours d\'ajout (environ 2 minutes).' : 'Demande refusée et fermée.'); charger(); } else { dire(lisible(r), true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); }
+      }).catch(() => { dire('Le service ne répond pas : vérifiez votre connexion.', true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); });
+    });
+    document.addEventListener('cdh-porte-ouverte', charger);
+    if (!$('#main').hidden) charger();
+  }
+  initDemandes();
+
   /* ---------- Tendances : la cote monte-t-elle ou baisse-t-elle, et où ? (données : data/tendances.json) ---------- */
   function initTendances() {
     const pct = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v * 100).toFixed(0).replace('.', ',') + ' %';
