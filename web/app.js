@@ -150,12 +150,9 @@
     $('#f-amax').innerHTML = '<option value="">Fin</option>' + annees.map(opt).join('');
 
     const nb = compter('version');
-    $('#f-versions').innerHTML = VERSIONS.map((v) => {
-      const m = anneeMediane(v);
-      return `<label class="edition"><input type="checkbox" value="${esc(v)}"><span class="tampon">${esc(v)}</span>` +
-        `<span class="reste"><span>Édition ${esc(v)}</span><small>${m ? `vers ${m}` : ''}</small></span>` +
-        `<span class="nb">${nb.get(v)} livres</span></label>`;
-    }).join('');
+    $('#f-versions').innerHTML = '<option value="">Toutes les éditions</option>' +
+      VERSIONS.map((v) => `<option value="${esc(v)}">Édition ${esc(v)} (${nb.get(v)})</option>`).join('') +
+      '<option value="multi" hidden disabled>Plusieurs éditions</option>';
 
     $('#h-etats').innerHTML = ETATS.map((e) =>
       `<label><input type="radio" name="h-etat" value="${e.k}"><span>${e.court}</span></label>`).join('');
@@ -172,7 +169,7 @@
     document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; synchroniser(); changer(); } }));
     brancherParcours();
     $('#f-versions').addEventListener('change', (e) => {
-      if (e.target.checked) S.versions.add(e.target.value); else S.versions.delete(e.target.value);
+      S.versions = new Set(e.target.value ? [e.target.value] : VERSIONS);
       changer();
     });
     $('#h-etats').addEventListener('change', (e) => { S.h = e.target.value; $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`; ecrireAdresse(); afficher(); });
@@ -200,7 +197,7 @@
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
     document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = (r.value === 'mine') === S.mine; });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
-    document.querySelectorAll('#f-versions input').forEach((i) => { i.checked = S.versions.has(i.value); });
+    $('#f-versions').value = S.versions.size === VERSIONS.length ? '' : S.versions.size === 1 ? [...S.versions][0] : 'multi';
     document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
     document.querySelectorAll('#f-vue input').forEach((i) => { i.checked = i.value === S.vue; });
   }
