@@ -74,8 +74,10 @@
   <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
   <p><code class="aj-exemple">9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré</code></p>
+  <p>Pour un livre sans ISBN, écrivez son titre, puis éventuellement la série et le numéro :</p>
+  <p><code class="aj-exemple">Cthulhu, le pacte d'Innsmouth ; L'Appel de Cthulhu ; 3</code></p>
   <label class="sr-only" for="aj-texte">Liste d'ISBN</label>
-  <textarea id="aj-texte" rows="6" spellcheck="false" autocomplete="off" placeholder="9791097577025&#10;2-07-033370-1&#10;9782070583805 ; Destins ; 731 ; Le Pirate des Sept Mers"></textarea>
+  <textarea id="aj-texte" rows="6" spellcheck="false" autocomplete="off" placeholder="9791097577025&#10;2-07-033370-1&#10;9782070583805 ; Destins ; 731 ; Le Pirate des Sept Mers&#10;Cthulhu, le pacte d'Innsmouth"></textarea>
   <div class="rv-ajout-actions"><button type="button" class="bouton" id="aj-verifier">Vérifier la liste</button></div>
   <div id="aj-resultat" hidden>
     <p id="aj-bilan" class="rv-ajout-bilan" role="status"></p>
