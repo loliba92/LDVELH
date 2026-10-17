@@ -2,7 +2,7 @@
  "date": "2026-10-17",
  "precedent": "2026-10-15",
  "nb_comparees": 1392,
- "nb_modifiees": 34,
+ "nb_modifiees": 37,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 27,
  "hausses": [
@@ -54,6 +54,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070507054",
+   "isbn13": "9782070507054",
+   "titre": "Les Mages de Solani",
+   "serie": "Défis Fantastiques",
+   "numero": "721",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 52.77,
+   "apres": 22.0,
+   "pct": -0.583,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070651412",
    "isbn13": "9782070651412",
    "titre": "La Nuit du Loup-Garou (Grand format)",
@@ -80,6 +95,21 @@
    "apres": 25.0,
    "pct": -0.51,
    "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070507054",
+   "isbn13": "9782070507054",
+   "titre": "Les Mages de Solani",
+   "serie": "Défis Fantastiques",
+   "numero": "721",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 68.91,
+   "apres": 34.47,
+   "pct": -0.5,
+   "nature": "archives",
    "nb": 0,
    "recalibre": false
   },
@@ -187,39 +217,9 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070509614",
-   "isbn13": "9782070509614",
-   "titre": "Le Temps de la Malédiction",
-   "serie": "Quête du Graal",
-   "numero": "363",
-   "version": "V2",
-   "etat": "convenable",
-   "avant": 13.44,
-   "apres": 8.0,
-   "pct": -0.405,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070582693",
-   "isbn13": "9782070582693",
-   "titre": "Retour à la Montagne de Feu",
-   "serie": "Défis Fantastiques",
-   "numero": "717",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 56.98,
-   "apres": 34.21,
-   "pct": -0.4,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 23,
+ "nb_grands_mouvements": 26,
  "modele": {
   "actif": false,
   "n_paires": 7,

@@ -160,6 +160,16 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070507054|convenable": {
+   "prix": 22.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
+  "9782070507054|tres_bon": {
+   "prix": 60.0,
+   "decision": "corrige",
+   "le": "2026-10-17"
+  },
   "9782070509294|bon": {
    "prix": 13.8,
    "decision": "confirme",
