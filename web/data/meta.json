@@ -1,7 +1,7 @@
 {
   "genere_le": "2026-10-17",
-  "nb_versions": 496,
-  "nb_livres": 268,
+  "nb_versions": 494,
+  "nb_livres": 266,
   "nb_series": 34,
   "sources_prix": [
     "Relevé d'archives (historique)",
@@ -12,7 +12,7 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 230,
+  "nb_prix_actuels": 228,
   "calibration": {
     "actif": false,
     "n_paires": 7,
