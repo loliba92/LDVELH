@@ -165,6 +165,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
+    corps = corps.replace("{ISSUES}", ISSUES)
     noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
