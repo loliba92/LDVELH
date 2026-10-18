@@ -2,10 +2,25 @@
  "date": "2026-10-18",
  "precedent": "2026-10-17",
  "nb_comparees": 1416,
- "nb_modifiees": 6,
+ "nb_modifiees": 30,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 3,
  "hausses": [
+  {
+   "id": "9782070333172",
+   "isbn13": "9782070333172",
+   "titre": "Le Dieu Perdu",
+   "serie": "Dragon d'Or",
+   "numero": "317",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 5.18,
+   "apres": 6.69,
+   "pct": 0.292,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070581344",
    "isbn13": "9782070581344",
@@ -19,6 +34,51 @@
    "pct": 0.231,
    "nature": "validé",
    "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332960",
+   "isbn13": "9782070332960",
+   "titre": "Les Grottes de Kalte",
+   "serie": "Loup Solitaire",
+   "numero": "296",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.32,
+   "apres": 6.97,
+   "pct": 0.103,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332960",
+   "isbn13": "9782070332960",
+   "titre": "Les Grottes de Kalte",
+   "serie": "Loup Solitaire",
+   "numero": "296",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 9.47,
+   "apres": 10.45,
+   "pct": 0.103,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332960",
+   "isbn13": "9782070332960",
+   "titre": "Les Grottes de Kalte",
+   "serie": "Loup Solitaire",
+   "numero": "296",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 15.79,
+   "apres": 17.42,
+   "pct": 0.103,
+   "nature": "annonces",
+   "nb": 6,
    "recalibre": false
   }
  ],
@@ -69,6 +129,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070334087",
+   "isbn13": "9782070334087",
+   "titre": "L'Ombre de la Guillotine",
+   "serie": "Histoire",
+   "numero": "408",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 10.16,
+   "apres": 6.88,
+   "pct": -0.323,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070581344",
    "isbn13": "9782070581344",
    "titre": "Les Sept Serpents",
@@ -80,6 +155,21 @@
    "apres": 30.0,
    "pct": -0.318,
    "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070334087",
+   "isbn13": "9782070334087",
+   "titre": "L'Ombre de la Guillotine",
+   "serie": "Histoire",
+   "numero": "408",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 14.39,
+   "apres": 10.32,
+   "pct": -0.283,
+   "nature": "archives",
    "nb": 0,
    "recalibre": false
   },
@@ -99,7 +189,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 6,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 7,
