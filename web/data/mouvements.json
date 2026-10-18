@@ -16,8 +16,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 77.83,
-   "apres": 34.86,
-   "pct": -0.552,
+   "apres": 31.82,
+   "pct": -0.591,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -31,8 +31,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 59.89,
-   "apres": 30.0,
-   "pct": -0.499,
+   "apres": 25.0,
+   "pct": -0.583,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
