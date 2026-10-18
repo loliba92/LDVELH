@@ -783,6 +783,18 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9791097577315|convenable": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-10-18",
+   "par": "loliba (superadmin)"
+  },
+  "9791097577315|tres_bon": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-10-18",
+   "par": "loliba (superadmin)"
+  },
   "9791097577414|convenable": {
    "prix": 9.0,
    "decision": "corrige",
