@@ -1,8 +1,8 @@
 {
-  "genere_le": "2026-10-17",
-  "nb_versions": 494,
-  "nb_livres": 266,
-  "nb_series": 34,
+  "genere_le": "2026-10-18",
+  "nb_versions": 495,
+  "nb_livres": 267,
+  "nb_series": 35,
   "sources_prix": [
     "Relevé d'archives (historique)",
     "eBay (interface officielle)",
@@ -18,7 +18,7 @@
     "n_paires": 7,
     "gain": null,
     "raison": "pas assez d'éditions comparables (7 sur 20 nécessaires)",
-    "calcule_le": "2026-10-17",
+    "calcule_le": "2026-10-18",
     "rapport_global": null,
     "nb_recalibres": 0
   }
