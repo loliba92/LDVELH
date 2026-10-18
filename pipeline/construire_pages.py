@@ -11,6 +11,7 @@ from pathlib import Path
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 MAJ = "11 octobre 2026"
+MAJ_LEGAL = "18 octobre 2026"      # dernière révision des pages Confidentialité et Mentions légales
 ISSUES = "https://github.com/loliba92/LDVELH/issues"
 
 
@@ -38,7 +39,7 @@ PAGES = {
     "le-projet.html": ("Le projet", "Le projet · La Cote du Héros",
                        "Pourquoi ce guide existe, d'où viennent ses données, comment les prix sont estimés, et ce qu'il ne fait pas."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
-                             "Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur."),
+                             "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive et vos notes dans le relais du site."),
     "contact.html": ("Contact", "Contact · La Cote du Héros",
                      "Écrire à La Cote du Héros : une question, une erreur à signaler, un prix constaté, une idée ou un partenariat."),
     "communaute.html": ("Communauté", "Communauté · La Cote du Héros",
@@ -55,43 +56,16 @@ PAGES = {
 # Textes qui changent quand la collection est liée au compte Google (voir COMPTE). Chaque paire doit trouver sa phrase : le test
 # pipeline/test_textes_compte.py le vérifie, pour qu'une modification des textes ne fasse pas silencieusement manquer une variante.
 VARIANTES = [
-    ("Ce que La Cote du Héros fait de vos données : rien n'est envoyé, tout reste dans votre navigateur.",
-     "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive."),
-    ("Il ne demande aucun compte et ne mesure pas votre visite.",
-     "Il ne demande aucun compte pour consulter les cotes et ne mesure pas votre visite."),
+    ('Il ne demande aucun compte et ne mesure pas votre visite.',
+     'Il ne demande aucun compte pour consulter les cotes et ne mesure pas votre visite.'),
     ("La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur.",
      "La collection que vous composez demande un compte Google : elle est enregistrée dans l'espace réservé de votre propre Google Drive, que seul ce site peut ouvrir, avec une copie sur votre appareil. Le guide n'a pas de serveur et ne la voit jamais."),
-    ("<strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.",
-     "<strong>consulter La Cote du Héros ne demande aucun compte et ne collecte aucune donnée personnelle.</strong> Pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Pour constituer une collection, vous vous connectez avec Google : elle est alors enregistrée dans votre propre Google Drive, pas chez l'éditeur."),
-    ("le guide écrit deux enregistrements dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.",
-     "le guide écrit quelques enregistrements dans le stockage local de votre navigateur. Ils ne quittent votre appareil que pour rejoindre votre propre Google Drive si vous êtes connecté, et l'éditeur n'y a pas accès."),
-    ('<td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>',
-     '<td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>\n'
-     '    <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l\'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>\n'
-     '    <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>'),
-    ("<h2>Comment les effacer</h2>",
-     "<h2>Si vous vous connectez avec Google</h2>\n"
-     "<p>Pour constituer une collection, vous vous connectez avec votre compte Google. Le site demande à Google deux choses : votre prénom, pour l'afficher, et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Le guide n'a pas de serveur : votre collection va directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit ni votre courriel ni vos autres fichiers. Le laissez-passer de connexion donné par Google reste sur cet appareil, sans jamais être envoyé ailleurs qu'à Google, et s'efface au bout d'une heure ou à la déconnexion.</p>\n"
-     "<p>Google intervient alors à votre demande comme prestataire de stockage, selon <a href=\"https://policies.google.com/privacy\" target=\"_blank\" rel=\"noopener\">sa propre politique de confidentialité</a>. Le seul moment où votre navigateur contacte Google est le clic sur « Se connecter ».</p>\n\n"
-     "<h2>Notes des livres</h2>\n"
-     "<p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée par le relais du site (un petit service hébergé chez Google, dans Google Apps Script), avec une <strong>empreinte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>\n\n"
-     "<h2>Comment les effacer</h2>"),
-    ("  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>",
-     "  <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>\n"
-     "  <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href=\"https://myaccount.google.com/permissions\" target=\"_blank\" rel=\"noopener\">myaccount.google.com</a>.</li>\n"
-     "  <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>"),
-    ("le guide n'appelle aucun service extérieur pour s'afficher.",
-     "le guide n'appelle aucun service extérieur pour s'afficher : Google n'est contacté que si vous cliquez sur « Se connecter »."),
-    ("Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur.",
-     "Le guide ne détient aucune donnée sur vous : votre collection est dans votre Drive, que vous pouvez consulter, corriger ou effacer vous-même, et il n'y a rien à demander à l'éditeur."),
-    ("Le site ne collecte aucune donnée personnelle et ne dépose aucun cookie.",
-     "Le site ne dépose aucun cookie et ne collecte aucune donnée personnelle. Si vous vous connectez avec Google pour constituer une collection, Google stocke celle-ci pour vous, à votre demande."),
-    ("Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.",
-     "Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Elle est sauvegardée dans votre Google Drive."),
-    ("Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.",
-     "Vos livres, leur état et leur valeur estimée, sauvegardés dans votre Google Drive."),
-    ("Votre collection reste dans votre navigateur : voir",
-     "Votre collection est dans votre Google Drive : voir"),
+    ('Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.',
+     'Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Elle est sauvegardée dans votre Google Drive.'),
+    ('Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.',
+     'Vos livres, leur état et leur valeur estimée, sauvegardés dans votre Google Drive.'),
+    ('Votre collection reste dans votre navigateur : voir',
+     'Votre collection est dans votre Google Drive : voir'),
 ]
 
 
@@ -535,25 +509,58 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 
 CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <h1>Confidentialité</h1>
-<p class="chapeau">En bref : <strong>La Cote du Héros ne collecte aucune donnée personnelle.</strong> Pas de compte, pas de formulaire, pas de cookie, pas de mesure d'audience, pas de publicité. Votre collection reste dans votre navigateur.</p>
+<p class="chapeau">En bref : <strong>consulter La Cote du Héros ne demande aucun compte et ne dépose aucun cookie.</strong> Pas de mesure d'audience, pas de publicité. Pour constituer une collection, noter un livre ou demander un ajout, vous vous connectez avec Google : votre collection est alors enregistrée dans votre propre Google Drive, pas chez l'éditeur.</p>
 
 <h2>Ce qui est enregistré sur votre appareil</h2>
-<p>Pour fonctionner comme vous le demandez, le guide écrit deux enregistrements dans le stockage local de votre navigateur. Ces données ne quittent jamais votre appareil et l'éditeur n'y a pas accès.</p>
+<p>Pour fonctionner comme vous le demandez, le guide écrit quelques enregistrements dans le stockage de votre navigateur. Ils ne quittent votre appareil que pour rejoindre votre propre Google Drive si vous êtes connecté, et l'éditeur n'y a pas accès.</p>
 <div class="tableau-page">
 <table>
   <thead><tr><th scope="col">Nom</th><th scope="col">Contenu</th><th scope="col">Pourquoi</th></tr></thead>
   <tbody>
     <tr><td data-label="Nom"><code>cote-collection-v1</code></td><td data-label="Contenu">Les livres de « Ma collection », leur état, leur quantité</td><td data-label="Pourquoi">Conserver votre collection d'une visite à l'autre</td></tr>
+    <tr><td data-label="Nom"><code>cote-souhaits-v1</code></td><td data-label="Contenu">Les livres de votre liste « À trouver »</td><td data-label="Pourquoi">Retenir ce que vous cherchez</td></tr>
     <tr><td data-label="Nom"><code>cote-parcours-v1</code></td><td data-label="Contenu">L'avancement de l'inventaire guidé</td><td data-label="Pourquoi">Reprendre là où vous en étiez</td></tr>
+    <tr><td data-label="Nom"><code>cote-collection-avant-reprise</code></td><td data-label="Contenu">Une copie de sécurité de votre collection, faite avant de la fusionner avec celle de votre compte</td><td data-label="Pourquoi">Ne rien perdre à la première connexion</td></tr>
+    <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>
+    <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
+    <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
+    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Admin ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-installer-ferme-jusqu-au</code></td><td data-label="Contenu">La date jusqu'à laquelle le bandeau d'installation reste masqué (quatorze jours)</td><td data-label="Pourquoi">Ne pas vous le montrer en boucle si vous l'avez fermé</td></tr>
   </tbody>
 </table>
 </div>
 <p>Le guide garde aussi des copies de ses propres pages et images dans la mémoire de votre navigateur (cache), pour s'ouvrir sans réseau. Elles ne contiennent aucune donnée sur vous.</p>
 <p><strong>Aucun cookie</strong> n'est déposé. Ces enregistrements sont nécessaires à des fonctions que vous demandez vous-même ; ils ne demandent donc pas de consentement et il n'y a pas de bandeau.</p>
 
+<h2>Si vous vous connectez avec Google</h2>
+<p>Le site demande à Google trois choses : votre prénom, pour l'afficher, votre adresse électronique, pour vous reconnaître (elle n'est lue que par le relais décrit plus bas), et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Votre collection va directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit pas vos autres fichiers. Le laissez-passer donné par Google reste sur cet appareil et s'efface au bout d'une heure ou à la déconnexion ; il n'est envoyé qu'à Google et, quand vous utilisez une fonction qui en a besoin, au relais.</p>
+<p>Google intervient à votre demande comme prestataire de stockage, selon <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">sa propre politique de confidentialité</a>. Votre navigateur contacte Google quand vous cliquez sur « Se connecter », puis à chaque sauvegarde de votre collection dans votre Drive.</p>
+
+<h2>Le relais du site</h2>
+<p>Certaines fonctions passent par un petit programme géré par l'éditeur et hébergé chez Google (Google Apps Script), appelé le <strong>relais</strong>. Il sert à afficher les moyennes des notes, à enregistrer vos notes, à transmettre vos demandes d'ajout de livres et à permettre aux administrateurs d'envoyer des prix.</p>
+<ul>
+  <li><strong>Sans connexion</strong> : à l'ouverture de la plupart des pages, le site interroge le relais pour afficher les moyennes des notes. Google reçoit alors, comme tout serveur, l'adresse IP et le type de navigateur du visiteur. Aucune donnée sur vous n'est envoyée.</li>
+  <li><strong>Connecté</strong> : votre laissez-passer est transmis au relais, qui le vérifie auprès de Google et en tire une <strong>empreinte</strong>, un code calculé à partir de votre adresse qui ne permet pas de la retrouver. Il s'en sert pour vous reconnaître et pour savoir à quel niveau vous êtes. Le relais ne conserve ni votre adresse ni votre nom : seulement cette empreinte, avec ce que vous lui demandez d'enregistrer (une note, une demande).</li>
+</ul>
+
+<h2>Notes des livres</h2>
+<p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le relais avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
+
+<h2>Demander l'ajout d'un livre</h2>
+<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, sur GitHub, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à trois par personne toutes les six heures.</p>
+
+<h2>Les administrateurs</h2>
+<p>Les administrateurs sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un administrateur envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
+
+<h2>Soutenir le guide</h2>
+<p>Le lien « Offrir un café » ouvre la page du guide sur Buy Me a Coffee, un service extérieur. Le don se fait chez ce service, selon ses propres règles. Il peut communiquer à l'éditeur les informations de votre don (par exemple le nom et le message que vous laissez). Le guide lui-même ne reçoit rien et n'enregistre rien à ce sujet.</p>
+
 <h2>Comment les effacer</h2>
 <ul>
   <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
+  <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>
+  <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com</a>.</li>
+  <li>Une demande d'ajout publiée sur GitHub : écrivez à l'éditeur par la page <a href="contact.html">Contact</a> pour la faire retirer.</li>
   <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
 </ul>
 
@@ -561,16 +568,16 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Le fichier que vous téléchargez (JSON ou CSV) est créé dans votre navigateur et enregistré chez vous. Quand vous chargez un fichier pour le retrouver, il est lu dans votre navigateur, sans être envoyé nulle part. Vous en restez seul responsable : il contient la liste de vos livres.</p>
 
 <h2>Hébergement et journaux techniques</h2>
-<p>Le site est hébergé par GitHub Pages (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub peut enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de l'hébergeur et non de l'éditeur, qui n'y a pas accès. GitHub est établi aux États-Unis ; son traitement des données est décrit dans sa <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité</a>.</p>
+<p>Le site est hébergé par GitHub Pages ; la connexion, la sauvegarde dans votre Drive et le relais passent par Google (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub et Google peuvent enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de ces sociétés et non de l'éditeur, qui n'y a pas accès. Elles sont établies aux États-Unis ; leur traitement des données est décrit dans la <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité de GitHub</a> et la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site : le guide n'appelle aucun service extérieur pour s'afficher. Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs (notice de la BnF, recherches sur Vinted, Leboncoin, eBay ou Facebook, GitHub). Ces sites ont leurs propres règles de confidentialité.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le relais, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook et Amazon, Buy Me a Coffee, GitHub. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
 
 <h2>Vos droits</h2>
-<p>Comme le guide ne détient aucune donnée sur vous, il n'y a rien à consulter, corriger ou effacer chez l'éditeur. Pour toute question, ou si vous pensez qu'une donnée vous concernant est traitée à tort, écrivez par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription d'administrateur), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a> ou par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
-<p>Si le guide devait un jour mesurer sa fréquentation, proposer des dons ou ouvrir des comptes, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : {MAJ}.</p>
+<p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : {MAJ_LEGAL}.</p>
 '''
 
 MENTIONS = f'''<p class="surtitre">Informations légales</p>
@@ -586,18 +593,21 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 
 <h2>Hébergeur</h2>
 <ul>
-  <li><strong>GitHub, Inc.</strong> (service GitHub Pages)</li>
+  <li><strong>GitHub, Inc.</strong> (service GitHub Pages), qui héberge le site</li>
   <li>Adresse : 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis [À VÉRIFIER]</li>
   <li>Téléphone : [À COMPLÉTER ou à vérifier auprès de l'hébergeur]</li>
   <li>Site : <a href="https://pages.github.com" target="_blank" rel="noopener">pages.github.com</a></li>
 </ul>
+
+<h2>Services de connexion et de sauvegarde</h2>
+<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des administrateurs, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
 
 <h2>Propriété intellectuelle</h2>
 <ul>
   <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits].</li>
   <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
   <li><strong>Données bibliographiques</strong> : catalogue général de la Bibliothèque nationale de France.</li>
-  <li><strong>Illustration de l'accueil</strong> : [À COMPLÉTER : auteur ou source de l'illustration, et conditions d'utilisation]</li>
+  <li><strong>Illustrations de l'accueil</strong> : images générées par intelligence artificielle pour le guide, choisies par l'éditeur.</li>
   <li><strong>Polices</strong> : Cormorant Garamond (© The Cormorant Project Authors) et Source Sans 3 (© Adobe), licence SIL Open Font 1.1.</li>
 </ul>
 
@@ -605,12 +615,12 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 <p>Les cotes sont des estimations indicatives, établies à partir de données d'archives et d'observations partielles. Elles n'ont aucune valeur contractuelle, ne remplacent ni une expertise ni un prix de vente réel, et l'éditeur ne garantit ni leur exactitude ni leur actualité. Chaque cote indique sa nature et son ancienneté. Les liens vers des sites extérieurs n'engagent pas leurs éditeurs ni celui de ce guide.</p>
 
 <h2>Données personnelles et cookies</h2>
-<p>Le site ne collecte aucune donnée personnelle et ne dépose aucun cookie. Voir la page <a href="confidentialite.html">Confidentialité</a>.</p>
+<p>Le site ne dépose aucun cookie, ne mesure pas sa fréquentation et ne contient aucune publicité. Consulter les cotes ne demande aucune donnée personnelle. Si vous vous connectez avec Google, votre collection est enregistrée dans votre propre Google Drive ; vos notes et vos demandes d'ajout sont enregistrées avec une empreinte de votre compte (jamais votre adresse), par un relais hébergé chez Google. L'éditeur est responsable de ces notes et de ces demandes : pour exercer vos droits, voir la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
 <h2>Droit applicable</h2>
-<p>Le site est soumis au droit français. Il ne propose ni vente ni service payant : aucune médiation de la consommation n'est donc applicable.</p>
+<p>Le site est soumis au droit français. Il ne propose ni vente ni service payant : aucune médiation de la consommation n'est donc applicable. Le lien « Offrir un café » mène à un service extérieur (Buy Me a Coffee) où l'on peut faire un don libre : un don n'est ni une vente ni la contrepartie d'un service.</p>
 
-<p class="sous">Dernière mise à jour : {MAJ}.</p>
+<p class="sous">Dernière mise à jour : {MAJ_LEGAL}.</p>
 '''
 
 
