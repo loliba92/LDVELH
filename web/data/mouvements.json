@@ -2,10 +2,25 @@
  "date": "2026-10-18",
  "precedent": "2026-10-17",
  "nb_comparees": 1416,
- "nb_modifiees": 30,
+ "nb_modifiees": 33,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 3,
+ "nouvelles_cotes": 6,
  "hausses": [
+  {
+   "id": "9782070332724",
+   "isbn13": "9782070332724",
+   "titre": "Le Labyrinthe de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "272",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 10.47,
+   "apres": 13.93,
+   "pct": 0.33,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
+  },
   {
    "id": "9782070333172",
    "isbn13": "9782070333172",
@@ -159,6 +174,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070332724",
+   "isbn13": "9782070332724",
+   "titre": "Le Labyrinthe de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "272",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 33.0,
+   "apres": 23.22,
+   "pct": -0.296,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070334087",
    "isbn13": "9782070334087",
    "titre": "L'Ombre de la Guillotine",
@@ -189,12 +219,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 12,
+ "nb_grands_mouvements": 14,
  "modele": {
   "actif": false,
-  "n_paires": 7,
+  "n_paires": 8,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (7 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (8 sur 20 nécessaires)",
   "rapport_global": null
  }
 }
