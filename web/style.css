@@ -1317,3 +1317,9 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .etats-carte button:disabled { opacity: .4; cursor: default; }
 .etats-carte button:disabled:hover { background: rgba(0, 0, 0, .78); border-color: rgba(217, 180, 95, .55); }
 @media (max-width: 380px) { .cotes .petit { font-size: .6rem; letter-spacing: .02em; overflow-wrap: normal; word-break: keep-all; } }
+
+/* Étagère : « Tout effacer » dans l'en-tête du panneau de filtres, visible dès qu'un filtre est actif (même panneau replié) */
+.selecteur-tete { position: sticky; top: -18px; z-index: 2; flex-wrap: wrap; margin: -18px -18px 12px; padding: 14px 18px 8px; background: var(--surface); }
+.selecteur-actions { display: flex; align-items: baseline; gap: 16px; }
+#reinit { min-height: 44px; display: inline-flex; align-items: center; font-weight: 700; }
+#reinit[hidden] { display: none; }

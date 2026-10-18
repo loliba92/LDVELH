@@ -362,6 +362,7 @@
     const liste = filtrer();
     const nf = nbFiltres();
     $('#nb-filtres').textContent = nf ? String(nf) : '';
+    $('#reinit').hidden = !nf;
     $('#nb-filtres').setAttribute('aria-label', nf ? `${nf} filtre${nf > 1 ? 's' : ''} actif${nf > 1 ? 's' : ''}` : '');
     majResume();
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;

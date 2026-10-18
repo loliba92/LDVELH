@@ -84,7 +84,10 @@
   <aside class="selecteur" id="selecteur" aria-labelledby="titre-selecteur">
     <div class="selecteur-tete">
       <h2 id="titre-selecteur">Composer la sélection <span class="actifs" id="nb-filtres"></span></h2>
-      <button type="button" class="bouton-lien bascule" id="bascule" aria-expanded="true" aria-controls="formulaire">Masquer</button>
+      <div class="selecteur-actions">
+        <button type="button" class="bouton-lien" id="reinit" hidden>Tout effacer</button>
+        <button type="button" class="bouton-lien bascule" id="bascule" aria-expanded="true" aria-controls="formulaire">Masquer</button>
+      </div>
     </div>
     <p class="resume" id="resume" hidden></p>
     <div class="formulaire" id="formulaire">
@@ -122,7 +125,6 @@
       </div>
       <label class="case"><input type="checkbox" id="f-vente"><span>Encore en vente neuve</span></label>
       <label class="case"><input type="checkbox" id="f-mine"><span>Seulement ma collection</span></label>
-      <button type="button" class="bouton-lien" id="reinit">Tout effacer</button>
     </div>
   </aside>
 
