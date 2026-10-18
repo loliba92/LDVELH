@@ -70,7 +70,7 @@ function doPost(e) {
       var d = validerDemande(q.texte, q.note);
       if (!d.ok) return reponse({ ok: false, erreur: d.raison });
       var cache = CacheService.getScriptCache(), cle = 'dem:' + moi.empreinte;
-      if (!peutDemander(cache.get(cle))) return reponse({ ok: false, erreur: 'trop de demandes pour le moment : réessayez plus tard' });
+      if (!peutDemander(cache.get(cle), moi.role)) return reponse({ ok: false, erreur: 'trop de demandes pour le moment : réessayez plus tard' });
       var f = formaterDemande(d.texte, d.note, moi.nom);
       var cree = github('/issues', { method: 'post', payload: { title: f.titre, body: f.corps, labels: [ETIQUETTE_DEMANDE] } });
       if (cree.code !== 201) return reponse({ ok: false, erreur: 'la demande n\'a pas pu être enregistrée (' + cree.code + ')' });

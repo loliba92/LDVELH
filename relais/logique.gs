@@ -106,7 +106,7 @@ function bloquerCompte(fichier, empreinte, par) {
    Les admins les lisent, corrigent la ligne si besoin, puis acceptent (le lot « Ajouter des livres » est lancé) ou refusent. */
 var PREFIXE_DEMANDE = "Demande d'ajout : ";
 var ETIQUETTE_DEMANDE = 'demande-ajout';
-var LIMITE_DEMANDES = 3;               // par personne et par fenêtre de six heures (mémoire du script)
+var LIMITE_DEMANDES = 6;               // par personne (Héros) et par fenêtre de six heures (mémoire du script) ; pas de limite pour les admins
 
 /* Texte sans retour à la ligne ni mise en forme : un signalement GitHub est public et interprète le markdown, les liens et les mentions. */
 function nettoyerTexteDemande(brut, max) {
@@ -128,7 +128,7 @@ function lireDemande(issue) {
   var note = lignes.slice(1).join('\n').split('\n\n').map(function (x) { return x.trim(); }).filter(function (x) { return x && x.charAt(0) !== '_'; }).join(' ');
   return { numero: issue.number, texte: issue.title.slice(PREFIXE_DEMANDE.length), par: par, note: note.slice(0, 300), date: String(issue.created_at || '').slice(0, 10) };
 }
-function peutDemander(compteur) { return (Number(compteur) || 0) < LIMITE_DEMANDES; }
+function peutDemander(compteur, role) { return (ROLE_DE[role] != null && ROLE_DE[role] >= ROLE_DE.admin) || (Number(compteur) || 0) < LIMITE_DEMANDES; }
 
 /* ---------- Notes des livres (1 à 5) ----------
    Une voix par compte et par livre (le livre, pas l'édition). Les votes sont rangés sous une empreinte courte du compte : ni adresse ni nom.

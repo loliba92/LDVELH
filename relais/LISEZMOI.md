@@ -32,7 +32,7 @@ Les règles sont dans `logique.gs` (testées par `node pipeline/test_relais.js`)
 ## Demandes d'ajout de livres
 
 Tout compte connecté (Héros) peut demander l'ajout d'un livre : le relais en fait un signalement GitHub (étiquette `demande-ajout`) au nom de la personne
-(prénom et quatre signes, jamais l'adresse), avec une limite de trois demandes par personne toutes les six heures. Les admins les voient dans l'espace
+(prénom et quatre signes, jamais l'adresse), avec une limite de six demandes par personne toutes les six heures (aucune limite pour les Admins et SuperAdmins, qui peuvent aussi ajouter directement). Les admins les voient dans l'espace
 administrateur, corrigent la ligne si besoin, puis acceptent (le lot « Ajouter des livres » est lancé, le signalement est fermé) ou refusent (fermé avec la raison).
 
 ## Notes des livres (1 à 5)

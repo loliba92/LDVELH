@@ -114,7 +114,8 @@ test('demande : le signalement se relit tel qu\'il a été écrit', () => {
 });
 test('demande : limite par personne', () => {
   const p = L('peutDemander');
-  assert.ok(p(undefined)); assert.ok(p('2')); assert.ok(!p('3')); assert.ok(!p('10'));
+  assert.ok(p(undefined)); assert.ok(p('5')); assert.ok(!p('6')); assert.ok(!p('10'));
+  assert.ok(!p('6', 'heros')); assert.ok(p('6', 'admin')); assert.ok(p('99', 'superadmin'));
 });
 test('notes : droits (tout compte connecté), pas les visiteurs', () => {
   assert.ok(L('peut')('heros', 'noter')); assert.ok(L('peut')('admin', 'noter')); assert.ok(L('peut')('superadmin', 'mes_notes'));
