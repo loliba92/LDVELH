@@ -356,6 +356,18 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070581344|convenable": {
+   "prix": 30.0,
+   "decision": "corrige",
+   "le": "2026-10-18",
+   "par": "loliba (superadmin)"
+  },
+  "9782070581344|tres_bon": {
+   "prix": 80.0,
+   "decision": "corrige",
+   "le": "2026-10-18",
+   "par": "loliba (superadmin)"
+  },
   "9782070582693|convenable": {
    "prix": 25.0,
    "decision": "corrige",

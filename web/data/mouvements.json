@@ -2,10 +2,26 @@
  "date": "2026-10-18",
  "precedent": "2026-10-17",
  "nb_comparees": 1416,
- "nb_modifiees": 3,
+ "nb_modifiees": 6,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070581344",
+   "isbn13": "9782070581344",
+   "titre": "Les Sept Serpents",
+   "serie": "Sorcellerie!",
+   "numero": "295",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 65.0,
+   "apres": 80.0,
+   "pct": 0.231,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070665846",
@@ -51,9 +67,39 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070581344",
+   "isbn13": "9782070581344",
+   "titre": "Les Sept Serpents",
+   "serie": "Sorcellerie!",
+   "numero": "295",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 44.01,
+   "apres": 30.0,
+   "pct": -0.318,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070581344",
+   "isbn13": "9782070581344",
+   "titre": "Les Sept Serpents",
+   "serie": "Sorcellerie!",
+   "numero": "295",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 52.01,
+   "apres": 46.48,
+   "pct": -0.106,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
   "n_paires": 7,
