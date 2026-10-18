@@ -690,7 +690,7 @@ html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 2
 .liens-vente { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
 .liens-vente .bouton { flex: 1 1 auto; min-width: 0; padding-inline: 10px; }
 @media (min-width: 701px) { .liens-vente .bouton { flex: 0 0 auto; min-width: 96px; padding-inline: 18px; } }
-@media (max-width: 380px) { .liens-vente { display: grid; grid-template-columns: 1fr 1fr; } }
+@media (max-width: 380px) { .liens-vente { display: grid; grid-template-columns: 1fr 1fr; } .liens-vente .bouton:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 /* Bandeau de la page collection sur téléphone : voile plus dense, le texte occupe toute la largeur */
 @media (max-width: 700px) {
   .banniere { background:
@@ -1316,3 +1316,4 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 
 .etats-carte button:disabled { opacity: .4; cursor: default; }
 .etats-carte button:disabled:hover { background: rgba(0, 0, 0, .78); border-color: rgba(217, 180, 95, .55); }
+@media (max-width: 380px) { .cotes .petit { font-size: .6rem; letter-spacing: .02em; overflow-wrap: normal; word-break: keep-all; } }

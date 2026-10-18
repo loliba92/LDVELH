@@ -656,6 +656,7 @@
       ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
       ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
+      ['Facebook', `https://www.facebook.com/marketplace/search/?query=${q}`],
     ];
     if (b.en_vente === 1 && b.isbn13) liens.push(['Amazon', `https://www.amazon.fr/s?k=${encodeURIComponent(b.isbn13)}`]);
     return liens;

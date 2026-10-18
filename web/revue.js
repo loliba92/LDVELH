@@ -106,7 +106,8 @@
       `<span class="rv-liens"><span>Voir les annonces :</span>${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
         ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
-        ['Vinted', `https://www.vinted.fr/catalog?search_text=${requete(ed.titre + ' ldvelh')}`]]
+        ['Vinted', `https://www.vinted.fr/catalog?search_text=${requete(ed.titre + ' ldvelh')}`],
+        ['Facebook', `https://www.facebook.com/marketplace/search/?query=${requete(ed.titre + ' ldvelh')}`]]
         .map(([nom, url]) => `<a class="rv-ebay" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(ed.titre)} sur ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></header>` +
       `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>Fourchette observée : de</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
       `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
