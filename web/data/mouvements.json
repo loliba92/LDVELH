@@ -4,7 +4,7 @@
  "nb_comparees": 1416,
  "nb_modifiees": 33,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 30,
+ "nouvelles_cotes": 33,
  "hausses": [
   {
    "id": "9782070332724",
@@ -222,9 +222,9 @@
  "nb_grands_mouvements": 14,
  "modele": {
   "actif": false,
-  "n_paires": 8,
+  "n_paires": 9,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (8 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (9 sur 20 nécessaires)",
   "rapport_global": null
  }
 }
