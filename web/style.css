@@ -1313,3 +1313,6 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .sur-ligne { display: block; }
 .coll-fiche .souhait { margin-top: 8px; }
 #seg-cherche[hidden] { display: none; }
+
+.etats-carte button:disabled { opacity: .4; cursor: default; }
+.etats-carte button:disabled:hover { background: rgba(0, 0, 0, .78); border-color: rgba(217, 180, 95, .55); }
