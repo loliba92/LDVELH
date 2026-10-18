@@ -520,6 +520,12 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070665846|bon": {
+   "prix": 31.82,
+   "decision": "confirme",
+   "le": "2026-10-18",
+   "par": "loliba (superadmin)"
+  },
   "9782070665846|convenable": {
    "prix": 25.0,
    "decision": "corrige",
