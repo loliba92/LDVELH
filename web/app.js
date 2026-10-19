@@ -21,6 +21,7 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/['’]/g, ' ');
+  const gv = (c) => (c && c.vendre ? { vendre: true } : {});            // le drapeau « à vendre » survit à tout changement d'état ou d'import
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
   // Rareté : d'après les collections saisies sur collection-ldvelh.fr (voir pipeline/rarete.py) ; une information, elle ne modifie aucune cote
@@ -586,7 +587,7 @@
         </button>
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
-          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div><button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v16l-5-3.5L7 20z"/></svg><span class="souhait-txt">À trouver</span></button>
+          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div><button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -967,7 +968,7 @@
     if (!garde(() => basculerPossede(id, etat))) return;
     if (COLL[id] && COLL[id].etat === etat) { delete COLL[id]; annonce(`${b.titre} retiré de votre collection.`); }
     else {
-      COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1 };
+      COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1, ...gv(COLL[id]) };
       annonce(`${b.titre} : en ${etatDe(etat).long.toLowerCase()} dans votre collection.`);
     }
     sauverColl();
@@ -1139,7 +1140,7 @@
   }
 
   function listeExemplaires(bl) {
-    const triees = bl.lignes.filter((x) => retenue(x)).sort((TRIS[FC.tri] || TRIS.serie)[1]);
+    const triees = bl.lignes.filter((x) => !x.c.vendre && retenue(x)).sort((TRIS[FC.tri] || TRIS.serie)[1]);
     const vus = triees.slice(0, limiteColl);
     const html = vus.map(({ b, c }) => {
       const v = valeurLigne(b, c);
@@ -1151,12 +1152,13 @@
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
           <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
+          <button type="button" class="ex-vendre" data-ex-vendre="${esc(b.id)}" title="Mettre dans la liste à vendre" aria-label="Mettre à vendre : ${nom}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span>À vendre</span></button>
         </div></li>`;
     }).join('');
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
   }
-  const texteFiltre = (lst, bl) => (!lst.nb ? 'Aucun exemplaire ne correspond à ces filtres.'
-    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
+  const texteFiltre = (lst, bl) => (!lst.nb ? (filtresActifs() ? 'Aucun exemplaire ne correspond à ces filtres.' : 'Tous vos livres sont dans la liste à vendre, plus bas.')
+    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
   const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
 
   // Séries de la collection proposées : celles de l'éditeur choisi (toutes si aucun)
@@ -1255,6 +1257,19 @@
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
   }
 
+  // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
+  function htmlAVendre(bl) {
+    const lignes = bl.lignes.filter((x) => x.c.vendre);
+    if (!lignes.length) return '';
+    return `<h3 id="titre-a-vendre">À vendre <span class="sous">(${lignes.length})</span></h3>
+      <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
+      <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
+        <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
+        <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
+  }
+
   // Page « Ma collection » : recherche d'un livre de la base pour l'ajouter d'un geste (titre, série, auteur ou ISBN)
   let AJ_Q = '';
   function rendreAjoutColl() {
@@ -1279,13 +1294,13 @@
   }
   // « Retiré. Annuler » : quelques secondes pour revenir sur un retrait fait par erreur
   let minuteurAnnuler = null;
-  function annulerRetrait(b, id, ancien) {
+  function annulerRetrait(b, id, ancien, libelle) {
     let z = $('#annuler-retrait');
     if (!z) { z = document.createElement('div'); z.id = 'annuler-retrait'; z.className = 'annuler-retrait'; z.setAttribute('role', 'status'); document.body.appendChild(z); }
-    z.innerHTML = `<span>${esc(b ? b.titre : 'Livre')} retiré.</span><button type="button" class="bouton-lien">Annuler</button>`;
+    z.innerHTML = `<span>${esc(b ? b.titre : 'Livre')} ${libelle || 'retiré'}.</span><button type="button" class="bouton-lien">Annuler</button>`;
     z.hidden = false;
     clearTimeout(minuteurAnnuler);
-    minuteurAnnuler = setTimeout(() => { z.hidden = true; }, 7000);
+    minuteurAnnuler = setTimeout(() => { z.hidden = true; }, 10000);
     z.querySelector('button').onclick = () => { COLL[id] = ancien; sauverColl(); afficher(); z.hidden = true; clearTimeout(minuteurAnnuler); };
   }
   function retourAjoutColl(id) {
@@ -1399,7 +1414,7 @@
     zone.innerHTML = `
       ${lienATrouver()}
       <div class="coll-haut">
-        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
+        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}${bl.lignes.some((x) => x.c.vendre) ? ` · dont ${bl.lignes.filter((x) => x.c.vendre).length} à vendre` : ''}</span></div>
         <div>
           <dl class="stats">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
@@ -1421,8 +1436,9 @@
       <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
       <ul class="ex-liste" id="coll-lignes">${lignesEx}</ul>
       <div id="coll-plus-zone">${boutonPlus(reste)}</div>
-      <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
+      ${htmlAVendre(bl)}
       ${htmlATrouver()}
+      <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
       <details class="coll-analyse" id="coll-analyse"><summary>Analyse de ma collection <span class="sous">valeur par tranche, par série, pièces les plus cotées</span></summary>
       <div id="coll-analyses" class="coll-analyses">${analysesPage()}</div>
       <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
@@ -1474,6 +1490,20 @@
         sauverColl(); afficher();
         return;
       }
+      const bVendre = t.closest('[data-ex-vendre]');
+      if (bVendre || t.dataset.vendreGarder || t.dataset.vendu) {   // liste « à vendre » : marquer, garder, ou retirer une fois vendu
+        const id = bVendre ? bVendre.dataset.exVendre : (t.dataset.vendreGarder || t.dataset.vendu);
+        if (!COLL[id] || !garde()) return;
+        if (t.dataset.vendu) {
+          const ancien = COLL[id], b = livreDe(id);
+          delete COLL[id]; sauverColl(); afficher(); annonce('Livre vendu : retiré de votre collection.');
+          annulerRetrait(b, id, ancien, 'vendu, retiré de votre collection');
+        } else {
+          if (bVendre) COLL[id].vendre = true; else delete COLL[id].vendre;
+          sauverColl(); afficher(); annonce(bVendre ? 'Livre ajouté à votre liste à vendre.' : 'Livre gardé dans votre collection.');
+        }
+        return;
+      }
       if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
       if (t.dataset.souhaitRetirer) { if (!garde()) return; delete SOUH[t.dataset.souhaitRetirer]; sauverColl(); afficher(); annonce('Livre retiré de votre liste à trouver.'); }
       else if (t.dataset.retirer) {
@@ -1519,13 +1549,13 @@
           ? 'Estimation fondée sur des cotes d\'archives (ancien relevé) : un ordre de grandeur, pas un prix de vente.'
           : 'Estimation mêlant prix actuels (annonces, ventes) et cotes d\'archives : un ordre de grandeur, pas un prix de vente.',
         estimation: { total: Math.round(bl.total * 100) / 100, exemplaires: bl.exemplaires, titres: bl.titres },
-        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null, lot: c.lot ?? null })),
+        exemplaires: bl.lignes.map(({ b, c }) => ({ isbn13: b.isbn13 || b.id, titre: b.titre, edition: b.version, serie: b.serie, numero: b.numero, etat: c.etat, quantite: c.qte, a_vendre: !!c.vendre, prix_unitaire_estime: b.prix[c.etat], prix_paye: c.prix ?? null, lot: c.lot ?? null })),
       }, null, 2), 'application/json');
     } else {
       const q = (t) => `"${String(t ?? '').replace(/"/g, '""')}"`;
-      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee', 'prix_paye'].join(';')]
+      const lignes = [['isbn13', 'titre', 'edition', 'serie', 'numero', 'etat', 'quantite', 'prix_unitaire_estime', 'valeur_estimee', 'prix_paye', 'a_vendre'].join(';')]
         .concat(bl.lignes.map(({ b, c }) => [q(b.isbn13 || b.id), q(b.titre), b.version, q(b.serie), q(b.numero), c.etat, c.qte,
-          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ','), prixSaisi(c.prix)].join(';')));
+          b.prix[c.etat] == null ? '' : String(b.prix[c.etat]).replace('.', ','), valeurLigne(b, c) == null ? '' : valeurLigne(b, c).toFixed(2).replace('.', ','), prixSaisi(c.prix), c.vendre ? 'oui' : ''].join(';')));
       telecharger(`ma-collection-${jour}.csv`, '﻿' + lignes.join('\r\n'), 'text/csv;charset=utf-8');
     }
     annonce('Export prêt : le fichier a été téléchargé.');
@@ -1565,7 +1595,7 @@
         const liste = Array.isArray(j) ? j : (Array.isArray(j.exemplaires) ? j.exemplaires : []);
         liste.forEach((x) => {
           if (typeof x === 'string') entrees.push({ cle: x });
-          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye), lot: typeof x.lot === 'string' ? x.lot.slice(0, 20) : null });
+          else if (x && typeof x === 'object') entrees.push({ cle: x.isbn13 || x.isbn || x.id || '?', etat: etatDepuis(x.etat || ''), qte: parseInt(x.quantite ?? x.qte, 10) || 1, prix: lirePrix(x.prix_paye), vendre: x.a_vendre === true, lot: typeof x.lot === 'string' ? x.lot.slice(0, 20) : null });
         });
         if (!entrees.length) return { erreur: 'Ce fichier ne contient aucun livre exploitable.' };
       }
@@ -1579,7 +1609,7 @@
         const col = (n) => tete.indexOf(n);
         brutes.slice(1).forEach((l) => {
           const v = coupe(l);
-          entrees.push({ cle: v[col('isbn13')], etat: etatDepuis(v[col('etat')] || ''), qte: parseInt(v[col('quantite')], 10) || 1, prix: col('prix_paye') >= 0 ? lirePrix(v[col('prix_paye')]) : null });
+          entrees.push({ cle: v[col('isbn13')], etat: etatDepuis(v[col('etat')] || ''), qte: parseInt(v[col('quantite')], 10) || 1, prix: col('prix_paye') >= 0 ? lirePrix(v[col('prix_paye')]) : null, vendre: col('a_vendre') >= 0 && /^(oui|1|true)$/i.test((v[col('a_vendre')] || '').trim()) });
         });
       }
     }
@@ -1608,7 +1638,7 @@
       const b = isbn ? DATA.find((x) => x.isbn13 === isbn) : DATA.find((x) => x.id === en.cle);
       if (!b) { inconnus.push(en.cle); return; }
       const avant = COLL[b.id];
-      COLL[b.id] = { etat: en.etat || (avant && avant.etat) || S.h, qte: Math.min(99, Math.max(1, en.qte || (avant && avant.qte) || 1)) };
+      COLL[b.id] = { etat: en.etat || (avant && avant.etat) || S.h, qte: Math.min(99, Math.max(1, en.qte || (avant && avant.qte) || 1)), ...(en.vendre ? { vendre: true } : gv(avant)) };
       const pp = en.prix != null ? en.prix : (avant && avant.prix != null ? avant.prix : null);
       if (pp != null) COLL[b.id].prix = pp;
       const lotId = en.lot || (avant && avant.lot);
@@ -2076,14 +2106,14 @@
     document.querySelectorAll(`[data-etat-livre="${CSS.escape(b.id)}"]`).forEach((el) => el.setAttribute('aria-pressed', String(!!COLL[b.id] && COLL[b.id].etat === el.dataset.e)));
   }
   function cocher(b, oui) {
-    if (oui) COLL[b.id] = { etat: P.etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1 };
+    if (oui) COLL[b.id] = { etat: P.etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1, ...gv(COLL[b.id]) };
     else delete COLL[b.id];
     majTuile(b);
   }
   // C / BE / TBE : choisit l'état d'un livre ; retoucher l'état déjà choisi retire le livre
   function etatRapide(b, etat) {
     if (COLL[b.id] && COLL[b.id].etat === etat) delete COLL[b.id];
-    else COLL[b.id] = { etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1 };
+    else COLL[b.id] = { etat, qte: (COLL[b.id] && COLL[b.id].qte) || 1, ...gv(COLL[b.id]) };
     majTuile(b);
   }
   function parseNumeros(txt) {

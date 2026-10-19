@@ -1545,3 +1545,19 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rayon .livre-carte .souhait-carte svg { flex: none; }
 .rayon .livre-carte { padding-bottom: 8px; }
 .rayon { margin-bottom: 8px; }
+.ex-vendre { margin-left: auto; min-height: 44px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: none; color: var(--muted); font: 600 .85rem var(--f-ui); cursor: pointer; }
+.ex-vendre:hover, .ex-vendre:focus-visible { color: var(--gold); border-color: var(--gold); }
+.a-vendre .vendre-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.rayon .livre-carte .souhait-carte svg { stroke-linecap: round; }
+.rayon .livre-carte .souhait-carte[aria-pressed="true"] svg { fill: none; stroke-width: 2.6; }
+.rayon .livre-carte .souhait-carte[aria-pressed="true"] circle { fill: currentColor; fill-opacity: .25; }
+.ex-vendre { display: inline-flex; align-items: center; gap: 6px; }
+.ex-vendre svg { flex: none; }
+.rayon .livre-carte { border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.a-vendre .nb { white-space: nowrap; }
+@media (max-width: 560px) {
+  .a-vendre li { flex-direction: column; align-items: stretch; }
+  .a-vendre .vendre-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; justify-content: stretch; }
+  .a-vendre .vendre-actions .retirer { min-height: 44px; width: 100%; }
+  .ex-vendre { flex: 1 1 100%; justify-content: center; }
+}
