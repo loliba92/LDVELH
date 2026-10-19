@@ -1113,12 +1113,11 @@
       return `<li class="ex" data-ligne="${esc(b.id)}">
         <div class="ex-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div>
-          <span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div>
+          <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span>
+            <button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${nom}">Retirer</button></div></div>
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
           <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
-          <label class="ex-prix"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Prix payé (€)" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${nom} (facultatif)"></label>
-          <button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${nom}">Retirer</button>
         </div></li>`;
     }).join('');
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
@@ -1321,7 +1320,7 @@
     if (!n) {
       zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
-        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button> <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button></p></div>${htmlATrouver()}`;
+        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}`;
       return;
     }
     // par série
@@ -1355,17 +1354,15 @@
       <div class="coll-haut">
         <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}</span></div>
         <div>
-          <dl class="stats${bl.nbPayes ? ' stats-4' : ''}">
+          <dl class="stats">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
             <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
             <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
-            ${bl.nbPayes ? `<div><dt>Investi</dt><dd>${fmtE(bl.investi)}<small>${bl.nbPayes} exemplaire${bl.nbPayes > 1 ? 's' : ''} renseigné${bl.nbPayes > 1 ? 's' : ''}</small></dd></div>` : ''}
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
           <div class="coll-actions">
             <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
-            <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button>
             <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
             <details class="exporter"><summary class="bouton bouton-clair">Exporter ma collection</summary>
               <div class="exporter-choix"><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div></details>
@@ -1646,7 +1643,6 @@
       <label class="case"><input type="checkbox" id="c-poss"${c ? ' checked' : ''}><span>Je possède ce livre</span></label>
       <div class="champ-ligne"><label for="c-etat">État</label><select id="c-etat"${c ? '' : ' disabled'}>${ETATS.map((x) => `<option value="${x.k}"${(c ? c.etat : S.h) === x.k ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></div>
       <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
-      <div class="champ-ligne"><label for="c-prix">Prix payé, par exemplaire (facultatif)</label><input type="text" id="c-prix" inputmode="decimal" autocomplete="off" placeholder="en €" value="${c ? prixSaisi(c.prix) : ''}"${c ? '' : ' disabled'}></div>
       <p class="valeur-ex" id="c-val"></p></div>
       <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>Je le recherche</span></label></div>`;
   }
@@ -1654,13 +1650,13 @@
     if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
     const maj = () => {
       const c = COLL[b.id];
-      $('#c-etat').disabled = !c; $('#c-qte').disabled = !c; $('#c-prix').disabled = !c;
+      $('#c-etat').disabled = !c; $('#c-qte').disabled = !c;
       const v = c ? valeurLigne(b, c) : null;
       $('#c-souhait-zone').hidden = !!c;
       $('#c-val').textContent = c ? (v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`) : '';
     };
     $('#c-poss').addEventListener('change', (e) => {
-      if (e.target.checked) { COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) }; const pp = lirePrix($('#c-prix').value); if (pp != null) COLL[b.id].prix = pp; }
+      if (e.target.checked) { COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) }; }
       else delete COLL[b.id];
       sauverColl(); maj(); afficher();
     });
@@ -1669,7 +1665,6 @@
       sauverColl(); maj(); afficher();
     });
     $('#c-etat').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].etat = e.target.value; sauverColl(); maj(); afficher(); } });
-    $('#c-prix').addEventListener('change', (e) => { if (COLL[b.id]) { const pp = lirePrix(e.target.value); if (pp == null) { delete COLL[b.id].prix; e.target.value = ''; } else { COLL[b.id].prix = pp; e.target.value = prixSaisi(pp); } sauverColl(); maj(); afficher(); } });
     $('#c-qte').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); e.target.value = COLL[b.id].qte; sauverColl(); maj(); afficher(); } });
     maj();
   }

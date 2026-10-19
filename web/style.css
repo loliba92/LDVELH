@@ -1386,14 +1386,13 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .ex-qte button { width: 44px; min-height: 44px; border: 0; background: none; color: var(--accent); font: 700 1.3rem var(--f-ui); cursor: pointer; }
 .ex-qte button:disabled { color: var(--muted); opacity: .45; cursor: default; }
 .ex-qte output { min-width: 30px; text-align: center; font: 700 1.05rem var(--f-ui); }
-.ex-prix { display: block; }
-.ex-prix input { width: 132px; min-height: 44px; padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
-.ex .retirer { margin-left: auto; min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--muted); font: 600 .9rem var(--f-ui); text-decoration: underline; cursor: pointer; }
+.ex-droite { display: grid; justify-items: end; gap: 0; }
+.ex .retirer { min-height: 36px; padding: 0 0 0 12px; border: 0; background: none; color: var(--muted); font: 600 .9rem var(--f-ui); text-decoration: underline; cursor: pointer; }
 .ex .retirer:hover { color: var(--accent); }
 @media (max-width: 560px) {
   .ex { gap: 8px; padding: 10px; }
   .ex-regl { gap: 8px 10px; padding-top: 8px; align-items: center; }
   .ex-livre { gap: 10px; }
   .ex-etats { flex: 1 1 auto; } .ex-etats button { flex: 1; }
-  .ex-prix { flex: 1 1 120px; } .ex-prix input { width: 100%; }
+
 }
