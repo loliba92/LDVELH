@@ -554,7 +554,7 @@
 
   // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
-  const FAMILLES = [['prix-ebay.yml', 'Relevé des prix'], ['ajout-isbn.yml', 'Ajout de livres'], ['corriger-fiche.yml', 'Correction de fiches'], ['corriger-prix.yml', 'Correction de cotes'], ['pages.yml', 'Publication du site']];
+  const FAMILLES = [['prix-ebay.yml', 'Relevé des prix'], ['ajout-isbn.yml', 'Ajout de livres'], ['corriger-fiche.yml', 'Correction de fiches'], ['corriger-prix.yml', 'Correction de cotes'], ['pages.yml', 'Publication du site'], ['veille-parutions.yml', 'Veille des parutions']];
   const depuis = (d) => {
     const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
     return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
@@ -577,6 +577,12 @@
       const [txt, cls] = etat(vedette.r || vedette);
       $('#rv-maj-resume').innerHTML = `<strong>${esc(releve.r ? 'Dernier relevé des prix' : recent.nom)}</strong> : ${esc(quand(releve.r || recent.r))} · <span class="rv-lot-${cls}">${esc(txt)}</span>`;
       $('#rv-maj-liste').innerHTML = lignes.map((l) => { if (!l.r) return `<li><strong>${esc(l.nom)}</strong> : pas d'exécution récente</li>`; const [t, c] = etat(l.r); return `<li><strong>${esc(l.nom)}</strong> : ${esc(quand(l.r))} · <span class="rv-lot-${c}">${esc(t)}</span></li>`; }).join('');
+      const veille = lignes.find((l) => l.nom === 'Veille des parutions'), age = veille && veille.r ? (Date.now() - new Date(veille.r.t).getTime()) / 86400000 : null;
+      if (veille && (age === null || age > 2)) {                    // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
+        const alerte = age === null ? 'pas encore d\'exécution' : `pas d'exécution depuis ${Math.floor(age)} jours`;
+        $('#rv-maj-resume').innerHTML += ` <span class="rv-lot-echec">⚠ Veille des parutions : ${esc(alerte)}. Lancez-la à la main (Actions, « Veille des parutions »).</span>`;
+        bloc.open = true;
+      }
       bloc.hidden = false;
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
