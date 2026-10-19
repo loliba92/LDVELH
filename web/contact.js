@@ -23,6 +23,7 @@
     new FormData(form).forEach(function (value, key) { data[key] = value; });
 
     if (btn) { btn.disabled = true; btn.textContent = 'Envoi…'; }
+    montrer('Envoi en cours…');
 
     fetch(form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
       method: 'POST',
@@ -30,12 +31,13 @@
       body: JSON.stringify(data)
     })
       .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
-      .then(function () {
+      .then(function (rep) {
+        if (rep && String(rep.success) === 'false') throw new Error(rep.message || 'refus');   // le service répond mais n'a pas envoyé (par exemple activation en attente)
         form.reset();
         montrer('Merci, votre message est bien parti. ✓');
       })
-      .catch(function () {
-        montrer('Envoi impossible pour le moment — réessayez dans quelques instants.', true);
+      .catch(function (err) {
+        montrer('Envoi impossible pour le moment — réessayez dans quelques instants.' + (err && err.message && err.message !== 'http' ? ' (' + err.message + ')' : ''), true);
       })
       .then(function () { if (btn) { btn.disabled = false; btn.textContent = 'Envoyer'; } });
   });
