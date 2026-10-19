@@ -106,12 +106,11 @@ def entete(courante):
 
 
 def barre(courante):
-    plus_actif = ' aria-current="page"'
+    plus_actif = '' if courante == 'collection.html' else ' aria-current="page"'      # « Compte » est la page en cours sur les pages d'information, pas sur « Ma collection »
     return f'''<nav class="barre-bas" id="barre-bas" aria-label="Menu du bas">
   <a href="./">{ico('<path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>')}<span>Accueil</span></a>
   <a href="./#recherche">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
-  <a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">{ico('<path d="M12 5v14M5 12h14"/>')}<span>Inventaire</span></a>
-  <a href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
+  <a class="barre-centre" href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/>')}<span>Compte</span></button>
 </nav>'''
 
@@ -643,12 +642,9 @@ COLLECTION_SECTION = '    <section class="collection" id="collection" aria-label
 
 
 def barre_collection():
-    """Barre du bas de la page collection : l'inventaire ouvre sa fenêtre sur place, « Ma collection » est la page en cours."""
+    """Barre du bas de la page collection : « Ma collection » est la page en cours."""
     b = barre("collection.html")
-    b = b.replace('<a class="barre-centre" href="./?inventaire" aria-label="Inventaire guidé de ma collection">',
-                  '<button type="button" class="barre-centre" data-parcours aria-label="Inventaire guidé de ma collection">')
-    b = b.replace('<span>Inventaire</span></a>', '<span>Inventaire</span></button>')
-    b = b.replace('<a href="collection.html">', '<a href="collection.html" aria-current="page">')
+    b = b.replace('<a class="barre-centre" href="collection.html">', '<a class="barre-centre" href="collection.html" aria-current="page">')
     return b.replace('<span>Ma collection</span></a>', '<span>Ma collection</span><b class="nb-coll" id="nb-coll-bas"></b></a>')
 
 

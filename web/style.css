@@ -512,7 +512,7 @@ dialog.parcours[open] { display: flex; }
 /* Barre de menu du bas (téléphones) : l'en-tête n'est pas collant et ses liens disparaissent, donc la navigation reste à portée de pouce */
 .barre-bas { display: none; }
 @media (max-width: 700px) {
-  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch;
+  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: stretch;
     padding: 0 4px env(safe-area-inset-bottom); background: var(--walnut); border-top: 3px double var(--brass); box-shadow: 0 -6px 18px rgba(0, 0, 0, .28); }
   .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 2px;
     background: none; border: 0; color: var(--walnut-text); font: 600 .72rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
