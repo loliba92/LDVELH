@@ -23,7 +23,7 @@
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/['’]/g, ' ');
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
-  const numero = (b) => (b.numero && b.numero !== '000' ? ` n° ${b.numero}` : '');
+  const numero = (b) => (b.numero && !/^0+$/.test(b.numero) ? ` n° ${b.numero}` : '');
 
   let DATA = [];
   let META = {};
@@ -1138,7 +1138,7 @@
     const nbEtat = (k) => bl.lignes.filter((x) => x.c.etat === k).reduce((t, x) => t + x.c.qte, 0);
     const champ = (id, nom, html) => `<label for="${id}">${nom}${html}</label>`;
     return `<div class="coll-filtres" role="group" aria-label="Filtrer et trier vos exemplaires">
-      ${champ('cf-q', 'Chercher', `<input type="search" id="cf-q" value="${esc(FC.q)}" placeholder="Titre, auteur ou ISBN" autocomplete="off">`)}
+      ${champ('cf-q', 'Filtrer mes exemplaires', `<input type="search" id="cf-q" value="${esc(FC.q)}" placeholder="Titre, auteur ou ISBN" autocomplete="off">`)}
       ${champ('cf-editeur', 'Éditeur', `<select id="cf-editeur">${opts(compte((b) => b.editeur), FC.editeur, 'Tous les éditeurs')}</select>`)}
       ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${optsSerieColl(bl)}</select>`)}
       ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes les éditions')}</select>`)}
@@ -1363,12 +1363,19 @@
             <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
             <button type="button" class="bouton bouton-clair" data-lot>Ajouter un lot acheté</button>
             <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
-            <button type="button" class="bouton bouton-clair" id="exp-json">Exporter (JSON)</button>
-            <button type="button" class="bouton bouton-clair" id="exp-csv">Exporter (CSV)</button>
-            <button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button>
+            <details class="exporter"><summary class="bouton bouton-clair">Exporter ma collection</summary>
+              <div class="exporter-choix"><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div></details>
           </div>
         </div>
       </div>
+      <h3 id="titre-exemplaires">Vos exemplaires</h3>
+      ${barreFiltres(bl)}
+      <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
+      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody id="coll-lignes">${lignesEx}</tbody></table>
+      <div id="coll-plus-zone">${boutonPlus(reste)}</div>
+      <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
+      ${htmlATrouver()}
+      <details class="coll-analyse" id="coll-analyse"><summary>Analyse de ma collection <span class="sous">valeur par tranche, par série, pièces les plus cotées</span></summary>
       <div id="coll-analyses" class="coll-analyses">${analysesPage()}</div>
       <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
       <p class="sous" id="coll-histo-note"></p>
@@ -1378,12 +1385,7 @@
       <h3>Par série</h3>
       <table class="cartes groupes"><thead><tr><th>Série</th><th class="num">Titres possédés</th><th class="num">Exemplaires</th><th class="num">Valeur estimée</th></tr></thead><tbody>${lignesSerie}</tbody></table>
       ${pieces.length ? `<h3>Vos pièces les plus cotées</h3><div class="pieces">${htmlPieces}</div>` : ''}
-      <h3 id="titre-exemplaires">Vos exemplaires</h3>
-      ${barreFiltres(bl)}
-      <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
-      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody id="coll-lignes">${lignesEx}</tbody></table>
-      <div id="coll-plus-zone">${boutonPlus(reste)}</div>
-      ${htmlATrouver()}`;
+      </details>`;
     afficherHistoColl(bl);
     brancherFiltresColl();
   }

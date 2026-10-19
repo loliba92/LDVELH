@@ -1347,3 +1347,14 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .corriger-suppr { margin-top: 12px; }
 @media (max-width: 560px) { .corriger-fiche-champs { grid-template-columns: 1fr; } }
 .ca-ok { margin: 0; padding: 10px 12px; border: 1px solid var(--accent); border-left-width: 4px; border-radius: var(--r); background: var(--surface); color: var(--text); }
+
+/* Ma collection : exemplaires d'abord, analyse repliée, export regroupé, « Tout effacer » à l'écart */
+.exporter { flex: 1 1 auto; }
+.exporter > summary { list-style: none; cursor: pointer; text-align: center; }
+.exporter > summary::-webkit-details-marker { display: none; }
+.exporter-choix { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.coll-analyse { margin: 28px 0 0; padding-top: 14px; border-top: 3px double var(--line); }
+.coll-analyse > summary { cursor: pointer; color: var(--accent); font-weight: 700; min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
+.coll-analyse > summary .sous { font-weight: 400; }
+.coll-effacer { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid var(--line); text-align: right; }
+@media (max-width: 560px) { .exporter, .exporter-choix .bouton { flex: 1 1 100%; } .coll-effacer { text-align: center; } }
