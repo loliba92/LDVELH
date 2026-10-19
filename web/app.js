@@ -582,17 +582,17 @@
     const cartes = vus.map((b) => {
       const p = b.prix[e.k];
       const poss = COLL[b.id];
-      return `<article class="livre-carte${poss ? ' possede-oui' : ''}">
+      return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}">
         <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + fmt(p) + ' en ' + e.long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
-            : tuile(b)}<span class="tampon-v">${esc(b.version)}</span></span>
+            : tuile(b)}<span class="tampon-v">${esc(b.version)}</span>${poss && poss.vendre ? '<span class="tampon-vendre">À vendre</span>' : ''}</span>
           <span class="infos"><span class="titre">${esc(b.titre)}</span><span class="meta" style="display:block">${esc(b.serie)}${esc(numero(b))}${b.annee ? ' · ' + b.annee : ''}</span></span>
-          <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
         </button>
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
+        <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -890,7 +890,7 @@
     if (vendreBtn) { basculerVendre(vendreBtn.dataset.vendreCarte); return; }
     const souhaitBtn = e.target.closest('button[data-souhait-carte]');
     if (souhaitBtn) { basculerSouhait(souhaitBtn.dataset.souhaitCarte); return; }
-    const carte = e.target.closest('button[data-id]');
+    const carte = e.target.closest('button[data-id]') || (e.target.closest('.livre-carte .prix') && e.target.closest('.livre-carte').querySelector('button.ouvrir'));
     if (carte) ouvrirFiche(carte.dataset.id);
   });
 
