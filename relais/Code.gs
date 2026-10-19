@@ -123,7 +123,7 @@ function doPost(e) {
       } finally { verrouB.releaseLock(); }
       if (rang) {
         var nc = formaterNouveauCompte(moi.nom, rang);
-        try { MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), subject: nc.sujet, body: nc.corps, name: 'La Cote du Héros' }); } catch (errMail) { /* le compte est compté même si le courriel échoue */ }
+        try { envoyerCourriel(nc.sujet, nc.corps); } catch (errMail) { console.error(raisonCourriel(errMail)); }    // le compte est compté même si le courriel échoue
       }
       return reponse({ ok: true, nouveau: !!rang });
     }
@@ -134,7 +134,7 @@ function doPost(e) {
       var cacheA = CacheService.getScriptCache(), cleAv = 'av:' + moi.empreinte.slice(7, 23);
       if (!avisAutorise(cacheA.get(cleAv))) return reponse({ ok: false, erreur: 'trop d\'avis pour le moment : réessayez plus tard' });
       var fa = formaterAvis(moi.nom, moi.role, av.note, av.texte);
-      MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), subject: fa.sujet, body: fa.corps, name: 'La Cote du Héros' });
+      try { envoyerCourriel(fa.sujet, fa.corps); } catch (errMail2) { console.error(raisonCourriel(errMail2)); return reponse({ ok: false, erreur: raisonCourriel(errMail2) }); }
       cacheA.put(cleAv, String((Number(cacheA.get(cleAv)) || 0) + 1), 21600);
       return reponse({ ok: true });
     }
@@ -185,6 +185,15 @@ function doPost(e) {
   }
 }
 
+/* ---------- Courriels à l'éditeur ---------- */
+// Destinataire : la propriété du script EMAIL_EDITEUR si elle existe, sinon le compte propriétaire du script
+function envoyerCourriel(sujet, corps) {
+  var dest = prop('EMAIL_EDITEUR') || Session.getEffectiveUser().getEmail();
+  if (!dest) throw new Error('adresse du destinataire introuvable');
+  MailApp.sendEmail({ to: dest, subject: sujet, body: corps, name: 'La Cote du Héros' });
+}
+function raisonCourriel(err) { return 'courriel impossible (' + String(err && err.message || err).replace(/[\r\n]+/g, ' ').slice(0, 140) + ')'; }
+
 /* ---------- Notes des livres ---------- */
 var PREFIXE_NOTE = 'n:';
 function cleNote(livre) { return PREFIXE_NOTE + livre; }
@@ -209,6 +218,7 @@ function notesPubliques() {
    Google demande alors l'autorisation d'envoyer des courriels depuis votre compte, nécessaire aux nouveaux comptes et aux avis. */
 function autoriser() {
   MailApp.getRemainingDailyQuota();
+  Session.getEffectiveUser().getEmail();
 }
 
 function doGet(e) {
