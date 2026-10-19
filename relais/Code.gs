@@ -180,6 +180,7 @@ function doPost(e) {
     }
     return reponse({ ok: false, erreur: 'action inconnue' });
   } catch (err) {
+    console.error(String(err && err.stack || err));                    // visible dans « Exécutions » d'Apps Script, jamais renvoyé au site
     return reponse({ ok: false, erreur: 'erreur du relais' });
   }
 }
@@ -202,6 +203,12 @@ function notesPubliques() {
   });
   cache.put('notes', JSON.stringify(resume), 600);
   return resume;
+}
+
+/* À lancer UNE FOIS à la main dans l'éditeur Apps Script (menu en haut : choisir « autoriser », puis Exécuter) :
+   Google demande alors l'autorisation d'envoyer des courriels depuis votre compte, nécessaire aux nouveaux comptes et aux avis. */
+function autoriser() {
+  MailApp.getRemainingDailyQuota();
 }
 
 function doGet(e) {
