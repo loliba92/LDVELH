@@ -51,7 +51,6 @@ function verifierConnexion(jeton) {
 function doPost(e) {
   try {
     var q = JSON.parse(e.postData.contents || '{}');
-    if (q.action === 'contact') return contacter(q);                // ouvert à tous, sans connexion
     var v = verifierConnexion(String(q.jeton || ''));
     if (!v.identite.ok) return reponse({ ok: false, erreur: v.identite.raison });
     var moi = v.identite, action = String(q.action || '');
@@ -155,19 +154,6 @@ function doPost(e) {
   } catch (err) {
     return reponse({ ok: false, erreur: 'erreur du relais' });
   }
-}
-
-/* ---------- Formulaire de contact : un courriel à l'éditeur, avec l'adresse du visiteur en « répondre à » ---------- */
-function contacter(q) {
-  var c = validerContact(q);
-  if (!c.ok) return reponse({ ok: false, erreur: c.raison });
-  var cache = CacheService.getScriptCache(), cleA = 'ct:' + empreinteDe(c.email).slice(7, 23), cleH = 'cth:' + Math.floor(Date.now() / 3600000);
-  if (!contactAutorise(cache.get(cleA), cache.get(cleH))) return reponse({ ok: false, erreur: 'trop de messages pour le moment : réessayez plus tard' });
-  var f = formaterContact(c);
-  MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), replyTo: c.email, subject: f.sujet, body: f.corps, name: 'La Cote du Héros' });
-  cache.put(cleA, String((Number(cache.get(cleA)) || 0) + 1), 21600);
-  cache.put(cleH, String((Number(cache.get(cleH)) || 0) + 1), 3600);
-  return reponse({ ok: true });
 }
 
 /* ---------- Notes des livres ---------- */

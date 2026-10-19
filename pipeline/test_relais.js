@@ -154,22 +154,4 @@ test('notes : le votant est une empreinte courte, sans adresse', () => {
   const v = L('votant')(h('x@gmail.com'));
   assert.ok(/^[0-9a-f]{16}$/.test(v)); assert.ok(!/@/.test(v));
 });
-test('contact : validation (adresse, message, piège)', () => {
-  const v = L('validerContact');
-  assert.deepStrictEqual(J(v({ nom: ' Marie ', email: ' Marie@Exemple.FR ', message: 'Bonjour, une question.' })), { ok: true, nom: 'Marie', email: 'marie@exemple.fr', message: 'Bonjour, une question.' });
-  ['', 'abc', 'a@b', 'a b@c.fr', 'a@b.fr, c@d.fr', null].forEach((e) => assert.strictEqual(v({ email: e, message: 'Un message assez long' }).ok, false, 'adresse ' + e));
-  assert.strictEqual(v({ email: 'a@b.fr', message: 'ok' }).ok, false);
-  assert.strictEqual(v({ email: 'a@b.fr', message: 'Un message assez long', piege: 'x' }).ok, false);
-  assert.strictEqual(v({ email: 'a@b.fr', message: 'x'.repeat(9000) }).message.length, 4000);
-  assert.strictEqual(v({ nom: 'A\nB', email: 'a@b.fr', message: 'Un message assez long' }).nom, 'A B');
-});
-test('contact : limites par adresse et par heure', () => {
-  const a = L('contactAutorise');
-  assert.ok(a(undefined, undefined)); assert.ok(a('2', '29')); assert.ok(!a('3', '0')); assert.ok(!a('0', '30'));
-});
-test('contact : courriel formaté, ouvert sans connexion', () => {
-  const f = J(L('formaterContact')({ nom: '', email: 'a@b.fr', message: 'Salut' }));
-  assert.ok(f.corps.indexOf('a@b.fr') >= 0 && f.corps.indexOf('Salut') > 0 && f.sujet);
-  assert.ok(!L('peut')('superadmin', 'contact'));                     // pas une action de compte : traité avant la connexion
-});
 console.log(n + ' tests passés');

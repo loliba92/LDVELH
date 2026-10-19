@@ -46,13 +46,6 @@ au plus 400 votes chacune), sous une empreinte courte du compte : ni adresse ni 
 **Après une mise à jour de `Code.gs` ou `logique.gs`** : recopier les deux fichiers dans le projet Apps Script, puis *Déployer > Gérer les déploiements >
 modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'application web ne change pas.
 
-## Formulaire de contact
-
-Ouvert à tout visiteur, sans connexion (action `contact`, traitée avant la vérification de connexion) : le relais envoie un courriel à l'éditeur
-(le compte propriétaire du script), avec l'adresse du visiteur en « répondre à ». Limites : trois messages par adresse et par six heures, trente par heure
-pour tout le site, champ piège contre les robots. Le script demande une nouvelle autorisation (envoi de courriels) au premier déploiement.
-Tant que le relais n'est pas mis à jour, la page Contact se replie sur FormSubmit.
-
 ## Gérer l'équipe
 
 - Depuis le site (SuperAdmin) : page « Équipe » (ajouter, retirer, bloquer).
