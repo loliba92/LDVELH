@@ -737,7 +737,7 @@ def corps_evolutions():
     try:
         mv = json.loads((WEB / "data" / "mouvements.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return "<h1>Évolutions des prix</h1>\n<p>Les premières évolutions apparaîtront après la prochaine mise à jour des prix.</p>"
+        return "<p class=\"surtitre\">Suivi des cotes</p>\n<h1>Évolutions des prix</h1>\n<p>Les premières évolutions apparaîtront après la prochaine mise à jour des prix.</p>"
     mois = ("janvier février mars avril mai juin juillet août septembre octobre novembre décembre").split()
     def jour(iso):
         a, m_, j = iso.split("-")
@@ -769,7 +769,8 @@ def corps_evolutions():
     modele = (f'<p>Le modèle apprend l\'écart entre les cotes d\'archives et les prix actuels, et se contrôle lui-même : '
               f'il ne s\'active que s\'il prédit mieux que les archives seules. '
               f'<strong>État : {"actif" if mo["actif"] else "inactif"}</strong> ({h(mo["raison"])}).</p>')
-    return f'''<h1>Évolutions des prix</h1>
+    return f'''<p class="surtitre">Suivi des cotes</p>
+<h1>Évolutions des prix</h1>
 <p class="chapeau">Ce que la cote a changé à la dernière mise à jour. Ces prix sont des prix demandés, pas des prix de vente.</p>
 <h2>En bref</h2>
 {bref}

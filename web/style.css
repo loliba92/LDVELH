@@ -1187,7 +1187,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 
 /* ---------- Accueil, refonte de l'intro : un bandeau (titre, recherche, compteurs) puis deux cartes alignées ---------- */
 .hero { min-height: 0; padding: 30px 0 30px; }
-.hero .hero-in { display: block; max-width: none; }
+.hero .hero-in { display: block; max-width: 1180px; }
 .hero .hero-in > * { max-width: 720px; }
 .hero h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 1.05; }
 .hero .chapeau { margin: 12px 0 0; max-width: 56ch; }
@@ -1491,3 +1491,10 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 }
 .rang > *, .carte, .carte > * { min-width: 0; }
 .grille-ajouts { max-width: 100%; }
+
+/* Largeurs intermédiaires (tablette) : l'en-tête ne coupe plus aucun mot ; « Offrir un café » reste dans le pied de page et le menu « À propos » */
+@media (min-width: 701px) and (max-width: 1000px) {
+  .menu a.menu-cafe { display: none; }
+  .menu .compte-bouton .compte-libelle { max-width: 13ch; overflow: hidden; text-overflow: ellipsis; }
+  .marque-nom, .bandeau nav a, .bandeau nav summary, .bandeau .compte button { white-space: nowrap; }
+}

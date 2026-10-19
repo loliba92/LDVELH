@@ -1939,13 +1939,7 @@
         </div>
         <p class="statut" id="pe-statut" role="status" aria-live="polite"></p>
       </section>
-      <p>Inutile de tout saisir à la main : on avance par grandes masses, de la série jusqu'à la couverture.</p>
-      <ol class="etapes">
-        <li><strong>Vos séries</strong> : vous touchez celles dont vous avez au moins un livre.</li>
-        <li><strong>Vos éditions</strong> : un seul tableau, pour dire quelles éditions (V1 à V5) vous possédez dans chaque série.</li>
-        <li><strong>Vos livres</strong> : pour chaque série et édition, vous cochez les couvertures. Une série complète se coche d'un geste.</li>
-        <li><strong>Le bilan</strong> : le guide estime votre patrimoine et vous remet un fichier de sauvegarde (JSON).</li>
-      </ol>
+      <p>Inutile de tout saisir à la main : vous touchez vos <strong>séries</strong>, puis vos <strong>éditions</strong>, puis vous cochez vos <strong>couvertures</strong>. Le <strong>bilan</strong> estime votre patrimoine à la fin.</p>
       <p><strong>Vos livres sont le plus souvent en…</strong> <span class="sous">(vous pourrez le changer à chaque liste)</span></p>
       <div class="choix-etat" role="radiogroup" aria-label="État habituel">
         ${ETATS.map((e) => `<label><input type="radio" name="pe-etat" value="${e.k}"${e.k === P.etat ? ' checked' : ''}><span>${e.k === 'tres_bon' ? 'Très bon état (TBE)' : e.court}<small>${esc(e.def.replace(' TBE signifie « très bon état ».', ''))}</small></span></label>`).join('')}
