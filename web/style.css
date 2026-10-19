@@ -1545,3 +1545,8 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 #ap-liste { grid-template-columns: repeat(auto-fill, 68px); justify-content: start; gap: 8px 10px; }
 .fiche-precommande > span { flex: 1 0 100%; }
 @media (max-width: 700px) { #ap-liste { gap: 8px; } }
+.projet-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 28px 0 8px; }
+.projet-duo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); display: block; background: var(--surface); }
+.projet-duo img:nth-child(1) { object-position: 50% 55%; }
+.projet-duo img:nth-child(2) { object-position: 50% 45%; }
+@media (max-width: 560px) { .projet-duo { gap: 6px; } .projet-duo img { aspect-ratio: 3 / 4; } }

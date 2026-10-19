@@ -535,6 +535,11 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h2>Votre collection</h2>
 <p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
+<div class="projet-duo" aria-hidden="true">
+  <img src="images/projet-glace.webp" alt="" width="1024" height="1100" loading="lazy" decoding="async">
+  <img src="images/projet-hydre.webp" alt="" width="800" height="1100" loading="lazy" decoding="async">
+</div>
+
 <h2>Contribuer</h2>
 <ul>
   <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>.</li>
