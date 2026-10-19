@@ -16,7 +16,9 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   demandes_lire: 'admin',
   demande_traiter: 'admin',
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
-  mes_notes: 'heros'
+  mes_notes: 'heros',
+  bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
+  avis: 'heros'                   // un avis libre sur le site, envoyé par courriel à l'éditeur
 };
 var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
@@ -157,4 +159,23 @@ function resumerNotes(votes) {
   if (!k.length) return [0, 0];
   var somme = 0; k.forEach(function (x) { somme += votes[x]; });
   return [Math.round(somme / k.length * 10) / 10, k.length];
+}
+
+/* ---------- Nouveaux comptes et avis ----------
+   Les deux envoient un courriel à l'éditeur. Jamais d'adresse : le prénom et quatre signes de l'empreinte du compte. */
+var LIMITE_AVIS = 3;                   // par personne et par fenêtre de six heures
+function texteLibre(brut, max) {          // texte multi-lignes : sans caractères de commande, retours à la ligne normalisés
+  return String(brut == null ? '' : brut).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, ' ').replace(/\r\n?/g, '\n').trim().slice(0, max);
+}
+function validerAvis(texte) {
+  var t = texteLibre(texte, 1500);
+  if (t.length < 5) return { ok: false, raison: 'votre avis est trop court' };
+  return { ok: true, texte: t };
+}
+function avisAutorise(compteur) { return (Number(compteur) || 0) < LIMITE_AVIS; }
+function formaterNouveauCompte(nom, rang) {
+  return { sujet: 'Nouveau compte sur La Cote du Héros', corps: 'Nouveau compte : ' + nom + ' (' + rang + (rang === 1 ? 'er' : 'e') + ' compte).' };
+}
+function formaterAvis(nom, role, texte) {
+  return { sujet: 'Avis sur La Cote du Héros', corps: 'De : ' + nom + (role && role !== 'heros' ? ' (' + role + ')' : '') + '\n\n' + texte };
 }

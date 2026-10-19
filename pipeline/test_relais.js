@@ -154,4 +154,16 @@ test('notes : le votant est une empreinte courte, sans adresse', () => {
   const v = L('votant')(h('x@gmail.com'));
   assert.ok(/^[0-9a-f]{16}$/.test(v)); assert.ok(!/@/.test(v));
 });
+test('nouveaux comptes et avis : droits, validation, limites, courriels', () => {
+  assert.ok(L('peut')('heros', 'bienvenue')); assert.ok(L('peut')('heros', 'avis')); assert.ok(!L('peut')('', 'avis'));
+  const v = L('validerAvis');
+  assert.strictEqual(v('ok').ok, false); assert.strictEqual(v(null).ok, false);
+  assert.strictEqual(v('Très bien, merci pour le site').ok, true);
+  assert.strictEqual(v('x'.repeat(5000)).texte.length, 1500);
+  const a = L('avisAutorise'); assert.ok(a(undefined)); assert.ok(a('2')); assert.ok(!a('3'));
+  assert.strictEqual(J(L('formaterNouveauCompte')('Marie #a3f2', 1)).corps, 'Nouveau compte : Marie #a3f2 (1er compte).');
+  assert.ok(J(L('formaterNouveauCompte')('Marie #a3f2', 42)).corps.indexOf('42e compte') > 0);
+  const f = J(L('formaterAvis')('Marie #a3f2', 'heros', 'Super site'));
+  assert.ok(f.corps.indexOf('Marie #a3f2') >= 0 && f.corps.indexOf('Super site') > 0 && !/@/.test(f.corps));
+});
 console.log(n + ' tests passés');

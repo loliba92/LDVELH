@@ -38,6 +38,7 @@ window.Compte = (function () {
     h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
+      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="avis">Donner votre avis</button></li>' : '') +
       (estAdmin() ? '<li><a href="revue-prix.html">Espace administrateur</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
       (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
@@ -80,10 +81,18 @@ window.Compte = (function () {
   }
 
   /* ---------- Niveau (Héros, Admin, SuperAdmin) ---------- */
+  // Premier passage d'un compte : le relais le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
+  function signalerCompte() {
+    try { if (localStorage.getItem('cdh-bienvenue')) return; } catch (e) { return; }
+    window.Relais.appeler('bienvenue').then(function (r) {
+      if (r && r.ok) { try { localStorage.setItem('cdh-bienvenue', '1'); } catch (e) { /* sans effet */ } }
+    }).catch(function () { /* nouvel essai à la prochaine connexion */ });
+  }
+
   function chargerRole() {
     if (!window.Relais || !window.Relais.configure() || !window.Cloud || !window.Cloud.actif()) return Promise.resolve();
     return window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; echecRole = ''; ecrireSession(CLE_ROLE, role); }
+      if (r && r.ok) { role = r.role; echecRole = ''; ecrireSession(CLE_ROLE, role); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
     }).catch(function () { echecRole = 'relais'; }).then(dessiner);
   }
@@ -214,6 +223,31 @@ window.Compte = (function () {
     });
   }
 
+  /* ---------- Avis : un mot libre, envoyé par courriel à l'éditeur ---------- */
+  function donnerAvis() {
+    if ($('.dlg-avis')) return;
+    if (!actifGoogle() || !window.Cloud.actif()) { intention = donnerAvis; if (window.Cloud.lie()) { annoncer('Reconnectez-vous pour donner votre avis.'); } invitation(); return; }
+    var d = dialogue('<h2>Qu\'en pensez-vous ?</h2>' +
+      '<p>Une idée, une gêne, un livre qui manque, un compliment : écrivez-le librement. L\'éditeur le reçoit par courriel et le lit.</p>' +
+      '<form id="avis-form" class="eq-form"><label for="avis-texte">Votre avis</label>' +
+      '<textarea id="avis-texte" rows="5" maxlength="1500" required placeholder="Ce qui vous plaît, ce qui manque, ce qui pourrait être plus simple…"></textarea>' +
+      '<p class="sous">Votre prénom est joint à l\'avis, jamais votre adresse. L\'avis n\'est pas public.</p>' +
+      '<p class="rv-ajout-bilan" id="avis-msg" role="status" hidden></p>' +
+      '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer mon avis</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-avis');
+    d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
+    $('#avis-form', d).addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var msg = $('#avis-msg', d), bouton = d.querySelector('button[type=submit]');
+      bouton.disabled = true; msg.hidden = false; msg.textContent = 'Envoi en cours…';
+      window.Relais.appeler('avis', { texte: $('#avis-texte', d).value }).then(function (r) {
+        if (r && r.ok) { d.close(); annoncer('Merci, votre avis est bien envoyé.'); return; }
+        var e = (r && r.erreur) || 'erreur inconnue';
+        msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : /action inconnue/.test(e) ? 'Cette fonction n\'est pas encore disponible. Réessayez bientôt.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+        bouton.disabled = false;
+      }).catch(function () { msg.textContent = 'Le service ne répond pas : vérifiez votre connexion.'; bouton.disabled = false; });
+    });
+  }
+
   /* ---------- Menu et clics ---------- */
   function fermerMenu(rendreFocus) {
     var m = $('#compte-menu'), b = $('#compte-btn');
@@ -227,6 +261,7 @@ window.Compte = (function () {
       if (a === 'connecter') { fermerMenu(); connecter(); }
       else if (a === 'sync') { premiereReprise(); }
       else if (a === 'role') { echecRole = ''; dessiner(); chargerRole(); }
+      else if (a === 'avis') { fermerMenu(); var feuilleA = $('#feuille-plus'); if (feuilleA && feuilleA.open) feuilleA.close(); donnerAvis(); }
       else if (a === 'demande') { fermerMenu(); var feuille = $('#feuille-plus'); if (feuille && feuille.open) feuille.close(); demanderLivre(); }
       else if (a === 'supprimer') {
         fermerMenu();

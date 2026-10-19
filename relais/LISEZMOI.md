@@ -46,6 +46,14 @@ au plus 400 votes chacune), sous une empreinte courte du compte : ni adresse ni 
 **Après une mise à jour de `Code.gs` ou `logique.gs`** : recopier les deux fichiers dans le projet Apps Script, puis *Déployer > Gérer les déploiements >
 modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'application web ne change pas.
 
+## Nouveaux comptes et avis
+
+- `bienvenue` (tout compte connecté) : la première fois qu'un compte appelle le relais, il est compté (propriétés du script `u:<empreinte courte>` et `u:total`) et un courriel
+  « Nouveau compte : Marie #a3f2 (42e compte) » est envoyé au compte propriétaire du script. Le site ne l'appelle qu'une fois par navigateur.
+- `avis` (tout compte connecté) : le texte libre du menu « Donner votre avis » (5 à 1500 caractères) est envoyé par courriel au compte propriétaire, avec le prénom du
+  compte, jamais l'adresse. Limite : trois avis par personne et par six heures.
+- Ces deux actions envoient des courriels : au premier déploiement, Google demande l'autorisation d'envoyer des courriels depuis votre compte.
+
 ## Gérer l'équipe
 
 - Depuis le site (SuperAdmin) : page « Équipe » (ajouter, retirer, bloquer).

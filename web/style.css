@@ -1173,7 +1173,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .eq-bloc { margin: 0 0 28px; }
 .eq-form { display: grid; gap: 8px; max-width: 460px; }
 .eq-form label { font: 700 .85rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.eq-form input, .eq-form select { width: 100%; box-sizing: border-box; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); }
+.eq-form input, .eq-form select, .eq-form textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); }
 .eq-form .bouton { margin-top: 6px; justify-self: start; }
 .eq-liste { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 640px; }
 .eq-membre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--bg); }
@@ -1532,3 +1532,4 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .projet-duo img:nth-child(1) { object-position: 50% 55%; }
 .projet-duo img:nth-child(2) { object-position: 50% 45%; }
 @media (max-width: 560px) { .projet-duo { gap: 6px; } .projet-duo img { aspect-ratio: 3 / 4; } }
+.eq-form textarea { resize: vertical; min-height: 110px; }

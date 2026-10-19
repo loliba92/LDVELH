@@ -111,6 +111,34 @@ function doPost(e) {
       return reponse({ ok: false, erreur: 'décision inconnue' });
     }
 
+    if (action === 'bienvenue') {                  // premier passage d'un compte : compté une fois, l'éditeur est prévenu par courriel
+      var verrouB = LockService.getScriptLock(), rang = 0;
+      verrouB.waitLock(10000);
+      try {
+        var props = PropertiesService.getScriptProperties(), cleU = 'u:' + votant(moi.empreinte);
+        if (!props.getProperty(cleU)) {
+          rang = (Number(props.getProperty('u:total')) || 0) + 1;
+          props.setProperty(cleU, '1'); props.setProperty('u:total', String(rang));
+        }
+      } finally { verrouB.releaseLock(); }
+      if (rang) {
+        var nc = formaterNouveauCompte(moi.nom, rang);
+        try { MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), subject: nc.sujet, body: nc.corps, name: 'La Cote du Héros' }); } catch (errMail) { /* le compte est compté même si le courriel échoue */ }
+      }
+      return reponse({ ok: true, nouveau: !!rang });
+    }
+
+    if (action === 'avis') {
+      var av = validerAvis(q.texte);
+      if (!av.ok) return reponse({ ok: false, erreur: av.raison });
+      var cacheA = CacheService.getScriptCache(), cleAv = 'av:' + moi.empreinte.slice(7, 23);
+      if (!avisAutorise(cacheA.get(cleAv))) return reponse({ ok: false, erreur: 'trop d\'avis pour le moment : réessayez plus tard' });
+      var fa = formaterAvis(moi.nom, moi.role, av.texte);
+      MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), subject: fa.sujet, body: fa.corps, name: 'La Cote du Héros' });
+      cacheA.put(cleAv, String((Number(cacheA.get(cleAv)) || 0) + 1), 21600);
+      return reponse({ ok: true });
+    }
+
     if (action === 'noter') {
       var nt = validerNote(q.livre, q.note);
       if (!nt.ok) return reponse({ ok: false, erreur: nt.raison });
