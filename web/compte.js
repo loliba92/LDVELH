@@ -274,7 +274,7 @@ window.Compte = (function () {
       if (a === 'connecter') { fermerMenu(); connecter(); }
       else if (a === 'sync') { premiereReprise(); }
       else if (a === 'role') { echecRole = ''; dessiner(); chargerRole(); }
-      else if (a === 'avis') { fermerMenu(); var feuilleA = $('#feuille-plus'); if (feuilleA && feuilleA.open) feuilleA.close(); donnerAvis(); }
+      else if (a === 'avis') { e.preventDefault(); document.querySelectorAll('details.menu-plus[open]').forEach(function (x) { x.open = false; }); fermerMenu(); var feuilleA = $('#feuille-plus'); if (feuilleA && feuilleA.open) feuilleA.close(); donnerAvis(); }
       else if (a === 'demande') { fermerMenu(); var feuille = $('#feuille-plus'); if (feuille && feuille.open) feuille.close(); demanderLivre(); }
       else if (a === 'supprimer') {
         fermerMenu();
