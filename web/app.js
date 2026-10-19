@@ -101,15 +101,8 @@
     // Livres annoncés (parution à venir) : de quoi donner envie de les précommander chez un libraire
     const aVenir = DATA.filter((b) => b.parution).sort((x, y) => x.parution.localeCompare(y.parution) || x.titre.localeCompare(y.titre, 'fr')).slice(0, 6);
     if (aVenir.length && $('#ap-liste')) {
-      const jourLong = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-      $('#ap-liste').innerHTML = aVenir.map((b) => `<li class="ap-carte">
-        <button type="button" class="ap-couv" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, fiche du livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="64" height="92" loading="lazy">` : `<span class="ap-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button>
-        <div class="ap-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span>
-          <span class="ap-date">Paraît le ${esc(jourLong(b.parution))}</span>
-          <span class="ap-liens"><span class="ap-pre">Précommander :</span>${[
-            ['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`],
-            ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`],
-            ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a class="ap-lien" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} chez ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></div></li>`).join('');
+      const jourCourt = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+      $('#ap-liste').innerHTML = aVenir.map((b) => `<div class="ap-item"><button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}, paraît le ${esc(jourCourt(b.parution))} : fiche du livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" loading="lazy" width="80" height="120">` : `<span class="ajout-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button><span class="ap-date">${esc(jourCourt(b.parution))}</span></div>`).join('');
       $('#ap-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
       $('#hero-aparaitre').hidden = false;
     }
@@ -834,6 +827,7 @@
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
+            ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             <h3 class="fiche-cotes-titre">Cotes de cette édition</h3>

@@ -1521,23 +1521,13 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rayon .livre-carte { min-width: 0; }
 
 /* À paraître (accueil) */
-.aparaitre { padding-bottom: 32px; }
+.aparaitre { padding-bottom: 28px; }
 .aparaitre .carte > header { align-items: baseline; }
 .ap-note { color: var(--muted); font-size: .85rem; }
-.ap-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 18px; }
-.ap-carte { display: flex; gap: 12px; align-items: flex-start; }
-.ap-couv { flex: none; width: 64px; height: 92px; padding: 0; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface-2); overflow: hidden; cursor: pointer; }
-.ap-couv img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ap-vide { display: grid; place-items: center; width: 100%; height: 100%; color: var(--gold); font: 700 1.6rem var(--f-display); }
-.ap-texte { display: grid; gap: 3px; min-width: 0; }
-.ap-texte strong { font: 600 1.05rem/1.2 var(--f-display); overflow-wrap: anywhere; }
-.ap-date { color: var(--gold); font-weight: 700; font-size: .92rem; }
-.ap-lien { color: var(--accent); font-weight: 700; font-size: .92rem; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
-@media (max-width: 900px) { .ap-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .ap-liste { grid-template-columns: 1fr; } .aparaitre { padding-bottom: 20px; } }
-.ap-liens { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; }
-.ap-pre { flex: 1 0 100%; color: var(--muted); font-size: .85rem; margin-top: 4px; }
-.ap-liens { gap: 0 12px; }
+.ap-item { display: grid; gap: 4px; min-width: 0; justify-items: center; }
+.ap-item .ajout-mini { width: 100%; }
+.ap-date { color: var(--gold); font-weight: 700; font-size: .78rem; text-align: center; white-space: nowrap; }
+@media (max-width: 700px) { .grille-ajouts .ap-item { flex: 0 0 72px; scroll-snap-align: start; } }
 
 /* Le projet : quelques illustrations pour donner envie de rêver */
 .projet-large { margin: 22px 0 6px; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); aspect-ratio: 21 / 9; background: var(--surface); }
@@ -1549,3 +1539,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .projet-trio img:nth-child(3) { object-position: 60% 35%; }
 .projet-legende { margin: 0 0 22px; color: var(--muted); font-size: .85rem; font-style: italic; }
 @media (max-width: 560px) { .projet-large { aspect-ratio: 16 / 9; } .projet-trio { gap: 6px; } }
+.fiche-precommande { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin: 0 0 10px; font-size: .92rem; }
+.fiche-precommande span { color: var(--muted); }
+.fiche-precommande a { color: var(--accent); font-weight: 700; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+#ap-liste { grid-template-columns: repeat(auto-fill, 68px); justify-content: start; gap: 8px 10px; }
+.fiche-precommande > span { flex: 1 0 100%; }
+@media (max-width: 700px) { #ap-liste { gap: 8px; } }
