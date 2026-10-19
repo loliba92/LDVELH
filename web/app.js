@@ -123,6 +123,8 @@
         $('#hero-ajouts').hidden = false;
       }
     }
+    // La croix du champ (ou l'effacement du texte) retire aussitôt le filtre : l'étagère n'attend pas un nouveau clic sur « Chercher »
+    $('#h-q').addEventListener('input', (e) => { if (!e.target.value && S.q) { S.q = ''; synchroniser(); changer(); } });
     $('#hero-recherche').addEventListener('submit', (e) => {
       e.preventDefault();
       S.q = $('#h-q').value.trim(); S.onglet = 'etagere';
