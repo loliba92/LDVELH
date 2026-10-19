@@ -1364,7 +1364,7 @@
       return;
     }
     if (!n) {
-      zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour en estimer la valeur.</p>
+      zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour la suivre dans le temps.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}`;
       return;

@@ -37,7 +37,7 @@ PAGES = {
     "evolutions.html": ("Évolutions", "Évolutions des prix · La Cote du Héros",
                         "Ce qui a bougé dans la cote : plus fortes hausses et baisses depuis la dernière mise à jour, et état du modèle d'auto-apprentissage."),
     "le-projet.html": ("Le projet", "Le projet · La Cote du Héros",
-                       "Pourquoi ce guide existe, d'où viennent ses données, comment les prix sont estimés, et ce qu'il ne fait pas."),
+                       "Un outil de collectionneur : tenir sa collection à jour, la suivre dans le temps et trouver les livres qui manquent. Les prix ne sont que des repères."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
                              "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive et vos notes dans le relais du site."),
     "contact.html": ("Contact", "Contact · La Cote du Héros",
@@ -60,10 +60,10 @@ VARIANTES = [
      'Il ne demande aucun compte pour consulter les cotes et ne mesure pas votre visite.'),
     ("La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur.",
      "La collection que vous composez demande un compte Google : elle est enregistrée dans l'espace réservé de votre propre Google Drive, que seul ce site peut ouvrir, avec une copie sur votre appareil. Le guide n'a pas de serveur et ne la voit jamais."),
-    ('Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.',
-     'Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Elle est sauvegardée dans votre Google Drive.'),
-    ('Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.',
-     'Vos livres, leur état et leur valeur estimée, sauvegardés dans votre Google Drive.'),
+    ('Composez et suivez votre collection de livres dont vous êtes le héros. Tout reste dans votre navigateur.',
+     'Composez et suivez votre collection de livres dont vous êtes le héros. Elle est sauvegardée dans votre Google Drive.'),
+    ('Vos livres, leur état et leur évolution. Tout reste dans votre navigateur.',
+     'Vos livres, leur état et leur évolution, sauvegardés dans votre Google Drive.'),
     ('Votre collection reste dans votre navigateur : voir',
      'Votre collection est dans votre Google Drive : voir'),
 ]
@@ -468,21 +468,23 @@ def _nombres_catalogue():
 
 LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h1>Le projet</h1>
-<p class="chapeau">La Cote du Héros est un guide indépendant, gratuit et sans publicité. Il aide à estimer la valeur des livres dont vous êtes le héros, pour suivre une collection et la compléter.</p>
+<p class="chapeau">La Cote du Héros est un guide indépendant, gratuit et sans publicité, fait pour les collectionneurs de livres dont vous êtes le héros : tenir sa collection à jour, la suivre dans le temps et trouver les livres qui lui manquent.</p>
 
 <h2>À quoi sert ce site</h2>
-<p>C'est un outil pour <strong>tenir sa collection à jour et la compléter</strong>, fait pour les collectionneurs et pas pour les traders (c'est dit avec le sourire, mais c'est sérieux). Aucune cote ne vous dit « achetez » ou « vendez » : les prix sont des repères, pas des promesses.</p>
-<p>Il sert d'abord à <strong>garder un œil sur ce que vous possédez</strong> : les titres et les éditions, ce qu'il vous manque, et ce que cela vaut à peu près. Il sert ensuite à <strong>progresser</strong> : voir ce qu'il reste à trouver pour finir une série, et ce que cela peut coûter, pour avancer à votre rythme sans mauvaise surprise sur le budget.</p>
+<p>C'est d'abord un outil pour <strong>tenir sa collection à jour et la suivre dans le temps</strong>. Vous indiquez les livres et les éditions que vous possédez, dans l'état où ils sont, et le guide garde la trace de ce que vous avez, de ce qu'il vous manque et de la façon dont votre collection grandit.</p>
+<p>Il sert ensuite à <strong>trouver les livres</strong> : voir ce qu'il reste à chercher pour finir une série, retrouver la bonne édition, repérer les nouveautés et les livres annoncés. Il garde aussi une liste « À trouver » pour ceux que vous cherchez.</p>
+<p>Les <strong>prix</strong> viennent après, comme de simples repères : ils aident à comprendre ce qu'un livre vaut à peu près. Ce ne sont ni des prix d'achat ni des prix de vente, et aucune cote ne vous dit « achetez » ou « vendez ». Le guide est fait pour les collectionneurs, pas pour les traders (c'est dit avec le sourire, mais c'est sérieux).</p>
 
 <h2>Pourquoi ce guide</h2>
-<p>Les livres-jeux ont paru en plusieurs éditions, chez plusieurs éditeurs, pendant près de quarante ans. Un même titre peut valoir quelques euros dans une édition et plusieurs dizaines dans une autre. Trouver le bon prix, c'est d'abord savoir de quelle édition on parle. Ce guide réunit toutes les éditions au même endroit, pour les comparer et pour estimer une collection entière.</p>
+<p>Les livres-jeux ont paru en plusieurs éditions, chez plusieurs éditeurs, pendant près de quarante ans. Savoir de quelle édition on parle est la première difficulté du collectionneur : un même titre existe sous plusieurs couvertures, et seul le numéro d'ISBN les distingue vraiment. Ce guide réunit toutes les éditions au même endroit, pour les reconnaître, les comparer et dire lesquelles vous avez.</p>
 
 <h2>Ce que vous y trouvez</h2>
 <ul>
   <li>{_nombres_catalogue()}, avec leur jaquette et leur fiche (éditeur, année, pages, auteurs).</li>
-  <li>Pour chaque édition, une cote par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
+  <li>Une <strong>collection</strong> à tenir à jour, avec un inventaire guidé pour la constituer sans tout saisir à la main, et une liste « À trouver ». Les deux sont enregistrées dans votre Google Drive.</li>
+  <li>Les <strong>nouveautés</strong> et les livres <strong>à paraître</strong>, repérés chaque jour.</li>
+  <li>Pour chaque édition, un repère de prix par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
   <li>Une page <a href="evolutions.html">Évolutions des prix</a> : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
-  <li>Une <strong>collection</strong> qui s'estime toute seule, avec un inventaire guidé pour la constituer sans tout saisir à la main.</li>
 </ul>
 
 <h2>Comment les prix sont estimés</h2>
@@ -675,7 +677,7 @@ def page_collection(index_html):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ma collection · La Cote du Héros</title>
-<meta name="description" content="Composez votre collection de livres dont vous êtes le héros et estimez sa valeur. Tout reste dans votre navigateur.">
+<meta name="description" content="Composez et suivez votre collection de livres dont vous êtes le héros. Tout reste dans votre navigateur.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
@@ -699,7 +701,7 @@ def page_collection(index_html):
   <div class="cadre banniere-in">
     <p class="surtitre">Mon inventaire</p>
     <h1 id="titre-page">Ma collection</h1>
-    <p class="chapeau">Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.</p>
+    <p class="chapeau">Vos livres, leur état et leur évolution. Tout reste dans votre navigateur.</p>
   </div>
 </div>
 

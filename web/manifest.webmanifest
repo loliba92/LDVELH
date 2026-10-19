@@ -1,7 +1,7 @@
 {
   "name": "La Cote du Héros",
   "short_name": "Cote du Héros",
-  "description": "Guide de cote des livres dont vous êtes le héros : prix, éditions, et estimation de votre collection.",
+  "description": "Guide du collectionneur de livres dont vous êtes le héros : votre collection, ses éditions, les livres à trouver et des repères de prix.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
