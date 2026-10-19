@@ -221,6 +221,13 @@ function autoriser() {
   Session.getEffectiveUser().getEmail();
 }
 
+/* Pour vérifier l'envoi : choisir « testerCourriel » dans l'éditeur, Exécuter. Le journal affiche l'adresse du destinataire, et un courriel de test part. */
+function testerCourriel() {
+  Logger.log('Destinataire : ' + (prop('EMAIL_EDITEUR') || Session.getEffectiveUser().getEmail()));
+  envoyerCourriel('Test du relais La Cote du Héros', 'Si vous lisez ce message, l\'envoi de courriels fonctionne.');
+  Logger.log('Courriel envoyé. Quota restant aujourd\'hui : ' + MailApp.getRemainingDailyQuota());
+}
+
 function doGet(e) {
   if (e && e.parameter && e.parameter.notes) return reponse({ ok: true, notes: notesPubliques() });      // lecture publique : pas de connexion
   return reponse({ ok: true, service: 'relais La Cote du Héros' });
