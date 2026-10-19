@@ -1511,3 +1511,11 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .form-sent { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #5aa876; border-left-width: 4px; border-radius: var(--r); background: var(--surface); font-weight: 700; }
 .form-sent[hidden] { display: none; }
 .form-sent.erreur { border-color: #b3414f; color: #f2b3b9; }
+
+/* Texte agrandi (200 %) sur petit écran : l'en-tête passe à la ligne au lieu de déborder */
+@media (max-width: 480px) {
+  .bandeau-in { flex-wrap: wrap; row-gap: 4px; padding-block: 6px; }
+  .menu { flex-wrap: wrap; row-gap: 4px; }
+}
+.livre-carte .titre, .livre-carte .meta, .livre-carte .prix { overflow-wrap: anywhere; min-width: 0; }
+.rayon .livre-carte { min-width: 0; }

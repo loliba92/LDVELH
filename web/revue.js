@@ -524,11 +524,21 @@
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
-      boutons.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.pane === nom)));
+      boutons.forEach((b) => { b.setAttribute('aria-selected', String(b.dataset.pane === nom)); b.tabIndex = b.dataset.pane === nom ? 0 : -1; });
       document.querySelectorAll('.rv-pane').forEach((p) => { p.hidden = p.id !== 'pane-' + nom; });
       try { sessionStorage.setItem('cdh-rv-pane', nom); } catch (e) { /* sans stockage : la page s'ouvre sur les prix */ }
     };
-    boutons.forEach((b) => b.addEventListener('click', () => montrer(b.dataset.pane)));
+    boutons.forEach((b) => {                              // motif des onglets : liés à leur panneau, flèches pour passer de l'un à l'autre
+      b.id = 'onglet-rv-' + b.dataset.pane; b.setAttribute('aria-controls', 'pane-' + b.dataset.pane);
+      const pan = document.getElementById('pane-' + b.dataset.pane);
+      if (pan) pan.setAttribute('aria-labelledby', b.id);
+      b.addEventListener('click', () => montrer(b.dataset.pane));
+      b.addEventListener('keydown', (e) => {
+        const visibles = boutons.filter((x) => !x.hidden), i = visibles.indexOf(b);
+        const cible = { ArrowRight: visibles[(i + 1) % visibles.length], ArrowLeft: visibles[(i - 1 + visibles.length) % visibles.length], Home: visibles[0], End: visibles[visibles.length - 1] }[e.key];
+        if (cible) { e.preventDefault(); cible.focus(); montrer(cible.dataset.pane); }
+      });
+    });
     [['tendances', '#rv-tendances'], ['demandes', '#rv-demandes']].forEach(([nom, sel]) => {
       const bloc = $(sel), onglet = boutons.find((b) => b.dataset.pane === nom);
       if (!bloc || !onglet) return;

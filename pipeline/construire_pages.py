@@ -134,7 +134,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
 </dialog>'''
 
 
-BANDEAU = '<p class="bandeau-chantier" role="note"><strong>Site en construction.</strong> Prix en cours de vérification.</p>'
+BANDEAU = '<aside aria-label="Avis sur le site"><p class="bandeau-chantier"><strong>Site en construction.</strong> Prix en cours de vérification.</p></aside>'
 
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="evolutions.html">Évolutions des prix</a>
@@ -695,13 +695,13 @@ def page_collection(index_html):
 {nav}
 </div>
 
-<header class="banniere" aria-labelledby="titre-page">
+<div class="banniere" role="region" aria-labelledby="titre-page">
   <div class="cadre banniere-in">
     <p class="surtitre">Mon inventaire</p>
     <h1 id="titre-page">Ma collection</h1>
     <p class="chapeau">Vos livres, leur état et leur valeur estimée. Tout reste dans votre navigateur.</p>
   </div>
-</header>
+</div>
 
 <main id="main" class="cadre contenu-collection">
     <section class="ajout-coll" aria-labelledby="titre-ajout">
@@ -710,6 +710,7 @@ def page_collection(index_html):
       <label class="sr-only" for="ca-q">Titre à ajouter à ma collection</label>
       <input type="search" id="ca-q" placeholder="Écrivez le titre ou l'ISBN du livre" autocomplete="off" enterkeyhint="search">
       <p class="sous">Choisissez le livre dans la liste, puis touchez son état : C (convenable), BE (bon état) ou TBE (très bon état). Retouchez pour le retirer.</p>
+      <p class="sr-only" id="ca-statut" role="status" aria-live="polite"></p>
       <p class="ca-ok" id="ca-ok" role="status" hidden></p>
       <ul class="ca-res" id="ca-res"></ul>
     </section>

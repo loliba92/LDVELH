@@ -185,6 +185,7 @@
     $('#reinit').addEventListener('click', () => { const { h, vue, tri, g, onglet } = S; S = { ...defaut(), h, vue, tri, g, onglet }; synchroniser(); changer(); });
     $('#bascule').addEventListener('click', () => basculerSelecteur());
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
+    $('#fiche').addEventListener('close', () => { const id = RETOUR_FICHE; RETOUR_FICHE = ''; if (!id) return; setTimeout(() => { const el = document.querySelector(`[data-id="${id.replace(/"/g, '')}"]`); if (el) el.focus({ preventScroll: true }); }, 0); });
     window.addEventListener('hashchange', () => {
       const h = location.hash.slice(1);
       if (h && !h.includes('=')) return;      // simple ancre de section (#cote, #apropos…) : les filtres restent
@@ -793,7 +794,7 @@
     const retenter = () => { if (!estProprietaire()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau d'administrateur arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
   }
-  let ficheOuverte = null;
+  let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -850,7 +851,7 @@
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));
-    if (!dlg.open) dlg.showModal();
+    if (!dlg.open) { RETOUR_FICHE = (document.activeElement && document.activeElement.dataset && document.activeElement.dataset.id) || ''; dlg.showModal(); }
     dlg.scrollTop = 0;
   }
 
@@ -1244,7 +1245,8 @@
     const liste = $('#ca-res');
     if (!liste) return;
     const q = norm(AJ_Q).trim();
-    if (q.length < 2) { liste.innerHTML = ''; return; }
+    const statut = $('#ca-statut');
+    if (q.length < 2) { liste.innerHTML = ''; if (statut) statut.textContent = ''; return; }
     const isbn = versIsbn13(AJ_Q);
     const mots = q.split(/\s+/);
     const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
@@ -1257,6 +1259,7 @@
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
       (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
+    if (statut) statut.textContent = trouves.length ? `${trouves.length} livre${trouves.length > 1 ? 's' : ''} trouvé${trouves.length > 1 ? 's' : ''}.` : 'Aucun livre trouvé.';
   }
   // « Retiré. Annuler » : quelques secondes pour revenir sur un retrait fait par erreur
   let minuteurAnnuler = null;
@@ -1385,7 +1388,7 @@
           <dl class="stats">
             <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
             <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
-            <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></dd></div>
+            <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></small></dd></div>
           </dl>
           <p class="trois">${esc(texteEstimation(bl))}</p>
           ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
