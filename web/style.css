@@ -1568,3 +1568,18 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rayon .livre-carte .tampon-vendre { position: absolute; left: 0; right: 0; top: 40%; z-index: 1; padding: 5px 0; background: rgba(122, 31, 43, .92); color: #fbf7ec; text-align: center; font: 800 .82rem var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-8deg) scale(1.08); box-shadow: 0 2px 8px rgba(0, 0, 0, .5); pointer-events: none; }
 .livre-carte.vendre-oui.possede-oui .couv img, .livre-carte.vendre-oui.possede-oui .couv .jaq-vide { outline: 3px dashed #c4465a; outline-offset: -3px; opacity: .78; }
 .rayon .livre-carte.vendre-oui .souhait-carte { color: #f0a5b0; }
+.rayon .livre-carte .tampon-trouver { position: absolute; left: 0; right: 0; top: 40%; z-index: 1; padding: 5px 0; background: rgba(36, 104, 66, .93); color: #f3fbf5; text-align: center; font: 800 .82rem var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-8deg) scale(1.08); box-shadow: 0 2px 8px rgba(0, 0, 0, .5); pointer-events: none; }
+.livre-carte.trouver-oui .couv img, .livre-carte.trouver-oui .couv .jaq-vide { outline: 3px dashed #5aa876; outline-offset: -3px; opacity: .8; }
+.rayon .livre-carte.trouver-oui .souhait-carte { color: #8fd3a8; }
+#f-coll { display: flex; max-width: 100%; }
+#f-coll label { flex: 1 1 auto; text-align: center; }
+@media (max-width: 560px) { #f-coll span { padding: 10px 10px; } #f-coll label + label span { border-top: 0; } }
+#f-coll { flex-wrap: wrap; }
+#f-coll label { min-width: max-content; }
+#f-coll label[hidden] { display: none; }
+@media (max-width: 560px) {
+  #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) { display: grid; grid-template-columns: 1fr 1fr; }
+  #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) label { min-width: 0; }
+  #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) label:nth-child(n+3) span { border-top: 1px solid var(--line-strong); }
+  #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) label:nth-child(3) span { border-left: 0; }
+}
