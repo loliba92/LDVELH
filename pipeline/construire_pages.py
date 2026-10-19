@@ -691,6 +691,7 @@ def page_collection(index_html):
 <main id="main" class="cadre contenu-collection">
     <section class="ajout-coll" aria-labelledby="titre-ajout">
       <h2 id="titre-ajout">Ajouter un titre à ma collection</h2>
+      <p class="ca-invite" id="ca-invite" hidden>Pour enregistrer vos livres, <button type="button" class="bouton-lien" data-compte="connecter">connectez-vous avec Google</button></p>
       <label class="sr-only" for="ca-q">Titre à ajouter à ma collection</label>
       <input type="search" id="ca-q" placeholder="Écrivez le titre ou l'ISBN du livre" autocomplete="off" enterkeyhint="search">
       <p class="sous">Choisissez le livre dans la liste, puis touchez son état : C (convenable), BE (bon état) ou TBE (très bon état). Retouchez pour le retirer.</p>

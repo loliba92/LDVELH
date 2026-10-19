@@ -1465,3 +1465,29 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rarete { display: inline-block; padding: 1px 9px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .78rem/1.5 var(--f-ui); letter-spacing: .03em; color: var(--muted); white-space: nowrap; }
 .rarete-rare { border-color: var(--gold); color: var(--gold); }
 .rarete-tres_rare { border-color: var(--gold); background: var(--gold); color: #1b1305; }
+
+/* Étagère : signet « à trouver » à droite du prix (trois boutons d'état plus larges sur la jaquette) ; aide courte tant que la collection est vide */
+.rayon .livre-carte .souhait-carte { position: absolute; right: 0; bottom: 0; z-index: 2; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.rayon .livre-carte .souhait-carte:hover, .rayon .livre-carte .souhait-carte:focus-visible { color: var(--gold); }
+.rayon .livre-carte .souhait-carte[aria-pressed="true"] { color: var(--gold); }
+.rayon .livre-carte .souhait-carte[aria-pressed="true"] svg { fill: currentColor; }
+.rayon .livre-carte .souhait-carte:disabled { opacity: .35; cursor: default; }
+.aide-cartes { margin: 0 0 14px; color: var(--muted); font-size: .85rem; line-height: 1.45; max-width: 60ch; }
+.aide-cartes[hidden] { display: none; }
+.aide-cartes strong { color: var(--text); }
+.ca-invite { margin: 0; color: var(--muted); }
+.ca-invite[hidden] { display: none; }
+.ca-invite .bouton-lien { min-height: 44px; font-weight: 700; }
+
+/* Téléphone : l'accueil arrive plus vite aux livres ; le bandeau rouge défile au lieu de rester collé */
+@media (max-width: 700px) {
+  .haut { top: -32px; }
+  html { scroll-padding-top: 82px; }
+  .grille-ajouts { display: flex; overflow-x: auto; gap: 8px; scrollbar-width: none; scroll-snap-type: x proximity; }
+  .grille-ajouts::-webkit-scrollbar { display: none; }
+  .grille-ajouts .ajout-mini { flex: 0 0 72px; scroll-snap-align: start; }
+  #hc-corps .texte { display: none; }
+  #titre-etagere { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+}
+.rang > *, .carte, .carte > * { min-width: 0; }
+.grille-ajouts { max-width: 100%; }
