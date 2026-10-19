@@ -1346,3 +1346,4 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .corriger-fiche-champs { grid-template-columns: 2fr 2fr 1fr; }
 .corriger-suppr { margin-top: 12px; }
 @media (max-width: 560px) { .corriger-fiche-champs { grid-template-columns: 1fr; } }
+.ca-ok { margin: 0; padding: 10px 12px; border: 1px solid var(--accent); border-left-width: 4px; border-radius: var(--r); background: var(--surface); color: var(--text); }

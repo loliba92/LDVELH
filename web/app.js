@@ -836,7 +836,12 @@
   // Clic sur une carte ou un titre
   document.addEventListener('click', (e) => {
     const etatBtn = e.target.closest('button[data-etat-possede]');
-    if (etatBtn) { basculerPossede(etatBtn.dataset.etatPossede, etatBtn.dataset.e); return; }
+    if (etatBtn) {
+      const id = etatBtn.dataset.etatPossede, depuisAjout = !!etatBtn.closest('#ca-res');
+      basculerPossede(id, etatBtn.dataset.e);
+      if (depuisAjout && COLL[id]) retourAjoutColl(id);          // le livre est ajouté : retour au champ pour le suivant, sans remonter à la main
+      return;
+    }
     const souhaitBtn = e.target.closest('button[data-souhait-carte]');
     if (souhaitBtn) { basculerSouhait(souhaitBtn.dataset.souhaitCarte); return; }
     const carte = e.target.closest('button[data-id]');
@@ -1230,7 +1235,15 @@
     }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
       (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
   }
-  document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; rendreAjoutColl(); } });
+  function retourAjoutColl(id) {
+    const b = livreDe(id), champ = $('#ca-q'), ok = $('#ca-ok');
+    if (!champ) return;
+    if (ok) { ok.textContent = `✓ ${b.titre} (${b.version}) ajouté en ${etatDe(COLL[id].etat).long.toLowerCase()}.`; ok.hidden = false; }
+    AJ_Q = ''; champ.value = ''; rendreAjoutColl();
+    $('.ajout-coll').scrollIntoView({ behavior: 'auto', block: 'start' });
+    champ.focus({ preventScroll: true });
+  }
+  document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
   function afficherCollection() {

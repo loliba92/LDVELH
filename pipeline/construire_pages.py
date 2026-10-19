@@ -683,6 +683,7 @@ def page_collection(index_html):
       <label class="sr-only" for="ca-q">Titre à ajouter à ma collection</label>
       <input type="search" id="ca-q" placeholder="Écrivez le titre ou l'ISBN du livre" autocomplete="off" enterkeyhint="search">
       <p class="sous">Choisissez le livre dans la liste, puis touchez son état : C (convenable), BE (bon état) ou TBE (très bon état). Retouchez pour le retirer.</p>
+      <p class="ca-ok" id="ca-ok" role="status" hidden></p>
       <ul class="ca-res" id="ca-res"></ul>
     </section>
 {COLLECTION_SECTION.replace('<h2 id="titre-collection">Ma collection</h2>', '<h2 id="titre-collection">Estimation</h2>')}</main>
