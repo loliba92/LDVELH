@@ -1401,3 +1401,6 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .annuler-retrait { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 14px; max-width: calc(100vw - 32px); padding: 10px 16px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface); color: var(--text); box-shadow: 0 6px 24px rgba(0, 0, 0, .6); }
 .annuler-retrait[hidden] { display: none; }
 .annuler-retrait .bouton-lien { min-height: 44px; font-weight: 700; }
+/* Note sur les prix : en pied de l'étagère, discrète */
+.note-bas { margin: 26px 0 0; padding-top: 12px; border-top: 1px solid var(--line); max-width: 70ch; color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.note-bas strong { font-family: inherit; font-size: inherit; color: var(--text); }
