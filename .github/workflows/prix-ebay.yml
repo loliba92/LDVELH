@@ -1,6 +1,7 @@
-name: Relevé des prix actuels (eBay)
+name: Relevé des prix (eBay et librairies)
 
-# Chaque lundi, ou à la demande : interroge l'interface officielle d'eBay, ajoute un relevé agrégé,
+# UN SEUL lot pour tous les prix, chaque lundi ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du neuf
+# chez les libraires (pipeline/prix_neuf.py), puis ajoute un relevé agrégé,
 # reconstruit la base, regénère les données du site et redéclenche sa publication.
 # Prérequis : secrets EBAY_CLIENT_ID et EBAY_CLIENT_SECRET (voir docs/PRIX-ACTUELS.md).
 on:
