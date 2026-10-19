@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Évolutions des prix · La Cote du Héros</title>
 <meta name="description" content="Ce qui a bougé dans la cote : plus fortes hausses et baisses depuis la dernière mise à jour, et état du modèle d'auto-apprentissage.">
+<meta name="robots" content="noindex">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
@@ -47,7 +48,13 @@
 </header>
 </div>
 
-<main id="main" class="cadre page">
+<div class="porte" id="porte">
+  <div class="porte-boite">
+    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Réservé aux personnes connectées</p>
+    <div class="porte-google" id="porte-google"></div>
+  </div>
+</div>
+<main id="main" class="cadre page" hidden data-niveau="heros">
 <p class="surtitre">Suivi des cotes</p>
 <h1>Évolutions des prix</h1>
 <p class="chapeau">Ce que la cote a changé à la dernière mise à jour. Ces prix sont des prix demandés, pas des prix de vente.</p>
@@ -110,5 +117,6 @@
 <script src="cloud.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>
+<script src="acces.js"></script>
 </body>
 </html>

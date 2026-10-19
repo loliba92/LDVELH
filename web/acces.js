@@ -13,10 +13,10 @@
   function evaluer() {
     var C = window.Cloud, niveau = window.Compte ? window.Compte.role() : '';
     var connecte = C && C.lie() && C.actif();
-    var ok = niveau === 'superadmin' || (niveau === 'admin' && exige === 'admin');
+    var ok = niveau === 'superadmin' || (niveau === 'admin' && exige !== 'superadmin') || (exige === 'heros' && niveau === 'heros');   // « heros » : toute personne connectée
     if (connecte && ok) return montrer();
     porte.hidden = false; main.hidden = true; zone.hidden = false;
-    if (!connecte) zone.innerHTML = '<p class="sous">Connectez-vous avec votre compte Google pour accéder à cet espace.</p>' + bouton;
+    if (!connecte) zone.innerHTML = '<p class="sous">Connectez-vous avec votre compte Google pour ' + (exige === 'heros' ? 'voir cette page.' : 'accéder à cet espace.') + '</p>' + bouton;
     else if (!niveau) {
       var echec = window.Compte && window.Compte.echecRole ? window.Compte.echecRole() : '';
       if (!echec) zone.innerHTML = '<p class="sous" role="status">Vérification de votre niveau…</p>';

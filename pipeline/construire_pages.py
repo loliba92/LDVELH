@@ -149,7 +149,7 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
     corps = corps.replace("{ISSUES}", ISSUES)
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html", "evolutions.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -176,7 +176,7 @@ def page(nom, corps):
 {entete(nom)}
 </div>
 
-{PORTE if nom in GARDEES else ""}<main id="main" class="cadre page"{" hidden" if nom in GARDEES else ""}{' data-niveau="superadmin"' if nom == "equipe.html" else ""}>
+{(PORTE_CONNECTE if nom == "evolutions.html" else PORTE) if nom in GARDEES else ""}<main id="main" class="cadre page"{" hidden" if nom in GARDEES else ""}{f' data-niveau="{NIVEAU_PAGE[nom]}"' if nom in NIVEAU_PAGE else ""}>
 {corps}
 </main>
 
@@ -203,10 +203,12 @@ def page(nom, corps):
 '''
 
 
-GARDEES = ("revue-prix.html", "equipe.html")      # pages derrière la porte (niveau Admin ou SuperAdmin)
+GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Admin, SuperAdmin, ou toute personne connectée (évolutions)
+NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
-               "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>'}
+               "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
+               "evolutions.html": '\n<script src="acces.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
@@ -215,6 +217,9 @@ PORTE = '''<div class="porte" id="porte">
   </div>
 </div>
 '''
+
+
+PORTE_CONNECTE = PORTE.replace(" Accès admin</p>", " Réservé aux personnes connectées</p>").replace('    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>\n', '')
 
 
 DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
@@ -484,7 +489,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li>Une <strong>collection</strong> à tenir à jour, avec un inventaire guidé pour la constituer sans tout saisir à la main, et une liste « À trouver ». Les deux sont enregistrées dans votre Google Drive.</li>
   <li>Les <strong>nouveautés</strong> et les livres <strong>à paraître</strong>, repérés chaque jour.</li>
   <li>Pour chaque édition, un repère de prix par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
-  <li>Une page <a href="evolutions.html">Évolutions des prix</a> : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
+  <li>Une page <a href="evolutions.html">Évolutions des prix</a>, pour les personnes connectées : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
 </ul>
 
 <h2>Comment les prix sont estimés</h2>
