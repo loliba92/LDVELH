@@ -1,8 +1,8 @@
 {
   "genere_le": "2026-10-18",
-  "nb_versions": 497,
-  "nb_livres": 268,
-  "nb_series": 35,
+  "nb_versions": 506,
+  "nb_livres": 278,
+  "nb_series": 36,
   "sources_prix": [
     "Relevé d'archives (historique)",
     "eBay (interface officielle)",
@@ -12,12 +12,12 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 228,
+  "nb_prix_actuels": 248,
   "calibration": {
     "actif": false,
-    "n_paires": 7,
+    "n_paires": 9,
     "gain": null,
-    "raison": "pas assez d'éditions comparables (7 sur 20 nécessaires)",
+    "raison": "pas assez d'éditions comparables (9 sur 20 nécessaires)",
     "calcule_le": "2026-10-18",
     "rapport_global": null,
     "nb_recalibres": 0
