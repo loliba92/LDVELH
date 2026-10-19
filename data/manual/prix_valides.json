@@ -459,15 +459,23 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
-  "9782070656530|convenable": {
-   "prix": 5.0,
+  "9782070656530|bon": {
+   "prix": 35.0,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-10-19",
+   "par": "loliba (superadmin)"
+  },
+  "9782070656530|convenable": {
+   "prix": 13.0,
+   "decision": "corrige",
+   "le": "2026-10-19",
+   "par": "loliba (superadmin)"
   },
   "9782070656530|tres_bon": {
-   "prix": 12.0,
+   "prix": 70.0,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-10-19",
+   "par": "loliba (superadmin)"
   },
   "9782070660797|convenable": {
    "prix": 4.0,
