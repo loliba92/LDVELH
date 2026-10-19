@@ -1109,13 +1109,17 @@
     const vus = triees.slice(0, limiteColl);
     const html = vus.map(({ b, c }) => {
       const v = valeurLigne(b, c);
-      return `<tr data-ligne="${esc(b.id)}"><td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-        <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div></td>
-        <td data-label="État"><select data-etat="${esc(b.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === c.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
-        <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${c.qte}" data-qte="${esc(b.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
-        <td data-label="Prix payé"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
-        <td class="num" data-label="Valeur estimée"><span class="prix-c${v == null ? ' nul' : ''}">${v == null ? 'sans cote' : fmt(v)}</span></td>
-        <td class="num"><button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}">Retirer</button></td></tr>`;
+      const nom = `${esc(b.titre)}, édition ${esc(b.version)}`;
+      return `<li class="ex" data-ligne="${esc(b.id)}">
+        <div class="ex-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+          <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div>
+          <span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div>
+        <div class="ex-regl">
+          <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
+          <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
+          <label class="ex-prix"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Prix payé (€)" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${nom} (facultatif)"></label>
+          <button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${nom}">Retirer</button>
+        </div></li>`;
     }).join('');
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
   }
@@ -1371,7 +1375,7 @@
       <h3 id="titre-exemplaires">Vos exemplaires</h3>
       ${barreFiltres(bl)}
       <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
-      <table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix payé</th><th class="num">Valeur estimée</th><th class="num">Retirer</th></tr></thead><tbody id="coll-lignes">${lignesEx}</tbody></table>
+      <ul class="ex-liste" id="coll-lignes">${lignesEx}</ul>
       <div id="coll-plus-zone">${boutonPlus(reste)}</div>
       <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
       ${htmlATrouver()}
@@ -1417,6 +1421,15 @@
     });
     $('#collection').addEventListener('click', (e) => {
       const t = e.target;
+      const bEtat = t.closest('[data-ex-etat]'), bQte = t.closest('[data-ex-qte]');
+      if (bEtat || bQte) {                                  // état (C, BE, TBE) et nombre d'exemplaires d'une ligne de la liste
+        const id = (bEtat || bQte).dataset.exEtat || (bEtat || bQte).dataset.exQte;
+        if (!COLL[id] || !garde()) return;
+        if (bEtat) COLL[id].etat = bEtat.dataset.e;
+        else COLL[id].qte = Math.min(99, Math.max(1, COLL[id].qte + (+bQte.dataset.delta)));
+        sauverColl(); afficher();
+        return;
+      }
       if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
       if (t.dataset.souhaitRetirer) { if (!garde()) return; delete SOUH[t.dataset.souhaitRetirer]; sauverColl(); afficher(); annonce('Livre retiré de votre liste à trouver.'); }
       else if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
