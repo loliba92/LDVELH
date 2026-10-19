@@ -39,12 +39,16 @@ def lire_liste(texte):
     """[{brut, serie, numero, titre}] : une entrée par ISBN trouvé, ou par titre pour une ligne sans ISBN ;
     les lignes vides et les # sont ignorées. Pour un titre, `brut` contient le titre (puis serie et numero)."""
     out = []
+    texte = re.sub(r"[\u200b-\u200f\u202a-\u202e\u2060\ufeff]", "", texte).replace("\u00a0", " ")   # caractères invisibles des copier-coller
     for ligne in re.split(r"[\r\n|]+", texte):          # « | » : plusieurs lignes dans un champ de lancement GitHub
         ligne = ligne.strip()
         if not ligne or ligne.startswith("#"):
             continue
         if ";" in ligne or "\t" in ligne:
             p = [x.strip() for x in re.split(r"[;\t]", ligne)] + ["", "", ""]
+            if sum(1 for x in p[:3] if x and ressemble_isbn(x) and len(re.sub(r"\D", "", x)) >= 10) >= 2:   # « isbn ; isbn ; isbn » : une liste, pas série et numéro
+                out += [{"brut": x, "serie": "", "numero": "", "titre": ""} for x in p if x and ressemble_isbn(x)]
+                continue
             out.append({"brut": p[0], "serie": p[1], "numero": p[2], "titre": p[3]})
         else:
             mots = [t for t in re.split(r"[,\s]+", ligne) if t]
@@ -71,7 +75,11 @@ def fiche_librairie(isbn, http=requests):
         return None
     titre = re.sub(r"^Livre-jeu,\s*", "", titre)
     titre = re.sub(r"\s+-\s+[^-]+$", "", titre)          # « Titre - Auteur » : on garde le titre
-    return {"titre": titre, "annee": g(r'itemprop="datePublished" datetime="(\d{4})'), "pages": g(r'itemprop="numberOfPages">(\d+)'),
+    serie = numero = ""
+    m = re.fullmatch(r"(.+?),\s*(\d{1,3}),\s*(.+)", titre)   # « Défis fantastiques, 18, L'Œil d'Émeraude »
+    if m:
+        serie, numero, titre = m.group(1).strip(), m.group(2), m.group(3).strip()
+    return {"serie": serie, "numero": numero, "titre": titre, "annee": g(r'itemprop="datePublished" datetime="(\d{4})'), "pages": g(r'itemprop="numberOfPages">(\d+)'),
             "editeur": g(r'<th scope="row">Éditeur</th>.*?<a[^>]*>(.*?)</a>'),
             "collection": g(r'<th scope="row">Collection</th>\s*<td>\s*<a[^>]*>(.*?)</a>').title()}
 

@@ -1,7 +1,7 @@
 {
-  "genere_le": "2026-10-18",
-  "nb_versions": 506,
-  "nb_livres": 278,
+  "genere_le": "2026-10-19",
+  "nb_versions": 504,
+  "nb_livres": 272,
   "nb_series": 36,
   "sources_prix": [
     "Relevé d'archives (historique)",
@@ -12,13 +12,13 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 248,
+  "nb_prix_actuels": 247,
   "calibration": {
     "actif": false,
     "n_paires": 9,
     "gain": null,
     "raison": "pas assez d'éditions comparables (9 sur 20 nécessaires)",
-    "calcule_le": "2026-10-18",
+    "calcule_le": "2026-10-19",
     "rapport_global": null,
     "nb_recalibres": 0
   }

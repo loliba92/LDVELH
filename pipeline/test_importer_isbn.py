@@ -25,6 +25,21 @@ class TestImport(unittest.TestCase):
         self.assertEqual([x["brut"] for x in l], ["9791097577025", "2-07-033370-1", "978-2-07-058380-5", "9782070583812"])
         self.assertEqual((l[0]["serie"], l[0]["numero"], l[0]["titre"]), ("Fabled Lands", "1", "Le Royaume déchiré"))
 
+    def test_isbn_separes_par_des_points_virgules_et_caracteres_invisibles(self):
+        l = imp.lire_liste("\u200e9782075237246 ; 9782075237192 ; 9782075243919\n\u200e")
+        self.assertEqual([x["brut"] for x in l], ["9782075237246", "9782075237192", "9782075243919"])
+        self.assertTrue(all(not x["serie"] and not x["titre"] for x in l))
+
+    def test_titre_de_librairie_decoupe_en_serie_numero_titre(self):
+        class R:
+            status_code = 200
+            text = "<title>Livre-jeu, Défis fantastiques, 18, L'Œil d'Émeraude - Ian Livingstone - Leslibraires.fr</title>"
+            def raise_for_status(self): pass
+        class H:
+            def get(self, *a, **k): return R()
+        f = imp.fiche_librairie("9782075237246", H())
+        self.assertEqual((f["serie"], f["numero"], f["titre"]), ("Défis fantastiques", "18", "L'Œil d'Émeraude"))
+
     def test_ajout_deja_et_invalide(self):
         b = self.base([("9791097577025", "Le Royaume déchiré", "2018")])
         bilan = imp.importer("9791097577025\n9791097577049 ; Fabled Lands ; 1\n123\n", b, SANS_BNF, LIBRAIRIE)
