@@ -690,7 +690,7 @@ html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 2
 .liens-vente { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
 .liens-vente .bouton { flex: 1 1 auto; min-width: 0; padding-inline: 10px; }
 @media (min-width: 701px) { .liens-vente .bouton { flex: 0 0 auto; min-width: 96px; padding-inline: 18px; } }
-@media (max-width: 380px) { .liens-vente { display: grid; grid-template-columns: 1fr 1fr; } .liens-vente .bouton:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+@media (max-width: 700px) { .liens-vente { display: grid; grid-template-columns: 1fr 1fr; } .liens-vente .bouton:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 /* Bandeau de la page collection sur téléphone : voile plus dense, le texte occupe toute la largeur */
 @media (max-width: 700px) {
   .banniere { background:
@@ -1460,3 +1460,8 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rv-lot-en-cours, .rv-lot-annule { color: var(--gold); font-weight: 700; }
 .rv-edition a.rv-fiche { font: 600 .82rem var(--f-ui); color: var(--accent); text-decoration: underline; }
 .aj-liste .aj-alerte span { color: #f2b3b9; }
+
+/* Rareté (information) */
+.rarete { display: inline-block; padding: 1px 9px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .78rem/1.5 var(--f-ui); letter-spacing: .03em; color: var(--muted); white-space: nowrap; }
+.rarete-rare { border-color: var(--gold); color: var(--gold); }
+.rarete-tres_rare { border-color: var(--gold); background: var(--gold); color: #1b1305; }

@@ -23,6 +23,9 @@
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/['’]/g, ' ');
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
+  // Rareté : d'après les collections saisies sur collection-ldvelh.fr (voir pipeline/rarete.py) ; une information, elle ne modifie aucune cote
+  const RARETE = { tres_rare: 'Très rare', rare: 'Rare', peu_courant: 'Peu courant', courant: 'Courant' };
+  const pastilleRarete = (b) => (b.rarete && (b.rarete.niveau === 'rare' || b.rarete.niveau === 'tres_rare') ? `<span class="rarete rarete-${b.rarete.niveau}" title="Possédé par ${b.rarete.pct} % des collections saisies sur collection-ldvelh.fr">${RARETE[b.rarete.niveau]}</span>` : '');
   const numero = (b) => (b.numero && !/^0+$/.test(b.numero) ? ` n° ${b.numero}` : '');
 
   let DATA = [];
@@ -813,7 +816,7 @@
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
-            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
+            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             <h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
@@ -827,7 +830,7 @@
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
-              ${ligne('Pages', b.pages)}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
+              ${ligne('Pages', b.pages)}${ligne('Rareté', b.rarete ? `${RARETE[b.rarete.niveau]} <span class="sous">(dans ${b.rarete.pct} % des collections saisies sur collection-ldvelh.fr ; une information, qui n'entre pas dans la cote)</span>` : '')}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
             </dl>
 
         ${blocNeuf(b)}

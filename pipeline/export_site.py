@@ -19,6 +19,7 @@ import editions
 from estimation import Obs, estimer
 import calibration
 import mouvements
+import rarete
 import tendances
 import etats
 import validations
@@ -280,6 +281,7 @@ def main():
     meta["calibration"] = {k: modele.get(k) for k in ("actif", "n_paires", "gain", "raison", "calcule_le", "rapport_global")}
     meta["calibration"]["nb_recalibres"] = nb_recalibres
     sortie.mkdir(parents=True, exist_ok=True)
+    rarete.annoter(versions, rarete.charger(DB.parent.parent / "raw" / "collection-ldvelh"))                # rareté (information), d'après les collections de collection-ldvelh.fr
     (sortie / "versions.json").write_text(json.dumps(versions, ensure_ascii=False, separators=(",", ":")),
                                           encoding="utf-8")
     (sortie / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
