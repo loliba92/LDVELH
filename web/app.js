@@ -37,7 +37,7 @@
 
   const defaut = () => ({
     q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'etagere', versions: new Set(VERSIONS),
-    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false,
+    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false, avendre: false,
   });
 
   /* ---------- Chargement ---------- */
@@ -185,8 +185,8 @@
     $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
-    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) S.cherche = false; synchroniser(); changer(); });
-    document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; synchroniser(); changer(); } }));
+    $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) { S.cherche = false; S.avendre = false; } synchroniser(); changer(); });
+    document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; S.avendre = e.target.value === 'vendre'; synchroniser(); changer(); } }));
     brancherParcours();
     $('#f-versions').addEventListener('change', (e) => {
       S.versions = new Set(e.target.value ? [e.target.value] : VERSIONS);
@@ -216,7 +216,7 @@
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
     $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
-    document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = r.value === (S.cherche ? 'cherche' : S.mine ? 'mine' : 'tous'); });
+    document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = r.value === (S.avendre ? 'vendre' : S.cherche ? 'cherche' : S.mine ? 'mine' : 'tous'); });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     $('#f-versions').value = S.versions.size === VERSIONS.length ? '' : S.versions.size === 1 ? [...S.versions][0] : 'multi';
     document.querySelectorAll('#h-etats input').forEach((i) => { i.checked = i.value === S.h; });
@@ -229,7 +229,7 @@
   document.addEventListener('cdh-notes', () => { clearTimeout(minuteNotes); minuteNotes = setTimeout(() => { if (PAGE !== 'collection') afficher(); }, 200); });
 
   function nbFiltres() {
-    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.versions.size !== VERSIONS.length].filter(Boolean).length;
+    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.avendre, S.versions.size !== VERSIONS.length].filter(Boolean).length;
   }
   function resumeFiltres() {
     const t = [];
@@ -242,6 +242,7 @@
     if (S.vente) t.push('encore en vente');
     if (S.mine) t.push('ma collection');
     if (S.cherche) t.push('à trouver');
+    if (S.avendre) t.push('à vendre');
     return t.join(' · ');
   }
   function basculerSelecteur(ouvert) {
@@ -272,6 +273,7 @@
     if (S.vente) p.set('vente', '1');
     if (S.mine) p.set('mine', '1');
     if (S.cherche) p.set('cherche', '1');
+    if (S.avendre) p.set('avendre', '1');
     if (S.versions.size !== d.versions.size) p.set('v', [...S.versions].join(','));
     if (S.h !== 'bon') p.set('h', S.h);
     if (S.vue !== 'etagere') p.set('vue', S.vue);
@@ -287,7 +289,7 @@
     FICHE_URL = p.get('fiche') || ''; CORR_URL = p.get('corriger') === '1';
     S = defaut();
     S.q = p.get('q') || ''; S.serie = p.get('serie') || ''; S.ed = p.get('ed') || '';
-    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1'; S.cherche = p.get('cherche') === '1';
+    S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1'; S.cherche = p.get('cherche') === '1'; S.avendre = p.get('avendre') === '1';
     if (p.has('v')) S.versions = new Set(p.get('v').split(',').filter((v) => VERSIONS.includes(v)));
     if (ETATS.some((e) => e.k === p.get('h'))) S.h = p.get('h');
     if (['etagere', 'liste', 'groupe'].includes(p.get('vue'))) S.vue = p.get('vue');
@@ -309,7 +311,7 @@
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) &&
+      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
       ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
@@ -410,6 +412,9 @@
     }
     if (S.cherche && !liste.length) {
       $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à trouver. Sur une fiche, cochez « Je le recherche » pour l\'ajouter ici.</p>';
+    }
+    if (S.avendre && !liste.length) {
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à vendre. Dans « Ma collection », touchez « À vendre » sous un exemplaire pour le placer ici.</p>';
     }
     afficherPied();
   }
@@ -1327,6 +1332,11 @@
       const nbS = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
       $('#seg-cherche').hidden = !nbS && !S.cherche;
       $('#nb-cherche-seg').textContent = nbS ? `(${nbS})` : '';
+    }
+    if ($('#seg-vendre')) {
+      const nbV = Object.keys(COLL).filter((id) => COLL[id].vendre && livreDe(id)).length;
+      $('#seg-vendre').hidden = !nbV && !S.avendre;
+      $('#nb-vendre-seg').textContent = nbV ? `(${nbV})` : '';
     }
     if ($('#hero-coll')) {              // accueil : la carte « Ma collection » a trois états (visiteur, connecté sans livre, avec collection)
       const visiteurAccueil = sansCompte();
