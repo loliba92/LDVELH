@@ -129,11 +129,11 @@ function doPost(e) {
     }
 
     if (action === 'avis') {
-      var av = validerAvis(q.texte);
+      var av = validerAvis(q.note, q.texte);
       if (!av.ok) return reponse({ ok: false, erreur: av.raison });
       var cacheA = CacheService.getScriptCache(), cleAv = 'av:' + moi.empreinte.slice(7, 23);
       if (!avisAutorise(cacheA.get(cleAv))) return reponse({ ok: false, erreur: 'trop d\'avis pour le moment : réessayez plus tard' });
-      var fa = formaterAvis(moi.nom, moi.role, av.texte);
+      var fa = formaterAvis(moi.nom, moi.role, av.note, av.texte);
       MailApp.sendEmail({ to: Session.getEffectiveUser().getEmail(), subject: fa.sujet, body: fa.corps, name: 'La Cote du Héros' });
       cacheA.put(cleAv, String((Number(cacheA.get(cleAv)) || 0) + 1), 21600);
       return reponse({ ok: true });

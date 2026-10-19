@@ -38,7 +38,7 @@ window.Compte = (function () {
     h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
-      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="avis">Donner votre avis</button></li>' : '') +
+      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="avis">Qu\'en pensez-vous ?</button></li>' : '') +
       (estAdmin() ? '<li><a href="revue-prix.html">Espace administrateur</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
       (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
@@ -223,23 +223,34 @@ window.Compte = (function () {
     });
   }
 
-  /* ---------- Avis : un mot libre, envoyé par courriel à l'éditeur ---------- */
+  /* ---------- Qu'en pensez-vous ? Une note de 1 à 5 étoiles et un commentaire facultatif, envoyés par courriel à l'éditeur ---------- */
   function donnerAvis() {
     if ($('.dlg-avis')) return;
     if (!actifGoogle() || !window.Cloud.actif()) { intention = donnerAvis; if (window.Cloud.lie()) { annoncer('Reconnectez-vous pour donner votre avis.'); } invitation(); return; }
+    var note = 0;
     var d = dialogue('<h2>Qu\'en pensez-vous ?</h2>' +
-      '<p>Une idée, une gêne, un livre qui manque, un compliment : écrivez-le librement. L\'éditeur le reçoit par courriel et le lit.</p>' +
-      '<form id="avis-form" class="eq-form"><label for="avis-texte">Votre avis</label>' +
-      '<textarea id="avis-texte" rows="5" maxlength="1500" required placeholder="Ce qui vous plaît, ce qui manque, ce qui pourrait être plus simple…"></textarea>' +
+      '<p>Que pensez-vous de La Cote du Héros ? Donnez une note et, si vous le souhaitez, un commentaire. L\'éditeur le reçoit par courriel et le lit.</p>' +
+      '<form id="avis-form" class="eq-form"><span class="avis-label" id="avis-lib">Votre note</span>' +
+      '<div class="avis-etoiles" role="radiogroup" aria-labelledby="avis-lib">' +
+      [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="false" data-avis-note="' + n + '" aria-label="' + n + ' sur 5">★</button>'; }).join('') + '</div>' +
+      '<label for="avis-texte">Un commentaire (facultatif)</label>' +
+      '<textarea id="avis-texte" rows="4" maxlength="1500" placeholder="Ce qui vous plaît, ce qui manque, ce qui pourrait être plus simple…"></textarea>' +
       '<p class="sous">Votre prénom est joint à l\'avis, jamais votre adresse. L\'avis n\'est pas public.</p>' +
       '<p class="rv-ajout-bilan" id="avis-msg" role="status" hidden></p>' +
       '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer mon avis</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-avis');
-    d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
+    var etoiles = d.querySelectorAll('[data-avis-note]');
+    var allumer = function (n) { note = n; etoiles.forEach(function (b) { var v = Number(b.dataset.avisNote); b.classList.toggle('allumee', v <= n); b.setAttribute('aria-checked', String(v === n)); }); };
+    d.addEventListener('click', function (e) {
+      if (e.target.closest('[data-fermer]')) d.close();
+      var et = e.target.closest('[data-avis-note]'); if (et) { allumer(Number(et.dataset.avisNote)); var m = $('#avis-msg', d); m.hidden = true; }
+    });
     $('#avis-form', d).addEventListener('submit', function (ev) {
       ev.preventDefault();
       var msg = $('#avis-msg', d), bouton = d.querySelector('button[type=submit]');
-      bouton.disabled = true; msg.hidden = false; msg.textContent = 'Envoi en cours…';
-      window.Relais.appeler('avis', { texte: $('#avis-texte', d).value }).then(function (r) {
+      msg.hidden = false;
+      if (!note) { msg.textContent = 'Choisissez d\'abord une note de 1 à 5 étoiles.'; return; }
+      bouton.disabled = true; msg.textContent = 'Envoi en cours…';
+      window.Relais.appeler('avis', { note: note, texte: $('#avis-texte', d).value }).then(function (r) {
         if (r && r.ok) { d.close(); annoncer('Merci, votre avis est bien envoyé.'); return; }
         var e = (r && r.erreur) || 'erreur inconnue';
         msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : /action inconnue/.test(e) ? 'Cette fonction n\'est pas encore disponible. Réessayez bientôt.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';

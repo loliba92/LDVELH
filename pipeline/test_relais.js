@@ -157,13 +157,15 @@ test('notes : le votant est une empreinte courte, sans adresse', () => {
 test('nouveaux comptes et avis : droits, validation, limites, courriels', () => {
   assert.ok(L('peut')('heros', 'bienvenue')); assert.ok(L('peut')('heros', 'avis')); assert.ok(!L('peut')('', 'avis'));
   const v = L('validerAvis');
-  assert.strictEqual(v('ok').ok, false); assert.strictEqual(v(null).ok, false);
-  assert.strictEqual(v('Très bien, merci pour le site').ok, true);
-  assert.strictEqual(v('x'.repeat(5000)).texte.length, 1500);
+  [0, 6, 2.5, '', null, undefined, 'abc', true].forEach((n) => assert.strictEqual(v(n, 'ok').ok, false, 'note ' + n));
+  assert.deepStrictEqual(J(v(5, '')), { ok: true, note: 5, texte: '' });                    // commentaire facultatif
+  assert.strictEqual(v('4', 'Très bien').texte, 'Très bien');
+  assert.strictEqual(v(3, 'x'.repeat(5000)).texte.length, 1500);
   const a = L('avisAutorise'); assert.ok(a(undefined)); assert.ok(a('2')); assert.ok(!a('3'));
   assert.strictEqual(J(L('formaterNouveauCompte')('Marie #a3f2', 1)).corps, 'Nouveau compte : Marie #a3f2 (1er compte).');
   assert.ok(J(L('formaterNouveauCompte')('Marie #a3f2', 42)).corps.indexOf('42e compte') > 0);
-  const f = J(L('formaterAvis')('Marie #a3f2', 'heros', 'Super site'));
-  assert.ok(f.corps.indexOf('Marie #a3f2') >= 0 && f.corps.indexOf('Super site') > 0 && !/@/.test(f.corps));
+  const f = J(L('formaterAvis')('Marie #a3f2', 'heros', 4, 'Super site'));
+  assert.ok(f.corps.indexOf('Marie #a3f2') >= 0 && f.corps.indexOf('★★★★☆') > 0 && f.corps.indexOf('Super site') > 0 && !/@/.test(f.corps) && f.sujet.indexOf('4/5') > 0);
+  assert.ok(J(L('formaterAvis')('M', 'heros', 5, '')).corps.indexOf('pas de commentaire') > 0);
 });
 console.log(n + ' tests passés');

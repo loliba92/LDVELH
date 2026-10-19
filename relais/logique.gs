@@ -167,15 +167,16 @@ var LIMITE_AVIS = 3;                   // par personne et par fenêtre de six he
 function texteLibre(brut, max) {          // texte multi-lignes : sans caractères de commande, retours à la ligne normalisés
   return String(brut == null ? '' : brut).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, ' ').replace(/\r\n?/g, '\n').trim().slice(0, max);
 }
-function validerAvis(texte) {
-  var t = texteLibre(texte, 1500);
-  if (t.length < 5) return { ok: false, raison: 'votre avis est trop court' };
-  return { ok: true, texte: t };
+function validerAvis(note, texte) {
+  var n = Number(note);
+  if (note === null || note === undefined || note === '' || typeof note === 'boolean' || !(n >= 1 && n <= 5 && n % 1 === 0)) return { ok: false, raison: 'choisissez une note de 1 à 5 étoiles' };
+  return { ok: true, note: n, texte: texteLibre(texte, 1500) };       // le commentaire est facultatif
 }
 function avisAutorise(compteur) { return (Number(compteur) || 0) < LIMITE_AVIS; }
 function formaterNouveauCompte(nom, rang) {
   return { sujet: 'Nouveau compte sur La Cote du Héros', corps: 'Nouveau compte : ' + nom + ' (' + rang + (rang === 1 ? 'er' : 'e') + ' compte).' };
 }
-function formaterAvis(nom, role, texte) {
-  return { sujet: 'Avis sur La Cote du Héros', corps: 'De : ' + nom + (role && role !== 'heros' ? ' (' + role + ')' : '') + '\n\n' + texte };
+function formaterAvis(nom, role, note, texte) {
+  var etoiles = new Array(note + 1).join('★') + new Array(6 - note).join('☆');
+  return { sujet: 'Avis ' + note + '/5 sur La Cote du Héros', corps: 'De : ' + nom + (role && role !== 'heros' ? ' (' + role + ')' : '') + '\nNote : ' + etoiles + ' (' + note + ' sur 5)' + (texte ? '\n\n' + texte : '\n\n(pas de commentaire)') };
 }

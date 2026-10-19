@@ -1533,3 +1533,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .projet-duo img:nth-child(2) { object-position: 50% 45%; }
 @media (max-width: 560px) { .projet-duo { gap: 6px; } .projet-duo img { aspect-ratio: 3 / 4; } }
 .eq-form textarea { resize: vertical; min-height: 110px; }
+.pied-liens .pied-avis { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; color: var(--gold); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.avis-label { font: 700 .85rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.avis-etoiles { display: flex; gap: 4px; }
+.avis-etoiles button { min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; font-size: 2rem; line-height: 1; color: var(--muted); cursor: pointer; }
+.avis-etoiles button.allumee { color: var(--gold); }
+.avis-etoiles button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
