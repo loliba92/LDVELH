@@ -21,13 +21,19 @@
     bouton.disabled = true;
     bouton.textContent = 'Envoi…';
     dire('Envoi en cours…');
+    var ctl = window.AbortController ? new AbortController() : null;
+    var delai = setTimeout(function () { if (ctl) ctl.abort(); }, 12000);   // sans réponse en 12 s : envoi classique
     fetch(form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
+      signal: ctl ? ctl.signal : undefined,
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(donnees)
     }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (rep) { if (rep && String(rep.success) === 'false') throw new Error(rep.message || 'refus'); form.reset(); dire('Merci, votre message est bien parti. Je vous répondrai à l\'adresse indiquée. ✓'); })
-      .catch(function () { dire('Envoi impossible pour le moment : vérifiez votre connexion et réessayez dans quelques instants.', true); })
-      .then(function () { bouton.disabled = false; bouton.textContent = 'Envoyer'; });
+      .catch(function () {                                              // l'envoi sans quitter la page a échoué : on envoie normalement
+        dire('Envoi en cours…');
+        form.submit();
+      })
+      .then(function () { clearTimeout(delai); bouton.disabled = false; bouton.textContent = 'Envoyer'; });
   });
 })();
