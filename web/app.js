@@ -115,9 +115,9 @@
     const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
     if (dates.length && dates[0] !== dates[dates.length - 1]) {
       const vus = new Set();
-      const recents = DATA.filter((b) => b.maj && b.couverture).sort(parRecence).filter((b) => (vus.has(b.livre_id) ? false : vus.add(b.livre_id))).slice(0, 8);      // une couverture par livre
+      const recents = DATA.filter((b) => b.maj && !b.parution).sort(parRecence).filter((b) => (vus.has(b.livre_id) ? false : vus.add(b.livre_id))).slice(0, 8);      // une couverture par livre
       if (recents.length) {
-        $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}"><img src="${esc(b.couverture)}" alt="" loading="lazy" width="80" height="120"></button>`).join('');
+        $('#hero-ajouts-liste').innerHTML = recents.map((b) => `<button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}">${b.couverture ? `<img src="${esc(b.couverture)}" alt="" loading="lazy" width="80" height="120">` : `<span class="ajout-vide" aria-hidden="true">${esc((b.serie && b.serie !== 'Non classée' ? b.serie : b.titre || '?').trim().charAt(0).toUpperCase())}</span>`}</button>`).join('');
         $('#hero-ajouts-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
         $('#hero-ajouts-tous').addEventListener('click', () => { S.tri = 'recent'; S.onglet = 'etagere'; synchroniser(); changer(); aller(); });
         $('#hero-ajouts').hidden = false;
