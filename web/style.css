@@ -1508,7 +1508,7 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .ct-champ input:focus-visible, .ct-champ textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .contact-form .bouton { justify-self: start; min-height: 48px; padding-inline: 28px; }
 .contact-form .bouton:disabled { opacity: .55; cursor: wait; }
-.form-sent { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #5aa876; border-left-width: 4px; border-radius: var(--r); background: var(--surface); font-weight: 700; }
+.form-sent { margin: 14px 0 0; padding: 12px 14px; border: 1px solid #5aa876; border-left-width: 4px; border-radius: var(--r); background: var(--surface); font-weight: 700; }
 .form-sent[hidden] { display: none; }
 .form-sent.erreur { border-color: #b3414f; color: #f2b3b9; }
 
@@ -1538,3 +1538,14 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .ap-liens { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; }
 .ap-pre { flex: 1 0 100%; color: var(--muted); font-size: .85rem; margin-top: 4px; }
 .ap-liens { gap: 0 12px; }
+
+/* Le projet : quelques illustrations pour donner envie de rêver */
+.projet-large { margin: 22px 0 6px; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); aspect-ratio: 21 / 9; background: var(--surface); }
+.projet-large img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; display: block; }
+.projet-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 26px 0 8px; }
+.projet-trio img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); display: block; background: var(--surface); }
+.projet-trio img:nth-child(1) { object-position: 60% 30%; }
+.projet-trio img:nth-child(2) { object-position: 78% 40%; }
+.projet-trio img:nth-child(3) { object-position: 60% 35%; }
+.projet-legende { margin: 0 0 22px; color: var(--muted); font-size: .85rem; font-style: italic; }
+@media (max-width: 560px) { .projet-large { aspect-ratio: 16 / 9; } .projet-trio { gap: 6px; } }

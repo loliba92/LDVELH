@@ -196,7 +196,7 @@ window.Compte = (function () {
       '<input id="dem-texte" type="text" maxlength="150" required autocomplete="off" placeholder="978-2380240283 ou un titre">' +
       '<label for="dem-note">Un mot (facultatif) : série, numéro, édition</label>' +
       '<input id="dem-note" type="text" maxlength="300" autocomplete="off" placeholder="Par exemple : édition collector">' +
-      '<p class="sous">Votre prénom est joint à la demande, jamais votre adresse. La demande est publique sur GitHub.</p>' +
+      '<p class="sous">Votre prénom est joint à la demande, jamais votre adresse. La demande est publique.</p>' +
       '<p class="rv-ajout-bilan" id="dem-msg" role="status" hidden></p>' +
       '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer la demande</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-demande');
     if (texteInitial) $('#dem-texte', d).value = texteInitial;

@@ -53,7 +53,6 @@
 <p class="chapeau">Une question, une erreur à signaler, un prix que vous avez constaté, une idée ou une proposition de collaboration : écrivez-moi avec le formulaire ci-dessous.</p>
 
 <h2 id="formulaire">Envoyer un message</h2>
-<p class="form-sent" id="form-sent" role="status" hidden>Merci, votre message est bien parti. ✓</p>
 <form class="contact-form" id="contact-form" action="https://formsubmit.co/2d378aed4baf4cbd45b3c9db45512b9c" method="POST">
   <input type="hidden" name="_subject" value="Nouveau message via La Cote du Héros">
   <input type="hidden" name="_next" value="https://lacoteduheros.fr/contact.html?envoye=1">
@@ -64,12 +63,12 @@
   <div class="ct-champ"><label for="ct-email">Votre adresse électronique</label><input id="ct-email" type="email" name="email" autocomplete="email" required maxlength="120" placeholder="Pour pouvoir vous répondre"></div>
   <div class="ct-champ"><label for="ct-message">Votre message</label><textarea id="ct-message" name="message" required maxlength="4000" rows="6" placeholder="Une question, une erreur à signaler, un prix constaté, une idée…"></textarea></div>
   <button class="bouton" type="submit">Envoyer</button>
+  <p class="form-sent" id="form-sent" role="status" aria-live="polite" tabindex="-1" hidden></p>
   <p class="sous">Vos coordonnées ne servent qu'à vous répondre. Le message passe par le service FormSubmit, qui le transmet à l'éditeur : voir <a href="confidentialite.html#contact">Confidentialité</a>.</p>
 </form>
 
 <h2>Pour signaler une erreur ou proposer un prix</h2>
 <p>Dites-moi quel livre (le titre ou l'ISBN) et ce que vous avez constaté. Pour un prix, il m'aide de connaître l'<strong>état</strong> du livre (convenable, bon état, très bon état), le <strong>prix</strong> et la <strong>source</strong> (une vente, une annonce, une boutique) avec sa date.</p>
-<p>Vous pouvez aussi passer par un <a href="https://github.com/loliba92/LDVELH/issues" target="_blank" rel="noopener">signalement sur GitHub</a>, qui demande un compte GitHub et reste public.</p>
 
 <h2>Vous voulez aider davantage</h2>
 <ul>

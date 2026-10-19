@@ -266,7 +266,6 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
 <p class="chapeau">Une question, une erreur à signaler, un prix que vous avez constaté, une idée ou une proposition de collaboration : écrivez-moi avec le formulaire ci-dessous.</p>
 
 <h2 id="formulaire">Envoyer un message</h2>
-<p class="form-sent" id="form-sent" role="status" hidden>Merci, votre message est bien parti. ✓</p>
 <form class="contact-form" id="contact-form" action="https://formsubmit.co/2d378aed4baf4cbd45b3c9db45512b9c" method="POST">
   <input type="hidden" name="_subject" value="Nouveau message via La Cote du Héros">
   <input type="hidden" name="_next" value="https://lacoteduheros.fr/contact.html?envoye=1">
@@ -277,12 +276,12 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
   <div class="ct-champ"><label for="ct-email">Votre adresse électronique</label><input id="ct-email" type="email" name="email" autocomplete="email" required maxlength="120" placeholder="Pour pouvoir vous répondre"></div>
   <div class="ct-champ"><label for="ct-message">Votre message</label><textarea id="ct-message" name="message" required maxlength="4000" rows="6" placeholder="Une question, une erreur à signaler, un prix constaté, une idée…"></textarea></div>
   <button class="bouton" type="submit">Envoyer</button>
+  <p class="form-sent" id="form-sent" role="status" aria-live="polite" tabindex="-1" hidden></p>
   <p class="sous">Vos coordonnées ne servent qu'à vous répondre. Le message passe par le service FormSubmit, qui le transmet à l'éditeur : voir <a href="confidentialite.html#contact">Confidentialité</a>.</p>
 </form>
 
 <h2>Pour signaler une erreur ou proposer un prix</h2>
 <p>Dites-moi quel livre (le titre ou l'ISBN) et ce que vous avez constaté. Pour un prix, il m'aide de connaître l'<strong>état</strong> du livre (convenable, bon état, très bon état), le <strong>prix</strong> et la <strong>source</strong> (une vente, une annonce, une boutique) avec sa date.</p>
-<p>Vous pouvez aussi passer par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>, qui demande un compte GitHub et reste public.</p>
 
 <h2>Vous voulez aider davantage</h2>
 <ul>
@@ -475,10 +474,19 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h1>Le projet</h1>
 <p class="chapeau">La Cote du Héros est un guide indépendant, gratuit et sans publicité, fait pour les collectionneurs de livres dont vous êtes le héros : tenir sa collection à jour, la suivre dans le temps et trouver les livres qui lui manquent.</p>
 
+<figure class="projet-large"><img src="images/accueil-4.webp" alt="" width="1122" height="1114" loading="lazy" decoding="async"></figure>
+
 <h2>À quoi sert ce site</h2>
 <p>C'est d'abord un outil pour <strong>tenir sa collection à jour et la suivre dans le temps</strong>. Vous indiquez les livres et les éditions que vous possédez, dans l'état où ils sont, et le guide garde la trace de ce que vous avez, de ce qu'il vous manque et de la façon dont votre collection grandit.</p>
 <p>Il sert ensuite à <strong>trouver les livres</strong> : voir ce qu'il reste à chercher pour finir une série, retrouver la bonne édition, repérer les nouveautés et les livres annoncés. Il garde aussi une liste « À trouver » pour ceux que vous cherchez.</p>
 <p>Les <strong>prix</strong> viennent après, comme de simples repères : ils aident à comprendre ce qu'un livre vaut à peu près. Ce ne sont ni des prix d'achat ni des prix de vente, et aucune cote ne vous dit « achetez » ou « vendez ». Le guide est fait pour les collectionneurs, pas pour les traders (c'est dit avec le sourire, mais c'est sérieux).</p>
+
+<div class="projet-trio" aria-hidden="true">
+  <img src="images/accueil-1.webp" alt="" width="992" height="1504" loading="lazy" decoding="async">
+  <img src="images/accueil-3.webp" alt="" width="1214" height="1295" loading="lazy" decoding="async">
+  <img src="images/accueil-5.webp" alt="" width="1215" height="1295" loading="lazy" decoding="async">
+</div>
+<p class="projet-legende">Des mondes à parcourir, des livres à retrouver. Illustrations générées par intelligence artificielle pour le guide.</p>
 
 <h2>Pourquoi ce guide</h2>
 <p>Les livres-jeux ont paru en plusieurs éditions, chez plusieurs éditeurs, pendant près de quarante ans. Savoir de quelle édition on parle est la première difficulté du collectionneur : un même titre existe sous plusieurs couvertures, et seul le numéro d'ISBN les distingue vraiment. Ce guide réunit toutes les éditions au même endroit, pour les reconnaître, les comparer et dire lesquelles vous avez.</p>
@@ -529,7 +537,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 
 <h2>Contribuer</h2>
 <ul>
-  <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>, ou ouvrez un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> (un compte GitHub est nécessaire, et le signalement est public).</li>
+  <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>.</li>
   <li><strong>Demander l'ajout d'un livre :</strong> connectez-vous avec Google, puis utilisez « Demander l'ajout d'un livre » dans le menu de votre compte.</li>
   <li><strong>Aider à tenir les prix à jour :</strong> <a href="devenir-admin.html">devenez administrateur</a>.</li>
   <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
@@ -582,7 +590,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le relais avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
 
 <h2>Demander l'ajout d'un livre</h2>
-<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, sur GitHub, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les administrateurs.</p>
+<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les administrateurs.</p>
 
 <h2>Les administrateurs</h2>
 <p>Les administrateurs sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un administrateur envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
@@ -595,7 +603,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
   <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
   <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>
   <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com</a>.</li>
-  <li>Une demande d'ajout publiée sur GitHub : écrivez à l'éditeur par la page <a href="contact.html">Contact</a> pour la faire retirer.</li>
+  <li>Une demande d'ajout publiée : écrivez à l'éditeur par la page <a href="contact.html">Contact</a> pour la faire retirer.</li>
   <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
 </ul>
 
@@ -603,13 +611,13 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Le fichier que vous téléchargez (JSON ou CSV) est créé dans votre navigateur et enregistré chez vous. Quand vous chargez un fichier pour le retrouver, il est lu dans votre navigateur, sans être envoyé nulle part. Vous en restez seul responsable : il contient la liste de vos livres.</p>
 
 <h2>Hébergement et journaux techniques</h2>
-<p>Le site est hébergé par GitHub Pages ; la connexion, la sauvegarde dans votre Drive et le relais passent par Google (voir les <a href="mentions-legales.html">mentions légales</a>). Comme tout hébergeur, GitHub et Google peuvent enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de ces sociétés et non de l'éditeur, qui n'y a pas accès. Elles sont établies aux États-Unis ; leur traitement des données est décrit dans la <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité de GitHub</a> et la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a>.</p>
+<p>Le site est hébergé par la société indiquée dans les <a href="mentions-legales.html">mentions légales</a> ; la connexion, la sauvegarde dans votre Drive et le relais passent par Google. Comme tout hébergeur, l'hébergeur du site et Google peuvent enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de ces sociétés et non de l'éditeur, qui n'y a pas accès. Elles sont établies aux États-Unis ; leur traitement des données est décrit dans leurs déclarations de confidentialité, dont celle de Google : <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le relais, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook, Amazon et la Fnac, fiches de leslibraires.fr, Buy Me a Coffee, GitHub. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le relais, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook, Amazon et la Fnac, fiches de leslibraires.fr, Buy Me a Coffee. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
 
 <h2>Vos droits</h2>
-<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription d'administrateur), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a> ou par un <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription d'administrateur), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
 <p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : {MAJ_LEGAL}.</p>
@@ -623,7 +631,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 <p>La Cote du Héros est un site personnel, non commercial.</p>
 <ul>
   <li><strong>Éditeur et directeur de la publication</strong> : [À COMPLÉTER : nom et prénom, ou pseudonyme si l'hébergeur détient vos coordonnées]</li>
-  <li><strong>Contact</strong> : par le <a href="contact.html#formulaire">formulaire de la page Contact</a>, ou par <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>.</li>
+  <li><strong>Contact</strong> : par le <a href="contact.html#formulaire">formulaire de la page Contact</a>.</li>
 </ul>
 
 <h2>Hébergeur</h2>

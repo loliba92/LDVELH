@@ -8,7 +8,7 @@
     etat.textContent = texte;
     etat.hidden = false;
     etat.classList.toggle('erreur', !!erreur);
-    etat.scrollIntoView({ block: 'center' });
+    etat.scrollIntoView({ block: 'center', behavior: 'smooth' });
   };
   if (/[?&]envoye=1/.test(location.search)) dire('Merci, votre message est bien parti. ✓');
   if (!window.fetch) return;
@@ -20,12 +20,13 @@
     if (donnees._honey) return;                                        // champ piège : un robot l'a rempli
     bouton.disabled = true;
     bouton.textContent = 'Envoi…';
+    dire('Envoi en cours…');
     fetch(form.action.replace('formsubmit.co/', 'formsubmit.co/ajax/'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(donnees)
     }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function () { form.reset(); dire('Merci, votre message est bien parti. ✓'); })
+      .then(function (rep) { if (rep && String(rep.success) === 'false') throw new Error(rep.message || 'refus'); form.reset(); dire('Merci, votre message est bien parti. Je vous répondrai à l\'adresse indiquée. ✓'); })
       .catch(function () { dire('Envoi impossible pour le moment : vérifiez votre connexion et réessayez dans quelques instants.', true); })
       .then(function () { bouton.disabled = false; bouton.textContent = 'Envoyer'; });
   });
