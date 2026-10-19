@@ -17,7 +17,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   demande_traiter: 'admin',
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros'
-};
+};                                       // « contact » n'est pas ici : il est ouvert à tous les visiteurs (voir contacter dans Code.gs)
 var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
@@ -157,4 +157,27 @@ function resumerNotes(votes) {
   if (!k.length) return [0, 0];
   var somme = 0; k.forEach(function (x) { somme += votes[x]; });
   return [Math.round(somme / k.length * 10) / 10, k.length];
+}
+
+/* ---------- Formulaire de contact ----------
+   Ouvert à tout visiteur, sans connexion : le message est envoyé par courriel à l'éditeur (adresse jamais montrée sur le site).
+   Limites : trois messages par adresse et par six heures, trente par heure pour tout le site. */
+var LIMITE_CONTACT_ADRESSE = 3;
+var LIMITE_CONTACT_HEURE = 30;
+function texteContact(brut, max) {
+  return String(brut == null ? '' : brut).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, ' ').replace(/\r\n?/g, '\n').trim().slice(0, max);
+}
+function validerContact(q) {
+  q = q || {};
+  if (q.piege) return { ok: false, raison: 'refusé' };                       // champ caché rempli : un robot
+  var email = minuscules(q.email).slice(0, 120), message = texteContact(q.message, 4000), nom = texteContact(q.nom, 80).replace(/\n+/g, ' ');
+  if (!/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]{2,}$/.test(email)) return { ok: false, raison: 'adresse électronique invalide' };
+  if (message.length < 5) return { ok: false, raison: 'le message est trop court' };
+  return { ok: true, nom: nom, email: email, message: message };
+}
+function contactAutorise(compteurAdresse, compteurHeure) {
+  return (Number(compteurAdresse) || 0) < LIMITE_CONTACT_ADRESSE && (Number(compteurHeure) || 0) < LIMITE_CONTACT_HEURE;
+}
+function formaterContact(c) {
+  return { sujet: 'Nouveau message via La Cote du Héros', corps: 'De : ' + (c.nom || '(sans nom)') + ' <' + c.email + '>\n\n' + c.message };
 }

@@ -277,7 +277,7 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
   <div class="ct-champ"><label for="ct-message">Votre message</label><textarea id="ct-message" name="message" required maxlength="4000" rows="6" placeholder="Une question, une erreur à signaler, un prix constaté, une idée…"></textarea></div>
   <button class="bouton" type="submit">Envoyer</button>
   <p class="form-sent" id="form-sent" role="status" aria-live="polite" tabindex="-1" hidden></p>
-  <p class="sous">Vos coordonnées ne servent qu'à vous répondre. Le message passe par le service FormSubmit, qui le transmet à l'éditeur : voir <a href="confidentialite.html#contact">Confidentialité</a>.</p>
+  <p class="sous">Vos coordonnées ne servent qu'à vous répondre. Le message est transmis à l'éditeur par courriel : voir <a href="confidentialite.html#contact">Confidentialité</a>.</p>
 </form>
 
 <h2>Pour signaler une erreur ou proposer un prix</h2>
@@ -549,7 +549,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 </ul>
 
 <h2 id="contact">Le formulaire de contact</h2>
-<p>Le formulaire de la page <a href="contact.html">Contact</a> envoie votre message au service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui le transmet par courriel à l'éditeur. Il reçoit ce que vous écrivez : votre nom si vous le donnez, votre adresse électronique et le texte du message. Ces informations ne servent qu'à vous répondre : elles ne sont ni publiées ni utilisées pour autre chose, et l'éditeur ne les garde pas plus longtemps que nécessaire pour traiter votre demande. Vous pouvez demander leur effacement par ce même formulaire. Rien n'est envoyé tant que vous n'avez pas cliqué sur « Envoyer ».</p>
+<p>Le formulaire de la page <a href="contact.html">Contact</a> envoie votre message par courriel à l'éditeur, en passant par le relais hébergé chez Google. Si le relais ne répond pas, le message est confié au service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui le transmet de la même façon. Il reçoit ce que vous écrivez : votre nom si vous le donnez, votre adresse électronique et le texte du message. Ces informations ne servent qu'à vous répondre : elles ne sont ni publiées ni utilisées pour autre chose, et l'éditeur ne les garde pas plus longtemps que nécessaire pour traiter votre demande. Vous pouvez demander leur effacement par ce même formulaire. Rien n'est envoyé tant que vous n'avez pas cliqué sur « Envoyer ».</p>
 
 <h2>Soutenir le guide</h2>
 <p>Le guide reste gratuit et sans publicité. S'il vous est utile, vous pouvez <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer">offrir un café</a> : cela aide à couvrir les frais du site, notamment son adresse web. C'est libre et sans aucune obligation.</p>
@@ -649,7 +649,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 
 <h2>Services de connexion et de sauvegarde</h2>
 <p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des administrateurs, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
-<p>Les messages envoyés par le formulaire de la page Contact sont acheminés par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui les transmet à l'éditeur par courriel.</p>
+<p>Les messages envoyés par le formulaire de la page Contact sont transmis à l'éditeur par courriel, par le relais hébergé chez Google ou, en cas d'indisponibilité, par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>).</p>
 
 <h2>Propriété intellectuelle</h2>
 <ul>
