@@ -1113,7 +1113,7 @@
         <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div></td>
         <td data-label="État"><select data-etat="${esc(b.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === c.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
         <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${c.qte}" data-qte="${esc(b.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
-        <td data-label="Prix payé (par exemplaire)"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
+        <td data-label="Prix payé"><input type="text" inputmode="decimal" autocomplete="off" placeholder="facultatif" value="${prixSaisi(c.prix)}" data-prix="${esc(b.id)}" aria-label="Prix payé, par exemplaire, pour ${esc(b.titre)}, édition ${esc(b.version)} (facultatif)"></td>
         <td class="num" data-label="Valeur estimée"><span class="prix-c${v == null ? ' nul' : ''}">${v == null ? 'sans cote' : fmt(v)}</span></td>
         <td class="num"><button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}">Retirer</button></td></tr>`;
     }).join('');
@@ -1143,7 +1143,7 @@
       ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${optsSerieColl(bl)}</select>`)}
       ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes les éditions')}</select>`)}
       ${champ('cf-etat', 'État', `<select id="cf-etat"><option value="">Tous les états</option>${ETATS.map((x) => `<option value="${x.k}"${x.k === FC.etat ? ' selected' : ''}>${esc(x.nom || x.court)} (${nbEtat(x.k)})</option>`).join('')}</select>`)}
-      ${champ('cf-cote', 'Cote', `<select id="cf-cote"><option value="">Avec ou sans cote</option><option value="avec"${FC.cote === 'avec' ? ' selected' : ''}>Avec cote</option><option value="sans"${FC.cote === 'sans' ? ' selected' : ''}>Sans cote</option></select>`)}
+      ${champ('cf-cote', 'Cote', `<select id="cf-cote"><option value="">Toutes</option><option value="avec"${FC.cote === 'avec' ? ' selected' : ''}>Avec cote</option><option value="sans"${FC.cote === 'sans' ? ' selected' : ''}>Sans cote</option></select>`)}
       ${champ('cf-tri', 'Trier par', `<select id="cf-tri">${Object.entries(TRIS).map(([k, [nom]]) => `<option value="${k}"${k === FC.tri ? ' selected' : ''}>${nom}</option>`).join('')}</select>`)}
       <button type="button" class="bouton bouton-clair" id="cf-raz"${filtresActifs() ? '' : ' hidden'}>Réinitialiser</button></div>`;
   }

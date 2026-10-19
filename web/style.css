@@ -1358,3 +1358,10 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .coll-analyse > summary .sous { font-weight: 400; }
 .coll-effacer { margin: 24px 0 0; padding-top: 16px; border-top: 1px solid var(--line); text-align: right; }
 @media (max-width: 560px) { .exporter, .exporter-choix .bouton { flex: 1 1 100%; } .coll-effacer { text-align: center; } }
+/* Lignes d'exemplaires : étiquettes sur une seule ligne, pour que les trois champs restent alignés */
+table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+@media (max-width: 700px) { table.coll-table tr { align-items: end; } }
+@media (max-width: 700px) {
+  table.coll-table tr { grid-template-columns: minmax(0, 1.45fr) minmax(0, .8fr) minmax(0, 1fr); }
+  .coll-table select { padding-left: 6px; padding-right: 4px; }
+}
