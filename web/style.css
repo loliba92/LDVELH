@@ -1498,3 +1498,16 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
   .menu .compte-bouton .compte-libelle { max-width: 13ch; overflow: hidden; text-overflow: ellipsis; }
   .marque-nom, .bandeau nav a, .bandeau nav summary, .bandeau .compte button { white-space: nowrap; }
 }
+
+/* Formulaire de contact */
+.contact-form { display: grid; gap: 14px; max-width: 560px; margin: 14px 0 26px; }
+.contact-form .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.ct-champ { display: grid; gap: 6px; }
+.ct-champ input, .ct-champ textarea { width: 100%; box-sizing: border-box; padding: 10px 12px; min-height: 48px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.ct-champ textarea { min-height: 150px; resize: vertical; line-height: 1.45; }
+.ct-champ input:focus-visible, .ct-champ textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.contact-form .bouton { justify-self: start; min-height: 48px; padding-inline: 28px; }
+.contact-form .bouton:disabled { opacity: .55; cursor: wait; }
+.form-sent { margin: 0 0 14px; padding: 12px 14px; border: 1px solid #5aa876; border-left-width: 4px; border-radius: var(--r); background: var(--surface); font-weight: 700; }
+.form-sent[hidden] { display: none; }
+.form-sent.erreur { border-color: #b3414f; color: #f2b3b9; }

@@ -204,7 +204,8 @@ def page(nom, corps):
 
 
 GARDEES = ("revue-prix.html", "equipe.html")      # pages derrière la porte (niveau Admin ou SuperAdmin)
-SCRIPT_PAGE = {"revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
+               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
@@ -257,12 +258,22 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
 
 CONTACT = '''<p class="surtitre">Nous écrire</p>
 <h1>Contact</h1>
-<p class="chapeau">Une question, une erreur à signaler, un prix que vous avez constaté, une idée ou une proposition de collaboration : écrivez-moi.</p>
+<p class="chapeau">Une question, une erreur à signaler, un prix que vous avez constaté, une idée ou une proposition de collaboration : écrivez-moi avec le formulaire ci-dessous.</p>
 
-<h2>Par courriel</h2>
-<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Écrire à La Cote du Héros</a></p>
-<p>Adresse : <a class="mail" data-u="obertrand92" data-d="gmail.com" href="contact.html">(affichée avec JavaScript)</a><noscript> obertrand92 (arobase) gmail.com</noscript></p>
-<p class="sous">L'adresse s'affiche quand la page est chargée : cela évite qu'elle soit recopiée automatiquement. Elle ne sert qu'à vous répondre.</p>
+<h2 id="formulaire">Envoyer un message</h2>
+<p class="form-sent" id="form-sent" role="status" hidden>Merci, votre message est bien parti. ✓</p>
+<form class="contact-form" id="contact-form" action="https://formsubmit.co/2d378aed4baf4cbd45b3c9db45512b9c" method="POST">
+  <input type="hidden" name="_subject" value="Nouveau message via La Cote du Héros">
+  <input type="hidden" name="_next" value="https://loliba92.github.io/LDVELH/contact.html?envoye=1">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div class="ct-champ"><label for="ct-nom">Votre nom (facultatif)</label><input id="ct-nom" type="text" name="nom" autocomplete="name" maxlength="80" placeholder="Comment vous appeler ?"></div>
+  <div class="ct-champ"><label for="ct-email">Votre adresse électronique</label><input id="ct-email" type="email" name="email" autocomplete="email" required maxlength="120" placeholder="Pour pouvoir vous répondre"></div>
+  <div class="ct-champ"><label for="ct-message">Votre message</label><textarea id="ct-message" name="message" required maxlength="4000" rows="6" placeholder="Une question, une erreur à signaler, un prix constaté, une idée…"></textarea></div>
+  <button class="bouton" type="submit">Envoyer</button>
+  <p class="sous">Vos coordonnées ne servent qu'à vous répondre. Le message passe par le service FormSubmit, qui le transmet à l'éditeur : voir <a href="confidentialite.html#contact">Confidentialité</a>.</p>
+</form>
 
 <h2>Pour signaler une erreur ou proposer un prix</h2>
 <p>Dites-moi quel livre (le titre ou l'ISBN) et ce que vous avez constaté. Pour un prix, il m'aide de connaître l'<strong>état</strong> du livre (convenable, bon état, très bon état), le <strong>prix</strong> et la <strong>source</strong> (une vente, une annonce, une boutique) avec sa date.</p>
@@ -314,7 +325,7 @@ def corps_communaute():
 
 <h2>Vous en faites partie ?</h2>
 <p>Vous tenez une chaîne, un site, un podcast, une boutique, ou vous avez une collection que vous aimez partager ? <a href="contact.html">Écrivez-moi</a> avec l'adresse et deux lignes de présentation. La sélection se fait au cas par cas, et le guide reste gratuit et sans publicité.</p>
-<p class="contact-mail"><a class="mail bouton" data-u="obertrand92" data-d="gmail.com" href="contact.html">Proposer un lien</a></p>
+<p class="contact-mail"><a class="bouton" href="contact.html#formulaire">Proposer un lien</a></p>
 '''
 
 
@@ -517,6 +528,9 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
 </ul>
 
+<h2 id="contact">Le formulaire de contact</h2>
+<p>Le formulaire de la page <a href="contact.html">Contact</a> envoie votre message au service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui le transmet par courriel à l'éditeur. Il reçoit ce que vous écrivez : votre nom si vous le donnez, votre adresse électronique et le texte du message. Ces informations ne servent qu'à vous répondre : elles ne sont ni publiées ni utilisées pour autre chose, et l'éditeur ne les garde pas plus longtemps que nécessaire pour traiter votre demande. Vous pouvez demander leur effacement par ce même formulaire. Rien n'est envoyé tant que vous n'avez pas cliqué sur « Envoyer ».</p>
+
 <h2>Soutenir le guide</h2>
 <p>Le guide reste gratuit et sans publicité. S'il vous est utile, vous pouvez <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer">offrir un café</a> : cela aide à couvrir les frais du site, notamment son adresse web. C'est libre et sans aucune obligation.</p>
 '''
@@ -602,7 +616,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 <p>La Cote du Héros est un site personnel, non commercial.</p>
 <ul>
   <li><strong>Éditeur et directeur de la publication</strong> : [À COMPLÉTER : nom et prénom, ou pseudonyme si l'hébergeur détient vos coordonnées]</li>
-  <li><strong>Contact</strong> : par <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a> ; adresse électronique : <a class="mail" data-u="obertrand92" data-d="gmail.com" href="contact.html">afficher l'adresse</a><noscript> obertrand92 (arobase) gmail.com</noscript> (voir aussi la page <a href="contact.html">Contact</a>)</li>
+  <li><strong>Contact</strong> : par le <a href="contact.html#formulaire">formulaire de la page Contact</a>, ou par <a href="{ISSUES}" target="_blank" rel="noopener">signalement sur GitHub</a>.</li>
 </ul>
 
 <h2>Hébergeur</h2>
@@ -615,6 +629,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 
 <h2>Services de connexion et de sauvegarde</h2>
 <p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des administrateurs, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
+<p>Les messages envoyés par le formulaire de la page Contact sont acheminés par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui les transmet à l'éditeur par courriel.</p>
 
 <h2>Propriété intellectuelle</h2>
 <ul>
