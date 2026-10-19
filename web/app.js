@@ -90,9 +90,13 @@
     }
   }
 
-  // Du plus récent au plus ancien ; à date égale (un lot de livres ajouté le même jour), par titre. Les petites jaquettes de l'accueil
-  // et le tri « Derniers ajouts » (bouton « Voir tous ») utilisent ce même ordre : un livre vu parmi les derniers ajouts est le premier de la liste.
-  const parRecence = (a, b) => (b.maj || '').localeCompare(a.maj || '') || (a.titre || '').localeCompare(b.titre || '', 'fr');
+  // Du plus récent au plus ancien ; à date égale, le livre ajouté en dernier à la base passe devant (une correction de fiche le même jour ne le déclasse pas).
+  // Les petites jaquettes de l'accueil et le tri « Derniers ajouts » (bouton « Voir tous ») utilisent ce même ordre : un livre vu parmi les derniers ajouts est le premier de la liste.
+  let RANG = null;                                                    // rang de chaque édition dans la base, calculé une fois les données chargées
+  const parRecence = (a, b) => {
+    if (!RANG) RANG = new Map(DATA.map((x, i) => [x.id, i]));
+    return (b.maj || '').localeCompare(a.maj || '') || (RANG.get(b.id) - RANG.get(a.id));
+  };
 
   /* ---------- En-tête : chiffres et éventail de jaquettes ---------- */
   function construireHero() {
