@@ -229,13 +229,13 @@ window.Compte = (function () {
     if (!actifGoogle() || !window.Cloud.actif()) { intention = donnerAvis; if (window.Cloud.lie()) { annoncer('Reconnectez-vous pour donner votre avis.'); } invitation(); return; }
     var note = 0;
     var d = dialogue('<h2>Qu\'en pensez-vous ?</h2>' +
-      '<p>Que pensez-vous de La Cote du Héros ? Donnez une note et, si vous le souhaitez, un commentaire. L\'éditeur le reçoit par courriel et le lit.</p>' +
-      '<form id="avis-form" class="eq-form"><span class="avis-label" id="avis-lib">Votre note</span>' +
+      '<p>Ce guide est fait pour les collectionneurs, et votre regard compte beaucoup pour moi. Je reçois chaque avis directement et je le lis moi-même. Dites-moi ce qui vous plaît, ce qui vous manque : c\'est ce qui fait avancer le projet.</p>' +
+      '<form id="avis-form" class="eq-form"><span class="avis-label" id="avis-lib">Votre note pour le guide</span>' +
       '<div class="avis-etoiles" role="radiogroup" aria-labelledby="avis-lib">' +
       [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="false" data-avis-note="' + n + '" aria-label="' + n + ' sur 5">★</button>'; }).join('') + '</div>' +
-      '<label for="avis-texte">Un commentaire (facultatif)</label>' +
-      '<textarea id="avis-texte" rows="4" maxlength="1500" placeholder="Ce qui vous plaît, ce qui manque, ce qui pourrait être plus simple…"></textarea>' +
-      '<p class="sous">Votre prénom est joint à l\'avis, jamais votre adresse. L\'avis n\'est pas public.</p>' +
+      '<label for="avis-texte">Un petit mot (facultatif)</label>' +
+      '<textarea id="avis-texte" rows="4" maxlength="1500" placeholder="Ce que vous aimez, ce qui manque, ce qui pourrait être plus simple… Dites-moi tout."></textarea>' +
+      '<p class="sous">Je vois votre prénom, jamais votre adresse. Votre avis reste entre nous : il n\'est pas public.</p>' +
       '<p class="rv-ajout-bilan" id="avis-msg" role="status" hidden></p>' +
       '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer mon avis</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-avis');
     var etoiles = d.querySelectorAll('[data-avis-note]');
@@ -251,7 +251,7 @@ window.Compte = (function () {
       if (!note) { msg.textContent = 'Choisissez d\'abord une note de 1 à 5 étoiles.'; return; }
       bouton.disabled = true; msg.textContent = 'Envoi en cours…';
       window.Relais.appeler('avis', { note: note, texte: $('#avis-texte', d).value }).then(function (r) {
-        if (r && r.ok) { d.close(); annoncer('Merci, votre avis est bien envoyé.'); return; }
+        if (r && r.ok) { d.close(); annoncer('Merci du fond du cœur ! J\'ai bien reçu votre avis et je le lirai avec attention.'); return; }
         var e = (r && r.erreur) || 'erreur inconnue';
         msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : /action inconnue/.test(e) ? 'Cette fonction n\'est pas encore disponible. Réessayez bientôt.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
         bouton.disabled = false;
