@@ -82,11 +82,11 @@ window.Compte = (function () {
 
   /* ---------- Niveau (Héros, Admin, SuperAdmin) ---------- */
   // Premier passage d'un compte : le relais le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
-  function signalerCompte() {
-    try { if (localStorage.getItem('cdh-bienvenue')) return; } catch (e) { return; }
+  function signalerCompte() {                     // une fois par session : c'est le relais qui reconnaît un compte déjà compté
+    if (lireSession('cdh-bienvenue')) return;
     window.Relais.appeler('bienvenue').then(function (r) {
-      if (r && r.ok) { try { localStorage.setItem('cdh-bienvenue', '1'); } catch (e) { /* sans effet */ } }
-    }).catch(function () { /* nouvel essai à la prochaine connexion */ });
+      if (r && r.ok) ecrireSession('cdh-bienvenue', '1');
+    }).catch(function () { /* nouvel essai à la prochaine page */ });
   }
 
   function chargerRole() {
