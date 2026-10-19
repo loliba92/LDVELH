@@ -1535,3 +1535,6 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .ap-lien { color: var(--accent); font-weight: 700; font-size: .92rem; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
 @media (max-width: 900px) { .ap-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .ap-liste { grid-template-columns: 1fr; } .aparaitre { padding-bottom: 20px; } }
+.ap-liens { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; }
+.ap-pre { flex: 1 0 100%; color: var(--muted); font-size: .85rem; margin-top: 4px; }
+.ap-liens { gap: 0 12px; }

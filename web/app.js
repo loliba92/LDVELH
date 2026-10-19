@@ -106,7 +106,10 @@
         <button type="button" class="ap-couv" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, fiche du livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="64" height="92" loading="lazy">` : `<span class="ap-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button>
         <div class="ap-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span>
           <span class="ap-date">Paraît le ${esc(jourLong(b.parution))}</span>
-          <a class="ap-lien" href="https://www.leslibraires.fr/livre/${esc(b.isbn13)}" target="_blank" rel="noopener noreferrer" aria-label="Précommander ${esc(b.titre)} chez les libraires (nouvel onglet)">Précommander chez les libraires ↗</a></div></li>`).join('');
+          <span class="ap-liens"><span class="ap-pre">Précommander :</span>${[
+            ['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`],
+            ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`],
+            ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a class="ap-lien" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} chez ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></div></li>`).join('');
       $('#ap-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
       $('#hero-aparaitre').hidden = false;
     }
