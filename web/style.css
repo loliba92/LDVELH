@@ -1387,8 +1387,10 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .ex-qte button:disabled { color: var(--muted); opacity: .45; cursor: default; }
 .ex-qte output { min-width: 30px; text-align: center; font: 700 1.05rem var(--f-ui); }
 .ex-droite { display: grid; justify-items: end; gap: 0; }
-.ex .retirer { min-height: 36px; padding: 0 0 0 12px; border: 0; background: none; color: var(--muted); font: 600 .9rem var(--f-ui); text-decoration: underline; cursor: pointer; }
-.ex .retirer:hover { color: var(--accent); }
+.ex { position: relative; }
+.ex .retirer { position: absolute; top: 4px; left: 4px; z-index: 2; width: 24px; height: 24px; padding: 0; border: 1px solid var(--line-strong); border-radius: 50%; background: rgba(0, 0, 0, .78); color: var(--text); font: 700 1rem/1 var(--f-ui); cursor: pointer; }
+.ex .retirer::after { content: ""; position: absolute; inset: -10px; }   /* zone de toucher de 44 px */
+.ex .retirer:hover, .ex .retirer:focus-visible { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 @media (max-width: 560px) {
   .ex { gap: 8px; padding: 10px; }
   .ex-regl { gap: 8px 10px; padding-top: 8px; align-items: center; }
@@ -1396,3 +1398,6 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
   .ex-etats { flex: 1 1 auto; } .ex-etats button { flex: 1; }
 
 }
+.annuler-retrait { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 14px; max-width: calc(100vw - 32px); padding: 10px 16px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--surface); color: var(--text); box-shadow: 0 6px 24px rgba(0, 0, 0, .6); }
+.annuler-retrait[hidden] { display: none; }
+.annuler-retrait .bouton-lien { min-height: 44px; font-weight: 700; }

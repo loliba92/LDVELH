@@ -1111,10 +1111,9 @@
       const v = valeurLigne(b, c);
       const nom = `${esc(b.titre)}, édition ${esc(b.version)}`;
       return `<li class="ex" data-ligne="${esc(b.id)}">
-        <div class="ex-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div>
-          <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span>
-            <button type="button" class="retirer" data-retirer="${esc(b.id)}" aria-label="Retirer ${nom}">Retirer</button></div></div>
+          <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div></div>
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
           <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
@@ -1241,6 +1240,17 @@
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
       (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
+  }
+  // « Retiré. Annuler » : quelques secondes pour revenir sur un retrait fait par erreur
+  let minuteurAnnuler = null;
+  function annulerRetrait(b, id, ancien) {
+    let z = $('#annuler-retrait');
+    if (!z) { z = document.createElement('div'); z.id = 'annuler-retrait'; z.className = 'annuler-retrait'; z.setAttribute('role', 'status'); document.body.appendChild(z); }
+    z.innerHTML = `<span>${esc(b ? b.titre : 'Livre')} retiré.</span><button type="button" class="bouton-lien">Annuler</button>`;
+    z.hidden = false;
+    clearTimeout(minuteurAnnuler);
+    minuteurAnnuler = setTimeout(() => { z.hidden = true; }, 7000);
+    z.querySelector('button').onclick = () => { COLL[id] = ancien; sauverColl(); afficher(); z.hidden = true; clearTimeout(minuteurAnnuler); };
   }
   function retourAjoutColl(id) {
     const b = livreDe(id), champ = $('#ca-q'), ok = $('#ca-ok');
@@ -1429,7 +1439,11 @@
       }
       if ((t.dataset.retirer || t.id === 'coll-vider') && !garde()) return;
       if (t.dataset.souhaitRetirer) { if (!garde()) return; delete SOUH[t.dataset.souhaitRetirer]; sauverColl(); afficher(); annonce('Livre retiré de votre liste à trouver.'); }
-      else if (t.dataset.retirer) { delete COLL[t.dataset.retirer]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.'); }
+      else if (t.dataset.retirer) {
+        const id = t.dataset.retirer, ancien = COLL[id], b = livreDe(id);
+        delete COLL[id]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.');
+        annulerRetrait(b, id, ancien);
+      }
       else if (t.id === 'imp-ouvrir') { if (garde()) $('#imp-fichier').click(); }
       else if (t.id === 'exp-json') exporter('json');
       else if (t.id === 'exp-csv') exporter('csv');
