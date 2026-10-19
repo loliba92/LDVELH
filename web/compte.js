@@ -235,7 +235,7 @@ window.Compte = (function () {
       [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="false" data-avis-note="' + n + '" aria-label="' + n + ' sur 5">★</button>'; }).join('') + '</div>' +
       '<label for="avis-texte">Un petit mot (facultatif)</label>' +
       '<textarea id="avis-texte" rows="4" maxlength="1500" placeholder="Ce que vous aimez, ce qui manque, ce qui pourrait être plus simple… Dites-moi tout."></textarea>' +
-      '<p class="sous">Je vois votre prénom, jamais votre adresse. Votre avis reste entre nous : il n\'est pas public.</p>' +
+      '<p class="sous">Votre avis est personnel : il n\'est lu que par moi et jamais publié, ni sur le site ni ailleurs. Je vois votre prénom, jamais votre adresse.</p>' +
       '<p class="rv-ajout-bilan" id="avis-msg" role="status" hidden></p>' +
       '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer mon avis</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-avis');
     var etoiles = d.querySelectorAll('[data-avis-note]');
