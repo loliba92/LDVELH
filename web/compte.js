@@ -250,12 +250,14 @@ window.Compte = (function () {
       msg.hidden = false;
       if (!note) { msg.textContent = 'Choisissez d\'abord une note de 1 à 5 étoiles.'; return; }
       bouton.disabled = true; msg.textContent = 'Envoi en cours…';
-      window.Relais.appeler('avis', { note: note, texte: $('#avis-texte', d).value }).then(function (r) {
+      var envoyer = function () { return window.Relais.appeler('avis', { note: note, texte: $('#avis-texte', d).value }); };
+      // Une coupure réseau brève (Google redéploie, passage du Wi-Fi à la 4G) : un deuxième essai automatique avant d'abandonner
+      envoyer().catch(function () { return new Promise(function (ok) { setTimeout(ok, 1500); }).then(envoyer); }).then(function (r) {
         if (r && r.ok) { d.close(); annoncer('Merci du fond du cœur ! J\'ai bien reçu votre avis et je le lirai avec attention.'); return; }
         var e = (r && r.erreur) || 'erreur inconnue';
         msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : /action inconnue/.test(e) ? 'Cette fonction n\'est pas encore disponible. Réessayez bientôt.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
         bouton.disabled = false;
-      }).catch(function () { msg.textContent = 'Le service ne répond pas : vérifiez votre connexion.'; bouton.disabled = false; });
+      }).catch(function () { msg.textContent = 'Le service ne répond pas pour le moment. Vérifiez votre connexion et réessayez dans une minute : votre texte est conservé.'; bouton.disabled = false; });
     });
   }
 
