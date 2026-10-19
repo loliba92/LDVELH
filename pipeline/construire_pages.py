@@ -352,6 +352,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
 
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
+<details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>

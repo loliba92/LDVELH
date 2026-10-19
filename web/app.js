@@ -78,6 +78,7 @@
     construireControles();
     lireAdresse();
     synchroniser();
+    ouvrirDepuisAdresse();
     basculerSelecteur(!window.matchMedia('(max-width: 1000px)').matches);
     afficher();
     if (new URLSearchParams(location.search).has('inventaire')) {   // lien « Inventaire » des pages annexes
@@ -260,8 +261,10 @@
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
+  let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un administrateur)
   function lireAdresse() {
     const p = new URLSearchParams(location.hash.slice(1));
+    FICHE_URL = p.get('fiche') || ''; CORR_URL = p.get('corriger') === '1';
     S = defaut();
     S.q = p.get('q') || ''; S.serie = p.get('serie') || ''; S.ed = p.get('ed') || '';
     S.amin = p.get('amin') || ''; S.amax = p.get('amax') || ''; S.pmin = p.get('pmin') || ''; S.pmax = p.get('pmax') || ''; S.vente = p.get('vente') === '1'; S.mine = p.get('mine') === '1'; S.cherche = p.get('cherche') === '1';
@@ -776,6 +779,16 @@
     });
   }
 
+  function ouvrirDepuisAdresse() {
+    const id = FICHE_URL;
+    if (!id || !DATA.some((b) => b.id === id)) return;
+    ouvrirFiche(id);
+    if (!CORR_URL) return;
+    const ouvrir = () => { const d = $('.corriger-fiche'); if (d) d.open = true; return !!d; };
+    if (ouvrir()) return;
+    const retenter = () => { if (!estProprietaire()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau d'administrateur arrive après le chargement
+    document.addEventListener('cdh-compte', retenter);
+  }
   let ficheOuverte = null;
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);

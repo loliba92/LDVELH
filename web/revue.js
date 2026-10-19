@@ -101,7 +101,8 @@
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="56" height="80" loading="lazy" decoding="async">` : '';
     const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
-      `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>${derniereRevision(ed)}</div></header>` +
+      `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>${derniereRevision(ed)}` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a></div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
@@ -250,8 +251,13 @@
     }
     return null;
   };
-  const lireListe = (texte) => texte.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).flatMap((l) => {
-    if (/[;\t]/.test(l)) { const [brut, serie = '', numero = '', titre = ''] = l.split(/[;\t]/).map((x) => x.trim()); return [{ brut, serie, numero, titre }]; }
+  const lireListe = (texte) => texte.replace(/[\u200b-\u200f\u202a-\u202e\u2060\ufeff]/g, '').replace(/\u00a0/g, ' ').split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).flatMap((l) => {
+    if (/[;\t]/.test(l)) {
+      const p = l.split(/[;\t]/).map((x) => x.trim()), [brut, serie = '', numero = '', titre = ''] = p;
+      const isbns = p.slice(0, 3).filter((x) => x && ressembleIsbn(x) && x.replace(/\D/g, '').length >= 10);
+      if (isbns.length >= 2) return p.filter((x) => x && ressembleIsbn(x)).map((x) => ({ brut: x, serie: '', numero: '', titre: '' }));   // « isbn ; isbn ; isbn » : une liste
+      return [{ brut, serie, numero, titre }];
+    }
     const mots = l.split(/[,\s]+/).filter(Boolean);
     if (!mots.some(ressembleIsbn)) return [{ brut: l, serie: '', numero: '', titre: '' }];     // aucun nombre sur la ligne : un titre
     return mots.map((brut) => ({ brut, serie: '', numero: '', titre: '' }));
@@ -286,6 +292,37 @@
     ['#aj-copier', '#aj-telecharger'].forEach((s) => { $(s).disabled = !n; });
     $('#aj-lancer').hidden = !jeton() || !n;
     $('#aj-resultat').hidden = false;
+    apercuBnf();
+  }
+  // Aperçu : pour chaque ISBN à ajouter sans titre, ce que la BnF connaît (titre, éditeur, année). Introuvable : la fiche sera cherchée chez
+  // le libraire ; mieux vaut alors écrire « isbn ; série ; numéro ; titre ». Les réponses sont gardées pour ne pas interroger deux fois.
+  const BNF = new Map();
+  const isbn10De = (i13) => { const c = i13.slice(3, 12), k = (11 - [...c].reduce((t, d, i) => t + d * (10 - i), 0) % 11) % 11; return c + (k === 10 ? 'X' : k); };
+  function notice(isbn) {                              // les notices anciennes sont indexées par l'ISBN-10, les récentes par l'ISBN-13 : on essaie les deux (comme le lot)
+    if (BNF.has(isbn)) return BNF.get(isbn);
+    const chercher = (num) => fetch(`https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=${encodeURIComponent(`bib.isbn adj "${num}"`)}&recordSchema=dublincore&maximumRecords=1`)
+      .then((r) => r.text()).then((t) => {
+        const x = new DOMParser().parseFromString(t, 'text/xml'), g = (n) => { const e = x.getElementsByTagNameNS('*', n)[0]; return e ? e.textContent.trim() : ''; };
+        return g('title') ? { titre: g('title').split(' / ')[0], editeur: g('publisher'), annee: (g('date').match(/\d{4}/) || [''])[0] } : null;
+      });
+    const p = chercher(isbn10De(isbn)).then((n) => n || chercher(isbn)).catch(() => undefined);
+    BNF.set(isbn, p);
+    return p;
+  }
+  function apercuBnf() {
+    document.querySelectorAll('#aj-liste li.aj-nouveau').forEach((li, i) => {
+      const a = AJOUT.filter((x) => x.statut === 'nouveau')[i];
+      if (!a || !a.isbn || a.titre) return;
+      const zone = li.querySelector('span');
+      const manque = [!a.serie && 'série', !a.numero && 'numéro'].filter(Boolean);
+      const alerte = manque.length ? ` · ${manque.join(' et ')} à compléter ensuite` : '';
+      zone.textContent = 'recherche de la fiche…';
+      notice(a.isbn).then((n) => {
+        if (n === undefined) zone.textContent = 'la BnF ne répond pas : la fiche sera complétée automatiquement' + alerte;
+        else if (n) zone.textContent = `BnF : ${n.titre}${n.editeur ? ' · ' + n.editeur : ''}${n.annee ? ' · ' + n.annee : ''}${alerte}`;
+        else { zone.textContent = 'inconnu de la BnF (livre récent ?) : écrivez « isbn ; série ; numéro ; titre » pour être sûr du résultat'; li.classList.add('aj-alerte'); }
+      });
+    });
   }
   const texteAjout = () => AJOUT.filter((a) => a.statut === 'nouveau').map((a) => (a.isbn ? [a.isbn, a.serie, a.numero, a.titre] : [a.brut, a.serie, a.numero]).join(' ; ').replace(/(\s;\s)+$/, '').replace(/\s;\s*$/, '')).join('\n');
   // Catalogue du site (ISBN et titres connus), chargé une fois : sert au formulaire d'ajout et au contrôle des demandes
@@ -504,6 +541,36 @@
     if (boutons.some((b) => b.dataset.pane === debut) && !(boutons.find((b) => b.dataset.pane === debut) || {}).hidden) montrer(debut);
   }
   initNav();
+
+  // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
+  // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
+  const FAMILLES = [['prix-ebay.yml', 'Relevé des prix'], ['ajout-isbn.yml', 'Ajout de livres'], ['corriger-fiche.yml', 'Correction de fiches'], ['corriger-prix.yml', 'Correction de cotes'], ['pages.yml', 'Publication du site']];
+  const depuis = (d) => {
+    const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+    return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
+  };
+  function initMaj() {
+    const bloc = $('#rv-maj');
+    if (!bloc) return;
+    const CLE = 'cdh-rv-lots';
+    const lire = () => { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return Promise.resolve(c.runs); } catch (e) { /* pas de cache */ }
+      return fetch('https://api.github.com/repos/loliba92/LDVELH/actions/runs?per_page=100', { headers: { Accept: 'application/vnd.github+json' } }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then((d) => { const runs = d.workflow_runs.map((x) => ({ f: x.path.split('/').pop(), st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at })); try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ } return runs; }); };
+    lire().then((runs) => {
+      const etat = (r) => (r.st !== 'completed' ? ['en cours…', 'en-cours'] : r.c === 'success' ? ['✓ réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['✗ échec', 'echec']);
+      const lignes = FAMILLES.map(([f, nom]) => ({ nom, r: runs.find((x) => x.f === f) }));
+      const quand = (r) => { const d = new Date(r.t); return `${depuis(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
+      const releve = lignes[0];
+      const recent = lignes.filter((l) => l.r).sort((a, b) => new Date(b.r.t) - new Date(a.r.t))[0];
+      const vedette = releve.r || recent;
+      if (!vedette) return;
+      const [txt, cls] = etat(vedette.r || vedette);
+      $('#rv-maj-resume').innerHTML = `<strong>${esc(releve.r ? 'Dernier relevé des prix' : recent.nom)}</strong> : ${esc(quand(releve.r || recent.r))} · <span class="rv-lot-${cls}">${esc(txt)}</span>`;
+      $('#rv-maj-liste').innerHTML = lignes.map((l) => { if (!l.r) return `<li><strong>${esc(l.nom)}</strong> : pas d'exécution récente</li>`; const [t, c] = etat(l.r); return `<li><strong>${esc(l.nom)}</strong> : ${esc(quand(l.r))} · <span class="rv-lot-${c}">${esc(t)}</span></li>`; }).join('');
+      bloc.hidden = false;
+    }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
+  }
+  initMaj();
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})
