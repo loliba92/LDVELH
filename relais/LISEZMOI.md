@@ -54,7 +54,7 @@ modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'appl
 
 ## Garde-fous
 
-- Seuls les lots `corriger-prix.yml` et `ajout-isbn.yml` peuvent être lancés, avec leurs champs connus et une taille limitée.
+- Seuls les lots `corriger-prix.yml`, `corriger-fiche.yml` et `ajout-isbn.yml` peuvent être lancés, avec leurs champs connus et une taille limitée.
 - Le nom enregistré est posé par le relais, jamais par le site.
 - On ne peut ni se retirer ni se bloquer soi-même, ni retirer le dernier SuperAdmin.
 - La liste des admins est relue à chaque envoi (30 secondes de mémoire au plus) : un retrait est quasi immédiat.

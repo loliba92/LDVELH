@@ -18,7 +18,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros'
 };
-var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'] };   // lots que le relais accepte de lancer, avec leurs champs
+var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
 

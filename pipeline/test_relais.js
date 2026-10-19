@@ -53,6 +53,7 @@ test('envoi : seuls les lots et champs connus passent', () => {
   const v = L('validerEnvoi');
   assert.strictEqual(v('corriger-prix.yml', { corrections: '9782070 ; 25' }).ok, true);
   assert.strictEqual(v('ajout-isbn.yml', { liste: '978', releve: 'oui' }).ok, true);
+  assert.strictEqual(v('corriger-fiche.yml', { corrections: '9782070 ; supprimer' }).ok, true);
   assert.strictEqual(v('pages.yml', { x: 'y' }).ok, false);
   assert.strictEqual(v('corriger-prix.yml', { corrections: 'a', auteur: 'Chef' }).ok, false);   // le nom est posé par le relais, jamais par le site
   assert.strictEqual(v('corriger-prix.yml', {}).ok, false);

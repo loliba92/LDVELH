@@ -1,0 +1,68 @@
+name: Corriger des fiches
+
+# Lancé depuis la fiche d'un livre (formulaire « Corriger la fiche », réservé aux administrateurs) ou à la main :
+# Actions > Run workflow > une correction par ligne ou séparées par « | » : identifiant ; titre | serie | numero | supprimer ; valeur
+on:
+  workflow_dispatch:
+    inputs:
+      corrections:
+        description: "identifiant ; titre|serie|numero|supprimer ; valeur. Plusieurs corrections : les séparer par |"
+        required: true
+        type: string
+      auteur:
+        description: "Nom de la personne qui envoie, transmis par le relais (ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+# File d'attente à part du relevé eBay (une demi-heure) : un envoi du site ne reste plus bloqué derrière lui, ni annulé en silence quand un
+# autre arrive. Les écritures simultanées sont sans risque : .github/scripts/publier.sh reprend depuis la dernière version si main a avancé.
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  corriger:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CORRECTIONS: ${{ inputs.corrections }}
+      IDENTITE: ${{ inputs.identite }}
+      AUTEUR_RELAIS: ${{ inputs.auteur }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pyjwt cryptography
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
+      - name: Tests
+        run: |
+          python pipeline/test_corriger_fiche.py
+      - name: Corriger les fiches
+        run: python pipeline/corriger_fiche.py "$CORRECTIONS" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Base et données du site
+        run: |
+          python pipeline/build_db.py
+          python pipeline/export_site.py
+          python pipeline/construire_pages.py
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "corriger-fiche"
+          git config user.email "corriger-fiche@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          # Si main a avancé pendant le lot, on repart de sa dernière version et on rejoue les corrections (voir .github/scripts/publier.sh)
+          REJOUER='python pipeline/corriger_fiche.py "$CORRECTIONS" && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
+            .github/scripts/publier.sh "Fiches corrigées depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" data/processed/editions.csv data/manual/prix_valides.json web/covers web/data web/evolutions.html web/revue-prix.html
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml

@@ -681,9 +681,57 @@
     const quand = ecart <= 0 ? 'aujourd\'hui' : ecart === 1 ? 'hier' : 'le ' + dateCourte(i.date);
     return `<p class="sous corriger-revision">Dernière révision : <strong>${esc(quand)}</strong>${i.par ? ', par ' + esc(i.par) : ''}.</p>`;
   }
+  // Corriger la fiche (titre, série, numéro, suppression) : réservé aux administrateurs, envoyé par le relais
+  function blocFiche(b) {
+    const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
+    return `<details class="corriger-fiche"><summary>Corriger la fiche <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></summary>
+      <form class="corriger" id="corriger-fiche" data-id="${esc(b.id)}">
+        <p class="sous">Le titre et la série s'appliquent à toutes les éditions de ce livre ; le numéro, à cette édition seulement. Pour une nouvelle série, écrivez simplement son nom.</p>
+        <div class="corriger-champs corriger-fiche-champs">
+          <label>Titre<input type="text" name="titre" maxlength="120" autocomplete="off" value="${esc(b.titre)}"></label>
+          <label>Série<input type="text" name="serie" maxlength="120" autocomplete="off" list="liste-series" value="${esc(b.serie)}"></label>
+          <label>Numéro<input type="text" name="numero" inputmode="numeric" maxlength="4" autocomplete="off" value="${esc(b.numero && b.numero !== '000' ? b.numero : '')}"></label>
+        </div>
+        <datalist id="liste-series">${series.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>
+        <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer la fiche</button></div>
+        <label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
+        <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>
+        <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
+      </form></details>`;
+  }
+  function brancherFiche() {
+    const f = $('#corriger-fiche');
+    if (!f) return;
+    const msg = $('#corriger-fiche-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+    const b = DATA.find((x) => x.id === f.dataset.id);
+    const numAffiche = b.numero && b.numero !== '000' ? b.numero : '';
+    f.elements.suppr.addEventListener('change', () => { $('#corriger-suppr').hidden = !f.elements.suppr.checked; });
+    const envoyer = async (corrections) => {
+      if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
+      f.querySelectorAll('button').forEach((x) => { x.disabled = true; }); dire('Envoi en cours…');
+      try {
+        const r = await window.Relais.envoyerLot('corriger-fiche.yml', { corrections: corrections.join(' | ') });
+        if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
+        else if (r.status === 401 || r.status === 403) dire("Ce compte n'a pas les droits d'administrateur, ou la connexion Google a expiré : reconnectez-vous.");
+        else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+      } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
+      f.querySelectorAll('button').forEach((x) => { x.disabled = false; });
+    };
+    const net = (t) => t.replace(/[;|]/g, ' ').replace(/\s+/g, ' ').trim();
+    f.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const l = [], t = net(f.elements.titre.value), se = net(f.elements.serie.value), n = f.elements.numero.value.trim();
+      if (t && t !== b.titre) l.push(`${b.id} ; titre ; ${t}`);
+      if (se && se !== b.serie) l.push(`${b.id} ; serie ; ${se}`);
+      if (n && n !== numAffiche) { if (!/^\d{1,4}$/.test(n)) return dire('Le numéro doit être un nombre.'); l.push(`${b.id} ; numero ; ${n}`); }
+      if (!l.length) return dire("Rien n'a changé.");
+      envoyer(l);
+    });
+    $('#corriger-suppr').addEventListener('click', () => { if (window.confirm(`Supprimer « ${b.titre} » (${b.version}) de la base ? Cette action est définitive.`)) envoyer([`${b.id} ; supprimer`]); });
+  }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
-    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction n\'est pas possible ici.</p>';
+    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>' + blocFiche(b);
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
     return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3>
         ${derniereRevision(b)}
@@ -696,9 +744,10 @@
           <div class="corriger-champs">${[['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']].map(champ).join('')}</div></details>
           <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer ces prix</button></div>
           <p class="corriger-msg" id="corriger-msg" role="status" hidden></p>
-        </form>`;
+        </form>${blocFiche(b)}`;
   }
   function brancherCorriger() {
+    brancherFiche();
     const f = $('#corriger');
     if (!f) return;
     f.addEventListener('submit', async (ev) => {
