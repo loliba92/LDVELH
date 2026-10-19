@@ -1323,3 +1323,19 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .selecteur-actions { display: flex; align-items: baseline; gap: 16px; }
 #reinit { min-height: 44px; display: inline-flex; align-items: center; font-weight: 700; }
 #reinit[hidden] { display: none; }
+
+/* Page « Ma collection » : recherche d'un livre à ajouter d'un geste */
+.ajout-coll { margin: 0 0 26px; display: grid; gap: 8px; }
+.ajout-coll h2 { margin: 0; font: 700 .78rem var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.ajout-coll .sous { margin: 0; }
+.ca-res { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ca-ligne { display: grid; grid-template-columns: 44px 1fr auto; gap: 4px 12px; align-items: center; padding: 6px 10px 6px 6px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface-2); }
+.ca-couv { width: 44px; height: 62px; display: block; background: var(--surface); border-radius: 2px; overflow: hidden; }
+.ca-couv img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ca-texte { display: grid; gap: 2px; min-width: 0; }
+.ca-texte strong { overflow-wrap: anywhere; }
+.ca-etats { display: flex; gap: 6px; }
+.ca-etats button { min-width: 44px; min-height: 44px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 700 .88rem var(--f-ui); cursor: pointer; }
+.ca-etats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+@media (max-width: 560px) { .ca-ligne { grid-template-columns: 44px 1fr; } .ca-etats { grid-column: 1 / -1; } .ca-etats button { flex: 1; } }
+.ca-res .lien { padding: 0; border: 0; background: none; color: var(--accent); font: 700 1rem var(--f-ui); text-decoration: underline; cursor: pointer; min-height: 44px; }

@@ -678,6 +678,13 @@ def page_collection(index_html):
 </header>
 
 <main id="main" class="cadre contenu-collection">
+    <section class="ajout-coll" aria-labelledby="titre-ajout">
+      <h2 id="titre-ajout">Ajouter un livre</h2>
+      <label class="sr-only" for="ca-q">Chercher un livre à ajouter</label>
+      <input type="search" id="ca-q" placeholder="Titre, série, auteur ou ISBN" autocomplete="off" enterkeyhint="search">
+      <p class="sous">Touchez C, BE ou TBE pour l'ajouter dans l'état voulu ; retouchez pour le retirer.</p>
+      <ul class="ca-res" id="ca-res"></ul>
+    </section>
 {COLLECTION_SECTION.replace('<h2 id="titre-collection">Ma collection</h2>', '<h2 id="titre-collection">Estimation</h2>')}</main>
 
 <footer class="pied">

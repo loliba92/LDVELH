@@ -20,7 +20,7 @@
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/['’]/g, ' ');
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
   const numero = (b) => (b.numero && b.numero !== '000' ? ` n° ${b.numero}` : '');
@@ -1161,7 +1161,31 @@
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
   }
 
+  // Page « Ma collection » : recherche d'un livre de la base pour l'ajouter d'un geste (titre, série, auteur ou ISBN)
+  let AJ_Q = '';
+  function rendreAjoutColl() {
+    const liste = $('#ca-res');
+    if (!liste) return;
+    const q = norm(AJ_Q).trim();
+    if (q.length < 2) { liste.innerHTML = ''; return; }
+    const isbn = versIsbn13(AJ_Q);
+    const mots = q.split(/\s+/);
+    const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
+      .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
+    liste.innerHTML = trouves.slice(0, 8).map((b) => {
+      const poss = COLL[b.id];
+      return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
+        <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
+        <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
+          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
+    }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
+      (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
+  }
+  document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; rendreAjoutColl(); } });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
+
   function afficherCollection() {
+    rendreAjoutColl();
     const bl = bilan();
     const n = bl.exemplaires;
     ['#nb-coll', '#nb-coll-bas'].forEach((sel) => {
