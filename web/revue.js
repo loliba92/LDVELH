@@ -67,7 +67,6 @@
   function boutons(ed, cle, v, l) {
     const id = `data-ed="${esc(ed.id)}" data-e="${cle}"`;
     return `<div class="rv-actions">` +
-      (v ? '' : `<button type="button" class="rv-b rv-ok" data-act="ok" ${id}>Confirmer</button>`) +
       `<button type="button" class="rv-b" data-act="corriger" ${id}>${l && l.publie != null || v ? 'Corriger' : 'Saisir un prix'}</button>` +
       (v && v.enAttente ? `<button type="button" class="rv-b rv-retirer" data-act="retirer" ${id}>Retirer</button>` : '') + `</div>` +
       `<form class="rv-form" data-ed="${esc(ed.id)}" data-e="${cle}" hidden><label>Prix en euros <input type="text" inputmode="decimal" pattern="[0-9]{1,4}([.,][0-9]{1,2})?" title="Un prix en euros, par exemple 24,50" required autocomplete="off" value="${String(v ? v.prix : (l && l.publie != null ? l.publie : '')).replace('.', ',')}"></label>` +
@@ -95,26 +94,27 @@
   function derniereRevision(ed) {
     let best = null;
     ETATS.forEach(([cle]) => { const v = validation(ed, cle); if (v && v.le && (!best || v.le >= best.le)) best = v; });
-    return best ? `<span class="rv-revision">Dernière révision : <strong>${esc(quand(best.le))}</strong>${best.par ? ', par ' + esc(best.par) : ''}</span>` : '<span class="rv-revision rien">Pas encore révisée</span>';
+    return best ? `<span class="rv-revision"${best.par ? ` title="Par ${esc(best.par)}"` : ''}>Révisée <strong>${esc(quand(best.le))}</strong></span>` : '<span class="rv-revision rien">Pas encore révisée</span>';
   }
 
   function carte(ed) {
-    const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
-    return `<article class="rv-edition${jaq ? ' avec-jaq' : ''}">${jaq}<div class="rv-corps"><header><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
-      `<span class="sous">${esc(ed.serie)}${ed.numero && ed.numero !== '000' ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>` + derniereRevision(ed) +
-      `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Tout confirmer</button>` +
-      `<span class="rv-liens"><span>Voir les annonces :</span>${[
+    const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="56" height="80" loading="lazy" decoding="async">` : '';
+    const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
+    return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
+      `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span></span>${derniereRevision(ed)}</div></header>` +
+      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
+      `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
+      `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
+      `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>De</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
+      `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
+      `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form></details>` +
+      `<span class="rv-liens">${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
         ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
         ['Vinted', `https://www.vinted.fr/catalog?search_text=${requete(ed.titre + ' ldvelh')}`],
         ['Facebook', `https://www.facebook.com/marketplace/search/?query=${requete(ed.titre + ' ldvelh')}`]]
-        .map(([nom, url]) => `<a class="rv-ebay" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(ed.titre)} sur ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></header>` +
-      `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>Fourchette observée : de</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
-      `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
-      `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form>` +
-      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div></div></article>`;
+        .map(([nom, url]) => `<a class="rv-ebay" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(ed.titre)} sur ${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</span></div></article>`;
   }
-
   const lignes = (ed) => Object.values(ed.etats);
   const aVerifier = (ed) => ETATS.some(([cle]) => ed.etats[cle] && raison(ed.etats[cle], validation(ed, cle)));
   const aValide = (ed) => ETATS.some(([cle]) => validation(ed, cle));
@@ -191,10 +191,10 @@
       const ed = EDITIONS.find((x) => x.id === edId), l = ed && ed.etats[cle];
       if (l && l.publie != null) enregistrer(edId, cle, l.publie, 'confirme');
     } else if (b.dataset.act === 'corriger') {
-      const f = cell.querySelector('.rv-form'); f.hidden = false; cell.querySelector('.rv-actions').hidden = true;
+      const f = cell.querySelector('.rv-form'); f.hidden = false; cell.querySelector('.rv-actions').hidden = true; cell.classList.add('ouvert');
       const champ = f.querySelector('input'); champ.focus(); champ.select();
     } else if (b.dataset.act === 'annuler') {
-      cell.querySelector('.rv-form').hidden = true; cell.querySelector('.rv-actions').hidden = false;
+      cell.querySelector('.rv-form').hidden = true; cell.querySelector('.rv-actions').hidden = false; cell.classList.remove('ouvert');
     } else if (b.dataset.act === 'retirer') {
       const ed = EDITIONS.find((x) => x.id === edId);
       if (ed) { delete LOC[cleDe(ed, cle)]; sauver(); afficher(); }
@@ -369,7 +369,7 @@
       window.Relais.appeler('demandes_lire').then((r) => {
         if (!r || !r.ok) { bloc.hidden = false; dire(lisible(r), true); return; }
         bloc.hidden = false;
-        $('#dm-nb').textContent = r.demandes.length || '';
+        $('#dm-nb').textContent = r.demandes.length || ''; $('#rv-nav-dm').textContent = r.demandes.length || '';
         if (!r.demandes.length) { liste.innerHTML = '<li class="sous">Aucune demande en attente.</li>'; return; }
         liste.innerHTML = r.demandes.map((d) => `<li class="dm-demande" data-n="${d.numero}">
           <p><strong>${esc(d.texte)}</strong> <span class="sous">demandé par ${esc(d.par || 'une personne connectée')}${d.date ? ', le ' + esc(jour(d.date)) : ''}</span></p>
@@ -482,6 +482,28 @@
   }
   initTendances();
   document.addEventListener('cdh-compte', () => { etatJeton(); });   // déconnexion : la porte se referme
+
+  // Sections de la page : un seul panneau à la fois ; les onglets Tendances et Demandes n'apparaissent que si leur contenu est disponible
+  function initNav() {
+    const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
+    const montrer = (nom) => {
+      boutons.forEach((b) => b.setAttribute('aria-selected', String(b.dataset.pane === nom)));
+      document.querySelectorAll('.rv-pane').forEach((p) => { p.hidden = p.id !== 'pane-' + nom; });
+      try { sessionStorage.setItem('cdh-rv-pane', nom); } catch (e) { /* sans stockage : la page s'ouvre sur les prix */ }
+    };
+    boutons.forEach((b) => b.addEventListener('click', () => montrer(b.dataset.pane)));
+    [['tendances', '#rv-tendances'], ['demandes', '#rv-demandes']].forEach(([nom, sel]) => {
+      const bloc = $(sel), onglet = boutons.find((b) => b.dataset.pane === nom);
+      if (!bloc || !onglet) return;
+      const maj = () => { onglet.hidden = bloc.hidden; if (bloc.hidden && onglet.getAttribute('aria-selected') === 'true') montrer('prix'); };
+      new MutationObserver(maj).observe(bloc, { attributes: true, attributeFilter: ['hidden'] });
+      maj();
+    });
+    let debut = (location.hash || '').slice(1);
+    try { debut = debut || sessionStorage.getItem('cdh-rv-pane') || ''; } catch (e) { /* idem */ }
+    if (boutons.some((b) => b.dataset.pane === debut) && !(boutons.find((b) => b.dataset.pane === debut) || {}).hidden) montrer(debut);
+  }
+  initNav();
 
   const JAQ = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; })).catch(() => {})

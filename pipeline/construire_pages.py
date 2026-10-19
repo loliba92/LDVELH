@@ -351,9 +351,46 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
 
 
 REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
-<p class="sous admin-note">Page réservée aux administrateurs : tout ce qui s'y trouve sert à gérer les cotes et le catalogue.</p>
 <div class="rv-identite" id="rv-identite" hidden></div>
+<div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
+  <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
+  <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>
+  <button type="button" role="tab" data-pane="ajout" aria-selected="false">Ajouter</button>
+  <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></button>
+</div>
+<div class="rv-pane" id="pane-prix" role="tabpanel">
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
+<div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
+  <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
+  <button type="button" data-vue="change" aria-pressed="false">Changés <span class="nb-onglet" id="rv-n-change"></span></button>
+  <button type="button" data-vue="valide" aria-pressed="false">Validés <span class="nb-onglet" id="rv-n-valide"></span></button>
+  <button type="button" data-vue="tous" aria-pressed="false">Tous <span class="nb-onglet" id="rv-n-tous"></span></button>
+</div>
+<div class="rv-envoi" id="rv-envoi" hidden>
+  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
+  <button type="button" class="bouton" id="rv-envoyer">Envoyer mes validations</button>
+  <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
+</div>
+<div class="rv-outils">
+  <div class="champ"><label for="rv-q">Chercher un livre</label><input type="search" id="rv-q" autocomplete="off" placeholder="titre ou série"></div>
+  <div class="champ"><label for="rv-serie">Série</label><select id="rv-serie"></select></div>
+</div>
+<p class="sous" id="rv-compte" role="status" aria-live="polite"></p>
+<p><button type="button" class="bouton bouton-clair" id="rv-tout-confirmer">Tout confirmer dans cette liste</button></p>
+<div id="rv-liste"><p>Chargement…</p></div>
+<p><button type="button" class="bouton bouton-clair" id="rv-plus" hidden>Voir la suite</button>
+<button type="button" class="bouton bouton-clair" id="rv-csv">Télécharger cette liste (tableur)</button></p>
+<details class="rv-aide"><summary>Comment lire cette page</summary>
+<ul>
+  <li><strong>Le gros prix</strong> est celui affiché sur le site. <strong>Le prix barré</strong> est l'ancienne cote (ancien relevé de 2024). Le pourcentage montre le changement.</li>
+  <li><strong>« À vérifier »</strong> : le prix a au moins doublé ou a été divisé par près de deux. Une raison est écrite en dessous.</li>
+  <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
+  <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
+  <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
+</ul>
+</details>
+</div>
+<div class="rv-pane" id="pane-tendances" role="tabpanel" hidden>
 <section class="rv-ajout rv-tendances" id="rv-tendances" aria-labelledby="tr-titre" hidden>
   <h2 id="tr-titre">Tendances des prix</h2>
   <p class="sous" id="tr-resume"></p>
@@ -369,14 +406,10 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <h3 class="tr-sous-titre">Évolution dans le temps</h3>
   <div id="tr-temps"></div>
 </section>
-<section class="rv-ajout" id="rv-demandes" aria-labelledby="dm-titre" hidden>
-  <h2 id="dm-titre">Demandes d'ajout <span class="nb-onglet" id="dm-nb"></span></h2>
-  <p class="sous">Livres demandés par les personnes connectées. Corrigez la ligne si besoin (ISBN, ou « titre ; série ; numéro »), puis acceptez : le livre est ajouté avec sa jaquette. Un refus ferme la demande.</p>
-  <ul class="dm-liste" id="dm-liste"></ul>
-  <p class="rv-ajout-bilan" id="dm-msg" role="status" hidden></p>
-</section>
+</div>
+<div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
 <section class="rv-ajout" aria-labelledby="aj-titre">
-  <h2 id="aj-titre">Ajouter des livres <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h2>
+  <h2 id="aj-titre">Ajouter des livres</h2>
   <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
   <p><code class="aj-exemple">9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré</code></p>
   <p>Pour un livre sans ISBN, écrivez son titre, puis éventuellement la série et le numéro :</p>
@@ -396,34 +429,15 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
     </div>
   </div>
 </section>
-<div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
-  <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
-  <button type="button" data-vue="change" aria-pressed="false">Tout ce qui a changé <span class="nb-onglet" id="rv-n-change"></span></button>
-  <button type="button" data-vue="valide" aria-pressed="false">Validés par vous <span class="nb-onglet" id="rv-n-valide"></span></button>
-  <button type="button" data-vue="tous" aria-pressed="false">Tous les livres <span class="nb-onglet" id="rv-n-tous"></span></button>
 </div>
-<div class="rv-envoi" id="rv-envoi" hidden>
-  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
-  <button type="button" class="bouton" id="rv-envoyer">Envoyer mes validations</button>
-  <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
+<div class="rv-pane" id="pane-demandes" role="tabpanel" hidden>
+<section class="rv-ajout" id="rv-demandes" aria-labelledby="dm-titre" hidden>
+  <h2 id="dm-titre">Demandes d'ajout <span class="nb-onglet" id="dm-nb"></span></h2>
+  <p class="sous">Livres demandés par les personnes connectées. Corrigez la ligne si besoin (ISBN, ou « titre ; série ; numéro »), puis acceptez : le livre est ajouté avec sa jaquette. Un refus ferme la demande.</p>
+  <ul class="dm-liste" id="dm-liste"></ul>
+  <p class="rv-ajout-bilan" id="dm-msg" role="status" hidden></p>
+</section>
 </div>
-<div class="rv-outils">
-  <div class="champ"><label for="rv-q">Chercher un livre</label><input type="search" id="rv-q" autocomplete="off" placeholder="titre ou série"></div>
-  <div class="champ"><label for="rv-serie">Série</label><select id="rv-serie"></select></div>
-</div>
-<p class="sous" id="rv-compte" role="status" aria-live="polite"></p>
-<p><button type="button" class="bouton bouton-clair" id="rv-tout-confirmer">Tout confirmer dans cette liste</button></p>
-<div id="rv-liste"><p>Chargement…</p></div>
-<p><button type="button" class="bouton bouton-clair" id="rv-plus" hidden>Voir la suite</button>
-<button type="button" class="bouton bouton-clair" id="rv-csv">Télécharger cette liste (tableur)</button></p>
-<h2>Comment lire cette page</h2>
-<ul>
-  <li><strong>Le gros prix</strong> est celui affiché sur le site. <strong>Le prix barré</strong> est l'ancienne cote (ancien relevé de 2024). Le pourcentage montre le changement.</li>
-  <li><strong>« À vérifier »</strong> : le prix a au moins doublé ou a été divisé par près de deux. Une raison est écrite en dessous.</li>
-  <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
-  <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
-  <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
-</ul>
 '''
 
 

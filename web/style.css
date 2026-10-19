@@ -1404,3 +1404,49 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 /* Note sur les prix : en pied de l'étagère, discrète */
 .note-bas { margin: 26px 0 0; padding-top: 12px; border-top: 1px solid var(--line); max-width: 70ch; color: var(--muted); font-size: .85rem; line-height: 1.5; }
 .note-bas strong { font-family: inherit; font-size: inherit; color: var(--text); }
+
+/* Page admin : sections en onglets, cartes compactes (trois prix sur une ligne, un seul « Confirmer »), liens en grille */
+.rv-nav { display: flex; gap: 6px; margin: 14px 0 18px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+.rv-nav::-webkit-scrollbar { display: none; }
+.rv-nav button { flex: 0 0 auto; min-height: 48px; padding: 8px 16px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 700 1rem var(--f-ui); cursor: pointer; white-space: nowrap; }
+.rv-nav button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+.rv-nav button[hidden] { display: none; }
+.rv-pane[hidden] { display: none; }
+.rv-onglets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.rv-onglets::-webkit-scrollbar { display: none; }
+.rv-onglets button { flex: 0 0 auto; white-space: nowrap; min-height: 44px; padding: 6px 14px; }
+.rv-aide { margin: 26px 0 0; }
+.rv-aide summary { cursor: pointer; color: var(--accent); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+
+.rv-edition { padding: 12px; }
+.rv-edition .rv-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.rv-edition .rv-jaq { width: 56px; height: 80px; flex: none; }
+.rv-titre { display: grid; gap: 2px; min-width: 0; }
+.rv-edition .rv-titre a { font: 700 1.15rem/1.2 var(--f-display); overflow-wrap: anywhere; }
+.rv-revision { font-size: .8rem; color: var(--muted); }
+.rv-edition .rv-trois { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.rv-edition .rv-prix { display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 3px; padding: 8px 10px; }
+.rv-edition .rv-prix.ouvert { grid-column: 1 / -1; }
+.rv-edition .rv-lib { flex: none; font-size: .68rem; letter-spacing: .06em; }
+.rv-edition .rv-prix strong { font-size: 1.35rem; }
+.rv-edition .rv-avant, .rv-edition .rv-note, .rv-edition .rv-raison { font-size: .74rem; line-height: 1.3; }
+.rv-edition .rv-raison { font-weight: 700; }
+.rv-edition .rv-actions { margin-top: 4px; }
+.rv-edition .rv-actions .rv-b { width: 100%; min-height: 44px; }
+.rv-bas { display: grid; gap: 10px; margin-top: 12px; }
+.rv-bas .rv-tout { width: 100%; min-height: 48px; font-size: 1rem; }
+.rv-tout-ok { color: #8fd19e; font-weight: 700; }
+.rv-det summary { cursor: pointer; color: var(--accent); font-weight: 700; min-height: 44px; display: flex; align-items: center; }
+.rv-det .rv-fourchette { margin: 4px 0 0; }
+.rv-bas .rv-liens { flex-basis: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+.rv-bas .rv-liens a.rv-ebay { min-height: 44px; display: inline-flex; align-items: center; }
+@media (min-width: 700px) {
+  .rv-bas { grid-template-columns: auto 1fr; align-items: start; }
+  .rv-bas .rv-liens { grid-column: 1 / -1; grid-template-columns: repeat(4, auto); justify-content: start; gap: 0 28px; }
+  .rv-bas .rv-tout { width: auto; }
+}
+@media (max-width: 600px) {
+  .rv-onglets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+  .rv-onglets button { white-space: normal; }
+  .rv-nav button { padding: 8px 12px; }
+}
