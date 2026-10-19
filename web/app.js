@@ -98,6 +98,18 @@
   function construireHero() {
     $('#chiffres-hero').textContent = `${META.nb_versions} éditions · ${META.nb_livres} livres · ${META.nb_series} séries`;
     const aller = () => $('#recherche').scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    // Livres annoncés (parution à venir) : de quoi donner envie de les précommander chez un libraire
+    const aVenir = DATA.filter((b) => b.parution).sort((x, y) => x.parution.localeCompare(y.parution) || x.titre.localeCompare(y.titre, 'fr')).slice(0, 6);
+    if (aVenir.length && $('#ap-liste')) {
+      const jourLong = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      $('#ap-liste').innerHTML = aVenir.map((b) => `<li class="ap-carte">
+        <button type="button" class="ap-couv" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, fiche du livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="64" height="92" loading="lazy">` : `<span class="ap-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button>
+        <div class="ap-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span>
+          <span class="ap-date">Paraît le ${esc(jourLong(b.parution))}</span>
+          <a class="ap-lien" href="https://www.leslibraires.fr/livre/${esc(b.isbn13)}" target="_blank" rel="noopener noreferrer" aria-label="Précommander ${esc(b.titre)} chez les libraires (nouvel onglet)">Précommander chez les libraires ↗</a></div></li>`).join('');
+      $('#ap-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
+      $('#hero-aparaitre').hidden = false;
+    }
     // Derniers livres ajoutés à la base : petites couvertures cliquables, et accès au tri « Derniers ajouts »
     const dates = DATA.map((b) => b.maj).filter(Boolean).sort();
     if (dates.length && dates[0] !== dates[dates.length - 1]) {
@@ -818,7 +830,7 @@
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
-            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
+            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             <h3 class="fiche-cotes-titre">Cotes de cette édition</h3>

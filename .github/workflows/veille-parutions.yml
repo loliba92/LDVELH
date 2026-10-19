@@ -1,0 +1,54 @@
+name: Veille des parutions
+
+# Chaque jour (vers 7 h, heure de Paris), et à la demande (Actions > Run workflow) : repère les nouveaux livres de Gallimard Jeunesse (Défis fantastiques, Loup solitaire,
+# Quête du Graal, Neige d'Automne) et d'Alkonost sur leslibraires.fr, les ajoute à la base avec leur jaquette, et met à jour les parutions à venir
+# présentées dans « À paraître » sur l'accueil. Voir pipeline/veille_parutions.py.
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+# Même file d'attente que les autres écritures de données : un envoi du site n'est jamais écrasé (voir .github/scripts/publier.sh).
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  veille:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - name: Tests
+        run: |
+          python pipeline/test_veille_parutions.py
+          python pipeline/test_importer_isbn.py
+      - name: Chercher les nouveautés
+        run: python pipeline/veille_parutions.py | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Jaquettes des livres ajoutés
+        run: python scrapers/jaquettes_librairie.py | tee -a "$GITHUB_STEP_SUMMARY" || echo "Jaquettes non récupérées (erreur ignorée)."
+      - name: Base et données du site
+        run: |
+          python pipeline/build_db.py
+          python pipeline/export_site.py
+          python pipeline/construire_pages.py
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "veille-parutions"
+          git config user.email "veille-parutions@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/veille_parutions.py && python scrapers/jaquettes_librairie.py || true; python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
+            .github/scripts/publier.sh "Veille des parutions du $(date +%F)" data/processed/editions.csv data/processed/veille.json web/covers web/data web/*.html
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml
+          # Un livre ajouté n'a pas encore de prix : le relevé des prix suit
+          if git diff --name-only "$AVANT" HEAD | grep -q "data/processed/editions.csv"; then gh workflow run prix-ebay.yml; fi
