@@ -264,7 +264,7 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
 <p class="form-sent" id="form-sent" role="status" hidden>Merci, votre message est bien parti. ✓</p>
 <form class="contact-form" id="contact-form" action="https://formsubmit.co/2d378aed4baf4cbd45b3c9db45512b9c" method="POST">
   <input type="hidden" name="_subject" value="Nouveau message via La Cote du Héros">
-  <input type="hidden" name="_next" value="https://loliba92.github.io/LDVELH/contact.html?envoye=1">
+  <input type="hidden" name="_next" value="https://lacoteduheros.fr/contact.html?envoye=1">
   <input type="hidden" name="_template" value="table">
   <input type="hidden" name="_captcha" value="false">
   <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
