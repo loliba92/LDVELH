@@ -262,6 +262,18 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070520381|convenable": {
+   "prix": 60.0,
+   "decision": "corrige",
+   "le": "2026-10-19",
+   "par": "loliba (superadmin)"
+  },
+  "9782070520381|tres_bon": {
+   "prix": 110.0,
+   "decision": "corrige",
+   "le": "2026-10-19",
+   "par": "loliba (superadmin)"
+  },
   "9782070520428|convenable": {
    "prix": 30.0,
    "decision": "corrige",
