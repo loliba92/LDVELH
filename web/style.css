@@ -1539,3 +1539,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .avis-etoiles button { min-width: 44px; min-height: 44px; padding: 0; border: 0; background: none; font-size: 2rem; line-height: 1; color: var(--muted); cursor: pointer; }
 .avis-etoiles button.allumee { color: var(--gold); }
 .avis-etoiles button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rayon .livre-carte .souhait-carte { width: auto; min-width: 44px; display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; padding: 0 8px 0 6px; font: 600 .74rem var(--f-ui); }
+.rayon .livre-carte .souhait-txt { white-space: nowrap; }
+.rayon .livre-carte .souhait-carte { position: static; align-self: flex-start; justify-content: flex-start; width: auto; min-height: 36px; padding: 0 4px 0 0; }
+.rayon .livre-carte .souhait-carte svg { flex: none; }
+.rayon .livre-carte { padding-bottom: 8px; }
+.rayon { margin-bottom: 8px; }
