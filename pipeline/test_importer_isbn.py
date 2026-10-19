@@ -40,6 +40,17 @@ class TestImport(unittest.TestCase):
         f = imp.fiche_librairie("9782075237246", H())
         self.assertEqual((f["serie"], f["numero"], f["titre"]), ("Défis fantastiques", "18", "L'Œil d'Émeraude"))
 
+    def test_la_librairie_comble_la_notice_de_la_bnf(self):
+        b = self.base([("9791040809630", "Reine des dragons", "2026")])
+        rows = editions.load(b)
+        rows[0]["editeur"] = "Sarbacane"
+        editions.save(rows, b)
+        bnf = lambda i13, i10: {"titre": "Reine de l'Ouest", "editeur": "Roman Sarbacane", "collection_editeur": "X'", "annee": "", "pages": "669"}
+        lib = lambda i: {"titre": "Reine de l'Ouest, Le western", "annee": "2024", "pages": "672", "editeur": "Sarbacane", "collection": "Exprim'"}
+        imp.importer("9791040805618", b, bnf, lib)
+        r = {x["id"]: x for x in editions.load(b)}["9791040805618"]
+        self.assertEqual((r["annee"], r["pages"], r["editeur"], r["collection_editeur"], r["titre"]), ("2024", "669", "Sarbacane", "Exprim'", "Reine de l'Ouest"))
+
     def test_ajout_deja_et_invalide(self):
         b = self.base([("9791097577025", "Le Royaume déchiré", "2018")])
         bilan = imp.importer("9791097577025\n9791097577049 ; Fabled Lands ; 1\n123\n", b, SANS_BNF, LIBRAIRIE)

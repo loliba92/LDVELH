@@ -84,6 +84,38 @@ def fiche_librairie(isbn, http=requests):
             "collection": g(r'<th scope="row">Collection</th>\s*<td>\s*<a[^>]*>(.*?)</a>').title()}
 
 
+def _editeur_connu(nom, rows):
+    """Nom d'éditeur déjà employé dans la base quand le nom lu en est une variante (« Roman Sarbacane » -> « Sarbacane »)."""
+    n = _cle(nom)
+    for r in rows:
+        e = _cle(r.get("editeur"))
+        if e and n and (e == n or e in n or n in e):
+            return r["editeur"]
+    return nom
+
+
+def completer_fiche(fiche, rows, isbn13, librairie):
+    """Complète la notice de la BnF avec la fiche de la librairie : année et pages seulement si elles manquent ; éditeur et collection
+    de la librairie (plus propres que ceux de la BnF) ; l'éditeur est ramené au nom déjà employé dans la base."""
+    try:
+        lib = librairie(isbn13)
+    except requests.RequestException:
+        lib = None
+    fiche = dict(fiche or {})
+    if lib:
+        for k in ("annee", "pages"):
+            if lib.get(k) and not fiche.get(k):
+                fiche[k] = lib[k]
+        for k, cle in (("editeur", "editeur"), ("collection", "collection_editeur")):
+            if lib.get(k):
+                fiche[cle] = lib[k]
+        for k in ("titre",):
+            fiche.setdefault(k, lib.get(k, ""))
+    if fiche.get("editeur"):
+        fiche["editeur"] = _editeur_connu(fiche["editeur"], rows)
+    return fiche, bool(lib)
+
+
 def _cle(t):
     return re.sub(r"\W+", " ", (t or "").casefold()).strip()
 
@@ -165,7 +197,11 @@ def importer(texte, base=None, bnf=editions.lookup_bnf, librairie=fiche_librairi
                 fiche, source = librairie(isbn13), "leslibraires"
             except requests.RequestException:
                 fiche = None
-        fiche = fiche or {}
+            fiche = fiche or {}
+            if fiche.get("editeur"):
+                fiche["editeur"] = _editeur_connu(fiche["editeur"], rows)
+        else:                                                 # notice BnF trouvée : la librairie comble ce qui manque
+            fiche, _ = completer_fiche(fiche, rows, isbn13, librairie)
         if local is not None:                                   # l'ISBN complète la fiche existante
             for k, v in fiche.items():
                 if k in local and v and not local[k] and k not in ("titre", "livre"):
