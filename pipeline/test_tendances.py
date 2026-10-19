@@ -40,6 +40,11 @@ class TestTendances(unittest.TestCase):
         g = t.groupes(t.variations(revue, t.MARCHE), VERSIONS)
         self.assertEqual([r["ids"] for r in g["version"]], [["a"], ["b"]])
 
+    def test_detail_garde_le_nom_de_l_administrateur_sans_son_niveau(self):
+        revue = [dict(lig("a", "bon", 10, 12), valide_par="loliba (superadmin)"), lig("a", "tres_bon", 20, 24)]
+        l = t.detail(revue, VERSIONS, t.MARCHE)["a"]["lignes"]
+        self.assertEqual((l[0].get("par"), l[1].get("par")), ("loliba", None))
+
     def test_indice_dans_le_temps(self):
         h = [{"date": "2026-10-11", "prix": {"a|bon": 10.0, "b|bon": 20.0}},
              {"date": "2026-10-15", "prix": {"a|bon": 11.0, "b|bon": 20.0, "c|bon": 5.0}}]

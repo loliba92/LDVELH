@@ -42,7 +42,10 @@ def detail(revue, versions, natures):
     for ligne in revue:
         a, p = ligne.get("archive"), ligne.get("publie")
         if a and p and ligne.get("nature") in natures and ligne["id"] in info:
-            par[ligne["id"]].append({"etat": ligne["etat"], "archive": a, "publie": p, "nature": ligne["nature"]})
+            entree = {"etat": ligne["etat"], "archive": a, "publie": p, "nature": ligne["nature"]}
+            if ligne.get("valide_par"):                         # nom de l'administrateur, sans son niveau entre parenthèses
+                entree["par"] = ligne["valide_par"].split(" (")[0].strip()
+            par[ligne["id"]].append(entree)
     sortie = {}
     for i, lignes in par.items():
         v = info[i]
