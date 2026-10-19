@@ -101,8 +101,9 @@
     // Livres annoncés (parution à venir) : de quoi donner envie de les précommander chez un libraire
     const aVenir = DATA.filter((b) => b.parution).sort((x, y) => x.parution.localeCompare(y.parution) || x.titre.localeCompare(y.titre, 'fr')).slice(0, 6);
     if (aVenir.length && $('#ap-liste')) {
-      const jourCourt = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
-      $('#ap-liste').innerHTML = aVenir.map((b) => `<div class="ap-item"><button type="button" class="ajout-mini" data-id="${esc(b.id)}" title="${esc(b.titre)} · ${esc(b.serie)}" aria-label="${esc(b.titre)}, ${esc(b.serie)}, paraît le ${esc(jourCourt(b.parution))} : fiche du livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" loading="lazy" width="80" height="120">` : `<span class="ajout-vide" aria-hidden="true">${esc((b.serie || '?').trim().charAt(0).toUpperCase())}</span>`}</button><span class="ap-date">${esc(jourCourt(b.parution))}</span></div>`).join('');
+      const jourCourt = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      $('#ap-titre').textContent = `À paraître (${aVenir.length})`;
+      $('#ap-liste').innerHTML = aVenir.map((b) => `<li><button type="button" class="bouton-lien" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous"> · ${esc(b.serie)} · ${esc(jourCourt(b.parution))}</span></li>`).join('');
       $('#ap-liste').addEventListener('click', (e) => { const x = e.target.closest('[data-id]'); if (x) ouvrirFiche(x.dataset.id); });
       $('#hero-aparaitre').hidden = false;
     }

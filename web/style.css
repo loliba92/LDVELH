@@ -1521,30 +1521,12 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rayon .livre-carte { min-width: 0; }
 
 /* À paraître (accueil) */
-.aparaitre { padding-bottom: 28px; }
-.aparaitre .carte > header { align-items: baseline; }
-.ap-note { color: var(--muted); font-size: .85rem; }
-.ap-item { display: grid; gap: 4px; min-width: 0; justify-items: center; }
-.ap-item .ajout-mini { width: 100%; }
-.ap-date { color: var(--gold); font-weight: 700; font-size: .78rem; text-align: center; white-space: nowrap; }
-@media (max-width: 700px) { .grille-ajouts .ap-item { flex: 0 0 72px; scroll-snap-align: start; } }
-
-/* Le projet : quelques illustrations pour donner envie de rêver */
-.projet-large { margin: 22px 0 6px; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); aspect-ratio: 21 / 9; background: var(--surface); }
-.projet-large img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; display: block; }
-.projet-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 26px 0 8px; }
-.projet-trio img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); display: block; background: var(--surface); }
-.projet-trio img:nth-child(1) { object-position: 60% 30%; }
-.projet-trio img:nth-child(2) { object-position: 78% 40%; }
-.projet-trio img:nth-child(3) { object-position: 60% 35%; }
-.projet-legende { margin: 0 0 22px; color: var(--muted); font-size: .85rem; font-style: italic; }
-@media (max-width: 560px) { .projet-large { aspect-ratio: 16 / 9; } .projet-trio { gap: 6px; } }
-.fiche-precommande { display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px; margin: 0 0 10px; font-size: .92rem; }
-.fiche-precommande span { color: var(--muted); }
-.fiche-precommande a { color: var(--accent); font-weight: 700; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
-#ap-liste { grid-template-columns: repeat(auto-fill, 68px); justify-content: start; gap: 8px 10px; }
-.fiche-precommande > span { flex: 1 0 100%; }
-@media (max-width: 700px) { #ap-liste { gap: 8px; } }
+.ap-det { margin-top: 12px; font-size: .92rem; }
+.ap-det summary { cursor: pointer; color: var(--muted); min-height: 32px; }
+.ap-det summary:hover, .ap-det summary:focus-visible { color: var(--gold); }
+.ap-det[hidden] { display: none; }
+.ap-liste { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.ap-liste .bouton-lien { text-align: left; }
 .projet-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 28px 0 8px; }
 .projet-duo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); display: block; background: var(--surface); }
 .projet-duo img:nth-child(1) { object-position: 50% 55%; }
