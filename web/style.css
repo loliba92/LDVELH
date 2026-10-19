@@ -633,7 +633,7 @@ dialog.parcours[open] { display: flex; }
 .onglets-ed button small { display: block; min-height: 1em; font-weight: 400; font-size: .72rem; opacity: .85; }
 .onglets-ed button[aria-pressed="true"] { background: var(--accent); border: 1px solid var(--accent); color: var(--on-accent); }
 .etats-rapides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.etats-rapides button { min-height: 36px; padding: 2px 0; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--bg); color: var(--text); font: 700 .74rem var(--f-ui); letter-spacing: 0; cursor: pointer; }
+.etats-rapides button { min-height: 44px; padding: 2px 0; border: 1px solid var(--line-strong); border-radius: 5px; background: var(--bg); color: var(--text); font: 700 .74rem var(--f-ui); letter-spacing: 0; cursor: pointer; }
 .etats-rapides button:hover { background: var(--surface-2); }
 .etats-rapides button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .etats-rapides button:focus-visible, .onglets-ed button:focus-visible, .col-tout:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
@@ -665,7 +665,7 @@ html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 2
 /* Étagère : trois boutons d'état (C, BE, TBE) posés sur le bas de chaque jaquette */
 .rayon .livre-carte { container-type: inline-size; }
 .etats-carte { position: absolute; z-index: 2; left: 6px; right: 6px; top: calc(140cqw - 44px); display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
-.etats-carte button { min-height: 36px; padding: 2px 0; border: 1px solid rgba(217, 180, 95, .55); border-radius: 5px; background: rgba(0, 0, 0, .78); color: var(--text);
+.etats-carte button { min-height: 44px; padding: 2px 0; border: 1px solid rgba(217, 180, 95, .55); border-radius: 5px; background: rgba(0, 0, 0, .78); color: var(--text);
   font: 700 .78rem var(--f-ui); letter-spacing: 0; cursor: pointer; backdrop-filter: blur(2px); }
 .etats-carte button:hover { background: var(--surface-2); border-color: var(--gold); }
 .etats-carte button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }

@@ -802,20 +802,23 @@
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             <div class="note-livre" id="note-livre" hidden></div>
-            <dl class="infos">
+            <h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
+        <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+
+          </div>
+        </div>
+        ${blocCollectionFiche(b)}
+        <h3>Détails du livre</h3>
+        <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
               ${ligne('Pages', b.pages)}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
             </dl>
-          </div>
-        </div>
-        <h3>Cotes de cette édition</h3>
-        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+
         ${blocNeuf(b)}
         ${blocRecherche(b)}
         ${blocCorriger(b)}
-        ${blocCollectionFiche(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
@@ -2258,6 +2261,21 @@
   /* ---------- Application installable (PWA) ---------- */
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => { /* hors ligne indisponible, sans conséquence */ }));
+  }
+
+  // Arrivée sur « #recherche » depuis une autre page : la page se met en place après le premier défilement (jaquettes, polices),
+  // qui s'arrêtait alors trop haut. On recale la section, sans animation, jusqu'à ce que la page soit stable.
+  if (PAGE !== 'collection' && location.hash === '#recherche') {
+    const caler = () => {
+      const el = $('#recherche'), html = document.documentElement;
+      if (!el) return;
+      html.style.scrollBehavior = 'auto';
+      el.scrollIntoView({ block: 'start' });
+      html.style.scrollBehavior = '';
+    };
+    requestAnimationFrame(caler);
+    window.addEventListener('load', caler, { once: true });
+    [400, 1200].forEach((ms) => setTimeout(caler, ms));
   }
 
   charger();
