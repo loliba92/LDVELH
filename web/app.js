@@ -1346,7 +1346,7 @@
     }
     if ($('#seg-vendre')) {
       const nbV = Object.keys(COLL).filter((id) => COLL[id].vendre && livreDe(id)).length;
-      $('#seg-vendre').hidden = !nbV && !S.avendre;
+      $('#seg-vendre').hidden = !nbV && !S.avendre && !Object.keys(COLL).length;      // visible dès qu'on possède un livre : on peut y arriver sans rien y avoir mis
       $('#nb-vendre-seg').textContent = nbV ? `(${nbV})` : '';
     }
     if ($('#hero-coll')) {              // accueil : la carte « Ma collection » a trois états (visiteur, connecté sans livre, avec collection)
