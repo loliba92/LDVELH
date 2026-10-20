@@ -59,6 +59,26 @@ class TestRechercheElargie(unittest.TestCase):
         self.assertTrue(next(i for i in r if i["itemId"] == "2").get("_titre_seul"))
 
 
+class TestAmbiguites(unittest.TestCase):
+    def test_une_annonce_trouvee_par_l_isbn_reste_a_son_edition(self):
+        a = {"itemId": "1", **item(10, "5000")}
+        par = {"A": [a], "B": [{**a, "_titre_seul": True}]}
+        r = ebay_api.ecarter_ambigues(par, {"A": "livre", "B": "livre"})
+        self.assertEqual((len(r["A"]), len(r["B"])), (1, 0))          # gardée sous A (ISBN), retirée sous B (titre)
+
+    def test_deux_isbn_citent_la_meme_annonce(self):
+        a = {"itemId": "1", **item(10, "5000")}
+        r = ebay_api.ecarter_ambigues({"A": [a], "B": [a]}, {"A": "livre", "B": "livre"})
+        self.assertEqual((len(r["A"]), len(r["B"])), (0, 0))
+
+    def test_annonce_du_titre_seul_gardee_si_une_seule_edition(self):
+        a = {"itemId": "9", "_titre_seul": True, **item(10, "5000")}
+        r = ebay_api.ecarter_ambigues({"A": [a], "B": []}, {"A": "livre", "B": "livre"})
+        self.assertEqual(len(r["A"]), 1)
+        r2 = ebay_api.ecarter_ambigues({"A": [a], "B": [a]}, {"A": "livre", "B": "livre"})
+        self.assertEqual((len(r2["A"]), len(r2["B"])), (0, 0))        # vue par deux éditions : ambiguë
+
+
 class TestEtatNonPrecise(unittest.TestCase):
     def test_etat_suppose_tres_bon_quand_non_precise(self):
         self.assertEqual(ebay_api.etat_de({"conditionId": "5000"}), ("bon", False))

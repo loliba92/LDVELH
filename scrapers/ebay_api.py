@@ -164,15 +164,28 @@ def annee_compatible(titre_annonce, annees):
 
 
 def ecarter_ambigues(par_isbn, livres):
-    """par_isbn : {isbn: [annonces]} ; livres : {isbn: livre}. Une annonce trouvée sous plusieurs éditions d'un même
-    livre (le vendeur cite plusieurs ISBN, ou la recherche déborde) ne peut pas être attribuée : on la retire de toutes."""
-    vues = {}
+    """par_isbn : {isbn: [annonces]} ; livres : {isbn: livre}. Une annonce ne doit être attribuée qu'à une édition :
+    - trouvée par l'ISBN sous une seule édition d'un livre : elle lui est attribuée (son vendeur a cité cet ISBN), et ses copies
+      trouvées par le titre sous les autres éditions du même livre sont retirées ;
+    - trouvée par l'ISBN sous plusieurs éditions du livre (le vendeur cite plusieurs ISBN) : retirée de toutes ;
+    - trouvée seulement par le titre (« _titre_seul ») : gardée seulement si une seule édition du livre la voit."""
+    par_ann = {}
     for isbn, items in par_isbn.items():
         for it in items:
             if it.get("itemId"):
-                vues.setdefault((livres.get(isbn), it["itemId"]), set()).add(isbn)
-    return {isbn: [it for it in items if len(vues.get((livres.get(isbn), it.get("itemId")), ())) < 2]
-            for isbn, items in par_isbn.items()}
+                e = par_ann.setdefault((livres.get(isbn), it["itemId"]), {"isbn": set(), "titre": set()})
+                e["titre" if it.get("_titre_seul") else "isbn"].add(isbn)
+
+    def garder(isbn, it):
+        e = par_ann.get((livres.get(isbn), it.get("itemId")))
+        if e is None:
+            return True
+        if len(e["isbn"]) >= 2:
+            return False
+        if len(e["isbn"]) == 1:
+            return isbn in e["isbn"]
+        return len(e["titre"]) < 2
+    return {isbn: [it for it in items if garder(isbn, it)] for isbn, items in par_isbn.items()}
 
 
 def agreger(items, isbn13, jour, titre=None, annees=None):
