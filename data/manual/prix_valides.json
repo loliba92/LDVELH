@@ -431,6 +431,18 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070593378|convenable": {
+   "prix": 25.0,
+   "decision": "corrige",
+   "le": "2026-10-20",
+   "par": "loliba (superadmin)"
+  },
+  "9782070593378|tres_bon": {
+   "prix": 52.0,
+   "decision": "corrige",
+   "le": "2026-10-20",
+   "par": "loliba (superadmin)"
+  },
   "9782070649525|bon": {
    "prix": 8.95,
    "decision": "confirme",

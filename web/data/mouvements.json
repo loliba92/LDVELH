@@ -2,11 +2,56 @@
  "date": "2026-10-20",
  "precedent": "2026-10-19",
  "nb_comparees": 1461,
- "nb_modifiees": 1,
+ "nb_modifiees": 4,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
  "baisses": [
+  {
+   "id": "9782070593378",
+   "isbn13": "9782070593378",
+   "titre": "Le Héros de Mynuit",
+   "serie": "Loup Solitaire",
+   "numero": "788",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 57.98,
+   "apres": 25.0,
+   "pct": -0.569,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070593378",
+   "isbn13": "9782070593378",
+   "titre": "Le Héros de Mynuit",
+   "serie": "Loup Solitaire",
+   "numero": "788",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 60.99,
+   "apres": 34.21,
+   "pct": -0.439,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070593378",
+   "isbn13": "9782070593378",
+   "titre": "Le Héros de Mynuit",
+   "serie": "Loup Solitaire",
+   "numero": "788",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 74.9,
+   "apres": 52.0,
+   "pct": -0.306,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782380240252",
    "isbn13": "9782380240252",
@@ -23,7 +68,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 1,
+ "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
   "n_paires": 9,
