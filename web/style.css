@@ -1655,3 +1655,4 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .piece .rarete { align-self: flex-start; font-size: .74rem; }
 .piece .rarete-rare { color: var(--gold); }
 .piece .rarete-tres_rare { color: #1b1305; }
+.ex-vendre.actif { color: #f0a5b0; border-color: #c4465a; background: rgba(122, 31, 43, .35); }

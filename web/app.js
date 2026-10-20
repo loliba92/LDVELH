@@ -1156,7 +1156,7 @@
   }
 
   function listeExemplaires(bl) {
-    const triees = bl.lignes.filter((x) => !x.c.vendre && retenue(x)).sort((TRIS[FC.tri] || TRIS.serie)[1]);
+    const triees = bl.lignes.filter((x) => retenue(x)).sort((TRIS[FC.tri] || TRIS.serie)[1]);
     const vus = triees.slice(0, limiteColl);
     const html = vus.map(({ b, c }) => {
       const v = valeurLigne(b, c);
@@ -1168,13 +1168,13 @@
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
           <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
-          <button type="button" class="ex-vendre" data-ex-vendre="${esc(b.id)}" title="Mettre dans la liste à vendre" aria-label="Mettre à vendre : ${nom}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span>À vendre</span></button>
+          <button type="button" class="ex-vendre${c.vendre ? ' actif' : ''}" data-ex-vendre="${esc(b.id)}" aria-pressed="${!!c.vendre}" title="${c.vendre ? 'Dans la liste à vendre : retirer' : 'Mettre dans la liste à vendre'}" aria-label="${c.vendre ? 'Retirer de la liste à vendre' : 'Mettre à vendre'} : ${nom}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span>À vendre</span></button>
         </div></li>`;
     }).join('');
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
   }
   const texteFiltre = (lst, bl) => (!lst.nb ? (filtresActifs() ? 'Aucun exemplaire ne correspond à ces filtres.' : 'Tous vos livres sont dans la liste à vendre, plus bas.')
-    : `${lst.ex} livre${lst.ex > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).reduce((t, x) => t + x.c.qte, 0)}` : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}${bl.lignes.some((x) => x.c.vendre) ? ` · ${bl.lignes.filter((x) => x.c.vendre).reduce((t, x) => t + x.c.qte, 0)} dans « À vendre »` : ''}`);
+    : `${lst.ex} livre${lst.ex > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.exemplaires}` : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
   const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
 
   // Séries de la collection proposées : celles de l'éditeur choisi (toutes si aucun)
@@ -1491,16 +1491,17 @@
       return;
     }
     const lst = listeExemplaires(bl);
+    const plusChere = bl.lignes.map(({ b, c }) => ({ b, v: b.prix[c.etat] })).filter((x) => x.v != null).sort((x, y) => y.v - x.v)[0];
     const aVendre = bl.lignes.filter((x) => x.c.vendre), exV = aVendre.reduce((t, x) => t + x.c.qte, 0), valVendre = aVendre.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0);
     const nbTrouver = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
     const cases = [
       ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) : 'à venir', aVendre.length ? `dont ${fmtE(valVendre)} à vendre` : '', 'cle-valeur'],
       ['Livres', String(bl.exemplaires), exV ? `dont ${exV} à vendre` : '', ''],
-      ['Titres', String(bl.titres), 'sans compter les rééditions', ''],
+      ['Plus chère', fmtE(plusChere ? plusChere.v : 0), plusChere ? plusChere.b.titre : '', ''],
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    const onglets = [['livres', 'Mes livres', bl.exemplaires - exV], ['analyse', 'Analyse', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     zone.innerHTML = `
       <ul class="coll-cles" id="coll-cles" aria-label="Chiffres clés de la collection">${cases.map(([l, v, d, c]) => `<li class="${c}"><span class="cle-lib">${l}</span><b>${v}</b>${d ? `<small>${d}</small>` : ''}</li>`).join('')}</ul>
@@ -1576,8 +1577,9 @@
           delete COLL[id]; sauverColl(); afficher(); annonce('Livre vendu : retiré de votre collection.');
           annulerRetrait(b, id, ancien, 'vendu, retiré de votre collection');
         } else {
-          if (bVendre) COLL[id].vendre = true; else delete COLL[id].vendre;
-          sauverColl(); afficher(); annonce(bVendre ? 'Livre ajouté à votre liste à vendre.' : 'Livre gardé dans votre collection.');
+          const mettre = bVendre ? !COLL[id].vendre : false;
+          if (mettre) COLL[id].vendre = true; else delete COLL[id].vendre;
+          sauverColl(); afficher(); annonce(mettre ? 'Livre ajouté à votre liste à vendre.' : 'Livre retiré de votre liste à vendre.');
         }
         return;
       }
