@@ -2,12 +2,28 @@
  "date": "2026-10-20",
  "precedent": "2026-10-19",
  "nb_comparees": 1461,
- "nb_modifiees": 0,
+ "nb_modifiees": 1,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
- "baisses": [],
- "nb_grands_mouvements": 0,
+ "baisses": [
+  {
+   "id": "9782380240252",
+   "isbn13": "9782380240252",
+   "titre": "CTHULHU - Le Pacte d'Innsmouth - RPG BooK",
+   "serie": "RPG BooK",
+   "numero": null,
+   "version": "V1",
+   "etat": "bon",
+   "avant": 18.0,
+   "apres": 14.0,
+   "pct": -0.222,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
+ "nb_grands_mouvements": 1,
  "modele": {
   "actif": false,
   "n_paires": 9,
