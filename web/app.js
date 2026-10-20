@@ -27,18 +27,10 @@
   // Rareté : d'après les collections saisies sur collection-ldvelh.fr (voir pipeline/rarete.py) ; une information, elle ne modifie aucune cote
   const RARETE = { tres_rare: 'Très rare', rare: 'Rare', peu_courant: 'Peu courant', courant: 'Courant' };
   const pastilleRarete = (b) => (b.rarete && (b.rarete.niveau === 'rare' || b.rarete.niveau === 'tres_rare') ? `<span class="rarete rarete-${b.rarete.niveau}" title="Possédé par ${b.rarete.pct} % des collections saisies sur collection-ldvelh.fr">${RARETE[b.rarete.niveau]}</span>` : '');
-  // Tendance de la cote : cote actuelle (prix récents) comparée à l'ancien relevé, quand les deux existent
-  const SEUIL_TENDANCE = 0.03;
-  function tendanceHtml(b) {
-    if (b.tendance == null) return '';
-    const t = b.tendance, k = t > SEUIL_TENDANCE ? 'hausse' : t < -SEUIL_TENDANCE ? 'baisse' : 'stable', pct = Math.round(Math.abs(t) * 100);
-    const lib = { hausse: 'en hausse', baisse: 'en baisse', stable: 'stable' }[k], sym = { hausse: '▲', baisse: '▼', stable: '▬' }[k];
-    const court = k === 'stable' ? 'stable' : `${t > 0 ? '+' : '−'}${pct} %`;
-    return `<span class="tend tend-${k}" title="Cote ${lib}${k === 'stable' ? '' : ` (${court})`} par rapport à l'ancien relevé" role="img" aria-label="Tendance : ${lib}${k === 'stable' ? '' : `, ${t > 0 ? 'plus' : 'moins'} ${pct} pour cent`}, depuis l'ancien relevé"><span aria-hidden="true">${sym} ${court}</span></span>`;
-  }
   const numero = (b) => (b.numero && !/^0+$/.test(b.numero) ? ` n° ${b.numero}` : '');
 
   let DATA = [];
+  let HIST = null;
   let META = {};
   let VERSIONS = [];
   let limite = PAR_PAGE;
@@ -68,11 +60,12 @@
 
   async function charger() {
     try {
-      const [v, m] = await Promise.all([
+      const [v, m, h] = await Promise.all([
         fetch(DONNEES + 'versions.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
         fetch(DONNEES + 'meta.json').then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+        fetch(DONNEES + 'historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null),      // facultatif : sans lui, pas de flèche
       ]);
-      DATA = v; META = m;
+      DATA = v; META = m; HIST = h;
     } catch (e) {
       $('#resultats').innerHTML = '<p class="vide-global">Les données n\'ont pas pu être chargées. ' +
         'Ouvrez le guide depuis un serveur (par exemple <code>python -m http.server</code> dans le dossier <code>web</code>).</p>';
@@ -601,7 +594,7 @@
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
-        <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>${tendanceHtml(b)}`}</span>
+        <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -1173,7 +1166,7 @@
       return `<li class="ex" data-ligne="${esc(b.id)}">
         <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div>
-          <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span>${tendanceHtml(b)}</div></div>
+          <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div></div>
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
           <div class="ex-qte" role="group" aria-label="Exemplaires : ${nom}"><button type="button" data-ex-qte="${esc(b.id)}" data-delta="-1" aria-label="Un exemplaire de moins : ${nom}"${c.qte <= 1 ? ' disabled' : ''}>−</button><output aria-live="polite">${c.qte}</output><button type="button" data-ex-qte="${esc(b.id)}" data-delta="1" aria-label="Un exemplaire de plus : ${nom}"${c.qte >= 99 ? ' disabled' : ''}>+</button></div>
@@ -1324,6 +1317,24 @@
   document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
+  // Tendance de la valeur de la collection : mêmes livres, mêmes états, cotes publiées à la première et à la dernière date de l'historique
+  function flecheValeur(bl) {
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return '';
+    let debut = 0, fin = 0;
+    bl.lignes.forEach(({ b, c }) => {
+      const a = HIST.cotes[`${b.id}|${c.etat}`];
+      if (!a) return;
+      const d = a[0], f = a[a.length - 1];
+      if (d > 0 && f > 0) { debut += d * c.qte; fin += f * c.qte; }
+    });
+    if (debut <= 0) return '';
+    const v = fin / debut - 1;
+    if (Math.abs(v) < 0.005) return '';                                  // trop faible pour dire quoi que ce soit : pas de flèche
+    const dir = v > 0 ? 'hausse' : 'baisse', pct = (Math.round(Math.abs(v) * 1000) / 10).toString().replace('.', ',');
+    const depuis = new Date(HIST.dates[0] + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    const txt = `Valeur de la collection en ${dir} de ${pct} % depuis le ${depuis}`;
+    return ` <span class="fleche fleche-${dir}" role="img" aria-label="${txt}" title="${txt}">${v > 0 ? '▲' : '▼'}</span>`;
+  }
   // Médiane de la valeur d'un exemplaire (chaque exemplaire compte pour une unité, au prix de son état)
   function medianeEx(bl) {
     const u = bl.lignes.flatMap(({ b, c }) => { const v = valeurLigne(b, c); return v == null ? [] : Array(c.qte).fill(v / c.qte); }).sort((x, y) => x - y);
@@ -1460,7 +1471,7 @@
         const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
         const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
         const pct = Math.max(2, Math.round(100 * bl.lignes.length / (META.nb_versions || 1)));
-        corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) : 'prix à venir'}</b></p>
+        corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) + flecheValeur(bl) : 'prix à venir'}</b></p>
           <p class="texte petit">${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}</p></div></div>
           <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.lignes.length} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
           <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Compléter pas à pas</button></p>`;
@@ -1504,7 +1515,7 @@
     const aVendre = bl.lignes.filter((x) => x.c.vendre), exV = aVendre.reduce((t, x) => t + x.c.qte, 0), valVendre = aVendre.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0);
     const nbTrouver = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
     const cases = [
-      ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) : 'à venir', aVendre.length ? `dont ${fmtE(valVendre)} à vendre` : '', 'cle-valeur'],
+      ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) + flecheValeur(bl) : 'à venir', aVendre.length ? `dont ${fmtE(valVendre)} à vendre` : '', 'cle-valeur'],
       ['Livres', String(bl.exemplaires), exV ? `dont ${exV} à vendre` : '', ''],
       ['Plus chère', fmtE(plusChere ? plusChere.v : 0), plusChere ? plusChere.b.titre : '', ''],
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
@@ -1523,7 +1534,6 @@
         <p class="coll-pas-a-pas"><button type="button" class="bouton" data-parcours>Compléter pas à pas</button></p>
         ${barreFiltres(bl)}
         <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
-        <p class="sous coll-legende-tend">▲ ▼ : tendance de la cote depuis l'ancien relevé, quand des prix récents existent.</p>
         <ul class="ex-liste" id="coll-lignes">${lst.html}</ul>
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>

@@ -286,11 +286,11 @@ def main():
     for v_ in versions:
         if annonces.get(v_["isbn13"], "") > args.aujourdhui.isoformat():
             v_["parution"] = annonces[v_["isbn13"]]
-    for id_, var in tendances.variations(revue, tendances.MARCHE).items():                              # tendance de la cote d'une édition : prix récents contre ancien relevé
-        for v_ in versions:
-            if v_["id"] == id_:
-                v_["tendance"] = round(var, 3)
-                break
+    hist_pub = sorted(mouvements.charger(hist_chemin), key=lambda h: h["date"])[-10:]        # cotes publiées aux dernières dates : la tendance de la collection se calcule dans le navigateur
+    cles = sorted({k for h in hist_pub for k in h["prix"]})
+    (sortie / "historique.json").write_text(json.dumps({"dates": [h["date"] for h in hist_pub],
+                                                         "cotes": {k: [h["prix"].get(k) for h in hist_pub] for k in cles}},
+                                                        ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     rarete.annoter(versions, rarete.charger(DB.parent.parent / "raw" / "collection-ldvelh"))                # rareté (information), d'après les collections de collection-ldvelh.fr
     (sortie / "versions.json").write_text(json.dumps(versions, ensure_ascii=False, separators=(",", ":")),
                                           encoding="utf-8")
