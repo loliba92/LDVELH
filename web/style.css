@@ -1583,3 +1583,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
   #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) label:nth-child(n+3) span { border-top: 1px solid var(--line-strong); }
   #f-coll:has(#seg-cherche:not([hidden])):has(#seg-vendre:not([hidden])) label:nth-child(3) span { border-left: 0; }
 }
+/* Marqueurs « À vendre » / « À trouver » : étiquette discrète sous la pastille de version, jaquette entièrement visible */
+.rayon .livre-carte .tampon-vendre, .rayon .livre-carte .tampon-trouver { left: 8px; right: auto; top: 36px; padding: 2px 8px; border-radius: 3px; transform: none; font: 800 .64rem var(--f-ui); letter-spacing: .1em; box-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.rayon .livre-carte .tampon-vendre { background: #7a1f2b; }
+.rayon .livre-carte .tampon-trouver { background: #246842; }
+.livre-carte.vendre-oui.possede-oui .couv img, .livre-carte.vendre-oui.possede-oui .couv .jaq-vide { outline: 2px solid #c4465a; outline-offset: -2px; opacity: 1; }
+.livre-carte.trouver-oui .couv img, .livre-carte.trouver-oui .couv .jaq-vide { outline: 2px solid #5aa876; outline-offset: -2px; opacity: 1; }
