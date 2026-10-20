@@ -32,6 +32,33 @@ class TestConcordance(unittest.TestCase):
         self.assertEqual([(x["etat"], x["nb_annonces"]) for x in l], [("bon", 1)])
 
 
+class TestRechercheElargie(unittest.TestCase):
+    def test_les_annonces_du_titre_seul_exigent_tous_les_mots(self):
+        trouve_isbn = {"itemId": "1", **item(10, "5000")}
+        par_titre_ok = {"itemId": "2", "_titre_seul": True, **item(11, "5000", "Le Sorcier de la montagne de feu - Défis Fantastiques")}
+        par_titre_flou = {"itemId": "3", "_titre_seul": True, **item(5, "5000", "Sorcier de la nuit - jeu de cartes")}
+        l = ebay_api.agreger([trouve_isbn, par_titre_ok, par_titre_flou], "9782070583805", date(2026, 10, 11), "Le Sorcier de la montagne de feu")
+        self.assertEqual([(x["etat"], x["nb_annonces"]) for x in l], [("bon", 2)])      # l'annonce floue (autres mots) est écartée
+
+    def test_requetes_complementaires(self):
+        q = ebay_api.requetes_complementaires({"livre": "Le Sorcier Majdar", "serie": "Astre d'Or", "numero": "370", "auteurs": "Ian Page ; Joe Dever"})
+        self.assertIn("Le Sorcier Majdar Ian Page", q)
+        self.assertIn("Le Sorcier Majdar livre dont vous êtes le héros", q)
+        self.assertIn("Le Sorcier Majdar Astre d'Or 370", q)
+        self.assertEqual(ebay_api.requetes_complementaires({"livre": "Rêves"}), [])          # un titre d'un seul mot : trop de bruit
+
+    def test_union_sans_doublon(self):
+        class Http(Faux):
+            def get(self, url, **kw):
+                q = kw["params"]["q"]
+                charge = [{"itemId": "1", **item(10, "5000")}] if q.isdigit() else [{"itemId": "1", **item(10, "5000")}, {"itemId": "2", **item(12, "5000")}]
+                self.charge = {"itemSummaries": charge}
+                return super().get(url, **kw)
+        r = ebay_api.chercher_elargi("9782070583805", "Le Sorcier de la montagne de feu", "T", {"livre": "Le Sorcier de la montagne de feu", "auteurs": "Ian"}, http=Http({}))
+        self.assertEqual(sorted(i["itemId"] for i in r), ["1", "2"])
+        self.assertTrue(next(i for i in r if i["itemId"] == "2").get("_titre_seul"))
+
+
 class TestEtatNonPrecise(unittest.TestCase):
     def test_etat_suppose_tres_bon_quand_non_precise(self):
         self.assertEqual(ebay_api.etat_de({"conditionId": "5000"}), ("bon", False))

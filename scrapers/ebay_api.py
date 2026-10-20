@@ -116,6 +116,43 @@ def chercher(isbn, titre, token, http=requests, pause=0):
     return items
 
 
+# Requêtes complémentaires (essai du 20 octobre 2026 sur 60 éditions) : l'ISBN seul ne trouve que 10 éditions à 3 annonces ; avec le titre
+# et l'auteur, le titre et « livre dont vous êtes le héros », le titre et la série, 35. Les annonces trouvées SEULEMENT par le titre
+# sont soumises à une concordance stricte (tous les mots du titre) et, comme toutes les autres, retirées si elles sont ambiguës entre
+# plusieurs éditions d'un même livre (ecarter_ambigues).
+def requetes_complementaires(ed):
+    ed = ed or {}
+    serie = (ed.get("serie") or "").strip()
+    num = (ed.get("numero") or "").strip().lstrip("0")
+    livre = ed.get("livre") or ed.get("titre") or ""
+    auteur = (ed.get("auteurs") or "").split(";")[0].strip()
+    q = [" ".join(x for x in (livre, auteur) if x), f"{livre} livre dont vous êtes le héros", " ".join(x for x in (livre, serie, num) if x)]
+    vues, sortie = set(), []
+    for t in q:
+        if t.strip() and len(mots(livre)) >= 2 and t not in vues:
+            vues.add(t); sortie.append(t)
+    return sortie
+
+
+def chercher_elargi(isbn, titre, token, ed=None, http=requests, pause=0):
+    """Annonces d'une édition : recherche par ISBN, puis par le titre (voir requetes_complementaires). Les annonces apportées
+    seulement par le titre sont marquées « _titre_seul » : agreger leur applique une concordance stricte."""
+    items = list(chercher(isbn, titre, token, http, pause))
+    vus = {it.get("itemId") for it in items}
+    for q in requetes_complementaires(ed):
+        try:
+            extra = annonces(q, token, http)
+        except requests.RequestException:
+            continue
+        if pause:
+            time.sleep(pause)
+        for it in extra:
+            if it.get("itemId") not in vus:
+                vus.add(it.get("itemId"))
+                items.append({**it, "_titre_seul": True})
+    return items
+
+
 ANNEE = re.compile(r"\b(19[5-9]\d|20[0-3]\d)\b")
 
 
@@ -142,7 +179,7 @@ def agreger(items, isbn13, jour, titre=None, annees=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for it in items:
-        if titre and not concorde(it.get("title", ""), titre):
+        if titre and not concorde(it.get("title", ""), titre, 1.0 if it.get("_titre_seul") else 0.6):
             continue
         if not annee_compatible(it.get("title", ""), annees):
             continue
@@ -278,6 +315,7 @@ def essayer(a, token):
     pas = max(1, len(cat) // a.essais)
     echantillon = cat[::pas][: a.essais]                                  # réparti sur tout le catalogue
     valables = collections.defaultdict(dict)                              # nom de requête -> {isbn: {itemId}}
+    valables_stricts = collections.defaultdict(dict)                      # idem, concordance stricte pour les requêtes par titre
     renvoyees = collections.Counter(); concordantes = collections.Counter()
     for isbn, titre, nb_ed, livre, annees in echantillon:
         for nom, texte in requetes_candidates(isbn, rows.get(isbn, {})).items():
@@ -288,7 +326,7 @@ def essayer(a, token):
             except requests.RequestException:
                 continue
             time.sleep(PAUSE)
-            ids = set()
+            ids, ids_stricts = set(), set()
             for it in items:
                 renvoyees[nom] += 1
                 if not concorde(it.get("title", ""), titre):
@@ -296,6 +334,7 @@ def essayer(a, token):
                 concordantes[nom] += 1
                 if not annee_compatible(it.get("title", ""), annees):
                     continue
+                strict = concorde(it.get("title", ""), titre, 1.0)
                 etat, _ = etat_de(it)
                 prix = it.get("price") or {}
                 age = age_jours(it, jour)
@@ -304,7 +343,10 @@ def essayer(a, token):
                 if age is not None and age > MAX_AGE_JOURS:
                     continue
                 ids.add(it.get("itemId"))
+                if strict or nom.startswith("isbn"):
+                    ids_stricts.add(it.get("itemId"))
             valables[nom][isbn] = ids
+            valables_stricts[nom][isbn] = ids_stricts
     base = valables["isbn13"]
     noms = list(valables)
     print(f"Essai sur {len(echantillon)} éditions réparties sur le catalogue (comptages seulement)\n")
@@ -328,6 +370,8 @@ def essayer(a, token):
         print(f"| + {nom} | {plus} | {avant3} → {apres3} |")
     tout = {isbn: set().union(*(valables[n].get(isbn, set()) for n in noms)) for isbn in base}
     print(f"| + toutes les requêtes | {sum(len(tout[i] - base[i]) for i in base)} | {avant3} → {sum(1 for x in tout.values() if len(x) >= 3)} |")
+    strict = {isbn: set().union(*(valables_stricts[n].get(isbn, set()) for n in noms)) for isbn in base}
+    print(f"| + toutes, concordance stricte sur le titre (méthode retenue) | {sum(len(strict[i] - base[i]) for i in base)} | {avant3} → {sum(1 for x in strict.values() if len(x) >= 3)} |")
 
 
 def main():
@@ -358,8 +402,10 @@ def main():
     cat = catalogue()[: a.limite]
     isbns = [c[0] for c in cat]
     lignes, par_isbn = [], {}
+    import editions
+    fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
     for isbn, titre, nb_ed, livre, annees in cat:
-        par_isbn[isbn] = chercher(isbn, titre, token, pause=PAUSE)
+        par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     for isbn, titre, nb_ed, livre, annees in cat:
         lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees)
