@@ -1174,7 +1174,7 @@
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
   }
   const texteFiltre = (lst, bl) => (!lst.nb ? (filtresActifs() ? 'Aucun exemplaire ne correspond à ces filtres.' : 'Tous vos livres sont dans la liste à vendre, plus bas.')
-    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}`);
+    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}${bl.lignes.some((x) => x.c.vendre) ? ` · ${bl.lignes.filter((x) => x.c.vendre).length} dans « À vendre »` : ''}`);
   const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
 
   // Séries de la collection proposées : celles de l'éditeur choisi (toutes si aucun)
@@ -1205,17 +1205,10 @@
   // Répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état ; une barre cliquée filtre la liste
   function afficherHistoColl(bl) {
     const valeursColl = [];
-    bl.lignes.filter((x) => retenue(x, false)).forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
+    bl.lignes.forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
     const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
-      valeurs: valeursColl, etat: 'l\'état de chaque exemplaire', nom: { s: 'exemplaire', p: 'exemplaires' }, choix: true, sel: { mini: FC.pmin, maxi: FC.pmax }, vide: 'Aucun exemplaire n\'a de cote pour ces filtres.' });
+      valeurs: valeursColl, etat: 'l\'état de chaque exemplaire', nom: { s: 'exemplaire', p: 'exemplaires' }, choix: true, sel: { mini: '', maxi: '' }, vide: 'Aucun exemplaire n\'a de cote pour l\'instant.' });
     $('#coll-histo-chiffres').hidden = !okH;
-  }
-
-  const analysesPage = () => { const sel = bilan(retenue); return infosRapides(sel) + analysesPortefeuille(sel, true); };
-  function majAnalysesPage() {
-    const z = $('#coll-analyses'), d = z.querySelector('details'), ouvert = d && d.open;
-    z.innerHTML = analysesPage();
-    if (ouvert && z.querySelector('details')) z.querySelector('details').open = true;
   }
 
   function majListe() {
@@ -1224,8 +1217,6 @@
     $('#coll-filtre-compte').textContent = texteFiltre(lst, bl);
     $('#coll-plus-zone').innerHTML = boutonPlus(lst.reste);
     if ($('#cf-raz')) $('#cf-raz').hidden = !filtresActifs();
-    afficherHistoColl(bl);
-    majAnalysesPage();
   }
 
   function brancherFiltresColl() {
@@ -1236,12 +1227,11 @@
     if (hz) {
       const choisir = (el) => {
         const deja = FC.pmin === el.dataset.mini && FC.pmax === el.dataset.maxi;
-        FC.pmin = deja ? '' : el.dataset.mini; FC.pmax = deja ? '' : el.dataset.maxi; limiteColl = 30; majListe();
-        if (!deja) $('#titre-exemplaires').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        FC = { ...FC0, pmin: el.dataset.mini, pmax: el.dataset.maxi }; limiteColl = 30; CTAB = 'livres'; afficherCollection(); ouvrirOnglet('livres', { aller: true });
+        const h = $('#titre-exemplaires'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
       };
       hz.addEventListener('click', (e) => { const el = e.target.closest('.h-clic'); if (el) choisir(el); });
       hz.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('h-clic')) { e.preventDefault(); choisir(e.target); } });
-      $('#coll-histo-legende').addEventListener('click', (e) => { if (e.target.closest('[data-effacer-prix]')) { FC.pmin = ''; FC.pmax = ''; limiteColl = 30; majListe(); } });
     }
     const ed = $('#cf-editeur');
     if (ed) ed.addEventListener('change', () => {          // la série choisie reste si elle appartient à cet éditeur, sinon elle est retirée
@@ -1251,11 +1241,6 @@
     });
     const raz = $('#cf-raz');
     if (raz) raz.addEventListener('click', () => { FC = { ...FC0 }; limiteColl = 30; afficherCollection(); });
-    document.querySelectorAll('tr.filtrable').forEach((tr) => {
-      const go = () => { FC = { ...FC0, serie: tr.dataset.serie }; limiteColl = 30; afficherCollection(); $('#titre-exemplaires').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-      tr.addEventListener('click', go);
-      tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
-    });
   }
 
   // Livres recherchés : la liste ne garde que ceux qui ne sont pas (encore) dans la collection
@@ -1330,6 +1315,105 @@
   document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
+  // Médiane de la valeur d'un exemplaire (chaque exemplaire compte pour une unité, au prix de son état)
+  function medianeEx(bl) {
+    const u = bl.lignes.flatMap(({ b, c }) => { const v = valeurLigne(b, c); return v == null ? [] : Array(c.qte).fill(v / c.qte); }).sort((x, y) => x - y);
+    if (!u.length) return 0;
+    return u.length % 2 ? u[(u.length - 1) / 2] : (u[u.length / 2 - 1] + u[u.length / 2]) / 2;
+  }
+  // Répartition de la valeur par segment : un seul sélecteur, des barres ; une barre cliquée filtre « Mes livres » quand ce segment sert de filtre
+  const SEGMENTS = [
+    ['serie', 'Série', (b) => b.serie || 'Sans série', 'serie'],
+    ['editeur', 'Éditeur', (b) => b.editeur || 'Éditeur inconnu', 'editeur'],
+    ['version', 'Édition (V1 à V5)', (b) => b.version, 'version'],
+    ['decennie', 'Décennie', (b) => (b.annee ? `${Math.floor(b.annee / 10) * 10}–${Math.floor(b.annee / 10) * 10 + 9}` : 'Année inconnue'), null],
+    ['etat', 'État', (b, c) => etatDe(c.etat).long, 'etat'],
+    ['rarete', 'Rareté', (b) => (b.rarete ? RARETE[b.rarete.niveau] : 'Sans information'), null]];
+  function barresSegment(bl) {
+    const [, , clef, filtre] = SEGMENTS.find((x) => x[0] === CSEG) || SEGMENTS[0];
+    const m = new Map();
+    bl.lignes.forEach(({ b, c }) => {
+      const k = clef(b, c), e = m.get(k) || { nom: k, val: 0, ex: 0, v: filtre === 'etat' ? c.etat : k };
+      e.val += valeurLigne(b, c) || 0; e.ex += c.qte; m.set(k, e);
+    });
+    let L = [...m.values()].sort((x, y) => y.val - x.val);
+    if (L.length > 8) { const reste = L.slice(7); L = L.slice(0, 7).concat([{ nom: 'Autres', val: reste.reduce((t, x) => t + x.val, 0), ex: reste.reduce((t, x) => t + x.ex, 0), v: null, autres: true }]); }
+    const max = Math.max(...L.map((x) => x.val), 1), tot = bl.total || 1;
+    return L.map((x) => {
+      const pct = Math.round((100 * x.val) / tot), txt = `<span class="seg-nom">${esc(x.nom)}</span><span class="seg-fond"><i style="width:${Math.max(3, Math.round((100 * x.val) / max))}%"></i></span><span class="seg-val">${fmtE(x.val)} · ${pct} %<small> · ${x.ex} ex.</small></span>`;
+      return filtre && !x.autres
+        ? `<li><button type="button" class="seg-ligne seg-clic" data-seg="${filtre}" data-val="${esc(x.v)}" aria-label="${esc(x.nom)} : ${fmtE(x.val)}, ${pct} % de la valeur, ${x.ex} exemplaire${x.ex > 1 ? 's' : ''}. Afficher ces livres.">${txt}</button></li>`
+        : `<li><div class="seg-ligne" role="group" aria-label="${esc(x.nom)} : ${fmtE(x.val)}, ${pct} % de la valeur, ${x.ex} exemplaire${x.ex > 1 ? 's' : ''}">${txt}</div></li>`;
+    }).join('');
+  }
+  function pieceHtml({ b, c }) {
+    return `<button type="button" class="piece" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}, ${fmt(b.prix[c.etat])}">
+      ${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+      <b>${esc(b.titre)}</b><span>${esc(b.version)} · ${esc(etatDe(c.etat).court)}</span><span class="p">${fmt(b.prix[c.etat])}</span>${pastilleRarete(b)}</button>`;
+  }
+  function analysePane(bl) {
+    const cotes = bl.lignes.filter((x) => x.b.prix[x.c.etat] != null);
+    const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+    const rang = { tres_rare: 0, rare: 1 };
+    const rares = bl.lignes.filter((x) => x.b.rarete && rang[x.b.rarete.niveau] !== undefined && x.b.prix[x.c.etat] != null)
+      .sort((x, y) => rang[x.b.rarete.niveau] - rang[y.b.rarete.niveau] || y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+    const sansInfo = bl.lignes.filter((x) => !x.b.rarete).length;
+    const recent = bl.lignes.reduce((t, x) => t + (estActuel(infoPrix(x.b, x.c.etat)) ? (valeurLigne(x.b, x.c) || 0) : 0), 0);
+    return `<h3>Répartition de la valeur</h3>
+      <div class="seg-choix"><label for="coll-segment">Répartir par</label><select id="coll-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === CSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <ul class="seg-liste" id="coll-seg">${barresSegment(bl)}</ul>
+      <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
+      <p class="sous" id="coll-histo-note"></p>
+      <div id="coll-histo" class="histo"></div>
+      <div class="legende" id="coll-histo-legende"></div>
+      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>
+      <div class="coll-pieces">
+        <div><h3>Les plus chères</h3>${chers.length ? `<div class="pieces">${chers.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune cote disponible pour l\'instant.</p>'}</div>
+        <div><h3>Les plus rares</h3>${rares.length ? `<div class="pieces">${rares.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune de vos pièces n\'est rare ou très rare.</p>'}
+          ${sansInfo ? `<p class="sous">${sansInfo} édition${sansInfo > 1 ? 's' : ''} sans information de rareté : ${sansInfo > 1 ? 'elles ne sont' : 'elle n\'est'} pas classée${sansInfo > 1 ? 's' : ''}.</p>` : ''}</div>
+      </div>
+      <p class="sous">${bl.total ? `${Math.round((100 * recent) / bl.total)} % de la valeur repose sur des prix récents ; le reste, sur d'anciennes archives (un ordre de grandeur).` : ''}</p>`;
+  }
+
+  /* ---------- Onglets de « Ma collection » : Mes livres, Analyse, À vendre, À trouver ---------- */
+  const ONGLETS_COLL = ['livres', 'analyse', 'vendre', 'trouver'];
+  const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
+  let CTAB = 'livres', CSEG = 'serie';
+  (function lireOngletInitial() {
+    const h = location.hash.replace('#', '');
+    if (ALIAS_ONGLET[h]) { CTAB = ALIAS_ONGLET[h]; return; }
+    try { const m = sessionStorage.getItem('cdh-coll-pane'); if (ONGLETS_COLL.includes(m)) CTAB = m; } catch (e) { /* sans stockage : « Mes livres » */ }
+  })();
+  function ouvrirOnglet(nom, { aller = false } = {}) {
+    if (!ONGLETS_COLL.includes(nom)) return;
+    CTAB = nom;
+    try { sessionStorage.setItem('cdh-coll-pane', nom); } catch (e) { /* sans effet */ }
+    if ($('#collection') && /^(#(livres|analyse|vendre|trouver|titre-[a-z-]+|coll-analyse)?)?$/.test(location.hash)) history.replaceState(null, '', '#' + nom);
+    ONGLETS_COLL.forEach((k) => {
+      const b = $('#onglet-coll-' + k), pan = $('#pane-coll-' + k);
+      if (b) { b.setAttribute('aria-selected', String(k === nom)); b.tabIndex = k === nom ? 0 : -1; }
+      if (pan) pan.hidden = k !== nom;
+    });
+    if (aller) { const t = $('#coll-nav'); if (t) t.scrollIntoView({ behavior: 'auto', block: 'start' }); }
+  }
+  document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b && $('#collection')) ouvrirOnglet(b.dataset.onglet, { aller: true }); });
+  document.addEventListener('keydown', (e) => {
+    const t = e.target.closest && e.target.closest('#coll-nav [role="tab"]');
+    if (!t) return;
+    const i = ONGLETS_COLL.indexOf(t.dataset.onglet);
+    const j = e.key === 'ArrowRight' ? (i + 1) % 4 : e.key === 'ArrowLeft' ? (i + 3) % 4 : e.key === 'Home' ? 0 : e.key === 'End' ? 3 : -1;
+    if (j < 0) return;
+    e.preventDefault(); ouvrirOnglet(ONGLETS_COLL[j]); $('#onglet-coll-' + ONGLETS_COLL[j]).focus();
+  });
+  window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
+  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } });
+  // Une barre de répartition ouvre « Mes livres » filtré sur ce segment
+  document.addEventListener('click', (e) => {
+    const l = e.target.closest('.seg-clic'); if (!l) return;
+    FC = { ...FC0, [l.dataset.seg]: l.dataset.val }; limiteColl = 30; CTAB = 'livres'; afficherCollection(); ouvrirOnglet('livres', { aller: true });
+    const h = $('#titre-exemplaires'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+  });
+
   function afficherCollection() {
     rendreAjoutColl();
     const bl = bilan();
@@ -1401,76 +1485,48 @@
       return;
     }
     if (!n) {
-      zone.innerHTML = `${lienATrouver()}<div class="coll-vide"><p>Constituez ici votre collection pour la suivre dans le temps.</p>
+      zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour la suivre dans le temps.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}`;
       return;
     }
-    // par série
-    const parSerie = new Map();
-    bl.lignes.forEach(({ b, c }) => {
-      const e = parSerie.get(b.serie) || { titres: new Set(), ex: 0, val: 0 };
-      e.titres.add(b.livre_id); e.ex += c.qte; e.val += valeurLigne(b, c) || 0;
-      parSerie.set(b.serie, e);
-    });
-    const totalTitres = new Map();
-    DATA.forEach((b) => { (totalTitres.get(b.serie) || totalTitres.set(b.serie, new Set()).get(b.serie)).add(b.livre_id); });
-    const series = [...parSerie].sort((a, b) => b[1].val - a[1].val);
-    const maxVal = Math.max(...series.map((x) => x[1].val), 1);
-    const lignesSerie = series.map(([nom, e]) => {
-      const tot = totalTitres.get(nom).size;
-      return `<tr class="filtrable" data-serie="${esc(nom)}" tabindex="0" title="Afficher seulement cette série dans la liste"><td class="principal"><div class="l-livre"><b style="font:700 1.1rem var(--f-display)">${esc(nom)}</b></div></td>
-        <td class="num" data-label="Titres"><span class="prix-c">${e.titres.size}</span> <span class="sous">sur ${tot}</span><span class="progres"><i style="width:${Math.round((e.titres.size / tot) * 100)}%"></i></span></td>
-        <td class="num" data-label="Exemplaires"><span class="prix-c">${e.ex}</span></td>
-        <td class="num" data-label="Valeur estimée"><span class="prix-c">${fmtE(e.val)}</span><span class="barre" style="width:${Math.max(4, (e.val / maxVal) * 100)}%"></span></td></tr>`;
-    }).join('');
-    // pièces les plus cotées
-    const pieces = [...bl.lignes].filter((x) => x.b.prix[x.c.etat] != null).sort((a, b) => b.b.prix[b.c.etat] - a.b.prix[a.c.etat]).slice(0, 5);
-    const htmlPieces = pieces.map(({ b, c }) => `<button type="button" class="piece" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}, ${fmt(b.prix[c.etat])}">
-      ${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-      <b>${esc(b.titre)}</b><span>${esc(b.version)} · ${esc(etatDe(c.etat).court)}</span><span class="p">${fmt(b.prix[c.etat])}</span></button>`).join('');
-    // exemplaires, modifiables, filtrés et triés (filtres : FC)
     const lst = listeExemplaires(bl);
-    const lignesEx = lst.html, reste = lst.reste;
+    const aVendre = bl.lignes.filter((x) => x.c.vendre), valVendre = aVendre.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0);
+    const nbTrouver = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
+    const cases = [
+      ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) : 'à venir', aVendre.length ? `dont ${aVendre.length} à vendre : ${fmtE(valVendre)}` : '', 'cle-valeur'],
+      ['Exemplaires', String(bl.exemplaires), '', ''],
+      ['Titres', String(bl.titres), `${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}`, ''],
+      ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
+      ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
+      ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
+    const onglets = [['livres', 'Mes livres', bl.lignes.length - aVendre.length], ['analyse', 'Analyse', null], ['vendre', 'À vendre', aVendre.length], ['trouver', 'À trouver', nbTrouver]];
+    const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     zone.innerHTML = `
-      ${lienATrouver()}
-      <div class="coll-haut">
-        <div class="sceau" role="img" aria-label="Patrimoine estimé : ${fmtE(bl.total)}"><span class="sceau-lib">Patrimoine estimé</span><span class="sceau-prix">${fmtE(bl.total)}</span><span class="sceau-etat">${bl.exemplaires} exemplaire${bl.exemplaires > 1 ? 's' : ''}${bl.lignes.some((x) => x.c.vendre) ? ` · dont ${bl.lignes.filter((x) => x.c.vendre).length} à vendre` : ''}</span></div>
-        <div>
-          <dl class="stats">
-            <div><dt>Titres</dt><dd>${bl.titres}<small>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}</small></dd></div>
-            <div><dt>Plancher</dt><dd>${fmtE(bl.bas)}<small>tout en convenable</small></dd></div>
-            <div><dt>Plafond</dt><dd>${fmtE(bl.haut)}<small>tout en <abbr title="Très bon état">TBE</abbr></small></dd></div>
-          </dl>
-          <p class="trois">${esc(texteEstimation(bl))}</p>
-          ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
-          <div class="coll-actions">
-            <button type="button" class="bouton" data-parcours>Compléter pas à pas</button>
-            <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
-            <details class="exporter"><summary class="bouton bouton-clair">Exporter ma collection</summary>
-              <div class="exporter-choix"><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div></details>
-          </div>
-        </div>
+      <ul class="coll-cles" id="coll-cles" aria-label="Chiffres clés de la collection">${cases.map(([l, v, d, c]) => `<li class="${c}"><span class="cle-lib">${l}</span><b>${v}</b>${d ? `<small>${d}</small>` : ''}</li>`).join('')}</ul>
+      <p class="trois">${esc(texteEstimation(bl))}</p>
+      ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
+      <div class="coll-nav" id="coll-nav" role="tablist" aria-label="Sections de ma collection">${onglets.map(([k, nom, nb]) =>
+        `<button type="button" role="tab" id="onglet-coll-${k}" aria-controls="pane-coll-${k}" aria-selected="${k === CTAB}" tabindex="${k === CTAB ? 0 : -1}" data-onglet="${k}">${nom}${nb == null ? '' : ` <span class="coll-nb" aria-label="${nb} livre${nb > 1 ? 's' : ''}">(${nb})</span>`}</button>`).join('')}</div>
+      <div class="coll-pane" id="pane-coll-livres" role="tabpanel" aria-labelledby="onglet-coll-livres"${CTAB === 'livres' ? '' : ' hidden'}>
+        <h3 id="titre-exemplaires" class="sr-only">Mes livres</h3>
+        <p class="coll-pas-a-pas"><button type="button" class="bouton" data-parcours>Compléter pas à pas</button></p>
+        ${barreFiltres(bl)}
+        <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
+        <ul class="ex-liste" id="coll-lignes">${lst.html}</ul>
+        <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
-      <h3 id="titre-exemplaires">Vos exemplaires</h3>
-      ${barreFiltres(bl)}
-      <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
-      <ul class="ex-liste" id="coll-lignes">${lignesEx}</ul>
-      <div id="coll-plus-zone">${boutonPlus(reste)}</div>
-      ${htmlAVendre(bl)}
-      ${htmlATrouver()}
-      <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
-      <details class="coll-analyse" id="coll-analyse"><summary>Analyse de ma collection <span class="sous">valeur par tranche, par série, pièces les plus cotées</span></summary>
-      <div id="coll-analyses" class="coll-analyses">${analysesPage()}</div>
-      <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
-      <p class="sous" id="coll-histo-note"></p>
-      <div id="coll-histo" class="histo"></div>
-      <div class="legende" id="coll-histo-legende"></div>
-      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>
-      <h3>Par série</h3>
-      <table class="cartes groupes"><thead><tr><th>Série</th><th class="num">Titres possédés</th><th class="num">Exemplaires</th><th class="num">Valeur estimée</th></tr></thead><tbody>${lignesSerie}</tbody></table>
-      ${pieces.length ? `<h3>Vos pièces les plus cotées</h3><div class="pieces">${htmlPieces}</div>` : ''}
-      </details>`;
+      <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
+      <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
+      <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
+      <div class="coll-gerer"><h3>Gérer ma collection</h3>
+        <div class="coll-actions">
+          <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
+          <details class="exporter"><summary class="bouton bouton-clair">Exporter ma collection</summary>
+            <div class="exporter-choix"><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div></details>
+        </div>
+        <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
+      </div>`;
     afficherHistoColl(bl);
     brancherFiltresColl();
   }
