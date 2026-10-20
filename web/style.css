@@ -1656,3 +1656,9 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .piece .rarete-rare { color: var(--gold); }
 .piece .rarete-tres_rare { color: #1b1305; }
 .ex-vendre.actif { color: #f0a5b0; border-color: #c4465a; background: rgba(122, 31, 43, .35); }
+.tend { display: inline-block; margin-top: 2px; font: 700 .78rem var(--f-ui); white-space: nowrap; }
+.tend-hausse { color: #7fd69c; }
+.tend-baisse { color: #f08f99; }
+.tend-stable { color: var(--muted); }
+.ex-droite { display: flex; flex-direction: column; align-items: flex-end; }
+.coll-legende-tend { margin: 4px 0 10px; font-size: .85rem; }
