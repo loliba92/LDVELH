@@ -1174,7 +1174,7 @@
     return { html, reste: triees.length - vus.length, nb: triees.length, ex: triees.reduce((t, x) => t + x.c.qte, 0), valeur: triees.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0) };
   }
   const texteFiltre = (lst, bl) => (!lst.nb ? (filtresActifs() ? 'Aucun exemplaire ne correspond à ces filtres.' : 'Tous vos livres sont dans la liste à vendre, plus bas.')
-    : `${lst.nb} édition${lst.nb > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).length}` : ''} · ${lst.ex} exemplaire${lst.ex > 1 ? 's' : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}${bl.lignes.some((x) => x.c.vendre) ? ` · ${bl.lignes.filter((x) => x.c.vendre).length} dans « À vendre »` : ''}`);
+    : `${lst.ex} livre${lst.ex > 1 ? 's' : ''}${filtresActifs() ? ` sur ${bl.lignes.filter((x) => !x.c.vendre).reduce((t, x) => t + x.c.qte, 0)}` : ''} · ${filtresActifs() ? 'valeur de cette sélection' : 'valeur'} : ${fmtE(lst.valeur)}${bl.lignes.some((x) => x.c.vendre) ? ` · ${bl.lignes.filter((x) => x.c.vendre).reduce((t, x) => t + x.c.qte, 0)} dans « À vendre »` : ''}`);
   const boutonPlus = (reste) => (reste > 0 ? `<button type="button" class="plus" id="coll-plus">Voir ${Math.min(reste, 30)} exemplaires de plus (${reste} restants)</button>` : '');
 
   // Séries de la collection proposées : celles de l'éditeur choisi (toutes si aucun)
@@ -1450,10 +1450,10 @@
       } else {
         const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
         const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
-        const pct = Math.max(2, Math.round(100 * bl.titres / (META.nb_versions || 1)));
+        const pct = Math.max(2, Math.round(100 * bl.lignes.length / (META.nb_versions || 1)));
         corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) : 'prix à venir'}</b></p>
-          <p class="texte petit">${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}</p></div></div>
-          <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.titres} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.titres} édition${bl.titres > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
+          <p class="texte petit">${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}</p></div></div>
+          <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.lignes.length} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
           <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Compléter pas à pas</button></p>`;
       }
       $('#hc-corps').innerHTML = corps;
@@ -1462,7 +1462,7 @@
     const visiteur = sansCompte();       // compte demandé et pas connecté : écran d'invitation à la place de l'outil
     if ($('#ca-invite')) $('#ca-invite').hidden = !visiteur;
     ['#importer', '#coll-prive', '#coll-compte'].forEach((s) => { if ($(s)) $(s).hidden = visiteur; });
-    $('#coll-compte').textContent = n ? `${bl.titres} titre${bl.titres > 1 ? 's' : ''} · ${n} exemplaire${n > 1 ? 's' : ''}` : 'vide pour l\'instant';
+    $('#coll-compte').textContent = n ? `${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}` : 'vide pour l\'instant';
     const comptePrevu = !!window.Compte && window.Compte.actif();
     $('#coll-prive').innerHTML = (stockageOk
       ? (comptePrevu
@@ -1491,16 +1491,16 @@
       return;
     }
     const lst = listeExemplaires(bl);
-    const aVendre = bl.lignes.filter((x) => x.c.vendre), valVendre = aVendre.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0);
+    const aVendre = bl.lignes.filter((x) => x.c.vendre), exV = aVendre.reduce((t, x) => t + x.c.qte, 0), valVendre = aVendre.reduce((t, x) => t + (valeurLigne(x.b, x.c) || 0), 0);
     const nbTrouver = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
     const cases = [
-      ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) : 'à venir', aVendre.length ? `dont ${aVendre.length} à vendre : ${fmtE(valVendre)}` : '', 'cle-valeur'],
-      ['Exemplaires', String(bl.exemplaires), '', ''],
-      ['Titres', String(bl.titres), `${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''}`, ''],
+      ['Valeur estimée', bl.total > 0 ? fmtE(bl.total) : 'à venir', aVendre.length ? `dont ${fmtE(valVendre)} à vendre` : '', 'cle-valeur'],
+      ['Livres', String(bl.exemplaires), exV ? `dont ${exV} à vendre` : '', ''],
+      ['Titres', String(bl.titres), 'sans compter les rééditions', ''],
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    const onglets = [['livres', 'Mes livres', bl.lignes.length - aVendre.length], ['analyse', 'Analyse', null], ['vendre', 'À vendre', aVendre.length], ['trouver', 'À trouver', nbTrouver]];
+    const onglets = [['livres', 'Mes livres', bl.exemplaires - exV], ['analyse', 'Analyse', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     zone.innerHTML = `
       <ul class="coll-cles" id="coll-cles" aria-label="Chiffres clés de la collection">${cases.map(([l, v, d, c]) => `<li class="${c}"><span class="cle-lib">${l}</span><b>${v}</b>${d ? `<small>${d}</small>` : ''}</li>`).join('')}</ul>
