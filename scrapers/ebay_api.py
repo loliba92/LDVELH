@@ -243,11 +243,99 @@ def diagnostiquer(isbn, token):
                   f"âge {age if age is not None else '?'} j | {motif} | {it.get('itemWebUrl', '')}")
 
 
+def requetes_candidates(isbn13, ed):
+    """Requêtes testées par --essais pour une édition : {nom: texte}. L'ISBN seul est la méthode actuelle."""
+    import editions
+    try:
+        _, isbn10 = editions.normalize_isbn(isbn13)
+    except ValueError:
+        isbn10 = ""
+    h = isbn13
+    trait = f"{h[:3]}-{h[3]}-{h[4:6]}-{h[6:12]}-{h[12]}" if len(h) == 13 else h
+    serie = (ed.get("serie") or "").strip()
+    num = (ed.get("numero") or "").strip().lstrip("0")
+    livre = ed.get("livre") or ed.get("titre") or ""
+    auteur = (ed.get("auteurs") or "").split(";")[0].strip()
+    q = {"isbn13": isbn13}
+    if isbn10:
+        q["isbn10"] = isbn10
+    q["isbn13_tirets"] = trait
+    q["titre_serie"] = " ".join(x for x in (livre, serie, num) if x)
+    q["titre_auteur"] = " ".join(x for x in (livre, auteur) if x)
+    q["titre_livre_heros"] = f"{livre} livre dont vous êtes le héros"
+    return q
+
+
+def essayer(a, token):
+    """Compare, sur N éditions, plusieurs façons de chercher sur eBay. Rien n'est enregistré, et le journal (public) ne montre
+    que des comptages. Une annonce est « valable » si elle concorde avec le titre et l'année de l'édition, n'est pas un lot,
+    est en euros, a un état connu et a moins de 90 jours : c'est exactement ce que le relevé retient."""
+    import collections
+    import editions
+    jour = date.today()
+    rows = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
+    cat = catalogue()
+    pas = max(1, len(cat) // a.essais)
+    echantillon = cat[::pas][: a.essais]                                  # réparti sur tout le catalogue
+    valables = collections.defaultdict(dict)                              # nom de requête -> {isbn: {itemId}}
+    renvoyees = collections.Counter(); concordantes = collections.Counter()
+    for isbn, titre, nb_ed, livre, annees in echantillon:
+        for nom, texte in requetes_candidates(isbn, rows.get(isbn, {})).items():
+            if not texte.strip():
+                continue
+            try:
+                items = annonces(texte, token)
+            except requests.RequestException:
+                continue
+            time.sleep(PAUSE)
+            ids = set()
+            for it in items:
+                renvoyees[nom] += 1
+                if not concorde(it.get("title", ""), titre):
+                    continue
+                concordantes[nom] += 1
+                if not annee_compatible(it.get("title", ""), annees):
+                    continue
+                etat, _ = etat_de(it)
+                prix = it.get("price") or {}
+                age = age_jours(it, jour)
+                if etat is None or prix.get("currency") != "EUR" or LOT.search(it.get("title", "")):
+                    continue
+                if age is not None and age > MAX_AGE_JOURS:
+                    continue
+                ids.add(it.get("itemId"))
+            valables[nom][isbn] = ids
+    base = valables["isbn13"]
+    noms = list(valables)
+    print(f"Essai sur {len(echantillon)} éditions réparties sur le catalogue (comptages seulement)\n")
+    print("| Requête | annonces renvoyées | concordantes avec le titre | annonces valables | éditions avec ≥ 1 | éditions avec ≥ 3 |")
+    print("|---|---|---|---|---|---|")
+    for nom in noms:
+        v = valables[nom]
+        print(f"| {nom} | {renvoyees[nom]} | {concordantes[nom]} ({100 * concordantes[nom] // max(renvoyees[nom], 1)} %) | {sum(len(x) for x in v.values())} | "
+              f"{sum(1 for x in v.values() if x)} | {sum(1 for x in v.values() if len(x) >= 3)} |")
+    print("\n**Gain par rapport à l'ISBN seul** (annonces valables nouvelles ; éditions qui atteignent 3 annonces)\n")
+    print("| Ajout à l'ISBN | annonces en plus | éditions avec ≥ 3 (avant → après) |")
+    print("|---|---|---|")
+    avant3 = sum(1 for x in base.values() if len(x) >= 3)
+    for nom in noms:
+        if nom == "isbn13":
+            continue
+        plus = 0; apres3 = 0
+        for isbn in base:
+            u = base[isbn] | valables[nom].get(isbn, set())
+            plus += len(u - base[isbn]); apres3 += len(u) >= 3
+        print(f"| + {nom} | {plus} | {avant3} → {apres3} |")
+    tout = {isbn: set().union(*(valables[n].get(isbn, set()) for n in noms)) for isbn in base}
+    print(f"| + toutes les requêtes | {sum(len(tout[i] - base[i]) for i in base)} | {avant3} → {sum(1 for x in tout.values() if len(x) >= 3)} |")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
     p.add_argument("--diagnostic", help="ISBN : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
+    p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
     cid, secret = (os.environ.get("EBAY_CLIENT_ID") or "").strip(), (os.environ.get("EBAY_CLIENT_SECRET") or "").strip()
@@ -263,6 +351,9 @@ def main():
         return
     if a.controle:
         controler(a, token)
+        return
+    if a.essais:
+        essayer(a, token)
         return
     cat = catalogue()[: a.limite]
     isbns = [c[0] for c in cat]
