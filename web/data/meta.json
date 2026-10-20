@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-19",
+  "genere_le": "2026-10-20",
   "nb_versions": 512,
   "nb_livres": 274,
   "nb_series": 36,
@@ -18,7 +18,7 @@
     "n_paires": 9,
     "gain": null,
     "raison": "pas assez d'éditions comparables (9 sur 20 nécessaires)",
-    "calcule_le": "2026-10-19",
+    "calcule_le": "2026-10-20",
     "rapport_global": null,
     "nb_recalibres": 0
   }
