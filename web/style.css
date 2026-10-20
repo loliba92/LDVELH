@@ -1662,3 +1662,6 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .tend-stable { color: var(--muted); }
 .ex-droite { display: flex; flex-direction: column; align-items: flex-end; }
 .coll-legende-tend { margin: 4px 0 10px; font-size: .85rem; }
+.livre-carte .prix .tend { display: inline-block; margin: 4px 0 0 0; font-size: .74rem; }
+.livre-carte .prix .tend + * { margin-left: 0; }
+.livre-carte .prix .tend { margin: 0 0 0 8px; vertical-align: middle; }
