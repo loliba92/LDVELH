@@ -62,6 +62,17 @@ Le workflow `.github/workflows/prix-ebay.yml` le lance chaque lundi, reconstruit
 
 Classements « plus chers / moins chers », « prix qui évoluent vite » (il faut plusieurs relevés datés), partage d'une collection par lien.
 
+## Règle assouplie (20 octobre 2026) : les petits relevés comptent, avec prudence
+
+La règle des 3 annonces le même jour, pour un même état, laissait environ deux tiers des éditions sur l'ancien relevé. Elle est remplacée par un jugement graduel (`pipeline/estimation.py`) :
+
+- **Toute annonce compte**, même seule. Un relevé de moins de 3 annonces le même jour voit son incertitude **doublée** (`FACTEUR_MINCE`) : il déplace peu l'estimation, et plus vite s'il s'éloigne de l'archive (`ECART_ALERTE_MINCE`).
+- **Un relevé mince dont le prix s'écarte de plus de 2,5 fois de l'archive est écarté** (`FACTEUR_ABERRANT`) : une annonce à 100 € pour un livre d'archive à 10 € est une erreur ou un exemplaire hors norme.
+- **Une cote « mince »** (ni 3 annonces le même jour, ni 6 au total sur plusieurs jours : `NB_FIABLE`, `NB_SOLIDE`) compte comme prix récent, avec une confiance faible, mais **ne sert pas à déduire les autres états** (répartition 40/60/100 de `etats.py`). Sinon une seule annonce en convenable réécrirait le bon état et le très bon état.
+- Les annonces d'une même édition, de jours différents, se cumulent déjà dans le lissage.
+
+Effet au 20 octobre : 158 éditions avec un prix récent avant, 318 après ; une variation médiane des états touchés d'environ +8 % (les prix demandés dépassent souvent les cotes d'archives).
+
 ## Premier relevé eBay (14 octobre 2026) et règle des 3 annonces
 Essai sur 20 éditions : 19 ont au moins une annonce, 43 lignes (édition × état), 78 annonces au total. Constats :
 - Les prix demandés sur eBay sont nettement plus élevés que les archives : rapport médian 1,95 sur la médiane des annonces, 1,4 sur le minimum (les archives sont une moyenne des prix les plus bas, pas une médiane : les deux mesures ne sont pas identiques).

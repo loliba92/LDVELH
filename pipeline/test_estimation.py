@@ -39,9 +39,9 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(r["source"], "actuel")         # une annonce récente pèse plus qu'une archive de dix mois
         self.assertEqual(r["confiance"], "moyenne")
 
-    def test_une_annonce_isolee_est_ignoree(self):
+    def test_une_annonce_isolee_tres_eloignee_de_l_archive_est_ignoree(self):
         r = estimer([Obs(10, "historique", AUJ, 1), Obs(104.69, "prix_demande", AUJ, 1), Obs(90, "prix_demande", AUJ - timedelta(days=7), 2)], AUJ)
-        self.assertEqual((r["prix"], r["source"]), (10, "archives"))          # 1 annonce un jour, 2 une autre : aucun relevé n'atteint 3
+        self.assertEqual((r["prix"], r["source"]), (10, "archives"))          # 1 annonce un jour, 2 une autre : relevés minces et dix fois l'archive, donc écartés
 
     def test_les_annonces_d_un_meme_jour_de_plusieurs_sources_se_comptent_ensemble(self):
         """2 annonces eBay + 1 exemplaire de librairie le même jour : 3 annonces, le relevé compte (et l'archive cède)."""
@@ -49,11 +49,17 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual(r["source"], "actuel")
         self.assertEqual(r["nb"], 3)
         self.assertLess(r["prix"], 30)                                       # tiré vers les annonces (17-20 €), pas vers l'archive (40 €)
-        seul = estimer([Obs(40, "historique", AUJ, 1), Obs(17, "prix_demande", AUJ, 1)], AUJ)           # une offre seule ne suffit pas
-        self.assertEqual((seul["prix"], seul["source"]), (40, "archives"))
+        seul = estimer([Obs(40, "historique", AUJ, 1), Obs(17, "prix_demande", AUJ, 1)], AUJ)           # une offre seule compte, mais peu
+        self.assertTrue(30 < seul["prix"] < 40, seul["prix"])
+        self.assertEqual(seul["confiance"], "faible")
 
-    def test_sans_autre_observation_un_releve_trop_mince_ne_donne_rien(self):
-        self.assertIsNone(estimer([Obs(30, "prix_demande", AUJ, 2)], AUJ))
+    def test_sans_archive_un_releve_mince_donne_une_cote_faible(self):
+        r = estimer([Obs(30, "prix_demande", AUJ, 2)], AUJ)
+        self.assertEqual((r["prix"], r["nature"], r["confiance"]), (30.0, "annonces", "faible"))
+
+    def test_une_annonce_un_peu_differente_de_l_archive_la_deplace_peu(self):
+        r = estimer([Obs(10, "historique", AUJ, 1), Obs(14, "prix_demande", AUJ, 1)], AUJ)
+        self.assertTrue(10 < r["prix"] < 12.5, r["prix"])
 
     def test_vente_reelle_pese_plus_qu_une_annonce(self):
         r = estimer([Obs(40, "prix_demande", AUJ, 3), Obs(20, "vente_reelle", AUJ, 1)], AUJ)

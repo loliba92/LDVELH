@@ -44,7 +44,7 @@ def repartir(par_etat, ratios):
     la fiabilité de chacun, des états observés (prix ÷ rapport de l'état) ; un état déduit vaut ce niveau multiplié par son
     rapport (convenable 40 %, bon 60 %, très bon 100 %) et remplace l'éventuelle archive (« déduit », jamais compté comme prix
     actuel). Une édition sans aucun prix actuel n'est pas touchée. Renvoie le nombre d'états dont le prix a changé."""
-    actuels = {e: v for e, v in par_etat.items() if v and v.get("prix") and v.get("source") != "archives"}
+    actuels = {e: v for e, v in par_etat.items() if v and v.get("prix") and v.get("source") != "archives" and not v.get("mince")}
     if not actuels:
         return 0
     poids = {e: 1 / max(v.get("incertitude") or 0.35, 0.05) ** 2 for e, v in actuels.items()}
@@ -69,7 +69,7 @@ def completer(par_etat, ratios):
     manquants = [e for e in ETATS if not par_etat.get(e)]
     if not connus or not manquants:
         return 0
-    actuels = {e: v for e, v in connus.items() if v.get("source") != "archives"}
+    actuels = {e: v for e, v in connus.items() if v.get("source") != "archives" and not v.get("mince")}
     refs = actuels or connus                                  # on se fie d'abord aux relevés actuels
     niveau = math.exp(statistics.mean(math.log(v["prix"] / ratios[e]) for e, v in refs.items()))   # prix en « très bon état »
     ref = max(refs.values(), key=lambda v: v.get("date", ""))
