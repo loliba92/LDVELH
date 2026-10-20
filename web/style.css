@@ -1589,3 +1589,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rayon .livre-carte .tampon-trouver { background: #246842; }
 .livre-carte.vendre-oui.possede-oui .couv img, .livre-carte.vendre-oui.possede-oui .couv .jaq-vide { outline: 2px solid #c4465a; outline-offset: -2px; opacity: 1; }
 .livre-carte.trouver-oui .couv img, .livre-carte.trouver-oui .couv .jaq-vide { outline: 2px solid #5aa876; outline-offset: -2px; opacity: 1; }
+/* Pavé de couleur sous la jaquette (zone du titre) : rouge = à vendre, vert = à trouver ; la jaquette reste intacte */
+.rayon .livre-carte.vendre-oui .infos, .rayon .livre-carte.vendre-oui .souhait-carte { background: rgba(122, 31, 43, .42); }
+.rayon .livre-carte.trouver-oui .infos, .rayon .livre-carte.trouver-oui .souhait-carte { background: rgba(36, 104, 66, .45); }
+.rayon .livre-carte.vendre-oui .infos, .rayon .livre-carte.trouver-oui .infos { padding: 8px 10px 4px; border-radius: 4px 4px 0 0; }
+.rayon .livre-carte.vendre-oui .souhait-carte, .rayon .livre-carte.trouver-oui .souhait-carte { width: 100%; box-sizing: border-box; align-self: stretch; margin-top: -6px; padding: 2px 10px 8px; border-radius: 0 0 4px 4px; }
+.rayon .livre-carte.vendre-oui .souhait-carte, .rayon .livre-carte.trouver-oui .souhait-carte { color: var(--text); }
