@@ -1693,3 +1693,13 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .rayon .livre-carte .souhait-carte { font-size: .8rem; }
 .rayon .livre-carte .infos .titre { min-height: 2.4em; }
 @media (min-width: 900px) { .rang { align-items: start; } }
+
+/* Fiche : mêmes gestes que l'étagère (C / BE / TBE, À vendre, À trouver) */
+.coll-fiche .coll-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.coll-fiche .fiche-qte { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font: 600 .9rem var(--f-ui); }
+.coll-fiche .fiche-qte input { width: 64px; min-height: 44px; }
+.fiche-marque { min-height: 44px; padding: 0 16px; border-radius: var(--r); border: 1px solid var(--line-strong); background: none; color: var(--text); font: 700 .9rem var(--f-ui); cursor: pointer; }
+.fiche-marque.vendre.actif { background: rgba(122, 31, 43, .55); border-color: #f0a5b0; }
+.fiche-marque.trouver.actif { background: rgba(36, 104, 66, .6); border-color: #8fd3a8; }
+.coll-fiche .ex-etats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.coll-fiche .valeur-ex { margin: 10px 0 0; }

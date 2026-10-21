@@ -1829,35 +1829,38 @@
       return `<div class="coll-fiche"><h3>Dans ma collection</h3><p class="sous">Les cotes restent consultables sans compte. Pour garder vos livres, connectez-vous : Google les enregistre dans un espace réservé de votre Drive.</p>
         <button type="button" class="bouton" data-compte="connecter">Se connecter pour ajouter à ma collection</button></div>`;
     }
-    const c = COLL[b.id];
-    return `<div class="coll-fiche"><h3>Dans ma collection</h3><div class="coll-ligne">
-      <label class="case"><input type="checkbox" id="c-poss"${c ? ' checked' : ''}><span>Je possède ce livre</span></label>
-      <div class="champ-ligne"><label for="c-etat">État</label><select id="c-etat"${c ? '' : ' disabled'}>${ETATS.map((x) => `<option value="${x.k}"${(c ? c.etat : S.h) === x.k ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></div>
-      <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
-      <p class="valeur-ex" id="c-val"></p></div>
-      <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>À trouver</span></label></div>`;
+    const c = COLL[b.id], v = c ? valeurLigne(b, c) : null;
+    const etats = ETATS.map((x) => `<button type="button" data-fe="${x.k}" aria-pressed="${!!c && c.etat === x.k}" title="${x.long}" aria-label="${x.long}${c && c.etat === x.k ? ' : retirer de ma collection' : ''}">${ABREGE[x.k]}</button>`).join('');
+    const action = c
+      ? `<button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button>`
+      : `<button type="button" class="fiche-marque trouver${SOUH[b.id] ? ' actif' : ''}" data-fe-trouver aria-pressed="${!!SOUH[b.id]}">À trouver</button>`;
+    return `<div class="coll-fiche"><h3>Dans ma collection</h3>
+      <p class="sous">${c ? 'Touchez l\'état de votre exemplaire. Toucher le même état le retire.' : 'Choisissez l\'état de votre exemplaire pour l\'ajouter.'}</p>
+      <div class="coll-ligne"><div class="ex-etats" role="group" aria-label="État de mon exemplaire">${etats}</div>
+        ${c ? `<label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label>` : ''}${action}</div>
+      ${c ? `<p class="valeur-ex">${v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`}</p>` : ''}</div>`;
   }
   function brancherFicheCollection(b) {
-    if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
-    const maj = () => {
-      const c = COLL[b.id];
-      $('#c-etat').disabled = !c; $('#c-qte').disabled = !c;
-      const v = c ? valeurLigne(b, c) : null;
-      $('#c-souhait-zone').hidden = !!c;
-      $('#c-val').textContent = c ? (v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`) : '';
+    const zone = $('.coll-fiche');
+    if (!zone || !zone.querySelector('[data-fe]')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
+    let enCours = false;
+    const rafraichir = () => {                                       // la zone reste en place : seul son contenu est remplacé
+      if (enCours) return;                                           // le retrait d'un champ actif déclenche un « change » : on l'ignore
+      enCours = true;
+      const t = document.createElement('div'); t.innerHTML = blocCollectionFiche(b);
+      zone.replaceChildren(...t.firstElementChild.childNodes); afficher();
+      enCours = false;
     };
-    $('#c-poss').addEventListener('change', (e) => {
-      if (e.target.checked) { COLL[b.id] = { etat: $('#c-etat').value, qte: Math.min(99, Math.max(1, parseInt($('#c-qte').value, 10) || 1)) }; }
-      else delete COLL[b.id];
-      sauverColl(); maj(); afficher();
+    zone.addEventListener('click', (e) => {
+      const et = e.target.closest('[data-fe]');
+      if (et) { basculerPossede(b.id, et.dataset.fe); rafraichir(); return; }
+      if (e.target.closest('[data-fe-vendre]')) { basculerVendre(b.id); rafraichir(); return; }
+      if (e.target.closest('[data-fe-trouver]')) { basculerSouhait(b.id); rafraichir(); }
     });
-    $('#c-souhait').addEventListener('change', (e) => {
-      if (e.target.checked) SOUH[b.id] = {}; else delete SOUH[b.id];
-      sauverColl(); maj(); afficher();
+    zone.addEventListener('change', (e) => {
+      if (e.target.id !== 'c-qte' || !COLL[b.id] || enCours) return;
+      COLL[b.id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); sauverColl(); rafraichir();
     });
-    $('#c-etat').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].etat = e.target.value; sauverColl(); maj(); afficher(); } });
-    $('#c-qte').addEventListener('change', (e) => { if (COLL[b.id]) { COLL[b.id].qte = Math.min(99, Math.max(1, parseInt(e.target.value, 10) || 1)); e.target.value = COLL[b.id].qte; sauverColl(); maj(); afficher(); } });
-    maj();
   }
 
 
