@@ -136,7 +136,7 @@
     const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
-      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a></div></header>` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${aDesAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : ''}</div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
@@ -555,36 +555,62 @@
   document.addEventListener('cdh-compte', () => { etatJeton(); });   // déconnexion : la porte se referme
 
   // Sections de la page : un seul panneau à la fois ; les onglets Tendances et Demandes n'apparaissent que si leur contenu est disponible
-  // Onglet « Annonces » : les annonces eBay retenues par le dernier relevé, livre par livre (données/annonces.json)
+  // Annonces eBay retenues par le dernier relevé (data/annonces.json) : onglet « Annonces » et lien « Voir les annonces » de chaque livre
+  let ANN = null, annChargees = false;
+  const chargerAnnonces = () => {
+    if (annChargees) return annChargees;
+    annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+      .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
+    return annChargees;
+  };
+  const aDesAnnonces = (ed) => !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
+  function annoncesEdition(ed) {
+    const par = ANN.annonces[ed.isbn];
+    const blocs = ETATS.map(([cle, lib]) => {
+      const l = par[cle];
+      if (!l || !l.length) return '';
+      const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
+      return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, origine]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
+    }).join('');
+    return `<h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs || '<p class="sous">Aucune annonce retenue pour cette édition.</p>'}`;
+  }
+  // Fenêtre ouverte depuis un livre de l'onglet Prix
+  function ouvrirAnnonces(ed) {
+    let dlg = $('#an-dialog');
+    if (!dlg) {
+      dlg = document.createElement('dialog');
+      dlg.id = 'an-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'an-dialog-titre');
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces eBay retenues</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
+      document.body.appendChild(dlg);
+      dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'an-fermer') dlg.close(); });
+    }
+    $('#an-dialog-corps').innerHTML = annoncesEdition(ed);
+    $('#an-dialog-date').textContent = jour(ANN.date);
+    dlg.showModal();
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-annonces]');
+    if (!b) return;
+    const ed = EDITIONS.find((x) => x.id === b.dataset.annonces);
+    if (ed && aDesAnnonces(ed)) ouvrirAnnonces(ed);
+  });
+
+  // Onglet « Annonces » : recherche d'un livre, puis ses annonces
   function initAnnonces() {
     const champ = $('#an-q'), liste = $('#an-liste'), etat = $('#an-etat');
     if (!champ) return;
-    let ANN = null, charge = false;
     const dessiner = () => {
       const clair = (t) => norm(t).replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]+/g, ' ').trim();
       const mots = clair(champ.value).split(' ').filter(Boolean), q = mots.join(' ');
-      if (!ANN) { etat.textContent = charge ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
+      if (!ANN) { etat.textContent = annChargees ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
       const nbEd = Object.keys(ANN.annonces).length;
       if (q.length < 2) { etat.textContent = `Relevé du ${jour(ANN.date)} : annonces retenues pour ${nbEd} éditions. Tapez au moins deux lettres.`; liste.innerHTML = ''; return; }
-      const trouves = EDITIONS.filter((ed) => ed.isbn && ANN.annonces[ed.isbn] && (() => { const t = clair(ed.titre + ' ' + ed.serie + ' ' + (ed.numero || '')); return mots.every((m) => t.includes(m)); })()).slice(0, 12);
+      const trouves = EDITIONS.filter((ed) => aDesAnnonces(ed) && (() => { const t = clair(ed.titre + ' ' + ed.serie + ' ' + (ed.numero || '')); return mots.every((m) => t.includes(m)); })()).slice(0, 12);
       etat.textContent = trouves.length ? `${trouves.length} édition${trouves.length > 1 ? 's' : ''}${trouves.length === 12 ? ' (les 12 premières : précisez la recherche)' : ''}.` : 'Aucune édition avec des annonces retenues pour cette recherche.';
-      liste.innerHTML = trouves.map((ed) => {
-        const par = ANN.annonces[ed.isbn];
-        const blocs = ETATS.map(([cle, lib]) => {
-          const l = par[cle];
-          if (!l || !l.length) return '';
-          const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-          return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, par]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${par === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
-        }).join('');
-        return `<article class="rv-edition"><h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs}</article>`;
-      }).join('');
+      liste.innerHTML = trouves.map((ed) => `<article class="rv-edition">${annoncesEdition(ed)}</article>`).join('');
     };
     champ.addEventListener('input', dessiner);
-    document.addEventListener('cdh-pane', (e) => {
-      if (e.detail !== 'annonces' || charge) return;
-      charge = true;
-      fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((a) => { ANN = a && a.annonces ? a : null; dessiner(); });
-    });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'annonces') chargerAnnonces().then(dessiner); });
     dessiner();
   }
 
@@ -620,6 +646,7 @@
   }
   initAnnonces();
   initNav();
+  chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); });
 
   // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.

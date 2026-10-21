@@ -1737,3 +1737,12 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .rv-ann-prix { font-weight: 700; color: var(--gold); }
 .rv-ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
 @media (max-width: 560px) { .rv-nav { gap: 0; } .rv-nav button { padding: 8px 7px; font-size: .9rem; } }
+.rv-voir-ann { display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px; }
+.an-dialog { max-width: 640px; }
+.an-cadre { padding: 16px 18px 18px; display: grid; gap: 10px; }
+.an-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.an-tete .surtitre { margin: 0; }
+.an-dialog h4 { margin: 12px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.an-dialog ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.an-dialog li { overflow-wrap: anywhere; line-height: 1.35; font-size: .95rem; }
+.an-dialog li a { color: var(--text); text-underline-offset: 3px; }
