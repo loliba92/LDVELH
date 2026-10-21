@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-10-20",
+  "genere_le": "2026-10-21",
   "nb_versions": 512,
   "nb_livres": 274,
   "nb_series": 36,
@@ -18,7 +18,7 @@
     "n_paires": 28,
     "gain": -0.042,
     "raison": "le modèle ne bat pas assez les archives (gain -4%, 15% exigés)",
-    "calcule_le": "2026-10-20",
+    "calcule_le": "2026-10-21",
     "rapport_global": 0.925,
     "nb_recalibres": 0
   }
