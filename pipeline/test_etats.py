@@ -105,5 +105,24 @@ class TestEtats(unittest.TestCase):
             self.assertEqual(etats.charger_ratios(f)["bon"], 0.7)
 
 
+class TestPlafond(unittest.TestCase):
+    def test_un_prix_ne_bouge_que_de_dix_pour_cent_par_jour(self):
+        p = {"convenable": est(20), "bon": est(20), "tres_bon": est(20)}
+        p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"] = 30.0, 21.0, 10.0
+        n = etats.plafonner(p, {"convenable": 20.0, "bon": 20.0, "tres_bon": 20.0}, 0.10)
+        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (22.0, 21.0, 18.0))
+        self.assertEqual(n, 2)
+        self.assertTrue(p["convenable"]["plafonne"] and "plafonne" not in p["bon"])
+
+    def test_un_prix_valide_n_est_jamais_plafonne(self):
+        p = {"bon": est(40, source="validé")}
+        self.assertEqual(etats.plafonner(p, {"bon": 20.0}, 0.10), 0)
+        self.assertEqual(p["bon"]["prix"], 40)
+
+    def test_sans_prix_de_la_veille_rien_ne_change(self):
+        p = {"bon": est(40)}
+        self.assertEqual(etats.plafonner(p, {"bon": None}, 0.10), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
