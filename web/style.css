@@ -1679,3 +1679,17 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 @media (max-width: 560px) { .gerer-danger { flex-direction: column; align-items: stretch; text-align: left; } .gerer-danger .bouton { width: 100%; } .coll-gerer .exporter-choix { grid-template-columns: minmax(0, 1fr); } }
 .gerer-danger .danger-texte { display: grid; gap: 4px; }
 .gerer-danger .danger-titre { font: 800 .72rem var(--f-ui); letter-spacing: .16em; text-transform: uppercase; color: #f08f99; }
+
+/* Audit UX (21 octobre) : illustrations de « Le projet » plus sobres, cibles tactiles, lisibilité des boutons des cartes */
+.nowrap { white-space: nowrap; }
+.projet-large { margin: 24px 0; }
+.projet-large img { display: block; width: 100%; max-height: 340px; object-fit: cover; object-position: 50% 40%; border-radius: var(--r); border: 1px solid var(--line); }
+.projet-trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 24px 0 8px; }
+.projet-trio img { width: 100%; aspect-ratio: 3 / 4; max-height: 300px; object-fit: cover; border-radius: var(--r); border: 1px solid var(--line); display: block; }
+@media (max-width: 560px) { .projet-large img { max-height: 220px; } .projet-trio { gap: 6px; } .projet-trio img { max-height: 170px; } }
+.ap-det summary { min-height: 44px; display: flex; align-items: center; }
+.marque { min-height: 44px; }
+.hero-coll .hc-progres .bouton-lien { min-height: 44px; }
+.rayon .livre-carte .souhait-carte { font-size: .8rem; }
+.rayon .livre-carte .infos .titre { min-height: 2.4em; }
+@media (min-width: 900px) { .rang { align-items: start; } }

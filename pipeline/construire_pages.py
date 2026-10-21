@@ -96,7 +96,7 @@ def entete(courante):
           {lien("evolutions.html", "Évolutions des prix", "evolutions.html")}
           {lien("communaute.html", "Communauté", "communaute.html")}
           {lien("contact.html", "Contact", "contact.html")}
-          <a href="contact.html" data-compte="avis">Qu'en pensez-vous ?</a>
+          <a href="#avis" data-compte="avis">Qu'en pensez-vous ?</a>
         </div>
       </details>
       <div class="compte" id="compte-haut"></div>
@@ -130,7 +130,7 @@ def feuille(courante, racine_a_propos="./#apropos"):
     {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
     {e("communaute.html", "Communauté", "Chaînes, sites et collectionneurs à suivre", "communaute.html")}
     {e("contact.html", "Contact", "Écrire à La Cote du Héros", "contact.html")}
-    <li><a href="contact.html" data-compte="avis"><b>Qu'en pensez-vous ?</b><small>Une note et un petit mot, que je lis moi-même</small></a></li>
+    <li><a href="#avis" data-compte="avis"><b>Qu'en pensez-vous ?</b><small>Une note et un petit mot, que je lis moi-même</small></a></li>
     {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
   </ul>
 </dialog>'''
@@ -722,7 +722,7 @@ def page_collection(index_html):
 
 <div class="banniere" role="region" aria-labelledby="titre-page">
   <div class="cadre banniere-in">
-    <p class="surtitre">Mon inventaire</p>
+    <p class="surtitre">Vos livres</p>
     <h1 id="titre-page">Ma collection</h1>
     <p class="chapeau">Vos livres, leur état et leur évolution. Tout reste dans votre navigateur.</p>
   </div>

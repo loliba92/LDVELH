@@ -413,7 +413,7 @@
       $('#resultats').innerHTML = '<p class="vide-global">Votre collection est vide. Touchez C, BE ou TBE sous une jaquette pour y ajouter un livre.</p>';
     }
     if (S.cherche && !liste.length) {
-      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à trouver. Sur une fiche, cochez « Je le recherche » pour l\'ajouter ici.</p>';
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à trouver. Sur une fiche, appuyez sur « À trouver » pour l\'ajouter ici.</p>';
     }
     if (S.avendre && !liste.length) {
       $('#resultats').innerHTML = '<p class="vide-global">Aucun livre à vendre. Dans « Ma collection », touchez « À vendre » sous un exemplaire pour le placer ici.</p>';
@@ -1165,7 +1165,7 @@
       const nom = `${esc(b.titre)}, édition ${esc(b.version)}`;
       return `<li class="ex" data-ligne="${esc(b.id)}">
         <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div>
+          <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span></span></div>
           <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div></div>
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
@@ -1256,7 +1256,7 @@
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span></span></div></div>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
   }
 
@@ -1268,7 +1268,7 @@
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
   }
@@ -1288,7 +1288,7 @@
     liste.innerHTML = trouves.slice(0, 8).map((b) => {
       const poss = COLL[b.id];
       return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
-        <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
+        <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
@@ -1457,7 +1457,6 @@
       const visiteurAccueil = sansCompte();
       const cha = $('#hero-chapeau');
       if (cha) cha.textContent = visiteurAccueil ? 'Retrouvez la cote de chaque édition des livres-jeux.' : n ? 'Votre collection est une aventure. Complétez-la.' : 'Votre collection est une aventure. Commencez-la.';
-      $('#hc-lien').hidden = !n || visiteurAccueil;
       let corps;
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
@@ -1836,7 +1835,7 @@
       <div class="champ-ligne"><label for="c-etat">État</label><select id="c-etat"${c ? '' : ' disabled'}>${ETATS.map((x) => `<option value="${x.k}"${(c ? c.etat : S.h) === x.k ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></div>
       <div class="champ-ligne"><label for="c-qte">Exemplaires</label><input type="number" id="c-qte" min="1" max="99" value="${c ? c.qte : 1}"${c ? '' : ' disabled'}></div>
       <p class="valeur-ex" id="c-val"></p></div>
-      <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>Je le recherche</span></label></div>`;
+      <label class="case souhait" id="c-souhait-zone"><input type="checkbox" id="c-souhait"${SOUH[b.id] ? ' checked' : ''}><span>À trouver</span></label></div>`;
   }
   function brancherFicheCollection(b) {
     if (!$('#c-poss')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
@@ -1923,7 +1922,7 @@
     const mots = q.split(/\s+/);
     const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
       .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
-    liste.innerHTML = trouves.slice(0, 8).map((b) => `<li><button type="button" data-lot-add="${esc(b.id)}"><strong>${esc(b.titre)}</strong><span>${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${b.annee ? ` · ${b.annee}` : ''}${COLL[b.id] ? ' · déjà dans votre collection' : ''}</span><em>Ajouter au lot</em></button></li>`).join('') +
+    liste.innerHTML = trouves.slice(0, 8).map((b) => `<li><button type="button" data-lot-add="${esc(b.id)}"><strong>${esc(b.titre)}</strong><span>${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}${COLL[b.id] ? ' · déjà dans votre collection' : ''}</span><em>Ajouter au lot</em></button></li>`).join('') +
       (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') + (!trouves.length ? '<li class="sous">Aucun livre trouvé.</li>' : '');
   }
   function rendreLot() {
@@ -1931,7 +1930,7 @@
     $('#lot-lignes').innerHTML = !LOT.lignes.length ? '<p class="sous">Aucun livre pour l\'instant : cherchez-les ci-dessus.</p>' :
       `<table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix par exemplaire</th><th class="num">Retirer</th></tr></thead><tbody>${LOT.lignes.map((l) => {
         const b = livreDe(l.id);
-        return `<tr><td class="principal"><div><strong>${esc(b.titre)}</strong><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} · <span class="badge">${esc(b.version)}</span>${COLL[b.id] ? ' · déjà possédé : l\'exemplaire s\'ajoute' : ''}</span></div></td>
+        return `<tr><td class="principal"><div><strong>${esc(b.titre)}</strong><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${COLL[b.id] ? ' · déjà possédé : l\'exemplaire s\'ajoute' : ''}</span></div></td>
           <td data-label="État"><select data-lot-etat="${esc(l.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === l.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
           <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${l.qte}" data-lot-qte="${esc(l.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
           <td data-label="Prix par exemplaire"><input type="text" inputmode="decimal" autocomplete="off" value="${prixSaisi(l.prix)}" placeholder="après le prix total" data-lot-prix="${esc(l.id)}" aria-label="Prix par exemplaire de ${esc(b.titre)}, édition ${esc(b.version)}">${l.manuel ? '<small class="sous">corrigé à la main</small>' : ''}</td>
