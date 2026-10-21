@@ -188,11 +188,41 @@ def ecarter_ambigues(par_isbn, livres):
     return {isbn: [it for it in items if garder(isbn, it)] for isbn, items in par_isbn.items()}
 
 
-def agreger(items, isbn13, jour, titre=None, annees=None):
+def _norm(texte):
+    import unicodedata
+    t = unicodedata.normalize("NFD", str(texte or "").lower())
+    return re.sub(r"[^a-z0-9]+", " ", "".join(c for c in t if not unicodedata.combining(c))).strip()
+
+
+GENERIQUES = ("ldvelh", "dont vous etes le heros", "dont vous etes", "livre jeu", "livres jeux", "gamebook")
+
+
+def parle_de_la_collection(titre_annonce, ed):
+    """Vrai si le titre d'une annonce trouvée par le seul titre montre qu'il s'agit d'un livre-jeu : mention générique (LDVELH,
+    « dont vous êtes le héros »), nom de la série ou nom de l'auteur. Sans cela, un titre de deux mots comme « La Tour de Cristal »
+    ramène des cartes Pokémon, des DVD et des bijoux, qui concordent « à 100 % » avec le titre. Sans fiche, on ne tranche pas."""
+    if not ed:
+        return True
+    t = " " + _norm(titre_annonce) + " "
+    if any(f" {g} " in t for g in GENERIQUES):
+        return True
+    serie = _norm(ed.get("serie"))
+    if len(serie) >= 4 and f" {serie} " in t:
+        return True
+    for auteur in str(ed.get("auteurs") or "").split(";"):
+        nom = _norm(auteur).split(" ")[-1] if _norm(auteur) else ""
+        if len(nom) >= 4 and f" {nom} " in t:
+            return True
+    return False
+
+
+def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for it in items:
         if titre and not concorde(it.get("title", ""), titre, 1.0 if it.get("_titre_seul") else 0.6):
+            continue
+        if it.get("_titre_seul") and not parle_de_la_collection(it.get("title", ""), ed):
             continue
         if not annee_compatible(it.get("title", ""), annees):
             continue
@@ -270,27 +300,37 @@ def controler(a, token):
 
 
 def diagnostiquer(isbn, token):
-    """Montre, pour un ISBN, les annonces de la recherche par ISBN puis de la recherche par titre seul, avec leur lien,
-    pour que le propriétaire les ouvre et vérifie. Rien n'est enregistré dans les données du site."""
+    """Montre, pour un ISBN, les annonces que le relevé voit (recherche par ISBN, puis par le titre) et ce qu'il en fait : retenue
+    ou écartée avec le motif, et la cote qui en résulte. Chaque annonce a son lien, pour que le propriétaire l'ouvre et vérifie.
+    Rien n'est enregistré dans les données du site."""
     import editions
     ed = next((r for r in editions.load() if r.get("isbn13") == isbn), None)
     titre = ed["titre"] if ed else ""
     annees = tuple(sorted({str(a) for a in ((ed or {}).get("annee"), (ed or {}).get("annee_bnf")) if a}))
     print(f"Édition {isbn} : « {titre} », parution {', '.join(annees) or 'inconnue'}")
-    for nom, q in (("Recherche par ISBN", isbn), ("Recherche par le seul titre (ancienne méthode de repli)", titre)):
-        items = annonces(q, token)
-        print(f"\n### {nom} : {len(items)} annonces")
-        for it in items:
-            etat, suppose = etat_de(it)
-            age = age_jours(it, date.today())
-            motif = ("autre livre" if not concorde(it.get("title", ""), titre) else
-                     "autre année" if not annee_compatible(it.get("title", ""), annees) else
-                     "lot" if LOT.search(it.get("title", "")) else
-                     "état écarté (neuf, pièces…)" if etat is None else
-                     "plus de 90 jours" if age is not None and age > MAX_AGE_JOURS else "retenue")
-            p = it.get("price") or {}
-            print(f"- {p.get('value')} {p.get('currency')} | {it.get('title', '')} | état {it.get('condition', '?')} | "
-                  f"âge {age if age is not None else '?'} j | {motif} | {it.get('itemWebUrl', '')}")
+    items = chercher_elargi(isbn, titre, token, ed)
+    gardees = []
+    print(f"\n### {len(items)} annonces trouvées (par l'ISBN, puis par le titre)")
+    for it in items:
+        etat, _suppose = etat_de(it)
+        titre_seul = bool(it.get("_titre_seul"))
+        age = age_jours(it, date.today())
+        motif = ("autre livre" if not concorde(it.get("title", ""), titre, 1.0 if titre_seul else 0.6) else
+                 "pas un livre-jeu (ni série, ni auteur, ni LDVELH)" if titre_seul and not parle_de_la_collection(it.get("title", ""), ed) else
+                 "autre année" if not annee_compatible(it.get("title", ""), annees) else
+                 "lot" if LOT.search(it.get("title", "")) else
+                 "état écarté (neuf, pièces…)" if etat is None else
+                 "plus de 90 jours" if age is not None and age > MAX_AGE_JOURS else "RETENUE")
+        if motif == "RETENUE":
+            gardees.append(it)
+        p = it.get("price") or {}
+        print(f"- {p.get('value')} {p.get('currency')} | {it.get('title', '')} | état {it.get('condition', '?')} | "
+              f"âge {age if age is not None else '?'} j | {'titre' if titre_seul else 'ISBN'} | {motif} | {it.get('itemWebUrl', '').split('?')[0]}")
+    print("\n### Ce que le relevé en tire")
+    for l in agreger(items, isbn, date.today(), titre, annees, ed):
+        print(f"- {l['etat']} : {l['nb_annonces']} annonce(s), de {l['prix_min']} à {l['prix_max']} €, médiane {l['prix_median']} €")
+    if not gardees:
+        print("- aucune annonce retenue")
 
 
 def requetes_candidates(isbn13, ed):
@@ -421,7 +461,7 @@ def main():
         par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     for isbn, titre, nb_ed, livre, annees in cat:
-        lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees)
+        lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
