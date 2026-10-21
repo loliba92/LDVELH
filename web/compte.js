@@ -208,6 +208,11 @@ window.Compte = (function () {
       '<p class="rv-ajout-bilan" id="dem-msg" role="status" hidden></p>' +
       '<div class="dlg-actions"><button type="submit" class="bouton" autofocus>Envoyer la demande</button><button type="button" class="bouton bouton-clair" data-fermer>Annuler</button></div></form>', 'dlg-demande');
     if (texteInitial) $('#dem-texte', d).value = texteInitial;
+    if (window.Scan) {                                                    // lire l'ISBN avec l'appareil photo plutôt que de le taper
+      var champ = $('#dem-texte', d), bloc = document.createElement('div'), sc = window.Scan.bouton();
+      bloc.className = 'ca-champ'; champ.parentNode.insertBefore(bloc, champ); bloc.appendChild(champ); bloc.appendChild(sc);
+      sc.addEventListener('click', function () { window.Scan.scanner(function (isbn) { champ.value = isbn; champ.focus(); }); });
+    }
     d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
     $('#dem-form', d).addEventListener('submit', function (ev) {
       ev.preventDefault();

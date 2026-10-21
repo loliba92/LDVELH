@@ -81,6 +81,8 @@
     return b;
   }
 
+  window.Scan = { scanner, bouton };                    // utilisé aussi par la demande d'ajout d'un livre (compte.js)
+
   // Ajouter un titre à ma collection : l'ISBN lu est mis dans le champ de recherche, le livre apparaît avec C / BE / TBE
   const champ = $('#ca-q');
   if (champ) {

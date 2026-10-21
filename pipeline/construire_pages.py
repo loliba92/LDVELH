@@ -198,6 +198,7 @@ def page(nom, corps):
 <script src="identite.js"></script>
 <script src="relais.js"></script>
 <script src="cloud.js"></script>
+<script src="scan.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>{SCRIPT_PAGE.get(nom, "")}
 </body>
@@ -208,7 +209,7 @@ def page(nom, corps):
 GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Admin, SuperAdmin, ou toute personne connectée (évolutions)
 NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
-               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>\n<script src="scan.js"></script>',
+               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
