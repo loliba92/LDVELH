@@ -109,7 +109,7 @@
       `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>De</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
       `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
       `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form></details>` +
-      `<span class="rv-liens">${[
+      `<span class="rv-liens"><span class="rv-liens-titre">Chercher en vente</span>${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
         ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
         ['Vinted', `https://www.vinted.fr/catalog?search_text=${requete(ed.titre + ' ldvelh')}`],

@@ -1719,3 +1719,10 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .page > * { max-width: 780px; }
 .contenu-collection { max-width: 1180px; }
 .page h1, .banniere h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); letter-spacing: -0.025em; }
+
+/* Revue des prix : liens vers les plateformes en boutons sobres, comme sur la fiche */
+.rv-bas .rv-liens { flex-basis: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+.rv-bas .rv-liens .rv-liens-titre { grid-column: 1 / -1; color: var(--gold); font: 700 .8rem var(--f-ui); letter-spacing: .12em; text-transform: uppercase; }
+.rv-bas .rv-liens a.rv-ebay { justify-content: center; min-height: 44px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: none; color: var(--text); font: 600 .92rem var(--f-ui); text-decoration: none; }
+.rv-bas .rv-liens a.rv-ebay:hover, .rv-bas .rv-liens a.rv-ebay:focus-visible { border-color: var(--gold); color: var(--gold); }
+@media (max-width: 700px) { .rv-bas .rv-liens { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 8px; } }
