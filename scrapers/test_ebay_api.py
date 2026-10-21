@@ -44,10 +44,11 @@ class TestRechercheElargie(unittest.TestCase):
         ed = {"serie": "Loup Solitaire", "auteurs": "Joe Dever"}
         livre = {"itemId": "1", "_titre_seul": True, **item(20, "5000", "LDVELH La Tour De Cristal Loup Solitaire n° 17")}
         auteur = {"itemId": "2", "_titre_seul": True, **item(8, "5000", "La Tour de Cristal, Dever, Joe")}
+        inverse = {"itemId": "5", "_titre_seul": True, **item(9, "5000", "La Tour de Cristal, Dever, Joe")}
         carte = {"itemId": "3", "_titre_seul": True, **item(548, "5000", "Carte Pokémon La Tour de Cristal : Entei, promotion du 10e film")}
         dvd = {"itemId": "4", "_titre_seul": True, **item(817, "5000", "DVD Pokemon le film : Empereur de la Tour de Cristal")}
-        l = ebay_api.agreger([livre, auteur, carte, dvd], "9782070512690", date(2026, 10, 21), "La Tour de Cristal", None, ed)
-        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 2, "20.00")])
+        l = ebay_api.agreger([livre, auteur, inverse, carte, dvd], "9782070512690", date(2026, 10, 21), "La Tour de Cristal", None, ed)
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 3, "20.00")])
 
     def test_requetes_complementaires(self):
         q = ebay_api.requetes_complementaires({"livre": "Le Sorcier Majdar", "serie": "Astre d'Or", "numero": "370", "auteurs": "Ian Page ; Joe Dever"})

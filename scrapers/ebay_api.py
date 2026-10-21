@@ -210,9 +210,9 @@ def parle_de_la_collection(titre_annonce, ed):
     if len(serie) >= 4 and f" {serie} " in t:
         return True
     for auteur in str(ed.get("auteurs") or "").split(";"):
-        nom = _norm(auteur).split(" ")[-1] if _norm(auteur) else ""
-        if len(nom) >= 4 and f" {nom} " in t:
-            return True
+        for nom in _norm(auteur).split(" "):                       # « Joe Dever » comme « Dever, Joe »
+            if len(nom) >= 4 and f" {nom} " in t:
+                return True
     return False
 
 
