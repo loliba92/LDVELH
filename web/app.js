@@ -1549,7 +1549,7 @@
           <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
         </div>
         <div class="exporter-choix" id="exporter-choix" hidden><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div>
-        <div class="gerer-danger"><span>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
+        <div class="gerer-danger" role="group" aria-label="Danger zone"><span class="danger-texte"><b class="danger-titre">Danger zone</b>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
       </div>`;
     const imp1 = $('#importer'), dang = $('.gerer-danger');
     if (imp1 && dang) dang.before(imp1);

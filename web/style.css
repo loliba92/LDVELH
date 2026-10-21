@@ -1677,3 +1677,5 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 #importer { margin-top: 14px; border-top: 0; }
 @media (max-width: 900px) { .gerer-grille { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .gerer-danger { flex-direction: column; align-items: stretch; text-align: left; } .gerer-danger .bouton { width: 100%; } .coll-gerer .exporter-choix { grid-template-columns: minmax(0, 1fr); } }
+.gerer-danger .danger-texte { display: grid; gap: 4px; }
+.gerer-danger .danger-titre { font: 800 .72rem var(--f-ui); letter-spacing: .16em; text-transform: uppercase; color: #f08f99; }
