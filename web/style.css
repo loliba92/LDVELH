@@ -1769,3 +1769,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .scan-liste li.ko { border-color: rgba(240, 165, 176, .5); }
 .scan-liste .bouton-lien { min-height: 44px; flex: none; }
 .scan-video.scan-erreur { display: none; }
+
+/* Accueil : le champ de recherche se réduit pour laisser place au bouton Scanner */
+.hero-recherche.avec-scan .scan-bouton { min-height: 52px; background: rgba(0, 0, 0, .72); }
+@media (max-width: 700px) { .hero-recherche.avec-scan input { flex: 1 1 0; } .hero-recherche.avec-scan .scan-bouton { flex: none; min-height: 56px; } }

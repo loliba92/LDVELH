@@ -159,6 +159,20 @@
     });
   }
 
+  // Accueil : scanner un livre pour voir sa cote (rien n'est ajouté à la collection) ; la fiche du livre s'ouvre
+  const hero = $('#hero-recherche'), hq = $('#h-q');
+  if (hero && hq) {
+    hero.classList.add('avec-scan');
+    const b = bouton('scan-hero');
+    b.addEventListener('click', () => scanner((isbn) => {
+      hq.value = isbn;
+      hero.requestSubmit ? hero.requestSubmit() : hero.dispatchEvent(new Event('submit', { cancelable: true }));
+      const livre = window.AjoutRapide && window.AjoutRapide.trouver(isbn);
+      if (livre) window.AjoutRapide.ouvrir(livre.id);
+    }));
+    hq.parentNode.insertBefore(b, hq.nextSibling);
+  }
+
   // Espace administrateur, « Ajouter des livres » : l'ISBN lu est ajouté à la liste, une ligne par livre
   const texte = $('#aj-texte');
   if (texte) {

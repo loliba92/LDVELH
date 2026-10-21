@@ -1326,6 +1326,7 @@
     },
     retirer(id) { delete COLL[id]; sauverColl(); afficher(); },
     titre: (b) => `${b.titre} (${b.version})`,
+    ouvrir: (id) => ouvrirFiche(id),
   };
   function retourAjoutColl(id) {
     const b = livreDe(id), champ = $('#ca-q'), ok = $('#ca-ok');
