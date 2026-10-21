@@ -131,7 +131,9 @@
     $('#hero-recherche').addEventListener('submit', (e) => {
       e.preventDefault();
       S.q = $('#h-q').value.trim(); S.onglet = 'etagere';
-      synchroniser(); changer(); aller();
+      synchroniser(); changer();
+      const r = $('#resultats');                                         // on descend jusqu'aux titres trouvés, pas seulement jusqu'au bloc des filtres
+      (r || $('#recherche')).scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     });
   }
 
