@@ -1703,3 +1703,13 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .fiche-marque.trouver.actif { background: rgba(36, 104, 66, .6); border-color: #8fd3a8; }
 .coll-fiche .ex-etats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .coll-fiche .valeur-ex { margin: 10px 0 0; }
+
+/* Mes livres : filtres repliables et liste sur deux colonnes */
+.cf-plus { grid-column: 1 / -1; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.cf-plus summary { display: flex; align-items: center; min-height: 44px; padding: 0 12px; cursor: pointer; color: var(--gold); font: 700 .88rem var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+.cf-plus summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.cf-plus .cf-plus-grille { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; padding: 4px 12px 12px; align-items: end; }
+@media (max-width: 640px) { .cf-plus .cf-plus-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; } }
+@media (min-width: 1000px) { .ex-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sous .nowrap { margin-left: .4em; }
+.coll-filtres > label:first-child { grid-column: 1 / -1; }

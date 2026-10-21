@@ -1165,7 +1165,7 @@
       const nom = `${esc(b.titre)}, édition ${esc(b.version)}`;
       return `<li class="ex" data-ligne="${esc(b.id)}">
         <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span></span></div>
+          <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div>
           <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div></div>
         <div class="ex-regl">
           <div class="ex-etats" role="group" aria-label="État : ${nom}">${ETATS.map((x) => `<button type="button" data-ex-etat="${esc(b.id)}" data-e="${x.k}" aria-pressed="${x.k === c.etat}" title="${x.long}" aria-label="${x.long} : ${nom}">${ABREGE[x.k]}</button>`).join('')}</div>
@@ -1187,20 +1187,25 @@
       .map(([k, n]) => `<option value="${esc(k)}"${k === FC.serie ? ' selected' : ''}>${esc(k)} (${n})</option>`).join('');
   }
 
+  const nbFiltresPlus = () => [FC.editeur, FC.serie, FC.version, FC.etat, FC.cote, FC.pmin !== '' || FC.pmax !== ''].filter(Boolean).length;
+  const titreFiltresColl = () => { const n = nbFiltresPlus(); return `Filtres et tri${n ? ` (${n})` : ''}`; };
   function barreFiltres(bl) {
     if (bl.lignes.length < 2) return '';
     const compte = (cle) => { const m = new Map(); bl.lignes.forEach(({ b, c }) => { const k = cle(b, c); if (k) m.set(k, (m.get(k) || 0) + c.qte); }); return [...m].sort((x, y) => String(x[0]).localeCompare(String(y[0]), 'fr', { numeric: true })); };
     const opts = (liste, val, tous) => `<option value="">${tous}</option>` + liste.map(([k, n]) => `<option value="${esc(k)}"${k === val ? ' selected' : ''}>${esc(k)} (${n})</option>`).join('');
     const nbEtat = (k) => bl.lignes.filter((x) => x.c.etat === k).reduce((t, x) => t + x.c.qte, 0);
     const champ = (id, nom, html) => `<label for="${id}">${nom}${html}</label>`;
+    const ouvert = window.matchMedia('(min-width: 900px)').matches || nbFiltresPlus() > 0;     // replié sur téléphone tant qu'aucun filtre n'est choisi
     return `<div class="coll-filtres" role="group" aria-label="Filtrer et trier vos exemplaires">
       ${champ('cf-q', 'Filtrer mes exemplaires', `<input type="search" id="cf-q" value="${esc(FC.q)}" placeholder="Titre, auteur ou ISBN" autocomplete="off">`)}
+      <details class="cf-plus" id="cf-plus"${ouvert ? ' open' : ''}><summary id="cf-resume">${titreFiltresColl()}</summary><div class="cf-plus-grille">
       ${champ('cf-editeur', 'Éditeur', `<select id="cf-editeur">${opts(compte((b) => b.editeur), FC.editeur, 'Tous les éditeurs')}</select>`)}
       ${champ('cf-serie', 'Série (collection)', `<select id="cf-serie">${optsSerieColl(bl)}</select>`)}
-      ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes les éditions')}</select>`)}
+      ${champ('cf-version', 'Édition', `<select id="cf-version">${opts(compte((b) => b.version), FC.version, 'Toutes')}</select>`)}
       ${champ('cf-etat', 'État', `<select id="cf-etat"><option value="">Tous les états</option>${ETATS.map((x) => `<option value="${x.k}"${x.k === FC.etat ? ' selected' : ''}>${esc(x.nom || x.court)} (${nbEtat(x.k)})</option>`).join('')}</select>`)}
       ${champ('cf-cote', 'Cote', `<select id="cf-cote"><option value="">Toutes</option><option value="avec"${FC.cote === 'avec' ? ' selected' : ''}>Avec cote</option><option value="sans"${FC.cote === 'sans' ? ' selected' : ''}>Sans cote</option></select>`)}
       ${champ('cf-tri', 'Trier par', `<select id="cf-tri">${Object.entries(TRIS).map(([k, [nom]]) => `<option value="${k}"${k === FC.tri ? ' selected' : ''}>${nom}</option>`).join('')}</select>`)}
+      </div></details>
       <button type="button" class="bouton bouton-clair" id="cf-raz"${filtresActifs() ? '' : ' hidden'}>Réinitialiser</button></div>`;
   }
 
@@ -1219,6 +1224,7 @@
     $('#coll-filtre-compte').textContent = texteFiltre(lst, bl);
     $('#coll-plus-zone').innerHTML = boutonPlus(lst.reste);
     if ($('#cf-raz')) $('#cf-raz').hidden = !filtresActifs();
+    if ($('#cf-resume')) $('#cf-resume').textContent = titreFiltresColl();
   }
 
   function brancherFiltresColl() {
@@ -1256,7 +1262,7 @@
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span></span></div></div>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
   }
 
@@ -1268,7 +1274,7 @@
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
   }
@@ -1288,7 +1294,7 @@
     liste.innerHTML = trouves.slice(0, 8).map((b) => {
       const poss = COLL[b.id];
       return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
-        <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
+        <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
@@ -1925,7 +1931,7 @@
     const mots = q.split(/\s+/);
     const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
       .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
-    liste.innerHTML = trouves.slice(0, 8).map((b) => `<li><button type="button" data-lot-add="${esc(b.id)}"><strong>${esc(b.titre)}</strong><span>${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}${COLL[b.id] ? ' · déjà dans votre collection' : ''}</span><em>Ajouter au lot</em></button></li>`).join('') +
+    liste.innerHTML = trouves.slice(0, 8).map((b) => `<li><button type="button" data-lot-add="${esc(b.id)}"><strong>${esc(b.titre)}</strong><span>${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}${COLL[b.id] ? ' · déjà dans votre collection' : ''}</span><em>Ajouter au lot</em></button></li>`).join('') +
       (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') + (!trouves.length ? '<li class="sous">Aucun livre trouvé.</li>' : '');
   }
   function rendreLot() {
@@ -1933,7 +1939,7 @@
     $('#lot-lignes').innerHTML = !LOT.lignes.length ? '<p class="sous">Aucun livre pour l\'instant : cherchez-les ci-dessus.</p>' :
       `<table class="cartes coll-table"><thead><tr><th>Livre</th><th>État</th><th>Exemplaires</th><th>Prix par exemplaire</th><th class="num">Retirer</th></tr></thead><tbody>${LOT.lignes.map((l) => {
         const b = livreDe(l.id);
-        return `<tr><td class="principal"><div><strong>${esc(b.titre)}</strong><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} <span class="nowrap">· <span class="badge">${esc(b.version)}</span></span>${COLL[b.id] ? ' · déjà possédé : l\'exemplaire s\'ajoute' : ''}</span></div></td>
+        return `<tr><td class="principal"><div><strong>${esc(b.titre)}</strong><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span>${COLL[b.id] ? ' · déjà possédé : l\'exemplaire s\'ajoute' : ''}</span></div></td>
           <td data-label="État"><select data-lot-etat="${esc(l.id)}" aria-label="État de ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) => `<option value="${x.k}"${x.k === l.etat ? ' selected' : ''}>${x.k === 'tres_bon' ? 'TBE' : x.court}</option>`).join('')}</select></td>
           <td data-label="Exemplaires"><input type="number" min="1" max="99" value="${l.qte}" data-lot-qte="${esc(l.id)}" aria-label="Nombre d'exemplaires de ${esc(b.titre)}, édition ${esc(b.version)}"></td>
           <td data-label="Prix par exemplaire"><input type="text" inputmode="decimal" autocomplete="off" value="${prixSaisi(l.prix)}" placeholder="après le prix total" data-lot-prix="${esc(l.id)}" aria-label="Prix par exemplaire de ${esc(b.titre)}, édition ${esc(b.version)}">${l.manuel ? '<small class="sous">corrigé à la main</small>' : ''}</td>
