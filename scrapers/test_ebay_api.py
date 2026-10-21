@@ -50,6 +50,16 @@ class TestRechercheElargie(unittest.TestCase):
         l = ebay_api.agreger([livre, auteur, inverse, carte, dvd], "9782070512690", date(2026, 10, 21), "La Tour de Cristal", None, ed)
         self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 3, "20.00")])
 
+    def test_les_prix_aberrants_sont_ecartes_quand_il_y_a_assez_d_annonces(self):
+        items = [{"itemId": str(i), **item(p, "5000", "Le Sorcier de la montagne de feu - Défis Fantastiques")} for i, p in enumerate((18, 20, 22, 21, 250, 3))]
+        l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
+        self.assertEqual([(x["nb_annonces"], x["prix_min"], x["prix_max"]) for x in l], [(4, "18.00", "22.00")])
+
+    def test_deux_annonces_ne_suffisent_pas_pour_juger(self):
+        items = [{"itemId": str(i), **item(p, "5000", "Le Sorcier de la montagne de feu - Défis Fantastiques")} for i, p in enumerate((20, 200))]
+        l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
+        self.assertEqual(l[0]["nb_annonces"], 2)
+
     def test_requetes_complementaires(self):
         q = ebay_api.requetes_complementaires({"livre": "Le Sorcier Majdar", "serie": "Astre d'Or", "numero": "370", "auteurs": "Ian Page ; Joe Dever"})
         self.assertIn("Le Sorcier Majdar Ian Page", q)

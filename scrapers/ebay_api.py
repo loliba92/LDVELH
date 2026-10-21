@@ -242,10 +242,29 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
     return sortie
 
 
+FACTEUR_ABERRANT_ANNONCE = 3.0       # au-delà de 3 × la médiane (ou en dessous du tiers) : très probablement un autre objet, ou un prix absurde
+
+
+def ecarter_aberrantes(liste):
+    """liste : sortie de `retenues`. Pour un état qui compte au moins 3 annonces récentes, retire celles dont le prix est à plus de
+    3 × la médiane ou à moins du tiers : ce sont presque toujours d'autres objets (carte, DVD…) ou des prix de collectionneur absurdes.
+    Les annonces anciennes ne servent pas à la cote : elles sont rangées avec leur état mais jugées sur les récentes."""
+    par = {}
+    for x in liste:
+        if not x[3]:
+            par.setdefault(x[1], []).append(x[2])
+    bornes = {}
+    for etat, prix in par.items():
+        if len(prix) >= 3:
+            m = statistics.median(prix)
+            bornes[etat] = (m / FACTEUR_ABERRANT_ANNONCE, m * FACTEUR_ABERRANT_ANNONCE)
+    return [x for x in liste if x[1] not in bornes or bornes[x[1]][0] <= x[2] <= bornes[x[1]][1]]
+
+
 def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
-    for _it, etat, valeur, ancienne in retenues(items, jour, titre, annees, ed):
+    for _it, etat, valeur, ancienne in ecarter_aberrantes(retenues(items, jour, titre, annees, ed)):
         par_etat.setdefault(etat, {"frais": [], "toutes": []})
         par_etat[etat]["toutes"].append(valeur)
         if not ancienne:
@@ -265,7 +284,7 @@ def lignes_annonces(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Les annonces récentes retenues pour la cote, une ligne chacune : le propriétaire peut ainsi ouvrir chaque annonce et vérifier
     que c'est bien le bon livre (page « Vérifier les prix »)."""
     sortie = []
-    for it, etat, valeur, ancienne in retenues(items, jour, titre, annees, ed):
+    for it, etat, valeur, ancienne in ecarter_aberrantes(retenues(items, jour, titre, annees, ed)):
         if ancienne:
             continue
         age = age_jours(it, jour)
