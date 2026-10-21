@@ -1280,7 +1280,7 @@
   }
 
   // Page « Ma collection » : recherche d'un livre de la base pour l'ajouter d'un geste (titre, série, auteur ou ISBN)
-  let AJ_Q = '';
+  let AJ_Q = '', AJ_N = 30;                                  // résultats montrés dans « Ajouter un titre » : 30, puis 30 de plus à chaque demande
   function rendreAjoutColl() {
     const liste = $('#ca-res');
     if (!liste) return;
@@ -1291,13 +1291,13 @@
     const mots = q.split(/\s+/);
     const trouves = DATA.filter((b) => (isbn ? b.isbn13 === isbn : mots.every((m) => b._txt.includes(m))))
       .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
-    liste.innerHTML = trouves.slice(0, 8).map((b) => {
+    liste.innerHTML = trouves.slice(0, AJ_N).map((b) => {
       const poss = COLL[b.id];
       return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
         <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
-    }).join('') + (trouves.length > 8 ? `<li class="sous">${trouves.length} résultats : précisez votre recherche.</li>` : '') +
+    }).join('') + (trouves.length > AJ_N ? `<li class="sous">${AJ_N} livres sur ${trouves.length}. <button type="button" class="bouton-lien" data-aj-plus>Afficher les ${Math.min(30, trouves.length - AJ_N)} suivants</button></li>` : '') +
       (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
     if (statut) statut.textContent = trouves.length ? `${trouves.length} livre${trouves.length > 1 ? 's' : ''} trouvé${trouves.length > 1 ? 's' : ''}.` : 'Aucun livre trouvé.';
   }
@@ -1336,7 +1336,8 @@
     $('.ajout-coll').scrollIntoView({ behavior: 'auto', block: 'start' });
     champ.focus({ preventScroll: true });
   }
-  document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
+  document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; AJ_N = 30; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-aj-plus]')) { AJ_N += 30; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
   // Tendance de la valeur de la collection : mêmes livres, mêmes états, cotes publiées à la première et à la dernière date de l'historique
