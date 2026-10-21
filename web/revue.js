@@ -36,6 +36,35 @@
     return null;
   }
 
+  // Prix recalculés quand des prix de l'édition viennent d'être saisis sur cette page (pas encore transmis) : le site fera le même
+  // calcul à la prochaine mise à jour (pipeline/etats.py puis export_site.aligner), la page le montre tout de suite. Un prix saisi
+  // ou issu d'annonces actuelles ne bouge pas ; les états sans annonce valent le « niveau » des autres (convenable 40 %, bon 60 %, très bon 100 %).
+  const RAPPORT = { convenable: 0.4, bon: 0.6, tres_bon: 1 };
+  function projection(ed) {
+    if (!ETATS.some(([cle]) => LOC[cleDe(ed, cle)])) return {};
+    const fixe = {}, poids = {};
+    ETATS.forEach(([cle]) => {
+      const v = validation(ed, cle), l = ed.etats[cle];
+      if (v) { fixe[cle] = v.prix; poids[cle] = 1 / 0.03 ** 2; }
+      else if (l && l.publie != null && (l.neuf || (l.source && l.source !== 'archives' && !l.deduit && !l.repartition))) { fixe[cle] = l.publie; poids[cle] = 1 / (l.neuf ? 0.05 : 0.35) ** 2; }
+    });
+    const cles = Object.keys(fixe);
+    if (!cles.length) return {};
+    const niveau = Math.exp(cles.reduce((t, c) => t + poids[c] * Math.log(fixe[c] / RAPPORT[c]), 0) / cles.reduce((t, c) => t + poids[c], 0));
+    const prix = {}, libres = {};
+    ETATS.forEach(([cle]) => { if (cle in fixe) prix[cle] = fixe[cle]; else { prix[cle] = Math.round(niveau * RAPPORT[cle] * 100) / 100; libres[cle] = true; } });
+    for (let i = 0; i < 3; i += 1) {                                   // cohérence C ≤ BE ≤ TBE : on bouge d'abord un prix déduit
+      ETATS.forEach(([bas], k) => {
+        const haut = k < 2 ? ETATS[k + 1][0] : null;
+        if (!haut || prix[haut] >= prix[bas]) return;
+        if (libres[haut]) prix[haut] = Math.round(prix[bas] * 1.2 * 100) / 100;
+        else if (libres[bas]) prix[bas] = Math.round(prix[haut] / 1.2 * 100) / 100;
+      });
+    }
+    return Object.fromEntries(Object.keys(libres).map((c) => [c, prix[c]]));
+  }
+  const prixAffiche = (ed, cle) => { const p = projection(ed)[cle], l = ed.etats[cle]; return p != null ? p : (l ? l.publie : null); };
+
   const ratio = (l) => (l && l.archive && l.publie ? l.publie / l.archive : null);
   const modifie = (l) => l && l.publie != null && l.archive != null && Math.abs(l.publie - l.archive) > 0.01;
   // « À vérifier » : le prix a presque doublé (×1,8) ou presque divisé par deux (×0,55)
@@ -82,6 +111,11 @@
       const calc = v.calcule != null && Math.abs(v.calcule - v.prix) > 0.005 ? `<span class="rv-avant">le site calculait <s>${eur(v.calcule)}</s></span>` : '';
       const quand = v.enAttente ? `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} ${jour(v.le)}${v.par ? ', par ' + v.par : ''} : à transmettre` : `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} le ${jour(v.le)}${v.par ? ', par ' + v.par : ''}`;
       return `<div class="rv-prix valide"><span class="rv-lib">${lib}</span><strong>${eur(v.prix)}</strong>${calc}<span class="rv-note rv-quand">✓ ${esc(quand)}</span>${boutons(ed, cle, v, l)}</div>`;
+    }
+    const proj = projection(ed)[cle];
+    if (proj != null) {                                                 // recalculé d'après les prix que vous venez de saisir
+      const site = l && l.publie != null && Math.abs(l.publie - proj) > 0.005 ? `<span class="rv-avant">le site affiche <s>${eur(l.publie)}</s></span>` : '';
+      return `<div class="rv-prix"><span class="rv-lib">${lib}</span><strong>${eur(proj)}</strong>${site}<span class="rv-note">recalculé d'après vos prix saisis (à transmettre)</span>${boutons(ed, cle, null, l)}</div>`;
     }
     const r = ratio(l), alerte = raison(l, null);
     const avant = modifie(l) ? `<span class="rv-avant">avant <s>${eur(l.archive)}</s> · <b>${pct(r)}</b></span>` : '';
@@ -173,8 +207,8 @@
   function confirmerEdition(ed) {
     let n = 0;
     ETATS.forEach(([cle]) => {
-      const l = ed.etats[cle];
-      if (l && l.publie != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(l.publie * 100) / 100, decision: 'confirme', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; n++; }
+      const l = ed.etats[cle], aff = prixAffiche(ed, cle);
+      if (l && aff != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(aff * 100) / 100, decision: 'confirme', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; n++; }
     });
     return n;
   }
