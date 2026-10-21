@@ -561,11 +561,12 @@
     if (!champ) return;
     let ANN = null, charge = false;
     const dessiner = () => {
-      const q = norm(champ.value).trim();
+      const clair = (t) => norm(t).replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]+/g, ' ').trim();
+      const mots = clair(champ.value).split(' ').filter(Boolean), q = mots.join(' ');
       if (!ANN) { etat.textContent = charge ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
       const nbEd = Object.keys(ANN.annonces).length;
       if (q.length < 2) { etat.textContent = `Relevé du ${jour(ANN.date)} : annonces retenues pour ${nbEd} éditions. Tapez au moins deux lettres.`; liste.innerHTML = ''; return; }
-      const trouves = EDITIONS.filter((ed) => ed.isbn && ANN.annonces[ed.isbn] && norm(ed.titre + ' ' + ed.serie).includes(q)).slice(0, 12);
+      const trouves = EDITIONS.filter((ed) => ed.isbn && ANN.annonces[ed.isbn] && (() => { const t = clair(ed.titre + ' ' + ed.serie + ' ' + (ed.numero || '')); return mots.every((m) => t.includes(m)); })()).slice(0, 12);
       etat.textContent = trouves.length ? `${trouves.length} édition${trouves.length > 1 ? 's' : ''}${trouves.length === 12 ? ' (les 12 premières : précisez la recherche)' : ''}.` : 'Aucune édition avec des annonces retenues pour cette recherche.';
       liste.innerHTML = trouves.map((ed) => {
         const par = ANN.annonces[ed.isbn];
