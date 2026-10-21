@@ -1713,3 +1713,9 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 @media (min-width: 1000px) { .ex-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sous .nowrap { margin-left: .4em; }
 .coll-filtres > label:first-child { grid-column: 1 / -1; }
+
+/* Harmonisation (audit UX) : toutes les pages alignées sur le logo (même cadre de 1180 px), mesure de lecture conservée, titres de page à la même taille */
+.page { max-width: 1180px; }
+.page > * { max-width: 780px; }
+.contenu-collection { max-width: 1180px; }
+.page h1, .banniere h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); letter-spacing: -0.025em; }
