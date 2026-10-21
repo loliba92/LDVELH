@@ -15,19 +15,31 @@
     return (10 - (somme % 10)) % 10 === Number(n[12]) ? n : null;
   }
 
-  let dlg, video, msg, arret = null;
+  let dlg, video, msg, arret = null, mode = null, vus = new Set(), etatChoisi = 'bon';
   function fenetre() {
     if (dlg) return;
     dlg = document.createElement('dialog');
     dlg.className = 'scan-dialog'; dlg.setAttribute('aria-labelledby', 'scan-titre');
     dlg.innerHTML = '<div class="scan-cadre"><div class="scan-tete"><p class="surtitre" id="scan-titre">Scanner un code-barres</p><button type="button" class="bouton bouton-clair" id="scan-fermer">Fermer</button></div>' +
       '<div class="scan-video"><video playsinline muted></video><span class="scan-viseur" aria-hidden="true"></span></div>' +
-      '<p class="sous" id="scan-msg" role="status" aria-live="polite"></p></div>';
+      '<p class="sous" id="scan-msg" role="status" aria-live="polite"></p><p class="sous" id="scan-ancien">Livre ancien sans code-barres ? Fermez cette fenêtre et tapez son titre dans le champ.</p>' +
+      '<div class="scan-serie" id="scan-serie" hidden><div class="scan-etat" id="scan-etat-zone"><span class="scan-etat-lib" id="scan-etat-lib">État des livres scannés</span><div class="ex-etats" role="group" aria-labelledby="scan-etat-lib">' +
+      '<button type="button" data-etat="convenable" title="Convenable">C</button><button type="button" data-etat="bon" title="Bon état">BE</button><button type="button" data-etat="tres_bon" title="Très bon état">TBE</button></div></div>' +
+      '<ul class="scan-liste" id="scan-liste" aria-label="Livres scannés"></ul></div></div>';
     document.body.appendChild(dlg);
     video = dlg.querySelector('video'); msg = dlg.querySelector('#scan-msg');
-    dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'scan-fermer') dlg.close(); });
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg || e.target.id === 'scan-fermer') { dlg.close(); return; }
+      const et = e.target.closest('[data-etat]');
+      if (et) { etatChoisi = et.dataset.etat; try { localStorage.setItem('cdh-scan-etat', etatChoisi); } catch (x) { /* sans stockage : BE par défaut */ } marquerEtat(); }
+      const ann = e.target.closest('[data-annuler]');
+      if (ann && mode && mode.annuler) { mode.annuler(ann.dataset.annuler); ann.closest('li').remove(); }      // l'ISBN reste « vu » : le livre encore sous la caméra n'est pas rajouté aussitôt
+    });
     dlg.addEventListener('close', () => { if (arret) { arret(); arret = null; } });
   }
+
+  const marquerEtat = () => dlg.querySelectorAll('[data-etat]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.etat === etatChoisi)));
+  const echapper = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function chargerZxing() {
     if (window.ZXing) return Promise.resolve();
@@ -39,7 +51,21 @@
   }
 
   async function lire(quandTrouve) {
-    const trouve = (code) => { const isbn = isbnValide(code); if (!isbn) return false; dlg.close(); quandTrouve(isbn); return true; };
+    const trouve = (code) => {
+      const isbn = isbnValide(code);
+      if (!isbn) return false;
+      if (!mode) { dlg.close(); quandTrouve(isbn); return true; }
+      if (vus.has(isbn)) return false;                                  // le même livre n'est pris qu'une fois par séance
+      vus.add(isbn);
+      const r = mode.traiter(isbn, etatChoisi);                          // { texte, ok, id } : une ligne dans la liste
+      if (navigator.vibrate) navigator.vibrate(r.ok ? 60 : [40, 60, 40]);
+      const li = document.createElement('li');
+      li.className = r.ok ? 'ok' : 'ko';
+      li.innerHTML = `<span>${echapper(r.texte)}</span>` + (r.id ? `<button type="button" class="bouton-lien" data-annuler="${echapper(r.id)}">Annuler</button>` : '') + (r.action || '');
+      dlg.querySelector('#scan-liste').prepend(li);
+      msg.textContent = r.texte;
+      return false;                                                      // la caméra continue : livre suivant
+    };
     if ('BarcodeDetector' in window) {
       const flux = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
       video.srcObject = flux; await video.play();
@@ -61,11 +87,27 @@
     await lecteur.decodeFromVideoDevice(null, video, (res) => { if (res) trouve(res.getText()); });
   }
 
-  function scanner(quandTrouve) {
+  // scanner(rappel) : un seul livre, puis la fenêtre se ferme.
+  // scanner(null, { traiter(isbn, etat) -> { texte, ok, id }, annuler(id), etats: true|false, fin(n) }) : plusieurs livres de suite.
+  function scanner(quandTrouve, serie) {
     fenetre();
-    msg.textContent = 'Cadrez le code-barres au dos du livre, bien éclairé. Il se lit tout seul.';
+    mode = serie || null; vus = new Set();
+    const zone = dlg.querySelector('#scan-serie');
+    zone.hidden = !mode; dlg.querySelector('#scan-liste').innerHTML = '';
+    dlg.querySelector('#scan-etat-zone').hidden = !(mode && mode.etats);
+    dlg.querySelector('#scan-fermer').textContent = mode ? 'Terminer' : 'Fermer';
+    dlg.querySelector('#scan-titre').textContent = mode ? 'Scanner plusieurs livres' : 'Scanner un code-barres';
+    try { etatChoisi = localStorage.getItem('cdh-scan-etat') || 'bon'; } catch (x) { etatChoisi = 'bon'; }
+    marquerEtat();
+    const consigne = mode ? 'Cadrez un code-barres, puis le suivant : chaque livre est ajouté au fur et à mesure.' : 'Cadrez le code-barres au dos du livre, bien éclairé. Il se lit tout seul.';
+    dlg.querySelector('.scan-video').classList.remove('scan-erreur');
+    msg.textContent = 'Démarrage de la caméra…';
+    video.onplaying = () => { msg.textContent = consigne; };                // la consigne n'apparaît qu'une fois l'image là
+    dlg.querySelector('#scan-ancien').hidden = false;
+    dlg.addEventListener('close', () => { if (mode && mode.fin) mode.fin(dlg.querySelectorAll('#scan-liste li.ok').length); }, { once: true });
     dlg.showModal();
     lire(quandTrouve).catch((e) => {
+      dlg.querySelector('.scan-video').classList.add('scan-erreur');
       msg.textContent = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')
         ? 'La caméra n\'est pas autorisée. Autorisez-la dans votre navigateur, ou saisissez l\'ISBN à la main.'
         : e && e.name === 'NotFoundError' ? 'Aucune caméra trouvée. Saisissez l\'ISBN à la main.'
@@ -83,7 +125,7 @@
 
   window.Scan = { scanner, bouton };                    // utilisé aussi par la demande d'ajout d'un livre (compte.js)
 
-  // Ajouter un titre à ma collection : l'ISBN lu est mis dans le champ de recherche, le livre apparaît avec C / BE / TBE
+  // Ajouter un titre à ma collection : plusieurs livres de suite, chacun ajouté dans l'état choisi (C, BE ou TBE) et annulable
   const champ = $('#ca-q');
   if (champ) {
     const bloc = document.createElement('div');
@@ -91,22 +133,43 @@
     champ.parentNode.insertBefore(bloc, champ);
     bloc.appendChild(champ);
     const b = bouton();
-    b.addEventListener('click', () => scanner((isbn) => {
-      champ.value = isbn;
-      champ.dispatchEvent(new Event('input', { bubbles: true }));
-      const st = $('#ca-statut'); if (st) st.textContent = `ISBN ${isbn} lu.`;
-      champ.focus({ preventScroll: true });
-    }));
+    b.addEventListener('click', () => {
+      const demarrer = () => scanner(null, {
+        etats: true,
+        traiter(isbn, etat) {
+          const livre = window.AjoutRapide.trouver(isbn);
+          if (!livre) return { ok: false, texte: `ISBN ${isbn} : ce livre n'est pas encore dans le guide.`, action: ` <button type="button" class="bouton-lien" data-demander="${isbn}">Demander son ajout</button>` };
+          const deja = window.AjoutRapide.etat(livre.id);
+          if (deja) return { ok: false, texte: `${window.AjoutRapide.titre(livre)} est déjà dans votre collection.` };
+          window.AjoutRapide.ajouter(livre.id, etat);
+          return { ok: true, texte: `✓ ${window.AjoutRapide.titre(livre)} ajouté`, id: livre.id };
+        },
+        annuler: (id) => window.AjoutRapide.retirer(id),
+        fin(n) {
+          const ok = $('#ca-ok');
+          if (ok && n) { ok.textContent = `✓ ${n} livre${n > 1 ? 's' : ''} scanné${n > 1 ? 's' : ''}.`; ok.hidden = false; }
+        },
+      });
+      if (!window.AjoutRapide || window.AjoutRapide.garde(demarrer)) demarrer();      // sans compte : la fenêtre de connexion s'ouvre, puis on reprend ici
+    });
     bloc.appendChild(b);
+    document.addEventListener('click', (e) => {                           // ISBN inconnu : on propose la demande d'ajout
+      const d = e.target.closest('[data-demander]');
+      if (d && dlg) { const isbn = d.dataset.demander; dlg.close(); if (window.Compte) window.Compte.demanderLivre(isbn); }
+    });
   }
 
   // Espace administrateur, « Ajouter des livres » : l'ISBN lu est ajouté à la liste, une ligne par livre
   const texte = $('#aj-texte');
   if (texte) {
     const b = bouton('scan-liste');
-    b.addEventListener('click', () => scanner((isbn) => {
-      texte.value = (texte.value.trim() ? texte.value.replace(/\s*$/, '\n') : '') + isbn + '\n';
-      texte.dispatchEvent(new Event('input', { bubbles: true }));
+    b.addEventListener('click', () => scanner(null, {
+      etats: false,
+      traiter(isbn) {
+        texte.value = (texte.value.trim() ? texte.value.replace(/\s*$/, '\n') : '') + isbn + '\n';
+        texte.dispatchEvent(new Event('input', { bubbles: true }));
+        return { ok: true, texte: `✓ ${isbn} ajouté à la liste` };
+      },
     }));
     texte.parentNode.insertBefore(b, texte.nextSibling);
   }

@@ -1312,6 +1312,21 @@
     minuteurAnnuler = setTimeout(() => { z.hidden = true; }, 10000);
     z.querySelector('button').onclick = () => { COLL[id] = ancien; sauverColl(); afficher(); z.hidden = true; clearTimeout(minuteurAnnuler); };
   }
+  // Ajout en série par scan (scan.js) : un livre est reconnu par son ISBN, ajouté dans l'état choisi, et peut être annulé
+  window.AjoutRapide = {
+    garde: (suite) => garde(suite),
+    trouver: (isbn) => DATA.find((b) => b.isbn13 === isbn) || null,
+    etat: (id) => (COLL[id] ? COLL[id].etat : null),
+    ajouter(id, etat) {
+      const b = livreDe(id);
+      if (!b) return;
+      COLL[id] = { etat, qte: (COLL[id] && COLL[id].qte) || 1, ...gv(COLL[id]) };
+      sauverColl(); afficher();
+      annonce(`${b.titre} : en ${etatDe(etat).long.toLowerCase()} dans votre collection.`);
+    },
+    retirer(id) { delete COLL[id]; sauverColl(); afficher(); },
+    titre: (b) => `${b.titre} (${b.version})`,
+  };
   function retourAjoutColl(id) {
     const b = livreDe(id), champ = $('#ca-q'), ok = $('#ca-ok');
     if (!champ) return;
