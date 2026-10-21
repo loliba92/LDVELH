@@ -1523,6 +1523,8 @@
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
     const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
+    const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
+    if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
     zone.innerHTML = `
       <ul class="coll-cles" id="coll-cles" aria-label="Chiffres clés de la collection">${cases.map(([l, v, d, c]) => `<li class="${c}"><span class="cle-lib">${l}</span><b>${v}</b>${d ? `<small>${d}</small>` : ''}</li>`).join('')}</ul>
       <p class="trois">${esc(texteEstimation(bl))}</p>
@@ -1541,13 +1543,16 @@
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-gerer"><h3>Gérer ma collection</h3>
-        <div class="coll-actions">
-          <button type="button" class="bouton bouton-clair" id="imp-ouvrir">Importer un fichier</button>
-          <details class="exporter"><summary class="bouton bouton-clair">Exporter ma collection</summary>
-            <div class="exporter-choix"><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div></details>
+        <div class="gerer-grille">
+          <button type="button" class="gerer-tuile" id="imp-ouvrir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span><b>Importer un fichier</b><small>JSON, CSV ou liste d'ISBN</small></span></button>
+          <button type="button" class="gerer-tuile" data-importer-liste aria-expanded="false" aria-controls="importer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span><b>Importer une liste</b><small>Coller des ISBN</small></span></button>
+          <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
         </div>
-        <p class="coll-effacer"><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer ma collection</button></p>
+        <div class="exporter-choix" id="exporter-choix" hidden><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div>
+        <div class="gerer-danger"><span>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
       </div>`;
+    const imp1 = $('#importer'), dang = $('.gerer-danger');
+    if (imp1 && dang) dang.before(imp1);
     afficherHistoColl(bl);
     brancherFiltresColl();
   }
@@ -1586,6 +1591,13 @@
         if (bEtat) COLL[id].etat = bEtat.dataset.e;
         else COLL[id].qte = Math.min(99, Math.max(1, COLL[id].qte + (+bQte.dataset.delta)));
         sauverColl(); afficher();
+        return;
+      }
+      const tImp = t.closest('[data-importer-liste]'), tExp = t.closest('[data-exporter]');
+      if (tImp || tExp) {                                 // « Gérer ma collection » : les deux tuiles qui déplient un bloc
+        const cible = tImp ? $('#importer') : $('#exporter-choix'), ouvert = tImp ? !cible.open : cible.hidden;
+        if (tImp) { cible.open = ouvert; if (ouvert) cible.scrollIntoView({ behavior: 'smooth', block: 'center' }); } else cible.hidden = !ouvert;
+        (tImp || tExp).setAttribute('aria-expanded', String(ouvert));
         return;
       }
       const bVendre = t.closest('[data-ex-vendre]');

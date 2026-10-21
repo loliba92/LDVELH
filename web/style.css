@@ -1659,3 +1659,21 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .fleche { display: inline-block; margin-left: 4px; font: 700 .7em var(--f-ui); vertical-align: middle; }
 .fleche-hausse { color: #7fd69c; }
 .fleche-baisse { color: #f08f99; }
+/* Gérer ma collection : trois tuiles égales, puis une zone sensible à part */
+.gerer-grille { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.gerer-tuile { display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 12px 16px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: border-color var(--t), background var(--t); }
+.gerer-tuile svg { flex: none; color: var(--gold); }
+.gerer-tuile span { display: grid; gap: 2px; min-width: 0; }
+.gerer-tuile b { font: 700 1rem var(--f-ui); color: var(--gold); }
+.gerer-tuile small { color: var(--muted); font-size: .85rem; line-height: 1.25; }
+.gerer-tuile:hover, .gerer-tuile:focus-visible, .gerer-tuile[aria-expanded="true"] { border-color: var(--gold); background: var(--surface-2, var(--surface)); }
+.gerer-tuile:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.coll-gerer .exporter-choix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.coll-gerer .exporter-choix[hidden] { display: none; }
+.gerer-danger { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 18px; padding: 12px 16px; border: 1px solid rgba(196, 70, 90, .45); border-radius: var(--r); background: rgba(122, 31, 43, .12); color: var(--muted); font-size: .9rem; }
+.gerer-danger .bouton { flex: none; min-height: 44px; }
+#importer:not([open]) { display: none; }
+#importer > summary { display: none; }
+#importer { margin-top: 14px; border-top: 0; }
+@media (max-width: 900px) { .gerer-grille { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .gerer-danger { flex-direction: column; align-items: stretch; text-align: left; } .gerer-danger .bouton { width: 100%; } .coll-gerer .exporter-choix { grid-template-columns: minmax(0, 1fr); } }
