@@ -1726,3 +1726,14 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .rv-bas .rv-liens a.rv-ebay { justify-content: center; min-height: 44px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: none; color: var(--text); font: 600 .92rem var(--f-ui); text-decoration: none; }
 .rv-bas .rv-liens a.rv-ebay:hover, .rv-bas .rv-liens a.rv-ebay:focus-visible { border-color: var(--gold); color: var(--gold); }
 @media (max-width: 700px) { .rv-bas .rv-liens { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 8px; } }
+
+/* Vérifier les prix : annonces retenues, ouvrables une à une */
+.rv-ann { margin: 6px 0 2px; font-size: .88rem; }
+.rv-ann summary { cursor: pointer; color: var(--accent); min-height: 44px; display: flex; align-items: center; font-weight: 600; }
+.rv-ann ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.rv-ann li { overflow-wrap: anywhere; line-height: 1.35; }
+.rv-ann a { color: var(--text); text-underline-offset: 3px; }
+.rv-ann-prix { font-weight: 700; color: var(--gold); }
+.rv-ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
+.rv-ann h4 { margin: 10px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.rv-ann ul + h4 { margin-top: 14px; }

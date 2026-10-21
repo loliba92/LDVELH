@@ -216,9 +216,10 @@ def parle_de_la_collection(titre_annonce, ed):
     return False
 
 
-def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
-    """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
-    par_etat = {}
+def retenues(items, jour, titre=None, annees=None, ed=None):
+    """Annonces que le relevé garde pour une édition : [(annonce, état, prix, ancienne)]. « ancienne » : plus de MAX_AGE_JOURS jours
+    (gardée pour les statistiques, pas pour la cote). Lots, devises étrangères, autres livres et autres années sont écartés."""
+    sortie = []
     for it in items:
         if titre and not concorde(it.get("title", ""), titre, 1.0 if it.get("_titre_seul") else 0.6):
             continue
@@ -237,16 +238,41 @@ def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            par_etat.setdefault(etat, {"frais": [], "toutes": []})
-            par_etat[etat]["toutes"].append(valeur)
-            if not ancienne:
-                par_etat[etat]["frais"].append(valeur)
+            sortie.append((it, etat, valeur, ancienne))
+    return sortie
+
+
+def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
+    """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
+    par_etat = {}
+    for _it, etat, valeur, ancienne in retenues(items, jour, titre, annees, ed):
+        par_etat.setdefault(etat, {"frais": [], "toutes": []})
+        par_etat[etat]["toutes"].append(valeur)
+        if not ancienne:
+            par_etat[etat]["frais"].append(valeur)
     # La cote n'utilise que les annonces récentes. Les statistiques de toutes les annonces sont gardées à côté :
     # le modèle d'auto-apprentissage en tire de combien les annonces anciennes surestiment les prix.
     return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v["frais"]),
              "prix_min": f"{min(v['frais']):.2f}", "prix_median": f"{statistics.median(v['frais']):.2f}", "prix_max": f"{max(v['frais']):.2f}",
              "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}"}
             for etat, v in sorted(par_etat.items()) if v["frais"]]
+
+
+CHAMPS_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par"]
+
+
+def lignes_annonces(items, isbn13, jour, titre=None, annees=None, ed=None):
+    """Les annonces récentes retenues pour la cote, une ligne chacune : le propriétaire peut ainsi ouvrir chaque annonce et vérifier
+    que c'est bien le bon livre (page « Vérifier les prix »)."""
+    sortie = []
+    for it, etat, valeur, ancienne in retenues(items, jour, titre, annees, ed):
+        if ancienne:
+            continue
+        age = age_jours(it, jour)
+        sortie.append({"isbn13": isbn13, "etat": etat, "prix": f"{valeur:.2f}", "titre": str(it.get("title", ""))[:120],
+                       "lien": str(it.get("itemWebUrl", "")).split("?")[0], "age_jours": "" if age is None else age,
+                       "trouvee_par": "titre" if it.get("_titre_seul") else "isbn"})
+    return sortie
 
 
 def catalogue():
@@ -460,8 +486,10 @@ def main():
     for isbn, titre, nb_ed, livre, annees in cat:
         par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
+    annonces_gardees = []
     for isbn, titre, nb_ed, livre, annees in cat:
         lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
+        annonces_gardees += lignes_annonces(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
@@ -469,6 +497,10 @@ def main():
         w = csv.DictWriter(f, fieldnames=CHAMPS)
         w.writeheader()
         w.writerows(lignes)
+    with open(sortie / f"annonces-{jour.isoformat()}.csv", "w", newline="", encoding="utf-8") as f:       # non lu par build_db : sert à vérifier
+        w = csv.DictWriter(f, fieldnames=CHAMPS_ANNONCES)
+        w.writeheader()
+        w.writerows(annonces_gardees)
     print(f"{len(isbns)} éditions interrogées, {len(lignes)} lignes écrites dans {fichier}")
 
 

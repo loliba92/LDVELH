@@ -9,7 +9,7 @@
   const requete = (t) => encodeURIComponent(t.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()).replace(/%20/g, '+');
   const eur = (v) => (v == null ? '—' : v.toFixed(2).replace('.', ',') + ' €');
   const norm = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  let EDITIONS = [], VUE = [], vue = 'verif', limite = PAGE;
+  let EDITIONS = [], VUE = [], vue = 'verif', limite = PAGE, ANN = null;
 
   // Validations faites sur cette page : gardées dans ce navigateur jusqu'à leur envoi (fichier à transmettre), puis reprises
   // dans les données du site (champ « valide »). Elles priment sur eBay et les archives.
@@ -93,6 +93,22 @@
     return l.publie == null ? '' : 'ancienne cote';
   }
 
+  // Annonces eBay retenues par le dernier relevé, pour les trois états : on peut les ouvrir et vérifier que c'est bien le bon livre, au bon état
+  function annoncesHtml(ed) {
+    const par = ANN && ed.isbn && ANN.annonces[ed.isbn];
+    if (!par) return '';
+    const blocs = ETATS.map(([cle, lib]) => {
+      const liste = par[cle];
+      if (!liste || !liste.length) return '';
+      const items = liste.map(([prix, titre, lien, origine]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('');
+      const dispersion = liste.length > 1 && liste[liste.length - 1][0] > liste[0][0] * 3;
+      return `<h4>${lib} · ${liste.length} annonce${liste.length > 1 ? 's' : ''}${dispersion ? ' · prix très dispersés' : ''}</h4><ul>${items}</ul>`;
+    }).join('');
+    if (!blocs) return '';
+    const nb = ETATS.reduce((t, [cle]) => t + ((par[cle] || []).length), 0);
+    return `<details class="rv-ann"><summary>Voir les ${nb} annonce${nb > 1 ? 's' : ''} eBay retenue${nb > 1 ? 's' : ''}</summary>${blocs}</details>`;
+  }
+
   function boutons(ed, cle, v, l) {
     const id = `data-ed="${esc(ed.id)}" data-e="${cle}"`;
     return `<div class="rv-actions">` +
@@ -137,7 +153,7 @@
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
       `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a></div></header>` +
-      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
+      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>${annoncesHtml(ed)}` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
       `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>De</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
@@ -623,6 +639,7 @@
   initMaj();
 
   const JAQ = {}, RAR = {};
+  fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((a) => { if (a && a.annonces) { ANN = a; if (typeof afficher === 'function' && EDITIONS.length) afficher(); } }).catch(() => {});
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
