@@ -2,7 +2,7 @@
  "date": "2026-10-21",
  "precedent": "2026-10-20",
  "nb_comparees": 1470,
- "nb_modifiees": 430,
+ "nb_modifiees": 442,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -112,21 +112,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070610327",
-   "isbn13": "9782070610327",
-   "titre": "Le Sorcier de la Montagne de Feu",
-   "serie": "Défis Fantastiques",
-   "numero": "252",
-   "version": "V3",
-   "etat": "convenable",
-   "avant": 2.86,
-   "apres": 5.17,
-   "pct": 0.808,
-   "nature": "archives",
-   "nb": 1,
-   "recalibre": false
-  },
-  {
    "id": "9782070509218",
    "isbn13": "9782070509218",
    "titre": "Le Labyrinthe de la Mort",
@@ -157,31 +142,46 @@
    "recalibre": false
   },
   {
-   "id": "9782070333417",
-   "isbn13": "9782070333417",
-   "titre": "La Porte des Mondes",
-   "serie": "L'Œil Noir",
-   "numero": "341",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 9.47,
-   "apres": 15.61,
-   "pct": 0.648,
-   "nature": "archives",
-   "nb": 1,
+   "id": "9782070512645",
+   "isbn13": "9782070512645",
+   "titre": "Le Voleur d'Ames",
+   "serie": "Défis Fantastiques",
+   "numero": "530",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 7.58,
+   "apres": 12.0,
+   "pct": 0.583,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
-   "id": "9782070610327",
-   "isbn13": "9782070610327",
-   "titre": "Le Sorcier de la Montagne de Feu",
-   "serie": "Défis Fantastiques",
-   "numero": "252",
-   "version": "V3",
+   "id": "9782070332915",
+   "isbn13": "9782070332915",
+   "titre": "La Traversée Infernale",
+   "serie": "Loup Solitaire",
+   "numero": "291",
+   "version": "V1",
    "etat": "bon",
-   "avant": 3.43,
-   "apres": 5.5,
-   "pct": 0.603,
+   "avant": 6.01,
+   "apres": 9.36,
+   "pct": 0.557,
+   "nature": "annonces",
+   "nb": 6,
+   "recalibre": false
+  },
+  {
+   "id": "9782070509461",
+   "isbn13": "9782070509461",
+   "titre": "Le Crépuscule des Maîtres",
+   "serie": "Loup Solitaire",
+   "numero": "570",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 4.23,
+   "apres": 6.29,
+   "pct": 0.487,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -215,6 +215,21 @@
    "apres": 18.0,
    "pct": -0.602,
    "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070647415",
+   "isbn13": "9782070647415",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 5.69,
+   "apres": 2.52,
+   "pct": -0.557,
+   "nature": "archives",
    "nb": 0,
    "recalibre": false
   },
@@ -309,21 +324,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070334094",
-   "isbn13": "9782070334094",
-   "titre": "A Feu et a Sang",
-   "serie": "Histoire",
-   "numero": "409",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 33.05,
-   "apres": 18.95,
-   "pct": -0.427,
-   "nature": "archives",
-   "nb": 1,
-   "recalibre": false
-  },
-  {
    "id": "9782070610426",
    "isbn13": "9782070610426",
    "titre": "Rendez-vous avec la M.O.R.T.",
@@ -369,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 206,
+ "nb_grands_mouvements": 190,
  "modele": {
   "actif": false,
-  "n_paires": 9,
+  "n_paires": 17,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (9 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (17 sur 20 nécessaires)",
   "rapport_global": null
  }
 }

@@ -1,44 +1,23 @@
 {
   "actif": false,
-  "n_paires": 28,
-  "calcule_le": "2026-10-20",
-  "par_etat": {
-    "bon": {
-      "rapport": 1.311,
-      "ecart": 0.298,
-      "n": 15
-    },
-    "tres_bon": {
-      "rapport": 0.821,
-      "ecart": 0.685,
-      "n": 12
-    },
-    "convenable": {
-      "rapport": 0.925,
-      "ecart": 0.675,
-      "n": 1
-    }
-  },
-  "erreur_modele": 0.607,
-  "erreur_archives": 0.583,
-  "gain": -0.042,
-  "raison": "le modèle ne bat pas assez les archives (gain -4%, 15% exigés)",
-  "rapport_global": 0.925,
+  "n_paires": 17,
+  "calcule_le": "2026-10-21",
+  "par_etat": {},
+  "erreur_modele": null,
+  "erreur_archives": null,
+  "gain": null,
+  "raison": "pas assez d'éditions comparables (17 sur 20 nécessaires)",
   "fraicheur": {
     "bon": {
       "rapport": 0.839,
-      "n": 4
+      "n": 2
     },
     "tres_bon": {
-      "rapport": 1.0,
-      "n": 7
+      "rapport": 1.037,
+      "n": 1
     }
   },
-  "sigma_archive": {
-    "bon": 0.298,
-    "tres_bon": 0.685,
-    "convenable": 0.675
-  },
+  "sigma_archive": {},
   "rapports_etats_mesures_archives": {
     "n": 421,
     "convenable": 0.624,
