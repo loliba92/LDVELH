@@ -208,7 +208,7 @@ def page(nom, corps):
 GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Admin, SuperAdmin, ou toute personne connectée (évolutions)
 NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
-               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>\n<script src="scan.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
@@ -740,7 +740,7 @@ def page_collection(index_html):
       <h2 id="titre-ajout">Ajouter un titre à ma collection</h2>
       <p class="ca-invite" id="ca-invite" hidden>Pour enregistrer vos livres, <button type="button" class="bouton-lien" data-compte="connecter">connectez-vous avec Google</button></p>
       <label class="sr-only" for="ca-q">Titre à ajouter à ma collection</label>
-      <input type="search" id="ca-q" placeholder="Écrivez le titre ou l'ISBN du livre" autocomplete="off" enterkeyhint="search">
+      <input type="search" id="ca-q" placeholder="Titre ou ISBN du livre" autocomplete="off" enterkeyhint="search">
       <p class="sous">Choisissez le livre dans la liste, puis touchez son état : C (convenable), BE (bon état) ou TBE (très bon état). Retouchez pour le retirer.</p>
       <p class="sr-only" id="ca-statut" role="status" aria-live="polite"></p>
       <p class="ca-ok" id="ca-ok" role="status" hidden></p>
@@ -772,6 +772,7 @@ def page_collection(index_html):
 <script src="cloud.js"></script>
 <script src="compte.js"></script>
 <script src="notes.js"></script>
+<script src="scan.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
