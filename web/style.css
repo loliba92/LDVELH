@@ -1726,3 +1726,14 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .rv-bas .rv-liens a.rv-ebay { justify-content: center; min-height: 44px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: none; color: var(--text); font: 600 .92rem var(--f-ui); text-decoration: none; }
 .rv-bas .rv-liens a.rv-ebay:hover, .rv-bas .rv-liens a.rv-ebay:focus-visible { border-color: var(--gold); color: var(--gold); }
 @media (max-width: 700px) { .rv-bas .rv-liens { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-content: stretch; gap: 8px; } }
+
+/* Espace administrateur : onglet « Annonces » (annonces eBay retenues par le dernier relevé) */
+#pane-annonces .champ { max-width: 420px; }
+.rv-ann-livre { margin: 0 0 6px; font-size: 1.15rem; }
+#an-liste h4 { margin: 12px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#an-liste ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+#an-liste li { overflow-wrap: anywhere; line-height: 1.35; font-size: .92rem; }
+#an-liste li a { color: var(--text); text-underline-offset: 3px; }
+.rv-ann-prix { font-weight: 700; color: var(--gold); }
+.rv-ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
+@media (max-width: 560px) { .rv-nav { gap: 0; } .rv-nav button { padding: 8px 7px; font-size: .9rem; } }

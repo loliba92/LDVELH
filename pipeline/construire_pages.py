@@ -372,6 +372,7 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>
+  <button type="button" role="tab" data-pane="annonces" aria-selected="false">Annonces</button>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false">Ajouter</button>
   <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></button>
 </div>
@@ -423,6 +424,12 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <h3 class="tr-sous-titre">Évolution dans le temps</h3>
   <div id="tr-temps"></div>
 </section>
+</div>
+<div class="rv-pane" id="pane-annonces" role="tabpanel" hidden>
+  <p class="chapeau">Les annonces eBay que le dernier relevé a retenues pour calculer les cotes. Cherchez un livre, ouvrez une annonce et vérifiez que c'est bien le bon livre, dans le bon état.</p>
+  <div class="champ"><label for="an-q">Chercher un livre</label><input type="search" id="an-q" autocomplete="off" placeholder="Titre ou série"></div>
+  <p class="sous" id="an-etat" role="status" aria-live="polite"></p>
+  <div id="an-liste"></div>
 </div>
 <div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
 <section class="rv-ajout" aria-labelledby="aj-titre">

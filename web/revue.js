@@ -555,11 +555,44 @@
   document.addEventListener('cdh-compte', () => { etatJeton(); });   // déconnexion : la porte se referme
 
   // Sections de la page : un seul panneau à la fois ; les onglets Tendances et Demandes n'apparaissent que si leur contenu est disponible
+  // Onglet « Annonces » : les annonces eBay retenues par le dernier relevé, livre par livre (données/annonces.json)
+  function initAnnonces() {
+    const champ = $('#an-q'), liste = $('#an-liste'), etat = $('#an-etat');
+    if (!champ) return;
+    let ANN = null, charge = false;
+    const dessiner = () => {
+      const q = norm(champ.value).trim();
+      if (!ANN) { etat.textContent = charge ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
+      const nbEd = Object.keys(ANN.annonces).length;
+      if (q.length < 2) { etat.textContent = `Relevé du ${jour(ANN.date)} : annonces retenues pour ${nbEd} éditions. Tapez au moins deux lettres.`; liste.innerHTML = ''; return; }
+      const trouves = EDITIONS.filter((ed) => ed.isbn && ANN.annonces[ed.isbn] && norm(ed.titre + ' ' + ed.serie).includes(q)).slice(0, 12);
+      etat.textContent = trouves.length ? `${trouves.length} édition${trouves.length > 1 ? 's' : ''}${trouves.length === 12 ? ' (les 12 premières : précisez la recherche)' : ''}.` : 'Aucune édition avec des annonces retenues pour cette recherche.';
+      liste.innerHTML = trouves.map((ed) => {
+        const par = ANN.annonces[ed.isbn];
+        const blocs = ETATS.map(([cle, lib]) => {
+          const l = par[cle];
+          if (!l || !l.length) return '';
+          const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
+          return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, par]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${par === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
+        }).join('');
+        return `<article class="rv-edition"><h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs}</article>`;
+      }).join('');
+    };
+    champ.addEventListener('input', dessiner);
+    document.addEventListener('cdh-pane', (e) => {
+      if (e.detail !== 'annonces' || charge) return;
+      charge = true;
+      fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null).then((a) => { ANN = a && a.annonces ? a : null; dessiner(); });
+    });
+    dessiner();
+  }
+
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
       boutons.forEach((b) => { b.setAttribute('aria-selected', String(b.dataset.pane === nom)); b.tabIndex = b.dataset.pane === nom ? 0 : -1; });
       document.querySelectorAll('.rv-pane').forEach((p) => { p.hidden = p.id !== 'pane-' + nom; });
+      document.dispatchEvent(new CustomEvent('cdh-pane', { detail: nom }));
       try { sessionStorage.setItem('cdh-rv-pane', nom); } catch (e) { /* sans stockage : la page s'ouvre sur les prix */ }
     };
     boutons.forEach((b) => {                              // motif des onglets : liés à leur panneau, flèches pour passer de l'un à l'autre
@@ -584,6 +617,7 @@
     try { debut = debut || sessionStorage.getItem('cdh-rv-pane') || ''; } catch (e) { /* idem */ }
     if (boutons.some((b) => b.dataset.pane === debut) && !(boutons.find((b) => b.dataset.pane === debut) || {}).hidden) montrer(debut);
   }
+  initAnnonces();
   initNav();
 
   // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
