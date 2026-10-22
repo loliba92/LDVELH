@@ -354,10 +354,8 @@
     if (e.source === 'editeur') return `<p class="sous prix-neuf">Prix du neuf : <strong>${fmt(e.prix)}</strong> (prix éditeur en librairie, relevé au ${dateCourte(e.date)})${e.parution ? `. À la parution : ${fmt(e.parution)} (notice de la BnF)` : ''}.</p>`;
     return `<p class="sous prix-neuf">Prix éditeur à la parution : <strong>${e.devise === 'EUR' ? fmt(e.prix) : String(e.prix).replace('.', ',') + ' F'}</strong> (notice de la BnF).</p>`;
   }
-  function texteEstimation(bl) {
-    if (prixAnciens()) return "Estimation d'après les cotes d'archives et l'état que vous indiquez. Elle ne remplace ni une expertise ni un prix de vente réel.";
-    return `Estimation d'après les cotes de la sélection et l'état que vous indiquez : ${bl.actuels} exemplaire${bl.actuels > 1 ? 's' : ''} sur ${bl.exemplaires - bl.sansCote} ` +
-      `${bl.actuels > 1 ? 'reposent' : 'repose'} sur des prix actuels, les autres sur des cotes d'archives. Elle ne remplace ni une expertise ni un prix de vente réel.`;
+  function texteEstimation() {          // texte fixe : il ne dépend ni de la collection ni de l'état des relevés
+    return "Estimation d'après les cotes du guide et l'état de chaque exemplaire. Elle ne remplace ni une expertise ni un prix de vente réel.";
   }
 
   /* ---------- Affichage général ---------- */
