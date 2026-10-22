@@ -1871,3 +1871,4 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
   .coll-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 6px; }
   .coll-nav button { min-height: 48px; padding: 4px 2px; font-size: .92rem; }
 }
+@media (min-width: 901px) { .gerer-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

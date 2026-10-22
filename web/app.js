@@ -1552,6 +1552,7 @@
   // « Gérer ma collection » : importer, exporter, effacer. Toujours affiché, même quand la collection est vide (c'est là qu'on la retrouve).
   const blocGerer = () => `<div class="coll-gerer"><h3>Gérer ma collection</h3>
         <div class="gerer-grille">
+          <button type="button" class="gerer-tuile" data-parcours><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span><b>Compléter pas à pas</b><small>Indiquer les séries que vous possédez</small></span></button>
           <button type="button" class="gerer-tuile" id="imp-ouvrir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span><b>Importer un fichier</b><small>JSON, CSV ou liste d'ISBN</small></span></button>
           <button type="button" class="gerer-tuile" data-importer-liste aria-expanded="false" aria-controls="importer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span><b>Importer une liste</b><small>Coller des ISBN</small></span></button>
           <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
@@ -1664,7 +1665,6 @@
         `<button type="button" role="tab" id="onglet-coll-${k}" aria-controls="pane-coll-${k}" aria-selected="${k === CTAB}" tabindex="${k === CTAB ? 0 : -1}" data-onglet="${k}">${nom}${nb == null ? '' : ` <span class="coll-nb" aria-label="${nb} livre${nb > 1 ? 's' : ''}">(${nb})</span>`}</button>`).join('')}</div>
       <div class="coll-pane" id="pane-coll-livres" role="tabpanel" aria-labelledby="onglet-coll-livres"${CTAB === 'livres' ? '' : ' hidden'}>
         <h3 id="titre-exemplaires" class="sr-only">Mes livres</h3>
-        <p class="coll-pas-a-pas"><button type="button" class="bouton" data-parcours>Compléter pas à pas</button></p>
         ${barreFiltres(bl)}
         <p class="coll-filtre-compte" id="coll-filtre-compte" role="status" aria-live="polite">${texteFiltre(lst, bl)}</p>
         <ul class="ex-liste" id="coll-lignes">${lst.html}</ul>
