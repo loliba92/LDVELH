@@ -32,8 +32,8 @@
    "avant": 5.56,
    "apres": 6.12,
    "pct": 0.101,
-   "nature": "annonces",
-   "nb": 6,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -214,8 +214,8 @@
    "avant": 6.95,
    "apres": 6.25,
    "pct": -0.101,
-   "nature": "annonces",
-   "nb": 9,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
