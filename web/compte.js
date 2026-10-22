@@ -257,13 +257,43 @@ window.Compte = (function () {
       var envoyer = function () { return window.Relais.appeler('avis', { note: note, texte: $('#avis-texte', d).value }); };
       // Une coupure réseau brève (Google redéploie, passage du Wi-Fi à la 4G) : un deuxième essai automatique avant d'abandonner
       envoyer().catch(function () { return new Promise(function (ok) { setTimeout(ok, 1500); }).then(envoyer); }).then(function (r) {
-        if (r && r.ok) { d.close(); annoncer('Merci du fond du cœur ! J\'ai bien reçu votre avis et je le lirai avec attention.'); return; }
+        if (r && r.ok) { d.close(); try { localStorage.setItem('cdh-avis-donne', '1'); } catch (x) { /* sans stockage : le bandeau pourra revenir */ } var bv = document.getElementById('bandeau-avis'); if (bv) bv.remove(); annoncer('Merci du fond du cœur ! J\'ai bien reçu votre avis et je le lirai avec attention.'); return; }
         var e = (r && r.erreur) || 'erreur inconnue';
         msg.textContent = /expir|jeton/.test(e) ? 'Votre connexion a expiré : reconnectez-vous puis réessayez.' : /action inconnue/.test(e) ? 'Cette fonction n\'est pas encore disponible. Réessayez bientôt.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
         bouton.disabled = false;
       }).catch(function () { msg.textContent = 'Le service ne répond pas pour le moment. Vérifiez votre connexion et réessayez dans une minute : votre texte est conservé.'; bouton.disabled = false; });
     });
   }
+
+  /* ---------- Bandeau « Donnez votre avis » : discret, pour les visiteurs connectés qui reviennent souvent ---------- */
+  var aujourdhui = function () { return new Date().toISOString().slice(0, 10); };
+  var plusTard = function (jours) { return new Date(Date.now() + jours * 86400000).toISOString().slice(0, 10); };
+  var lire = function (cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } };
+  var ecrire = function (cle, v) { try { localStorage.setItem(cle, v); } catch (e) { /* sans stockage : pas de mémoire des visites */ } };
+  (function noterVisite() {                                           // les jours où la personne est venue (dix derniers), jamais son identité
+    var jours = []; try { jours = JSON.parse(lire('cdh-visites') || '[]') || []; } catch (e) { jours = []; }
+    if (jours.indexOf(aujourdhui()) < 0) { jours.push(aujourdhui()); ecrire('cdh-visites', JSON.stringify(jours.slice(-10))); }
+  })();
+  function bandeauAvis() {
+    var page = document.body && document.body.dataset.page;
+    if (page !== 'accueil' && page !== 'collection') return;
+    var deja = document.getElementById('bandeau-avis');
+    var visites = []; try { visites = JSON.parse(lire('cdh-visites') || '[]') || []; } catch (e) { visites = []; }
+    var voir = actifGoogle() && window.Cloud && window.Cloud.actif() && visites.length >= 3 && !lire('cdh-avis-donne') && !((lire('cdh-avis-ferme') || '') > aujourdhui());
+    if (!voir) { if (deja) deja.remove(); return; }
+    if (deja) return;
+    var b = document.createElement('div');
+    b.id = 'bandeau-avis'; b.className = 'bandeau-avis cadre';
+    b.innerHTML = '<p>Le guide vous est utile ? <a href="#avis" data-compte="avis">Donnez votre avis</a></p><button type="button" data-avis-ferme aria-label="Fermer ce message">×</button>';
+    var rang = document.getElementById('rang-accueil'), main = document.getElementById('main');
+    if (rang) rang.parentNode.insertBefore(b, rang); else if (main) main.insertBefore(b, main.firstChild);
+    b.addEventListener('click', function (e) {
+      if (e.target.closest('[data-avis-ferme]')) { ecrire('cdh-avis-ferme', plusTard(60)); b.remove(); }
+      else if (e.target.closest('[data-compte="avis"]')) ecrire('cdh-avis-ferme', plusTard(14));   // s'il annule, on ne le relance pas avant deux semaines
+    });
+  }
+  document.addEventListener('cdh-compte', bandeauAvis);
+  document.addEventListener('DOMContentLoaded', bandeauAvis);
 
   /* ---------- Menu et clics ---------- */
   function fermerMenu(rendreFocus) {

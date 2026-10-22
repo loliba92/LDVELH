@@ -1785,3 +1785,10 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .etats-carte button[aria-pressed="true"]::before { content: "✓ "; content: "✓ " / ""; font-weight: 800; }
 .rayon .livre-carte .ouvrir .infos { flex: 1 1 auto; }      /* le pavé « À vendre » / « À trouver » reste d'un seul bloc quand une carte voisine a un titre plus long */
 .rv-ajout-actions .scan-bouton { margin: 0; height: 44px; min-height: 44px; padding: 0 16px; align-self: center; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; white-space: nowrap; }      /* même rangée et même hauteur que « Vérifier la liste » */
+
+/* Bandeau « Donnez votre avis » : une ligne discrète pour les visiteurs connectés qui reviennent souvent */
+.bandeau-avis { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px auto 0; padding-top: 0; padding-bottom: 0; color: var(--muted); font-size: .92rem; }
+.bandeau-avis p { margin: 0; }
+.bandeau-avis a { color: var(--gold); font-weight: 700; text-underline-offset: 3px; }
+.bandeau-avis button { flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--muted); font: 400 1.4rem/1 var(--f-ui); cursor: pointer; }
+.bandeau-avis button:hover, .bandeau-avis button:focus-visible { color: var(--text); }
