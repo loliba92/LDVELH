@@ -182,7 +182,7 @@ window.Compte = (function () {
   function invitation() {
     if ($('.dlg-invitation')) return;
     var d = dialogue('<h2>Connectez-vous pour devenir Héros</h2>' +
-      '<p>Les fiches et la recherche restent libres. Avec un compte Google, vous voyez les cotes exactes, vous scannez vos livres et vous gardez votre collection.</p>' +
+      '<p>Les fiches et la recherche restent libres. Avec un compte Google, gratuit, vous voyez les prix exacts, vous scannez vos livres, vous suivez la valeur de votre collection, vos doubles à vendre et vos livres à trouver, et vous retrouvez tout sur vos appareils.</p>' +
       '<p class="sous">Google enregistre votre collection dans un espace réservé de votre Drive, que seul ce site peut ouvrir.</p>' +
       '<p class="sous">Nous ne voyons ni votre courriel ni vos autres fichiers. Votre collection est stockée chez vous, dans votre Google Drive, et vous pouvez la supprimer à tout moment.</p>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Continuer avec Google</button><button type="button" class="bouton bouton-clair" data-fermer>Plus tard</button></div>', 'dlg-invitation');

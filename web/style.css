@@ -1798,3 +1798,6 @@ body.cotes-masquees #onglet-cote, body.cotes-masquees #cote, body.cotes-masquees
 .cotes .valeur.repere { font-size: 1rem; line-height: 1.25; }
 .scan-aide { margin: 8px auto 0; width: fit-content; max-width: 100%; padding: 4px 10px; border-radius: 6px; background: rgba(0, 0, 0, .6); text-align: center; }
 .scan-bouton.scan-reserve { opacity: .8; }
+
+.avantages { margin: 4px 0 14px; padding-left: 20px; }
+.avantages li { margin: 2px 0; }
