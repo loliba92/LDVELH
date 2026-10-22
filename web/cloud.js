@@ -60,7 +60,7 @@
 
   var CLE_LIEN = 'cdh-cloud-lie', CLE_META = 'cdh-cloud-meta';
   var CLE_JETON = 'cdh-cloud-jeton';
-  var cfg = null, jeton = '', expire = 0, auClient = null, auDrive = null, minuterie = null, enCours = false, aRejouer = false, statut = 'hors-ligne';
+  var derniereErreur = '', cfg = null, jeton = '', expire = 0, auClient = null, auDrive = null, minuterie = null, enCours = false, aRejouer = false, statut = 'hors-ligne';
   var ecouteurs = [];
   var lireLoc = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
   var ecrireLoc = function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } };
@@ -128,23 +128,29 @@
   }
 
   var entetes = function () { return { Authorization: 'Bearer ' + jeton }; };
+  // Appel réseau qui ne reste jamais suspendu : sans réponse au bout de 25 s, il échoue (la synchronisation affiche alors une erreur au lieu de rester « en cours »)
+  function reseau(url, options) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var minute = setTimeout(function () { if (ctl) ctl.abort(); }, 25000);
+    return fetch(url, Object.assign({}, options, ctl ? { signal: ctl.signal } : {})).then(function (r) { clearTimeout(minute); return r; }, function (e) { clearTimeout(minute); throw new Error(e && e.name === 'AbortError' ? 'delai' : 'reseau'); });
+  }
   var API = 'https://www.googleapis.com/drive/v3/files', UP = 'https://www.googleapis.com/upload/drive/v3/files';
   function verifier(r) { if (r.status === 401 || r.status === 403) { jeton = ''; expire = 0; oublierJeton(); throw new Error('expire'); } if (!r.ok) throw new Error('drive-' + r.status); return r; }
 
   function lireDrive() {
-    return fetch(API + '?spaces=appDataFolder&pageSize=1&fields=files(id)&q=' + encodeURIComponent("name='" + FICHIER + "'"), { headers: entetes() }).then(verifier).then(function (r) { return r.json(); }).then(function (l) {
+    return reseau(API + '?spaces=appDataFolder&pageSize=1&fields=files(id)&q=' + encodeURIComponent("name='" + FICHIER + "'"), { headers: entetes() }).then(verifier).then(function (r) { return r.json(); }).then(function (l) {
       if (!l.files || !l.files.length) { auDrive = null; return null; }
       auDrive = l.files[0].id;
-      return fetch(API + '/' + auDrive + '?alt=media', { headers: entetes() }).then(verifier).then(function (r) { return r.json(); }).catch(function (e) { if (e.message === 'expire' || /^drive-/.test(e.message)) throw e; return null; });
+      return reseau(API + '/' + auDrive + '?alt=media', { headers: entetes() }).then(verifier).then(function (r) { return r.json(); }).catch(function (e) { if (e.message === 'expire' || e.message === 'delai' || e.message === 'reseau' || /^drive-/.test(e.message)) throw e; return null; });
     });
   }
   function ecrireDrive(doc) {
     var corps = JSON.stringify(doc);
-    if (auDrive) return fetch(UP + '/' + auDrive + '?uploadType=media', { method: 'PATCH', headers: Object.assign({ 'Content-Type': 'application/json' }, entetes()), body: corps }).then(verifier);
+    if (auDrive) return reseau(UP + '/' + auDrive + '?uploadType=media', { method: 'PATCH', headers: Object.assign({ 'Content-Type': 'application/json' }, entetes()), body: corps }).then(verifier);
     var borne = 'cdh' + Date.now();
     var multi = '--' + borne + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify({ name: FICHIER, parents: ['appDataFolder'] }) +
       '\r\n--' + borne + '\r\nContent-Type: application/json\r\n\r\n' + corps + '\r\n--' + borne + '--';
-    return fetch(UP + '?uploadType=multipart&fields=id', { method: 'POST', headers: Object.assign({ 'Content-Type': 'multipart/related; boundary=' + borne }, entetes()), body: multi })
+    return reseau(UP + '?uploadType=multipart&fields=id', { method: 'POST', headers: Object.assign({ 'Content-Type': 'multipart/related; boundary=' + borne }, entetes()), body: multi })
       .then(verifier).then(function (r) { return r.json(); }).then(function (f) { auDrive = f.id; });
   }
 
@@ -153,9 +159,10 @@
     if (!lie()) return Promise.resolve();
     if (!actif()) { dire('a-reprendre'); return Promise.resolve(); }
     if (enCours) { aRejouer = true; return Promise.resolve(); }
-    enCours = true; dire('synchro');
-    var maintenant = Date.now();
-    var local = etatLocal(lireColl(), lireMeta(), maintenant);
+    enCours = true; dire('synchro'); derniereErreur = '';
+    var maintenant = Date.now(), local;
+    try { local = etatLocal(lireColl(), lireMeta(), maintenant); }
+    catch (e) { enCours = false; derniereErreur = 'lecture locale'; dire('erreur'); return Promise.resolve(); }      // jamais « en cours » pour toujours
     return lireDrive().then(function (distant) {
       // strategie : « fusionner » (défaut), « compte » (le Drive remplace l'appareil), « appareil » (l'appareil remplace le Drive)
       var fusion = strategie === 'compte' && distant && distant.items ? { v: VERSION, items: distant.items, sup: distant.sup || {} }
@@ -167,7 +174,8 @@
       if (change) adopter(res.coll);
       return meme(fusion, distant) ? null : ecrireDrive(fusion);
     }).then(function () { dire('a-jour', Date.now()); }).catch(function (e) {
-      dire(e.message === 'expire' ? 'a-reprendre' : 'erreur');
+      derniereErreur = e && e.message ? e.message : 'inconnue';
+      dire(e && e.message === 'expire' ? 'a-reprendre' : 'erreur');
     }).then(function () { enCours = false; if (aRejouer) { aRejouer = false; return synchroniser(lireColl, adopter); } });
   }
   // Supprime la copie du Drive et la mémoire de synchronisation de l'appareil (la collection locale est vidée par l'appelant)
@@ -201,6 +209,6 @@
   racine.Cloud = {
     config: config, lie: lie, nom: nom, actif: actif, preuve: preuve, connecter: connecter, deconnecter: deconnecter,
     synchroniser: synchroniser, planifier: planifier, apercu: apercu, premiereFois: premiereFois, enAttente: enAttente, supprimerDrive: supprimerDrive, statut: function () { return statut; },
-    surChangement: function (f) { ecouteurs.push(f); }
+    surChangement: function (f) { ecouteurs.push(f); }, derniereErreur: function () { return derniereErreur; }
   };
 })(typeof window !== 'undefined' ? window : this);

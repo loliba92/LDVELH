@@ -18,7 +18,7 @@ window.Compte = (function () {
     if (!window.Cloud.actif() || s === 'a-reprendre') return { cle: 'reprendre', ligne: 'Votre connexion a expiré. Vos changements sont gardés sur cet appareil.' };
     if (s === 'connecte' && !reprisEnCours && window.Cloud.premiereFois()) return { cle: 'choix', ligne: 'Votre collection n\'est pas encore enregistrée dans votre compte : il reste un choix à faire.' };
     if (s === 'synchro' || s === 'connecte') return { cle: 'synchro', ligne: 'Enregistrement en cours…' };
-    if (s === 'erreur') return { cle: 'erreur', ligne: 'La sauvegarde n\'a pas abouti. Vos changements sont gardés ici.' };
+    if (s === 'erreur') { var det = window.Cloud.derniereErreur ? window.Cloud.derniereErreur() : ''; return { cle: 'erreur', ligne: 'La sauvegarde n\'a pas abouti' + (det ? ' (' + ({ delai: 'Google ne répond pas', reseau: 'réseau coupé', 'lecture locale': 'lecture de la collection de cet appareil' }[det] || det) + ')' : '') + '. Vos changements sont gardés ici.' }; }
     return { cle: 'a-jour', ligne: 'Collection sauvegardée dans votre Google Drive.' };
   }
   var LIBELLE = { deconnecte: 'Se connecter', reprendre: 'Reconnecter', synchro: '', erreur: '', 'a-jour': '' };
