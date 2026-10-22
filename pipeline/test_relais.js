@@ -11,6 +11,18 @@ const infos = (sur = {}) => Object.assign({ aud: CLIENT, iss: 'https://accounts.
 const decider = (i, f = fichier()) => L('decider')(i, f, CLIENT, h, NOW);
 let n = 0; const test = (nom, f) => { f(); n++; console.log('ok  ' + nom); };
 
+test('comptes_lire est réservé au SuperAdmin', () => {
+  assert.strictEqual(L('peut')('superadmin', 'comptes_lire'), true);
+  assert.strictEqual(L('peut')('admin', 'comptes_lire'), false);
+  assert.strictEqual(L('peut')('heros', 'comptes_lire'), false);
+});
+test('liste des comptes : du plus récent au plus ancien, arrivées du jour comptées', () => {
+  assert.strictEqual(L('ligneCompte')('Marie | x', '2026-10-22T10:00'), 'Marie x|2026-10-22');
+  const r = J(L('listerComptes')([{ rang: 2, valeur: 'Paul #ab12|2026-10-21' }, { rang: 5, valeur: 'Marie|2026-10-22' }, { rang: 4, valeur: 'Luc|2026-10-22' }, { rang: 0, valeur: 'x|y' }], '2026-10-22', 300));
+  assert.deepStrictEqual(r.liste.map((c) => c.nom), ['Marie', 'Luc', 'Paul #ab12']);
+  assert.strictEqual(r.aujourdhui, 2); assert.strictEqual(r.connus, 3);
+  assert.strictEqual(J(L('listerComptes')([{ rang: 1, valeur: 'A|2026-10-22' }, { rang: 2, valeur: 'B|2026-10-22' }], '2026-10-22', 1)).liste.length, 1);
+});
 test('un compte inconnu est un Héros, avec un suffixe qui le distingue', () => {
   const d = decider(infos()); assert.strictEqual(d.ok, true); assert.strictEqual(d.role, 'heros');
   assert.strictEqual(d.nom, 'Paul #' + h('inconnu@gmail.com').slice(7, 11));

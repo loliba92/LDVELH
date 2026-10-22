@@ -119,6 +119,7 @@ function doPost(e) {
         if (!props.getProperty(cleU)) {
           rang = (Number(props.getProperty('u:total')) || 0) + 1;
           props.setProperty(cleU, '1'); props.setProperty('u:total', String(rang));
+          props.setProperty('un:' + rang, ligneCompte(moi.nom, Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd')));      // prénom et date d'arrivée, pour la page Équipe
         }
       } finally { verrouB.releaseLock(); }
       if (rang) {
@@ -167,6 +168,13 @@ function doPost(e) {
     if (action === 'equipe_lire') {
       var eq = v.admins.contenu.equipe || {};
       return reponse({ ok: true, equipe: Object.keys(eq).map(function (k) { return { empreinte: k, nom: eq[k].nom, role: eq[k].role }; }), bloques: v.admins.contenu.bloques || [] });
+    }
+
+    if (action === 'comptes_lire') {               // SuperAdmin : total, arrivées du jour et prénoms (comptes arrivés depuis l'ajout de cette liste)
+      var tout = PropertiesService.getScriptProperties().getProperties(), vals = [];
+      Object.keys(tout).forEach(function (k) { if (/^un:\d+$/.test(k)) vals.push({ rang: Number(k.slice(3)), valeur: tout[k] }); });
+      var lc = listerComptes(vals, Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd'), 300);
+      return reponse({ ok: true, total: Number(tout['u:total']) || 0, aujourdhui: lc.aujourdhui, connus: lc.connus, liste: lc.liste });
     }
 
     if (action === 'equipe_ajouter' || action === 'equipe_retirer' || action === 'equipe_bloquer') {

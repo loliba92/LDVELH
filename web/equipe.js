@@ -25,7 +25,22 @@
     etat.textContent = r.equipe.length + ' membre' + (r.equipe.length > 1 ? 's' : '') + ' dans l\'équipe.';
   }
 
+  function comptes() {
+    var etatC = $('#eq-comptes-etat'), ul = $('#eq-comptes');
+    if (!etatC) return;
+    window.Relais.appeler('comptes_lire').then(function (r) {
+      if (!r || !r.ok) { etatC.textContent = /action inconnue/.test((r && r.erreur) || '') ? 'Mettez à jour le relais (relais/Code.gs) pour voir les comptes.' : erreurLisible(r); return; }
+      var sans = Math.max(0, r.total - r.connus);
+      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ', dont ' + r.aujourdhui + ' arrivé' + (r.aujourdhui > 1 ? 's' : '') + ' aujourd\'hui.' +
+        (sans ? ' Les ' + sans + ' premiers comptes sont arrivés avant la liste : leurs prénoms ne sont pas gardés.' : '');
+      ul.innerHTML = r.liste.length ? r.liste.map(function (c) {
+        return '<li class="eq-membre"><div><strong>' + esc(c.nom) + '</strong> <span class="sous">· ' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '') + ' · compte n° ' + esc(c.rang) + '</span></div></li>';
+      }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant : la liste se remplit à chaque nouveau compte.</li>';
+    }).catch(function () { etatC.textContent = 'Le relais ne répond pas : vérifiez votre connexion.'; });
+  }
+
   function charger() {
+    comptes();
     etat.textContent = 'Chargement…';
     window.Relais.appeler('equipe_lire').then(function (r) {
       if (!r || !r.ok) { etat.textContent = erreurLisible(r); return; }

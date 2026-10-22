@@ -370,6 +370,12 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
   <ul class="eq-liste" id="eq-liste"></ul>
 </section>
 
+<section class="eq-bloc" aria-labelledby="eq-t-comptes">
+  <h2 id="eq-t-comptes">Comptes</h2>
+  <p class="sous" id="eq-comptes-etat" role="status">Chargement…</p>
+  <ul class="eq-liste eq-comptes" id="eq-comptes"></ul>
+</section>
+
 <section class="eq-bloc" aria-labelledby="eq-t-bloques">
   <h2 id="eq-t-bloques">Comptes bloqués</h2>
   <p class="sous" id="eq-bloques"></p>
@@ -616,7 +622,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le relais avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
 
 <h2>Première connexion et avis</h2>
-<p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
+<p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les SuperAdmins peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
 
 <h2>Demander l'ajout d'un livre</h2>
 <p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les administrateurs.</p>

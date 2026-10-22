@@ -12,6 +12,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   equipe_retirer: 'superadmin',
   equipe_bloquer: 'superadmin',
   releve: 'superadmin',
+  comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
   demandes_lire: 'admin',
   demande_traiter: 'admin',
@@ -175,6 +176,15 @@ function validerAvis(note, texte) {
 function avisAutorise(compteur) { return (Number(compteur) || 0) < LIMITE_AVIS; }
 function formaterNouveauCompte(nom, rang) {
   return { sujet: 'Nouveau compte sur La Cote du Héros', corps: 'Nouveau compte : ' + nom + ' (' + rang + (rang === 1 ? 'er' : 'e') + ' compte).' };
+}
+function ligneCompte(nom, date) { return nettoyerNom(nom) + '|' + String(date || '').slice(0, 10); }
+/* valeurs : [{ rang, valeur }] lues dans les propriétés du script ; renvoie les comptes du plus récent au plus ancien et le nombre d'arrivées du jour */
+function listerComptes(valeurs, aujourdhui, limite) {
+  var liste = (valeurs || []).map(function (v) {
+    var m = String(v.valeur || '').split('|');
+    return { rang: Number(v.rang), nom: m[0] || '(sans prénom)', date: m[1] || '' };
+  }).filter(function (c) { return c.rang > 0; }).sort(function (a, b) { return b.rang - a.rang; });
+  return { liste: liste.slice(0, limite || 300), aujourdhui: liste.filter(function (c) { return c.date === aujourdhui; }).length, connus: liste.length };
 }
 function formaterAvis(nom, role, note, texte) {
   var etoiles = new Array(note + 1).join('★') + new Array(6 - note).join('☆');

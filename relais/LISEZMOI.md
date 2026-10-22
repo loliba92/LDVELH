@@ -50,6 +50,7 @@ modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'appl
 
 - `bienvenue` (tout compte connecté) : la première fois qu'un compte appelle le relais, il est compté (propriétés du script `u:<empreinte courte>` et `u:total`) et un courriel
   « Nouveau compte : Marie #a3f2 (42e compte) » est envoyé au compte propriétaire du script. Le site ne l'appelle qu'une fois par navigateur.
+- `comptes_lire` (SuperAdmin) : total des comptes (`u:total`), arrivées du jour et liste des prénoms avec leur date (propriétés `un:<rang>`, écrites par `bienvenue` depuis l'ajout de cette liste ; les comptes arrivés avant n'ont que leur rang). Affichés par la page Équipe. À redéployer après mise à jour de `Code.gs` et `logique.gs`.
 - `avis` (tout compte connecté) : la note de 1 à 5 étoiles (obligatoire) et le commentaire (facultatif, 1500 caractères au plus) de « Qu'en pensez-vous ? » sont envoyés par courriel au compte propriétaire, avec le prénom du
   compte, jamais l'adresse. Limite : trois avis par personne et par six heures.
 - Ces deux actions envoient des courriels. Il faut d'abord autoriser l'envoi : dans l'éditeur Apps Script, choisir la fonction `autoriser` dans la liste en haut, cliquer sur Exécuter, accepter les autorisations demandées par Google, puis redéployer (Déployer > Gérer les déploiements > crayon > Nouvelle version > Déployer).
