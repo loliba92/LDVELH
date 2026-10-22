@@ -399,12 +399,13 @@
   function afficher() {
     if (PAGE === 'collection') { afficherCollection(); return; }
     appliquerMasqueCotes();
+    if ($('#legende-niveaux')) $('#legende-niveaux').hidden = !cotesMasquees() || S.vue === 'groupe';
     appliquerOnglet();
     const liste = filtrer();
     const nf = nbFiltres();
     $('#nb-filtres').textContent = nf ? String(nf) : '';
     $('#reinit').hidden = !nf;
-    if ($('#aide-cartes')) $('#aide-cartes').hidden = S.vue !== 'etagere' || Object.keys(COLL).length > 0;      // l'aide disparaît dès le premier livre ajouté
+    if ($('#aide-cartes')) $('#aide-cartes').hidden = S.vue !== 'etagere' || (!cotesMasquees() && Object.keys(COLL).length > 0);      // l'aide disparaît dès le premier livre ajouté
     $('#nb-filtres').setAttribute('aria-label', nf ? `${nf} filtre${nf > 1 ? 's' : ''} actif${nf > 1 ? 's' : ''}` : '');
     majResume();
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
@@ -442,6 +443,7 @@
     if (!m) return;
     if (S.onglet === 'cote') S.onglet = 'etagere';
     if (S.tri === 'cher' || S.tri === 'pascher') S.tri = 'serie';
+    S.mine = false; S.cherche = false; S.avendre = false;               // filtres de collection : réservés aux comptes
     const t = $('#tri');
     if (t) [...t.options].forEach((o) => { if (o.value === 'cher' || o.value === 'pascher') { o.hidden = true; o.disabled = true; } if (o.value === S.tri) t.value = S.tri; });
   }
@@ -608,8 +610,8 @@
     const vus = tri.slice(0, limite);
     const cartes = vus.map((b) => {
       const p = b.prix[e.k];
-      const poss = COLL[b.id];
-      return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && SOUH[b.id] ? ' trouver-oui' : ''}">
+      const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id];
+      return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
         <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 4' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
@@ -618,7 +620,7 @@
         </button>
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
-          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
+          `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!souh}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : souh ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : souh ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
         <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : coteTxt(p, e.k, true)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
       </article>`;
     }).join('');
@@ -720,6 +722,14 @@
   }
   const htmlLiens = (b) => liensRecherche(b).map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('');
   function blocRecherche(b) {
+    if (cotesMasquees()) {          // sans compte : seul Amazon reste libre ; les autres sites sont visibles, grisés, et mènent à la connexion
+      const boutons = liensRecherche(b).map(([nom, url]) => nom === 'Amazon'
+        ? `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`
+        : `<button type="button" class="bouton bouton-clair lien-reserve" data-compte="connecter" aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`).join('');
+      return `<h3>Chercher cette édition en vente</h3>
+        <p class="liens-vente">${boutons}</p>
+        <p class="sous">Vinted, Leboncoin, eBay et Facebook sont réservés aux comptes connectés : touchez-en un pour vous connecter avec Google.</p>`;
+    }
     return `<h3>Chercher cette édition en vente</h3>
         <p class="liens-vente">${htmlLiens(b)}</p>
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
@@ -873,9 +883,9 @@
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
-            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Cote de cette édition</h3>
+            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Niveau de prix</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 4'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">Niveau de prix de 1 à 4 euros, établi en comparant ce livre aux autres du guide (€ : parmi les moins chers, €€€€ : parmi les plus chers). Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <p class="sous legende-prix">De € (parmi les moins chers) à €€€€ (parmi les plus chers), en comparant ce livre aux autres du guide. Les prix exacts sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
@@ -1516,12 +1526,12 @@
   function afficherCollection() {
     rendreAjoutColl();
     const bl = bilan();
-    const n = bl.exemplaires;
+    const n = bl.exemplaires, nPastille = cotesMasquees() ? 0 : n;          // sans compte, la copie gardée sur l'appareil n'est pas affichée
     ['#nb-coll', '#nb-coll-bas'].forEach((sel) => {
-      $(sel).textContent = n ? String(n) : '';
-      $(sel).setAttribute('aria-label', n ? `${n} exemplaire${n > 1 ? 's' : ''}` : '');
+      $(sel).textContent = nPastille ? String(nPastille) : '';
+      $(sel).setAttribute('aria-label', nPastille ? `${nPastille} exemplaire${nPastille > 1 ? 's' : ''}` : '');
     });
-    if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = n ? `(${n})` : '';
+    if ($('#nb-coll-seg')) $('#nb-coll-seg').textContent = nPastille ? `(${nPastille})` : '';
     if ($('#seg-cherche')) {
       const nbS = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
       $('#seg-cherche').hidden = !nbS && !S.cherche;
@@ -1571,10 +1581,11 @@
     const zone = $('#coll-corps');
     if (visiteur) {
       zone.innerHTML = `<div class="coll-invite">
-        ${n ? `<p class="coll-reprise" role="status">Vous avez déjà <strong>${bl.titres} livre${bl.titres > 1 ? 's' : ''}</strong> sur cet appareil. Ils seront repris dans votre compte à la connexion. <button type="button" class="bouton-lien" id="exp-json">Exporter d'abord (JSON)</button> <button type="button" class="bouton-lien" id="exp-csv">Exporter (CSV)</button></p>` : ''}
+        ${n ? `<p class="coll-reprise" role="status">Vous avez déjà <strong>${bl.titres} livre${bl.titres > 1 ? 's' : ''}</strong> sur cet appareil. Ils seront repris dans votre compte à la connexion.</p>` : ''}
         <h3>Gardez votre collection, où que vous soyez</h3>
         <ul class="coll-avantages">
           <li><b>Sauvegardée</b><span>Vos exemplaires sont enregistrés dans votre Google Drive, pas chez nous.</span></li>
+          <li><b>Scannée</b><span>Scannez le code-barres des livres pour les ajouter à votre collection.</span></li>
           <li><b>Estimée</b><span>Sa valeur suit les cotes, livre par livre.</span></li>
           <li><b>Partout</b><span>Retrouvée sur tous vos appareils, sans rien recopier.</span></li>
         </ul>
