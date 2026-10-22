@@ -267,7 +267,7 @@
       const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | ') });
       dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
         : r.status === 401 || r.status === 403 ? MSG_REFUS : `Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
-    } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
+    } catch (err) { dire(err && err.name === 'AbortError' ? 'Le serveur ne répond pas (plus de 40 secondes). Vos validations sont gardées : réessayez dans quelques minutes.' : 'Envoi impossible : vérifiez votre connexion.'); }
     $('#rv-envoyer').disabled = false;
   }
 

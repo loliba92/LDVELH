@@ -13,8 +13,11 @@ window.Relais = (function () {
   // Le corps part en « text/plain » : c'est ce qui évite la pré-vérification CORS, que les scripts Google n'acceptent pas.
   function appeler(action, params) {
     var corps = Object.assign({ action: action, jeton: preuve() }, params || {});
-    return fetch(URL_RELAIS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corps) })
-      .then(function (r) { return r.json(); });
+    // Sans réponse au bout de 40 s, l'appel échoue : l'écran n'affiche plus « en cours » pour toujours (les validations restent gardées)
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var minute = setTimeout(function () { if (ctl) ctl.abort(); }, 40000);
+    return fetch(URL_RELAIS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(corps), signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { clearTimeout(minute); return r.json(); }, function (e) { clearTimeout(minute); throw e; });
   }
 
   // Même forme de réponse que l'ancien envoi direct : { status } (204 = lancé)

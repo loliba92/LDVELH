@@ -3,7 +3,7 @@
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
-  var configure = null, exigeCompte = false, role = '', echecRole = '', intention = null, reprisEnCours = false;
+  var configure = null, configPrete = false, exigeCompte = false, role = '', echecRole = '', intention = null, reprisEnCours = false;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -13,7 +13,7 @@ window.Compte = (function () {
 
   /* ---------- État affiché ---------- */
   function etat() {
-    if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Consulter les cotes reste libre.' };
+    if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Les fiches et la recherche restent libres ; les cotes exactes et le scan sont réservés aux comptes.' };
     var s = window.Cloud.statut();
     if (!window.Cloud.actif() || s === 'a-reprendre') return { cle: 'reprendre', ligne: 'Votre connexion a expiré. Vos changements sont gardés sur cet appareil.' };
     if (s === 'connecte' && !reprisEnCours && window.Cloud.premiereFois()) return { cle: 'choix', ligne: 'Votre collection n\'est pas encore enregistrée dans votre compte : il reste un choix à faire.' };
@@ -181,8 +181,9 @@ window.Compte = (function () {
   function actifGoogle() { return exigeCompte === true; }     // la collection exige un compte (drapeau « collection » de admin-config.json)
   function invitation() {
     if ($('.dlg-invitation')) return;
-    var d = dialogue('<h2>Connectez-vous pour constituer votre collection</h2>' +
-      '<p>Consulter les cotes reste libre. Pour garder vos livres, Google enregistre votre collection dans un espace réservé de votre Drive, que seul ce site peut ouvrir.</p>' +
+    var d = dialogue('<h2>Connectez-vous pour devenir Héros</h2>' +
+      '<p>Les fiches et la recherche restent libres. Avec un compte Google, vous voyez les cotes exactes, vous scannez vos livres et vous gardez votre collection.</p>' +
+      '<p class="sous">Google enregistre votre collection dans un espace réservé de votre Drive, que seul ce site peut ouvrir.</p>' +
       '<p class="sous">Nous ne voyons ni votre courriel ni vos autres fichiers. Votre collection est stockée chez vous, dans votre Google Drive, et vous pouvez la supprimer à tout moment.</p>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Continuer avec Google</button><button type="button" class="bouton bouton-clair" data-fermer>Plus tard</button></div>', 'dlg-invitation');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-compte="connecter"]') || e.target.closest('[data-fermer]')) d.close(); });
@@ -383,6 +384,7 @@ window.Compte = (function () {
     window.Cloud.config().then(function (c) {
       configure = !!(c && c.client_id && (c.collection === true || c.relais_url));    // le bouton « Se connecter » n'apparaît que si une fonction l'utilise
       exigeCompte = !!(c && c.client_id && c.collection === true);
+      configPrete = true;
       if (!configure) { ['#compte-haut', '#compte-feuille'].forEach(function (s) { var n = $(s); if (n) n.hidden = true; }); return; }
       role = lireSession(CLE_ROLE);
       bandeau(); dessiner();
@@ -404,5 +406,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { annoncer: annoncer, demanderLivre: demanderLivre, exiger: exiger, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
+  return { annoncer: annoncer, demanderLivre: demanderLivre, exiger: exiger, inviter: function () { if (exigeCompte && window.Cloud && !window.Cloud.lie()) invitation(); }, pret: function () { return configPrete; }, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
 })();

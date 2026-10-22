@@ -205,7 +205,7 @@
     $('#reinit').addEventListener('click', () => { const { h, vue, tri, g, onglet } = S; S = { ...defaut(), h, vue, tri, g, onglet }; synchroniser(); changer(); });
     $('#bascule').addEventListener('click', () => basculerSelecteur());
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
-    $('#fiche').addEventListener('close', () => { const id = RETOUR_FICHE; RETOUR_FICHE = ''; if (!id) return; setTimeout(() => { const el = document.querySelector(`[data-id="${id.replace(/"/g, '')}"]`); if (el) el.focus({ preventScroll: true }); }, 0); });
+    $('#fiche').addEventListener('close', () => { inviterApresFiches(); const id = RETOUR_FICHE; RETOUR_FICHE = ''; if (!id) return; setTimeout(() => { const el = document.querySelector(`[data-id="${id.replace(/"/g, '')}"]`); if (el) el.focus({ preventScroll: true }); }, 0); });
     window.addEventListener('hashchange', () => {
       const h = location.hash.slice(1);
       if (h && !h.includes('=')) return;      // simple ancre de section (#cote, #apropos…) : les filtres restent
@@ -307,8 +307,8 @@
   function filtrer(avecPrix = true) {
     const q = norm(S.q.trim());
     const k = etatDe(S.h).k;
-    const pmin = avecPrix && S.pmin !== '' ? +S.pmin : null;
-    const pmax = avecPrix && S.pmax !== '' ? +S.pmax : null;
+    const pmin = avecPrix && S.pmin !== '' && !cotesMasquees() ? +S.pmin : null;
+    const pmax = avecPrix && S.pmax !== '' && !cotesMasquees() ? +S.pmax : null;
     const amin = S.amin ? +S.amin : null;
     const amax = S.amax ? +S.amax : null;
     return DATA.filter((b) =>
@@ -362,6 +362,17 @@
 
   /* ---------- Affichage général ---------- */
   // Onglets « Cote de la sélection » / « Sur l'étagère » : un seul panneau à la fois, sans défilement
+  // Après la cinquième fiche consultée (une fois par visite, au plus une fois par mois), à la fermeture de la fiche : une invitation fermable à se connecter
+  function inviterApresFiches() {
+    if (!sansCompte() || !window.Compte) return;
+    try {
+      const vus = JSON.parse(sessionStorage.getItem('cdh-fiches-vues') || '[]');
+      if (vus.length < 5 || sessionStorage.getItem('cdh-invite-vue')) return;
+      if (Date.now() - (+localStorage.getItem('cdh-invite-fiches') || 0) < 30 * 86400000) return;
+      sessionStorage.setItem('cdh-invite-vue', '1'); localStorage.setItem('cdh-invite-fiches', String(Date.now()));
+      setTimeout(() => window.Compte.inviter(), 400);
+    } catch (e) { /* stockage indisponible : pas d'invitation */ }
+  }
   function appliquerOnglet() {
     ['cote', 'etagere'].forEach((n) => {
       const on = S.onglet === n;
@@ -387,6 +398,7 @@
 
   function afficher() {
     if (PAGE === 'collection') { afficherCollection(); return; }
+    appliquerMasqueCotes();
     appliquerOnglet();
     const liste = filtrer();
     const nf = nbFiltres();
@@ -424,7 +436,17 @@
   }
 
   /* ---------- Cote : sceau et chiffres ---------- */
+  function appliquerMasqueCotes() {
+    const m = cotesMasquees();
+    document.body.classList.toggle('cotes-masquees', m);
+    if (!m) return;
+    if (S.onglet === 'cote') S.onglet = 'etagere';
+    if (S.tri === 'cher' || S.tri === 'pascher') S.tri = 'serie';
+    const t = $('#tri');
+    if (t) [...t.options].forEach((o) => { if (o.value === 'cher' || o.value === 'pascher') { o.hidden = true; o.disabled = true; } if (o.value === S.tri) t.value = S.tri; });
+  }
   function afficherCote(liste) {
+    if (cotesMasquees()) { ['#sceau', '#stats', '#trois'].forEach((q) => { const n = $(q); if (n) n.innerHTML = ''; }); return; }
     const e = etatDe(S.h);
     const st = stat(liste, e.k);
     $('#sceau').setAttribute('aria-label', st.n ? `Prix moyen en ${e.long.toLowerCase()} : ${fmt(st.avg)}` : 'Aucun prix pour cette sélection');
@@ -539,6 +561,7 @@
   }
 
   function afficherHisto() {
+    if (cotesMasquees()) { ['#histo', '#histo-legende', '#histo-table'].forEach((q) => { const n = $(q); if (n) n.innerHTML = ''; }); return; }
     const e = etatDe(S.h);
     const valeurs = filtrer(false).map((b) => b.prix[e.k]).filter((x) => x != null);   // sans la tranche : toutes les barres restent
     $('#titre-histo').textContent = `Où se situent les prix · ${e.long.toLowerCase()}`;
@@ -587,7 +610,7 @@
       const p = b.prix[e.k];
       const poss = COLL[b.id];
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && SOUH[b.id] ? ' trouver-oui' : ''}">
-        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + fmt(p) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
+        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? repere(p, e.k).toLowerCase() : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
             : tuile(b)}</span>
@@ -596,7 +619,7 @@
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!SOUH[b.id]}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : SOUH[b.id] ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
-        <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : fmt(p)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
+        <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : coteTxt(p, e.k, true)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
       </article>`;
     }).join('');
     const reste = tri.length - vus.length;
@@ -608,7 +631,7 @@
 
   /* ---------- Liste ---------- */
   function cellulesPrix(b) {
-    return ETATS.map((e) => `<td class="num" data-label="${e.court}"><span class="prix-c${b.prix[e.k] == null ? ' nul' : ''}">${fmt(b.prix[e.k])}</span></td>`).join('');
+    return ETATS.map((e) => `<td class="num" data-label="${e.court}"><span class="prix-c${b.prix[e.k] == null ? ' nul' : ''}">${coteTxt(b.prix[e.k], e.k, true)}</span></td>`).join('');
   }
   function afficherListe(liste) {
     const tri = trier(liste);
@@ -652,7 +675,7 @@
     const nomCol = { serie: 'Série', version: 'Édition', annee: 'Année', decennie: 'Décennie', editeur: 'Éditeur' }[S.g];
     const lignes = groupes.map((g) => {
       const nom = S.g === 'decennie' && g.k !== 'Année inconnue' ? `Années ${g.k}` : (S.g === 'version' ? `Édition ${g.k}` : g.k);
-      const cel = ETATS.map((e) => {
+      const cel = cotesMasquees() ? '' : ETATS.map((e) => {
         const s = stat(g.l, e.k);
         const barre = e.k === S.h && s.n ? `<span class="barre" style="width:${Math.max(4, (s.avg / maxi) * 100)}%"></span>` : '';
         return `<td class="num" data-label="${e.court}"><span class="prix-c${s.n ? '' : ' nul'}">${fmt(s.avg)}</span>${barre}</td>`;
@@ -661,8 +684,8 @@
         <td class="num" data-label="Livres">${g.l.length}</td>${cel}</tr>`;
     }).join('');
     $('#resultats').innerHTML = `<table class="cartes groupes"><thead><tr><th>${nomCol}</th><th class="num">Livres</th>
-      ${ETATS.map((e) => `<th class="num">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</th>`).join('')}</tr></thead><tbody>${lignes}</tbody></table>
-      <p class="sous" style="margin:14px 0 0">Prix moyens par groupe. Touchez une ligne pour ne garder que ce groupe et voir ses livres sur l'étagère.</p>`;
+      ${cotesMasquees() ? '' : ETATS.map((e) => `<th class="num">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</th>`).join('')}</tr></thead><tbody>${lignes}</tbody></table>
+      <p class="sous" style="margin:14px 0 0">${cotesMasquees() ? 'Nombre de livres par groupe.' : 'Prix moyens par groupe.'} Touchez une ligne pour ne garder que ce groupe et voir ses livres sur l'étagère.</p>`;
     $('#resultats').querySelectorAll('tr.cliquable').forEach((tr) => tr.addEventListener('click', () => appliquerGroupe(tr.dataset.groupe)));
   }
   function appliquerGroupe(k) {
@@ -824,6 +847,9 @@
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
     ficheOuverte = id;
+    if (sansCompte()) {                       // fiches distinctes consultées pendant la visite : sert à proposer la connexion (voir inviterApresFiches)
+      try { const vus = new Set(JSON.parse(sessionStorage.getItem('cdh-fiches-vues') || '[]')); vus.add(b.livre_id); sessionStorage.setItem('cdh-fiches-vues', JSON.stringify([...vus])); } catch (e) { /* stockage indisponible */ }
+    }
     const sel = etatDe(S.h);
     const autres = DATA.filter((x) => x.livre_id === b.livre_id).sort((x, y) => x.version_n - y.version_n);
     const ligne = (nom, val) => (val ? `<div><dt>${nom}</dt><dd>${val}</dd></div>` : '');
@@ -847,9 +873,11 @@
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
-            <h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Cote de cette édition</h3>
+        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere">${repere(b.prix[e.k], e.k, true)}</span></div>`).join('')}</div>
+        <p class="sous legende-prix">Repère établi d'après les prix constatés. Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>
+        <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
           </div>
         </div>
@@ -867,7 +895,7 @@
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
-          <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${fmt(x.prix[sel.k])}</span></button>`).join('')}</div>` : ''}
+          <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
       </div>`;
     const dlg = $('#fiche');
@@ -959,6 +987,23 @@
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
   const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
+  // Cotes exactes réservées aux comptes : un visiteur voit un repère (modeste, moyenne, élevée), jamais le chiffre. Tant que la configuration du compte
+  // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
+  const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
+  const SEUILS = {};
+  function seuilsCote(k) {
+    if (!SEUILS[k]) {
+      const v = DATA.map((b) => b.prix[k]).filter((x) => x != null).sort((a, b) => a - b);
+      SEUILS[k] = v.length ? [v[Math.floor(v.length / 3)], v[Math.floor((2 * v.length) / 3)]] : [0, 0];
+    }
+    return SEUILS[k];
+  }
+  const repere = (v, k, court) => {
+    if (v == null) return '—';
+    const [a, c] = seuilsCote(k), n = v < a ? 0 : v < c ? 1 : 2;
+    return court ? ['Modeste', 'Moyenne', 'Élevée'][n] : ['Cote modeste', 'Cote moyenne', 'Cote élevée'][n];
+  };
+  const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
   let etaitSansCompte = null, appPrete = false;
   document.addEventListener('cdh-compte', () => {
@@ -1497,7 +1542,7 @@
       let corps;
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
-          <p class="texte">Consulter les cotes est libre. Pour enregistrer vos livres et suivre leur valeur, connectez-vous avec Google.</p>
+          <p class="texte">Les fiches et la recherche restent libres. Pour voir les cotes exactes, scanner vos livres et garder votre collection, connectez-vous avec Google.</p>
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
         corps = `<p class="gros">Elle est encore vide</p>
@@ -1859,7 +1904,7 @@
   // Fiche : bloc « dans ma collection »
   function blocCollectionFiche(b) {
     if (sansCompte()) {
-      return `<div class="coll-fiche"><h3>Dans ma collection</h3><p class="sous">Les cotes restent consultables sans compte. Pour garder vos livres, connectez-vous : Google les enregistre dans un espace réservé de votre Drive.</p>
+      return `<div class="coll-fiche"><h3>Dans ma collection</h3><p class="sous">Les fiches restent consultables sans compte. Pour garder vos livres, connectez-vous : Google les enregistre dans un espace réservé de votre Drive.</p>
         <button type="button" class="bouton" data-compte="connecter">Se connecter pour ajouter à ma collection</button></div>`;
     }
     const c = COLL[b.id], v = c ? valeurLigne(b, c) : null;
