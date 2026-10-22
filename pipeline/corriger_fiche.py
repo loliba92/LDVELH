@@ -9,6 +9,7 @@ L'identifiant est celui de la fiche (l'ISBN-13, ou « LOCAL-… » pour un livre
 Usage : python pipeline/corriger_fiche.py "9782075237246 ; serie ; Défis Fantastiques"
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -54,8 +55,8 @@ def _retirer_prix(ident, chemin):
     Path(chemin).write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True):
-    """Applique les corrections. Renvoie [(statut, identifiant, texte)] ; statut : ok | refuse."""
+def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True, role="superadmin"):
+    """Applique les corrections. Renvoie [(statut, identifiant, texte)] ; statut : ok | refuse. La suppression d'une édition est réservée au SuperAdmin."""
     rows = editions.load(base)
     bilan = []
     for e in lire(texte):
@@ -66,6 +67,8 @@ def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True):
         nom = f"{r['titre']} ({r['version']})"
         if e["champ"] not in CHAMPS:
             bilan.append(("refuse", e["id"], f"champ inconnu : {e['champ']}"))
+        elif e["champ"] == "supprimer" and role != "superadmin":
+            bilan.append(("refuse", e["id"], "la suppression d'une édition est réservée au SuperAdmin"))
         elif e["champ"] == "supprimer":
             rows = [x for x in rows if x["id"] != r["id"]]
             if jaquettes:
@@ -99,7 +102,7 @@ def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True):
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    bilan = appliquer(" | ".join(sys.argv[1:]))
+    bilan = appliquer(" | ".join(sys.argv[1:]), role=os.environ.get("ROLE_AUTEUR", ""))      # rôle vérifié par identite.py ; absent : pas de suppression
     for s, ident, t in bilan:
         print(f"{'+' if s == 'ok' else '✗'} {ident}  {t}")
     ok = sum(1 for s, _, _ in bilan if s == "ok")

@@ -87,6 +87,14 @@ def verifier(jeton, client_id, noms, certs=None, ouvert=False, bloques=()):
     return f"{prenom} #{empreinte[7:11]}", None
 
 
+def role_de(nom, fichier):
+    """Niveau (« admin » ou « superadmin ») de la personne qui porte ce nom dans data/admins.json, sinon chaîne vide."""
+    for m in (fichier.get("equipe") or {}).values():
+        if isinstance(m, dict) and m.get("nom") == nom and m.get("role") in ("admin", "superadmin"):
+            return m["role"]
+    return ""
+
+
 def main():
     config, fichier = _lire(CONFIG), _lire(ADMINS)
     client_id = config.get("client_id", "")
@@ -101,7 +109,7 @@ def main():
         print(f"Envoi de {nom} (via le relais).")
         if os.environ.get("GITHUB_ENV"):
             with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
-                f.write(f"AUTEUR={nom}\n")
+                f.write(f"AUTEUR={nom}\nROLE_AUTEUR={role_de(nom, fichier)}\n")
         return 0
     noms = dict(fichier.get("noms", {}))
     noms.update({k: m.get("nom", "") for k, m in fichier.get("equipe", {}).items() if isinstance(m, dict) and m.get("nom")})
@@ -113,7 +121,7 @@ def main():
     print(f"Envoi de {nom}.")
     if os.environ.get("GITHUB_ENV"):
         with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
-            f.write(f"AUTEUR={nom}\n")
+            f.write(f"AUTEUR={nom}\nROLE_AUTEUR={role_de(nom, fichier)}\n")
     return 0
 
 

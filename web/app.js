@@ -727,8 +727,8 @@
         </div>
         <datalist id="liste-series">${series.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>
         <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer la fiche</button></div>
-        <label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
-        <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>
+        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris) <span class="badge-admin" title="Réservé au SuperAdmin">SuperAdmin</span></span></label>
+        <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
       </form></details>`;
   }
@@ -738,7 +738,7 @@
     const msg = $('#corriger-fiche-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
     const b = DATA.find((x) => x.id === f.dataset.id);
     const numAffiche = b.numero && b.numero !== '000' ? b.numero : '';
-    f.elements.suppr.addEventListener('change', () => { $('#corriger-suppr').hidden = !f.elements.suppr.checked; });
+    if (f.elements.suppr) f.elements.suppr.addEventListener('change', () => { $('#corriger-suppr').hidden = !f.elements.suppr.checked; });
     const envoyer = async (corrections) => {
       if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
       f.querySelectorAll('button').forEach((x) => { x.disabled = true; }); dire('Envoi en cours…');
@@ -760,7 +760,7 @@
       if (!l.length) return dire("Rien n'a changé.");
       envoyer(l);
     });
-    $('#corriger-suppr').addEventListener('click', () => { if (window.confirm(`Supprimer « ${b.titre} » (${b.version}) de la base ? Cette action est définitive.`)) envoyer([`${b.id} ; supprimer`]); });
+    if ($('#corriger-suppr')) $('#corriger-suppr').addEventListener('click', () => { if (window.confirm(`Supprimer « ${b.titre} » (${b.version}) de la base ? Cette action est définitive.`)) envoyer([`${b.id} ; supprimer`]); });
   }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';

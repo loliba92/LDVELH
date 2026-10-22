@@ -105,7 +105,7 @@ class TestPrincipal(unittest.TestCase):
 
     def test_mode_relais_accepte_le_nom_transmis(self):
         code, env = self.lancer({"relais": True, "equipe": {}}, auteur_relais="Marie | x")
-        self.assertEqual((code, env), (0, "AUTEUR=Marie x\n"))
+        self.assertEqual((code, env), (0, "AUTEUR=Marie x\nROLE_AUTEUR=\n"))
 
     def test_mode_relais_sans_nom_refuse(self):
         self.assertEqual(self.lancer({"relais": True}, auteur_relais="")[0], 1)
@@ -122,7 +122,7 @@ class TestPrincipal(unittest.TestCase):
             code, env = self.lancer({"relais": False, "equipe": {h: {"nom": "Marc (admin)", "role": "admin"}}}, identite_jeton=jeton(cle))
         finally:
             identite.certificats = orig
-        self.assertEqual((code, env), (0, "AUTEUR=Marc (admin)\n"))
+        self.assertEqual((code, env), (0, "AUTEUR=Marc (admin)\nROLE_AUTEUR=admin\n"))
 
 
 if __name__ == "__main__":

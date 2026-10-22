@@ -19,6 +19,17 @@ class TestFiches(unittest.TestCase):
         (d / "p.json").write_text(json.dumps({"valides": {"9782075237192|bon": {"prix": 5}, "9782070332885|bon": {"prix": 7}}}), encoding="utf-8")
         return str(d / "e.csv"), d / "p.json"
 
+    def test_la_suppression_est_reservee_au_superadmin(self):
+        base, prix = self.base()
+        for role in ("admin", ""):
+            bilan = c.appliquer("9782075237192 ; supprimer", base, prix, jaquettes=False, role=role)
+            self.assertEqual(bilan[0][0], "refuse")
+            self.assertIn("SuperAdmin", bilan[0][2])
+            self.assertIn("9782075237192", {r["id"] for r in editions.load(base)})
+        bilan = c.appliquer("9782075237192 ; supprimer", base, prix, jaquettes=False, role="superadmin")
+        self.assertEqual(bilan[0][0], "ok")
+        self.assertNotIn("9782075237192", {r["id"] for r in editions.load(base)})
+
     def test_serie_et_titre_valent_pour_toutes_les_editions_du_livre(self):
         base, prix = self.base()
         bilan = c.appliquer("9782075237192 ; serie ; Loup Solitaire | 9782075237192 ; titre ; Le Héros de Minuit", base, prix)
