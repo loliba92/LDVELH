@@ -1654,9 +1654,9 @@
         delete COLL[id]; sauverColl(); afficher(); annonce('Exemplaire retiré de votre collection.');
         annulerRetrait(b, id, ancien);
       }
-      else if (t.id === 'imp-ouvrir') { if (garde()) $('#imp-fichier').click(); }
-      else if (t.id === 'exp-json') exporter('json');
-      else if (t.id === 'exp-csv') exporter('csv');
+      else if (t.closest('#imp-ouvrir')) { if (garde()) { $('#importer').open = true; $('#importer').hidden = false; $('#imp-fichier').click(); } }
+      else if (t.closest('#exp-json')) exporter('json');
+      else if (t.closest('#exp-csv')) exporter('csv');
       else if (t.id === 'coll-plus') { limiteColl += 30; afficherCollection(); }
       else if (t.id === 'coll-vider') {
         if (window.confirm(dansCompte() ? 'Effacer toute votre collection, y compris dans votre compte Google ? Pensez à l\'exporter avant : cette action est définitive.' : 'Effacer toute votre collection de ce navigateur ? Pensez à l\'exporter avant : cette action est définitive.')) {
