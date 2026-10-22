@@ -721,11 +721,13 @@
     return liens;
   }
   const htmlLiens = (b) => liensRecherche(b).map(([nom, url]) => `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join('');
+  // Un bouton réservé aux comptes ouvre la fenêtre qui explique l'intérêt de se connecter (et non la connexion directe)
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-invite]') && window.Compte) window.Compte.inviter(); });
   function blocRecherche(b) {
     if (cotesMasquees()) {          // sans compte : seul Amazon reste libre ; les autres sites sont visibles, grisés, et mènent à la connexion
       const boutons = liensRecherche(b).map(([nom, url]) => nom === 'Amazon'
         ? `<a class="bouton bouton-clair" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`
-        : `<button type="button" class="bouton bouton-clair lien-reserve" data-compte="connecter" aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`).join('');
+        : `<button type="button" class="bouton bouton-clair lien-reserve" data-invite aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`).join('');
       return `<h3>Chercher cette édition en vente</h3>
         <p class="liens-vente">${boutons}</p>
         <p class="sous">Vinted, Leboncoin, eBay et Facebook sont réservés aux comptes connectés : touchez-en un pour vous connecter avec Google.</p>`;
