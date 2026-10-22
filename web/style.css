@@ -1820,3 +1820,4 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 
 .lien-reserve { opacity: .5; }
 @media (min-width: 701px) { .coll-avantages { grid-template-columns: repeat(2, minmax(0, 1fr)); } .coll-invite { max-width: 80ch; } }
+.ajout-coll[hidden] { display: none !important; }

@@ -1569,7 +1569,7 @@
     }
     if (!$('#collection')) return;      // l'accueil n'affiche que les pastilles ; la section est sur la page collection
     const visiteur = sansCompte();       // compte demandé et pas connecté : écran d'invitation à la place de l'outil
-    if ($('#ca-invite')) $('#ca-invite').hidden = !visiteur;
+    if ($('.ajout-coll')) $('.ajout-coll').hidden = visiteur;           // sans compte, la carte d'invitation ci-dessous dit tout : pas de second appel à se connecter
     ['#importer', '#coll-prive', '#coll-compte'].forEach((s) => { if ($(s)) $(s).hidden = visiteur; });
     $('#coll-compte').textContent = n ? `${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}` : 'vide pour l\'instant';
     const comptePrevu = !!window.Compte && window.Compte.actif();
