@@ -1773,3 +1773,12 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 /* Accueil : le champ de recherche se réduit pour laisser place au bouton Scanner */
 .hero-recherche.avec-scan .scan-bouton { min-height: 52px; background: rgba(0, 0, 0, .72); }
 @media (max-width: 700px) { .hero-recherche.avec-scan input { flex: 1 1 0; } .hero-recherche.avec-scan .scan-bouton { flex: none; min-height: 56px; } }
+
+/* Livre possédé : pastille ✓ sur la jaquette (repère par la forme, visible sur toutes les couvertures) et ✓ devant l'état choisi */
+.livre-carte.possede-oui .couv::after {
+  content: "✓"; content: "✓" / "";
+  position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; box-sizing: border-box;
+  border-radius: 50%; border: 2px solid #0a0a0a; background: var(--gold); color: #0a0a0a;
+  font: 800 14px/22px var(--f-ui); text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none;
+}
+.etats-carte button[aria-pressed="true"]::before { content: "✓ "; content: "✓ " / ""; font-weight: 800; }

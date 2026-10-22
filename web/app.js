@@ -587,7 +587,7 @@
       const p = b.prix[e.k];
       const poss = COLL[b.id];
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && SOUH[b.id] ? ' trouver-oui' : ''}">
-        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + fmt(p) + ' en ' + e.long.toLowerCase() : ''}">
+        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + fmt(p) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
             : tuile(b)}<span class="tampon-v">${esc(b.version)}</span></span>
