@@ -875,7 +875,7 @@
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Cote de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere">${repere(b.prix[e.k], e.k, true)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">Repère établi d'après les prix constatés. Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <p class="sous legende-prix">Repère établi d'après les prix constatés, en comparant ce livre aux autres du guide : pas cher, prix moyen ou cher. Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
@@ -987,7 +987,7 @@
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
   const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
-  // Cotes exactes réservées aux comptes : un visiteur voit un repère (modeste, moyenne, élevée), jamais le chiffre. Tant que la configuration du compte
+  // Cotes exactes réservées aux comptes : un visiteur voit un repère (pas cher, prix moyen, cher), jamais le chiffre. Tant que la configuration du compte
   // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
   const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
   const SEUILS = {};
@@ -998,10 +998,10 @@
     }
     return SEUILS[k];
   }
-  const repere = (v, k, court) => {
+  const repere = (v, k) => {
     if (v == null) return '—';
     const [a, c] = seuilsCote(k), n = v < a ? 0 : v < c ? 1 : 2;
-    return court ? ['Modeste', 'Moyenne', 'Élevée'][n] : ['Cote modeste', 'Cote moyenne', 'Cote élevée'][n];
+    return ['Pas cher', 'Prix moyen', 'Cher'][n];
   };
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
