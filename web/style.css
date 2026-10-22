@@ -1872,3 +1872,8 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
   .coll-nav button { min-height: 48px; padding: 4px 2px; font-size: .92rem; }
 }
 @media (min-width: 901px) { .gerer-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Barre d'onglets de la collection : fond plus clair que la page, bordure dorée, pour bien la voir */
+.coll-nav { background: #2b251b; border-color: var(--brass); box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 2px 8px rgba(0, 0, 0, .5); }
+.coll-nav button:not([aria-selected="true"]) { background: rgba(255, 255, 255, .06); }
+.coll-nav button:not([aria-selected="true"]):hover { background: rgba(212, 165, 60, .22); }
