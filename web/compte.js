@@ -181,10 +181,17 @@ window.Compte = (function () {
   function actifGoogle() { return exigeCompte === true; }     // la collection exige un compte (drapeau « collection » de admin-config.json)
   function invitation() {
     if ($('.dlg-invitation')) return;
-    var d = dialogue('<h2>Connectez-vous pour devenir Héros</h2>' +
-      '<p>Les fiches et la recherche restent libres. Avec un compte Google, gratuit, vous voyez les prix exacts, vous scannez vos livres, vous suivez la valeur de votre collection, vos doubles à vendre et vos livres à trouver, et vous retrouvez tout sur vos appareils.</p>' +
-      '<p class="sous">Google enregistre votre collection dans un espace réservé de votre Drive, que seul ce site peut ouvrir.</p>' +
-      '<p class="sous">Nous ne voyons ni votre courriel ni vos autres fichiers. Votre collection est stockée chez vous, dans votre Google Drive, et vous pouvez la supprimer à tout moment.</p>' +
+    var d = dialogue('<h2>Devenez Héros, c\'est gratuit</h2>' +
+      '<p>Les fiches et la recherche restent libres. Un compte Google vous ouvre tout le reste :</p>' +
+      '<ul class="avantages">' +
+      '<li><strong>Les prix exacts</strong> de chaque état (convenable, bon, très bon).</li>' +
+      '<li><strong>Votre collection</strong> : ajoutez vos livres en un geste, ou en scannant leur code-barres.</li>' +
+      '<li><strong>Sa valeur</strong>, calculée avec les prix du guide.</li>' +
+      '<li><strong>Vos doubles à vendre</strong> et les livres que vous cherchez, bien séparés.</li>' +
+      '<li><strong>Tout sauvegardé</strong> : vous retrouvez votre collection sur téléphone comme sur ordinateur.</li>' +
+      '<li><strong>Un livre manque ?</strong> Demandez son ajout, et notez ceux que vous avez lus.</li>' +
+      '</ul>' +
+      '<p class="sous"><strong>Et mes données ?</strong> Google garde votre collection dans un espace réservé de votre Drive, que seul ce site peut ouvrir. Nous ne voyons ni votre courriel ni vos autres fichiers, et vous pouvez tout supprimer à tout moment.</p>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Continuer avec Google</button><button type="button" class="bouton bouton-clair" data-fermer>Plus tard</button></div>', 'dlg-invitation');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-compte="connecter"]') || e.target.closest('[data-fermer]')) d.close(); });
   }

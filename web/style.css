@@ -1693,7 +1693,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .hero-coll .hc-progres .bouton-lien { min-height: 44px; }
 .rayon .livre-carte .souhait-carte { font-size: .8rem; }
 .rayon .livre-carte .infos .titre { min-height: 2.4em; }
-@media (min-width: 900px) { .rang { align-items: start; } }
+@media (min-width: 900px) { .rang { align-items: stretch; } }
 
 /* Fiche : mêmes gestes que l'étagère (C / BE / TBE, À vendre, À trouver) */
 .coll-fiche .coll-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
@@ -1799,5 +1799,10 @@ body.cotes-masquees #onglet-cote, body.cotes-masquees #cote, body.cotes-masquees
 .scan-aide { margin: 8px auto 0; width: fit-content; max-width: 100%; padding: 4px 10px; border-radius: 6px; background: rgba(0, 0, 0, .6); text-align: center; }
 .scan-bouton.scan-reserve { opacity: .8; }
 
-.avantages { margin: 4px 0 14px; padding-left: 20px; }
-.avantages li { margin: 2px 0; }
+.avantages { list-style: none; margin: 6px 0 14px; padding: 0; columns: 2; column-gap: 18px; }
+.avantages li { margin: 0 0 4px; break-inside: avoid; }
+.avantages li::before { content: "✓"; color: var(--brass); font-weight: 700; margin-right: 8px; }
+@media (max-width: 560px) { .avantages { columns: 1; } }
+
+.dlg-invitation .avantages { columns: 1; margin: 8px 0 12px; }
+.dlg-invitation .avantages li { margin: 0 0 8px; }
