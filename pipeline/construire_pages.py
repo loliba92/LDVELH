@@ -560,7 +560,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
 <h2>Votre collection</h2>
-<p>La collection que vous composez est enregistrée sur votre appareil et, si vous vous connectez avec Google, dans l'espace réservé de votre propre Google Drive. L'éditeur ne la voit pas. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
+<p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
 <div class="projet-duo" aria-hidden="true">
   <img src="images/projet-glace.webp" alt="" width="1024" height="1100" loading="lazy" decoding="async">
