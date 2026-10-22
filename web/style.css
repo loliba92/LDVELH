@@ -1840,3 +1840,12 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
   .tableau-page .tableau-droits td::before { content: none; }
   .tableau-droits td { width: 4.2rem; }
 }
+
+/* Pied de page : liens centrés, café en bouton, mention en dessous */
+.pied-liens { justify-content: center; align-items: center; gap: 2px 26px; }
+.pied-liens a { font-weight: 500; text-decoration: none; padding: 0 2px; border-bottom: 1px solid transparent; }
+.pied-liens a:hover, .pied-liens a:focus-visible { border-bottom-color: var(--gold); }
+.pied-liens a[href*="buymeacoffee"] { min-height: 40px; padding: 0 16px; border: 1px solid var(--gold); border-radius: 999px; font-weight: 600; }
+.pied-liens a[href*="buymeacoffee"]:hover, .pied-liens a[href*="buymeacoffee"]:focus-visible { background: rgba(212, 165, 60, .12); border-bottom-color: var(--gold); }
+.annexe .pied-in > .sous, .pied-in > nav + .sous { text-align: center; margin: 14px auto 0; max-width: 60ch; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .12); }
+@media (max-width: 560px) { .pied-liens { gap: 0 18px; } .pied-liens a[href*="buymeacoffee"] { margin-top: 6px; } }
