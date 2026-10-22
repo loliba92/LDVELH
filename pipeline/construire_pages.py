@@ -11,7 +11,7 @@ from pathlib import Path
 
 WEB = Path(__file__).resolve().parent.parent / "web"
 MAJ = "11 octobre 2026"
-MAJ_LEGAL = "18 octobre 2026"      # dernière révision des pages Confidentialité et Mentions légales
+MAJ_LEGAL = "22 octobre 2026"      # dernière révision des pages Confidentialité et Mentions légales
 ISSUES = "https://github.com/loliba92/LDVELH/issues"
 
 
@@ -560,7 +560,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
 <h2>Votre collection</h2>
-<p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
+<p>La collection que vous composez est enregistrée sur votre appareil et, si vous vous connectez avec Google, dans l'espace réservé de votre propre Google Drive. L'éditeur ne la voit pas. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
 <div class="projet-duo" aria-hidden="true">
   <img src="images/projet-glace.webp" alt="" width="1024" height="1100" loading="lazy" decoding="async">
@@ -600,12 +600,17 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
     <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
     <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Admin ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-avis-donne</code>, <code>cdh-avis-ferme</code>, <code>cdh-visites</code> et <code>cdh-bienvenue</code></td><td data-label="Contenu">Le fait que vous avez déjà répondu à « Qu'en pensez-vous ? » ou fermé le bandeau, les dates de vos visites, et le fait que l'accueil a été affiché</td><td data-label="Pourquoi">Ne proposer l'avis qu'aux visiteurs réguliers, une seule fois ; ces données restent sur votre appareil</td></tr>
+    <tr><td data-label="Nom"><code>cdh-scan-etat</code>, <code>cdh-coll-pane</code>, <code>cdh-pane</code></td><td data-label="Contenu">Vos réglages d'affichage (état choisi pour le scan, onglet ouvert)</td><td data-label="Pourquoi">Retrouver la page comme vous l'avez laissée</td></tr>
     <tr><td data-label="Nom"><code>cdh-installer-ferme-jusqu-au</code></td><td data-label="Contenu">La date jusqu'à laquelle le bandeau d'installation reste masqué (quatorze jours)</td><td data-label="Pourquoi">Ne pas vous le montrer en boucle si vous l'avez fermé</td></tr>
   </tbody>
 </table>
 </div>
 <p>Le guide garde aussi des copies de ses propres pages et images dans la mémoire de votre navigateur (cache), pour s'ouvrir sans réseau. Elles ne contiennent aucune donnée sur vous.</p>
 <p><strong>Aucun cookie</strong> n'est déposé. Ces enregistrements sont nécessaires à des fonctions que vous demandez vous-même ; ils ne demandent donc pas de consentement et il n'y a pas de bandeau.</p>
+
+<h2>Appareil photo et lecture des codes-barres</h2>
+<p>Pour ajouter un livre en scannant son code-barres, le site vous demande l'autorisation d'utiliser l'appareil photo, à chaque usage selon votre navigateur. L'image est analysée dans votre navigateur par un composant libre (ZXing) hébergé avec le site : <strong>aucune image ni photo n'est enregistrée ni envoyée</strong>. Seul le numéro lu (l'ISBN) est utilisé, pour retrouver le livre. Vous pouvez refuser l'autorisation et saisir le numéro à la main.</p>
 
 <h2>Si vous vous connectez avec Google</h2>
 <p>Le site demande à Google trois choses : votre prénom, pour l'afficher, votre adresse électronique, pour vous reconnaître (elle n'est lue que par le relais décrit plus bas), et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Votre collection et votre liste « À trouver » vont directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit pas vos autres fichiers. Le laissez-passer donné par Google reste sur cet appareil et s'efface au bout d'une heure ou à la déconnexion ; il n'est envoyé qu'à Google et, quand vous utilisez une fonction qui en a besoin, au relais.</p>
@@ -637,6 +642,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <ul>
   <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
   <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>
+  <li>Les anciennes versions de votre collection gardées par Google Drive (historique du fichier) : elles disparaissent avec « Supprimer ma collection du Drive » ou avec le retrait de l'accès.</li>
   <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com</a>.</li>
   <li>Une demande d'ajout publiée : écrivez à l'éditeur par la page <a href="contact.html">Contact</a> pour la faire retirer.</li>
   <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
@@ -660,20 +666,18 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 
 MENTIONS = f'''<p class="surtitre">Informations légales</p>
 <h1>Mentions légales</h1>
-<p class="encart-a-completer" role="note"><strong>Page à compléter.</strong> Les informations entre crochets doivent être renseignées par l'éditeur avant toute publicité de cette page.</p>
 
 <h2>Éditeur du site</h2>
 <p>La Cote du Héros est un site personnel, non commercial.</p>
 <ul>
-  <li><strong>Éditeur et directeur de la publication</strong> : [À COMPLÉTER : nom et prénom, ou pseudonyme si l'hébergeur détient vos coordonnées]</li>
+  <li><strong>Éditeur et directeur de la publication</strong> : un particulier, qui agit à titre non professionnel et reste anonyme à l'égard du public. Conformément à l'article 6 de la loi du 21 juin 2004 (LCEN), son identité a été communiquée à l'hébergeur, qui peut la transmettre à l'autorité judiciaire</li>
   <li><strong>Contact</strong> : par le <a href="contact.html#formulaire">formulaire de la page Contact</a>.</li>
 </ul>
 
 <h2>Hébergeur</h2>
 <ul>
   <li><strong>GitHub, Inc.</strong> (service GitHub Pages), qui héberge le site</li>
-  <li>Adresse : 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis [À VÉRIFIER]</li>
-  <li>Téléphone : [À COMPLÉTER ou à vérifier auprès de l'hébergeur]</li>
+  <li>Adresse : 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis</li>
   <li>Site : <a href="https://pages.github.com" target="_blank" rel="noopener">pages.github.com</a></li>
 </ul>
 
@@ -683,7 +687,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 
 <h2>Propriété intellectuelle</h2>
 <ul>
-  <li><strong>Textes, calculs et code du guide</strong> : © [À COMPLÉTER : titulaire des droits].</li>
+  <li><strong>Textes, calculs et code du guide</strong> : © La Cote du Héros, tous droits réservés.</li>
   <li><strong>Jaquettes</strong> : © leurs éditeurs, reproduites à titre d'illustration d'un guide non commercial. Un ayant droit qui souhaiterait le retrait d'une image peut le demander par le contact ci-dessus.</li>
   <li><strong>Données bibliographiques</strong> : catalogue général de la Bibliothèque nationale de France.</li>
   <li><strong>Illustrations de l'accueil</strong> : images générées par intelligence artificielle pour le guide, choisies par l'éditeur.</li>

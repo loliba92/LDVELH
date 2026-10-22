@@ -77,12 +77,17 @@
     <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
     <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Admin ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-avis-donne</code>, <code>cdh-avis-ferme</code>, <code>cdh-visites</code> et <code>cdh-bienvenue</code></td><td data-label="Contenu">Le fait que vous avez déjà répondu à « Qu'en pensez-vous ? » ou fermé le bandeau, les dates de vos visites, et le fait que l'accueil a été affiché</td><td data-label="Pourquoi">Ne proposer l'avis qu'aux visiteurs réguliers, une seule fois ; ces données restent sur votre appareil</td></tr>
+    <tr><td data-label="Nom"><code>cdh-scan-etat</code>, <code>cdh-coll-pane</code>, <code>cdh-pane</code></td><td data-label="Contenu">Vos réglages d'affichage (état choisi pour le scan, onglet ouvert)</td><td data-label="Pourquoi">Retrouver la page comme vous l'avez laissée</td></tr>
     <tr><td data-label="Nom"><code>cdh-installer-ferme-jusqu-au</code></td><td data-label="Contenu">La date jusqu'à laquelle le bandeau d'installation reste masqué (quatorze jours)</td><td data-label="Pourquoi">Ne pas vous le montrer en boucle si vous l'avez fermé</td></tr>
   </tbody>
 </table>
 </div>
 <p>Le guide garde aussi des copies de ses propres pages et images dans la mémoire de votre navigateur (cache), pour s'ouvrir sans réseau. Elles ne contiennent aucune donnée sur vous.</p>
 <p><strong>Aucun cookie</strong> n'est déposé. Ces enregistrements sont nécessaires à des fonctions que vous demandez vous-même ; ils ne demandent donc pas de consentement et il n'y a pas de bandeau.</p>
+
+<h2>Appareil photo et lecture des codes-barres</h2>
+<p>Pour ajouter un livre en scannant son code-barres, le site vous demande l'autorisation d'utiliser l'appareil photo, à chaque usage selon votre navigateur. L'image est analysée dans votre navigateur par un composant libre (ZXing) hébergé avec le site : <strong>aucune image ni photo n'est enregistrée ni envoyée</strong>. Seul le numéro lu (l'ISBN) est utilisé, pour retrouver le livre. Vous pouvez refuser l'autorisation et saisir le numéro à la main.</p>
 
 <h2>Si vous vous connectez avec Google</h2>
 <p>Le site demande à Google trois choses : votre prénom, pour l'afficher, votre adresse électronique, pour vous reconnaître (elle n'est lue que par le relais décrit plus bas), et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Votre collection et votre liste « À trouver » vont directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit pas vos autres fichiers. Le laissez-passer donné par Google reste sur cet appareil et s'efface au bout d'une heure ou à la déconnexion ; il n'est envoyé qu'à Google et, quand vous utilisez une fonction qui en a besoin, au relais.</p>
@@ -114,6 +119,7 @@
 <ul>
   <li>Votre collection : bouton « Tout effacer » dans la section Ma collection, ou « Repartir de zéro » dans l'inventaire guidé.</li>
   <li>Vos notes : « Retirer ma note » dans la fiche du livre noté.</li>
+  <li>Les anciennes versions de votre collection gardées par Google Drive (historique du fichier) : elles disparaissent avec « Supprimer ma collection du Drive » ou avec le retrait de l'accès.</li>
   <li>Votre collection dans le Drive : « Supprimer ma collection du Drive » dans le menu du compte, ou retirez l'accès à ce site depuis <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com</a>.</li>
   <li>Une demande d'ajout publiée : écrivez à l'éditeur par la page <a href="contact.html">Contact</a> pour la faire retirer.</li>
   <li>Tout le reste : effacez les données du site dans les réglages de votre navigateur.</li>
@@ -132,7 +138,7 @@
 <p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription d'administrateur), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
-<p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : 18 octobre 2026.</p>
+<p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : 22 octobre 2026.</p>
 
 </main>
 
