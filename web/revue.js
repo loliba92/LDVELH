@@ -563,7 +563,8 @@
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const aDesAnnonces = (ed) => !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
+  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // les annonces ne sont montrées qu'au SuperAdmin
+  const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
   function annoncesEdition(ed) {
     const par = ANN.annonces[ed.isbn];
     const blocs = ETATS.map(([cle, lib]) => {
@@ -610,7 +611,7 @@
       liste.innerHTML = trouves.map((ed) => `<article class="rv-edition">${annoncesEdition(ed)}</article>`).join('');
     };
     champ.addEventListener('input', dessiner);
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'annonces') chargerAnnonces().then(dessiner); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'annonces' && estSuper()) chargerAnnonces().then(dessiner); });
     dessiner();
   }
 
@@ -646,7 +647,19 @@
   }
   initAnnonces();
   initNav();
-  chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); });
+  // Annonces : lien et onglet réservés au SuperAdmin (le rôle arrive après la connexion)
+  function majAnnonces() {
+    const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
+    const super_ = estSuper();
+    if (onglet) {
+      onglet.hidden = !super_;
+      if (!super_ && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
+    }
+    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); });
+    else if (EDITIONS.length) afficher();
+  }
+  document.addEventListener('cdh-compte', majAnnonces);
+  majAnnonces();
 
   // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
