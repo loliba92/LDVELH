@@ -17,8 +17,9 @@
     liste.innerHTML = r.equipe.length ? r.equipe.map(function (m) {
       return '<li class="eq-membre"><div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau">' + esc(NIVEAU[m.role] || m.role) + '</span>' +
         '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>' +
-        '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
-        '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div></li>';
+        (m.role === 'superadmin' ? '<p class="sous">Protégé : un SuperAdmin ne peut être ni retiré ni bloqué.</p>' :
+          '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
+          '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>') + '</li>';
     }).join('') : '<li class="sous">Aucun membre.</li>';
     var n = r.bloques.length;
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse à l\'équipe.' : 'Aucun compte bloqué.';

@@ -83,13 +83,13 @@ test('ajouter un membre : empreinte, niveau, nom ; un compte bloqué est débloq
   const f = fichier(); f.bloques = [nouveau];
   assert.deepStrictEqual(J(a(f, nouveau, 'P', 'admin', SUPER).fichier.bloques), []);
 });
-test('retirer : jamais soi-même, jamais le dernier SuperAdmin', () => {
+test('retirer : jamais soi-même, jamais un SuperAdmin', () => {
   const r = L('retirerMembre');
   assert.strictEqual(r(fichier(), ADM, SUPER).ok, true);
   assert.strictEqual(r(fichier(), SUPER, SUPER).ok, false);
   assert.strictEqual(r(fichier(), h('absent'), SUPER).ok, false);
   const f = fichier(); f.equipe[ADM].role = 'superadmin';
-  assert.strictEqual(r(f, SUPER, ADM).ok, true);                       // deux SuperAdmins : l'un peut retirer l'autre
+  assert.strictEqual(r(f, SUPER, ADM).ok, false);                      // un SuperAdmin est protégé, même face à un autre SuperAdmin
   const seul = fichier(); assert.strictEqual(r(seul, SUPER, ADM).ok, false);
 });
 test('bloquer : retire de l\'équipe et ajoute à la liste ; pas soi-même ni le dernier SuperAdmin', () => {
@@ -97,6 +97,8 @@ test('bloquer : retire de l\'équipe et ajoute à la liste ; pas soi-même ni le
   assert.strictEqual(x.ok, true); assert.ok(!x.fichier.equipe[ADM]); assert.deepStrictEqual(J(x.fichier.bloques), [ADM]);
   assert.strictEqual(b(fichier(), SUPER, SUPER).ok, false);
   assert.strictEqual(b(fichier(), SUPER, ADM).ok, false);
+  const deux = fichier(); deux.equipe[ADM].role = 'superadmin'; assert.strictEqual(b(deux, SUPER, ADM).ok, false);
+  assert.strictEqual(L('ajouterMembre')(fichier(), SUPER, 'loliba', 'admin', ADM).ok, false);   // pas de rétrogradation
   assert.deepStrictEqual(J(b(x.fichier, ADM, SUPER).fichier.bloques), [ADM]);          // pas de doublon
 });
 test('les modifications ne touchent pas au fichier d\'origine', () => {

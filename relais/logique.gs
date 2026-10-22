@@ -82,6 +82,7 @@ function ajouterMembre(fichier, empreinte, nom, role, par) {
   var n = nettoyerNom(nom);
   if (!n) return { ok: false, raison: 'nom manquant' };
   var f = copie(fichier); f.equipe = f.equipe || {};
+  if (f.equipe[empreinte] && f.equipe[empreinte].role === 'superadmin' && role !== 'superadmin') return { ok: false, raison: 'un SuperAdmin ne peut pas être rétrogradé' };
   f.equipe[empreinte] = { nom: n, role: role };
   f.bloques = (f.bloques || []).filter(function (b) { return minuscules(b) !== empreinte; });
   return { ok: true, fichier: f };
@@ -90,7 +91,7 @@ function retirerMembre(fichier, empreinte, par) {
   var f = copie(fichier); f.equipe = f.equipe || {};
   if (!f.equipe[empreinte]) return { ok: false, raison: 'membre introuvable' };
   if (empreinte === par) return { ok: false, raison: 'vous ne pouvez pas vous retirer vous-même' };
-  if (f.equipe[empreinte].role === 'superadmin' && nbSuperAdmins(f.equipe) <= 1) return { ok: false, raison: 'il faut garder au moins un SuperAdmin' };
+  if (f.equipe[empreinte].role === 'superadmin') return { ok: false, raison: 'un SuperAdmin ne peut pas être retiré' };
   delete f.equipe[empreinte];
   return { ok: true, fichier: f };
 }
@@ -98,7 +99,7 @@ function bloquerCompte(fichier, empreinte, par) {
   if (!/^sha256:[0-9a-f]{64}$/.test(empreinte)) return { ok: false, raison: 'empreinte invalide' };
   if (empreinte === par) return { ok: false, raison: 'vous ne pouvez pas vous bloquer vous-même' };
   var f = copie(fichier); f.equipe = f.equipe || {}; f.bloques = f.bloques || [];
-  if (f.equipe[empreinte] && f.equipe[empreinte].role === 'superadmin' && nbSuperAdmins(f.equipe) <= 1) return { ok: false, raison: 'il faut garder au moins un SuperAdmin' };
+  if (f.equipe[empreinte] && f.equipe[empreinte].role === 'superadmin') return { ok: false, raison: 'un SuperAdmin ne peut pas être bloqué' };
   delete f.equipe[empreinte];
   if (f.bloques.map(minuscules).indexOf(empreinte) < 0) f.bloques.push(empreinte);
   return { ok: true, fichier: f };
