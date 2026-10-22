@@ -1509,6 +1509,16 @@
   }
 
   /* ---------- Onglets de « Ma collection » : Mes livres, Analyse, À vendre, À trouver ---------- */
+  // Pictogrammes de la barre d'onglets de la collection (décoratifs : le libellé reste lu)
+  const pict = (d) => `<svg class="onglet-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  const ICONES_ONGLET = {
+    livres: pict('<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M8 17h10"/>'),
+    analyse: pict('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+    historique: pict('<path d="M3 17l5-6 4 3 8-9"/><path d="M15 5h5v5"/>'),
+    vendre: pict('<circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/>'),
+    trouver: pict('<circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/>'),
+    gerer: pict('<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'),
+  };
   const ONGLETS_COLL = ['livres', 'analyse', 'historique', 'vendre', 'trouver', 'gerer'];
   const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', historique: 'historique', gerer: 'gerer', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
   let CTAB = 'livres', CSEG = 'serie';
@@ -1660,7 +1670,7 @@
       <p class="trois">${esc(texteEstimation(bl))}</p>
       ${bl.sansCote ? `<p class="sans-cote">${bl.sansCote} exemplaire${bl.sansCote > 1 ? 's' : ''} sans cote pour l'état choisi : non compté${bl.sansCote > 1 ? 's' : ''} dans le total.</p>` : ''}
       <div class="coll-nav" id="coll-nav" role="tablist" aria-label="Sections de ma collection">${onglets.map(([k, nom, nb]) =>
-        `<button type="button" role="tab" id="onglet-coll-${k}" aria-controls="pane-coll-${k}" aria-selected="${k === CTAB}" tabindex="${k === CTAB ? 0 : -1}" data-onglet="${k}">${nom}${nb == null ? '' : ` <span class="coll-nb" aria-label="${nb} livre${nb > 1 ? 's' : ''}">(${nb})</span>`}</button>`).join('')}</div>
+        `<button type="button" role="tab" id="onglet-coll-${k}" aria-controls="pane-coll-${k}" aria-selected="${k === CTAB}" tabindex="${k === CTAB ? 0 : -1}" data-onglet="${k}">${ICONES_ONGLET[k] || ''}<span class="onglet-nom">${nom}</span>${nb == null ? '' : ` <span class="coll-nb" aria-label="${nb} livre${nb > 1 ? 's' : ''}">(${nb})</span>`}</button>`).join('')}</div>
       <div class="coll-pane" id="pane-coll-livres" role="tabpanel" aria-labelledby="onglet-coll-livres"${CTAB === 'livres' ? '' : ' hidden'}>
         <h3 id="titre-exemplaires" class="sr-only">Mes livres</h3>
         ${barreFiltres(bl)}
