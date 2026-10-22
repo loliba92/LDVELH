@@ -355,7 +355,7 @@
     return `<p class="sous prix-neuf">Prix éditeur à la parution : <strong>${e.devise === 'EUR' ? fmt(e.prix) : String(e.prix).replace('.', ',') + ' F'}</strong> (notice de la BnF).</p>`;
   }
   function texteEstimation() {          // texte fixe : il ne dépend ni de la collection ni de l'état des relevés
-    return "Estimation d'après les cotes du guide et l'état de chaque exemplaire. Elle ne remplace ni une expertise ni un prix de vente réel.";
+    return "Estimation indicative d'après les cotes du guide.";
   }
 
   /* ---------- Affichage général ---------- */
