@@ -610,7 +610,7 @@
       const p = b.prix[e.k];
       const poss = COLL[b.id];
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && SOUH[b.id] ? ' trouver-oui' : ''}">
-        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? repere(p, e.k).toLowerCase() : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
+        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 4' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
             : tuile(b)}</span>
@@ -874,8 +874,8 @@
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Cote de cette édition</h3>
-        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere">${repere(b.prix[e.k], e.k, true)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">Repère établi d'après les prix constatés, en comparant ce livre aux autres du guide : abordable, moyen ou cher. Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 4'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
+        <p class="sous legende-prix">Niveau de prix de 1 à 4 euros, établi en comparant ce livre aux autres du guide (€ : parmi les moins chers, €€€€ : parmi les plus chers). Pour voir la cote exacte de chaque état, connectez-vous avec Google.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
@@ -987,22 +987,19 @@
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
   const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
-  // Cotes exactes réservées aux comptes : un visiteur voit un repère (abordable, moyen, cher), jamais le chiffre. Tant que la configuration du compte
+  // Cotes exactes réservées aux comptes : un visiteur voit un niveau de 1 à 4 euros (€ à €€€€), jamais le chiffre. Tant que la configuration du compte
   // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
   const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
   const SEUILS = {};
-  function seuilsCote(k) {
+  function seuilsCote(k) {            // quatre niveaux : quartiles des prix de la base, état par état
     if (!SEUILS[k]) {
       const v = DATA.map((b) => b.prix[k]).filter((x) => x != null).sort((a, b) => a - b);
-      SEUILS[k] = v.length ? [v[Math.floor(v.length / 3)], v[Math.floor((2 * v.length) / 3)]] : [0, 0];
+      SEUILS[k] = v.length ? [1, 2, 3].map((q) => v[Math.floor((q * v.length) / 4)]) : [0, 0, 0];
     }
     return SEUILS[k];
   }
-  const repere = (v, k) => {
-    if (v == null) return '—';
-    const [a, c] = seuilsCote(k), n = v < a ? 0 : v < c ? 1 : 2;
-    return ['Abordable', 'Moyen', 'Cher'][n];
-  };
+  const niveauCote = (v, k) => (v == null ? 0 : 1 + seuilsCote(k).filter((x) => v >= x).length);
+  const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
   let etaitSansCompte = null, appPrete = false;
