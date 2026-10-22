@@ -1451,6 +1451,41 @@
       ${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
       <b>${esc(b.titre)}</b><span>${esc(b.version)} · ${esc(etatDe(c.etat).court)}</span><span class="p">${fmt(b.prix[c.etat])}</span>${pastilleRarete(b)}</button>`;
   }
+  // Historique : valeur de la collection à chaque date de relevé, pour les livres dont la cote est connue à toutes les dates (mêmes livres, mêmes états)
+  function historiquePane(bl) {
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
+    const n = HIST.dates.length, tot = new Array(n).fill(0);
+    let suivis = 0;
+    bl.lignes.forEach(({ b, c }) => {
+      const a = HIST.cotes[`${b.id}|${c.etat}`];
+      if (!a) return;
+      const sr = []; let der = null;
+      for (let i = 0; i < n; i += 1) { if (a[i] != null && a[i] > 0) der = a[i]; sr.push(der); }       // une date sans cote reprend la dernière connue
+      if (sr.some((x) => x == null)) return;
+      suivis += c.qte;
+      sr.forEach((x, i) => { tot[i] += x * c.qte; });
+    });
+    if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote suivie sur plusieurs dates. L\'historique apparaîtra après les prochains relevés.</p>';
+    const jour = (d, long) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'numeric' });
+    const mini = Math.min(...tot), maxi = Math.max(...tot), marge = Math.max((maxi - mini) * 0.2, maxi * 0.02);
+    const bas = mini - marge, haut = maxi + marge, W = 640, H = 240, gx = 52, gd = 18, gh = 16, gb = 34;
+    const X = (i) => gx + (i * (W - gx - gd)) / (n - 1), Y = (v) => gh + ((haut - v) / (haut - bas)) * (H - gh - gb);
+    const pts = tot.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
+    const graduations = [bas + marge, (mini + maxi) / 2, maxi].map((v) => `<g><line x1="${gx}" x2="${W - gd}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="hc-grille"/><text x="${gx - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end">${fmtE(v)}</text></g>`).join('');
+    const pas = Math.max(1, Math.ceil(n / 6));
+    const dates = HIST.dates.map((d, i) => (i % pas === 0 || i === n - 1) ? `<text x="${X(i).toFixed(1)}" y="${H - 12}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}">${jour(d)}</text>` : '').join('');
+    const points = tot.map((v, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.5"/>`).join('');
+    const v0 = tot[0], v1 = tot[n - 1], ev = v0 > 0 ? v1 / v0 - 1 : 0;
+    const pct = (Math.round(Math.abs(ev) * 1000) / 10).toString().replace('.', ',');
+    const phrase = Math.abs(ev) < 0.005 ? `Valeur stable depuis le ${jour(HIST.dates[0], true)} : ${fmtE(v1)}.` : `De ${fmtE(v0)} le ${jour(HIST.dates[0], true)} à ${fmtE(v1)} le ${jour(HIST.dates[n - 1], true)} (${ev > 0 ? 'hausse' : 'baisse'} de ${pct} %).`;
+    const lignes = HIST.dates.map((d, i) => `<tr><td>${jour(d, true)}</td><td class="num">${fmtE(tot[i])}</td><td class="num">${i ? `${tot[i] - tot[i - 1] >= 0 ? '+' : '−'}${fmtE(Math.abs(tot[i] - tot[i - 1]))}` : '—'}</td></tr>`).join('');
+    const total = bl.exemplaires;
+    return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
+      <p class="hc-phrase" role="status">${phrase}</p>
+      <figure class="hc-fig"><svg viewBox="0 0 ${W} ${H}" class="hc-svg" role="img" aria-label="Courbe de la valeur de la collection du ${jour(HIST.dates[0], true)} au ${jour(HIST.dates[n - 1], true)}. ${phrase}">${graduations}<polyline points="${pts}" class="hc-ligne"/>${points}${dates}</svg></figure>
+      <p class="sous">${suivis === total ? 'Tous vos exemplaires sont suivis.' : `${suivis} exemplaire${suivis > 1 ? 's' : ''} sur ${total} suivi${suivis > 1 ? 's' : ''} : les autres n'ont pas de cote à toutes les dates.`} Mêmes livres, mêmes états à chaque date : seule la cote change. Les relevés de prix commencent le ${jour(HIST.dates[0], true)}.</p>
+      <details class="chiffres"><summary>Voir les chiffres</summary><div class="tableau-page"><table><thead><tr><th scope="col">Date</th><th scope="col">Valeur</th><th scope="col">Écart</th></tr></thead><tbody>${lignes}</tbody></table></div></details>`;
+  }
   function analysePane(bl) {
     const cotes = bl.lignes.filter((x) => x.b.prix[x.c.etat] != null);
     const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
@@ -1476,8 +1511,8 @@
   }
 
   /* ---------- Onglets de « Ma collection » : Mes livres, Analyse, À vendre, À trouver ---------- */
-  const ONGLETS_COLL = ['livres', 'analyse', 'vendre', 'trouver'];
-  const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
+  const ONGLETS_COLL = ['livres', 'analyse', 'historique', 'vendre', 'trouver'];
+  const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', historique: 'historique', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
   let CTAB = 'livres', CSEG = 'serie';
   (function lireOngletInitial() {
     const h = location.hash.replace('#', '');
@@ -1501,7 +1536,7 @@
     const t = e.target.closest && e.target.closest('#coll-nav [role="tab"]');
     if (!t) return;
     const i = ONGLETS_COLL.indexOf(t.dataset.onglet);
-    const j = e.key === 'ArrowRight' ? (i + 1) % 4 : e.key === 'ArrowLeft' ? (i + 3) % 4 : e.key === 'Home' ? 0 : e.key === 'End' ? 3 : -1;
+    const j = e.key === 'ArrowRight' ? (i + 1) % ONGLETS_COLL.length : e.key === 'ArrowLeft' ? (i + ONGLETS_COLL.length - 1) % ONGLETS_COLL.length : e.key === 'Home' ? 0 : e.key === 'End' ? ONGLETS_COLL.length - 1 : -1;
     if (j < 0) return;
     e.preventDefault(); ouvrirOnglet(ONGLETS_COLL[j]); $('#onglet-coll-' + ONGLETS_COLL[j]).focus();
   });
@@ -1617,7 +1652,7 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['historique', 'Historique', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1636,6 +1671,7 @@
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
+      <div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       ${blocGerer()}`;

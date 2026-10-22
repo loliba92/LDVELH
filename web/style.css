@@ -1646,7 +1646,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 @media (max-width: 900px) { .coll-cles .cle-valeur { grid-column: auto; } }
 @media (max-width: 560px) { .coll-cles .cle-valeur { grid-column: auto; } }
 @media (max-width: 560px) {
-  .coll-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: visible; }
+  .coll-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; overflow: visible; }
   .coll-nav button { min-width: 0; padding: 6px 2px; font-size: .88rem; white-space: normal; line-height: 1.2; }
   .coll-nav .coll-nb { display: block; font-size: .8rem; }
 }
@@ -1849,3 +1849,13 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pied-liens a[href*="buymeacoffee"]:hover, .pied-liens a[href*="buymeacoffee"]:focus-visible { background: rgba(212, 165, 60, .12); border-bottom-color: var(--gold); }
 .annexe .pied-in > .sous, .pied-in > nav + .sous { text-align: center; margin: 14px auto 0; max-width: 60ch; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .12); }
 @media (max-width: 560px) { .pied-liens { gap: 0 18px; } .pied-liens a[href*="buymeacoffee"] { margin-top: 6px; } }
+
+/* Historique de la collection */
+.hc-phrase { margin: 4px 0 12px; font-weight: 600; }
+.hc-fig { margin: 0 0 8px; }
+.hc-svg { display: block; width: 100%; height: auto; max-height: 300px; }
+.hc-svg text { fill: var(--muted); font: 600 13px var(--f-ui); }
+@media (max-width: 560px) { .hc-svg text { font-size: 19px; } .coll-nav button { font-size: .8rem; } }
+.hc-grille { stroke: var(--line); stroke-width: 1; }
+.hc-ligne { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.hc-svg circle { fill: var(--gold); }
