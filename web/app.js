@@ -1511,8 +1511,8 @@
   }
 
   /* ---------- Onglets de « Ma collection » : Mes livres, Analyse, À vendre, À trouver ---------- */
-  const ONGLETS_COLL = ['livres', 'analyse', 'historique', 'vendre', 'trouver'];
-  const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', historique: 'historique', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
+  const ONGLETS_COLL = ['livres', 'analyse', 'historique', 'vendre', 'trouver', 'gerer'];
+  const ALIAS_ONGLET = { livres: 'livres', analyse: 'analyse', historique: 'historique', gerer: 'gerer', vendre: 'vendre', trouver: 'trouver', 'titre-exemplaires': 'livres', 'titre-a-vendre': 'vendre', 'titre-a-trouver': 'trouver', 'titre-analyses': 'analyse', 'coll-analyse': 'analyse' };
   let CTAB = 'livres', CSEG = 'serie';
   (function lireOngletInitial() {
     const h = location.hash.replace('#', '');
@@ -1652,7 +1652,7 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['historique', 'Historique', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver]];
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['historique', 'Historique', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1674,7 +1674,7 @@
       <div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
-      ${blocGerer()}`;
+      <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
     const imp1 = $('#importer'), dang = $('.gerer-danger');
     if (imp1 && dang) dang.before(imp1);
     afficherHistoColl(bl);

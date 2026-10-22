@@ -1859,3 +1859,15 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .hc-grille { stroke: var(--line); stroke-width: 1; }
 .hc-ligne { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .hc-svg circle { fill: var(--gold); }
+
+/* Barre d'onglets de la collection : plus visible (fond, bordure, onglet actif plein) */
+.coll-nav { gap: 6px; padding: 6px; margin: 18px 0 16px; border: 1px solid var(--line-strong); border-radius: 14px; background: var(--surface); }
+.coll-nav button { min-height: 46px; padding: 0 16px; border: 1px solid transparent; border-bottom-width: 1px; border-radius: 10px; color: var(--text); font-size: 1.02rem; }
+.coll-nav button:hover { background: rgba(212, 165, 60, .12); color: var(--text); }
+.coll-nav button[aria-selected="true"] { background: var(--gold); border-color: var(--gold); color: #1a1204; }
+.coll-nav button[aria-selected="true"] .coll-nb { opacity: 1; }
+@media (min-width: 561px) { .coll-nav { overflow: visible; } .coll-nav button { flex: 1 1 auto; } }
+@media (max-width: 560px) {
+  .coll-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 6px; }
+  .coll-nav button { min-height: 48px; padding: 4px 2px; font-size: .92rem; }
+}
