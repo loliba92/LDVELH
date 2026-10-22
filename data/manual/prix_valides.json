@@ -1081,6 +1081,18 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782352946434|convenable": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-10-22",
+   "par": "loliba (superadmin)"
+  },
+  "9782352946434|tres_bon": {
+   "prix": 14.0,
+   "decision": "corrige",
+   "le": "2026-10-22",
+   "par": "loliba (superadmin)"
+  },
   "9782380240252|bon": {
    "prix": 14.0,
    "decision": "corrige",
