@@ -317,7 +317,7 @@ def main():
     (sortie / "historique.json").write_text(json.dumps({"dates": [h["date"] for h in hist_pub],
                                                          "cotes": {k: [h["prix"].get(k) for h in hist_pub] for k in cles}},
                                                         ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    rarete.annoter(versions, rarete.charger(DB.parent.parent / "raw" / "collection-ldvelh"))                # rareté (information), d'après les collections de collection-ldvelh.fr
+    rarete.annoter(versions, rarete.charger(DB.parent.parent / "raw" / "collection-ldvelh"), rarete.charger_tirages())                # rareté (information), d'après les collections de collection-ldvelh.fr
     (sortie / "versions.json").write_text(json.dumps(versions, ensure_ascii=False, separators=(",", ":")),
                                           encoding="utf-8")
     (sortie / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")

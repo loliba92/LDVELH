@@ -20,6 +20,20 @@ class TestRarete(unittest.TestCase):
         self.assertIsNone(niv["x"])
         self.assertIsNone(niv["inconnu"])
 
+    def test_les_tirages_gallimard_donnent_le_niveau(self):
+        d = Path(tempfile.mkdtemp()) / "t.txt"
+        lignes = ["# commentaire"] + [f"MA SERIE|1990|{i}|Livre {chr(65 + i)} Test|0|{i + 1}|0|0|0|0|0|0" for i in range(12)]
+        d.write_text("\n".join(lignes), encoding="utf-8")
+        tirages = rarete.charger_tirages(d)
+        versions = [{"id": f"i{i}", "isbn13": f"i{i}", "version": "V1", "serie": "Ma série", "livre": f"Livre {chr(65 + i)} Test", "titre": f"Livre {chr(65 + i)} Test"} for i in range(12)]
+        versions.append({"id": "autre", "isbn13": "x", "version": "V1", "serie": "Autre", "livre": "Sans tirage", "titre": "Sans tirage"})
+        n = rarete.annoter(versions, {}, tirages)
+        self.assertEqual(n, 12)
+        r = {v["id"]: v.get("rarete") for v in versions}
+        self.assertEqual((r["i0"]["tirages"], r["i0"]["niveau"]), (1, "tres_rare"))
+        self.assertEqual(r["i11"]["niveau"], "courant")
+        self.assertIsNone(r["autre"])
+
     def test_lecture_du_dernier_fichier(self):
         d = Path(tempfile.mkdtemp())
         (d / "books_data-2026-01-01.csv").write_text("isbn,collection_percentage\n111,5\n", encoding="utf-8")

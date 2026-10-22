@@ -1,0 +1,214 @@
+# Nombre de tirages par édition Gallimard (V0 V1 V2 V3 V4 V4GF V5 V5C), compilé par Thomtom d'après exlibris.to
+# serie|annee|tome|titre|V0|V1|V2|V3|V4|V4GF|V5|V5C
+DEFIS FANTASTIQUES|1983|1|Le Sorcier de la Montagne de Feu|2|14|8|2|4|0|2|0
+DEFIS FANTASTIQUES|1984|2|La Citadelle du Chaos|0|13|6|2|4|0|2|0
+DEFIS FANTASTIQUES|1984|3|La Forêt de la Malédiction|0|14|7|1|3|0|2|0
+DEFIS FANTASTIQUES|1984|4|La Galaxie Tragique|0|13|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1984|5|La Cité des Voleurs|0|13|7|2|1|0|3|0
+DEFIS FANTASTIQUES|1984|6|Le Labyrinthe de la Mort|0|14|5|1|3|0|2|0
+DEFIS FANTASTIQUES|1984|7|L'Ile du Roi Lézard|0|9|1|1|0|0|0|0
+DEFIS FANTASTIQUES|1985|8|La Marais aux Scorpions|0|14|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1985|9|La Sorcière des Neiges|0|14|5|1|1|0|2|0
+DEFIS FANTASTIQUES|1985|10|Le Manoir de l'Enfer|0|15|6|1|2|0|2|0
+DEFIS FANTASTIQUES|1985|11|Le Talisman de la Mort|0|11|3|1|2|0|0|0
+DEFIS FANTASTIQUES|1985|12|Le Mercenaire de l'Espace|0|13|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1985|13|Le Combattant de l'Autoroute|0|8|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1985|14|Le Temple de la Terreur|0|12|1|1|2|0|0|0
+DEFIS FANTASTIQUES|1986|15|Les Trafiquants de Kelter|0|6|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1986|16|Défis Sanglants sur l'Océan|0|6|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1986|17|Rendez-Vous avec la M.O.R.T.|0|6|1|1|1|0|0|0
+DEFIS FANTASTIQUES|1986|18|La Planète Rebelle|0|8|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1986|19|Le Démons des Profondeurs|0|5|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1987|20|L'Epée du Samourai|0|7|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1987|21|L'Epreuve des Champions|0|5|1|1|2|0|0|0
+DEFIS FANTASTIQUES|1987|22|La Grande Menace des Robots|0|6|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1987|23|Les Sceaux de la Destruction|0|4|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1989|24|La Créature venue du Chaos|0|4|3|1|1|0|2|0
+DEFIS FANTASTIQUES|1987|25|La Forteresse du Cauchemar|0|6|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1987|26|La Crypte du Sorcier|0|5|1|1|2|0|0|0
+DEFIS FANTASTIQUES|1987|27|Le Chasseur des Etoiles|0|5|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1988|28|Les Spectres de l'Angoisse|0|3|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1988|29|Les Rodeurs de la Nuit|0|6|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1988|30|Les Gouffres de la Cruauté|0|3|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1988|31|L'Empire des Hommes-Lézards|0|2|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1989|32|Les Esclaves de l'Eternité|0|2|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1989|33|Le Justicier de l'univers|0|4|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1989|34|Le Voleur d'Ames|0|3|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|35|L'Elu des Six Clans|0|1|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|36|Les Sombres Cohortes|0|4|4|1|2|0|0|0
+DEFIS FANTASTIQUES|1990|37|La Nuit des Mutants|0|2|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|38|Le Vampire du Château Noir|0|4|3|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|39|Le Volcan de Zamara|0|3|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|40|La Vengeance des Démons|0|3|0|0|0|0|0|0
+DEFIS FANTASTIQUES|1990|41|Le Sceptre Noir|0|4|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1991|42|L'ancienne Prophétie|0|5|1|0|0|0|0|0
+DEFIS FANTASTIQUES|1991|43|Le Repaire des Morts-Vivants|0|4|1|0|0|0|0|0
+DEFIS FANTASTIQUES|1991|44|La Légende des Guerriers Fantômes|0|3|4|0|0|0|0|0
+DEFIS FANTASTIQUES|1993|45|Les Mondes de l'Alpeh|0|2|4|0|0|0|0|0
+DEFIS FANTASTIQUES|1992|46|La Tour de la Destruction|0|3|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1993|47|Les Mercenaires du Levant|0|1|3|0|0|0|0|0
+DEFIS FANTASTIQUES|1992|48|L'Arpenteur de la Lune|0|1|1|0|0|0|0|0
+DEFIS FANTASTIQUES|1993|49|Le Siège de Sardath|0|2|3|0|0|0|0|0
+DEFIS FANTASTIQUES|1993|50|Retour à la Montagne de Feu|0|2|6|1|2|0|0|0
+DEFIS FANTASTIQUES|1994|51|Les Mages de Solani|0|2|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1997|52|Le Dragon de la Nuit|0|0|3|0|0|0|0|0
+DEFIS FANTASTIQUES|1994|53|Le Sépulcre des Ombres|0|1|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1994|54|La Légende de Zagor|0|1|5|1|2|0|0|0
+DEFIS FANTASTIQUES|1995|55|Le Voleur de Vie|0|1|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1995|56|Les Chevalieurs du Destin|0|1|3|0|0|0|0|0
+DEFIS FANTASTIQUES|1995|57|Le Chasseur de Mages|0|1|2|0|0|0|0|0
+DEFIS FANTASTIQUES|1997|58|La Revanche du Vampire|0|0|3|0|0|0|0|0
+DEFIS FANTASTIQUES|2015|59|La Malédiction de la Momie|0|0|0|0|0|2|0|0
+DEFIS FANTASTIQUES|2007|60|L'Œil d'Emeraude|0|0|0|1|3|0|0|0
+DEFIS FANTASTIQUES|2012|61|Le Pirate de l'Au-Delà|0|0|0|0|0|4|1|0
+DEFIS FANTASTIQUES|2013|62|La Nuit du Loup-Garou|0|0|0|0|0|2|0|0
+DEFIS FANTASTIQUES|2013|63|Le Maître des Tempêtes|0|0|0|0|0|2|0|0
+DEFIS FANTASTIQUES|2012|64|La Nuit du Nécromancien|0|0|0|0|0|2|1|0
+DEFIS FANTASTIQUES|2014|65|Le Sang des Zombies|0|0|0|0|2|1|0|0
+DEFIS FANTASTIQUES|2018|66|L'Anneau des Serpents de Feu|0|0|0|0|0|0|1|0
+DEFIS FANTASTIQUES|2019|67|Le Fléau de Titan|0|0|0|0|0|0|1|0
+DEFIS FANTASTIQUES|2023|70|Les Mystères de Salamonis|0|0|0|0|0|0|0|1
+LOUP SOLITAIRE|1985|1|Les Maîtres des Ténébres|0|16|6|3|5|0|3|0
+LOUP SOLITAIRE|2021|1|Les Maîtres des Ténèbres - Version augmentée|0|0|0|0|0|0|1|1
+LOUP SOLITAIRE|1985|2|La Traversée Infernale|0|17|5|1|1|0|3|0
+LOUP SOLITAIRE|1985|3|Les Grottes de Kalte|0|15|5|1|1|0|2|0
+LOUP SOLITAIRE|1985|4|Le Gouffre Maudit|0|14|4|1|2|0|1|0
+LOUP SOLITAIRE|1986|5|Le Tyran du Désert|0|10|5|1|3|0|1|0
+LOUP SOLITAIRE|1986|6|La Pierre de la Sagesse|0|9|3|2|3|0|1|0
+LOUP SOLITAIRE|1987|7|La Forteresse Maudite|0|11|5|2|2|0|1|0
+LOUP SOLITAIRE|1987|8|Dans l'Enfer de la Jungle|0|8|4|1|2|0|1|0
+LOUP SOLITAIRE|1987|9|La Métropole de la Peur|0|4|3|1|1|0|1|0
+LOUP SOLITAIRE|1989|10|Dans les Entrailles de Torgar|0|4|4|1|3|0|0|0
+LOUP SOLITAIRE|1989|11|Les Prisonniers du Temps|0|4|2|1|2|0|0|0
+LOUP SOLITAIRE|1990|12|Le Crépuscule des Maîtres|0|5|5|1|2|0|0|0
+LOUP SOLITAIRE|1990|13|Les Druides de Cener|0|6|3|1|1|0|0|0
+LOUP SOLITAIRE|1991|14|Le Captif du Roi-Sorcier|0|6|4|1|1|0|0|0
+LOUP SOLITAIRE|1992|15|La Croisade du Désespoir|0|4|4|1|1|0|0|0
+LOUP SOLITAIRE|1992|16|L'Héritage de Vashna|0|4|4|1|1|0|0|0
+LOUP SOLITAIRE|1993|17|La Tour de Cristal|0|3|3|1|2|0|0|0
+LOUP SOLITAIRE|1993|18|La Porte d'Ombre|0|3|3|1|2|0|0|0
+LOUP SOLITAIRE|1994|19|Le Combat des Loups|0|1|2|1|2|0|0|0
+LOUP SOLITAIRE|1994|20|La Malédiction de Naar|0|2|2|1|1|0|0|0
+LOUP SOLITAIRE|1995|21|Le Voyage de la Pierre de Lune|0|1|2|0|0|0|0|0
+LOUP SOLITAIRE|1995|22|Les Pirates de Shadaki|0|1|3|0|0|0|0|0
+LOUP SOLITAIRE|1997|23|Le Héros de Mynuit|0|0|2|0|0|0|0|0
+LOUP SOLITAIRE|1997|24|La Guerre des Runes|0|0|4|0|0|0|0|0
+LOUP SOLITAIRE|1999|25|Sur la Piste du Loup|0|0|2|0|0|0|0|0
+LOUP SOLITAIRE|1999|26|Le Démon des Profondeurs|0|0|1|0|0|0|0|0
+LOUP SOLITAIRE|1999|27|La Griffe du Vampire|0|0|1|0|0|0|0|0
+LOUP SOLITAIRE|1999|28|La Cité de l'Empereur|0|0|1|0|0|0|0|0
+LOUP SOLITAIRE|2017|29|L'Œil d'Agarash|0|0|0|0|0|1|2|0
+LOUP SOLITAIRE|2021|30|Au Bord de l'Abyme|0|0|0|0|0|0|0|1
+QUETE DU GRAAL|1985|1|Le Château des Ténèbres|0|12|7|0|0|0|4|0
+QUETE DU GRAAL|1985|2|L'Antre des Dragons|0|11|7|0|0|0|4|0
+QUETE DU GRAAL|1986|3|Les Portes de l'Au-Delà|0|9|6|0|0|0|2|0
+QUETE DU GRAAL|1986|4|Le Voyage de l'Effroi|0|10|4|0|0|0|1|0
+QUETE DU GRAAL|1986|5|Au Royaume de l'Epouvante|0|5|5|0|0|0|1|0
+QUETE DU GRAAL|1986|6|Le Temps de la Malédiction|0|5|3|0|0|0|0|0
+QUETE DU GRAAL|1986|7|Le Tombeau des Maléfices|0|9|4|0|0|0|0|0
+QUETE DU GRAAL|1987|8|La Légion des Morts|0|7|2|0|0|0|0|0
+LOUP*ARDENT|1985|1|La Horde des Démons|0|13|2|0|0|0|0|0
+LOUP*ARDENT|1985|2|Les Cryptes de la Terreur|0|11|2|0|0|0|0|0
+LOUP*ARDENT|1986|3|L'Ultime Combat de la Horde|0|7|2|0|0|0|0|0
+LOUP*ARDENT|1986|4|Les Maîtres du Mal|0|8|1|0|0|0|0|0
+DRAGON D'OR|1985|1|Le Tombeau du Vampire|0|8|3|0|0|0|0|0
+DRAGON D'OR|1985|2|Le Dieu Perdu|0|7|3|0|0|0|0|0
+DRAGON D'OR|1985|3|Le Seigneur de l'Ombre|0|8|3|0|0|0|0|0
+DRAGON D'OR|1986|4|La Malédiction du Pharaon|0|9|2|0|0|0|0|0
+DRAGON D'OR|1986|5|Le Château des Ames Damnées|0|5|1|0|0|0|0|0
+DRAGON D'OR|1987|6|L'Œil du Dragon|0|3|4|0|0|0|0|0
+SORCELLERIE !|1985|1|Les Collines Maléfiques|0|12|4|0|0|2|0|0
+SORCELLERIE !|1985|2|La Cité des Pièges|0|16|4|0|0|1|0|0
+SORCELLERIE !|1985|3|Les Sept Serpents|0|8|3|0|0|1|0|0
+SORCELLERIE !|1985|4|La Couronne des Rois|0|10|3|0|0|1|0|0
+LES PORTES INTERDITES|1986|1|L'Horreur dans la Vallée|0|6|0|0|0|0|0|0
+LES PORTES INTERDITES|1986|2|Terreur Hors du Temps|0|4|0|0|0|0|0|0
+CHRONIQUES CRETOISES|1986|1|La Vengeance d'Althéos|0|5|0|0|0|0|0|0
+CHRONIQUES CRETOISES|1986|2|Le Labyrinthe du Roi Minos|0|4|0|0|0|0|0|0
+CHRONIQUES CRETOISES|1986|3|L'Odyssée D'Althéos|0|3|0|0|0|0|0|0
+L'ŒIL NOIR|1985|1|L'Auberge du Sanglier Noir|0|6|0|0|0|0|0|0
+L'ŒIL NOIR|1985|2|La Forêt Sans Retour|0|5|0|0|0|0|0|0
+L'ŒIL NOIR|1985|3|La Fille du Calife|0|3|0|0|0|0|0|0
+L'ŒIL NOIR|1985|4|Le Sept Coupes Magiques|0|4|0|0|0|0|0|0
+L'ŒIL NOIR|1985|5|La Source de Mort|0|5|0|0|0|0|0|0
+L'ŒIL NOIR|1985|6|Le Fleuve du Désastre|0|3|0|0|0|0|0|0
+L'ŒIL NOIR|1986|7|Le Tournoi des Félons|0|2|0|0|0|0|0|0
+L'ŒIL NOIR|1986|8|Le Magicien des Glaces|0|2|0|0|0|0|0|0
+L'ŒIL NOIR|1986|9|L'Archipel des Cyclopes|0|3|0|0|0|0|0|0
+L'ŒIL NOIR|1986|10|Dans les Griffes des Démons|0|2|0|0|0|0|0|0
+L'ŒIL NOIR|1986|11|La Porte des Mondes|0|1|0|0|0|0|0|0
+L'ŒIL NOIR|1986|12|Le Navire des Ames Perdues|0|2|0|0|0|0|0|0
+L'ŒIL NOIR|1986|13|Le Bourreau de Thalussa|0|1|0|0|0|0|0|0
+L'ŒIL NOIR|1986|14|Les Hiéroglyphes de l'Horreur|0|2|0|0|0|0|0|0
+L'ŒIL NOIR|1986|15|Les Spectres des Marais|0|1|0|0|0|0|0|0
+L'ŒIL NOIR|1986|16|La Reine des Amazones|0|1|0|0|0|0|0|0
+L'ŒIL NOIR|1986|17|Le Chemin Maudit|0|1|0|0|0|0|0|0
+L'ŒIL NOIR|1986|18|Les Esclaves d'Al'Anfa|0|1|0|0|0|0|0|0
+ASTRE D'OR|1986|1|Le Sorcier Majdar|0|6|2|0|0|0|0|0
+ASTRE D'OR|1986|2|La Cité Interdite|0|6|3|0|0|0|0|0
+ASTRE D'OR|1987|3|Le Royaume de l'Oubli|0|7|2|0|0|0|0|0
+ASTRE D'OR|1987|4|La Guerre des Sorciers|0|6|2|0|0|0|0|0
+LA VOIE DU TIGRE|1987|1|La Vengeance du Ninja|0|8|0|0|0|0|0|0
+LA VOIE DU TIGRE|1987|2|Les Parchemins de Kettsuin|0|11|0|0|0|0|0|0
+LA VOIE DU TIGRE|1987|3|L'Usurpateur d'Irsmun|0|7|0|0|0|0|0|0
+LA VOIE DU TIGRE|1987|4|Le Grand Maître d'Irsmun|0|8|0|0|0|0|0|0
+LA VOIE DU TIGRE|1987|5|Les Seigneurs de la Guerre|0|8|0|0|0|0|0|0
+LA VOIE DU TIGRE|1988|6|Les Démons du Manmarch|0|5|0|0|0|0|0|0
+EPOUVANTE|1987|1|Le Château de Dracula|0|8|4|0|0|0|0|0
+EPOUVANTE|1987|2|Frankenstein le Maudit|0|7|3|0|0|0|0|0
+HISTOIRE|1987|1|L'Ombre de la Guillotine|0|7|0|0|0|0|0|0
+HISTOIRE|1987|2|A Feu et à Sang|0|5|0|0|0|0|0|0
+HISTOIRE|1987|3|La Dernière Invasion|0|6|0|0|0|0|0|0
+HISTOIRE|1988|4|Pour l'Indépendance !|0|3|0|0|0|0|0|0
+HISTOIRE|1989|5|Les Vaisseaux de Feu|0|2|0|0|0|0|0|0
+LES MESSAGERS DU TEMPS|1987|1|Le Carillon de la Mort|0|6|0|0|0|0|0|0
+LES MESSAGERS DU TEMPS|1987|2|Le Masque de Sang|0|8|0|0|0|0|0|0
+LES MESSAGERS DU TEMPS|1988|3|L'Homme au Cheval de Brume|0|6|0|0|0|0|0|0
+LES MESSAGERS DU TEMPS|1989|4|Objectif : Apocalypse|0|4|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1988|1|Caïthness l'Elémentaliste|0|7|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1988|2|Keldrilh le Ménestrel|0|4|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1988|3|Péreim le Chevalier|0|6|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1988|4|Kandjar le Magicien|0|7|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1991|5|Les Héritiers de Dorgan|0|1|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1991|6|Le Sanctuaire des Horlas|0|4|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1992|7|La Huitième Porte|0|2|0|0|0|0|0|0
+DEFIS ET SORTILEGES|1992|8|L'Ultime Réincarnation|0|3|0|0|0|0|0|0
+DOUBLE JEU|1988|1|Issel le Guerrier|0|3|0|0|0|0|0|0
+DOUBLE JEU|1988|2|Darian le Magicien|0|4|0|0|0|0|0|0
+DOUBLE JEU|1989|3|Coréus le Prince|0|3|0|0|0|0|0|0
+DOUBLE JEU|1989|4|Bardik le Voleur|0|2|0|0|0|0|0|0
+DOUBLE JEU|1990|5|Lothar le Sorcier|0|1|0|0|0|0|0|0
+DOUBLE JEU|1990|6|Clovis le Chevalier|0|2|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1989|1|Le Livre des Règles|0|3|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1989|2|Initiation à la Magie|0|3|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1989|3|Le Secret des Elfes|0|4|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1989|4|Les Créatures de l'Ombre|0|3|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1990|5|La Puissance des Ténèbres|0|2|0|0|0|0|0|0
+LES TERRES DE LEGENDE|1990|6|Les Terres de Légende|0|1|0|0|0|0|0|0
+LE MAITRE DU DESTIN|1989|1|La Forêt du Dragon|0|3|0|0|0|0|0|0
+LE MAITRE DU DESTIN|1989|2|Le Maître du Feu|0|3|0|0|0|0|0|0
+L'EPEE DE LEGENDE|1991|1|Les Treize Mages|0|2|0|0|0|0|0|0
+L'EPEE DE LEGENDE|1991|2|Le Maître des Rêves|0|3|0|0|0|0|0|0
+L'EPEE DE LEGENDE|1991|3|Le Port des Assassins|0|1|0|0|0|0|0|0
+L'EPEE DE LEGENDE|1991|4|L'Impossible Mission|0|1|0|0|0|0|0|0
+L'EPEE DE LEGENDE|1992|5|Les Murailles de Spyte|0|4|0|0|0|0|0|0
+SHERLOCK HOLMES|1991|1|Meurtre au Club Diogène|0|6|2|0|0|0|0|0
+SHERLOCK HOLMES|1991|2|L'Emeraude de la Rivière Noire|0|6|2|0|0|0|0|0
+SHERLOCK HOLMES|1991|3|Le Maître Chanteur d'Appledore|0|4|1|0|0|0|0|0
+SHERLOCK HOLMES|1991|4|Le Crime du Docteur Watson|0|4|1|0|0|0|0|0
+SHERLOCK HOLMES|1992|5|La Conspiration des Dynamiteurs|0|3|1|0|0|0|0|0
+SHERLOCK HOLMES|1992|6|Un Duel dans le Yorkshire|0|3|1|0|0|0|0|0
+SHERLOCK HOLMES|1992|7|Pour l'Honneur de la Reine|0|2|1|0|0|0|0|0
+SHERLOCK HOLMES|1993|8|L'Héritier Disparu|0|2|2|0|0|0|0|0
+SUPER SHERLOCK|1992|1|Le Mystère de Compton|0|3|2|0|0|0|0|0
+SUPER SHERLOCK|1993|2|La Villa des Revenants|0|3|2|0|0|0|0|0
+METAMORPHOSES|1993|1|L'homme aux Cent Visages|0|2|0|0|0|0|0|0
+METAMORPHOSES|1994|2|L'Oracle de Balkh|0|3|0|0|0|0|0|0
+DESTINS|1994|1|Le Pirate des Sept Mers|0|2|0|0|0|0|0|0
+DESTINS|1995|2|L'Etoile de la Destinée|0|1|0|0|0|0|0|0
+DESTINS|1995|3|Le Peuple Maudit|0|1|2|0|0|0|0|0
+DESTINS|1995|4|Le Collier Maléfique|0|1|0|0|0|0|0|0
+DEFIS DE L'HISTOIRE|2000|1|Le Trésor des Pharaons|0|0|3|0|0|0|0|0
+DEFIS DE L'HISTOIRE|2000|2|La Dernière Folie de Caligula|0|0|3|0|0|0|0|0
+DEFIS DE L'HISTOIRE|2000|3|La Guerre de Troie aura-t-elle lieu ?|0|0|3|0|0|0|0|0
+DEFIS DE L'HISTOIRE|2000|4|Sacrifice chez les Aztèques|0|0|3|0|0|0|0|0

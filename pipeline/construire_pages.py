@@ -545,6 +545,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <ul>
   <li><strong>Catalogue et fiches :</strong> notices du catalogue général de la Bibliothèque nationale de France, complétées à partir de l'ancien relevé.</li>
   <li><strong>Prix :</strong> voir « Comment les prix sont estimés » ci-dessus.</li>
+  <li><strong>Rareté :</strong> le nombre de tirages de chaque édition Gallimard, compilé par Thomtom d'après le site exlibris.to, et la part des collections qui possèdent le livre (collection-ldvelh.fr). C'est une information : elle n'entre pas dans la cote.</li>
   <li><strong>Jaquettes :</strong> © leurs éditeurs, reproduites à titre d'illustration.</li>
   <li><strong>Polices :</strong> Cormorant Garamond et Source Sans 3, sous licence SIL Open Font 1.1, hébergées avec le site.</li>
 </ul>

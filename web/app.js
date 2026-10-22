@@ -24,9 +24,9 @@
   const gv = (c) => (c && c.vendre ? { vendre: true } : {});            // le drapeau « à vendre » survit à tout changement d'état ou d'import
   const etatDe = (k) => ETATS.find((e) => e.k === k) || ETATS[1];
   const racine = (b) => b || null;
-  // Rareté : d'après les collections saisies sur collection-ldvelh.fr (voir pipeline/rarete.py) ; une information, elle ne modifie aucune cote
+  // Rareté : d'après le nombre de tirages Gallimard, sinon les collections saisies sur collection-ldvelh.fr (voir pipeline/rarete.py) ; une information, elle ne modifie aucune cote
   const RARETE = { tres_rare: 'Très rare', rare: 'Rare', peu_courant: 'Peu courant', courant: 'Courant' };
-  const pastilleRarete = (b) => (b.rarete && (b.rarete.niveau === 'rare' || b.rarete.niveau === 'tres_rare') ? `<span class="rarete rarete-${b.rarete.niveau}" title="Possédé par ${b.rarete.pct} % des collections saisies sur collection-ldvelh.fr">${RARETE[b.rarete.niveau]}</span>` : '');
+  const pastilleRarete = (b) => (b.rarete && (b.rarete.niveau === 'rare' || b.rarete.niveau === 'tres_rare') ? `<span class="rarete rarete-${b.rarete.niveau}" title="${b.rarete.tirages ? 'Imprimé ' + b.rarete.tirages + ' fois par Gallimard' : 'Possédé par ' + b.rarete.pct + ' % des collections saisies sur collection-ldvelh.fr'}">${RARETE[b.rarete.niveau]}</span>` : '');
   const numero = (b) => (b.numero && !/^0+$/.test(b.numero) ? ` n° ${b.numero}` : '');
 
   let DATA = [];
@@ -858,7 +858,7 @@
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
-              ${ligne('Pages', b.pages)}${ligne('Rareté', b.rarete ? `${RARETE[b.rarete.niveau]} <span class="sous">(dans ${b.rarete.pct} % des collections saisies sur collection-ldvelh.fr ; une information, qui n'entre pas dans la cote)</span>` : '')}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
+              ${ligne('Pages', b.pages)}${ligne('Rareté', b.rarete ? `${RARETE[b.rarete.niveau]} <span class="sous">(${b.rarete.tirages ? 'imprimé ' + b.rarete.tirages + ' fois par Gallimard' : ''}${b.rarete.tirages && b.rarete.pct != null ? ' ; ' : ''}${b.rarete.pct != null ? 'dans ' + b.rarete.pct + ' % des collections saisies sur collection-ldvelh.fr' : ''} ; une information, qui n'entre pas dans la cote)</span>` : '')}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
             </dl>
 
         ${blocNeuf(b)}
