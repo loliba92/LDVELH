@@ -10,7 +10,9 @@ import json
 from pathlib import Path
 
 WEB = Path(__file__).resolve().parent.parent / "web"
-MAJ = "11 octobre 2026"
+_MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+_AUJ = __import__("datetime").date.today()
+MAJ = f"{_AUJ.day} {_MOIS[_AUJ.month - 1]} {_AUJ.year}"      # date de la dernière construction des pages
 MAJ_LEGAL = "22 octobre 2026"      # dernière révision des pages Confidentialité et Mentions légales
 ISSUES = "https://github.com/loliba92/LDVELH/issues"
 
