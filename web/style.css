@@ -176,7 +176,8 @@ input[type="search"], .deux input, select {
 .livre-carte .couv img, .livre-carte .couv .jaq-vide { display: block; width: 100%; height: auto; aspect-ratio: 5 / 7; object-fit: cover; border-radius: 3px; background: var(--line); box-shadow: var(--shadow-cover); transition: transform var(--t), box-shadow var(--t); }
 .livre-carte:hover .couv img, .livre-carte:focus-within .couv img { transform: translateY(-5px); }
 .livre-carte:hover .titre { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.livre-carte .tampon-v { position: absolute; top: 8px; left: 8px; padding: 2px 8px; border-radius: 3px; background: var(--walnut); color: var(--gold); font: 700 .8rem var(--f-display); letter-spacing: .04em; box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
+.livre-carte .meta .ed { display: block; margin-top: 3px; white-space: nowrap; }
+.livre-carte .meta .bv { display: inline-block; margin-right: 6px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 3px; color: var(--gold); font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .04em; vertical-align: 1px; }
 .livre-carte .titre { font: 700 1.12rem/1.15 var(--f-display); }
 .livre-carte .meta { color: var(--muted); font-size: .88rem; margin-top: 2px; }
 .livre-carte .prix { margin-top: auto; padding-top: 8px; border-top: 1px solid var(--line); font: 700 1.35rem/1 var(--f-display); font-variant-numeric: lining-nums; color: var(--accent); }
@@ -1777,7 +1778,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 /* Livre possédé : pastille ✓ sur la jaquette (repère par la forme, visible sur toutes les couvertures) et ✓ devant l'état choisi */
 .livre-carte.possede-oui .couv::after {
   content: "✓"; content: "✓" / "";
-  position: absolute; top: 34px; right: 6px; width: 24px; height: 24px; box-sizing: border-box;      /* sous la pastille de note (en haut à droite) */
+  position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; box-sizing: border-box;      /* en haut à gauche, face à la note (en haut à droite) */
   border-radius: 50%; border: 2px solid #0a0a0a; background: var(--gold); color: #0a0a0a;
   font: 800 13px/20px var(--f-ui); text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none;
 }
