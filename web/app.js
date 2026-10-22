@@ -1477,11 +1477,15 @@
     const pct = (Math.round(Math.abs(ev) * 1000) / 10).toString().replace('.', ',');
     const phrase = Math.abs(ev) < 0.005 ? `Valeur stable depuis le ${jour(HIST.dates[0], true)} : ${fmtE(v1)}.` : `De ${fmtE(v0)} le ${jour(HIST.dates[0], true)} à ${fmtE(v1)} le ${jour(HIST.dates[n - 1], true)} (${ev > 0 ? 'hausse' : 'baisse'} de ${pct} %).`;
     const lignes = HIST.dates.map((d, i) => `<tr><td>${jour(d, true)}</td><td class="num">${fmtE(tot[i])}</td><td class="num">${i ? `${tot[i] - tot[i - 1] >= 0 ? '+' : '−'}${fmtE(Math.abs(tot[i] - tot[i - 1]))}` : '—'}</td></tr>`).join('');
-    const total = bl.exemplaires;
+    const total = bl.exemplaires, dir = Math.abs(ev) < 0.005 ? '' : ev > 0 ? 'hausse' : 'baisse';
+    const cle = (lib, val, cls = '') => `<li class="${cls}"><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
-      <figure class="hc-fig"><svg viewBox="0 0 ${W} ${H}" class="hc-svg" role="img" aria-label="Courbe de la valeur de la collection du ${jour(HIST.dates[0], true)} au ${jour(HIST.dates[n - 1], true)}. ${phrase}">${graduations}<polyline points="${pts}" class="hc-ligne"/>${points}${dates}</svg></figure>
-      <p class="sous">${suivis === total ? 'Tous vos exemplaires sont suivis.' : `${suivis} exemplaire${suivis > 1 ? 's' : ''} sur ${total} suivi${suivis > 1 ? 's' : ''} : les autres n'ont pas de cote à toutes les dates.`} Mêmes livres, mêmes états à chaque date : seule la cote change. Les relevés de prix commencent le ${jour(HIST.dates[0], true)}.</p>
+      <div class="hc-grille">
+        <figure class="hc-fig"><svg viewBox="0 0 ${W} ${H}" class="hc-svg" role="img" aria-label="Courbe de la valeur de la collection du ${jour(HIST.dates[0], true)} au ${jour(HIST.dates[n - 1], true)}. ${phrase}">${graduations}<polyline points="${pts}" class="hc-ligne"/>${points}${dates}</svg></figure>
+        <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
+      </div>
+      <p class="sous hc-note">${suivis === total ? 'Tous vos exemplaires sont suivis.' : `${suivis} exemplaire${suivis > 1 ? 's' : ''} sur ${total} suivi${suivis > 1 ? 's' : ''} : les autres n'ont pas de cote à toutes les dates.`} Mêmes livres, mêmes états à chaque date : seule la cote change.</p>
       <details class="chiffres"><summary>Voir les chiffres</summary><div class="tableau-page"><table><thead><tr><th scope="col">Date</th><th scope="col">Valeur</th><th scope="col">Écart</th></tr></thead><tbody>${lignes}</tbody></table></div></details>`;
   }
   function analysePane(bl) {

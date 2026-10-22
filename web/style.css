@@ -1883,3 +1883,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .coll-nav .onglet-ico { flex: 0 0 auto; }
 .coll-nav .coll-nb { flex-basis: 100%; text-align: center; }
 @media (min-width: 561px) { .coll-nav .coll-nb { flex-basis: auto; } }
+
+/* Historique : courbe à gauche, repères à droite ; textes alignés sur la même largeur */
+.hc-grille { display: grid; grid-template-columns: minmax(0, 2fr) minmax(210px, 1fr); gap: 20px; align-items: center; margin: 4px 0 14px; }
+.hc-grille .hc-fig { margin: 0; padding: 12px 8px 4px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.hc-cles { grid-template-columns: 1fr; margin: 0; }
+.hc-cles b { font-size: 1.5rem; }
+.hc-phrase { margin: 4px 0 10px; font-size: 1.05rem; }
+.hc-note, #coll-prive { max-width: 75ch; margin: 0 0 12px; font-size: .92rem; line-height: 1.5; }
+#coll-prive { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); }
+.collection details.chiffres { margin: 0 0 8px; }
+@media (max-width: 800px) { .hc-grille { grid-template-columns: minmax(0, 1fr); } .hc-cles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .hc-cles li { padding: 8px; } .hc-cles b { font-size: 1.15rem; } .hc-cles .cle-lib { font-size: .64rem; letter-spacing: .08em; } }
