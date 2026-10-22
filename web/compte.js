@@ -268,18 +268,18 @@ window.Compte = (function () {
   /* ---------- Bandeau « Donnez votre avis » : discret, pour les visiteurs connectés qui reviennent souvent ---------- */
   var aujourdhui = function () { return new Date().toISOString().slice(0, 10); };
   var plusTard = function (jours) { return new Date(Date.now() + jours * 86400000).toISOString().slice(0, 10); };
-  var lire = function (cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } };
-  var ecrire = function (cle, v) { try { localStorage.setItem(cle, v); } catch (e) { /* sans stockage : pas de mémoire des visites */ } };
+  var lireStock = function (cle) { try { return localStorage.getItem(cle); } catch (e) { return null; } };
+  var ecrireStock = function (cle, v) { try { localStorage.setItem(cle, v); } catch (e) { /* sans stockage : pas de mémoire des visites */ } };
   (function noterVisite() {                                           // les jours où la personne est venue (dix derniers), jamais son identité
-    var jours = []; try { jours = JSON.parse(lire('cdh-visites') || '[]') || []; } catch (e) { jours = []; }
-    if (jours.indexOf(aujourdhui()) < 0) { jours.push(aujourdhui()); ecrire('cdh-visites', JSON.stringify(jours.slice(-10))); }
+    var jours = []; try { jours = JSON.parse(lireStock('cdh-visites') || '[]') || []; } catch (e) { jours = []; }
+    if (jours.indexOf(aujourdhui()) < 0) { jours.push(aujourdhui()); ecrireStock('cdh-visites', JSON.stringify(jours.slice(-10))); }
   })();
   function bandeauAvis() {
     var page = document.body && document.body.dataset.page;
     if (page !== 'accueil' && page !== 'collection') return;
     var deja = document.getElementById('bandeau-avis');
-    var visites = []; try { visites = JSON.parse(lire('cdh-visites') || '[]') || []; } catch (e) { visites = []; }
-    var voir = actifGoogle() && window.Cloud && window.Cloud.actif() && visites.length >= 3 && !lire('cdh-avis-donne') && !((lire('cdh-avis-ferme') || '') > aujourdhui());
+    var visites = []; try { visites = JSON.parse(lireStock('cdh-visites') || '[]') || []; } catch (e) { visites = []; }
+    var voir = actifGoogle() && window.Cloud && window.Cloud.actif() && visites.length >= 3 && !lireStock('cdh-avis-donne') && !((lireStock('cdh-avis-ferme') || '') > aujourdhui());
     if (!voir) { if (deja) deja.remove(); return; }
     if (deja) return;
     var b = document.createElement('div');
@@ -288,8 +288,8 @@ window.Compte = (function () {
     var rang = document.getElementById('rang-accueil'), main = document.getElementById('main');
     if (rang) rang.parentNode.insertBefore(b, rang); else if (main) main.insertBefore(b, main.firstChild);
     b.addEventListener('click', function (e) {
-      if (e.target.closest('[data-avis-ferme]')) { ecrire('cdh-avis-ferme', plusTard(60)); b.remove(); }
-      else if (e.target.closest('[data-compte="avis"]')) ecrire('cdh-avis-ferme', plusTard(14));   // s'il annule, on ne le relance pas avant deux semaines
+      if (e.target.closest('[data-avis-ferme]')) { ecrireStock('cdh-avis-ferme', plusTard(60)); b.remove(); }
+      else if (e.target.closest('[data-compte="avis"]')) ecrireStock('cdh-avis-ferme', plusTard(14));   // s'il annule, on ne le relance pas avant deux semaines
     });
   }
   document.addEventListener('cdh-compte', bandeauAvis);
