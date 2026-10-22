@@ -82,9 +82,10 @@ window.Compte = (function () {
   /* ---------- Niveau (Héros, Admin, SuperAdmin) ---------- */
   // Premier passage d'un compte : le relais le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
   function signalerCompte() {                     // une fois par session : c'est le relais qui reconnaît un compte déjà compté
-    if (lireSession('cdh-bienvenue')) return;
+    var qui = window.Cloud.nom() || '1';            // le signal est lié au compte connecté : changer de compte dans le même onglet le renvoie
+    if (lireSession('cdh-bienvenue') === qui) return;
     window.Relais.appeler('bienvenue').then(function (r) {
-      if (r && r.ok) ecrireSession('cdh-bienvenue', '1');
+      if (r && r.ok) ecrireSession('cdh-bienvenue', qui);
     }).catch(function () { /* nouvel essai à la prochaine page */ });
   }
 
@@ -386,7 +387,7 @@ window.Compte = (function () {
       role = lireSession(CLE_ROLE);
       bandeau(); dessiner();
       if (window.Cloud.actif() && !role) chargerRole();      // connexion reprise sans nouvel onglet : le niveau est relu
-      window.Cloud.surChangement(function () { dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
+      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); role = ''; } dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
       document.addEventListener('cdh-collection', dessiner);
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)
       var derniere = 0;
