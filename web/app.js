@@ -1002,15 +1002,15 @@
   // Cotes exactes réservées aux comptes : un visiteur voit un niveau de 1 à 4 euros (€ à €€€€), jamais le chiffre. Tant que la configuration du compte
   // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
   const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
-  const SEUILS = {};
-  function seuilsCote(k) {            // quatre niveaux : quartiles des prix de la base, état par état
-    if (!SEUILS[k]) {
-      const v = DATA.map((b) => b.prix[k]).filter((x) => x != null).sort((a, b) => a - b);
-      SEUILS[k] = v.length ? [1, 2, 3].map((q) => v[Math.floor((q * v.length) / 4)]) : [0, 0, 0];
+  let SEUILS = null;
+  function seuilsCote() {            // quatre niveaux : quartiles de tous les prix de la base, états confondus (un meilleur état ne paraît jamais moins cher)
+    if (!SEUILS) {
+      const v = DATA.flatMap((b) => ['convenable', 'bon', 'tres_bon'].map((k) => b.prix[k])).filter((x) => x != null).sort((a, b) => a - b);
+      SEUILS = v.length ? [1, 2, 3].map((q) => v[Math.floor((q * v.length) / 4)]) : [0, 0, 0];
     }
-    return SEUILS[k];
+    return SEUILS;
   }
-  const niveauCote = (v, k) => (v == null ? 0 : 1 + seuilsCote(k).filter((x) => v >= x).length);
+  const niveauCote = (v, k) => (v == null ? 0 : 1 + seuilsCote().filter((x) => v >= x).length);
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
