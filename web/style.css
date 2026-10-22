@@ -1821,3 +1821,22 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .lien-reserve { opacity: .5; }
 @media (min-width: 701px) { .coll-avantages { grid-template-columns: repeat(2, minmax(0, 1fr)); } .coll-invite { max-width: 80ch; } }
 .ajout-coll[hidden] { display: none !important; }
+
+/* Le projet : tableau des fonctions, visiteur et Héros */
+.tableau-droits td { text-align: center; width: 6.5rem; font-size: 1.1rem; }
+.tableau-droits td span[aria-label="oui"] { color: var(--brass); font-weight: 700; }
+.tableau-droits td span[aria-label="non"] { color: var(--muted); }
+.tableau-droits th[scope="col"]:not(:first-child) { text-align: center; }
+
+/* Tableau Visiteur / Héros : reste un vrai tableau à trois colonnes, même sur téléphone */
+.tableau-droits th[scope="row"] { color: var(--text); font: 400 .98rem var(--f-ui); letter-spacing: 0; text-transform: none; }
+.tableau-droits thead th { font-size: .78rem; }
+@media (max-width: 700px) {
+  .tableau-page .tableau-droits { display: table; }
+  .tableau-page .tableau-droits thead { display: table-header-group; }
+  .tableau-page .tableau-droits tbody { display: table-row-group; }
+  .tableau-page .tableau-droits tr { display: table-row; padding: 0; }
+  .tableau-page .tableau-droits th, .tableau-page .tableau-droits td { display: table-cell; padding: 9px 6px; border-bottom: 1px solid var(--line); }
+  .tableau-page .tableau-droits td::before { content: none; }
+  .tableau-droits td { width: 4.2rem; }
+}

@@ -56,8 +56,6 @@ PAGES = {
 # Textes qui changent quand la collection est liée au compte Google (voir COMPTE). Chaque paire doit trouver sa phrase : le test
 # pipeline/test_textes_compte.py le vérifie, pour qu'une modification des textes ne fasse pas silencieusement manquer une variante.
 VARIANTES = [
-    ('Il ne demande aucun compte et ne mesure pas votre visite.',
-     'Il ne demande aucun compte pour consulter les cotes et ne mesure pas votre visite.'),
     ("La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur.",
      "La collection que vous composez demande un compte Google : elle est enregistrée dans l'espace réservé de votre propre Google Drive, que seul ce site peut ouvrir, avec une copie sur votre appareil. Le guide n'a pas de serveur et ne la voit jamais."),
     ('Composez et suivez votre collection de livres dont vous êtes le héros. Tout reste dans votre navigateur.',
@@ -537,15 +535,31 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <p>Quand plusieurs sources existent, la cote est une <strong>médiane pondérée</strong> : une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive, et un prix récent compte plus qu'un prix ancien (le poids est divisé par deux tous les 90 jours, tous les 365 jours pour l'ancien relevé). Un état sans prix est déduit des autres états de la même édition (le bon état vaut environ 60 % du très bon état, le convenable environ 40 %), et la fiche l'indique.</p>
 <p>La fiche de chaque édition précise la nature du prix, le nombre d'observations, leur date et un niveau de confiance.</p>
 
-<h2>Qui fait vivre le guide</h2>
-<p>Le guide est tenu par des passionnés, avec des niveaux simples :</p>
-<ul>
-  <li><strong>Tout le monde</strong> peut consulter les cotes, sans compte.</li>
-  <li>Les <strong>Héros</strong> sont les personnes connectées avec Google : elles construisent leur collection, peuvent demander l'ajout d'un livre et noter les livres de 1 à 5.</li>
-  <li>Les <strong>Admins</strong> vérifient les prix et ajoutent les livres. Pour en faire partie, voir <a href="devenir-admin.html">Devenir administrateur</a>.</li>
-  <li>Les <strong>SuperAdmins</strong> gèrent l'équipe.</li>
-</ul>
-<p>Chaque mise à jour porte le nom de la personne qui l'a faite : le guide sait toujours qui a changé quoi.</p>
+<h2>Ce que vous pouvez faire</h2>
+<p>Consulter le guide est libre. Le compte Héros est un compte Google, gratuit : il ouvre tout le reste.</p>
+<div class="tableau-page">
+<table class="tableau-droits">
+  <thead><tr><th scope="col">Fonction</th><th scope="col">Visiteur</th><th scope="col">Héros</th></tr></thead>
+  <tbody>
+    <tr><th scope="row" data-label="Fonction">Chercher un livre par titre, auteur ou ISBN</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Parcourir l'étagère et filtrer (série, édition, année, éditeur)</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Ouvrir les fiches : jaquette, détails, rareté d'après les tirages</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Lire les notes moyennes des livres</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Voir un niveau de prix (<span class="nowrap">€ à €€€€</span>) pour comparer les livres</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Voir les prix exacts de chaque état</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Chercher l'édition en vente (Vinted, Leboncoin, eBay, Facebook)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Constituer sa collection : état et nombre d'exemplaires</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Scanner le code-barres d'un livre pour l'ajouter</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Importer ou exporter sa collection</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Suivre la valeur de sa collection</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Séparer ses doubles à vendre et les livres à trouver</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Retrouver sa collection sur tous ses appareils (Google Drive)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Demander l'ajout d'un livre qui manque</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Noter les livres de 1 à 5 et donner son avis</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+  </tbody>
+</table>
+</div>
+<p>Le compte ne sert qu'à cela. Le guide ne voit ni votre courriel ni vos autres fichiers, et vous pouvez tout supprimer à tout moment : voir la page <a href="confidentialite.html">Confidentialité</a>.</p>
 
 <h2>D'où viennent les données</h2>
 <ul>
@@ -557,7 +571,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 </ul>
 
 <h2>Ce que le guide ne fait pas</h2>
-<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
+<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches (réservés aux Héros) ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
 <h2>Votre collection</h2>
 <p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
