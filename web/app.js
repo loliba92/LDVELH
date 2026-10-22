@@ -1539,7 +1539,7 @@
       let corps;
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
-          <p class="texte">Les fiches et la recherche restent libres. Avec un compte Google gratuit, vous avez accès à :</p>
+          <p class="texte">Avec un compte Google, gratuit :</p>
           <ul class="avantages"><li>Prix exacts</li><li>Scan des codes-barres</li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
