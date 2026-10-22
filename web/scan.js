@@ -185,6 +185,7 @@
         return { ok: true, texte: `✓ ${isbn} ajouté à la liste` };
       },
     }));
-    texte.parentNode.insertBefore(b, texte.nextSibling);
+    const actions = document.querySelector('#aj-verifier') && document.querySelector('#aj-verifier').parentNode;     // à côté de « Vérifier la liste », même rangée, même hauteur
+    if (actions) actions.appendChild(b); else texte.parentNode.insertBefore(b, texte.nextSibling);
   }
 })();

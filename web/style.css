@@ -1784,3 +1784,4 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 }
 .etats-carte button[aria-pressed="true"]::before { content: "✓ "; content: "✓ " / ""; font-weight: 800; }
 .rayon .livre-carte .ouvrir .infos { flex: 1 1 auto; }      /* le pavé « À vendre » / « À trouver » reste d'un seul bloc quand une carte voisine a un titre plus long */
+.rv-ajout-actions .scan-bouton { margin: 0; height: 44px; min-height: 44px; padding: 0 16px; align-self: center; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; white-space: nowrap; }      /* même rangée et même hauteur que « Vérifier la liste » */
