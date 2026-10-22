@@ -159,6 +159,16 @@ def page(nom, corps):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{titre}</title>
 <meta name="description" content="{desc}">{noindex}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="La Cote du Héros">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="{titre}">
+<meta property="og:description" content="{desc}">
+<meta property="og:image" content="https://lacoteduheros.fr/images/partage.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="La Cote du Héros : le guide de cote des livres dont vous êtes le héros, sur téléphone">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
