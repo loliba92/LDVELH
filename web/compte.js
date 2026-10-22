@@ -265,6 +265,46 @@ window.Compte = (function () {
     });
   }
 
+  /* ---------- Retrouver une version précédente : Google Drive garde d'anciennes copies du fichier de collection ---------- */
+  function retrouverVersions() {
+    if (!window.Cloud.lie()) { annoncer('Connectez-vous d\'abord.'); return; }
+    if (!window.Cloud.actif()) { annoncer('Votre connexion a expiré : reconnectez-vous, puis rouvrez cette fenêtre.'); connecter(); return; }
+    if ($('.dlg-versions')) return;
+    var d = dialogue('<h2>Retrouver une version précédente</h2>' +
+      '<p>Google Drive garde d\'anciennes copies de votre collection. Choisissez celle qui contient vos livres : le nombre de livres est indiqué pour chacune.</p>' +
+      '<ul class="eq-liste" id="ver-liste"><li class="sous">Recherche des versions…</li></ul>' +
+      '<p class="rv-ajout-bilan" id="ver-msg" role="status" hidden></p>' +
+      '<div class="dlg-actions"><button type="button" class="bouton bouton-clair" data-fermer>Fermer</button></div>', 'dlg-versions');
+    var liste = $('#ver-liste', d), msg = $('#ver-msg', d), trouvees = [];
+    d.addEventListener('click', function (e) {
+      if (e.target.closest('[data-fermer]')) { d.close(); return; }
+      var b = e.target.closest('[data-restaurer]');
+      if (!b) return;
+      var v = trouvees[Number(b.dataset.restaurer)];
+      if (!v || !window.confirm('Remplacer la collection de cet appareil et de votre Drive par cette version (' + v.nb + ' livres) ?')) return;
+      adopter(v.coll);
+      msg.hidden = false; msg.textContent = 'Restauration en cours…';
+      window.Cloud.synchroniser(lire, adopter, 'appareil').then(function () {
+        msg.textContent = 'Terminé : votre collection a été restaurée (' + v.nb + ' livres).'; annoncer('Votre collection a été restaurée.');
+      }).catch(function () { msg.textContent = 'La restauration n\'a pas abouti sur le Drive, mais la collection est revenue sur cet appareil. Réessayez avec « Synchroniser maintenant ».'; });
+    });
+    window.Cloud.versionsDrive().then(function (vs) {
+      if (!vs.length) { liste.innerHTML = '<li class="sous">Google Drive n\'a pas gardé de version précédente.</li>'; return; }
+      return Promise.all(vs.slice(0, 20).map(function (v) {
+        return window.Cloud.lireVersion(v.id).then(function (doc) {
+          var coll = window.Cloud.collectionDe(doc);
+          return { date: v.modifiedTime, coll: coll, nb: Object.keys(coll).filter(function (k) { return k.indexOf('souhait:') !== 0; }).length };
+        }).catch(function () { return null; });
+      })).then(function (res) {
+        trouvees = res.filter(Boolean);
+        liste.innerHTML = trouvees.length ? trouvees.map(function (v, i) {
+          return '<li class="eq-membre"><div><strong>' + esc(v.nb) + ' livre' + (v.nb > 1 ? 's' : '') + '</strong> <span class="sous">· ' + esc(new Date(v.date).toLocaleString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })) + '</span></div>' +
+            '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-restaurer="' + i + '">Restaurer</button></div></li>';
+        }).join('') : '<li class="sous">Les versions précédentes n\'ont pas pu être lues.</li>';
+      });
+    }).catch(function () { liste.innerHTML = '<li class="sous">Impossible de lire les versions pour le moment. Vérifiez votre connexion et réessayez.</li>'; });
+  }
+
   /* ---------- Bandeau « Donnez votre avis » : discret, pour les visiteurs connectés qui reviennent souvent ---------- */
   var aujourdhui = function () { return new Date().toISOString().slice(0, 10); };
   var plusTard = function (jours) { return new Date(Date.now() + jours * 86400000).toISOString().slice(0, 10); };
@@ -307,6 +347,7 @@ window.Compte = (function () {
       var a = act.dataset.compte;
       if (a === 'connecter') { fermerMenu(); connecter(); }
       else if (a === 'sync') { premiereReprise(); }
+      else if (a === 'versions') { retrouverVersions(); }
       else if (a === 'role') { echecRole = ''; dessiner(); chargerRole(); }
       else if (a === 'avis') { e.preventDefault(); document.querySelectorAll('details.menu-plus[open]').forEach(function (x) { x.open = false; }); fermerMenu(); var feuilleA = $('#feuille-plus'); if (feuilleA && feuilleA.open) feuilleA.close(); donnerAvis(); }
       else if (a === 'demande') { fermerMenu(); var feuille = $('#feuille-plus'); if (feuille && feuille.open) feuille.close(); demanderLivre(); }

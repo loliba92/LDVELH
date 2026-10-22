@@ -208,9 +208,23 @@
     minuterie = setTimeout(function () { synchroniser(lireColl, adopter); }, 2000);
   }
 
+  // Anciennes versions du fichier de collection gardées par Google Drive : pour retrouver une collection effacée ou abîmée par erreur
+  function versionsDrive() {
+    if (!actif()) return Promise.reject(new Error('expire'));
+    return lireDrive().then(function () {
+      if (!auDrive) return [];
+      return reseau(API + '/' + auDrive + '/revisions?pageSize=200&fields=revisions(id,modifiedTime)', { headers: entetes() }).then(verifier).then(function (r) { return r.json(); })
+        .then(function (j) { return (j.revisions || []).slice(-40).reverse(); });
+    });
+  }
+  function lireVersion(id) {
+    return reseau(API + '/' + auDrive + '/revisions/' + encodeURIComponent(id) + '?alt=media', { headers: entetes() }).then(verifier).then(function (r) { return r.json(); });
+  }
+  function collectionDe(doc) { return doc && doc.items ? versLocal(doc).coll : {}; }
+
   racine.Cloud = {
     config: config, lie: lie, nom: nom, actif: actif, preuve: preuve, connecter: connecter, deconnecter: deconnecter,
     synchroniser: synchroniser, planifier: planifier, apercu: apercu, premiereFois: premiereFois, enAttente: enAttente, supprimerDrive: supprimerDrive, statut: function () { return statut; },
-    surChangement: function (f) { ecouteurs.push(f); }, derniereErreur: function () { return derniereErreur; }
+    surChangement: function (f) { ecouteurs.push(f); }, derniereErreur: function () { return derniereErreur; }, versionsDrive: versionsDrive, lireVersion: lireVersion, collectionDe: collectionDe
   };
 })(typeof window !== 'undefined' ? window : this);
