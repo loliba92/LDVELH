@@ -77,7 +77,7 @@
     DATA.forEach((b) => { b._txt = norm([b.titre, b.livre, b.auteurs, b.isbn13, b.serie, b.editeur].join(' ')); });
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
     S = defaut();
-    chargerColl(); chargerSouh();
+    chargerColl(); chargerSouh(); COLL_PRET = true; document.dispatchEvent(new Event('cdh-collection-prete'));
     appPrete = true;
     if (PAGE === 'collection') { initPageCollection(); return; }
     construireHero();
@@ -920,6 +920,7 @@
      3. un champ ou un livre inconnu est ignoré et signalé, il ne fait jamais échouer l'import. */
   const FORMAT_FICHIER = 1;
   let COLL = {};
+  let COLL_PRET = false;                       // vrai quand la collection de l'appareil est lue : jusque-là, COLL est vide et ne doit jamais être synchronisée
   let stockageOk = true;
   const chargerColl = () => {
     try { COLL = JSON.parse(localStorage.getItem(CLE) || '{}') || {}; } catch (e) { COLL = {}; stockageOk = false; }
@@ -953,7 +954,7 @@
     if (window.Cloud) window.Cloud.planifier(toutSynchro, adopterCloud);
     document.dispatchEvent(new Event('cdh-collection'));
   };
-  window.AppCollection = { lire: toutSynchro, adopter: adopterCloud, nb: () => Object.keys(COLL).length };
+  window.AppCollection = { lire: toutSynchro, adopter: adopterCloud, nb: () => Object.keys(COLL).length, pret: () => COLL_PRET };
   // Construire sa collection exige un compte Google (consulter reste libre). `suite` est rejouée après la connexion.
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
@@ -1459,6 +1460,16 @@
     const h = $('#titre-exemplaires'); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
   });
 
+  // « Gérer ma collection » : importer, exporter, effacer. Toujours affiché, même quand la collection est vide (c'est là qu'on la retrouve).
+  const blocGerer = () => `<div class="coll-gerer"><h3>Gérer ma collection</h3>
+        <div class="gerer-grille">
+          <button type="button" class="gerer-tuile" id="imp-ouvrir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span><b>Importer un fichier</b><small>JSON, CSV ou liste d'ISBN</small></span></button>
+          <button type="button" class="gerer-tuile" data-importer-liste aria-expanded="false" aria-controls="importer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span><b>Importer une liste</b><small>Coller des ISBN</small></span></button>
+          <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
+        </div>
+        <div class="exporter-choix" id="exporter-choix" hidden><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div>
+        <div class="gerer-danger" role="group" aria-label="Danger zone"><span class="danger-texte"><b class="danger-titre">Danger zone</b>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
+      </div>`;
   function afficherCollection() {
     rendreAjoutColl();
     const bl = bilan();
@@ -1529,9 +1540,13 @@
       return;
     }
     if (!n) {
+      const imp00 = $('#importer');                       // le panneau d'import est remis à l'abri avant de redessiner
+      if (imp00 && zone.contains(imp00)) $('#collection').insertBefore(imp00, $('#coll-prive'));
       zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour la suivre dans le temps.</p>
         <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
-        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}`;
+        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}${blocGerer()}`;
+      const imp2 = $('#importer'), dang2 = $('.gerer-danger');
+      if (imp2 && dang2) dang2.before(imp2);
       return;
     }
     const lst = listeExemplaires(bl);
@@ -1566,15 +1581,7 @@
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
-      <div class="coll-gerer"><h3>Gérer ma collection</h3>
-        <div class="gerer-grille">
-          <button type="button" class="gerer-tuile" id="imp-ouvrir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span><b>Importer un fichier</b><small>JSON, CSV ou liste d'ISBN</small></span></button>
-          <button type="button" class="gerer-tuile" data-importer-liste aria-expanded="false" aria-controls="importer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span><b>Importer une liste</b><small>Coller des ISBN</small></span></button>
-          <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
-        </div>
-        <div class="exporter-choix" id="exporter-choix" hidden><button type="button" class="bouton bouton-clair" id="exp-json">Fichier JSON</button><button type="button" class="bouton bouton-clair" id="exp-csv">Fichier CSV (tableur)</button></div>
-        <div class="gerer-danger" role="group" aria-label="Danger zone"><span class="danger-texte"><b class="danger-titre">Danger zone</b>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
-      </div>`;
+      ${blocGerer()}`;
     const imp1 = $('#importer'), dang = $('.gerer-danger');
     if (imp1 && dang) dang.before(imp1);
     afficherHistoColl(bl);

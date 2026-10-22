@@ -350,13 +350,14 @@ window.Compte = (function () {
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)
       var derniere = 0;
       var rafraichir = function () {
-        if (!window.AppCollection || !window.Cloud.lie() || !window.Cloud.actif() || window.Cloud.premiereFois() || reprisEnCours) return;
+        if (!window.AppCollection || !window.AppCollection.pret || !window.AppCollection.pret() || !window.Cloud.lie() || !window.Cloud.actif() || window.Cloud.premiereFois() || reprisEnCours) return;
         if (Date.now() - derniere < 30000) return;
         derniere = Date.now(); sync();
       };
       rafraichir();
       document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') rafraichir(); });
       window.addEventListener('focus', rafraichir);
+      document.addEventListener('cdh-collection-prete', rafraichir);        // la collection de l'appareil est lue : seulement maintenant on peut la comparer au Drive
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();

@@ -164,6 +164,8 @@
     try { local = etatLocal(lireColl(), lireMeta(), maintenant); }
     catch (e) { enCours = false; derniereErreur = 'lecture locale'; try { console.error('Synchronisation : lecture locale impossible', e); } catch (x) { /* console absente */ } dire('erreur'); return Promise.resolve(); }      // jamais « en cours » pour toujours
     return lireDrive().then(function (distant) {
+      // Garde-fou : un appareil qui se retrouve soudain sans aucun livre alors qu'il en avait ne doit JAMAIS effacer le Drive (collection pas encore lue, stockage vidé…)
+      if (!strategie && Object.keys(local.doc.items).length === 0 && Object.keys(lireMeta().base || {}).length > 0 && distant && distant.items && Object.keys(distant.items).length > 0) strategie = 'compte';
       // strategie : « fusionner » (défaut), « compte » (le Drive remplace l'appareil), « appareil » (l'appareil remplace le Drive)
       var fusion = strategie === 'compte' && distant && distant.items ? { v: VERSION, items: distant.items, sup: distant.sup || {} }
         : strategie === 'appareil' ? { v: VERSION, items: local.doc.items, sup: {} }
