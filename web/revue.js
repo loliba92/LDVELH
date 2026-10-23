@@ -137,7 +137,7 @@
     const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
-      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${aDesAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estSuper() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce eBay retenue au dernier relevé</span>' : '')}${ed.isbn && ETATS.some(([cle]) => ed.etats[cle] && ed.etats[cle].lib_prix) ? `<a class="bouton-lien rv-voir-ann" href="https://www.leslibraires.fr/livre/${encodeURIComponent(ed.isbn)}" target="_blank" rel="noopener noreferrer" aria-label="Voir l'exemplaire en librairie sur leslibraires.fr (nouvel onglet)">Voir en librairie ↗</a>` : ''}</div></header>` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${aDesAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estSuper() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
@@ -556,7 +556,7 @@
   document.addEventListener('cdh-compte', () => { etatJeton(); });   // déconnexion : la porte se referme
 
   // Sections de la page : un seul panneau à la fois ; les onglets Tendances et Demandes n'apparaissent que si leur contenu est disponible
-  // Annonces eBay retenues par le dernier relevé (data/annonces.json) : onglet « Annonces » et lien « Voir les annonces » de chaque livre
+  // Annonces retenues par le dernier relevé, eBay et librairies (data/annonces.json) : onglet « Annonces » et lien « Voir les annonces » de chaque livre
   let ANN = null, annChargees = false;
   const chargerAnnonces = () => {
     if (annChargees) return annChargees;
@@ -572,7 +572,7 @@
       const l = par[cle];
       if (!l || !l.length) return '';
       const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-      return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, origine]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
+      return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, origine]) => `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
     }).join('');
     return `<h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs || '<p class="sous">Aucune annonce retenue pour cette édition.</p>'}`;
   }
@@ -582,7 +582,7 @@
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'an-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'an-dialog-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces eBay retenues</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces retenues (eBay et librairies)</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'an-fermer') dlg.close(); });
     }

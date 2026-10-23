@@ -296,10 +296,18 @@ def main():
         with open(fichiers_ann[-1], encoding="utf-8", newline="") as f:
             for r in csv.DictReader(f):
                 annonces.setdefault(r["isbn13"], {}).setdefault(r["etat"], []).append([float(r["prix"]), r["titre"], r["lien"], r["trouvee_par"]])
+    # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
+    titres = {v["isbn13"]: v["titre"] for v in versions}
+    for (isbn, etat), prix in libraires.items():
+        if isbn in titres:
+            annonces.setdefault(isbn, {}).setdefault(etat, []).append([prix, f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie"])
+    if annonces:
         for par_etat in annonces.values():
             for liste in par_etat.values():
                 liste.sort()
-        (sortie / "annonces.json").write_text(json.dumps({"date": fichiers_ann[-1].stem[-10:], "annonces": annonces}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        fichiers_lib = sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv"))
+        date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:]])
+        (sortie / "annonces.json").write_text(json.dumps({"date": date_ann, "annonces": annonces}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),
                                                       ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
