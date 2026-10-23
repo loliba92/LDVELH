@@ -63,6 +63,8 @@
     }
     return Object.fromEntries(Object.keys(libres).map((c) => [c, prix[c]]));
   }
+  // Bon état déduit d'un convenable et d'un très bon état (mêmes rapports que ci-dessus), gardé entre les deux : C ≤ BE ≤ TBE
+  const bonDeduit = (c, t) => Math.round(Math.min(t, Math.max(c, Math.sqrt((c / RAPPORT.convenable) * (t / RAPPORT.tres_bon)) * RAPPORT.bon)) * 100) / 100;
   const prixAffiche = (ed, cle) => { const p = projection(ed)[cle], l = ed.etats[cle]; return p != null ? p : (l ? l.publie : null); };
 
   const ratio = (l) => (l && l.archive && l.publie ? l.publie / l.archive : null);
@@ -252,8 +254,20 @@
     const mini = f.elements.mini.value.trim(), maxi = f.elements.maxi.value.trim();
     if (!mini && !maxi) return;
     if ([mini, maxi].some((x) => x && !(nb(x) > 0 && nb(x) < 10000)) || (mini && maxi && nb(mini) > nb(maxi))) { f.classList.add('erreur'); return; }
-    if (mini && maxi) { enregistrer(f.dataset.ed, 'convenable', nb(mini), 'corrige'); enregistrer(f.dataset.ed, 'tres_bon', nb(maxi), 'corrige'); }
-    else enregistrer(f.dataset.ed, 'tres_bon', nb(mini || maxi), 'corrige');          // un seul prix : très bon état
+    const ed = EDITIONS.find((x) => x.id === f.dataset.ed);
+    if (!ed) return;
+    const nouveau = (cle, prix) => { LOC[cleDe(ed, cle)] = { prix: Math.round(prix * 100) / 100, decision: 'corrige', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; };
+    const bonValide = validation(ed, 'bon');
+    if (mini && maxi) {
+      nouveau('convenable', nb(mini)); nouveau('tres_bon', nb(maxi));
+      if (bonValide) nouveau('bon', bonDeduit(nb(mini), nb(maxi)));            // un bon état déjà validé ne doit pas rester hors de la fourchette : il est recalculé
+    } else {
+      const t = nb(mini || maxi);
+      nouveau('tres_bon', t);                                                    // un seul prix : très bon état
+      const c = prixAffiche(ed, 'convenable');
+      if (bonValide && bonValide.prix > t && c != null) nouveau('bon', bonDeduit(Math.min(c, t), t));   // bon état au-dessus du nouveau très bon état : recalculé
+    }
+    sauver(); afficher();
   });
 
   // Fichier à transmettre : mêmes validations, dans le format lu par pipeline/validations.py
