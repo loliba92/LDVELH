@@ -52,6 +52,48 @@ class TestCorrections(unittest.TestCase):
         c.appliquer("9782070585168 ; 30", chemin, base)
         self.assertEqual(validations.lire(chemin)[("9782070585168", "convenable")]["prix"], 30.0)
 
+    def _valides(self, chemin, **prix):
+        envoi = {f"9782070585168|{e}": {"prix": p, "decision": "confirme", "le": "2026-10-21"} for e, p in prix.items()}
+        f = chemin.parent / "envoi.json"
+        f.write_text(json.dumps({"valides": envoi}), encoding="utf-8")
+        validations.importer(f, chemin)
+
+    def test_une_fourchette_recalcule_un_bon_etat_deja_valide(self):
+        base, chemin = self.base()
+        self._valides(chemin, convenable=16.38, bon=24.58, tres_bon=40.96)
+        bilan = c.appliquer("9782070585168 ; 2,5 ; ; 13", chemin, base)
+        v = validations.lire(chemin)
+        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 5.41, 13.0])
+        self.assertEqual(v[("9782070585168", "bon")]["decision"], "corrige")
+        self.assertIn("bon état recalculé", bilan[0][2])
+
+    def test_un_seul_prix_recalcule_le_bon_etat_qui_le_depasse(self):
+        base, chemin = self.base()
+        self._valides(chemin, convenable=2, bon=24.58, tres_bon=40.96)
+        c.appliquer("9782070585168 ; ; ; 13", chemin, base)
+        v = validations.lire(chemin)
+        self.assertEqual(v[("9782070585168", "tres_bon")]["prix"], 13.0)
+        self.assertEqual(v[("9782070585168", "bon")]["prix"], 4.84)
+
+    def test_un_bon_etat_coherent_n_est_pas_touche(self):
+        base, chemin = self.base()
+        self._valides(chemin, convenable=16.38, bon=24.58, tres_bon=40.96)
+        c.appliquer("9782070585168 ; ; ; 50", chemin, base)                  # 24,58 reste entre 16,38 et 50
+        v = validations.lire(chemin)
+        self.assertEqual(v[("9782070585168", "bon")]["prix"], 24.58)
+        self.assertEqual(v[("9782070585168", "bon")]["decision"], "confirme")
+
+    def test_sans_bon_etat_valide_rien_n_est_cree(self):
+        base, chemin = self.base()
+        c.appliquer("9782070585168 ; 2,5 ; ; 13", chemin, base)
+        self.assertNotIn(("9782070585168", "bon"), validations.lire(chemin))
+
+    def test_un_bon_etat_saisi_est_garde_tel_quel(self):
+        base, chemin = self.base()
+        self._valides(chemin, bon=24.58)
+        c.appliquer("9782070585168 ; 2,5 ; 7 ; 13", chemin, base)
+        self.assertEqual(validations.lire(chemin)[("9782070585168", "bon")]["prix"], 7.0)
+
     def test_prix_confirmes(self):
         base, chemin = self.base()
         c.appliquer("9782070585168 ; 25 ; 40 ; 60 ; confirme", chemin, base)
