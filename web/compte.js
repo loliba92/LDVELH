@@ -195,6 +195,29 @@ window.Compte = (function () {
       '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Continuer avec Google</button><button type="button" class="bouton bouton-clair" data-fermer>Plus tard</button></div>', 'dlg-invitation');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-compte="connecter"]') || e.target.closest('[data-fermer]')) d.close(); });
   }
+  // Première visite sur l'accueil, sans compte : une fenêtre explique ce qu'est le site et ce qu'ouvre un compte gratuit (une seule fois par appareil)
+  function bienvenue() {
+    if ($('.dlg-bienvenue')) return;
+    var d = dialogue('<h2>Bienvenue sur La Cote du Héros</h2>' +
+      '<p>L\'outil des collectionneurs de livres dont vous êtes le héros : retrouvez vos livres, repérez vos doubles à vendre et ce que vous cherchez, et estimez la valeur de chaque édition.</p>' +
+      '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix, <span class="nowrap">de € à €€€€</span>. <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
+      '<ul class="avantages">' +
+      '<li><strong>Les prix exacts</strong> de chaque état.</li>' +
+      '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +
+      '<li><strong>Vos doubles à vendre</strong> et les livres à trouver.</li>' +
+      '<li><strong>Des liens directs</strong> vers Leboncoin, Vinted et eBay.</li>' +
+      '<li><strong>Tout sauvegardé</strong>, sur téléphone comme sur ordinateur.</li>' +
+      '</ul>' +
+      '<p class="sous">La cote est un ordre de grandeur calculé sur des prix demandés : la marge de négociation reste à votre main. Votre collection est gardée dans un espace réservé de votre Drive, que vous pouvez supprimer à tout moment.</p>' +
+      '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Créer mon compte gratuit</button><button type="button" class="bouton bouton-clair" data-fermer>Découvrir le site</button></div>', 'dlg-invitation dlg-bienvenue');
+    d.addEventListener('click', function (e) { if (e.target.closest('[data-compte="connecter"]') || e.target.closest('[data-fermer]')) d.close(); });
+  }
+  // Appelée par app.js : n'ouvre la fenêtre que pour un visiteur sur l'accueil, sans fiche demandée, et jamais deux fois sur le même appareil
+  function accueillir() {
+    if (!exigeCompte || !window.Cloud || window.Cloud.lie() || !$('#hero-coll') || /fiche=/.test(location.hash) || $('dialog[open]')) return;
+    try { if (localStorage.getItem('cdh-bienvenue')) return; localStorage.setItem('cdh-bienvenue', '1'); } catch (e) { return; }
+    setTimeout(function () { if (!$('dialog[open]')) bienvenue(); }, 600);
+  }
   // Renvoie true si la personne peut modifier sa collection ; sinon ouvre l'invitation et garde l'intention, appliquée après la connexion.
   function exiger(suite) {
     if (!actifGoogle() || window.Cloud.lie()) return true;
@@ -413,5 +436,5 @@ window.Compte = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer); else demarrer();
 
-  return { annoncer: annoncer, demanderLivre: demanderLivre, exiger: exiger, inviter: function () { if (exigeCompte && window.Cloud && !window.Cloud.lie()) invitation(); }, pret: function () { return configPrete; }, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
+  return { accueillir: accueillir, annoncer: annoncer, demanderLivre: demanderLivre, exiger: exiger, inviter: function () { if (exigeCompte && window.Cloud && !window.Cloud.lie()) invitation(); }, pret: function () { return configPrete; }, connecter: connecter, etat: etat, role: function () { return role; }, echecRole: function () { return echecRole; }, actif: actifGoogle, avecEquipe: true };
 })();
