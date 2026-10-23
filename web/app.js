@@ -1572,7 +1572,7 @@
     try { const m = sessionStorage.getItem('cdh-coll-pane'); if (ONGLETS_COLL.includes(m)) CTAB = m; } catch (e) { /* sans stockage : « Mes livres » */ }
   })();
   function ouvrirOnglet(nom, { aller = false } = {}) {
-    if (!ONGLETS_COLL.includes(nom)) return;
+    if (!ONGLETS_COLL.includes(nom) || !$('#onglet-coll-' + nom)) return;          // un onglet réservé aux administrateurs n'existe pas pour les autres
     CTAB = nom;
     try { sessionStorage.setItem('cdh-coll-pane', nom); } catch (e) { /* sans effet */ }
     if ($('#collection') && /^(#(livres|analyse|vendre|trouver|titre-[a-z-]+|coll-analyse)?)?$/.test(location.hash)) history.replaceState(null, '', '#' + nom);
@@ -1587,10 +1587,10 @@
   document.addEventListener('keydown', (e) => {
     const t = e.target.closest && e.target.closest('#coll-nav [role="tab"]');
     if (!t) return;
-    const i = ONGLETS_COLL.indexOf(t.dataset.onglet);
-    const j = e.key === 'ArrowRight' ? (i + 1) % ONGLETS_COLL.length : e.key === 'ArrowLeft' ? (i + ONGLETS_COLL.length - 1) % ONGLETS_COLL.length : e.key === 'Home' ? 0 : e.key === 'End' ? ONGLETS_COLL.length - 1 : -1;
+    const dispo = ONGLETS_COLL.filter((k) => $('#onglet-coll-' + k)), i = dispo.indexOf(t.dataset.onglet);
+    const j = e.key === 'ArrowRight' ? (i + 1) % dispo.length : e.key === 'ArrowLeft' ? (i + dispo.length - 1) % dispo.length : e.key === 'Home' ? 0 : e.key === 'End' ? dispo.length - 1 : -1;
     if (j < 0) return;
-    e.preventDefault(); ouvrirOnglet(ONGLETS_COLL[j]); $('#onglet-coll-' + ONGLETS_COLL[j]).focus();
+    e.preventDefault(); ouvrirOnglet(dispo[j]); $('#onglet-coll-' + dispo[j]).focus();
   });
   window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
   document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } });
@@ -1705,7 +1705,8 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ['historique', 'Historique', null], ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
+    if (CTAB === 'historique' && !estProprietaire()) CTAB = 'livres';           // l'historique est réservé aux administrateurs
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estProprietaire() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1723,7 +1724,7 @@
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
-      <div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>
+      ${estProprietaire() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
