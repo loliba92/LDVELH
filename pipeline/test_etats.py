@@ -123,7 +123,7 @@ class TestDecote(unittest.TestCase):
 
 class TestLissage(unittest.TestCase):
     def prix(self, cible, nb, **extra):
-        return {**est(cible), "nb": nb, **extra}
+        return {**est(cible, source="actuel"), "nb": nb, "nb_jour": nb, **extra}
 
     def test_le_prix_du_jour_depend_de_celui_de_la_veille(self):
         p = {"bon": self.prix(42.0, 3)}                                  # trois annonces : gain 0,3
@@ -136,6 +136,17 @@ class TestLissage(unittest.TestCase):
             p = {"bon": self.prix(100.0, nb)}
             etats.lisser(p, {"bon": 10.0})
             self.assertEqual(p["bon"]["prix"], attendu, f"{nb} annonce(s)")
+
+    def test_un_meme_exemplaire_revu_chaque_jour_ne_compte_pas_pour_plusieurs(self):
+        p = {"bon": self.prix(100.0, 6, nb_jour=1)}                      # 6 observations cumulées, mais 1 annonce par jour
+        etats.lisser(p, {"bon": 10.0})
+        self.assertEqual(p["bon"]["prix"], 19.0)                          # gain 0,10 et non 0,30
+
+    def test_un_prix_d_archive_ou_deduit_bouge_lentement(self):
+        for extra in ({"source": "archives"}, {"deduit": True}):
+            p = {"bon": self.prix(100.0, 3, **extra)}
+            etats.lisser(p, {"bon": 10.0})
+            self.assertEqual(p["bon"]["prix"], 19.0, extra)
 
     def test_un_prix_valide_n_est_jamais_lisse(self):
         p = {"bon": est(40, source="validé")}

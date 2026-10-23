@@ -114,10 +114,16 @@ def charger_gains(chemin):
 
 
 def gain_de(estimation, gains):
-    """Gain applicable à un prix : un prix du neuf est fiable (gain maximal) ; sinon on compte les annonces qui le fondent."""
+    """Gain applicable à un prix. Un prix du neuf est fiable (gain maximal) ; un prix d'archive ou déduit des autres états n'est fondé
+    sur aucune annonce (gain minimal) ; sinon on compte les annonces DISTINCTES : le plus grand nombre vu le même jour (« nb_jour »),
+    et non le total additionné sur plusieurs jours, où un même exemplaire revu chaque jour compterait pour plusieurs."""
     if estimation.get("neuf"):
         return gains[3]
-    return gains[max(0, min(3, int(estimation.get("nb") or 0)))]
+    if estimation.get("source") == "archives" or estimation.get("deduit"):
+        return gains[0]
+    n = estimation.get("nb_jour")
+    n = estimation.get("nb") if n is None else n
+    return gains[max(0, min(3, int(n or 0)))]
 
 
 def lisser(par_etat, precedents, gains=GAINS_DEFAUT):

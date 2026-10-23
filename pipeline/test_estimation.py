@@ -25,6 +25,14 @@ class TestEstimation(unittest.TestCase):
         self.assertGreater(avec["prix"], 0.85 * 10.0)
         self.assertEqual((avec["nature"], avec["source"]), (sans["nature"], sans["source"]))
 
+    def test_nb_jour_compte_les_annonces_distinctes_pas_le_cumul(self):
+        revu = [Obs(10.0, "prix_demande", AUJ - timedelta(days=k), 1) for k in range(5)]      # même exemplaire vu 5 jours de suite
+        r = estimer(revu, AUJ)
+        self.assertEqual((r["nb"], r["nb_jour"]), (5, 1))
+        trois = [Obs(10.0, "prix_demande", AUJ, 3)]
+        self.assertEqual(estimer(trois, AUJ)["nb_jour"], 3)
+        self.assertNotIn("nb_jour", estimer([Obs(12.0, "historique", AUJ, 1)], AUJ))           # archive : aucune annonce
+
     def test_aucune_observation(self):
         self.assertIsNone(estimer([], AUJ))
 

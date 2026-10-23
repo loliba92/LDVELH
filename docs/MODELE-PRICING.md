@@ -45,13 +45,13 @@ L'estimation ci-dessus est recalculée chaque jour : c'est la **cible du jour**.
 prix du jour = prix de la veille + gain × (cible du jour − prix de la veille)
 ```
 
-Le **gain** (part de l'écart rattrapée en un jour) dépend du nombre d'annonces qui fondent le prix :
+Le **gain** (part de l'écart rattrapée en un jour) dépend du nombre d'annonces **distinctes** qui fondent le prix, c'est-à-dire le plus grand nombre vu le même jour (un exemplaire revu chaque jour compte pour une seule annonce, pas pour sept) :
 
 | Annonces | 0 (déduit, archive) | 1 | 2 | 3 ou plus |
 |---|---|---|---|---|
 | Gain | 0,10 | 0,10 | 0,20 | 0,30 |
 
-Un prix du neuf (prix éditeur) prend le gain maximal. Un prix **validé** par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de « prix de la veille » ensuite. Les gains se règlent dans `data/manual/ratios_etats.json` (clé `gains_lissage`). Effet : une annonce isolée, ou retirée, ne fait plus sauter un prix ; un prix appuyé sur plusieurs annonces rejoint sa cible en quelques jours (cible 42 € contre 5 € la veille, trois annonces : 16 € le premier jour, environ 39 € au bout de sept). Sans prix de la veille, la cible est prise telle quelle. Règle en vigueur depuis le 23 octobre 2026, en remplacement du plafond de 10 % par jour.
+Un prix du neuf (prix éditeur) prend le gain maximal ; un prix d'archive ou déduit des autres états, le gain minimal. Un prix **validé** par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de « prix de la veille » ensuite. Les gains se règlent dans `data/manual/ratios_etats.json` (clé `gains_lissage`). Effet : une annonce isolée, ou retirée, ne fait plus sauter un prix ; un prix appuyé sur plusieurs annonces rejoint sa cible en quelques jours (cible 42 € contre 5 € la veille, trois annonces : 16 € le premier jour, environ 39 € au bout de sept). Sans prix de la veille, la cible est prise telle quelle. Règle en vigueur depuis le 23 octobre 2026, en remplacement du plafond de 10 % par jour.
 
 ## 4. Indice de liquidité (0 à 100)
 

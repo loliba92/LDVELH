@@ -122,6 +122,8 @@ def estimer(observations, aujourdhui=None, sigma_hist=None, decote=1.0):
         confiance = "faible" if w_actuel < 0.5 else ("moyenne" if w_actuel < 0.85 else "élevée")
     res = {"prix": round(prix, 2), "source": source, "nature": nature, "nb": nb,
            "date": d.isoformat(), "confiance": confiance, "incertitude": round(incertitude, 3)}
+    if nature == "annonces" and par_jour:
+        res["nb_jour"] = max(par_jour.values())       # plus grand nombre d'annonces vues le même jour : un exemplaire revu chaque jour ne compte pas pour plusieurs
     if source != "archives" and nature == "annonces" and nb < NB_SOLIDE and not any(par_jour.get(o.date, 0) >= NB_FIABLE for o, _ in actuelles):
         res["mince"] = True        # ni 3 annonces le même jour ni 6 au total : compte comme prix récent, mais ne sert pas à déduire les autres états
     return res
