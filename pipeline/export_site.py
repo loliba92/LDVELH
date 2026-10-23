@@ -11,7 +11,7 @@ import json
 import sqlite3
 import statistics
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -76,6 +76,31 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
         if not change:
             break
     return sum(1 for e in ordre if par_etat[e].get("ajuste"))
+
+
+JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
+
+
+def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
+    """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
+    Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
+    Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation]. Une annonce non revue depuis plus de `jours` jours
+    avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}."""
+    fichiers = sorted(fichiers)
+    if not fichiers:
+        return {}
+    vues = {}
+    for f in fichiers:
+        jour = f.stem[-10:]
+        with open(f, encoding="utf-8", newline="") as fh:
+            for r in csv.DictReader(fh):
+                vues[(r["isbn13"], r["lien"])] = (r["etat"], float(r["prix"]), r["titre"], r["trouvee_par"], jour)
+    limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
+    sortie = {}
+    for (isbn, lien), (etat, prix, titre, par, jour) in vues.items():
+        if jour >= limite:
+            sortie.setdefault(isbn, {}).setdefault(etat, []).append([prix, titre, lien, par, jour])
+    return sortie
 
 
 def main():
@@ -291,11 +316,7 @@ def main():
     # Annonces retenues par le dernier relevé eBay (titre, prix, lien) : l'onglet « Annonces » de l'espace administrateur les montre pour que chaque prix puisse
     # être contrôlé à la main (bon livre ? bon état ?). Absent tant qu'aucun relevé ne les a enregistrées.
     fichiers_ann = sorted((DB.parent.parent / "raw" / "occasion").glob("annonces-*.csv"))
-    annonces = {}
-    if fichiers_ann:
-        with open(fichiers_ann[-1], encoding="utf-8", newline="") as f:
-            for r in csv.DictReader(f):
-                annonces.setdefault(r["isbn13"], {}).setdefault(r["etat"], []).append([float(r["prix"]), r["titre"], r["lien"], r["trouvee_par"]])
+    annonces = annonces_cumulees(fichiers_ann)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
@@ -307,7 +328,8 @@ def main():
                 liste.sort()
         fichiers_lib = sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv"))
         date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:]])
-        (sortie / "annonces.json").write_text(json.dumps({"date": date_ann, "annonces": annonces}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        (sortie / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None, "annonces": annonces},
+                                                         ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),
                                                       ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
