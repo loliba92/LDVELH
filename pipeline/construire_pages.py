@@ -875,7 +875,7 @@ def corps_evolutions():
   <li>La cote ne saute pas : chaque nouveau relevé corrige le prix précédent d'une part qui dépend du nombre d'annonces et de l'ancienneté.</li>
   <li>Un grand mouvement sur une seule semaine peut être du bruit ; c'est la répétition d'une semaine à l'autre qui compte.</li>
 </ul>
-<p class="sous">Mise à jour automatique chaque jour. Les prix viennent d'annonces publiques et d'un ancien relevé, voir <a href="le-projet.html">Le projet</a>.</p>'''
+<p class="sous">Mise à jour automatique tous les deux jours. Les prix viennent d'annonces publiques et d'un ancien relevé, voir <a href="le-projet.html">Le projet</a>.</p>'''
 
 
 def main():

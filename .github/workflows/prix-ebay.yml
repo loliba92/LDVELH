@@ -1,15 +1,15 @@
 name: Relevé des prix (eBay et librairies)
 
-# UN SEUL lot pour tous les prix, chaque jour ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du neuf
-# chez les libraires (pipeline/prix_neuf.py) le LUNDI et à la demande seulement (programme présenté comme une lecture hebdomadaire, réseau de
-# petites librairies : on ne le sollicite pas plus), puis ajoute un relevé agrégé, reconstruit la base, regénère les données du site et
-# redéclenche sa publication. Le relevé eBay est quotidien : le prix évolue par petites étapes (lissage, voir docs/MODELE-PRICING.md) au lieu de
-# grands sauts après une semaine de données (environ 2 400 appels par relevé, pour une limite habituelle de 5 000 par jour : éviter deux relevés complets le même jour).
+# UN SEUL lot pour tous les prix, tous les deux jours ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du
+# neuf chez les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé date d'au moins 6 jours, et à la demande (programme présenté comme une
+# lecture hebdomadaire, réseau de petites librairies : on ne le sollicite pas plus), puis ajoute un relevé agrégé, reconstruit la base, regénère les
+# données du site et redéclenche sa publication. Le relevé eBay a lieu tous les deux jours : le prix évolue par petites étapes (lissage, voir
+# docs/MODELE-PRICING.md) au lieu de grands sauts après une semaine de données (environ 2 400 appels par relevé, pour une limite habituelle de
+# 5 000 par jour : éviter deux relevés complets le même jour). « */2 » = les jours impairs du mois : en fin de mois, le 31 puis le 1er sont consécutifs.
 # Prérequis : secrets EBAY_CLIENT_ID et EBAY_CLIENT_SECRET (voir docs/PRIX-ACTUELS.md).
 on:
   schedule:
-    - cron: "17 5 * * 1"        # lundi : eBay + prix du neuf
-    - cron: "17 5 * * 0,2-6"    # les autres jours : eBay seulement
+    - cron: "17 5 */2 * *"      # tous les deux jours, à 5 h 17 (Greenwich)
   workflow_dispatch:
     inputs:
       limite:
@@ -75,9 +75,18 @@ jobs:
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
       - name: Prix du neuf et disponibilité des éditions en vente
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && github.event.schedule != '17 5 * * 0,2-6' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
         continue-on-error: true
-        run: python pipeline/prix_neuf.py
+        run: |
+          # Lancé par l'horaire : au plus un relevé du neuf tous les 6 jours (lecture hebdomadaire des fiches de leslibraires.fr). À la demande : toujours.
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -f data/processed/prix_neuf.csv ]; then
+            derniere="$(python -c "import csv; print(max((r['date'] for r in csv.DictReader(open('data/processed/prix_neuf.csv', encoding='utf-8')) if r.get('date')), default=''))")"
+            if [ -n "$derniere" ]; then
+              age=$(( ( $(date +%s) - $(date -d "$derniere" +%s) ) / 86400 ))
+              if [ "$age" -lt 6 ]; then echo "Prix du neuf relevé le $derniere (il y a $age jour(s)) : étape ignorée."; exit 0; fi
+            fi
+          fi
+          python pipeline/prix_neuf.py
       - name: Base et données du site
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
         run: |
