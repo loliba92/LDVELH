@@ -1,7 +1,7 @@
 name: Relevé des prix (eBay et librairies)
 
 # UN SEUL lot pour tous les prix, tous les deux jours ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du
-# neuf chez les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé date d'au moins 6 jours, et à la demande (programme présenté comme une
+# neuf chez les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé date d'au moins 7 jours (donc jamais plus d'une fois par semaine ; avec un relevé eBay tous les deux jours, cela donne un relevé du neuf environ tous les 8 jours), et à la demande (programme présenté comme une
 # lecture hebdomadaire, réseau de petites librairies : on ne le sollicite pas plus), puis ajoute un relevé agrégé, reconstruit la base, regénère les
 # données du site et redéclenche sa publication. Le relevé eBay a lieu tous les deux jours : le prix évolue par petites étapes (lissage, voir
 # docs/MODELE-PRICING.md) au lieu de grands sauts après une semaine de données (environ 2 400 appels par relevé, pour une limite habituelle de
@@ -78,12 +78,12 @@ jobs:
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
         continue-on-error: true
         run: |
-          # Lancé par l'horaire : au plus un relevé du neuf tous les 6 jours (lecture hebdomadaire des fiches de leslibraires.fr). À la demande : toujours.
+          # Lancé par l'horaire : au plus un relevé du neuf par semaine (7 jours minimum ; lecture hebdomadaire des fiches de leslibraires.fr). À la demande : toujours.
           if [ "${{ github.event_name }}" = "schedule" ] && [ -f data/processed/prix_neuf.csv ]; then
             derniere="$(python -c "import csv; print(max((r['date'] for r in csv.DictReader(open('data/processed/prix_neuf.csv', encoding='utf-8')) if r.get('date')), default=''))")"
             if [ -n "$derniere" ]; then
               age=$(( ( $(date +%s) - $(date -d "$derniere" +%s) ) / 86400 ))
-              if [ "$age" -lt 6 ]; then echo "Prix du neuf relevé le $derniere (il y a $age jour(s)) : étape ignorée."; exit 0; fi
+              if [ "$age" -lt 7 ]; then echo "Prix du neuf relevé le $derniere (il y a $age jour(s)) : étape ignorée."; exit 0; fi
             fi
           fi
           python pipeline/prix_neuf.py
