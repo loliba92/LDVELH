@@ -1407,7 +1407,7 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .note-bas strong { font-family: inherit; font-size: inherit; color: var(--text); }
 
 /* Page admin : sections en onglets, cartes compactes (trois prix sur une ligne, un seul « Confirmer »), liens en grille */
-.rv-nav { display: flex; gap: 6px; margin: 16px 0 22px; padding: 6px; overflow-x: auto; scrollbar-width: none; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; }
+.rv-nav { position: sticky; top: calc(var(--haut-h, 96px) + 6px); z-index: 40; display: flex; gap: 6px; margin: 16px 0 22px; padding: 6px; overflow-x: auto; scrollbar-width: none; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; }
 .rv-nav::-webkit-scrollbar { display: none; }
 .rv-nav button { flex: 1 0 auto; min-height: 48px; padding: 8px 18px; border: 0; border-radius: 10px; background: none; color: var(--text); font: 700 1.05rem var(--f-ui); cursor: pointer; white-space: nowrap; transition: background var(--t), color var(--t); }
 .rv-nav button:hover { background: var(--accent-soft); color: var(--gold); }
