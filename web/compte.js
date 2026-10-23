@@ -198,9 +198,10 @@ window.Compte = (function () {
   // Première visite sur l'accueil, sans compte : une fenêtre explique ce qu'est le site et ce qu'ouvre un compte gratuit (une seule fois par appareil)
   function bienvenue() {
     if ($('.dlg-bienvenue')) return;
-    var d = dialogue('<h2>Bienvenue sur La Cote du Héros</h2>' +
+    var d = dialogue('<img class="bienvenue-img" src="images/accueil-2.webp" alt="" width="460" height="120" decoding="async">' +
+      '<h2>Bienvenue sur La Cote du Héros</h2>' +
       '<p>L\'outil des collectionneurs de livres dont vous êtes le héros : retrouvez vos livres, repérez vos doubles à vendre et ce que vous cherchez, et estimez la valeur de chaque édition.</p>' +
-      '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix, <span class="nowrap">de € à €€€€</span>. <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
+      '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix&nbsp;(€&nbsp;à&nbsp;€&#8288;€&#8288;€&#8288;€). <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
       '<ul class="avantages">' +
       '<li><strong>Les prix exacts</strong> de chaque état.</li>' +
       '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +
