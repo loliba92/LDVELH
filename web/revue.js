@@ -16,6 +16,10 @@
   const CLE_LOC = 'cdh-validations-v1';
   let LOC = {};
   try { LOC = JSON.parse(localStorage.getItem(CLE_LOC) || '{}') || {}; } catch (e) { LOC = {}; }
+  // Une validation envoyée reste gardée jusqu'à ce que le site l'ait reprise (voir plus bas) ; pendant ce délai elle n'est plus « à transmettre ».
+  // Si le site ne l'a pas reprise au bout de 20 minutes, elle est de nouveau proposée à l'envoi (l'envoi a pu échouer).
+  const ATTENTE_SITE = 20 * 60000;
+  const envoyee = (v) => !!v.envoye && Date.now() - v.envoye < ATTENTE_SITE;
   const sauver = () => { try { localStorage.setItem(CLE_LOC, JSON.stringify(LOC)); } catch (e) { /* navigateur sans stockage : la validation reste valable tant que la page est ouverte */ } };
   const cleDe = (ed, cle) => `${ed.isbn}|${cle}`;
   const aujourdhui = () => new Date().toISOString().slice(0, 10);
@@ -171,10 +175,15 @@
       : vue === 'valide' ? base.filter(aValide).sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0))
       : base.slice().sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0) || a.version.localeCompare(b.version));
     $('#rv-compte').textContent = `${VUE.length} livre${VUE.length > 1 ? 's' : ''}` + (vue === 'verif' ? ' dont un prix a beaucoup bougé, du plus fort changement au plus faible.' : vue === 'change' ? ' dont au moins un prix a changé.' : vue === 'valide' ? ' dont au moins un prix est validé.' : '.');
-    const nbAttente = Object.keys(LOC).length;
-    $('#rv-envoi').hidden = !nbAttente;
+    const valeurs = Object.values(LOC), nbAttente = valeurs.filter((v) => !envoyee(v)).length, nbEnvoyees = valeurs.length - nbAttente;
+    $('#rv-envoi').hidden = !valeurs.length;
+    $('#rv-envoi-attente').hidden = !nbAttente;                      // rien à transmettre : seules des validations déjà envoyées attendent la mise à jour du site
+    $('#rv-envoyer').hidden = !nbAttente;
     $('#rv-n-attente').textContent = nbAttente;
     $('#rv-envoyer').textContent = 'Envoyer mes validations';
+    const faites = $('#rv-envoi-faites');
+    faites.hidden = !nbEnvoyees;
+    faites.textContent = `${nbEnvoyees} validation${nbEnvoyees > 1 ? 's' : ''} déjà envoyée${nbEnvoyees > 1 ? 's' : ''} : le site se met à jour (environ 2 minutes). ${nbEnvoyees > 1 ? 'Elles disparaîtront' : 'Elle disparaîtra'} de cette liste dès qu'il ${nbEnvoyees > 1 ? 'les' : 'la'} aura reprise${nbEnvoyees > 1 ? 's' : ''}.`;
     $('#rv-liste').innerHTML = VUE.length ? VUE.slice(0, limite).map(carte).join('') : '<p>Aucun livre dans cette liste.</p>';
     $('#rv-plus').hidden = VUE.length <= limite;
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
@@ -274,13 +283,15 @@
   async function envoyer() {
     const msg = $('#rv-envoi-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
     if (!jeton()) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page. Vos validations sont gardées.');
-    const par = {};
-    Object.entries(LOC).forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
+    const par = {}, aEnvoyer = Object.entries(LOC).filter(([, v]) => !envoyee(v));
+    if (!aEnvoyer.length) return dire('Rien à envoyer : vos validations sont déjà parties.');
+    aEnvoyer.forEach(([cle, v]) => { const [isbn, etat] = cle.split('|'), k = `${isbn}|${v.decision}`; (par[k] = par[k] || {})[etat] = v.prix; });
     const lignes = Object.entries(par).map(([k, p]) => `${k.split('|')[0]} ; ${p.convenable ?? ''} ; ${p.bon ?? ''} ; ${p.tres_bon ?? ''}${k.endsWith('|confirme') ? ' ; confirme' : ''}`);
     $('#rv-envoyer').disabled = true; dire('Envoi en cours…');
     try {
       const r = await lancer('corriger-prix.yml', { corrections: lignes.join(' | ') });
-      dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}). Le site sera à jour dans environ 2 minutes ; ces validations disparaîtront de la liste « à transmettre » dès qu'elles y seront.`
+      if (r.status === 204) { const t = Date.now(); aEnvoyer.forEach(([cle, v]) => { if (LOC[cle] === v) v.envoye = t; }); sauver(); afficher(); }      // envoyées : ne sont plus « à transmettre »
+      dire(r.status === 204 ? `Envoyé (${lignes.length} livre${lignes.length > 1 ? 's' : ''}, ${aEnvoyer.length} prix). Le site sera à jour dans environ 2 minutes.`
         : r.status === 401 || r.status === 403 ? MSG_REFUS : `Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
     } catch (err) { dire(err && err.name === 'AbortError' ? 'Le serveur ne répond pas (plus de 40 secondes). Vos validations sont gardées : réessayez dans quelques minutes.' : 'Envoi impossible : vérifiez votre connexion.'); }
     $('#rv-envoyer').disabled = false;
