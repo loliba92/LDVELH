@@ -776,6 +776,7 @@ def page_collection(index_html):
 
 <div class="banniere" role="region" aria-labelledby="titre-page">
   <div class="cadre banniere-in">
+    <a class="hero-butin" id="hero-butin" href="revue-prix.html#pepites" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg>Butin</a>
     <p class="surtitre">Vos livres</p>
     <h1 id="titre-page">Ma collection</h1>
     <p class="chapeau">Vos livres, leur état et leur évolution. Tout reste dans votre navigateur.</p>
