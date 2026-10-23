@@ -260,7 +260,7 @@
     const bonValide = validation(ed, 'bon');
     if (mini && maxi) {
       nouveau('convenable', nb(mini)); nouveau('tres_bon', nb(maxi));
-      if (bonValide) nouveau('bon', bonDeduit(nb(mini), nb(maxi)));            // un bon état déjà validé ne doit pas rester hors de la fourchette : il est recalculé
+      nouveau('bon', bonDeduit(nb(mini), nb(maxi)));                          // une fourchette met toujours à jour les trois prix, même si le bon état venait d'annonces ou était déjà validé
     } else {
       const t = nb(mini || maxi);
       nouveau('tres_bon', t);                                                    // un seul prix : très bon état
