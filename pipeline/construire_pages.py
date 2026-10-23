@@ -47,9 +47,9 @@ PAGES = {
     "communaute.html": ("Communauté", "Communauté · La Cote du Héros",
                         "Des passionnés de livres dont vous êtes le héros : chaînes, sites, blogs, collectionneurs et boutiques à suivre."),
     "equipe.html": ("Équipe", "Équipe · La Cote du Héros",
-                    "Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les administrateurs."),
-    "devenir-admin.html": ("Devenir admin", "Devenir administrateur · La Cote du Héros",
-                           "Comment devenir administrateur : les niveaux, la demande, la première connexion avec Google et les bonnes pratiques."),
+                    "Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les sorciers."),
+    "devenir-admin.html": ("Devenir sorcier", "Devenir sorcier · La Cote du Héros",
+                           "Comment devenir sorcier : les niveaux, la demande, la première connexion avec Google et les bonnes pratiques."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
                               "Éditeur, hébergeur et conditions d'utilisation de La Cote du Héros."),
 }
@@ -216,7 +216,7 @@ def page(nom, corps):
 '''
 
 
-GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Admin, SuperAdmin, ou toute personne connectée (évolutions)
+GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Sorcier, SuperAdmin, ou toute personne connectée (évolutions)
 NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
@@ -224,25 +224,25 @@ SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
-    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
+    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès sorcier</p>
     <div class="porte-google" id="porte-google"></div>
   </div>
 </div>
 '''
 
 
-PORTE_CONNECTE = PORTE.replace(" Accès admin</p>", " Réservé aux personnes connectées</p>")
+PORTE_CONNECTE = PORTE.replace(" Accès sorcier</p>", " Réservé aux personnes connectées</p>")
 
 
-DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
-<h1>Devenir administrateur</h1>
-<p class="chapeau">Les administrateurs tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir.</p>
+DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
+<h1>Devenir sorcier</h1>
+<p class="chapeau">Les sorciers tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir.</p>
 
 <h2>Les niveaux</h2>
 <ul>
   <li><strong>Héros</strong> : toute personne connectée avec Google. Elle construit sa collection, sauvegardée dans son propre Google Drive.</li>
-  <li><strong>Admin</strong> : en plus, elle vérifie et corrige les prix et ajoute des livres.</li>
-  <li><strong>SuperAdmin</strong> : en plus, elle gère l'équipe (ajouter, retirer, bloquer des admins).</li>
+  <li><strong>Sorcier</strong> : en plus, elle vérifie et corrige les prix et ajoute des livres.</li>
+  <li><strong>SuperAdmin</strong> : en plus, elle gère l'équipe (ajouter, retirer, bloquer des sorciers).</li>
 </ul>
 
 <h2>Comment le devenir</h2>
@@ -255,21 +255,21 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
 <h2>Votre première connexion</h2>
 <ol>
   <li>Sur le site, cliquez sur <strong>« Se connecter »</strong> (en haut à droite, ou l'onglet « Compte » sur téléphone) et choisissez le compte Google dont vous avez donné l'adresse.</li>
-  <li>Ouvrez le menu de votre compte : votre nom s'affiche avec un badge <strong>Admin</strong>, et une entrée <strong>« Espace administrateur »</strong> apparaît.</li>
-  <li>Dans l'espace administrateur, corrigez les prix, puis cliquez sur <strong>« Envoyer mes validations »</strong>. Le site est à jour environ deux minutes plus tard.</li>
+  <li>Ouvrez le menu de votre compte : votre nom s'affiche avec un badge <strong>Sorcier</strong>, et une entrée <strong>« Espace des sorciers »</strong> apparaît.</li>
+  <li>Dans l'espace sorcier, corrigez les prix, puis cliquez sur <strong>« Envoyer mes validations »</strong>. Le site est à jour environ deux minutes plus tard.</li>
 </ol>
 <p class="sous">La connexion dure environ une heure. Si elle expire, la page vous le dit : reconnectez-vous, vos validations en attente sont conservées.</p>
 
 <h2>Les bonnes pratiques</h2>
 <ul>
-  <li><strong>Regardez la « Dernière révision »</strong> affichée sur chaque fiche avant de la revoir : si elle date d'aujourd'hui, un autre administrateur vient de s'en occuper.</li>
+  <li><strong>Regardez la « Dernière révision »</strong> affichée sur chaque fiche avant de la revoir : si elle date d'aujourd'hui, un autre sorcier vient de s'en occuper.</li>
   <li><strong>Ne confirmez que ce que vous avez vérifié.</strong> Confirmer un prix le fige : il prime ensuite sur les relevés automatiques.</li>
   <li>Une erreur ? Corrigez le prix, ou utilisez « Retirer » tant que la validation n'est pas envoyée.</li>
-  <li><strong>Ne partagez pas votre connexion.</strong> Chaque administrateur a la sienne, et son nom est inscrit sur ses mises à jour.</li>
+  <li><strong>Ne partagez pas votre connexion.</strong> Chaque sorcier a la sienne, et son nom est inscrit sur ses mises à jour.</li>
 </ul>
 
 <h2>Changer d'appareil ou quitter</h2>
-<p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être administrateur, demandez à un SuperAdmin de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
+<p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être sorcier, demandez à un SuperAdmin de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
 '''
 
 
@@ -345,7 +345,7 @@ def corps_communaute():
 
 
 EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmins">SuperAdmin</span></h1>
-<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Admin a accès à l'espace administrateur ; un SuperAdmin gère aussi l'équipe.</p>
+<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Sorcier a accès à l'espace sorcier ; un SuperAdmin gère aussi l'équipe.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
@@ -354,9 +354,9 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
     <label for="eq-adresse">Adresse Google</label>
     <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
     <label for="eq-nom">Nom affiché sur ses mises à jour</label>
-    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (admin)">
+    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (sorcier)">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="admin">Admin : prix et livres</option><option value="superadmin">SuperAdmin : et gestion de l'équipe</option></select>
+    <select id="eq-niveau"><option value="admin">Sorcier : prix et livres</option><option value="superadmin">SuperAdmin : et gestion de l'équipe</option></select>
     <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
   <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
@@ -381,7 +381,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
 '''
 
 
-REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h1>
+REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
 <details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
@@ -540,7 +540,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li><strong>L'ancien relevé.</strong> Point de départ du guide : des cotes d'archives, qui ne sont plus tenues à jour. Quand rien de plus récent n'existe, c'est lui qui s'affiche, et la fiche le dit.</li>
   <li><strong>Les annonces actuelles.</strong> Le guide relève régulièrement les annonces en ligne d'une plateforme, par son interface officielle et sous réserve de ses conditions d'utilisation. On n'en garde que des chiffres d'ensemble (nombre, minimum, médiane, maximum) : ni titre d'annonce, ni vendeur. Une annonce est un prix demandé, pas un prix payé : le guide ne la corrige pas et le signale.</li>
   <li><strong>Les prix des éditeurs.</strong> Pour les nouveautés encore en vente neuve, le prix de l'éditeur sert de repère pour le très bon état.</li>
-  <li><strong>Les prix validés.</strong> Un administrateur peut confirmer ou corriger un prix après vérification : ce prix prime alors sur tout le reste, et la fiche indique qu'il a été validé, et quand.</li>
+  <li><strong>Les prix validés.</strong> Un sorcier peut confirmer ou corriger un prix après vérification : ce prix prime alors sur tout le reste, et la fiche indique qu'il a été validé, et quand.</li>
 </ul>
 <p>Quand plusieurs sources existent, la cote est une <strong>médiane pondérée</strong> : une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive, et un prix récent compte plus qu'un prix ancien (le poids est divisé par deux tous les 90 jours, tous les 365 jours pour l'ancien relevé). Un état sans prix est déduit des autres états de la même édition (le bon état vaut environ 60 % du très bon état, le convenable environ 40 %), et la fiche l'indique.</p>
 <p>La fiche de chaque édition précise la nature du prix, le nombre d'observations, leur date et un niveau de confiance.</p>
@@ -623,7 +623,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
     <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
-    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Admin ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Sorcier ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
     <tr><td data-label="Nom"><code>cdh-avis-donne</code>, <code>cdh-avis-ferme</code>, <code>cdh-visites</code> et <code>cdh-bienvenue</code></td><td data-label="Contenu">Le fait que vous avez déjà répondu à « Qu'en pensez-vous ? » ou fermé le bandeau, les dates de vos visites, et le fait que l'accueil a été affiché</td><td data-label="Pourquoi">Ne proposer l'avis qu'aux visiteurs réguliers, une seule fois ; ces données restent sur votre appareil</td></tr>
     <tr><td data-label="Nom"><code>cdh-fiches-vues</code>, <code>cdh-invite-vue</code> et <code>cdh-invite-fiches</code></td><td data-label="Contenu">Les fiches consultées pendant la visite (effacées à la fermeture de l'onglet), et la date à laquelle l'invitation à se connecter a été montrée</td><td data-label="Pourquoi">Proposer la connexion une seule fois, après quelques fiches, et pas plus d'une fois par mois</td></tr>
     <tr><td data-label="Nom"><code>cdh-scan-etat</code>, <code>cdh-coll-pane</code>, <code>cdh-pane</code></td><td data-label="Contenu">Vos réglages d'affichage (état choisi pour le scan, onglet ouvert)</td><td data-label="Pourquoi">Retrouver la page comme vous l'avez laissée</td></tr>
@@ -642,7 +642,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Google intervient à votre demande comme prestataire de stockage, selon <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">sa propre politique de confidentialité</a>. Votre navigateur contacte Google quand vous cliquez sur « Se connecter », puis à chaque sauvegarde de votre collection dans votre Drive.</p>
 
 <h2>Le relais du site</h2>
-<p>Certaines fonctions passent par un petit programme géré par l'éditeur et hébergé chez Google (Google Apps Script), appelé le <strong>relais</strong>. Il sert à afficher les moyennes des notes, à enregistrer vos notes, à transmettre vos demandes d'ajout de livres et à permettre aux administrateurs d'envoyer des prix.</p>
+<p>Certaines fonctions passent par un petit programme géré par l'éditeur et hébergé chez Google (Google Apps Script), appelé le <strong>relais</strong>. Il sert à afficher les moyennes des notes, à enregistrer vos notes, à transmettre vos demandes d'ajout de livres et à permettre aux sorciers d'envoyer des prix.</p>
 <ul>
   <li><strong>Sans connexion</strong> : à l'ouverture de la plupart des pages, le site interroge le relais pour afficher les moyennes des notes. Google reçoit alors, comme tout serveur, l'adresse IP et le type de navigateur du visiteur. Aucune donnée sur vous n'est envoyée.</li>
   <li><strong>Connecté</strong> : votre laissez-passer est transmis au relais, qui le vérifie auprès de Google et en tire une <strong>empreinte</strong>, un code calculé à partir de votre adresse qui ne permet pas de la retrouver. Il s'en sert pour vous reconnaître et pour savoir à quel niveau vous êtes. Le relais ne conserve ni votre adresse ni votre nom : seulement cette empreinte, avec ce que vous lui demandez d'enregistrer (une note, une demande).</li>
@@ -655,10 +655,10 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les SuperAdmins peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
 
 <h2>Demander l'ajout d'un livre</h2>
-<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les administrateurs.</p>
+<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les sorciers.</p>
 
-<h2>Les administrateurs</h2>
-<p>Les administrateurs sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un administrateur envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
+<h2>Les sorciers</h2>
+<p>Les sorciers sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un sorcier envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
 
 <h2>Soutenir le guide</h2>
 <p>Le lien « Offrir un café » ouvre la page du guide sur Buy Me a Coffee, un service extérieur. Le don se fait chez ce service, selon ses propres règles. Il peut communiquer à l'éditeur les informations de votre don (par exemple le nom et le message que vous laissez). Le guide lui-même ne reçoit rien et n'enregistre rien à ce sujet.</p>
@@ -683,7 +683,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le relais, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook, Amazon et la Fnac, fiches de leslibraires.fr, Buy Me a Coffee. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
 
 <h2>Vos droits</h2>
-<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription d'administrateur), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription de sorcier), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
 <p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : {MAJ_LEGAL}.</p>
@@ -707,7 +707,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 </ul>
 
 <h2>Services de connexion et de sauvegarde</h2>
-<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des administrateurs, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
+<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des sorciers, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
 <p>Les messages envoyés par le formulaire de la page Contact sont acheminés par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui les transmet à l'éditeur par courriel.</p>
 
 <h2>Propriété intellectuelle</h2>
