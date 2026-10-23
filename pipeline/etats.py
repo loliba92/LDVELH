@@ -87,6 +87,20 @@ def completer(par_etat, ratios):
 GAINS_DEFAUT = {0: 0.10, 1: 0.10, 2: 0.20, 3: 0.30}      # selon le nombre d'annonces (3 = trois ou plus) ; 0 : prix déduit ou d'archive
 
 
+DECOTE_ANNONCES_DEFAUT = 0.85     # prix demandé (annonce) -> prix visé : une annonce est un prix de vente affiché, au-dessus du prix qui se conclut
+
+
+def charger_decote(chemin):
+    """Décote des annonces (clé « decote_annonces » de ratios_etats.json, entre 0,5 et 1 ; 1 = aucune correction)."""
+    try:
+        v = float(json.loads(Path(chemin).read_text(encoding="utf-8"))["decote_annonces"])
+        if 0.5 <= v <= 1.0:
+            return v
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return DECOTE_ANNONCES_DEFAUT
+
+
 def charger_gains(chemin):
     """Gains de lissage (clé « gains_lissage » de ratios_etats.json : {"0": …, "1": …, "2": …, "3": …}, chacun entre 0 et 1)."""
     try:

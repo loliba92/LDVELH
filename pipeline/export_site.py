@@ -136,7 +136,8 @@ def main():
     # 2. s'il bat les archives (validation croisée), il remet à niveau celles des éditions sans relevé actuel.
     modele = calibration.apprendre(brut, args.aujourdhui)
     sig_arch = calibration.sigma_archive(modele)
-    prix = {cle: {e: estimer(obs, args.aujourdhui, sig_arch.get(e)) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
+    decote = etats.charger_decote(DB.parent.parent / "manual" / "ratios_etats.json")         # prix demandé -> prix visé (voir estimation.py)
+    prix = {cle: {e: estimer(obs, args.aujourdhui, sig_arch.get(e), decote) for e, obs in par_etat.items()} for cle, par_etat in brut.items()}
     modele["fraicheur"] = fraicheur
     modele["sigma_archive"] = sig_arch
     trip = []

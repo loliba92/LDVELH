@@ -11,6 +11,20 @@ AUJ = date(2026, 10, 11)
 
 
 class TestEstimation(unittest.TestCase):
+    def test_la_decote_ne_touche_que_les_prix_demandes(self):
+        annonces = [Obs(20.0, "prix_demande", AUJ, 4)]
+        self.assertEqual(estimer(annonces, AUJ)["prix"], 20.0)                           # sans décote : inchangé
+        self.assertEqual(estimer(annonces, AUJ, decote=0.85)["prix"], 17.0)              # 20 × 0,85
+        archive = [Obs(12.34, "historique", AUJ, 1)]
+        self.assertEqual(estimer(archive, AUJ, decote=0.85)["prix"], 12.34)              # une archive n'est pas un prix demandé
+
+    def test_la_decote_tire_le_prix_vers_le_bas_sans_changer_la_nature(self):
+        obs = [Obs(10.0, "historique", AUJ - timedelta(days=200), 1), Obs(20.0, "prix_demande", AUJ, 4)]
+        sans, avec = estimer(obs, AUJ), estimer(obs, AUJ, decote=0.85)
+        self.assertLess(avec["prix"], sans["prix"])
+        self.assertGreater(avec["prix"], 0.85 * 10.0)
+        self.assertEqual((avec["nature"], avec["source"]), (sans["nature"], sans["source"]))
+
     def test_aucune_observation(self):
         self.assertIsNone(estimer([], AUJ))
 
