@@ -1935,12 +1935,20 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 @media (max-width: 700px) { .tableau-droits td.txt { width: 6.8rem; font-size: .8rem; padding-inline: 4px; } }
 
 /* Onglet « Pépites » (SuperAdmin) : annonces à 50 % du prix du site ou moins */
-.pp-carte header { align-items: center; }
-.pp-carte p { margin: 6px 0; overflow-wrap: anywhere; }
-.pp-prix { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
-.pp-prix .rv-ann-prix { font-size: 1.4rem; }
+.pp-barre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; margin: 6px 0 12px; }
+.pp-barre .sous { margin: 0; }
+.pp-carte { padding: 12px 16px; border-left: 3px solid var(--line-strong); }
+.pp-carte.solide { border-left-color: var(--gold); }
+.pp-carte header { margin-bottom: 6px; }
+.pp-carte p { margin: 4px 0; overflow-wrap: anywhere; }
+.pp-ligne { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 16px; }
+.pp-prix { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.pp-prix .rv-ann-prix { font-size: 1.5rem; line-height: 1.2; }
 .pp-eco { color: var(--gold); }
-.pp-carte p a { color: var(--text); text-underline-offset: 3px; }
+.pp-eco strong { font-size: 1.1rem; }
+.pp-annonce { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.pp-annonce .sous { min-width: 0; }
+.pp-ouvrir { color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
 .pp-badge { display: inline-block; padding: 1px 10px; border-radius: 999px; font: 700 .78rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
-.pp-badge.solide { border: 1px solid var(--gold); color: var(--gold); }
+.pp-badge.solide { background: var(--gold); color: var(--bg, #000); border: 1px solid var(--gold); }
 .pp-badge.verifier { border: 1px solid var(--line-strong); color: var(--muted); }
