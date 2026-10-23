@@ -7,6 +7,36 @@
  "nouvelles_cotes": 0,
  "hausses": [
   {
+   "id": "9782070647385",
+   "isbn13": "9782070647385",
+   "titre": "La Forteresse maudite",
+   "serie": "Loup Solitaire",
+   "numero": "403",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 9.02,
+   "apres": 15.34,
+   "pct": 0.701,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070649518",
+   "isbn13": "9782070649518",
+   "titre": "Les Prisonniers du Temps",
+   "serie": "Loup Solitaire",
+   "numero": "539",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 7.58,
+   "apres": 12.68,
+   "pct": 0.673,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070592272",
    "isbn13": "9782070592272",
    "titre": "La Revanche du Vampire",
@@ -15,10 +45,55 @@
    "version": "V2",
    "etat": "tres_bon",
    "avant": 52.56,
-   "apres": 63.02,
-   "pct": 0.199,
-   "nature": "archives",
-   "nb": 1,
+   "apres": 81.75,
+   "pct": 0.555,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333493",
+   "isbn13": "9782070333493",
+   "titre": "Au Royaume de l'Epouvante",
+   "serie": "Quête du Graal",
+   "numero": "349",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 20.99,
+   "apres": 30.28,
+   "pct": 0.443,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070506996",
+   "isbn13": "9782070506996",
+   "titre": "Le Mystère de Compton",
+   "serie": "Super Sherlock",
+   "numero": "678",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 18.11,
+   "apres": 24.58,
+   "pct": 0.357,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070334032",
+   "isbn13": "9782070334032",
+   "titre": "La Forteresse Maudite",
+   "serie": "Loup Solitaire",
+   "numero": "403",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 19.69,
+   "apres": 23.5,
+   "pct": 0.193,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -32,23 +107,8 @@
    "avant": 25.99,
    "apres": 29.9,
    "pct": 0.15,
-   "nature": "annonces",
-   "nb": 4,
-   "recalibre": false
-  },
-  {
-   "id": "9782070506996",
-   "isbn13": "9782070506996",
-   "titre": "Le Mystère de Compton",
-   "serie": "Super Sherlock",
-   "numero": "678",
-   "version": "V2",
-   "etat": "tres_bon",
-   "avant": 18.11,
-   "apres": 20.77,
-   "pct": 0.147,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -62,8 +122,8 @@
    "avant": 11.09,
    "apres": 12.61,
    "pct": 0.137,
-   "nature": "annonces",
-   "nb": 6,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -77,8 +137,8 @@
    "avant": 14.31,
    "apres": 16.25,
    "pct": 0.136,
-   "nature": "annonces",
-   "nb": 6,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -92,23 +152,23 @@
    "avant": 36.14,
    "apres": 40.93,
    "pct": 0.133,
-   "nature": "annonces",
-   "nb": 6,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
-   "id": "9782070647385",
-   "isbn13": "9782070647385",
-   "titre": "La Forteresse maudite",
+   "id": "9782070506859",
+   "isbn13": "9782070506859",
+   "titre": "La Traversée Infernale",
    "serie": "Loup Solitaire",
-   "numero": "403",
-   "version": "V4",
-   "etat": "tres_bon",
-   "avant": 9.02,
-   "apres": 10.07,
-   "pct": 0.116,
-   "nature": "archives",
-   "nb": 1,
+   "numero": "291",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 4.33,
+   "apres": 4.86,
+   "pct": 0.122,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -125,66 +185,6 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070332885",
-   "isbn13": "9782070332885",
-   "titre": "Le Marais aux Scorpions",
-   "serie": "Défis Fantastiques",
-   "numero": "288",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 24.24,
-   "apres": 26.93,
-   "pct": 0.111,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070647361",
-   "isbn13": "9782070647361",
-   "titre": "Le Tyran du désert",
-   "serie": "Loup Solitaire",
-   "numero": "330",
-   "version": "V4",
-   "etat": "convenable",
-   "avant": 5.21,
-   "apres": 5.79,
-   "pct": 0.111,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070647361",
-   "isbn13": "9782070647361",
-   "titre": "Le Tyran du désert",
-   "serie": "Loup Solitaire",
-   "numero": "330",
-   "version": "V4",
-   "etat": "tres_bon",
-   "avant": 13.02,
-   "apres": 14.47,
-   "pct": 0.111,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070649518",
-   "isbn13": "9782070649518",
-   "titre": "Les Prisonniers du Temps",
-   "serie": "Loup Solitaire",
-   "numero": "539",
-   "version": "V4",
-   "etat": "tres_bon",
-   "avant": 7.58,
-   "apres": 8.42,
-   "pct": 0.111,
-   "nature": "archives",
-   "nb": 1,
-   "recalibre": false
   }
  ],
  "baisses": [
@@ -199,8 +199,8 @@
    "avant": 80.0,
    "apres": 63.23,
    "pct": -0.21,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -214,8 +214,8 @@
    "avant": 89.57,
    "apres": 75.88,
    "pct": -0.153,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -229,8 +229,8 @@
    "avant": 12.27,
    "apres": 10.54,
    "pct": -0.141,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -244,8 +244,8 @@
    "avant": 14.72,
    "apres": 12.65,
    "pct": -0.141,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -369,7 +369,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 85,
+ "nb_grands_mouvements": 87,
  "modele": {
   "actif": false,
   "n_paires": 19,
