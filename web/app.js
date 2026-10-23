@@ -441,10 +441,7 @@
     document.body.classList.toggle('cotes-masquees', m);
     if (!m) return;
     if (S.onglet === 'cote') S.onglet = 'etagere';
-    if (S.tri === 'cher' || S.tri === 'pascher') S.tri = 'serie';
     S.mine = false; S.cherche = false; S.avendre = false;               // filtres de collection : réservés aux comptes
-    const t = $('#tri');
-    if (t) [...t.options].forEach((o) => { if (o.value === 'cher' || o.value === 'pascher') { o.hidden = true; o.disabled = true; } if (o.value === S.tri) t.value = S.tri; });
   }
   function afficherCote(liste) {
     if (cotesMasquees()) { ['#sceau', '#stats', '#trois'].forEach((q) => { const n = $(q); if (n) n.innerHTML = ''; }); return; }
@@ -592,13 +589,16 @@
   function trier(liste) {
     const num = (b) => parseInt(b.numero, 10) || 0;
     const k = etatDe(S.h).k;
+    const parSerie = (a, b) => a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n;
+    // Un visiteur ne voit que le niveau (€ à €€€€€) : il est trié sur ce niveau, puis par série, sans révéler l'ordre exact des prix
+    const valeur = (b) => (b.prix[k] == null ? null : cotesMasquees() ? niveauCote(b.prix[k], k) : b.prix[k]);
     const cmp = {
-      serie: (a, b) => a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
+      serie: parSerie,
       titre: (a, b) => a.titre.localeCompare(b.titre, 'fr') || a.version_n - b.version_n,
       recent: (a, b) => parRecence(a, b) || a.serie.localeCompare(b.serie, 'fr') || num(a) - num(b) || a.version_n - b.version_n,
       annee: (a, b) => (a.annee || 9999) - (b.annee || 9999) || a.titre.localeCompare(b.titre, 'fr'),
-      cher: (a, b) => (b.prix[k] ?? -1) - (a.prix[k] ?? -1),
-      pascher: (a, b) => (a.prix[k] ?? 1e9) - (b.prix[k] ?? 1e9),
+      cher: (a, b) => (valeur(b) ?? -1) - (valeur(a) ?? -1) || parSerie(a, b),
+      pascher: (a, b) => (valeur(a) ?? 1e9) - (valeur(b) ?? 1e9) || parSerie(a, b),
     }[S.tri] || (() => 0);
     return [...liste].sort(cmp);
   }
