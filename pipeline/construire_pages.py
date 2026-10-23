@@ -452,7 +452,17 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <p class="chapeau">Les bonnes affaires : annonces encore en ligne à <strong>50 % du prix du site ou moins</strong>, pour la même édition et le même état, avec au moins 3 € d'économie. Une annonce est un prix demandé : ouvrez-la pour vérifier le livre, son état et les frais de port.</p>
   <div class="pp-barre">
     <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
-    <label class="case"><input type="checkbox" id="pp-solides"><span>Seulement les solides</span></label>
+    <div class="pp-outils">
+      <label class="pp-tri"><span>Trier par</span><select id="pp-tri">
+        <option value="solides">Solides d'abord</option>
+        <option value="eco">Plus grosse économie</option>
+        <option value="pct">Plus forte réduction</option>
+        <option value="prix">Prix de l'annonce, croissant</option>
+        <option value="date">Vues le plus récemment</option>
+        <option value="titre">Titre, de A à Z</option>
+      </select></label>
+      <label class="case"><input type="checkbox" id="pp-solides"><span>Seulement les solides</span></label>
+    </div>
   </div>
   <div id="pp-liste"></div>
 </div>
