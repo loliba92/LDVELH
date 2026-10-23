@@ -1,5 +1,5 @@
-/* Compte : un seul point d'entrée pour se connecter avec Google, voir l'état de la sauvegarde et, selon son niveau, accéder à l'espace admin.
-   Niveaux : visiteur (non connecté), Héros (connecté), Admin, SuperAdmin (le niveau vient du relais, voir relais/).
+/* Compte : un seul point d'entrée pour se connecter avec Google, voir l'état de la sauvegarde et, selon son niveau, accéder à l'espace des sorciers.
+   Niveaux : visiteur (non connecté), Héros (connecté), Sorcier, SuperAdmin (le niveau vient du relais, voir relais/).
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
@@ -8,7 +8,7 @@ window.Compte = (function () {
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
   var ecrireSession = function (k, v) { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* sans effet */ } };
-  var NIVEAUX = { heros: 'Héros', admin: 'Admin', superadmin: 'SuperAdmin' };
+  var NIVEAUX = { heros: 'Héros', admin: 'Sorcier', superadmin: 'SuperAdmin' };
   var estAdmin = function () { return role === 'admin' || role === 'superadmin'; };
 
   /* ---------- État affiché ---------- */
@@ -24,7 +24,7 @@ window.Compte = (function () {
   var LIBELLE = { deconnecte: 'Se connecter', reprendre: 'Reconnecter', synchro: '', erreur: '', 'a-jour': '' };
   var SILHOUETTE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>';
 
-  function badge() { return estAdmin() ? ' <span class="badge-admin">' + (role === 'superadmin' ? 'SuperAdmin' : 'Admin') + '</span>' : ''; }
+  function badge() { return estAdmin() ? ' <span class="badge-admin">' + (role === 'superadmin' ? 'SuperAdmin' : 'Sorcier') + '</span>' : ''; }
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
     if (e.cle === 'deconnecte') {
@@ -38,7 +38,7 @@ window.Compte = (function () {
     h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
-      (estAdmin() ? '<li><a href="revue-prix.html">Espace administrateur</a></li>' : '') +
+      (estAdmin() ? '<li><a href="revue-prix.html">Espace des sorciers</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
       (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">Se déconnecter</button></li></ul>';
@@ -52,7 +52,7 @@ window.Compte = (function () {
       var prenom = window.Cloud && window.Cloud.nom();
       var libelle = e.cle === 'deconnecte' || e.cle === 'reprendre' ? LIBELLE[e.cle] : (prenom || 'Compte');
       haut.innerHTML = '<button type="button" class="compte-bouton compte-' + e.cle + '" id="compte-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="compte-menu">' +
-        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + (estAdmin() ? '<span class="badge-admin">' + (role === 'superadmin' ? 'SuperAdmin' : 'Admin') + '</span>' : '') + '<i class="compte-point" aria-hidden="true"></i></button>' +
+        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + (estAdmin() ? '<span class="badge-admin">' + (role === 'superadmin' ? 'SuperAdmin' : 'Sorcier') + '</span>' : '') + '<i class="compte-point" aria-hidden="true"></i></button>' +
         '<div class="compte-menu" id="compte-menu" role="group" aria-label="Mon compte" hidden>' + bloc(e) + '</div>';
     }
     var f = $('#compte-feuille');
@@ -79,7 +79,7 @@ window.Compte = (function () {
     var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
   }
 
-  /* ---------- Niveau (Héros, Admin, SuperAdmin) ---------- */
+  /* ---------- Niveau (Héros, Sorcier, SuperAdmin) ---------- */
   // Premier passage d'un compte : le relais le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
   function signalerCompte() {                     // une fois par session : c'est le relais qui reconnaît un compte déjà compté
     var qui = window.Cloud.nom() || '1';            // le signal est lié au compte connecté : changer de compte dans le même onglet le renvoie
@@ -228,12 +228,12 @@ window.Compte = (function () {
     return false;
   }
 
-  /* ---------- Demande d'ajout d'un livre (Héros) : le relais en fait un signalement que les admins traitent ---------- */
+  /* ---------- Demande d'ajout d'un livre (Héros) : le relais en fait un signalement que les sorciers traitent ---------- */
   function demanderLivre(texteInitial) {
     if ($('.dlg-demande')) return;
     if (!actifGoogle() || !window.Cloud.actif()) { intention = function () { demanderLivre(texteInitial); }; if (window.Cloud.lie()) { annoncer('Reconnectez-vous pour demander l\'ajout d\'un livre.'); } invitation(); return; }
     var d = dialogue('<h2>Demander l\'ajout d\'un livre</h2>' +
-      '<p>Un livre manque au guide ? Indiquez son titre ou son ISBN. Un administrateur l\'examine, puis l\'ajoute avec sa jaquette.</p>' +
+      '<p>Un livre manque au guide ? Indiquez son titre ou son ISBN. Un sorcier l\'examine, puis l\'ajoute avec sa jaquette.</p>' +
       '<form id="dem-form" class="eq-form"><label for="dem-texte">Titre ou ISBN</label>' +
       '<input id="dem-texte" type="text" maxlength="150" required autocomplete="off" placeholder="978-2380240283 ou un titre">' +
       '<label for="dem-note">Un mot (facultatif) : série, numéro, édition</label>' +

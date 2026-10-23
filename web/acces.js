@@ -1,4 +1,4 @@
-/* Porte de la page admin : le niveau (Admin ou SuperAdmin) vient du relais (voir relais/), après la connexion Google du site.
+/* Porte de la page admin : le niveau (Sorcier ou SuperAdmin) vient du relais (voir relais/), après la connexion Google du site.
    Plus de mot de passe. Une page peut exiger un niveau plus élevé avec data-niveau="superadmin" sur <main>.
    Protection légère côté navigateur : la vraie vérification est faite par le relais à chaque envoi. */
 (function () {
@@ -27,9 +27,9 @@
     else zone.innerHTML = '<p class="sous" role="status">Ce compte n\'a pas les droits nécessaires pour cette page. Demandez-les à la personne qui gère le site.</p>';
   }
   function demarrer() {
-    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace administrateur est momentanément indisponible.</p>'; return; }
+    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
     window.Identite.config().then(function (c) {
-      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace administrateur est momentanément indisponible.</p>'; return; }
+      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
       document.addEventListener('cdh-compte', evaluer);
       evaluer();
     });

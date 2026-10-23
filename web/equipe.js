@@ -1,9 +1,9 @@
-/* Page « Équipe » (SuperAdmin) : ajouter, retirer ou bloquer des administrateurs, par le relais (voir relais/).
+/* Page « Équipe » (SuperAdmin) : ajouter, retirer ou bloquer des sorciers, par le relais (voir relais/).
    Le relais vérifie à chaque demande que la personne est SuperAdmin ; cette page n'est qu'une commande à distance. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var NIVEAU = { admin: 'Admin', superadmin: 'SuperAdmin' };
+  var NIVEAU = { admin: 'Sorcier', superadmin: 'SuperAdmin' };
   var etat = $('#eq-etat'), msg = $('#eq-msg');
   var dire = function (t, erreur) { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
 

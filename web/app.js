@@ -288,7 +288,7 @@
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
-  let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un administrateur)
+  let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un sorcier)
   function lireAdresse() {
     const p = new URLSearchParams(location.hash.slice(1));
     FICHE_URL = p.get('fiche') || ''; CORR_URL = p.get('corriger') === '1';
@@ -770,7 +770,7 @@
   }
 
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
-  // Visible seulement pour un compte Admin ou SuperAdmin connecté (niveau donné par le relais, voir relais/ et compte.js).
+  // Visible seulement pour un compte Sorcier ou SuperAdmin connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
   const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveau donné par le relais
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
@@ -781,10 +781,10 @@
     const quand = ecart <= 0 ? 'aujourd\'hui' : ecart === 1 ? 'hier' : 'le ' + dateCourte(i.date);
     return `<p class="sous corriger-revision">Dernière révision : <strong>${esc(quand)}</strong>${i.par ? ', par ' + esc(i.par) : ''}.</p>`;
   }
-  // Corriger la fiche (titre, série, numéro, suppression) : réservé aux administrateurs, envoyé par le relais
+  // Corriger la fiche (titre, série, numéro, suppression) : réservé aux sorciers, envoyé par le relais
   function blocFiche(b) {
     const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
-    return `<details class="corriger-fiche"><summary>Corriger la fiche <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></summary>
+    return `<details class="corriger-fiche"><summary>Corriger la fiche <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></summary>
       <form class="corriger" id="corriger-fiche" data-id="${esc(b.id)}">
         <p class="sous">Le titre et la série s'appliquent à toutes les éditions de ce livre ; le numéro, à cette édition seulement. Pour une nouvelle série, écrivez simplement son nom.</p>
         <div class="corriger-champs corriger-fiche-champs">
@@ -812,7 +812,7 @@
       try {
         const r = await window.Relais.envoyerLot('corriger-fiche.yml', { corrections: corrections.join(' | ') });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire("Ce compte n'a pas les droits d'administrateur, ou la connexion Google a expiré : reconnectez-vous.");
+        else if (r.status === 401 || r.status === 403) dire("Ce compte n'a pas les droits de sorcier, ou la connexion Google a expiré : reconnectez-vous.");
         else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
       f.querySelectorAll('button').forEach((x) => { x.disabled = false; });
@@ -831,9 +831,9 @@
   }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
-    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
+    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
-    return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux administrateurs">Admin</span></h3>
+    return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3>
         ${derniereRevision(b)}
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
           <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
@@ -869,7 +869,7 @@
       try {
         const r = await window.Relais.envoyerLot('corriger-prix.yml', { corrections: ligne });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas les droits d\'administrateur, ou la connexion Google a expiré : reconnectez-vous.');
+        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas les droits de sorcier, ou la connexion Google a expiré : reconnectez-vous.');
         else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
       f.querySelector('button').disabled = false;
@@ -883,7 +883,7 @@
     if (!CORR_URL) return;
     const ouvrir = () => { const d = $('.corriger-fiche'); if (d) d.open = true; return !!d; };
     if (ouvrir()) return;
-    const retenter = () => { if (!estProprietaire()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau d'administrateur arrive après le chargement
+    const retenter = () => { if (!estProprietaire()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de sorcier arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
   }
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
@@ -1577,7 +1577,7 @@
     try { const m = sessionStorage.getItem('cdh-coll-pane'); if (ONGLETS_COLL.includes(m)) CTAB = m; } catch (e) { /* sans stockage : « Mes livres » */ }
   })();
   function ouvrirOnglet(nom, { aller = false } = {}) {
-    if (!ONGLETS_COLL.includes(nom) || !$('#onglet-coll-' + nom)) return;          // un onglet réservé aux administrateurs n'existe pas pour les autres
+    if (!ONGLETS_COLL.includes(nom) || !$('#onglet-coll-' + nom)) return;          // un onglet réservé aux sorciers n'existe pas pour les autres
     CTAB = nom;
     try { sessionStorage.setItem('cdh-coll-pane', nom); } catch (e) { /* sans effet */ }
     if ($('#collection') && /^(#(livres|analyse|vendre|trouver|titre-[a-z-]+|coll-analyse)?)?$/.test(location.hash)) history.replaceState(null, '', '#' + nom);
@@ -1710,7 +1710,7 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    if (CTAB === 'historique' && !estProprietaire()) CTAB = 'livres';           // l'historique est réservé aux administrateurs
+    if (CTAB === 'historique' && !estProprietaire()) CTAB = 'livres';           // l'historique est réservé aux sorciers
     const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estProprietaire() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
