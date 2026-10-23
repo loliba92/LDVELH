@@ -1961,3 +1961,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pp-badge.verifier { background: rgba(0, 0, 0, .82); border: 1px solid var(--gold); color: #fff; }
 .pp-ouvrir { display: flex; align-items: center; min-height: 44px; color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
 .rayon .pp-carte .infos .titre { min-height: 0; }
+.pp-outils { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.pp-tri { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .95rem; }
+.pp-tri select { min-height: 40px; padding: 4px 10px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; font: 600 .95rem var(--f-ui); }
+.pp-tri span { white-space: nowrap; text-transform: none; letter-spacing: 0; font: 600 .95rem var(--f-ui); color: var(--muted); }

@@ -664,7 +664,7 @@
           if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
         }
-        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons });
+        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue });
       });
     }));
     return lignes.sort((x, y) => (y.pub - y.prix) - (x.pub - x.prix));
@@ -685,11 +685,21 @@
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a></article>`;
   }
   function initPepites() {
-    const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides');
+    const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri');
     if (!liste) return;
+    try { const m = localStorage.getItem('cdh-butin-tri'); if (m && [...tri.options].some((o) => o.value === m)) tri.value = m; } catch (e) { /* sans stockage : tri par défaut */ }
+    // Les listes arrivent classées « solides d'abord, puis économie » ; les autres choix reclassent toute la liste (à égalité : l'économie la plus grande d'abord)
+    const ordonner = (l, cle) => {
+      if (cle === 'solides') return l;
+      const eco = (p) => p.pub - p.prix, pct = (p) => 1 - p.prix / p.pub;
+      const f = { eco: (a, b) => eco(b) - eco(a), pct: (a, b) => pct(b) - pct(a), prix: (a, b) => a.prix - b.prix,
+        date: (a, b) => (b.vue || '').localeCompare(a.vue || ''), titre: (a, b) => a.ed.titre.localeCompare(b.ed.titre, 'fr') }[cle];
+      return [...l].sort((a, b) => f(a, b) || eco(b) - eco(a));
+    };
+    tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
     dessinerPepites = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
-      const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length));   // solides d'abord, puis à vérifier (chacun trié par économie)
+      const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
