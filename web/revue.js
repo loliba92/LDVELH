@@ -674,12 +674,13 @@
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
     const lieu = p.origine === 'librairie' ? ' de la librairie' : ' sur eBay';
-    return `<article class="rv-edition pp-carte ${solide ? 'solide' : 'verifier'}"><header><a href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
+    const jaq = JAQ[p.ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
+    return `<article class="rv-edition pp-carte ${solide ? 'solide' : 'verifier'}${jaq ? ' avec-jaq' : ''}">${jaq}<div class="pp-corps"><header><a href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
       `<span class="sous">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span></header>` +
       `<div class="pp-ligne"><p class="pp-prix"><span class="rv-ann-prix">${eur(p.prix)}</span><span class="sous">au lieu de ${eur(p.pub)}</span></p>` +
       `<p class="pp-eco"><strong>−${pct} %</strong> <span>${eur(eco)} d'économie</span></p></div>` +
       `<p class="pp-confiance"><span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>${solide ? '' : ' <span class="sous">' + p.raisons.map(esc).join(' · ') + '</span>'}</p>` +
-      `<p class="pp-annonce"><a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a> <span class="sous">${esc(p.titre)}</span></p></article>`;
+      `<p class="pp-annonce"><a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a> <span class="sous">${esc(p.titre)}</span></p></div></article>`;
   }
   function initPepites() {
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides');

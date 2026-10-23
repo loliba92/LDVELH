@@ -1939,6 +1939,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pp-barre .sous { margin: 0; }
 .pp-carte { padding: 12px 16px; border-left: 3px solid var(--line-strong); }
 .pp-carte.solide { border-left-color: var(--gold); }
+.pp-corps { flex: 1; min-width: 0; }
 .pp-carte header { margin-bottom: 6px; }
 .pp-carte p { margin: 4px 0; overflow-wrap: anywhere; }
 .pp-ligne { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 16px; }
