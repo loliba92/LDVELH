@@ -735,6 +735,36 @@
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
+  /* ---------- Annonces retenues (SuperAdmin) ---------- */
+  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au SuperAdmin.
+  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';
+  let ANN = null, annChargees = null;
+  const chargerAnnonces = () => annChargees || (annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
+  function blocAnnonces(b) {
+    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au SuperAdmin">SuperAdmin</span></summary>
+      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
+  }
+  function remplirAnnonces(b) {
+    const zone = $('#annonces-corps');
+    if (!zone) return;
+    chargerAnnonces().then(() => {
+      if (ficheOuverte !== b.id || !$('#annonces-corps')) return;
+      const par = ANN && b.isbn13 ? ANN.annonces[b.isbn13] : null;
+      const nb = par ? ETATS.reduce((n, e) => n + ((par[e.k] || []).length), 0) : 0;
+      const resume = $('#annonces-fiche summary');
+      if (resume && nb) resume.firstChild.textContent = `Annonces retenues (${nb}) `;
+      if (!nb) { zone.innerHTML = `<p class="sous">${ANN ? 'Aucune annonce retenue pour cette édition.' : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
+      zone.innerHTML = ETATS.map((e) => {
+        const l = par[e.k];
+        if (!l || !l.length) return '';
+        const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
+        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map(([prix, titre, lien, origine]) =>
+          `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}</li>`).join('')}</ul>`;
+      }).join('') + `<p class="sous">Relevé du ${dateCourte(ANN.date)}. Prix demandés, pas des prix payés. Ouvrez une annonce pour vérifier le livre et son état.</p>`;
+    });
+  }
+
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
   // Visible seulement pour un compte Admin ou SuperAdmin connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
@@ -900,6 +930,7 @@
             </dl>
 
         ${blocNeuf(b)}
+        ${estSuper() ? blocAnnonces(b) : ''}
         ${blocRecherche(b)}
         ${blocCorriger(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
@@ -912,6 +943,7 @@
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
     brancherFicheCollection(b);
     brancherCorriger();
+    if (estSuper()) remplirAnnonces(b);
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));
@@ -1012,13 +1044,16 @@
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
-  let etaitSansCompte = null, appPrete = false;
+  let etaitSansCompte = null, etaitSuper = null, appPrete = false;
   document.addEventListener('cdh-compte', () => {
     if (!appPrete) return;
     const sans = sansCompte();
     afficher();
     if (etaitSansCompte !== null && etaitSansCompte !== sans && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSansCompte = sans;
+    const super_ = estSuper();           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
+    if (etaitSuper !== null && etaitSuper !== super_ && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
+    etaitSuper = super_;
   });
   const annonce = (t) => { $('#annonce').textContent = ''; setTimeout(() => { $('#annonce').textContent = t; }, 30); };
   const parId = () => new Map(DATA.map((b) => [b.id, b]));

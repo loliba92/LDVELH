@@ -1894,3 +1894,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 #coll-prive { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); }
 .collection details.chiffres { margin: 0 0 8px; }
 @media (max-width: 800px) { .hc-grille { grid-template-columns: minmax(0, 1fr); } .hc-cles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .hc-cles li { padding: 8px; } .hc-cles b { font-size: 1.15rem; } .hc-cles .cle-lib { font-size: .64rem; letter-spacing: .08em; } }
+
+/* Fiche : annonces retenues derrière la cote (SuperAdmin) */
+.annonces-fiche { margin: 14px 0 6px; padding: 0; }
+.annonces-fiche summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
+.annonces-corps { padding: 2px 0 6px; }
+.annonces-corps h4 { margin: 12px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.annonces-corps ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.annonces-corps li { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); column-gap: 10px; align-items: baseline; line-height: 1.35; font-size: .92rem; overflow-wrap: anywhere; }
+.annonces-corps li a { color: var(--text); text-underline-offset: 3px; }
+.annonces-corps .ann-prix { font-weight: 700; color: var(--gold); text-align: right; }
+.annonces-corps .ann-titre { grid-column: 2; justify-self: start; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
