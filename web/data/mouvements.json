@@ -249,6 +249,51 @@
    "recalibre": false
   },
   {
+   "id": "9782070332939",
+   "isbn13": "9782070332939",
+   "titre": "Les Collines Maléfiques",
+   "serie": "Sorcellerie!",
+   "numero": "293",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 38.59,
+   "apres": 21.0,
+   "pct": -0.456,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332939",
+   "isbn13": "9782070332939",
+   "titre": "Les Collines Maléfiques",
+   "serie": "Sorcellerie!",
+   "numero": "293",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 21.27,
+   "apres": 13.04,
+   "pct": -0.387,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332939",
+   "isbn13": "9782070332939",
+   "titre": "Les Collines Maléfiques",
+   "serie": "Sorcellerie!",
+   "numero": "293",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 13.89,
+   "apres": 9.0,
+   "pct": -0.352,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782010116988",
    "isbn13": "9782010116988",
    "titre": "L'Oeil du Sphinx",
@@ -322,24 +367,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070333417",
-   "isbn13": "9782070333417",
-   "titre": "La Porte des Mondes",
-   "serie": "L'Œil Noir",
-   "numero": "341",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 14.72,
-   "apres": 12.65,
-   "pct": -0.141,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 25,
+ "nb_grands_mouvements": 28,
  "modele": {
   "actif": false,
   "n_paires": 19,
