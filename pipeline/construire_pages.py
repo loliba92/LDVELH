@@ -226,13 +226,12 @@ PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès admin</p>
     <div class="porte-google" id="porte-google"></div>
-    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>
   </div>
 </div>
 '''
 
 
-PORTE_CONNECTE = PORTE.replace(" Accès admin</p>", " Réservé aux personnes connectées</p>").replace('    <p class="porte-aide"><a href="devenir-admin.html">Comment devenir admin ?</a></p>\n', '')
+PORTE_CONNECTE = PORTE.replace(" Accès admin</p>", " Réservé aux personnes connectées</p>")
 
 
 DEVENIR_ADMIN = '''<p class="surtitre">Accès administrateur</p>
@@ -298,7 +297,6 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
 
 <h2>Vous voulez aider davantage</h2>
 <ul>
-  <li><a href="devenir-admin.html">Devenir administrateur</a> : corriger les prix et ajouter des livres vous-même.</li>
   <li><a href="communaute.html">Communauté</a> : proposer une chaîne, un site ou une collection à faire connaître.</li>
 </ul>
 '''
@@ -402,8 +400,9 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <button type="button" data-vue="tous" aria-pressed="false">Tous <span class="nb-onglet" id="rv-n-tous"></span></button>
 </div>
 <div class="rv-envoi" id="rv-envoi" hidden>
-  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
+  <p id="rv-envoi-attente"><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
   <button type="button" class="bouton" id="rv-envoyer">Envoyer mes validations</button>
+  <p class="sous" id="rv-envoi-faites" role="status" hidden></p>
   <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
 </div>
 <div class="rv-outils">
@@ -588,7 +587,6 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <ul>
   <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>.</li>
   <li><strong>Demander l'ajout d'un livre :</strong> connectez-vous avec Google, puis utilisez « Demander l'ajout d'un livre » dans le menu de votre compte.</li>
-  <li><strong>Aider à tenir les prix à jour :</strong> <a href="devenir-admin.html">devenez administrateur</a>.</li>
   <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
 </ul>
 
