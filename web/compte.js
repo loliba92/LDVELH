@@ -25,6 +25,19 @@ window.Compte = (function () {
   var SILHOUETTE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>';
 
   function badge() { return estAdmin() ? ' <span class="badge-admin">' + (role === 'superadmin' ? 'SuperAdmin' : 'Sorcier') + '</span>' : ''; }
+  // Petites icônes du menu (même trait que la barre d'onglets de la page Vérifier les prix)
+  var ICO = {
+    collection: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16 5l4 1-3 14-4-1z"/>',
+    sync: '<path d="M20 11a8 8 0 0 0-14-4M4 5v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 19v-4h-4"/>',
+    demande: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M12 9v6M9 12h6"/>',
+    sorciers: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
+    butin: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/>',
+    equipe: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2 .6 3 2.5 3 5"/>',
+    supprimer: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+    deconnecter: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
+  };
+  function ico(nom) { return '<svg class="ico-menu" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[nom] + '</svg>'; }
+
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
     if (e.cle === 'deconnecte') {
@@ -35,14 +48,14 @@ window.Compte = (function () {
     if (e.cle === 'reprendre') h += '<button type="button" class="bouton" data-compte="connecter">Reconnecter</button>';
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
-    h += '<ul class="compte-liste"><li><a href="collection.html">Ma collection</a></li>' +
-      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
-      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
-      (estAdmin() ? '<li><a href="revue-prix.html">Espace des sorciers</a></li>' : '') +
-      (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">Butin</a></li>' : '') +
-      (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
-      (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
-      '<li><button type="button" class="bouton-lien" data-compte="deconnecter">Se déconnecter</button></li></ul>';
+    h += '<ul class="compte-liste"><li><a href="collection.html">' + ico('collection') + 'Ma collection</a></li>' +
+      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
+      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">' + ico('demande') + 'Demander l\'ajout d\'un livre</button></li>' : '') +
+      (estAdmin() ? '<li><a href="revue-prix.html">' + ico('sorciers') + 'Espace des sorciers</a></li>' : '') +
+      (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">' + ico('butin') + 'Butin</a></li>' : '') +
+      (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
+      (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">' + ico('supprimer') + 'Supprimer ma collection du Drive</button></li>' : '') +
+      '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
     return h;
   }
 

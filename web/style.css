@@ -725,6 +725,10 @@ html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 2
 .hero-texte { min-width: 0; }
 .hero-compte { margin: 16px 0 0; color: var(--muted); font-size: .92rem; }
 .hero .hero-cta { margin-top: 14px; }
+.hero-butin { display: inline-flex; align-items: center; gap: 6px; margin-left: 14px; padding: 6px 0; color: var(--gold); font: 600 .92rem var(--f-ui); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.hero-butin[hidden] { display: none; }
+.hero-butin:hover { color: var(--accent); }
+.hero-butin:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .contenu > .avis { margin: 0 0 14px; max-width: none; padding: 8px 14px; font-size: .92rem; box-shadow: none; }
 .contenu > .avis strong { font-size: 1rem; }
 .bandeau-chantier { padding: 6px 16px; font-size: .88rem; }
@@ -1138,6 +1142,8 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .compte-liste li { margin: 0; }
 .compte-liste a, .compte-liste .bouton-lien { display: flex; align-items: center; min-height: 44px; width: 100%; padding: 0 4px; color: var(--text); font: 600 1rem var(--f-ui); text-decoration: none; text-align: left; background: none; border: 0; cursor: pointer; }
 .compte-liste a:hover, .compte-liste .bouton-lien:hover { color: var(--accent); }
+.compte-liste a, .compte-liste .bouton-lien { gap: 12px; }
+.compte-liste .ico-menu { flex: none; color: var(--gold); }
 .compte-menu .bouton, .compte-feuille .bouton { width: 100%; }
 .compte-feuille { margin: 0; padding: 4px 18px 8px; border-bottom: 1px solid var(--line); }
 .compte-feuille[hidden], .compte[hidden] { display: none; }
