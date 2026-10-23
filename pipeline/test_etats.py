@@ -105,6 +105,22 @@ class TestEtats(unittest.TestCase):
             self.assertEqual(etats.charger_ratios(f)["bon"], 0.7)
 
 
+class TestDecote(unittest.TestCase):
+    def test_la_decote_se_regle_dans_le_fichier(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "r.json"
+            f.write_text(json.dumps({"decote_annonces": 0.9}))
+            self.assertEqual(etats.charger_decote(f), 0.9)
+            f.write_text(json.dumps({"decote_annonces": 1}))                       # 1 : aucune correction, valide
+            self.assertEqual(etats.charger_decote(f), 1.0)
+            for invalide in (0.3, 1.2, "abc", None):
+                f.write_text(json.dumps({"decote_annonces": invalide}))
+                self.assertEqual(etats.charger_decote(f), etats.DECOTE_ANNONCES_DEFAUT)
+            f.write_text("{}")
+            self.assertEqual(etats.charger_decote(f), 0.85)
+            self.assertEqual(etats.charger_decote(Path(d) / "absent.json"), 0.85)
+
+
 class TestLissage(unittest.TestCase):
     def prix(self, cible, nb, **extra):
         return {**est(cible), "nb": nb, **extra}

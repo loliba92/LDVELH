@@ -7,8 +7,9 @@ ci-dessous servent à qualifier le résultat (source, nature, confiance). Chaque
   - le nombre d'annonces qu'elle résume (racine carrée, plafonnée à 9 annonces).
 Un relevé mince (moins de 3 annonces) compte, mais peu : son incertitude est plus grande, et une valeur très éloignée de
 l'estimation en cours est vite écartée (voir ECART_ALERTE_MINCE) : une annonce isolée peut être absurde.
-Les prix demandés ne sont pas corrigés : faute de ventes réelles, on ne sait pas mesurer l'écart
-entre prix demandé et prix payé. Le résultat l'indique (« annonces »).
+Les prix demandés sont multipliés par une décote (paramètre `decote`, 0,85 dans l'export du site, réglable dans
+data/manual/ratios_etats.json) : une annonce est un prix de vente affiché, au-dessus du prix qui se conclut. Faute de ventes réelles,
+cette décote est une hypothèse, pas une mesure. Le résultat garde la mention « annonces ».
 """
 from collections import namedtuple
 from datetime import date
@@ -44,7 +45,7 @@ def poids(o, aujourdhui):
     return POIDS_TYPE[o.type] * 0.5 ** (age / demi_vie) * sqrt(min(max(o.nb, 1), PLAFOND_ANNONCES))
 
 
-def lisser(observations, aujourdhui, sigma_hist=None, jours_minces=()):
+def lisser(observations, aujourdhui, sigma_hist=None, jours_minces=(), decote=1.0):
     """Prix lissé (filtre de Kalman en log) : renvoie (prix, incertitude). Les observations sont lues dans l'ordre
     des dates ; chaque nouvelle valeur corrige l'estimation d'une part (le « gain ») d'autant plus grande qu'elle
     est précise (nature, nombre d'annonces) et que l'estimation précédente est ancienne."""
@@ -52,7 +53,7 @@ def lisser(observations, aujourdhui, sigma_hist=None, jours_minces=()):
     for o in sorted(observations, key=lambda x: x.date):
         sigma = sigma_hist if (o.type == "historique" and sigma_hist) else SIGMA[o.type]
         r = (sigma * (FACTEUR_MINCE if (o.type == "prix_demande" and o.date in jours_minces) else 1)) ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
-        y = log(o.prix)
+        y = log(o.prix * (decote if o.type == "prix_demande" else 1))      # une annonce est un prix demandé : on vise le prix qui se conclut
         if m is None:
             m, var = y, r
         else:
@@ -82,12 +83,13 @@ def mediane_ponderee(points):
     return pts[-1][0]
 
 
-def estimer(observations, aujourdhui=None, sigma_hist=None):
+def estimer(observations, aujourdhui=None, sigma_hist=None, decote=1.0):
     """Renvoie un dict {prix, source, nature, nb, date, confiance} ou None s'il n'y a aucune observation.
 
     source : « archives » (aucune observation actuelle), « actuel » ou « mixte ».
     nature : « annonces », « ventes », « rachats » (observation actuelle dominante) ou « archives ».
     sigma_hist : incertitude de l'archive (écart-type du log du prix), apprise par le modèle ; défaut SIGMA["historique"].
+    decote : facteur appliqué aux prix demandés (annonces) avant le calcul ; 1 = aucune correction.
     confiance : « ancienne » pour les archives ; « faible », « moyenne » ou « élevée » pour le reste.
     """
     aujourdhui = aujourdhui or date.today()
@@ -104,7 +106,7 @@ def estimer(observations, aujourdhui=None, sigma_hist=None):
     if not obs:
         return None
     poids_obs = [(o, poids(o, aujourdhui)) for o in obs]
-    prix, incertitude = lisser(obs, aujourdhui, sigma_hist, jours_minces)
+    prix, incertitude = lisser(obs, aujourdhui, sigma_hist, jours_minces, decote)
     actuelles = [(o, w) for o, w in poids_obs if o.type in ACTUELS]
     w_actuel = sum(w for _, w in actuelles)
     w_total = sum(w for _, w in poids_obs)

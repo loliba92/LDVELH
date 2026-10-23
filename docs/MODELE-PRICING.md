@@ -8,7 +8,7 @@ But : pour un livre (ISBN) et un état, donner une fourchette de prix de revente
 |---|---|---|
 | Vente réelle (vous, eBay) | 1,0 | Référence. |
 | Vente probable déduite | 0,6 | Annonce disparue. |
-| Prix demandé (annonce active) | 0,3 | Corrigé par la décote moyenne demandé→vendu, mesurée sur les livres où l'on a les deux. |
+| Prix demandé (annonce active) | 0,3 | Multiplié par une décote fixe demandé→vendu (`decote_annonces`, 0,85 au 23 octobre 2026, réglable dans `data/manual/ratios_etats.json`). Hypothèse, faute de ventes réelles : voir §7. |
 | Historique collection-ldvelh | 0,2 | Base de départ, vieillit (voir plus bas). |
 
 Le poids diminue avec l'ancienneté : demi-vie de 90 jours pour les relevés récents, 12 mois pour l'historique.
@@ -86,7 +86,7 @@ Pour un livre à faible liquidité, on utilise le bas de fourchette plutôt que 
 
 ## 7. Limites assumées
 
-- Les prix demandés surestiment les prix vendus.
+- Les prix demandés surestiment les prix vendus (vendeurs qui affichent haut, annonces invendues qui restent en ligne). La décote de 0,85 (−15 %) est une **hypothèse** d'ordre de grandeur, pas une mesure : l'effet net sur les cotes est environ moitié moindre (le modèle mélange déjà les annonces avec les archives). À mesurer : une annonce qui disparaît d'un relevé quotidien à l'autre (cumul des annonces, `web/data/annonces.json`) est une vente probable ; son prix comparé à celui des annonces restantes donnera la vraie décote. À revoir quand ces ventes probables seront assez nombreuses. Ce n'est pas la marge de négociation, qui reste à la charge de l'acheteur, en plus de la cote.
 - Sans accès aux ventes de Vinted et Leboncoin, ces plateformes (probablement les plus actives) ne sont représentées que par la saisie assistée.
 - La rareté réelle dépend aussi de l'édition précise ; tant que l'ISBN manque, le rapprochement reste approximatif.
 
