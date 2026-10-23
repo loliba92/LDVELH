@@ -36,12 +36,12 @@ Types : `vente` (vous avez vendu), `achat` (vous avez acheté), `releve` (prix v
 `rachat` (offre d'un professionnel). Les lots sont exclus du calcul. La saisie est écrite dans
 `data/manual/observations.csv`.
 
-## Option 2 : relevé hebdomadaire eBay
+## Option 2 : relevé quotidien eBay
 
 `scrapers/ebay_api.py` interroge la Browse API (place de marché France), par ISBN. Il écarte les lots,
 les devises étrangères et les états non précisés, puis n'enregistre que des **agrégats** par état
 (nombre, minimum, médiane, maximum) dans `data/raw/occasion/ebay-AAAA-MM-JJ.csv`. Ni titre, ni vendeur, ni lien.
-Le workflow `.github/workflows/prix-ebay.yml` le lance chaque lundi, reconstruit la base et republie le site.
+Le workflow `.github/workflows/prix-ebay.yml` le lance **chaque jour** (5 h 17, heure de Greenwich), reconstruit la base et republie le site : le prix évolue par petites étapes (lissage, `docs/MODELE-PRICING.md`) au lieu de grands sauts après une semaine de données. Un relevé complet dure environ 33 minutes et fait environ 2 400 appels ; la limite habituelle de la Browse API est de 5 000 appels par jour (à confirmer sur le compte développeur) : éviter de lancer deux relevés complets le même jour. Le **prix du neuf** (étape suivante, leslibraires.fr) reste hebdomadaire : il n'est relevé que le lundi et à la demande.
 
 ### Ce que seul le propriétaire peut faire
 

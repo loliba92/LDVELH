@@ -1,12 +1,15 @@
 name: Relevé des prix (eBay et librairies)
 
-# UN SEUL lot pour tous les prix, chaque lundi ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du neuf
-# chez les libraires (pipeline/prix_neuf.py), puis ajoute un relevé agrégé,
-# reconstruit la base, regénère les données du site et redéclenche sa publication.
+# UN SEUL lot pour tous les prix, chaque jour ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du neuf
+# chez les libraires (pipeline/prix_neuf.py) le LUNDI et à la demande seulement (programme présenté comme une lecture hebdomadaire, réseau de
+# petites librairies : on ne le sollicite pas plus), puis ajoute un relevé agrégé, reconstruit la base, regénère les données du site et
+# redéclenche sa publication. Le relevé eBay est quotidien : le prix évolue par petites étapes (lissage, voir docs/MODELE-PRICING.md) au lieu de
+# grands sauts après une semaine de données (environ 2 400 appels par relevé, pour une limite habituelle de 5 000 par jour : éviter deux relevés complets le même jour).
 # Prérequis : secrets EBAY_CLIENT_ID et EBAY_CLIENT_SECRET (voir docs/PRIX-ACTUELS.md).
 on:
   schedule:
-    - cron: "17 5 * * 1"
+    - cron: "17 5 * * 1"        # lundi : eBay + prix du neuf
+    - cron: "17 5 * * 0,2-6"    # les autres jours : eBay seulement
   workflow_dispatch:
     inputs:
       limite:
@@ -72,7 +75,7 @@ jobs:
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
       - name: Prix du neuf et disponibilité des éditions en vente
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && github.event.schedule != '17 5 * * 0,2-6' }}
         continue-on-error: true
         run: python pipeline/prix_neuf.py
       - name: Base et données du site
