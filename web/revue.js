@@ -695,6 +695,7 @@
     dessinerPepites();
   }
 
+  let ouvrirOnglet = () => {};
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
@@ -703,6 +704,7 @@
       document.dispatchEvent(new CustomEvent('cdh-pane', { detail: nom }));
       try { sessionStorage.setItem('cdh-rv-pane', nom); } catch (e) { /* sans stockage : la page s'ouvre sur les prix */ }
     };
+    ouvrirOnglet = (nom) => { const b = boutons.find((x) => x.dataset.pane === nom); if (b && !b.hidden) montrer(nom); };
     boutons.forEach((b) => {                              // motif des onglets : liés à leur panneau, flèches pour passer de l'un à l'autre
       b.id = 'onglet-rv-' + b.dataset.pane; b.setAttribute('aria-controls', 'pane-' + b.dataset.pane);
       const pan = document.getElementById('pane-' + b.dataset.pane);
@@ -729,6 +731,7 @@
   initPepites();
   initNav();
   // Annonces : lien et onglet réservés au SuperAdmin (le rôle arrive après la connexion)
+  let pepitesOuvertes = false;
   function majAnnonces() {
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
     const super_ = estSuper();
@@ -741,6 +744,7 @@
       pep.hidden = !super_;
       if (!super_ && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
+    if (super_ && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerPepites(); });
     else if (EDITIONS.length) afficher();
   }
@@ -800,5 +804,6 @@
     $('#rv-tout-confirmer').addEventListener('click', toutConfirmerListe);
     $('#rv-envoyer').addEventListener('click', envoyer);
     afficher();
+    dessinerPepites();                                     // les annonces peuvent arriver avant les éditions : on redessine les pépites quand elles sont là
   }).catch(() => { $('#rv-liste').innerHTML = '<p class="erreur">Les données n\'ont pas pu être chargées.</p>'; });
 })();
