@@ -674,13 +674,16 @@
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
     const lieu = p.origine === 'librairie' ? ' de la librairie' : ' sur eBay';
-    const jaq = JAQ[p.ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">` : '';
-    return `<article class="rv-edition pp-carte ${solide ? 'solide' : 'verifier'}${jaq ? ' avec-jaq' : ''}">${jaq}<div class="pp-corps"><header><a href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
-      `<span class="sous">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span></header>` +
-      `<div class="pp-ligne"><p class="pp-prix"><span class="rv-ann-prix">${eur(p.prix)}</span><span class="sous">au lieu de ${eur(p.pub)}</span></p>` +
-      `<p class="pp-eco"><strong>−${pct} %</strong> <span>${eur(eco)} d'économie</span></p></div>` +
-      `<p class="pp-confiance"><span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>${solide ? '' : ' <span class="sous">' + p.raisons.map(esc).join(' · ') + '</span>'}</p>` +
-      `<p class="pp-annonce"><a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a> <span class="sous">${esc(p.titre)}</span></p></div></article>`;
+    const img = JAQ[p.ed.id] ? `<img src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">`
+      : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
+    return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
+      `<span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>` +
+      `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></span>` +
+      `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
+      `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
+      `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
+      (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + `</span>` +
+      `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a></article>`;
   }
   function initPepites() {
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides');
@@ -689,7 +692,7 @@
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length));   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
-      liste.innerHTML = vues.length ? vues.map(cartePepite).join('') : '<p>Aucune bonne affaire pour ce filtre.</p>';
+      liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     solides.addEventListener('change', dessinerPepites);
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estSuper()) chargerAnnonces().then(dessinerPepites); });

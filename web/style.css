@@ -1407,10 +1407,11 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .note-bas strong { font-family: inherit; font-size: inherit; color: var(--text); }
 
 /* Page admin : sections en onglets, cartes compactes (trois prix sur une ligne, un seul « Confirmer »), liens en grille */
-.rv-nav { display: flex; gap: 6px; margin: 14px 0 18px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+.rv-nav { display: flex; gap: 6px; margin: 16px 0 22px; padding: 6px; overflow-x: auto; scrollbar-width: none; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; }
 .rv-nav::-webkit-scrollbar { display: none; }
-.rv-nav button { flex: 0 0 auto; min-height: 48px; padding: 8px 16px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: 700 1rem var(--f-ui); cursor: pointer; white-space: nowrap; }
-.rv-nav button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+.rv-nav button { flex: 1 0 auto; min-height: 48px; padding: 8px 18px; border: 0; border-radius: 10px; background: none; color: var(--text); font: 700 1.05rem var(--f-ui); cursor: pointer; white-space: nowrap; transition: background var(--t), color var(--t); }
+.rv-nav button:hover { background: var(--accent-soft); color: var(--gold); }
+.rv-nav button[aria-selected="true"] { background: var(--gold); color: var(--on-accent); }
 .rv-nav button[hidden] { display: none; }
 .rv-pane[hidden] { display: none; }
 .rv-onglets { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
@@ -1737,7 +1738,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 #an-liste li a { color: var(--text); text-underline-offset: 3px; }
 .rv-ann-prix { font-weight: 700; color: var(--gold); }
 .rv-ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
-@media (max-width: 560px) { .rv-nav { gap: 0; } .rv-nav button { padding: 8px 7px; font-size: .9rem; } }
+@media (max-width: 560px) { .rv-nav { gap: 2px; padding: 4px; } .rv-nav button { padding: 8px 9px; font-size: .95rem; } }
 .rv-voir-ann { display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px; }
 .an-dialog { max-width: 640px; }
 .an-cadre { padding: 16px 18px 18px; display: grid; gap: 10px; }
@@ -1937,19 +1938,19 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 /* Onglet « Butin » (SuperAdmin) : annonces à 50 % du prix du site ou moins */
 .pp-barre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; margin: 6px 0 12px; }
 .pp-barre .sous { margin: 0; }
-.pp-carte { padding: 12px 16px; border-left: 3px solid var(--line-strong); }
-.pp-carte.solide { border-left-color: var(--gold); }
-.pp-corps { flex: 1; min-width: 0; }
-.pp-carte header { margin-bottom: 6px; }
-.pp-carte p { margin: 4px 0; overflow-wrap: anywhere; }
-.pp-ligne { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 16px; }
-.pp-prix { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
-.pp-prix .rv-ann-prix { font-size: 1.5rem; line-height: 1.2; }
-.pp-eco { color: var(--gold); }
-.pp-eco strong { font-size: 1.1rem; }
-.pp-annonce { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
-.pp-annonce .sous { min-width: 0; }
-.pp-ouvrir { color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
-.pp-badge { display: inline-block; padding: 1px 10px; border-radius: 999px; font: 700 .78rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
-.pp-badge.solide { background: var(--gold); color: var(--bg, #000); border: 1px solid var(--gold); }
-.pp-badge.verifier { border: 1px solid var(--line-strong); color: var(--muted); }
+/* Butin : mêmes jaquettes que l'étagère (.rayon / .livre-carte), infos posées sur et sous la jaquette */
+.pp-carte .couv { display: block; }
+.pp-carte .infos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pp-carte .titre { color: var(--text); text-decoration: none; }
+.pp-carte .meta { display: block; }
+.pp-carte .pp-eco { color: var(--gold); }
+.pp-carte .pp-raison { color: var(--muted); font-style: italic; }
+.pp-carte .jaq-vide.pp-sans-jaq { aspect-ratio: 5 / 7; padding: 10px; text-align: center; font-size: 1.05rem; line-height: 1.2; overflow: hidden; }
+.pp-carte .pp-voile { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 28px 8px 7px; border-radius: 0 0 3px 3px; background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .88) 55%); }
+.pp-prix { font: 700 1.45rem/1 var(--f-display); color: var(--gold); font-variant-numeric: lining-nums; }
+.pp-pct { font: 700 .9rem var(--f-ui); color: #fff; white-space: nowrap; }
+.pp-badge { position: absolute; top: 6px; left: 6px; padding: 1px 9px; border-radius: 999px; font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .05em; text-transform: uppercase; }
+.pp-badge.solide { background: var(--gold); color: #000; border: 1px solid var(--gold); }
+.pp-badge.verifier { background: rgba(0, 0, 0, .82); border: 1px solid var(--gold); color: #fff; }
+.pp-ouvrir { display: flex; align-items: center; min-height: 44px; color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
+.rayon .pp-carte .infos .titre { min-height: 0; }
