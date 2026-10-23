@@ -1912,3 +1912,4 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 
 /* Légende des niveaux de prix (visiteur) : cinq repères alignés, chacun d'un seul tenant */
 .niveaux { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-bottom: 6px; }
+.rv-pas-ann { display: inline-block; margin-top: 4px; }

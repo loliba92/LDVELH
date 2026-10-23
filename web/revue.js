@@ -88,6 +88,7 @@
     if (l.repartition) { const n = l.eb_nb_toutes || l.eb_nb; return `annonces eBay${n ? ' (' + n + ')' : ''}, réparti 40/60`; }
     if (l.source && l.source !== 'archives') {
       const n = l.eb_nb_toutes || l.eb_nb;
+      if (!n && l.lib_prix) return `d'après un exemplaire en librairie : ${eur(l.lib_prix)}`;           // pas d'annonce eBay : le prix actuel vient d'une librairie
       return n ? `d'après ${n} annonce${n > 1 ? 's' : ''} eBay` : "d'après les annonces eBay";
     }
     return l.publie == null ? '' : 'ancienne cote';
@@ -119,7 +120,7 @@
     }
     const r = ratio(l), alerte = raison(l, null);
     const avant = modifie(l) ? `<span class="rv-avant">avant <s>${eur(l.archive)}</s> · <b>${pct(r)}</b></span>` : '';
-    const notes = [origine(l), l.lib_prix ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
+    const notes = [origine(l), l.lib_prix && (l.eb_nb_toutes || l.eb_nb || l.deduit || l.valide || l.neuf || l.repartition) ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
     return `<div class="rv-prix${modifie(l) ? (r > 1 ? ' hausse' : ' baisse') : ''}${alerte ? ' alerte' : ''}"><span class="rv-lib">${lib}</span>` +
       `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span>${boutons(ed, cle, null, l)}</div>`;
   }
@@ -136,7 +137,7 @@
     const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
-      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${aDesAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : ''}</div></header>` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${aDesAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estSuper() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce eBay retenue au dernier relevé</span>' : '')}</div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
