@@ -544,18 +544,20 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <thead><tr><th scope="col">Fonction</th><th scope="col">Visiteur</th><th scope="col">Héros</th></tr></thead>
   <tbody>
     <tr><th scope="row" data-label="Fonction">Chercher un livre par titre, auteur ou ISBN</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Parcourir l'étagère et filtrer (série, édition, année, éditeur)</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Parcourir l'étagère, filtrer et trier (série, édition, année, éditeur, prix)</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Ouvrir les fiches : jaquette, détails, rareté d'après les tirages</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Voir les derniers ajouts et les livres à paraître</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Lire les notes moyennes des livres</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Voir un niveau de prix (<span class="nowrap">€ à €€€€€</span>) pour comparer les livres</th><td data-label="Visiteur"><span aria-label="oui">✓</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Voir les prix estimés de chaque état</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Chercher l'édition en vente (Vinted, Leboncoin, eBay, Facebook)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Voir le prix estimé de chaque état (convenable, bon, très bon)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Chercher l'édition en vente (Leboncoin, Vinted, eBay, Facebook)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Constituer sa collection : état et nombre d'exemplaires</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Scanner le code-barres d'un livre pour l'ajouter</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Compléter sa collection pas à pas, série par série</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Importer ou exporter sa collection</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Suivre la valeur de sa collection</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Suivre la valeur de sa collection et l'analyser</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Séparer ses doubles à vendre et les livres à trouver</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Retrouver sa collection sur tous ses appareils (Google Drive)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Retrouver sa collection sur tous ses appareils (Google Drive), et une ancienne version si besoin</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Demander l'ajout d'un livre qui manque</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Noter les livres de 1 à 5</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
   </tbody>
@@ -573,7 +575,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 </ul>
 
 <h2>Ce que le guide ne fait pas</h2>
-<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches (réservés aux Héros) ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Il ne demande aucun compte et ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
+<p>Il ne vend rien et ne contient ni publicité ni lien d'affiliation : les boutons Vinted, Leboncoin, eBay et Facebook des fiches (réservés aux Héros) ouvrent de simples recherches sur ces sites, sans rien rapporter au guide. Consulter les fiches ne demande aucun compte, et le guide ne mesure pas votre visite. Il ne recopie pas les sites d'annonces ou de comparaison de prix qui interdisent la collecte automatique de leurs pages : cette interdiction est respectée.</p>
 
 <h2>Votre collection</h2>
 <p>La collection que vous composez est enregistrée dans votre navigateur, sur votre appareil. Rien n'est envoyé à un serveur. Les détails sont dans la page <a href="confidentialite.html">Confidentialité</a>.</p>
