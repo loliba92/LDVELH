@@ -5,6 +5,8 @@ Source : les pages de collection de leslibraires.fr, qui listent les livres d'un
 et chaque fiche /livre/<identifiant>, pour l'ISBN, la date de parution et la disponibilité. Une pause sépare deux requêtes.
 Pour Gallimard Jeunesse, un livre n'est ajouté que si son titre porte le nom d'une des séries ; un livre d'un auteur connu mais sans nom de série
 est seulement signalé. Pour Alkonost, tous les livres de ses collections de livres-jeux sont ajoutés.
+Scriptarium (éditeur de Clermont-Ferrand : Défis et Sortilèges, L'Œil noir, La Voie du Tigre, Loup solitaire) n'a pas de page de collection chez le libraire :
+la veille interroge le catalogue de la BnF (notices de l'éditeur) et n'ajoute que les livres-jeux ; le reste (BD, romans) est seulement signalé.
 Les livres annoncés (parution à venir) sont ajoutés aussi, avec leur date : data/processed/veille.json garde les fiches déjà vues et les dates de
 parution à venir (l'accueil les présente dans « À paraître »).
 """
@@ -32,6 +34,9 @@ GJ = ["/editeur/gallimard-jeunesse/collection/grand-format-li/",
 ALKONOST = "/editeur/alkonost/"
 SERIES_GJ = re.compile(r"d[ée]fis fantastiques|loup solitaire|qu[êe]te du graal|neige d.automne", re.I)
 PAGES_MAX = 60
+# Collections de Scriptarium (nom dans la notice de la BnF) -> série de la base. Une collection absente est seulement signalée ; la bande dessinée est écartée.
+SERIES_SCRIPTARIUM = [(r"d[ée]fis et sortil[èe]ges", "Défis et Sortilèges"), (r"oeil noir|œil noir", "L'Œil noir (solos)"), (r"voie du tigre", "La Voie du Tigre"),
+                      (r"l[ée]gendes du loup solitaire", "Les Légendes du Loup Solitaire"), (r"aventures en magnamund", "Aventures en Magnamund")]
 
 
 def cle(t):
@@ -83,6 +88,48 @@ def fiche(h):
     return {"isbn": isbn if len(isbn) == 13 else "", "date": d.group(1)[:10] if d else ""}
 
 
+def notices_scriptarium(maximum=50):
+    """[{isbn, titre, collection, numero, annee}] des notices de la BnF dont l'éditeur est Scriptarium."""
+    out, debut = [], 1
+    while True:
+        r = requests.get(editions.BNF_URL, headers=AGENT, timeout=60, params={
+            "version": "1.2", "operation": "searchRetrieve", "recordSchema": "dublincore", "maximumRecords": str(maximum),
+            "startRecord": str(debut), "query": 'bib.publisher all "Scriptarium"'})
+        r.raise_for_status()
+        recs = re.findall(r"<srw:record>(.*?)</srw:record>", r.text, flags=re.S)
+        for rec in recs:
+            d = {}
+            for k, val in re.findall(r"<dc:(\w+)>([^<]*)</dc:\1>", rec):
+                d.setdefault(k, []).append(html.unescape(val))
+            isbn = next((re.sub(r"\D", "", i) for i in d.get("identifier", []) if i.startswith("ISBN")), "")
+            if len(isbn) != 13:
+                continue
+            coll = next((m.group(1).strip() for x in d.get("description", []) for m in [re.match(r"Collection : ([^;]*)", x)] if m), "")
+            num = next((m.group(1) for x in d.get("description", []) for m in [re.search(r"Collection : [^;]*;\s*(\d+)", x)] if m), "")
+            titre = re.sub(r"\s*[/(].*$", "", (d.get("title") or [""])[0]).strip()
+            out.append({"isbn": isbn, "titre": titre, "collection": coll, "numero": num, "annee": (d.get("date") or [""])[0][:4]})
+        total = int(re.search(r"<srw:numberOfRecords>(\d+)", r.text).group(1))
+        debut += maximum
+        if not recs or debut > total:
+            return out
+
+
+def classer_scriptarium(n, rows):
+    """(série, numéro, titre) d'une notice de Scriptarium qui est un livre-jeu, sinon None. La série vient de la collection de la notice ;
+    à défaut, d'un livre du même titre déjà dans la base (les éditions courantes de Scriptarium n'ont pas de collection dans la BnF)."""
+    coll = n["collection"].lower()
+    if "dessin" in coll:                                       # bande dessinée
+        return None
+    for motif, serie in SERIES_SCRIPTARIUM:
+        if re.search(motif, coll):
+            return serie, n["numero"], n["titre"]
+    if not coll:
+        series = {r["serie"] for r in rows if r.get("serie") and cle(r["titre"]) == cle(n["titre"]) and r.get("editeur") != "Scriptarium"}
+        if len(series) == 1:
+            return series.pop(), "", n["titre"]
+    return None
+
+
 def charger(chemin=CHEMIN):
     try:
         return json.loads(Path(chemin).read_text(encoding="utf-8"))
@@ -117,7 +164,7 @@ def http_get(url, params=None):
     return r.text if r.status_code == 200 else None
 
 
-def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, importer=importer_isbn.importer):
+def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, importer=importer_isbn.importer, scriptarium=None):
     """Ajoute à la base les livres nouveaux. Renvoie {ajoutes: [...], signales: [...], a_paraitre: {...}}."""
     aujourdhui = (aujourdhui or date.today()).isoformat()
     etat = charger(chemin)
@@ -138,6 +185,19 @@ def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, 
         time.sleep(pause)
     uniques = {c["id"]: c for c in cartes}
     signales, lignes, infos = [], [], {}
+    for n in (scriptarium() if scriptarium else []):
+        if n["isbn"] in connus:
+            continue
+        rang = classer_scriptarium(n, rows)
+        if rang is None:
+            if n["isbn"] not in etat.setdefault("signales", []):
+                signales.append(f"{n['titre']} (Scriptarium, {n['collection'] or 'sans collection'}, {n['annee']}) : pas un livre-jeu reconnu ({n['isbn']})")
+                etat["signales"].append(n["isbn"])
+            continue
+        serie, numero, titre = rang
+        infos[n["isbn"]] = {"carte": {}, "fiche": {"isbn": n["isbn"], "date": ""}, "serie": serie, "numero": numero, "titre": titre,
+                           "scriptarium": True, "collection": n["collection"]}
+        lignes.append(f"{n['isbn']} ; {serie} ; {numero} ; {titre}")
     for c in uniques.values():
         if c["editeur"] == "gj" and not SERIES_GJ.search(c["titre"]):
             # Titre sans nom de série : seulement les auteurs de la collection. Déjà dans la base (une réédition annoncée, par exemple) : on suit sa
@@ -192,14 +252,25 @@ def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, 
             sib = next((x for x in rows if x["id"] != isbn and x["serie"] == r["serie"] and cle(x["titre"]) == cle(r["titre"]) and x.get("numero")), None)
             if sib:
                 r["numero"], r["livre"] = sib["numero"], sib["livre"]
+                if i.get("scriptarium"):
+                    r["titre"] = sib["titre"]                          # même écriture que l'édition déjà connue (« La Huitième Porte »)
+            if i.get("scriptarium"):
+                r["editeur"], r["collection_editeur"] = "Scriptarium", i["collection"]   # la fiche de la librairie renvoie parfois du texte de page (« Acheter »)
             ajoutes.append(f"{r['titre']} ({r['serie']}, {r['version']}, {r['annee']}) : {isbn}")
+        # Versions de Scriptarium : numérotées par année, à la suite des éditions déjà connues du même livre (le lot ajoute dans l'ordre de la BnF)
+        neuves = {isbn for isbn, i in infos.items() if i.get("scriptarium") and isbn in par_id}
+        for livre in {cle(par_id[isbn]["livre"]) for isbn in neuves}:
+            groupe = [r for r in rows if cle(r["livre"]) == livre]
+            avant = [r for r in groupe if r["id"] not in neuves]
+            for k, r in enumerate(sorted((r for r in groupe if r["id"] in neuves), key=lambda r: (r["annee"], r["id"])), start=1):
+                r["version"] = f"V{len(avant) + k}"
         editions.save(rows, base)
     sauver(etat, chemin)
     return {"ajoutes": ajoutes, "signales": signales, "a_paraitre": dict(etat["a_paraitre"])}
 
 
 def main():
-    r = veiller()
+    r = veiller(scriptarium=notices_scriptarium)
     print(f"{len(r['ajoutes'])} livre(s) ajouté(s) :")
     for a in r["ajoutes"]:
         print("  +", a)
