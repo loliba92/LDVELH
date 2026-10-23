@@ -1431,14 +1431,8 @@
   // Tendance de la valeur de la collection : mêmes livres, mêmes états, cotes publiées à la première et à la dernière date de l'historique
   function flecheValeur(bl) {
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '';
-    let debut = 0, fin = 0;
-    bl.lignes.forEach(({ b, c }) => {
-      const a = HIST.cotes[`${b.id}|${c.etat}`];
-      if (!a) return;
-      const d = a[0], f = a[a.length - 1];
-      if (d > 0 && f > 0) { debut += d * c.qte; fin += f * c.qte; }
-    });
-    if (debut <= 0) return '';
+    const { tot } = serieValeur(bl), debut = tot[0], fin = tot[tot.length - 1];
+    if (!(debut > 0)) return '';
     const v = fin / debut - 1;
     if (Math.abs(v) < 0.005) return '';                                  // trop faible pour dire quoi que ce soit : pas de flèche
     const dir = v > 0 ? 'hausse' : 'baisse', pct = (Math.round(Math.abs(v) * 1000) / 10).toString().replace('.', ',');
@@ -1489,21 +1483,29 @@
     return `<section class="hc-liste"><h4>${titre}</h4>` + (liste.length ? `<ol>${liste.map(({ b, c, d, f, delta, pct }) => `<li><button type="button" class="hc-livre" data-id="${esc(b.id)}" aria-label="Ouvrir la fiche : ${esc(b.titre)}, édition ${esc(b.version)}"><span class="hc-titre">${esc(b.titre)}</span><span class="hc-sous">${esc(b.serie)} · ${esc(b.version)} · ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}</span></button>` +
       `<span class="hc-var fleche-${dir}"><b>${fl} ${signe}${fmt(Math.abs(delta))}</b><small>${fmt(d)} → ${fmt(f)} · ${signe}${(Math.round(Math.abs(pct) * 1000) / 10).toString().replace('.', ',')} %</small></span></li>`).join('')}</ol>` : '<p class="sous">Aucun livre dans ce cas.</p>') + '</section>';
   }
-  function historiquePane(bl) {
-    if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
+  // Valeur de la collection à chaque date de relevé : même calcul pour la courbe, les listes et la flèche de tendance
+  function serieValeur(bl) {
     const n = HIST.dates.length, tot = new Array(n).fill(0), mouv = [];
     let suivis = 0;
     bl.lignes.forEach(({ b, c }) => {
-      const a = HIST.cotes[`${b.id}|${c.etat}`];
-      if (!a) return;
+      const cur = b.prix[c.etat];
+      if (cur == null || cur <= 0) return;                                  // sans cote : hors du total, comme dans l'estimation
+      const a = HIST.cotes[`${b.id}|${c.etat}`] || [];
       const sr = []; let der = null;
       for (let i = 0; i < n; i += 1) { if (a[i] != null && a[i] > 0) der = a[i]; sr.push(der); }       // une date sans cote reprend la dernière connue
-      if (sr.some((x) => x == null)) return;
+      const premier = sr.find((x) => x != null) ?? cur;
+      for (let i = 0; i < n; i += 1) if (sr[i] == null) sr[i] = premier;      // avant sa première cote, un livre garde cette première cote
+      sr[n - 1] = cur;                                                      // le dernier point est la cote du jour : le graphique rejoint toujours le total de l'estimation
       suivis += c.qte;
-      sr.forEach((x, i) => { tot[i] += x * c.qte; });
+      sr.forEach((x, k) => { tot[k] += x * c.qte; });
       mouv.push({ b, c, d: sr[0], f: sr[n - 1], delta: (sr[n - 1] - sr[0]) * c.qte, pct: sr[n - 1] / sr[0] - 1 });
     });
-    if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote suivie sur plusieurs dates. L\'historique apparaîtra après les prochains relevés.</p>';
+    return { n, tot, mouv, suivis };
+  }
+  function historiquePane(bl) {
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
+    const { n, tot, mouv, suivis } = serieValeur(bl);
+    if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote : l\'historique apparaîtra avec les prochains relevés.</p>';
     const jour = (d, long) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'numeric' });
     const mini = Math.min(...tot), maxi = Math.max(...tot), marge = Math.max((maxi - mini) * 0.2, maxi * 0.02);
     const bas = mini - marge, haut = maxi + marge, W = 640, H = 240, gx = 78, gd = 22, gh = 16, gb = 34;
@@ -1525,7 +1527,7 @@
         <figure class="hc-fig"><svg viewBox="0 0 ${W} ${H}" class="hc-svg" role="img" aria-label="Courbe de la valeur de la collection du ${jour(HIST.dates[0], true)} au ${jour(HIST.dates[n - 1], true)}. ${phrase}">${graduations}<polyline points="${pts}" class="hc-ligne"/>${points}${dates}</svg></figure>
         <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
       </div>
-      <p class="sous hc-note">${suivis === total ? 'Tous vos exemplaires sont suivis.' : `${suivis} exemplaire${suivis > 1 ? 's' : ''} sur ${total} suivi${suivis > 1 ? 's' : ''} : les autres n'ont pas de cote à toutes les dates.`} Mêmes livres, mêmes états à chaque date : seule la cote change.</p>
+      <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
