@@ -33,7 +33,6 @@ window.Compte = (function () {
     sorciers: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
     butin: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/>',
     equipe: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2 .6 3 2.5 3 5"/>',
-    supprimer: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
     deconnecter: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
   };
   function ico(nom) { return '<svg class="ico-menu" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[nom] + '</svg>'; }
@@ -58,7 +57,6 @@ window.Compte = (function () {
       (estAdmin() ? '<li><a href="revue-prix.html">' + ico('sorciers') + 'Espace des sorciers' + niv('sorcier') + '</a></li>' : '') +
       (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">' + ico('butin') + 'Butin' + niv('zagor') + '</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe' + niv('zagor') + '</a></li>' : '') +
-      (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">' + ico('supprimer') + 'Supprimer ma collection du Drive' + niv('heros') + '</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
     return h;
   }
