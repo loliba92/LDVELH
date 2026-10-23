@@ -201,7 +201,7 @@ window.Compte = (function () {
     var d = dialogue('<img class="bienvenue-img" src="images/accueil-2.webp" alt="" width="460" height="120" decoding="async">' +
       '<h2>Bienvenue sur La Cote du Héros</h2>' +
       '<p>L\'outil des collectionneurs de livres dont vous êtes le héros : retrouvez vos livres, repérez vos doubles à vendre et ce que vous cherchez, et estimez la valeur de chaque édition.</p>' +
-      '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix&nbsp;(€&nbsp;à&nbsp;€&#8288;€&#8288;€&#8288;€). <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
+      '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix&nbsp;(€&nbsp;à&nbsp;€&#8288;€&#8288;€&#8288;€&#8288;€). <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
       '<ul class="avantages">' +
       '<li><strong>Le prix estimé</strong> de chaque livre, selon son état.</li>' +
       '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +

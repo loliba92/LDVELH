@@ -398,7 +398,7 @@
   function afficher() {
     if (PAGE === 'collection') { afficherCollection(); return; }
     appliquerMasqueCotes();
-    if ($('#legende-niveaux')) $('#legende-niveaux').hidden = !cotesMasquees() || S.vue === 'groupe';
+    if ($('#legende-niveaux')) { $('#legende-niveaux').hidden = !cotesMasquees() || S.vue === 'groupe'; $('#legende-niveaux').innerHTML = `<span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.`; }
     appliquerOnglet();
     const liste = filtrer();
     const nf = nbFiltres();
@@ -611,7 +611,7 @@
       const p = b.prix[e.k];
       const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id];
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
-        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 4' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
+        <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 5' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
             : tuile(b)}</span>
@@ -915,8 +915,8 @@
             ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Niveau de prix</h3>
-        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 4'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">De € (parmi les moins chers) à €€€€ (parmi les plus chers), en comparant ce livre aux autres du guide. Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 5'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
+        <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
@@ -1030,18 +1030,14 @@
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
   const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
-  // Cotes chiffrées réservées aux comptes : un visiteur voit un niveau de 1 à 4 euros (€ à €€€€), jamais le chiffre. Tant que la configuration du compte
+  // Cotes chiffrées réservées aux comptes : un visiteur voit un niveau de 1 à 5 euros (€ à €€€€€), jamais le chiffre. Tant que la configuration du compte
   // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
   const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
-  let SEUILS = null;
-  function seuilsCote() {            // quatre niveaux : quartiles de tous les prix de la base, états confondus (un meilleur état ne paraît jamais moins cher)
-    if (!SEUILS) {
-      const v = DATA.flatMap((b) => ['convenable', 'bon', 'tres_bon'].map((k) => b.prix[k])).filter((x) => x != null).sort((a, b) => a - b);
-      SEUILS = v.length ? [1, 2, 3].map((q) => v[Math.floor((q * v.length) / 4)]) : [0, 0, 0];
-    }
-    return SEUILS;
-  }
-  const niveauCote = (v, k) => (v == null ? 0 : 1 + seuilsCote().filter((x) => v >= x).length);
+  // Cinq niveaux à seuils fixes (en euros) : moins de 10, 10 à 20, 20 à 40, 40 à 70, 70 et plus. Les mêmes seuils pour les trois états.
+  const SEUILS_COTE = [10, 20, 40, 70];
+  const niveauCote = (v, k) => (v == null ? 0 : 1 + SEUILS_COTE.filter((x) => v >= x).length);
+  const LEGENDE_NIVEAUX = [['€', 'moins de 10 €'], ['€€', '10 à 20 €'], ['€€€', '20 à 40 €'], ['€€€€', '40 à 70 €'], ['€€€€€', '70 € et plus']]
+    .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
