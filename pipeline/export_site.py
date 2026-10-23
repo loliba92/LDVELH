@@ -173,9 +173,10 @@ def main():
     racine_donnees = DB.parent.parent
     auto = lire_csv(racine_donnees / "processed" / "prix_neuf.csv")
     manuel = {k: v for k, v in lire_csv(racine_donnees / "manual" / "prix_editeur.csv").items() if v.get("prix")}
+    direct = {k for k, v in manuel.items() if v.get("vente_directe") == "1"}       # vendu seulement chez l'éditeur : la librairie ne le voit pas, ce n'est pas « hors vente »
     bnf = {k: v for k, v in lire_csv(racine_donnees / "processed" / "prix_editeur.csv").items() if v.get("prix")}
     hors_manuel = set(lire_csv(racine_donnees / "manual" / "hors_vente.csv"))      # décision du propriétaire : l'emporte toujours
-    hors_vente = hors_manuel | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible"}
+    hors_vente = hors_manuel | {k for k, v in auto.items() if v.get("disponibilite") == "indisponible" and k not in direct}
     en_stock = {k for k, v in auto.items() if v.get("disponibilite") == "en_stock" and v.get("prix")}      # en vente neuve, constaté ce jour
     editeur = {}
     for isbn_e in set(bnf) | set(manuel) | set(auto):
