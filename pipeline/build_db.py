@@ -162,10 +162,15 @@ def load_livres_versions(cx):
                  r.get("notice_bnf") or None, r.get("couverture") or None, r.get("statut") or "brut"))
 
 
+class EditionInconnue(ValueError):
+    """Édition absente de la base (supprimée depuis le relevé, ou jamais ajoutée). Une ligne de prix qui la vise est écartée et signalée,
+    sans faire échouer la construction : sinon un livre supprimé pendant l'heure que dure un relevé fait perdre tout le relevé."""
+
+
 def insert_fait(cx, version_id, d, source, type_prix, etat, prix, port=None, lot=0, url=None, nb=1):
     v = cx.execute("SELECT version_key, livre_key, serie_key FROM DimVersion WHERE id=?", (version_id,)).fetchone()
     if v is None:
-        raise ValueError(f"édition inconnue : {version_id}")
+        raise EditionInconnue(f"édition inconnue : {version_id}")
     keys = {}
     for table, col, code in (("DimEtat", "etat_key", etat), ("DimSource", "source_key", source),
                              ("DimTypePrix", "type_key", type_prix)):
@@ -234,8 +239,10 @@ def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api"):
 
     Une ligne par livre et par état : isbn13, date, etat, nb_annonces, prix_min, prix_median, prix_max.
     Seule la médiane entre dans la base (nature « prix demandé », nombre d'annonces conservé).
+    Une ligne dont l'édition n'est plus dans la base est écartée (renvoyée dans le 5e élément) : ce n'est pas une erreur.
     """
     n, doublons, erreurs, fichiers = 0, 0, [], sorted(Path(dossier).glob(motif))
+    ecartees = {}                                              # {fichier: {isbn: nombre de lignes}} : éditions absentes de la base
     for fichier in fichiers:
         with open(fichier, newline="", encoding="utf-8") as f:
             for i, r in enumerate(csv.DictReader(f), start=2):
@@ -248,9 +255,12 @@ def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api"):
                                          r["etat"], round(prix, 2), nb=nb)
                     n += ajoute
                     doublons += 1 - ajoute
+                except EditionInconnue:
+                    isbn = (r.get("isbn13") or "").strip()
+                    ecartees.setdefault(fichier.name, {})[isbn] = ecartees.get(fichier.name, {}).get(isbn, 0) + 1
                 except (ValueError, KeyError) as e:
                     erreurs.append(f"{fichier.name} ligne {i} : {e}")
-    return n, doublons, erreurs, len(fichiers)
+    return n, doublons, erreurs, len(fichiers), ecartees
 
 
 def main():
@@ -270,8 +280,8 @@ def main():
         load_livres_versions(cx)
         n_hist, ignores, orphelins = load_historique(cx)
         n_man, doublons, erreurs = load_manuel(cx, a.manual)
-        n_ebay, dbl_ebay, err_ebay, nb_fichiers = load_ebay(cx, a.occasion)
-        n_lib, dbl_lib, err_lib, nb_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires")
+        n_ebay, dbl_ebay, err_ebay, nb_fichiers, ecart_ebay = load_ebay(cx, a.occasion)
+        n_lib, dbl_lib, err_lib, nb_lib, ecart_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires")
         n_ebay += n_lib
         nb_fichiers += nb_lib
         doublons += dbl_ebay + dbl_lib
@@ -289,6 +299,8 @@ def main():
           f"{orphelins} prix sans édition connue écartés)")
     for e in erreurs:
         print(f"  ✗ {e}")
+    for fichier, par_isbn in {**ecart_ebay, **ecart_lib}.items():          # éditions supprimées depuis le relevé : écartées, sans échec
+        print(f"  ⚠ {fichier} : {sum(par_isbn.values())} ligne(s) écartée(s), édition absente de la base (supprimée ?) : {', '.join(sorted(par_isbn))}")
     print("  Contrôle des clés étrangères :", "OK" if not problemes else f"{len(problemes)} anomalie(s)")
     cx.close()
     return 1 if (problemes or erreurs) else 0
