@@ -122,7 +122,7 @@
     const avant = modifie(l) ? `<span class="rv-avant">avant <s>${eur(l.archive)}</s> · <b>${pct(r)}</b></span>` : '';
     const notes = [origine(l), l.lib_prix && (l.eb_nb_toutes || l.eb_nb || l.deduit || l.valide || l.neuf || l.repartition) ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
     return `<div class="rv-prix${modifie(l) ? (r > 1 ? ' hausse' : ' baisse') : ''}${alerte ? ' alerte' : ''}"><span class="rv-lib">${lib}</span>` +
-      `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span>${boutons(ed, cle, null, l)}</div>`;
+      `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}${l.lib_prix && ed.isbn ? ` <a class="rv-lien-lib" href="https://www.leslibraires.fr/livre/${encodeURIComponent(ed.isbn)}" target="_blank" rel="noopener noreferrer" aria-label="Voir l'exemplaire en librairie sur leslibraires.fr (nouvel onglet)">Voir en librairie ↗</a>` : ''}</span>${boutons(ed, cle, null, l)}</div>`;
   }
 
   // Dernière révision d'une édition : la validation la plus récente de l'un de ses états (y compris celles pas encore transmises)
