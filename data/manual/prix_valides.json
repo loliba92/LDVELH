@@ -61,6 +61,24 @@
    "le": "2026-10-17",
    "par": "loliba (superadmin)"
   },
+  "9782070332885|bon": {
+   "prix": 16.16,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070332885|convenable": {
+   "prix": 10.77,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070332885|tres_bon": {
+   "prix": 26.93,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
   "9782070333394|convenable": {
    "prix": 8.0,
    "decision": "corrige",
@@ -249,21 +267,21 @@
    "le": "2026-10-15"
   },
   "9782070334728|bon": {
-   "prix": 9.17,
+   "prix": 8.34,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070334728|convenable": {
-   "prix": 6.12,
+   "prix": 5.56,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070334728|tres_bon": {
-   "prix": 13.31,
+   "prix": 13.9,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070335510|convenable": {
@@ -815,22 +833,40 @@
    "le": "2026-10-21",
    "par": "loliba (superadmin)"
   },
-  "9782070647415|bon": {
-   "prix": 5.76,
+  "9782070647361|bon": {
+   "prix": 8.68,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070647361|convenable": {
+   "prix": 5.79,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070647361|tres_bon": {
+   "prix": 14.47,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070647415|bon": {
+   "prix": 5.79,
+   "decision": "confirme",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070647415|convenable": {
-   "prix": 2.48,
+   "prix": 2.52,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070647415|tres_bon": {
-   "prix": 6.25,
+   "prix": 6.95,
    "decision": "confirme",
-   "le": "2026-10-22",
+   "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
   "9782070649525|bon": {
