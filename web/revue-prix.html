@@ -73,6 +73,7 @@
   <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>
   <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden>Annonces</button>
+  <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden>Pépites</button>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false">Ajouter</button>
   <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></button>
 </div>
@@ -131,6 +132,12 @@
   <div class="champ"><label for="an-q">Chercher un livre</label><input type="search" id="an-q" autocomplete="off" placeholder="Titre ou série"></div>
   <p class="sous" id="an-etat" role="status" aria-live="polite"></p>
   <div id="an-liste"></div>
+</div>
+<div class="rv-pane" id="pane-pepites" role="tabpanel" hidden>
+  <p class="chapeau">Les bonnes affaires : annonces encore en ligne à <strong>50 % du prix du site ou moins</strong>, pour la même édition et le même état, avec au moins 3 € d'économie. Une annonce est un prix demandé : ouvrez-la pour vérifier le livre, son état et les frais de port.</p>
+  <label class="case"><input type="checkbox" id="pp-solides"><span>Seulement les solides</span></label>
+  <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
+  <div id="pp-liste"></div>
 </div>
 <div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
 <section class="rv-ajout" aria-labelledby="aj-titre">

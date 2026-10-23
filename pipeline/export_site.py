@@ -84,7 +84,9 @@ JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultabl
 def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
-    Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation]. Une annonce non revue depuis plus de `jours` jours
+    Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation, état supposé]. « état supposé » : 1 si l'annonce ne précise
+    pas son état (on suppose le très bon état), 0 s'il est indiqué, None pour les relevés d'avant l'enregistrement de cette information.
+    Une annonce non revue depuis plus de `jours` jours
     avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}."""
     fichiers = sorted(fichiers)
     if not fichiers:
@@ -94,12 +96,13 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
         jour = f.stem[-10:]
         with open(f, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh):
-                vues[(r["isbn13"], r["lien"])] = (r["etat"], float(r["prix"]), r["titre"], r["trouvee_par"], jour)
+                supp = (r.get("etat_suppose") or "").strip()
+                vues[(r["isbn13"], r["lien"])] = (r["etat"], float(r["prix"]), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
     sortie = {}
-    for (isbn, lien), (etat, prix, titre, par, jour) in vues.items():
+    for (isbn, lien), (etat, prix, titre, par, jour, supp) in vues.items():
         if jour >= limite:
-            sortie.setdefault(isbn, {}).setdefault(etat, []).append([prix, titre, lien, par, jour])
+            sortie.setdefault(isbn, {}).setdefault(etat, []).append([prix, titre, lien, par, jour, supp])
     return sortie
 
 
@@ -322,7 +325,7 @@ def main():
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
         if isbn in titres:
-            annonces.setdefault(isbn, {}).setdefault(etat, []).append([prix, f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie"])
+            annonces.setdefault(isbn, {}).setdefault(etat, []).append([prix, f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie", None, 1])      # une librairie n'indique pas l'état : supposé
     if annonces:
         for par_etat in annonces.values():
             for liste in par_etat.values():

@@ -1933,3 +1933,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 
 .tableau-droits td.txt { width: 11rem; font-size: .92rem; line-height: 1.3; }
 @media (max-width: 700px) { .tableau-droits td.txt { width: 6.8rem; font-size: .8rem; padding-inline: 4px; } }
+
+/* Onglet « Pépites » (SuperAdmin) : annonces à 50 % du prix du site ou moins */
+.pp-carte header { align-items: center; }
+.pp-carte p { margin: 6px 0; overflow-wrap: anywhere; }
+.pp-prix { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.pp-prix .rv-ann-prix { font-size: 1.4rem; }
+.pp-eco { color: var(--gold); }
+.pp-carte p a { color: var(--text); text-underline-offset: 3px; }
+.pp-badge { display: inline-block; padding: 1px 10px; border-radius: 999px; font: 700 .78rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+.pp-badge.solide { border: 1px solid var(--gold); color: var(--gold); }
+.pp-badge.verifier { border: 1px solid var(--line-strong); color: var(--muted); }
