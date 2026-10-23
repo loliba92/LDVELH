@@ -1043,6 +1043,10 @@
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
+  // Accès discret au Butin sur l'accueil : SuperAdmin seulement (le rôle arrive après le chargement)
+  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSuper(); };
+  document.addEventListener('cdh-compte', majButin);
+  majButin();
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
   let etaitSansCompte = null, etaitSuper = null, appPrete = false;
   document.addEventListener('cdh-compte', () => {
