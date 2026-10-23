@@ -83,6 +83,7 @@
     construireHero();
     construireControles();
     lireAdresse();
+    if (window.Compte && window.Compte.pret()) window.Compte.accueillir();
     synchroniser();
     ouvrirDepuisAdresse();
     basculerSelecteur(!window.matchMedia('(max-width: 1000px)').matches);
@@ -1054,6 +1055,7 @@
     const super_ = estSuper();           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
     if (etaitSuper !== null && etaitSuper !== super_ && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSuper = super_;
+    if (window.Compte) window.Compte.accueillir();
   });
   const annonce = (t) => { $('#annonce').textContent = ''; setTimeout(() => { $('#annonce').textContent = t; }, 30); };
   const parId = () => new Map(DATA.map((b) => [b.id, b]));
