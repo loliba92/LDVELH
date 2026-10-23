@@ -13,7 +13,7 @@ window.Compte = (function () {
 
   /* ---------- État affiché ---------- */
   function etat() {
-    if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Les fiches et la recherche restent libres ; les cotes exactes et le scan sont réservés aux comptes.' };
+    if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Les fiches et la recherche restent libres ; les prix estimés et le scan sont réservés aux comptes.' };
     var s = window.Cloud.statut();
     if (!window.Cloud.actif() || s === 'a-reprendre') return { cle: 'reprendre', ligne: 'Votre connexion a expiré. Vos changements sont gardés sur cet appareil.' };
     if (s === 'connecte' && !reprisEnCours && window.Cloud.premiereFois()) return { cle: 'choix', ligne: 'Votre collection n\'est pas encore enregistrée dans votre compte : il reste un choix à faire.' };
@@ -184,7 +184,7 @@ window.Compte = (function () {
     var d = dialogue('<h2>Devenez Héros, c\'est gratuit</h2>' +
       '<p>Les fiches et la recherche restent libres. Un compte Google vous ouvre tout le reste :</p>' +
       '<ul class="avantages">' +
-      '<li><strong>Les prix exacts</strong> de chaque état (convenable, bon, très bon).</li>' +
+      '<li><strong>Les prix estimés</strong> de chaque état (convenable, bon, très bon).</li>' +
       '<li><strong>Votre collection</strong> : ajoutez vos livres en un geste, ou en scannant leur code-barres.</li>' +
       '<li><strong>Sa valeur</strong>, calculée avec les prix du guide.</li>' +
       '<li><strong>Vos doubles à vendre</strong> et les livres que vous cherchez, bien séparés.</li>' +
@@ -203,7 +203,7 @@ window.Compte = (function () {
       '<p>L\'outil des collectionneurs de livres dont vous êtes le héros : retrouvez vos livres, repérez vos doubles à vendre et ce que vous cherchez, et estimez la valeur de chaque édition.</p>' +
       '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix&nbsp;(€&nbsp;à&nbsp;€&#8288;€&#8288;€&#8288;€). <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
       '<ul class="avantages">' +
-      '<li><strong>Les prix exacts</strong> de chaque état.</li>' +
+      '<li><strong>Les prix estimés</strong> de chaque état.</li>' +
       '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +
       '<li><strong>Vos doubles à vendre</strong> et les livres à trouver.</li>' +
       '<li><strong>Des liens directs</strong> vers Leboncoin, Vinted et eBay.</li>' +

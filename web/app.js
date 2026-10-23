@@ -916,7 +916,7 @@
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Niveau de prix</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 4'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix">De € (parmi les moins chers) à €€€€ (parmi les plus chers), en comparant ce livre aux autres du guide. Les prix exacts sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <p class="sous legende-prix">De € (parmi les moins chers) à €€€€ (parmi les plus chers), en comparant ce livre aux autres du guide. Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
@@ -1030,7 +1030,7 @@
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
   const dansCompte = () => !!window.Compte && window.Compte.actif() && !!window.Cloud && window.Cloud.lie();
   const sansCompte = () => !!window.Compte && window.Compte.actif() && !window.Cloud.lie();
-  // Cotes exactes réservées aux comptes : un visiteur voit un niveau de 1 à 4 euros (€ à €€€€), jamais le chiffre. Tant que la configuration du compte
+  // Cotes chiffrées réservées aux comptes : un visiteur voit un niveau de 1 à 4 euros (€ à €€€€), jamais le chiffre. Tant que la configuration du compte
   // n'est pas lue, on masque aussi (pas d'affichage furtif des chiffres).
   const cotesMasquees = () => !!window.Compte && !dansCompte() && (!window.Compte.pret() || window.Compte.actif());
   let SEUILS = null;
@@ -1637,7 +1637,7 @@
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
           <p class="texte">Avec un compte Google, gratuit :</p>
-          <ul class="avantages"><li>Prix exacts</li><li>Scan des codes-barres</li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
+          <ul class="avantages"><li>Prix estimés</li><li>Scan des codes-barres</li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
         corps = `<p class="gros">Elle est encore vide</p>
