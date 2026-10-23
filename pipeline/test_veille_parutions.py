@@ -24,7 +24,7 @@ class TestScriptarium(unittest.TestCase):
         n = lambda **k: dict({"isbn": "9782490523351", "titre": "X", "collection": "", "numero": "", "annee": "2026"}, **k)
         self.assertEqual(v.classer_scriptarium(n(titre="Les Murmures", collection="Oeil Noir", numero="3"), rows), ("L'Œil noir (solos)", "3", "Les Murmures"))
         self.assertEqual(v.classer_scriptarium(n(titre="La huitième porte"), rows), ("Défis et Sortilèges", "", "La huitième porte"))   # sans collection : série du même titre
-        self.assertIsNone(v.classer_scriptarium(n(collection="Oeil Noir bande dessinnée", numero="1"), rows))                           # bande dessinée
+        self.assertEqual(v.classer_scriptarium(n(titre="Le Chevalier", collection="Oeil Noir bande dessinnée", numero="1"), rows), ("L'Œil noir (BD)", "1", "Le Chevalier"))
         self.assertIsNone(v.classer_scriptarium(n(titre="Le bal au pont"), rows))                                                        # roman : signalé seulement
 
     def test_ajout_et_versions(self):
