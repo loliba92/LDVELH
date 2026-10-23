@@ -1,4 +1,4 @@
-import sys, unittest
+import json, sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import etats
@@ -105,23 +105,51 @@ class TestEtats(unittest.TestCase):
             self.assertEqual(etats.charger_ratios(f)["bon"], 0.7)
 
 
-class TestPlafond(unittest.TestCase):
-    def test_un_prix_ne_bouge_que_de_dix_pour_cent_par_jour(self):
-        p = {"convenable": est(20), "bon": est(20), "tres_bon": est(20)}
-        p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"] = 30.0, 21.0, 10.0
-        n = etats.plafonner(p, {"convenable": 20.0, "bon": 20.0, "tres_bon": 20.0}, 0.10)
-        self.assertEqual((p["convenable"]["prix"], p["bon"]["prix"], p["tres_bon"]["prix"]), (22.0, 21.0, 18.0))
-        self.assertEqual(n, 2)
-        self.assertTrue(p["convenable"]["plafonne"] and "plafonne" not in p["bon"])
+class TestLissage(unittest.TestCase):
+    def prix(self, cible, nb, **extra):
+        return {**est(cible), "nb": nb, **extra}
 
-    def test_un_prix_valide_n_est_jamais_plafonne(self):
+    def test_le_prix_du_jour_depend_de_celui_de_la_veille(self):
+        p = {"bon": self.prix(42.0, 3)}                                  # trois annonces : gain 0,3
+        n = etats.lisser(p, {"bon": 5.0})
+        self.assertEqual(p["bon"]["prix"], 16.1)                          # 5 + 0,3 × (42 − 5)
+        self.assertEqual((p["bon"]["cible"], p["bon"]["lisse"], n), (42.0, True, 1))
+
+    def test_moins_d_annonces_le_prix_bouge_moins_vite(self):
+        for nb, attendu in ((0, 19.0), (1, 19.0), (2, 28.0), (3, 37.0), (7, 37.0)):       # veille 10, cible 100
+            p = {"bon": self.prix(100.0, nb)}
+            etats.lisser(p, {"bon": 10.0})
+            self.assertEqual(p["bon"]["prix"], attendu, f"{nb} annonce(s)")
+
+    def test_un_prix_valide_n_est_jamais_lisse(self):
         p = {"bon": est(40, source="validé")}
-        self.assertEqual(etats.plafonner(p, {"bon": 20.0}, 0.10), 0)
+        self.assertEqual(etats.lisser(p, {"bon": 20.0}), 0)
         self.assertEqual(p["bon"]["prix"], 40)
 
     def test_sans_prix_de_la_veille_rien_ne_change(self):
         p = {"bon": est(40)}
-        self.assertEqual(etats.plafonner(p, {"bon": None}, 0.10), 0)
+        self.assertEqual(etats.lisser(p, {"bon": None}), 0)
+        self.assertEqual(p["bon"]["prix"], 40)
+
+    def test_un_prix_deja_a_sa_cible_ne_change_pas(self):
+        p = {"bon": self.prix(20.0, 3)}
+        self.assertEqual(etats.lisser(p, {"bon": 20.0}), 0)
+        self.assertNotIn("lisse", p["bon"])
+
+    def test_le_prix_du_neuf_est_fiable(self):
+        p = {"tres_bon": self.prix(15.5, 0, neuf=True)}
+        etats.lisser(p, {"tres_bon": 10.0})
+        self.assertEqual(p["tres_bon"]["prix"], 11.65)                    # gain 0,3 même sans annonce
+
+    def test_les_gains_se_reglent_dans_le_fichier(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "r.json"
+            f.write_text(json.dumps({"gains_lissage": {"0": 0.05, "1": 0.1, "2": 0.5, "3": 1}}))
+            self.assertEqual(etats.charger_gains(f)[2], 0.5)
+            f.write_text(json.dumps({"gains_lissage": {"0": 0, "1": 0.1, "2": 0.5, "3": 1}}))    # 0 : invalide
+            self.assertEqual(etats.charger_gains(f), etats.GAINS_DEFAUT)
+            f.write_text("{}")
+            self.assertEqual(etats.charger_gains(f), etats.GAINS_DEFAUT)
 
 
 if __name__ == "__main__":
