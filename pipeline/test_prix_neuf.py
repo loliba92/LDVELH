@@ -58,5 +58,51 @@ class TestPrixNeuf(unittest.TestCase):
             p.source_leslibraires("x", Faux(Rep(503), Rep(503)), attentes=(0,))
 
 
+class TestReleveLeger(unittest.TestCase):
+    """Relevé léger (--occasion) : seulement les éditions qui ont un exemplaire d'occasion, fusionné dans les fichiers existants."""
+    A, B, C = "9782070585168", "9782070333707", "9782070544035"      # A : neuf en stock, B : occasion, C : occasion
+
+    def ecrire_sortie(self, d):
+        (d / "prix_neuf.csv").write_text("isbn13,prix,disponibilite,prix_occasion,date,source\n"
+                                         f"{self.A},13.5,en_stock,,2026-10-01,leslibraires.fr\n"
+                                         f"{self.B},,indisponible,20.0,2026-10-01,leslibraires.fr\n"
+                                         f"{self.C},,indisponible,30.0,2026-10-01,leslibraires.fr\n", encoding="utf-8")
+
+    def test_les_isbn_a_relire_sont_ceux_qui_ont_un_exemplaire_d_occasion(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as t:
+            self.ecrire_sortie(Path(t))
+            self.assertEqual(p.isbn_avec_occasion(Path(t) / "prix_neuf.csv"), sorted([self.B, self.C]))
+            self.assertEqual(p.isbn_avec_occasion(Path(t) / "absent.csv"), [])
+
+    def test_fusion_remplace_garde_et_ajoute(self):
+        anciennes = [{"isbn13": "1", "x": "a"}, {"isbn13": "2", "x": "b"}]
+        nouvelles = [{"isbn13": "2", "x": "B"}, {"isbn13": "3", "x": "c"}]
+        self.assertEqual(p.fusionner(anciennes, nouvelles), [{"isbn13": "1", "x": "a"}, {"isbn13": "2", "x": "B"}, {"isbn13": "3", "x": "c"}])
+
+    def test_le_releve_leger_ne_lit_que_ces_fiches_et_garde_le_reste(self):
+        import tempfile
+        lues = []
+        def faux(isbn):
+            lues.append(isbn)
+            return {"isbn13": isbn, "prix": None, "disponibilite": "indisponible", "prix_occasion": 25.0 if isbn == self.B else None, "source": "leslibraires.fr", "date": "2026-10-24"}
+        with tempfile.TemporaryDirectory() as t:
+            t = Path(t); self.ecrire_sortie(t)
+            sauve = (p.SORTIE, p.OCCASION, p.prix_neuf, p.time.sleep, sys.argv)
+            try:
+                p.SORTIE, p.OCCASION, p.prix_neuf, p.time.sleep, sys.argv = t / "prix_neuf.csv", t / "occ", faux, (lambda s: None), ["prix_neuf.py", "--occasion"]
+                p.main()
+            finally:
+                p.SORTIE, p.OCCASION, p.prix_neuf, p.time.sleep, sys.argv = sauve
+            self.assertEqual(sorted(lues), sorted([self.B, self.C]))                    # A (neuf) n'est pas relue
+            lignes = {r["isbn13"]: r for r in p.lire_csv(t / "prix_neuf.csv")}
+            self.assertEqual((lignes[self.A]["date"], lignes[self.A]["prix"]), ("2026-10-01", "13.5"))         # intacte
+            self.assertEqual((lignes[self.B]["date"], lignes[self.B]["prix_occasion"]), ("2026-10-24", "25.0"))  # relue
+            self.assertEqual(lignes[self.C]["prix_occasion"], "")                                              # exemplaire vendu : plus d'occasion
+            fichier = list((t / "occ").glob("libraires-*.csv"))
+            self.assertEqual(len(fichier), 1)
+            self.assertEqual([r["isbn13"] for r in p.lire_csv(fichier[0])], [self.B])
+
+
 if __name__ == "__main__":
     unittest.main()
