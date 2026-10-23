@@ -1,15 +1,15 @@
-/* Page « Équipe » (SuperAdmin) : ajouter, retirer ou bloquer des sorciers, par le relais (voir relais/).
-   Le relais vérifie à chaque demande que la personne est SuperAdmin ; cette page n'est qu'une commande à distance. */
+/* Page « Équipe » (Zagor) : ajouter, retirer ou bloquer des sorciers, par le relais (voir relais/).
+   Le relais vérifie à chaque demande que la personne est Zagor ; cette page n'est qu'une commande à distance. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var NIVEAU = { admin: 'Sorcier', superadmin: 'SuperAdmin' };
+  var NIVEAU = { admin: 'Sorcier', superadmin: 'Zagor' };
   var etat = $('#eq-etat'), msg = $('#eq-msg');
   var dire = function (t, erreur) { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
 
   function erreurLisible(r) {
     var e = (r && r.erreur) || 'erreur inconnue';
-    return e === 'droits insuffisants' ? 'Ce compte n\'est pas SuperAdmin.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+    return e === 'droits insuffisants' ? 'Ce compte n\'est pas Zagor.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
   }
 
   function dessiner(r) {
@@ -17,7 +17,7 @@
     liste.innerHTML = r.equipe.length ? r.equipe.map(function (m) {
       return '<li class="eq-membre"><div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau">' + esc(NIVEAU[m.role] || m.role) + '</span>' +
         '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>' +
-        (m.role === 'superadmin' ? '<p class="sous">Protégé : un SuperAdmin ne peut être ni retiré ni bloqué.</p>' :
+        (m.role === 'superadmin' ? '<p class="sous">Protégé : un Zagor ne peut être ni retiré ni bloqué.</p>' :
           '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
           '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>') + '</li>';
     }).join('') : '<li class="sous">Aucun membre.</li>';
@@ -74,7 +74,7 @@
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   });
 
-  // La porte ouvre la page une fois le niveau SuperAdmin confirmé par le relais
+  // La porte ouvre la page une fois le niveau Zagor confirmé par le relais
   document.addEventListener('cdh-porte-ouverte', charger);
   if (!document.getElementById('main').hidden) charger();
 })();

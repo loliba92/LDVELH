@@ -56,7 +56,7 @@ def _retirer_prix(ident, chemin):
 
 
 def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True, role="superadmin"):
-    """Applique les corrections. Renvoie [(statut, identifiant, texte)] ; statut : ok | refuse. La suppression d'une édition est réservée au SuperAdmin."""
+    """Applique les corrections. Renvoie [(statut, identifiant, texte)] ; statut : ok | refuse. La suppression d'une édition est réservée au Zagor."""
     rows = editions.load(base)
     bilan = []
     for e in lire(texte):
@@ -68,7 +68,7 @@ def appliquer(texte, base=None, chemin_prix=validations.CHEMIN, jaquettes=True, 
         if e["champ"] not in CHAMPS:
             bilan.append(("refuse", e["id"], f"champ inconnu : {e['champ']}"))
         elif e["champ"] == "supprimer" and role != "superadmin":
-            bilan.append(("refuse", e["id"], "la suppression d'une édition est réservée au SuperAdmin"))
+            bilan.append(("refuse", e["id"], "la suppression d'une édition est réservée au Zagor"))
         elif e["champ"] == "supprimer":
             rows = [x for x in rows if x["id"] != r["id"]]
             if jaquettes:

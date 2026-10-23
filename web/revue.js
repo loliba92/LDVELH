@@ -589,7 +589,7 @@
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // les annonces ne sont montrées qu'au SuperAdmin
+  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // les annonces ne sont montrées qu'au Zagor
   const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
   const voirAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
   function annoncesEdition(ed) {
@@ -645,7 +645,7 @@
     dessiner();
   }
 
-  // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au SuperAdmin comme les annonces.
+  // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au Zagor comme les annonces.
   // « Solide » : exemplaire de librairie, ou trouvée par l'ISBN avec l'état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   let dessinerPepites = () => {};
@@ -733,7 +733,7 @@
   initAnnonces();
   initPepites();
   initNav();
-  // Annonces : lien et onglet réservés au SuperAdmin (le rôle arrive après la connexion)
+  // Annonces : lien et onglet réservés au Zagor (le rôle arrive après la connexion)
   let pepitesOuvertes = false;
   function majAnnonces() {
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');

@@ -24,7 +24,7 @@ class TestFiches(unittest.TestCase):
         for role in ("admin", ""):
             bilan = c.appliquer("9782075237192 ; supprimer", base, prix, jaquettes=False, role=role)
             self.assertEqual(bilan[0][0], "refuse")
-            self.assertIn("SuperAdmin", bilan[0][2])
+            self.assertIn("Zagor", bilan[0][2])
             self.assertIn("9782075237192", {r["id"] for r in editions.load(base)})
         bilan = c.appliquer("9782075237192 ; supprimer", base, prix, jaquettes=False, role="superadmin")
         self.assertEqual(bilan[0][0], "ok")

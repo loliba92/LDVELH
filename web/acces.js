@@ -1,4 +1,4 @@
-/* Porte de la page admin : le niveau (Sorcier ou SuperAdmin) vient du relais (voir relais/), après la connexion Google du site.
+/* Porte de la page admin : le niveau (Sorcier ou Zagor) vient du relais (voir relais/), après la connexion Google du site.
    Plus de mot de passe. Une page peut exiger un niveau plus élevé avec data-niveau="superadmin" sur <main>.
    Protection légère côté navigateur : la vraie vérification est faite par le relais à chaque envoi. */
 (function () {
