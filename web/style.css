@@ -1915,3 +1915,18 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rv-pas-ann { display: inline-block; margin-top: 4px; }
 .rv-lien-lib { display: inline-block; margin-top: 2px; white-space: nowrap; }
 .rv-titre a.rv-voir-ann { font: 600 .82rem var(--f-ui); color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Historique : livres qui ont le plus progressé / reculé */
+.hc-mouv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 6px 0 4px; }
+.hc-liste h4 { margin: 0 0 8px; font: 700 .78rem var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--brass-text, var(--gold)); }
+.hc-liste ol { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.hc-liste li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.hc-liste li:last-child { border-bottom: 0; }
+.hc-livre { display: flex; flex-direction: column; min-width: 0; padding: 4px 0; border: 0; background: none; color: var(--text); text-align: left; cursor: pointer; font: inherit; min-height: 44px; justify-content: center; }
+.hc-livre:hover .hc-titre, .hc-livre:focus-visible .hc-titre { text-decoration: underline; }
+.hc-titre { font-weight: 600; overflow-wrap: anywhere; }
+.hc-sous { color: var(--muted); font-size: .82rem; }
+.hc-var { display: flex; flex-direction: column; align-items: flex-end; flex: 0 0 auto; text-align: right; }
+.hc-var b { font-size: 1rem; white-space: nowrap; }
+.hc-var small { color: var(--muted); font-size: .76rem; white-space: nowrap; }
+@media (max-width: 800px) { .hc-mouv { grid-template-columns: minmax(0, 1fr); } }

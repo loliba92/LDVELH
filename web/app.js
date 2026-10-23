@@ -1483,9 +1483,15 @@
       <b>${esc(b.titre)}</b><span>${esc(b.version)} · ${esc(etatDe(c.etat).court)}</span><span class="p">${fmt(b.prix[c.etat])}</span>${pastilleRarete(b)}</button>`;
   }
   // Historique : valeur de la collection à chaque date de relevé, pour les livres dont la cote est connue à toutes les dates (mêmes livres, mêmes états)
+  // Les cinq livres dont la valeur (cote × exemplaires) a le plus monté ou le plus baissé depuis le premier relevé
+  function listeMouv(titre, liste, dir) {
+    const signe = dir === 'hausse' ? '+' : '−', fl = dir === 'hausse' ? '▲' : '▼';
+    return `<section class="hc-liste"><h4>${titre}</h4>` + (liste.length ? `<ol>${liste.map(({ b, c, d, f, delta, pct }) => `<li><button type="button" class="hc-livre" data-id="${esc(b.id)}" aria-label="Ouvrir la fiche : ${esc(b.titre)}, édition ${esc(b.version)}"><span class="hc-titre">${esc(b.titre)}</span><span class="hc-sous">${esc(b.serie)} · ${esc(b.version)} · ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}</span></button>` +
+      `<span class="hc-var fleche-${dir}"><b>${fl} ${signe}${fmt(Math.abs(delta))}</b><small>${fmt(d)} → ${fmt(f)} · ${signe}${(Math.round(Math.abs(pct) * 1000) / 10).toString().replace('.', ',')} %</small></span></li>`).join('')}</ol>` : '<p class="sous">Aucun livre dans ce cas.</p>') + '</section>';
+  }
   function historiquePane(bl) {
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
-    const n = HIST.dates.length, tot = new Array(n).fill(0);
+    const n = HIST.dates.length, tot = new Array(n).fill(0), mouv = [];
     let suivis = 0;
     bl.lignes.forEach(({ b, c }) => {
       const a = HIST.cotes[`${b.id}|${c.etat}`];
@@ -1495,16 +1501,17 @@
       if (sr.some((x) => x == null)) return;
       suivis += c.qte;
       sr.forEach((x, i) => { tot[i] += x * c.qte; });
+      mouv.push({ b, c, d: sr[0], f: sr[n - 1], delta: (sr[n - 1] - sr[0]) * c.qte, pct: sr[n - 1] / sr[0] - 1 });
     });
     if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote suivie sur plusieurs dates. L\'historique apparaîtra après les prochains relevés.</p>';
     const jour = (d, long) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', long ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'numeric' });
     const mini = Math.min(...tot), maxi = Math.max(...tot), marge = Math.max((maxi - mini) * 0.2, maxi * 0.02);
-    const bas = mini - marge, haut = maxi + marge, W = 640, H = 240, gx = 52, gd = 18, gh = 16, gb = 34;
+    const bas = mini - marge, haut = maxi + marge, W = 640, H = 240, gx = 78, gd = 22, gh = 16, gb = 34;
     const X = (i) => gx + (i * (W - gx - gd)) / (n - 1), Y = (v) => gh + ((haut - v) / (haut - bas)) * (H - gh - gb);
     const pts = tot.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');
-    const graduations = [bas + marge, (mini + maxi) / 2, maxi].map((v) => `<g><line x1="${gx}" x2="${W - gd}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="hc-grille"/><text x="${gx - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end">${fmtE(v)}</text></g>`).join('');
+    const graduations = [bas + marge, (mini + maxi) / 2, maxi].map((v) => `<g><line x1="${gx}" x2="${W - gd}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="hc-grille"/><text x="${gx - 6}" y="${(Y(v) + 4).toFixed(1)}" text-anchor="end">${Math.round(v)} €</text></g>`).join('');
     const pas = Math.max(1, Math.ceil(n / 6));
-    const dates = HIST.dates.map((d, i) => (i % pas === 0 || i === n - 1) ? `<text x="${X(i).toFixed(1)}" y="${H - 12}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}">${jour(d)}</text>` : '').join('');
+    const dates = HIST.dates.map((d, i) => ((i % pas === 0 && n - 1 - i >= Math.max(2, pas)) || i === n - 1) ? `<text x="${X(i).toFixed(1)}" y="${H - 12}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}">${jour(d)}</text>` : '').join('');
     const points = tot.map((v, i) => `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.5"/>`).join('');
     const v0 = tot[0], v1 = tot[n - 1], ev = v0 > 0 ? v1 / v0 - 1 : 0;
     const pct = (Math.round(Math.abs(ev) * 1000) / 10).toString().replace('.', ',');
@@ -1519,7 +1526,7 @@
         <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
       </div>
       <p class="sous hc-note">${suivis === total ? 'Tous vos exemplaires sont suivis.' : `${suivis} exemplaire${suivis > 1 ? 's' : ''} sur ${total} suivi${suivis > 1 ? 's' : ''} : les autres n'ont pas de cote à toutes les dates.`} Mêmes livres, mêmes états à chaque date : seule la cote change.</p>
-      <details class="chiffres"><summary>Voir les chiffres</summary><div class="tableau-page"><table><thead><tr><th scope="col">Date</th><th scope="col">Valeur</th><th scope="col">Écart</th></tr></thead><tbody>${lignes}</tbody></table></div></details>`;
+      <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
     const cotes = bl.lignes.filter((x) => x.b.prix[x.c.etat] != null);
