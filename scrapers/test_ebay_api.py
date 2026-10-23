@@ -55,6 +55,16 @@ class TestRechercheElargie(unittest.TestCase):
         l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
         self.assertEqual([(x["nb_annonces"], x["prix_min"], x["prix_max"]) for x in l], [(4, "18.00", "22.00")])
 
+    def test_le_fichier_des_annonces_dit_si_l_etat_est_precise_ou_suppose(self):
+        titre = "Le Sorcier de la montagne de feu - Défis Fantastiques"
+        items = [{"itemId": "1", "itemWebUrl": "http://a", **item(20, "5000", titre)},       # bon état indiqué
+                 {"itemId": "2", "itemWebUrl": "http://b", **item(21, "3000", titre)},       # « d'occasion » sans précision : très bon état supposé
+                 {"itemId": "3", "itemWebUrl": "http://c", **item(22, "", titre)}]           # aucun état : supposé aussi
+        lignes = ebay_api.lignes_annonces(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
+        self.assertEqual({l["lien"]: (l["etat"], l["etat_suppose"]) for l in lignes},
+                         {"http://a": ("bon", 0), "http://b": ("tres_bon", 1), "http://c": ("tres_bon", 1)})
+        self.assertIn("etat_suppose", ebay_api.CHAMPS_ANNONCES)
+
     def test_deux_annonces_ne_suffisent_pas_pour_juger(self):
         items = [{"itemId": str(i), **item(p, "5000", "Le Sorcier de la montagne de feu - Défis Fantastiques")} for i, p in enumerate((20, 200))]
         l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")

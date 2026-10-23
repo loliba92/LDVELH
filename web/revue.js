@@ -645,6 +645,54 @@
     dessiner();
   }
 
+  // Onglet « Pépites » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au SuperAdmin comme les annonces.
+  // « Solide » : trouvée par l'ISBN et état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
+  const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+  let dessinerPepites = () => {};
+  function pepites() {
+    const lignes = [];
+    if (!ANN) return lignes;
+    EDITIONS.forEach((ed) => ETATS.forEach(([cle, lib]) => {
+      const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle];
+      if (!pub || !liste) return;
+      liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
+        if (vue && ANN.date_ebay && vue < ANN.date_ebay) return;                 // plus en ligne au dernier relevé
+        if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
+        const raisons = [];
+        if (origine === 'librairie') raisons.push('exemplaire de librairie : état non indiqué');
+        else {
+          if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
+          if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
+          else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
+        }
+        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons });
+      });
+    }));
+    return lignes.sort((x, y) => (y.pub - y.prix) - (x.pub - x.prix));
+  }
+  function cartePepite(p) {
+    const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
+    const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
+    return `<article class="rv-edition pp-carte"><header><a href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
+      `<span class="sous">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)}</span><span class="badge" title="${esc(p.lib)}">${ABR_ETAT[p.cle]}</span></header>` +
+      `<p class="pp-prix"><span class="rv-ann-prix">${eur(p.prix)}</span><span class="sous">au lieu de ${eur(p.pub)}</span><strong class="pp-eco">−${pct} % · ${eur(eco)} d'économie</strong></p>` +
+      `<p><a href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${p.origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(p.titre)}">${esc(p.titre)} ↗</a></p>` +
+      `<p class="pp-confiance"><span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>${solide ? '' : ' <span class="sous">' + p.raisons.map(esc).join(' · ') + '</span>'}</p></article>`;
+  }
+  function initPepites() {
+    const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides');
+    if (!liste) return;
+    dessinerPepites = () => {
+      if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = solides.checked ? sures : toutes;
+      etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      liste.innerHTML = vues.length ? vues.map(cartePepite).join('') : '<p>Aucune bonne affaire pour ce filtre.</p>';
+    };
+    solides.addEventListener('change', dessinerPepites);
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estSuper()) chargerAnnonces().then(dessinerPepites); });
+    dessinerPepites();
+  }
+
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
@@ -676,6 +724,7 @@
     if (boutons.some((b) => b.dataset.pane === debut) && !(boutons.find((b) => b.dataset.pane === debut) || {}).hidden) montrer(debut);
   }
   initAnnonces();
+  initPepites();
   initNav();
   // Annonces : lien et onglet réservés au SuperAdmin (le rôle arrive après la connexion)
   function majAnnonces() {
@@ -685,7 +734,12 @@
       onglet.hidden = !super_;
       if (!super_ && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
-    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); });
+    const pep = document.querySelector('#rv-nav [data-pane="pepites"]');
+    if (pep) {
+      pep.hidden = !super_;
+      if (!super_ && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
+    }
+    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerPepites(); });
     else if (EDITIONS.length) afficher();
   }
   document.addEventListener('cdh-compte', majAnnonces);

@@ -76,14 +76,22 @@ class TestAnnoncesCumulees(unittest.TestCase):
         f = self.fichiers(**{"2026_10_21": ["111,bon,10.00,Livre A,http://a,3,isbn", "111,bon,12.00,Livre B,http://b,3,isbn"],
                              "2026_10_22": ["111,bon,11.00,Livre A,http://a,4,isbn"]})
         r = annonces_cumulees(f)["111"]["bon"]
-        self.assertEqual(sorted(r), [[11.0, "Livre A", "http://a", "isbn", "2026-10-22"], [12.0, "Livre B", "http://b", "isbn", "2026-10-21"]])
+        self.assertEqual(sorted(r), [[11.0, "Livre A", "http://a", "isbn", "2026-10-22", None], [12.0, "Livre B", "http://b", "isbn", "2026-10-21", None]])
 
     def test_la_version_la_plus_recente_l_emporte_et_pas_de_doublon(self):
         f = self.fichiers(**{"2026_10_21": ["111,bon,10.00,Ancien titre,http://a,3,isbn"],
                              "2026_10_22": ["111,tres_bon,20.00,Nouveau titre,http://a,4,titre"]})
         r = annonces_cumulees(f)["111"]
         self.assertNotIn("bon", r)
-        self.assertEqual(r["tres_bon"], [[20.0, "Nouveau titre", "http://a", "titre", "2026-10-22"]])
+        self.assertEqual(r["tres_bon"], [[20.0, "Nouveau titre", "http://a", "titre", "2026-10-22", None]])
+
+    def test_l_etat_suppose_est_transporte(self):
+        d = Path(tempfile.mkdtemp())
+        f = d / "annonces-2026-10-22.csv"
+        f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,etat_suppose\n"
+                     "111,bon,10.00,Etat indique,http://a,3,isbn,0\n111,tres_bon,12.00,Etat suppose,http://b,3,isbn,1\n", encoding="utf-8")
+        r = annonces_cumulees([f])["111"]
+        self.assertEqual((r["bon"][0][5], r["tres_bon"][0][5]), (0, 1))
 
     def test_une_tres_vieille_annonce_est_ecartee(self):
         f = self.fichiers(**{"2026_01_01": ["111,bon,10.00,Vieille,http://v,3,isbn"], "2026_10_22": ["222,bon,5.00,Recente,http://r,1,isbn"]})
