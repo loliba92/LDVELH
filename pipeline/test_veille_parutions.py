@@ -23,7 +23,7 @@ class TestScriptarium(unittest.TestCase):
         rows = [ligne(id="1", serie="Défis et Sortilèges", titre="La Huitième Porte", editeur="Gallimard")]
         n = lambda **k: dict({"isbn": "9782490523351", "titre": "X", "collection": "", "numero": "", "annee": "2026"}, **k)
         self.assertEqual(v.classer_scriptarium(n(titre="Les Murmures", collection="Oeil Noir", numero="3"), rows), ("L'Œil noir (solos)", "3", "Les Murmures"))
-        self.assertEqual(v.classer_scriptarium(n(titre="La huitième porte"), rows), ("Défis et Sortilèges", "", "La huitième porte"))   # sans collection : série du même titre
+        self.assertEqual(v.classer_scriptarium(n(titre="La huitième porte"), rows), ("Défis et Sortilèges (Scriptarium)", "", "La huitième porte"))   # sans collection : série du même titre, à part (autre éditeur)
         self.assertEqual(v.classer_scriptarium(n(titre="Le Chevalier", collection="Oeil Noir bande dessinnée", numero="1"), rows), ("L'Œil noir (BD)", "1", "Le Chevalier"))
         self.assertIsNone(v.classer_scriptarium(n(titre="Le bal au pont"), rows))                                                        # roman : signalé seulement
 
@@ -46,7 +46,7 @@ class TestScriptarium(unittest.TestCase):
         rows = {x["id"]: x for x in editions.load(str(base))}
         self.assertEqual((len(r["ajoutes"]), len(r["signales"])), (2, 1))
         self.assertEqual([(rows[i]["version"], rows[i]["numero"], rows[i]["titre"], rows[i]["editeur"]) for i in ("9782490523184", "9782490523313")],
-                         [("V2", "672", "La Huitième Porte", "Scriptarium"), ("V3", "672", "La Huitième Porte", "Scriptarium")])
+                         [("V1", "3", "La huitième porte", "Scriptarium"), ("V2", "3", "La huitième porte", "Scriptarium")])
         r2 = v.veiller(lambda u, p=None: None, base=str(base), chemin=d / "veille.json", aujourdhui=date(2026, 10, 24), pause=0, importer=faux_importer, scriptarium=lambda: notices)
         self.assertEqual((r2["ajoutes"], r2["signales"]), ([], []))                    # rien de nouveau, le roman n'est signalé qu'une fois
 

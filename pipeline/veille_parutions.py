@@ -35,7 +35,7 @@ ALKONOST = "/editeur/alkonost/"
 SERIES_GJ = re.compile(r"d[ée]fis fantastiques|loup solitaire|qu[êe]te du graal|neige d.automne", re.I)
 PAGES_MAX = 60
 # Collections de Scriptarium (nom dans la notice de la BnF) -> série de la base. Une collection absente est seulement signalée.
-SERIES_SCRIPTARIUM = [(r"d[ée]fis et sortil[èe]ges", "Défis et Sortilèges"), (r"(oeil|œil) noir.*dessin", "L'Œil noir (BD)"), (r"oeil noir|œil noir", "L'Œil noir (solos)"),
+SERIES_SCRIPTARIUM = [(r"d[ée]fis et sortil[èe]ges", "Défis et Sortilèges (Scriptarium)"), (r"(oeil|œil) noir.*dessin", "L'Œil noir (BD)"), (r"oeil noir|œil noir", "L'Œil noir (solos)"),
                       (r"d[ée]fis fantastiques", "Défis Fantastiques (hors-série)"), (r"voie du tigre", "La Voie du Tigre"),
                       (r"l[ée]gendes du loup solitaire", "Les Légendes du Loup Solitaire"), (r"aventures en magnamund", "Aventures en Magnamund")]
 
@@ -125,7 +125,9 @@ def classer_scriptarium(n, rows):
     if not coll:
         series = {r["serie"] for r in rows if r.get("serie") and cle(r["titre"]) == cle(n["titre"]) and r.get("editeur") != "Scriptarium"}
         if len(series) == 1:
-            return series.pop(), "", n["titre"]
+            serie = series.pop()
+            # une version doit avoir le même éditeur : la réédition de Scriptarium d'un livre de Gallimard est une série à part, pas sa version suivante
+            return (serie if serie.endswith("(Scriptarium)") else serie + " (Scriptarium)"), "", n["titre"]
     return None
 
 
@@ -184,7 +186,9 @@ def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, 
         time.sleep(pause)
     uniques = {c["id"]: c for c in cartes}
     signales, lignes, infos = [], [], {}
-    for n in (scriptarium() if scriptarium else []):
+    notices = scriptarium() if scriptarium else []
+    numeros = {cle(n["titre"]): n["numero"] for n in notices if n["numero"]}      # numéro dans la collection de Scriptarium, pour ses éditions sans collection
+    for n in notices:
         if n["isbn"] in connus:
             continue
         rang = classer_scriptarium(n, rows)
@@ -194,6 +198,7 @@ def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, 
                 etat["signales"].append(n["isbn"])
             continue
         serie, numero, titre = rang
+        numero = numero or numeros.get(cle(titre), "")
         infos[n["isbn"]] = {"carte": {}, "fiche": {"isbn": n["isbn"], "date": ""}, "serie": serie, "numero": numero, "titre": titre,
                            "scriptarium": True, "collection": n["collection"]}
         lignes.append(f"{n['isbn']} ; {serie} ; {numero} ; {titre}")
@@ -253,6 +258,8 @@ def veiller(get=http_get, base=None, chemin=CHEMIN, aujourdhui=None, pause=1.2, 
                 r["numero"], r["livre"] = sib["numero"], sib["livre"]
                 if i.get("scriptarium"):
                     r["titre"] = sib["titre"]                          # même écriture que l'édition déjà connue (« La Huitième Porte »)
+            if i.get("scriptarium") and any(x["id"] != isbn and x["editeur"] != "Scriptarium" and cle(x["livre"]) == cle(r["livre"]) for x in rows):
+                r["livre"] += " (Scriptarium)"                         # le même titre chez un autre éditeur n'est pas une autre version du même livre
             if i.get("scriptarium"):
                 r["editeur"], r["collection_editeur"] = "Scriptarium", i["collection"]   # la fiche de la librairie renvoie parfois du texte de page (« Acheter »)
             ajoutes.append(f"{r['titre']} ({r['serie']}, {r['version']}, {r['annee']}) : {isbn}")
