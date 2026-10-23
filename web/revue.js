@@ -646,7 +646,7 @@
   }
 
   // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au SuperAdmin comme les annonces.
-  // « Solide » : trouvée par l'ISBN et état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
+  // « Solide » : exemplaire de librairie, ou trouvée par l'ISBN avec l'état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   let dessinerPepites = () => {};
   function pepites() {
@@ -659,8 +659,7 @@
         if (vue && ANN.date_ebay && vue < ANN.date_ebay) return;                 // plus en ligne au dernier relevé
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
-        if (origine === 'librairie') raisons.push('exemplaire de librairie : état non indiqué');
-        else {
+        if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
           if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
           if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
@@ -790,6 +789,10 @@
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
   initMaj();
+
+  // La barre d'onglets reste visible sous l'en-tête collant : on lui donne la hauteur réelle de l'en-tête
+  const calerOnglets = () => { const h = document.querySelector('.haut'); if (h) document.documentElement.style.setProperty('--haut-h', Math.max(0, Math.round(h.getBoundingClientRect().bottom)) + 'px'); };   // le bas de l'en-tête change quand le bandeau se replie au défilement
+  calerOnglets(); addEventListener('resize', calerOnglets); addEventListener('load', calerOnglets); addEventListener('scroll', calerOnglets, { passive: true });
 
   const JAQ = {}, RAR = {};
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; })).catch(() => {})
