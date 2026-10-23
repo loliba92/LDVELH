@@ -1,7 +1,7 @@
-import sys, unittest
+import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner
+from export_site import aligner, annonces_cumulees
 
 
 def e(prix):
@@ -62,6 +62,35 @@ class TestAligner(unittest.TestCase):
         p = {"bon": e(15), "tres_bon": e(12)}
         aligner(p, 1.1)
         self.assertEqual(p["tres_bon"]["prix"], 16.5)
+
+
+class TestAnnoncesCumulees(unittest.TestCase):
+    def fichiers(self, **jours):
+        d = Path(tempfile.mkdtemp())
+        for jour, lignes in jours.items():
+            f = d / f"annonces-{jour.replace('_', '-')}.csv"
+            f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par\n" + "".join(f"{l}\n" for l in lignes), encoding="utf-8")
+        return sorted(d.glob("annonces-*.csv"))
+
+    def test_une_annonce_retiree_reste_avec_sa_derniere_date(self):
+        f = self.fichiers(**{"2026_10_21": ["111,bon,10.00,Livre A,http://a,3,isbn", "111,bon,12.00,Livre B,http://b,3,isbn"],
+                             "2026_10_22": ["111,bon,11.00,Livre A,http://a,4,isbn"]})
+        r = annonces_cumulees(f)["111"]["bon"]
+        self.assertEqual(sorted(r), [[11.0, "Livre A", "http://a", "isbn", "2026-10-22"], [12.0, "Livre B", "http://b", "isbn", "2026-10-21"]])
+
+    def test_la_version_la_plus_recente_l_emporte_et_pas_de_doublon(self):
+        f = self.fichiers(**{"2026_10_21": ["111,bon,10.00,Ancien titre,http://a,3,isbn"],
+                             "2026_10_22": ["111,tres_bon,20.00,Nouveau titre,http://a,4,titre"]})
+        r = annonces_cumulees(f)["111"]
+        self.assertNotIn("bon", r)
+        self.assertEqual(r["tres_bon"], [[20.0, "Nouveau titre", "http://a", "titre", "2026-10-22"]])
+
+    def test_une_tres_vieille_annonce_est_ecartee(self):
+        f = self.fichiers(**{"2026_01_01": ["111,bon,10.00,Vieille,http://v,3,isbn"], "2026_10_22": ["222,bon,5.00,Recente,http://r,1,isbn"]})
+        r = annonces_cumulees(f)
+        self.assertNotIn("111", r)
+        self.assertIn("222", r)
+        self.assertEqual(annonces_cumulees([]), {})
 
 
 if __name__ == "__main__":
