@@ -1135,7 +1135,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 @keyframes compte-pouls { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .compte-synchro .compte-point { animation: none; } }
 @media (max-width: 1000px) and (min-width: 701px) { .menu .compte-bouton .compte-libelle { max-width: 7ch; overflow: hidden; text-overflow: ellipsis; } }
-.compte-menu { position: absolute; z-index: 60; top: calc(100% + 8px); right: 0; width: 300px; padding: 16px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: 0 12px 32px rgba(0, 0, 0, .5); }
+.compte-menu { position: absolute; z-index: 60; top: calc(100% + 8px); right: 0; width: 360px; padding: 16px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: 0 12px 32px rgba(0, 0, 0, .5); }
 .compte-menu[hidden] { display: none; }
 .compte-nom { margin: 0 0 4px; font: 700 1.15rem var(--f-display); }
 .compte-niveau { display: inline-block; margin-left: 6px; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .7rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; vertical-align: middle; }
@@ -1965,3 +1965,6 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pp-tri { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .95rem; }
 .pp-tri select { min-height: 40px; padding: 4px 10px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; font: 600 .95rem var(--f-ui); }
 .pp-tri span { white-space: nowrap; text-transform: none; letter-spacing: 0; font: 600 .95rem var(--f-ui); color: var(--muted); }
+.compte-liste .niv { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .68rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.compte-liste .niv-sorcier { color: var(--gold); border-color: var(--gold); }
+.compte-liste .niv-zagor { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
