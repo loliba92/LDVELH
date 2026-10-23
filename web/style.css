@@ -1909,3 +1909,6 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 /* Fenêtre de bienvenue : bandeau illustré en haut (même illustration que l'accueil) */
 .dlg-bienvenue .bienvenue-img { display: block; width: calc(100% + 44px); max-width: none; height: 120px; margin: -22px -22px 14px; object-fit: cover; object-position: center 30%; border-radius: 11px 11px 0 0; }
 @media (max-width: 700px) { .dlg-bienvenue .bienvenue-img { height: 76px; border-radius: 15px 15px 0 0; } }
+
+/* Légende des niveaux de prix (visiteur) : cinq repères alignés, chacun d'un seul tenant */
+.niveaux { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-bottom: 6px; }
