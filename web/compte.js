@@ -206,7 +206,7 @@ window.Compte = (function () {
       '<li><strong>Le prix estimé</strong> de chaque livre, selon son état.</li>' +
       '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +
       '<li><strong>Vos doubles à vendre</strong> et les livres à trouver.</li>' +
-      '<li><strong>Des liens directs</strong> vers Leboncoin, Vinted et eBay.</li>' +
+      '<li><strong>Des liens directs</strong> vers LBC, Vinted et eBay.</li>' +
       '<li><strong>Un livre manque ?</strong> Demandez son ajout.</li>' +
       '<li><strong>Les livres à paraître</strong>, à surveiller.</li>' +
       '</ul>' +
