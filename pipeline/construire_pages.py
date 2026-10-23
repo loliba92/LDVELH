@@ -388,7 +388,7 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
   <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>
   <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden>Annonces</button>
-  <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden>Pépites</button>
+  <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden>Butin</button>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false">Ajouter</button>
   <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></button>
 </div>
