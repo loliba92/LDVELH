@@ -385,12 +385,12 @@ REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux
 <div class="rv-identite" id="rv-identite" hidden></div>
 <details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
-  <button type="button" role="tab" data-pane="prix" aria-selected="true">Prix</button>
-  <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden>Tendances</button>
-  <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden>Annonces</button>
-  <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden>Butin</button>
-  <button type="button" role="tab" data-pane="ajout" aria-selected="false">Ajouter</button>
-  <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></button>
+  <button type="button" role="tab" data-pane="prix" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.2"/></svg><span>Prix</span></button>
+  <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Tendances</span></button>
+  <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>
+  <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
+  <button type="button" role="tab" data-pane="ajout" aria-selected="false"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter</span></button>
+  <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel">
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>

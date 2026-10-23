@@ -1407,9 +1407,9 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .note-bas strong { font-family: inherit; font-size: inherit; color: var(--text); }
 
 /* Page admin : sections en onglets, cartes compactes (trois prix sur une ligne, un seul « Confirmer »), liens en grille */
-.rv-nav { position: sticky; top: calc(var(--haut-h, 96px) + 6px); z-index: 40; display: flex; gap: 6px; margin: 16px 0 22px; padding: 6px; overflow-x: auto; scrollbar-width: none; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; }
-.rv-nav::-webkit-scrollbar { display: none; }
-.rv-nav button { flex: 1 0 auto; min-height: 48px; padding: 8px 18px; border: 0; border-radius: 10px; background: none; color: var(--text); font: 700 1.05rem var(--f-ui); cursor: pointer; white-space: nowrap; transition: background var(--t), color var(--t); }
+.rv-nav { position: sticky; top: calc(var(--haut-h, 96px) + 6px); z-index: 40; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; margin: 16px 0 22px; padding: 6px; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 14px; }
+.rv-nav button { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; min-width: 0; padding: 8px 4px; border: 0; border-radius: 10px; background: none; color: var(--text); font: 700 1.05rem var(--f-ui); cursor: pointer; white-space: nowrap; transition: background var(--t), color var(--t); }
+.rv-nav .rv-ico { flex: none; }
 .rv-nav button:hover { background: var(--accent-soft); color: var(--gold); }
 .rv-nav button[aria-selected="true"] { background: var(--gold); color: var(--on-accent); }
 .rv-nav button[hidden] { display: none; }
@@ -1450,7 +1450,6 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 @media (max-width: 600px) {
   .rv-onglets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
   .rv-onglets button { white-space: normal; }
-  .rv-nav button { padding: 8px 12px; }
 }
 
 /* Page admin : dernière exécution des mises à jour, lien « Corriger la fiche », alertes d'aperçu */
@@ -1738,7 +1737,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 #an-liste li a { color: var(--text); text-underline-offset: 3px; }
 .rv-ann-prix { font-weight: 700; color: var(--gold); }
 .rv-ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
-@media (max-width: 560px) { .rv-nav { gap: 2px; padding: 4px; } .rv-nav button { padding: 8px 9px; font-size: .95rem; } }
+@media (max-width: 560px) { .rv-nav { gap: 2px; padding: 4px; } .rv-nav button { position: relative; flex-direction: column; gap: 2px; padding: 6px 2px; font-size: .74rem; } .rv-nav .nb-onglet { position: absolute; top: 0; right: 2px; } .rv-nav:has(button[data-pane="demandes"]:not([hidden])) button { font-size: .66rem; } }
 .rv-voir-ann { display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px; }
 .an-dialog { max-width: 640px; }
 .an-cadre { padding: 16px 18px 18px; display: grid; gap: 10px; }
