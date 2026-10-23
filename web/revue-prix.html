@@ -86,8 +86,9 @@
   <button type="button" data-vue="tous" aria-pressed="false">Tous <span class="nb-onglet" id="rv-n-tous"></span></button>
 </div>
 <div class="rv-envoi" id="rv-envoi" hidden>
-  <p><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
+  <p id="rv-envoi-attente"><strong><span id="rv-n-attente"></span> validation(s) à transmettre.</strong> Elles sont gardées dans ce navigateur. « Envoyer » les enregistre pour tous en un clic, sous votre nom.</p>
   <button type="button" class="bouton" id="rv-envoyer">Envoyer mes validations</button>
+  <p class="sous" id="rv-envoi-faites" role="status" hidden></p>
   <p class="rv-ajout-bilan" id="rv-envoi-msg" role="status" hidden></p>
 </div>
 <div class="rv-outils">
