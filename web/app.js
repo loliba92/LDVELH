@@ -736,14 +736,14 @@
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
-  /* ---------- Annonces retenues (SuperAdmin) ---------- */
-  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au SuperAdmin.
+  /* ---------- Annonces retenues (Zagor) ---------- */
+  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au Zagor.
   const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';
   let ANN = null, annChargees = null;
   const chargerAnnonces = () => annChargees || (annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au SuperAdmin">SuperAdmin</span></summary>
+    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au Zagor">Zagor</span></summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
   }
   function remplirAnnonces(b) {
@@ -770,7 +770,7 @@
   }
 
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
-  // Visible seulement pour un compte Sorcier ou SuperAdmin connecté (niveau donné par le relais, voir relais/ et compte.js).
+  // Visible seulement pour un compte Sorcier ou Zagor connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
   const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveau donné par le relais
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
@@ -794,7 +794,7 @@
         </div>
         <datalist id="liste-series">${series.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>
         <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer la fiche</button></div>
-        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris) <span class="badge-admin" title="Réservé au SuperAdmin">SuperAdmin</span></span></label>
+        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris) <span class="badge-admin" title="Réservé au Zagor">Zagor</span></span></label>
         <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
       </form></details>`;
@@ -1043,7 +1043,7 @@
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
-  // Accès discret au Butin sur l'accueil : SuperAdmin seulement (le rôle arrive après le chargement)
+  // Accès discret au Butin sur l'accueil : Zagor seulement (le rôle arrive après le chargement)
   const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSuper(); };
   document.addEventListener('cdh-compte', majButin);
   majButin();

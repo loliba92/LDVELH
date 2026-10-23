@@ -1,5 +1,5 @@
 /* Envois vers GitHub par le relais (dossier relais/) : le site transmet la connexion Google de la personne, le relais vérifie son niveau
-   (Héros, Admin, SuperAdmin) dans data/admins.json puis lance lui-même le lot. La clé GitHub n'est jamais dans le navigateur.
+   (Héros, Admin, Zagor) dans data/admins.json puis lance lui-même le lot. La clé GitHub n'est jamais dans le navigateur.
    Actif quand web/data/admin-config.json contient « relais_url » ; sinon l'ancien envoi par clé continue de fonctionner. */
 window.Relais = (function () {
   var URL_RELAIS = '';

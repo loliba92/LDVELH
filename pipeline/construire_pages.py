@@ -47,7 +47,7 @@ PAGES = {
     "communaute.html": ("Communauté", "Communauté · La Cote du Héros",
                         "Des passionnés de livres dont vous êtes le héros : chaînes, sites, blogs, collectionneurs et boutiques à suivre."),
     "equipe.html": ("Équipe", "Équipe · La Cote du Héros",
-                    "Page réservée aux SuperAdmins : ajouter, retirer ou bloquer les sorciers."),
+                    "Page réservée aux Zagors : ajouter, retirer ou bloquer les sorciers."),
     "devenir-admin.html": ("Devenir sorcier", "Devenir sorcier · La Cote du Héros",
                            "Comment devenir sorcier : les niveaux, la demande, la première connexion avec Google et les bonnes pratiques."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
@@ -216,7 +216,7 @@ def page(nom, corps):
 '''
 
 
-GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Sorcier, SuperAdmin, ou toute personne connectée (évolutions)
+GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
 NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
@@ -242,14 +242,14 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
 <ul>
   <li><strong>Héros</strong> : toute personne connectée avec Google. Elle construit sa collection, sauvegardée dans son propre Google Drive.</li>
   <li><strong>Sorcier</strong> : en plus, elle vérifie et corrige les prix et ajoute des livres.</li>
-  <li><strong>SuperAdmin</strong> : en plus, elle gère l'équipe (ajouter, retirer, bloquer des sorciers).</li>
+  <li><strong>Zagor</strong> : en plus, elle gère l'équipe (ajouter, retirer, bloquer des sorciers).</li>
 </ul>
 
 <h2>Comment le devenir</h2>
 <ol>
   <li>Écrivez-nous depuis la <a href="contact.html">page Contact</a>. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</li>
   <li>Donnez-lui l'<strong>adresse Google</strong> avec laquelle vous vous connectez et le <strong>nom</strong> à afficher à côté de vos mises à jour (un prénom ou un pseudo).</li>
-  <li>Un SuperAdmin vous ajoute à l'équipe. Il n'y a ni mot de passe ni clé à recevoir : votre compte Google suffit.</li>
+  <li>Un Zagor vous ajoute à l'équipe. Il n'y a ni mot de passe ni clé à recevoir : votre compte Google suffit.</li>
 </ol>
 
 <h2>Votre première connexion</h2>
@@ -269,7 +269,7 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
 </ul>
 
 <h2>Changer d'appareil ou quitter</h2>
-<p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être sorcier, demandez à un SuperAdmin de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
+<p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être sorcier, demandez à un Zagor de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
 '''
 
 
@@ -344,8 +344,8 @@ def corps_communaute():
 '''
 
 
-EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmins">SuperAdmin</span></h1>
-<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Sorcier a accès à l'espace sorcier ; un SuperAdmin gère aussi l'équipe.</p>
+EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Zagor</span></h1>
+<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Sorcier a accès à l'espace sorcier ; un Zagor gère aussi l'équipe.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
@@ -356,7 +356,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux SuperAdmi
     <label for="eq-nom">Nom affiché sur ses mises à jour</label>
     <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (sorcier)">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="admin">Sorcier : prix et livres</option><option value="superadmin">SuperAdmin : et gestion de l'équipe</option></select>
+    <select id="eq-niveau"><option value="admin">Sorcier : prix et livres</option><option value="superadmin">Zagor : et gestion de l'équipe</option></select>
     <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
   <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
@@ -623,7 +623,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
     <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
-    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Sorcier ou SuperAdmin) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Sorcier ou Zagor) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
     <tr><td data-label="Nom"><code>cdh-avis-donne</code>, <code>cdh-avis-ferme</code>, <code>cdh-visites</code> et <code>cdh-bienvenue</code></td><td data-label="Contenu">Le fait que vous avez déjà répondu à « Qu'en pensez-vous ? » ou fermé le bandeau, les dates de vos visites, et le fait que l'accueil a été affiché</td><td data-label="Pourquoi">Ne proposer l'avis qu'aux visiteurs réguliers, une seule fois ; ces données restent sur votre appareil</td></tr>
     <tr><td data-label="Nom"><code>cdh-fiches-vues</code>, <code>cdh-invite-vue</code> et <code>cdh-invite-fiches</code></td><td data-label="Contenu">Les fiches consultées pendant la visite (effacées à la fermeture de l'onglet), et la date à laquelle l'invitation à se connecter a été montrée</td><td data-label="Pourquoi">Proposer la connexion une seule fois, après quelques fiches, et pas plus d'une fois par mois</td></tr>
     <tr><td data-label="Nom"><code>cdh-scan-etat</code>, <code>cdh-coll-pane</code>, <code>cdh-pane</code></td><td data-label="Contenu">Vos réglages d'affichage (état choisi pour le scan, onglet ouvert)</td><td data-label="Pourquoi">Retrouver la page comme vous l'avez laissée</td></tr>
@@ -652,7 +652,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le relais avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
 
 <h2>Première connexion et avis</h2>
-<p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les SuperAdmins peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
+<p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les Zagors peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
 
 <h2>Demander l'ajout d'un livre</h2>
 <p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les sorciers.</p>
