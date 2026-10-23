@@ -1,5 +1,23 @@
 {
  "valides": {
+  "9782010116988|bon": {
+   "prix": 5.51,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782010116988|convenable": {
+   "prix": 3.66,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782010116988|tres_bon": {
+   "prix": 15.12,
+   "decision": "confirme",
+   "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
   "9782010117244|convenable": {
    "prix": 6.0,
    "decision": "corrige",
