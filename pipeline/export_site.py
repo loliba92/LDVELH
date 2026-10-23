@@ -48,7 +48,7 @@ JOIN DimDate d ON d.date_key = f.date_key
 WHERE f.est_lot = 0
 """
 ETATS = ("convenable", "bon", "tres_bon")
-PLAFOND_DEPUIS = "2026-10-22"
+LISSAGE_DEPUIS = "2026-10-22"
 
 
 def aligner(par_etat, ecart=etats.ECART_DEFAUT):
@@ -205,19 +205,19 @@ def main():
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
     nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
-    # Plafond du mouvement quotidien (10 %) : à partir du 22 octobre 2026, après la remise à zéro du relevé du 21 (annonces d'autres objets
-    # retirées), pour ne pas bloquer cette correction.
-    nb_plafonnes = 0
-    if args.aujourdhui.isoformat() >= PLAFOND_DEPUIS:
+    # Lissage quotidien : le prix du jour dépend de celui de la veille (voir etats.lisser). Appliqué à partir du 22 octobre 2026, après la
+    # remise à zéro du relevé du 21 (annonces d'autres objets retirées), pour ne pas bloquer cette correction.
+    nb_lisses = 0
+    if args.aujourdhui.isoformat() >= LISSAGE_DEPUIS:
         veilles = [h for h in mouvements.charger(DB.parent.parent / "processed" / "cotes-historique.json") if h["date"] < args.aujourdhui.isoformat()]
         if veilles:
             veille = max(veilles, key=lambda h: h["date"])["prix"]
-            variation = etats.charger_variation(DB.parent.parent / "manual" / "ratios_etats.json")
+            gains = etats.charger_gains(DB.parent.parent / "manual" / "ratios_etats.json")
             isbn_de = {r["version_key"]: r["isbn13"] for r in cx.execute(REQUETE) if r["isbn13"]}
             for vk, par_etat in prix.items():
                 isbn_v = isbn_de.get(vk)
                 if isbn_v:
-                    nb_plafonnes += etats.plafonner(par_etat, {e: veille.get(f"{isbn_v}|{e}") for e in ETATS}, variation)
+                    nb_lisses += etats.lisser(par_etat, {e: veille.get(f"{isbn_v}|{e}") for e in ETATS}, gains)
     nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
 
     dates_maj = {x["id"]: x["date_maj"] for x in editions.load(None)}      # date d'ajout (ou de dernière mise à jour) de la fiche
@@ -355,7 +355,7 @@ def main():
     sans_prix = sum(1 for v in versions if all(x is None for x in v["prix"].values()))
     taille = (sortie / "versions.json").stat().st_size // 1024
     print(f"{len(versions)} versions, {meta['nb_livres']} livres, {meta['nb_series']} séries exportés "
-          f"({taille} Ko) ; {nb_ajustes} prix remonté(s) pour rester cohérents (C ≤ BE ≤ TBE) ; {nb_plafonnes} prix retenu(s) par le plafond quotidien ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette ; modèle d'auto-apprentissage : {'ACTIF (' + str(nb_recalibres) + ' prix remis à niveau)' if modele['actif'] else 'inactif (' + modele['raison'] + ')'}")
+          f"({taille} Ko) ; {nb_ajustes} prix remonté(s) pour rester cohérents (C ≤ BE ≤ TBE) ; {nb_lisses} prix lissé(s) sur la veille ; {sans_prix} version(s) sans prix ; {sans_image} sans jaquette ; modèle d'auto-apprentissage : {'ACTIF (' + str(nb_recalibres) + ' prix remis à niveau)' if modele['actif'] else 'inactif (' + modele['raison'] + ')'}")
 
 
 if __name__ == "__main__":

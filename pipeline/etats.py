@@ -79,32 +79,44 @@ def completer(par_etat, ratios):
     return len(manquants)
 
 
-VARIATION_MAX_JOUR = 0.10      # un prix ne bouge pas de plus de 10 % d'un jour à l'autre : une cote qui saute inquiète plus qu'elle n'informe
+# Lissage quotidien : le prix du jour dépend de celui de la veille.
+#     prix du jour = prix de la veille + gain × (cible du jour − prix de la veille)
+# La « cible » est l'estimation recalculée chaque jour à partir des données (annonces, archives, rapports entre états). Le gain
+# (part de l'écart rattrapée en un jour) dépend de la confiance : plus il y a d'annonces, plus le prix suit vite sa cible.
+# Un prix validé par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de prix de la veille ensuite.
+GAINS_DEFAUT = {0: 0.10, 1: 0.10, 2: 0.20, 3: 0.30}      # selon le nombre d'annonces (3 = trois ou plus) ; 0 : prix déduit ou d'archive
 
 
-def charger_variation(chemin):
-    """Variation maximale d'un prix d'un jour à l'autre (clé « variation_max_jour » de ratios_etats.json, entre 1 % et 50 %)."""
+def charger_gains(chemin):
+    """Gains de lissage (clé « gains_lissage » de ratios_etats.json : {"0": …, "1": …, "2": …, "3": …}, chacun entre 0 et 1)."""
     try:
-        v = float(json.loads(Path(chemin).read_text(encoding="utf-8"))["variation_max_jour"])
-        if 0.01 <= v <= 0.5:
-            return v
+        brut = json.loads(Path(chemin).read_text(encoding="utf-8"))["gains_lissage"]
+        gains = {n: float(brut[str(n)]) for n in GAINS_DEFAUT}
+        if all(0 < g <= 1 for g in gains.values()):
+            return gains
     except (OSError, ValueError, KeyError, TypeError):
         pass
-    return VARIATION_MAX_JOUR
+    return dict(GAINS_DEFAUT)
 
 
-def plafonner(par_etat, precedents, variation=VARIATION_MAX_JOUR):
-    """Limite le mouvement quotidien : chaque prix calculé reste à `variation` près (± 10 %) de celui publié la veille ; la cote
-    rejoint sa nouvelle valeur en quelques jours au lieu de sauter. Un prix validé par un administrateur n'est jamais plafonné.
-    precedents : {etat: prix publié la veille}. Renvoie le nombre de prix retenus."""
+def gain_de(estimation, gains):
+    """Gain applicable à un prix : un prix du neuf est fiable (gain maximal) ; sinon on compte les annonces qui le fondent."""
+    if estimation.get("neuf"):
+        return gains[3]
+    return gains[max(0, min(3, int(estimation.get("nb") or 0)))]
+
+
+def lisser(par_etat, precedents, gains=GAINS_DEFAUT):
+    """par_etat : {etat: estimation du jour (la cible)} ; precedents : {etat: prix publié la veille}. Remplace chaque prix par le prix
+    lissé et garde la cible dans « cible ». Sans prix de la veille, ou pour un prix validé, rien ne change. Renvoie le nombre de prix lissés."""
     n = 0
     for e in ETATS:
         v, avant = par_etat.get(e), precedents.get(e)
         if not v or not v.get("prix") or not avant or v.get("source") == "validé":
             continue
-        bas, haut = round(avant * (1 - variation), 2), round(avant * (1 + variation), 2)
-        if v["prix"] > haut + 1e-9 or v["prix"] < bas - 1e-9:
-            par_etat[e] = {**v, "prix": haut if v["prix"] > haut else bas, "plafonne": True}
+        nouveau = round(avant + gain_de(v, gains) * (v["prix"] - avant), 2)
+        if abs(nouveau - v["prix"]) > 0.005:
+            par_etat[e] = {**v, "prix": nouveau, "lisse": True, "cible": v["prix"]}
             n += 1
     return n
 
