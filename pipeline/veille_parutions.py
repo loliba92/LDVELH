@@ -6,7 +6,7 @@ et chaque fiche /livre/<identifiant>, pour l'ISBN, la date de parution et la dis
 Pour Gallimard Jeunesse, un livre n'est ajouté que si son titre porte le nom d'une des séries ; un livre d'un auteur connu mais sans nom de série
 est seulement signalé. Pour Alkonost, tous les livres de ses collections de livres-jeux sont ajoutés.
 Scriptarium (éditeur de Clermont-Ferrand : Défis et Sortilèges, L'Œil noir, La Voie du Tigre, Loup solitaire) n'a pas de page de collection chez le libraire :
-la veille interroge le catalogue de la BnF (notices de l'éditeur) et n'ajoute que ses collections de livres-jeux (BD et suppléments compris) ; le reste (romans) est seulement signalé.
+la veille interroge le catalogue de la BnF (notices de l'éditeur) et n'ajoute que ses collections de livres-jeux ; le reste (BD, suppléments, romans) est seulement signalé.
 Les livres annoncés (parution à venir) sont ajoutés aussi, avec leur date : data/processed/veille.json garde les fiches déjà vues et les dates de
 parution à venir (l'accueil les présente dans « À paraître »).
 """
@@ -35,8 +35,7 @@ ALKONOST = "/editeur/alkonost/"
 SERIES_GJ = re.compile(r"d[ée]fis fantastiques|loup solitaire|qu[êe]te du graal|neige d.automne", re.I)
 PAGES_MAX = 60
 # Collections de Scriptarium (nom dans la notice de la BnF) -> série de la base. Une collection absente est seulement signalée.
-SERIES_SCRIPTARIUM = [(r"d[ée]fis et sortil[èe]ges", "Défis et Sortilèges (Scriptarium)"), (r"(oeil|œil) noir.*dessin", "L'Œil noir (BD)"), (r"oeil noir|œil noir", "L'Œil noir (solos)"),
-                      (r"d[ée]fis fantastiques", "Défis Fantastiques (hors-série)"), (r"voie du tigre", "La Voie du Tigre"),
+SERIES_SCRIPTARIUM = [(r"d[ée]fis et sortil[èe]ges", "Défis et Sortilèges (Scriptarium)"), (r"oeil noir|œil noir", "L'Œil noir (solos)"), (r"voie du tigre", "La Voie du Tigre"),
                       (r"l[ée]gendes du loup solitaire", "Les Légendes du Loup Solitaire"), (r"aventures en magnamund", "Aventures en Magnamund")]
 
 
@@ -119,6 +118,8 @@ def classer_scriptarium(n, rows):
     """(série, numéro, titre) d'une notice de Scriptarium qui est un livre-jeu, sinon None. La série vient de la collection de la notice ;
     à défaut, d'un livre du même titre déjà dans la base (les éditions courantes de Scriptarium n'ont pas de collection dans la BnF)."""
     coll = n["collection"].lower()
+    if "dessin" in coll:                                       # bande dessinée : pas un livre-jeu
+        return None
     for motif, serie in SERIES_SCRIPTARIUM:
         if re.search(motif, coll):
             return serie, n["numero"], n["titre"]
