@@ -203,13 +203,14 @@ window.Compte = (function () {
       '<p>L\'outil des collectionneurs de livres dont vous êtes le héros : retrouvez vos livres, repérez vos doubles à vendre et ce que vous cherchez, et estimez la valeur de chaque édition.</p>' +
       '<p class="sous">Sans compte, vous consultez les fiches et un niveau de prix&nbsp;(€&nbsp;à&nbsp;€&#8288;€&#8288;€&#8288;€). <strong>Un compte Google, gratuit, ouvre tout le reste :</strong></p>' +
       '<ul class="avantages">' +
-      '<li><strong>Les prix estimés</strong> de chaque état.</li>' +
+      '<li><strong>Le prix estimé</strong> de chaque livre, selon son état.</li>' +
       '<li><strong>Votre collection</strong>, en scannant les codes-barres avec votre téléphone.</li>' +
       '<li><strong>Vos doubles à vendre</strong> et les livres à trouver.</li>' +
       '<li><strong>Des liens directs</strong> vers Leboncoin, Vinted et eBay.</li>' +
-      '<li><strong>Tout sauvegardé</strong>, sur téléphone comme sur ordinateur.</li>' +
+      '<li><strong>Un livre manque ?</strong> Demandez son ajout.</li>' +
+      '<li><strong>Les livres à paraître</strong>, à surveiller.</li>' +
       '</ul>' +
-      '<p class="sous">La cote est un ordre de grandeur calculé sur des prix demandés : la marge de négociation reste à votre main. Votre collection est gardée dans un espace réservé de votre Drive, que vous pouvez supprimer à tout moment.</p>' +
+      '<p class="sous">La cote est un ordre de grandeur calculé sur des prix demandés : la marge de négociation reste à votre main. Votre collection est sauvegardée dans un espace réservé de votre Drive, sur téléphone comme sur ordinateur, et vous pouvez la supprimer à tout moment.</p>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-compte="connecter" autofocus>Créer mon compte gratuit</button><button type="button" class="bouton bouton-clair" data-fermer>Découvrir le site</button></div>', 'dlg-invitation dlg-bienvenue');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-compte="connecter"]') || e.target.closest('[data-fermer]')) d.close(); });
   }
