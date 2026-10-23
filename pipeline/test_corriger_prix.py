@@ -32,7 +32,7 @@ class TestCorrections(unittest.TestCase):
         v = validations.lire(chemin)
         self.assertEqual(v[("9782070585168", "convenable")]["prix"], 25.0)
         self.assertEqual(v[("9782070585168", "tres_bon")]["prix"], 60.0)
-        self.assertNotIn(("9782070585168", "bon"), v)                     # case vide : l'état n'est pas touché
+        self.assertEqual(v[("9782070585168", "bon")]["prix"], 36.74)      # fourchette complète : le bon état vide est calculé entre les deux
 
     def test_le_nom_d_admin_est_garde_et_nettoye(self):
         base, chemin = self.base()
@@ -83,9 +83,15 @@ class TestCorrections(unittest.TestCase):
         self.assertEqual(v[("9782070585168", "bon")]["prix"], 24.58)
         self.assertEqual(v[("9782070585168", "bon")]["decision"], "confirme")
 
-    def test_sans_bon_etat_valide_rien_n_est_cree(self):
-        base, chemin = self.base()
+    def test_une_fourchette_met_toujours_a_jour_les_trois_prix(self):
+        base, chemin = self.base()                                            # aucun bon état validé (il pouvait venir d'annonces)
         c.appliquer("9782070585168 ; 2,5 ; ; 13", chemin, base)
+        v = validations.lire(chemin)
+        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 5.41, 13.0])
+
+    def test_un_seul_prix_sans_bon_etat_valide_ne_cree_pas_de_bon_etat(self):
+        base, chemin = self.base()
+        c.appliquer("9782070585168 ; ; ; 13", chemin, base)
         self.assertNotIn(("9782070585168", "bon"), validations.lire(chemin))
 
     def test_un_bon_etat_saisi_est_garde_tel_quel(self):

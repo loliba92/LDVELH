@@ -2,13 +2,13 @@
 
 Une correction par ligne, ou plusieurs séparées par « | » (les champs d'un lancement GitHub tiennent sur une ligne) :
     ISBN ; convenable ; bon état ; très bon état [; confirme]
-Le mot « confirme » en dernier champ marque ces prix comme confirmés (et non corrigés). Une case vide ne change pas cet état. Les prix acceptent la virgule. Exemple :
+Le mot « confirme » en dernier champ marque ces prix comme confirmés (et non corrigés). Une case vide ne change pas l'état correspondant (sauf le bon état d'une fourchette : voir plus bas). Les prix acceptent la virgule. Exemple :
     9782070585168 ; 25 ; ; 60
 Chaque prix saisi devient un prix validé (data/manual/prix_valides.json) : il prime sur eBay, les archives et la règle 40/60 ;
 les états non saisis en sont déduits (voir pipeline/export_site.py).
-Exception : un bon état DÉJÀ validé, non saisi dans la ligne, est recalculé (entre le convenable et le très bon état, mêmes rapports
-que le site) quand la ligne donne le convenable ET le très bon état (une fourchette), ou quand il sort de l'intervalle
-[convenable, très bon état] après la correction. Sans cela, un ancien prix validé resterait figé, parfois au-dessus du très bon état.
+Exception : une fourchette (convenable ET très bon état, bon état non saisi) met toujours à jour les trois prix : le bon état est calculé
+entre les deux, avec les mêmes rapports que le site, et remplace un ancien bon état validé ou issu d'annonces. Avec un seul des deux prix,
+un bon état déjà validé n'est recalculé que s'il sort de l'intervalle [convenable, très bon état] après la correction.
 Usage : python pipeline/corriger_prix.py "9782070585168 ; 25 ; ; 60"
 """
 import json
@@ -31,7 +31,8 @@ def bon_recalcule(prix, valides, isbn, ratios):
     """Nouveau bon état à enregistrer quand un bon état déjà validé contredit la ligne, sinon None.
     prix : prix saisis dans la ligne ; valides : validations existantes ({(isbn, etat): {prix, ...}})."""
     ancien = valides.get((isbn, "bon"))
-    if "bon" in prix or not ancien:
+    fourchette = bool(prix.get("convenable") and prix.get("tres_bon"))
+    if "bon" in prix or not (ancien or fourchette):
         return None
     connu = lambda etat: prix.get(etat) or (valides.get((isbn, etat)) or {}).get("prix")
     c, t = connu("convenable"), connu("tres_bon")
@@ -41,7 +42,6 @@ def bon_recalcule(prix, valides, isbn, ratios):
     t = t if t is not None else c * ratios["tres_bon"] / ratios["convenable"]
     if c > t:
         return None                                                   # prix qui se contredisent : on ne devine pas
-    fourchette = bool(prix.get("convenable") and prix.get("tres_bon"))
     if not fourchette and c <= ancien["prix"] <= t:
         return None                                                   # le bon état validé reste cohérent : on n'y touche pas
     niveau = ((c / ratios["convenable"]) * (t / ratios["tres_bon"])) ** 0.5
