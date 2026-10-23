@@ -39,7 +39,7 @@ window.Compte = (function () {
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">Synchroniser maintenant</button></li>' : '') +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">Demander l\'ajout d\'un livre</button></li>' : '') +
       (estAdmin() ? '<li><a href="revue-prix.html">Espace des sorciers</a></li>' : '') +
-      (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">Pépites</a></li>' : '') +
+      (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">Butin</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">Équipe</a></li>' : '') +
       (e.cle === 'a-jour' && exigeCompte ? '<li><button type="button" class="bouton-lien" data-compte="supprimer">Supprimer ma collection du Drive</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">Se déconnecter</button></li></ul>';

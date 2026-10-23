@@ -645,7 +645,7 @@
     dessiner();
   }
 
-  // Onglet « Pépites » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au SuperAdmin comme les annonces.
+  // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au SuperAdmin comme les annonces.
   // « Solide » : trouvée par l'ISBN et état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   let dessinerPepites = () => {};
