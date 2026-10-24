@@ -9,7 +9,7 @@ Relevé du 2026-10-11 (robots.txt et accès direct). À revérifier avant chaque
 | collection-ldvelh.fr | `Disallow:` vide, tout autorisé | 200 | Fait. Données figées (site plus à jour) : sert de base historique. |
 | eBay.fr | Accès automatisé interdit sans autorisation | 403 sur la recherche web | Passer par l'interface officielle (API). Pas de scraping. |
 | Vinted | Création de jeux de données interdite | 200 | Pas de collecte automatique. Saisie assistée (voir plus bas). |
-| Leboncoin | Robots et méthodes automatiques interdits | 403 | Pas de collecte automatique. Saisie assistée. |
+| Leboncoin | Robots et méthodes automatiques interdits | 403 | Pas de collecte automatique pour la cote : saisie assistée. Seule exception, décidée par le propriétaire le 24 octobre 2026 : une alerte personnelle sur les nouvelles annonces (voir plus bas). |
 | AbeBooks | Recherche interdite aux robots | non testé | Écarté, sauf accord. |
 | Momox / Rakuten | Partiellement ouvert | non testé | À étudier : prix de rachat (plancher) et prix de vente reconditionné. |
 
@@ -32,3 +32,13 @@ Principe : on ne contourne jamais un blocage (403, anti-robot). Un blocage signi
 - Respect de `robots.txt`, délai entre requêtes, identification claire, reprise après erreur, journal.
 - Les données personnelles des vendeurs ne sont jamais conservées.
 - Un relevé par semaine suffit pour ce marché : le marché bouge lentement.
+
+## Exception : alerte personnelle Leboncoin (24 octobre 2026)
+
+Le propriétaire a choisi d'utiliser, pour son usage personnel, un bot d'alerte sur les nouvelles annonces Leboncoin (outil open source `lbc-finder`). Ses limites, pour que la règle ci-dessus reste lisible :
+
+- l'outil vit **hors de ce dépôt**, sur l'ordinateur du propriétaire ; il lit `web/data/versions.json` sans rien y écrire ;
+- il **ne nourrit jamais la cote** : aucun prix, titre ni lien d'annonce n'est enregistré dans `data/` ;
+- **aucun proxy ni contournement** : si Leboncoin répond par un blocage (403, DataDome), l'outil est arrêté et la source reste indisponible ;
+- cadence modérée (une vérification toutes les 10 minutes par recherche) ;
+- l'usage reste à la charge du propriétaire : les conditions de Leboncoin interdisent les méthodes automatiques.
