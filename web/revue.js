@@ -413,7 +413,19 @@
     }
     return { ok: true, texte: elements.length > 1 ? `${elements.length} livres à ajouter.` : 'Ligne correcte : le livre sera ajouté.' };
   }
+  // Scan : après chaque livre lu, la liste est vérifiée puis envoyée toute seule (un seul envoi pour une rafale de scans).
+  // Une liste contenant une ligne invalide n'est pas envoyée : elle reste affichée, pour correction.
+  let minuterieScan = null;
+  function envoiAutoScan() {
+    chargerCatalogue().then((cat) => {
+      verifierListe(cat);
+      if (AJOUT.some((a) => a.statut === 'invalide')) return;
+      if (!AJOUT.some((a) => a.statut === 'nouveau') || !jeton()) return;
+      $('#aj-lancer').click();
+    });
+  }
   function initAjout() {
+    document.addEventListener('cdh-scan-ajout', () => { clearTimeout(minuterieScan); minuterieScan = setTimeout(envoiAutoScan, 1200); });
     $('#aj-verifier').addEventListener('click', () => { chargerCatalogue().then(verifierListe); });
     $('#aj-copier').addEventListener('click', () => {
       const t = texteAjout().replace(/\n/g, ' | '), ok = () => { $('#aj-copier').textContent = 'Liste copiée ✓'; setTimeout(() => { $('#aj-copier').textContent = 'Copier la liste à ajouter'; }, 2500); };
@@ -442,6 +454,7 @@
       $('#aj-lancer').disabled = true; dire('Envoi en cours…');
       try {
         const r = await lancer('ajout-isbn.yml', { liste: texteAjout().replace(/\n/g, ' | '), releve: 'oui' });
+        if (r.status === 204) { $('#aj-texte').value = ''; AJOUT = []; }   // envoyé : la liste est vidée pour ne pas renvoyer ces livres au scan suivant
         dire(r.status === 204 ? 'Envoyé. Les livres seront sur le site dans environ 2 minutes, les prix après le relevé qui suit.'
           : r.status === 401 || r.status === 403 ? MSG_REFUS : `Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
