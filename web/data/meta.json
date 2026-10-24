@@ -14,12 +14,12 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 633,
+  "nb_prix_actuels": 646,
   "calibration": {
     "actif": false,
-    "n_paires": 28,
-    "gain": -0.092,
-    "raison": "le modèle ne bat pas assez les archives (gain -9%, 15% exigés)",
+    "n_paires": 30,
+    "gain": -0.182,
+    "raison": "le modèle ne bat pas assez les archives (gain -18%, 15% exigés)",
     "calcule_le": "2026-10-24",
     "rapport_global": 1.172,
     "nb_recalibres": 0

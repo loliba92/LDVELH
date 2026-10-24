@@ -2,9 +2,9 @@
  "date": "2026-10-24",
  "precedent": "2026-10-23",
  "nb_comparees": 1491,
- "nb_modifiees": 483,
+ "nb_modifiees": 498,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 3,
  "hausses": [
   {
    "id": "9782070335770",
@@ -15,10 +15,25 @@
    "version": "V1",
    "etat": "bon",
    "avant": 37.78,
-   "apres": 53.61,
-   "pct": 0.419,
+   "apres": 53.1,
+   "pct": 0.406,
    "nature": "annonces",
    "nb": 3,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333349",
+   "isbn13": "9782070333349",
+   "titre": "Les Maîtres du Mal",
+   "serie": "Loup*Ardent",
+   "numero": "334",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 7.1,
+   "apres": 9.69,
+   "pct": 0.365,
+   "nature": "annonces",
+   "nb": 5,
    "recalibre": false
   },
   {
@@ -30,8 +45,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 47.45,
-   "apres": 57.79,
-   "pct": 0.218,
+   "apres": 57.52,
+   "pct": 0.212,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -52,18 +67,33 @@
    "recalibre": false
   },
   {
-   "id": "9782070333349",
-   "isbn13": "9782070333349",
-   "titre": "Les Maîtres du Mal",
-   "serie": "Loup*Ardent",
-   "numero": "334",
+   "id": "9782070333912",
+   "isbn13": "9782070333912",
+   "titre": "Le Grand Maître d'Irsmun",
+   "serie": "La Voie du Tigre",
+   "numero": "391",
    "version": "V1",
    "etat": "bon",
-   "avant": 7.1,
-   "apres": 8.26,
-   "pct": 0.163,
+   "avant": 12.57,
+   "apres": 14.2,
+   "pct": 0.13,
    "nature": "annonces",
-   "nb": 3,
+   "nb": 6,
+   "recalibre": false
+  },
+  {
+   "id": "9782070546039",
+   "isbn13": "9782070546039",
+   "titre": "Le Château des Ames Damnées",
+   "serie": "Dragon d'Or",
+   "numero": "356",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 19.21,
+   "apres": 21.19,
+   "pct": 0.103,
+   "nature": "archives",
+   "nb": 0,
    "recalibre": false
   }
  ],
@@ -137,8 +167,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 52.71,
-   "apres": 43.4,
-   "pct": -0.177,
+   "apres": 43.47,
+   "pct": -0.175,
    "nature": "annonces",
    "nb": 6,
    "recalibre": false
@@ -189,12 +219,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 12,
+ "nb_grands_mouvements": 14,
  "modele": {
   "actif": false,
-  "n_paires": 28,
-  "gain": -0.092,
-  "raison": "le modèle ne bat pas assez les archives (gain -9%, 15% exigés)",
+  "n_paires": 30,
+  "gain": -0.182,
+  "raison": "le modèle ne bat pas assez les archives (gain -18%, 15% exigés)",
   "rapport_global": 1.172
  }
 }
