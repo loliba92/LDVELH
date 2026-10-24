@@ -2,7 +2,7 @@
  "date": "2026-10-24",
  "precedent": "2026-10-23",
  "nb_comparees": 1491,
- "nb_modifiees": 499,
+ "nb_modifiees": 502,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -204,6 +204,21 @@
    "recalibre": false
   },
   {
+   "id": "9782075190800",
+   "isbn13": "9782075190800",
+   "titre": "Les Mystères de Salamonis",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V5",
+   "etat": "tres_bon",
+   "avant": 18.0,
+   "apres": 16.0,
+   "pct": -0.111,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070336319",
    "isbn13": "9782070336319",
    "titre": "Le Port des Assassins",
@@ -219,7 +234,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 14,
+ "nb_grands_mouvements": 15,
  "modele": {
   "actif": false,
   "n_paires": 30,

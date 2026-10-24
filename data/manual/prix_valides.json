@@ -1431,19 +1431,22 @@
    "le": "2026-10-15"
   },
   "9782075190800|bon": {
-   "prix": 10.8,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 10.04,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
   },
   "9782075190800|convenable": {
-   "prix": 7.2,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 7.0,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
   },
   "9782075190800|tres_bon": {
-   "prix": 18.0,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 16.0,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
   },
   "9782075191005|bon": {
    "prix": 7.8,
