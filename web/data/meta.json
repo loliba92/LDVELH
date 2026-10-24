@@ -6,20 +6,22 @@
   "sources_prix": [
     "Relevé d'archives (historique)",
     "eBay (interface officielle)",
-    "Librairies indépendantes (leslibraires.fr)"
+    "Librairies indépendantes (leslibraires.fr)",
+    "Leboncoin"
   ],
   "types_prix": [
+    "Vente probable (annonce disparue)",
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 601,
+  "nb_prix_actuels": 626,
   "calibration": {
     "actif": false,
-    "n_paires": 19,
-    "gain": null,
-    "raison": "pas assez d'éditions comparables (19 sur 20 nécessaires)",
+    "n_paires": 28,
+    "gain": -0.092,
+    "raison": "le modèle ne bat pas assez les archives (gain -9%, 15% exigés)",
     "calcule_le": "2026-10-24",
-    "rapport_global": null,
+    "rapport_global": 1.172,
     "nb_recalibres": 0
   }
 }
