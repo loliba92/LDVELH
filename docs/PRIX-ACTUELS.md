@@ -2,7 +2,7 @@
 
 Les prix d'archives (ancien relevé de collection-ldvelh.fr) restent la base. Deux sources les complètent,
 toutes deux légitimes : vos propres transactions, et les annonces d'eBay lues par son interface officielle.
-Aucun site n'est « scrapé » (Vinted, Leboncoin, chasse-aux-livres : non).
+Aucun site n'est « scrapé » par ce dépôt (Vinted, chasse-aux-livres : non). Seule exception, voulue par le propriétaire : les relevés Leboncoin de son bot personnel, reçus par une boîte aux lettres contrôlée (voir `docs/STRATEGIE-EXTRACTION.md`).
 
 ## Ce que le site affiche
 

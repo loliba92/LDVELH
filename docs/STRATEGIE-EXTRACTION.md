@@ -33,12 +33,15 @@ Principe : on ne contourne jamais un blocage (403, anti-robot). Un blocage signi
 - Les données personnelles des vendeurs ne sont jamais conservées.
 - Un relevé par semaine suffit pour ce marché : le marché bouge lentement.
 
-## Exception : alerte personnelle Leboncoin (24 octobre 2026)
+## Exception : relevés Leboncoin du bot personnel (25 octobre 2026)
 
-Le propriétaire a choisi d'utiliser, pour son usage personnel, un bot d'alerte sur les nouvelles annonces Leboncoin (outil open source `lbc-finder`). Ses limites, pour que la règle ci-dessus reste lisible :
+Le propriétaire utilise, pour son usage personnel, un bot d'alerte sur Leboncoin (outil open source `lbc-finder`, adapté dans le dépôt privé `lbc-cote`). Il a décidé que les annonces que ce bot reconnaît avec certitude **alimentent la cote et le Butin**, avec leur titre et leur lien, pour pouvoir les contrôler. Les limites, pour que la règle générale (« pas de collecte automatique pour la cote ») reste lisible :
 
-- l'outil vit **hors de ce dépôt**, sur l'ordinateur du propriétaire ; il lit `web/data/versions.json` sans rien y écrire ;
-- il **ne nourrit jamais la cote** : aucun prix, titre ni lien d'annonce n'est enregistré dans `data/` ;
-- **aucun proxy ni contournement** : si Leboncoin répond par un blocage (403, DataDome), l'outil est arrêté et la source reste indisponible ;
-- cadence modérée (une vérification toutes les 10 minutes par recherche) ;
-- l'usage reste à la charge du propriétaire : les conditions de Leboncoin interdisent les méthodes automatiques.
+- le bot vit **hors de ce dépôt**, sur l'ordinateur du propriétaire ; **aucun code de collecte n'est dans ce dépôt** ;
+- il envoie chaque soir un relevé par une **boîte aux lettres** : une issue GitHub dont le titre commence par « Relevé Leboncoin », ouverte avec une clé qui n'a que le droit d'ouvrir des issues. Le lot `.github/workflows/releve-leboncoin.yml` ne réagit qu'aux issues du propriétaire du dépôt portant ce titre et ne les exécute jamais comme une instruction ;
+- `pipeline/importer_leboncoin.py` contrôle chaque ligne (ISBN connu, état, prix plausible, lien Leboncoin, date récente), nettoie le titre, et écrit dans `data/raw/occasion/` : `annonces-leboncoin-*.csv` (actives, onglet Butin), `vendus-leboncoin-*.csv` (vendues, contrôle seulement), et deux agrégats `leboncoin-*.csv` et `leboncoin-vendus-*.csv` lus par `build_db.py` ;
+- poids dans la cote : **prix demandé** (0,3) pour une annonce active, **vente probable** (0,6) pour une annonce vendue ; les règles de lissage et d'écart aberrant d'`estimation.py` s'appliquent comme pour eBay ;
+- dans le Butin, une annonce Leboncoin est toujours « à vérifier » (édition et état à contrôler) ;
+- **aucun proxy ni contournement** : si Leboncoin bloque le bot, il s'arrête et attend ; la source devient simplement indisponible ;
+- sobriété du bot : aucune requête de 23 h à 7 h, 120 requêtes par jour au plus, ralentissement après chaque blocage ;
+- **point d'attention** : les conditions de Leboncoin interdisent les méthodes automatiques et la réutilisation de ses contenus. Publier des titres et des liens d'annonces dans un dépôt public augmente l'exposition par rapport à de simples agrégats. La décision et le risque restent au propriétaire ; l'interrupteur est de désactiver l'envoi côté bot, ou d'enlever ce lot.
