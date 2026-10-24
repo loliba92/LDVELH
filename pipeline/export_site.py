@@ -78,6 +78,7 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
     return sum(1 for e in ordre if par_etat[e].get("ajuste"))
 
 
+JOURS_LEBONCOIN = 3        # une annonce Leboncoin non revue depuis plus de 3 jours avant le dernier relevé est écartée (elles partent vite)
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
 
@@ -320,8 +321,15 @@ def main():
             revue.append(ligne)
     # Annonces retenues par le dernier relevé eBay (titre, prix, lien) : l'onglet « Annonces » de l'espace administrateur les montre pour que chaque prix puisse
     # être contrôlé à la main (bon livre ? bon état ?). Absent tant qu'aucun relevé ne les a enregistrées.
-    fichiers_ann = sorted((DB.parent.parent / "raw" / "occasion").glob("annonces-*.csv"))
+    dossier_occasion = DB.parent.parent / "raw" / "occasion"
+    fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if "leboncoin" not in f.name)         # eBay
     annonces = annonces_cumulees(fichiers_ann)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
+    # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
+    # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
+    fichiers_lbc = sorted(dossier_occasion.glob("annonces-leboncoin-20*.csv"))
+    for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN).items():
+        for etat, liste in par_etat.items():
+            annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
@@ -332,8 +340,9 @@ def main():
             for liste in par_etat.values():
                 liste.sort()
         fichiers_lib = sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv"))
-        date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:]])
-        (sortie / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None, "annonces": annonces},
+        date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:] + fichiers_lbc[-1:]])
+        (sortie / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
+                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),

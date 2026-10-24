@@ -598,7 +598,8 @@
       const l = par[cle];
       if (!l || !l.length) return '';
       const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-      const partie = ([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
+      const dateRef = (origine) => (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
+      const partie = ([, , , origine, vue]) => !!(vue && dateRef(origine) && vue < dateRef(origine));          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
       const nbPartie = l.filter(partie).length;
       return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} plus en ligne)` : ''}${disp}</h4><ul>${l.map((a) => { const [prix, titre, lien, origine, vue] = a; return `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? ` <span class="rv-ann-titre">plus en ligne · vue le ${jour(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
     }).join('');
@@ -611,7 +612,7 @@
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'an-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'an-dialog-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces retenues (eBay et librairies)</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces retenues (eBay, librairies et Leboncoin)</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'an-fermer') dlg.close(); });
     }
@@ -656,11 +657,12 @@
       const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
-        if (vue && ANN.date_ebay && vue < ANN.date_ebay) return;                 // plus en ligne au dernier relevé
+        if (vue && (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay) && vue < (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay)) return;                 // plus en ligne au dernier relevé
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
           if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
+          if (origine === 'leboncoin') raisons.push("annonce Leboncoin : vérifier l'édition et l'état");
           if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
         }
@@ -672,7 +674,7 @@
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
-    const lieu = p.origine === 'librairie' ? ' de la librairie' : ' sur eBay';
+    const lieu = p.origine === 'librairie' ? ' de la librairie' : p.origine === 'leboncoin' ? ' sur Leboncoin' : ' sur eBay';
     const img = JAQ[p.ed.id] ? `<img src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">`
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +

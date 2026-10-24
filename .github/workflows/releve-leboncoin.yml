@@ -1,0 +1,66 @@
+name: Relevé Leboncoin (boîte aux lettres)
+
+# Le bot personnel du propriétaire (sur son ordinateur, hors de ce dépôt) ouvre chaque soir une « issue » dont le titre commence par « Relevé Leboncoin » et dont le texte contient
+# un bloc csv : une ligne par annonce reconnue avec certitude (voir pipeline/importer_leboncoin.py). Ce lot contrôle chaque ligne, l'enregistre dans
+# data/raw/occasion/, reconstruit la base et le site, le republie, puis répond sur l'issue et la ferme.
+# Garde-fous : seule une issue ouverte par le propriétaire du dépôt, avec ce titre, déclenche ce lot ; le texte de l'issue n'est jamais exécuté
+# (il passe par une variable d'environnement, lue comme du texte) ; la clé du bot ne peut qu'ouvrir des issues (aucun droit sur le code).
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+# Même file d'attente que les autres écritures de données : un envoi du site n'est jamais écrasé (voir .github/scripts/publier.sh).
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  importer:
+    if: github.event.issue.user.login == github.repository_owner && startsWith(github.event.issue.title, 'Relevé Leboncoin')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CORPS: ${{ github.event.issue.body }}
+      NUMERO: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - name: Tests
+        run: |
+          python pipeline/test_importer_leboncoin.py
+          python pipeline/test_build_db.py
+          python pipeline/test_export.py
+      - name: Importer le relevé
+        id: importer
+        run: |
+          set +e
+          python pipeline/importer_leboncoin.py | tee compte-rendu.txt
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Base et données du site
+        run: |
+          python pipeline/build_db.py
+          python pipeline/export_site.py
+          python pipeline/construire_pages.py
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "releve-leboncoin"
+          git config user.email "releve-leboncoin@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/importer_leboncoin.py && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
+            .github/scripts/publier.sh "Relevé Leboncoin (issue $NUMERO)" data/raw/occasion data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml
+      - name: Répondre et fermer l'issue
+        if: always()
+        run: |
+          [ -s compte-rendu.txt ] || echo "Relevé non traité : voir le journal du lot." > compte-rendu.txt
+          gh issue comment "$NUMERO" --body-file compte-rendu.txt
+          gh issue close "$NUMERO" --reason completed
