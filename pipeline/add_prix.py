@@ -3,6 +3,8 @@
     python pipeline/add_prix.py 9782070583805 12.5 --etat bon --type vente
     python pipeline/add_prix.py 9782070583805 8 --etat tres_bon --type achat --date 2026-10-03 --url https://...
 
+Prix vu sur Leboncoin : python pipeline/add_prix.py 9782070583805 15 --etat bon --type releve --plateforme leboncoin
+
 Types : vente (vous avez vendu à ce prix), achat (vous avez acheté), releve (prix vu sur une annonce),
         rachat (offre d'un professionnel). Une vente réelle compte plus qu'une annonce dans l'estimation.
 Ensuite : python pipeline/build_db.py && python pipeline/export_site.py
@@ -25,9 +27,10 @@ TYPES = {  # option -> (source, type_prix)
     "rachat": ("releve_manuel", "rachat"),
 }
 ETATS = ("convenable", "bon", "tres_bon")
+PLATEFORMES = {"leboncoin": "leboncoin"}  # source dédiée, pour les types « releve » et « rachat »
 
 
-def ligne(isbn, prix, etat, type_, jour, port=None, url=None, lot=0):
+def ligne(isbn, prix, etat, type_, jour, port=None, url=None, lot=0, plateforme=None):
     isbn13 = editions.normalize_isbn(isbn)[0]
     if etat not in ETATS:
         raise ValueError(f"état inconnu : {etat} (choix : {', '.join(ETATS)})")
@@ -36,6 +39,12 @@ def ligne(isbn, prix, etat, type_, jour, port=None, url=None, lot=0):
     if prix <= 0:
         raise ValueError("le prix doit être positif")
     source, type_prix = TYPES[type_]
+    if plateforme:
+        if plateforme not in PLATEFORMES:
+            raise ValueError(f"plateforme inconnue : {plateforme} (choix : {', '.join(PLATEFORMES)})")
+        if type_ not in ("releve", "rachat"):
+            raise ValueError("la plateforme ne s'applique qu'aux types releve et rachat")
+        source = PLATEFORMES[plateforme]
     return {"isbn": isbn13, "date": jour.isoformat(), "source": source, "type_prix": type_prix, "etat": etat,
             "prix": f"{prix:.2f}", "frais_port": "" if port is None else f"{port:.2f}", "lot": int(lot),
             "url": url or "", "nb": 1}
@@ -66,11 +75,12 @@ def main():
     p.add_argument("--date", type=date.fromisoformat, default=date.today())
     p.add_argument("--port", type=float)
     p.add_argument("--url")
+    p.add_argument("--plateforme", choices=list(PLATEFORMES), help="origine du prix vu (types releve et rachat)")
     p.add_argument("--lot", action="store_true", help="prix d'un lot : non utilisé dans l'estimation")
     p.add_argument("--fichier", default=str(MANUEL))
     a = p.parse_args()
     try:
-        row = ligne(a.isbn, a.prix, a.etat, a.type_, a.date, a.port, a.url, a.lot)
+        row = ligne(a.isbn, a.prix, a.etat, a.type_, a.date, a.port, a.url, a.lot, a.plateforme)
     except ValueError as e:
         sys.exit(f"Erreur : {e}")
     ajouter(a.fichier, row)

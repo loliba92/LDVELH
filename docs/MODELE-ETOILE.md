@@ -52,7 +52,7 @@ isbn,date,source,type_prix,etat,prix,frais_port,lot,url
 9782070583805,2026-10-10,vente_perso,vente_reelle,bon,72.50,3.20,0,
 ```
 
-Codes acceptés : sources `collection_ldvelh`, `ebay_api`, `vente_perso`, `achat_perso`, `releve_manuel`, `communaute` ; types `vente_reelle`, `vente_probable`, `prix_demande`, `rachat`, `historique` ; états `inconnu`, `convenable`, `bon`, `tres_bon`, `neuf`.
+Codes acceptés : sources `collection_ldvelh`, `ebay_api`, `vente_perso`, `achat_perso`, `releve_manuel`, `leboncoin`, `communaute` ; types `vente_reelle`, `vente_probable`, `prix_demande`, `rachat`, `historique` ; états `inconnu`, `convenable`, `bon`, `tres_bon`, `neuf`.
 
 Le script contrôle chaque ligne (ISBN valide, codes connus, prix lisible), signale les erreurs avec leur numéro de ligne et ignore les doublons.
 

@@ -41,6 +41,7 @@ SOURCES = [  # code, nom, famille, accès, fiabilité
     ("vente_perso", "Mes ventes", "perso", "saisie", 1.0),
     ("achat_perso", "Mes achats", "perso", "saisie", 0.9),
     ("releve_manuel", "Relevé manuel (Vinted, Leboncoin, comparateurs)", "marketplace", "saisie", 0.6),
+    ("leboncoin", "Leboncoin (relevé manuel)", "marketplace", "saisie", 0.6),
     ("communaute", "Contribution d'un visiteur", "communaute", "saisie", 0.5),
 ]
 TYPES = [  # code, libellé, poids, prix réel ?
