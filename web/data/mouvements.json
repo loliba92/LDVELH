@@ -2,7 +2,7 @@
  "date": "2026-10-24",
  "precedent": "2026-10-23",
  "nb_comparees": 1491,
- "nb_modifiees": 479,
+ "nb_modifiees": 482,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -84,6 +84,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070543540",
+   "isbn13": "9782070543540",
+   "titre": "Sacrifice chez les aztèques",
+   "serie": "Défis de l'Histoire",
+   "numero": "1099",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 15.53,
+   "apres": 8.0,
+   "pct": -0.485,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070543540",
+   "isbn13": "9782070543540",
+   "titre": "Sacrifice chez les aztèques",
+   "serie": "Défis de l'Histoire",
+   "numero": "1099",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 23.22,
+   "apres": 12.59,
+   "pct": -0.458,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070512621",
    "isbn13": "9782070512621",
    "titre": "Le Chasseur de Mages",
@@ -129,6 +159,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070543540",
+   "isbn13": "9782070543540",
+   "titre": "Sacrifice chez les aztèques",
+   "serie": "Défis de l'Histoire",
+   "numero": "1099",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 24.98,
+   "apres": 22.0,
+   "pct": -0.119,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070336319",
    "isbn13": "9782070336319",
    "titre": "Le Port des Assassins",
@@ -144,7 +189,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 28,

@@ -802,6 +802,24 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070543540|bon": {
+   "prix": 12.59,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
+  },
+  "9782070543540|convenable": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
+  },
+  "9782070543540|tres_bon": {
+   "prix": 22.0,
+   "decision": "corrige",
+   "le": "2026-10-24",
+   "par": "loliba (superadmin)"
+  },
   "9782070544035|bon": {
    "prix": 5.92,
    "decision": "corrige",
