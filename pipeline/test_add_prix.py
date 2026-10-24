@@ -23,6 +23,18 @@ class TestAddPrix(unittest.TestCase):
             with self.assertRaises(ValueError):
                 add_prix.ligne(*args, date(2026, 10, 3))
 
+    def test_plateforme_leboncoin(self):
+        r = add_prix.ligne("9782070583805", 15, "bon", "releve", date(2026, 10, 24), plateforme="leboncoin")
+        self.assertEqual((r["source"], r["type_prix"]), ("leboncoin", "prix_demande"))
+        r = add_prix.ligne("9782070583805", 15, "bon", "releve", date(2026, 10, 24))
+        self.assertEqual(r["source"], "releve_manuel")  # sans plateforme : comportement inchangé
+
+    def test_plateforme_refusee(self):
+        with self.assertRaises(ValueError):  # une vente perso ne vient pas d'une plateforme
+            add_prix.ligne("9782070583805", 15, "bon", "vente", date(2026, 10, 24), plateforme="leboncoin")
+        with self.assertRaises(ValueError):
+            add_prix.ligne("9782070583805", 15, "bon", "releve", date(2026, 10, 24), plateforme="autre")
+
 
 if __name__ == "__main__":
     unittest.main()
