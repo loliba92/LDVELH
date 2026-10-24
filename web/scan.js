@@ -190,6 +190,7 @@
       traiter(isbn) {
         texte.value = (texte.value.trim() ? texte.value.replace(/\s*$/, '\n') : '') + isbn + '\n';
         texte.dispatchEvent(new Event('input', { bubbles: true }));
+        document.dispatchEvent(new CustomEvent('cdh-scan-ajout'));        // revue.js vérifie puis envoie la liste, sans clic
         return { ok: true, texte: `✓ ${isbn} ajouté à la liste` };
       },
     }));
