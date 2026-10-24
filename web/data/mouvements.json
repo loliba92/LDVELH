@@ -2,7 +2,7 @@
  "date": "2026-10-24",
  "precedent": "2026-10-23",
  "nb_comparees": 1491,
- "nb_modifiees": 477,
+ "nb_modifiees": 479,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -69,6 +69,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070332717",
+   "isbn13": "9782070332717",
+   "titre": "La Cité des Voleurs",
+   "serie": "Défis Fantastiques",
+   "numero": "271",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 38.92,
+   "apres": 10.0,
+   "pct": -0.743,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070512621",
    "isbn13": "9782070512621",
    "titre": "Le Chasseur de Mages",
@@ -112,9 +127,24 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070332717",
+   "isbn13": "9782070332717",
+   "titre": "La Cité des Voleurs",
+   "serie": "Défis Fantastiques",
+   "numero": "271",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 7.93,
+   "apres": 7.1,
+   "pct": -0.105,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 7,
+ "nb_grands_mouvements": 9,
  "modele": {
   "actif": false,
   "n_paires": 28,
