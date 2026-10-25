@@ -2,7 +2,7 @@
  "date": "2026-10-25",
  "precedent": "2026-10-24",
  "nb_comparees": 1494,
- "nb_modifiees": 496,
+ "nb_modifiees": 502,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -187,9 +187,24 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070335930",
+   "isbn13": "9782070335930",
+   "titre": "Le Volcan de Zamarra",
+   "serie": "Défis Fantastiques",
+   "numero": "593",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 20.88,
+   "apres": 17.3,
+   "pct": -0.171,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 12,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 30,
