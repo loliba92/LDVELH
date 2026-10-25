@@ -2,7 +2,7 @@
  "date": "2026-10-25",
  "precedent": "2026-10-24",
  "nb_comparees": 1494,
- "nb_modifiees": 504,
+ "nb_modifiees": 505,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -217,9 +217,24 @@
    "nature": "annonces",
    "nb": 11,
    "recalibre": false
+  },
+  {
+   "id": "9782070335046",
+   "isbn13": "9782070335046",
+   "titre": "Péreim le Chevalier",
+   "serie": "Défis et Sortilèges",
+   "numero": "504",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 13.7,
+   "apres": 12.27,
+   "pct": -0.104,
+   "nature": "annonces",
+   "nb": 9,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 14,
+ "nb_grands_mouvements": 15,
  "modele": {
   "actif": false,
   "n_paires": 30,
