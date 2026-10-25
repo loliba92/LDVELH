@@ -411,6 +411,24 @@
    "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
+  "9782070335404|bon": {
+   "prix": 30.83,
+   "decision": "corrige",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335404|convenable": {
+   "prix": 22.0,
+   "decision": "corrige",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335404|tres_bon": {
+   "prix": 48.0,
+   "decision": "corrige",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
   "9782070335510|convenable": {
    "prix": 21.0,
    "decision": "corrige",
