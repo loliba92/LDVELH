@@ -19,9 +19,9 @@
       "n": 1
     }
   },
-  "erreur_modele": 0.392,
-  "erreur_archives": 0.332,
-  "gain": -0.183,
+  "erreur_modele": 0.39,
+  "erreur_archives": 0.33,
+  "gain": -0.184,
   "raison": "le modèle ne bat pas assez les archives (gain -18%, 15% exigés)",
   "rapport_global": 1.172,
   "fraicheur": {
