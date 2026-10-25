@@ -2,10 +2,40 @@
  "date": "2026-10-25",
  "precedent": "2026-10-24",
  "nb_comparees": 1494,
- "nb_modifiees": 484,
+ "nb_modifiees": 485,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782070649815",
+   "isbn13": "9782070649815",
+   "titre": "Le Talisman de la mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 12.8,
+   "apres": 18.3,
+   "pct": 0.43,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333370",
+   "isbn13": "9782070333370",
+   "titre": "Le Tournoi des Félons",
+   "serie": "L'Œil Noir",
+   "numero": "337",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 24.97,
+   "apres": 30.63,
+   "pct": 0.227,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070332915",
    "isbn13": "9782070332915",
@@ -17,8 +47,8 @@
    "avant": 10.0,
    "apres": 12.05,
    "pct": 0.205,
-   "nature": "annonces",
-   "nb": 14,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -63,6 +93,21 @@
    "apres": 66.58,
    "pct": 0.158,
    "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070649815",
+   "isbn13": "9782070649815",
+   "titre": "Le Talisman de la mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 9.91,
+   "apres": 10.98,
+   "pct": 0.108,
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   }
@@ -124,12 +169,12 @@
    "avant": 16.74,
    "apres": 13.7,
    "pct": -0.182,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
   "n_paires": 30,
