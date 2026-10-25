@@ -2,7 +2,7 @@
  "date": "2026-10-25",
  "precedent": "2026-10-24",
  "nb_comparees": 1494,
- "nb_modifiees": 486,
+ "nb_modifiees": 496,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -110,6 +110,21 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070333912",
+   "isbn13": "9782070333912",
+   "titre": "Le Grand Maître d'Irsmun",
+   "serie": "La Voie du Tigre",
+   "numero": "391",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 14.2,
+   "apres": 15.65,
+   "pct": 0.102,
+   "nature": "annonces",
+   "nb": 8,
+   "recalibre": false
   }
  ],
  "baisses": [
@@ -174,11 +189,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 30,
-  "gain": -0.179,
+  "gain": -0.183,
   "raison": "le modèle ne bat pas assez les archives (gain -18%, 15% exigés)",
   "rapport_global": 1.172
  }
