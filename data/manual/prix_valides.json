@@ -495,6 +495,24 @@
    "le": "2026-10-21",
    "par": "loliba (superadmin)"
   },
+  "9782070335930|bon": {
+   "prix": 20.76,
+   "decision": "confirme",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335930|convenable": {
+   "prix": 17.3,
+   "decision": "confirme",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335930|tres_bon": {
+   "prix": 27.72,
+   "decision": "confirme",
+   "le": "2026-10-25",
+   "par": "loliba (superadmin)"
+  },
   "9782070336098|convenable": {
    "prix": 38.0,
    "decision": "corrige",
