@@ -22,6 +22,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070333349",
+   "isbn13": "9782070333349",
+   "titre": "Les Maîtres du Mal",
+   "serie": "Loup*Ardent",
+   "numero": "334",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 9.69,
+   "apres": 12.07,
+   "pct": 0.246,
+   "nature": "annonces",
+   "nb": 8,
+   "recalibre": false
+  },
+  {
    "id": "9782070333370",
    "isbn13": "9782070333370",
    "titre": "Le Tournoi des Félons",
@@ -67,21 +82,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070333349",
-   "isbn13": "9782070333349",
-   "titre": "Les Maîtres du Mal",
-   "serie": "Loup*Ardent",
-   "numero": "334",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 9.69,
-   "apres": 11.5,
-   "pct": 0.187,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  },
-  {
    "id": "9782070335770",
    "isbn13": "9782070335770",
    "titre": "Les Terres de Légende",
@@ -124,6 +124,21 @@
    "pct": 0.102,
    "nature": "annonces",
    "nb": 8,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333349",
+   "isbn13": "9782070333349",
+   "titre": "Les Maîtres du Mal",
+   "serie": "Loup*Ardent",
+   "numero": "334",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 14.6,
+   "apres": 16.07,
+   "pct": 0.101,
+   "nature": "archives",
+   "nb": 0,
    "recalibre": false
   }
  ],
@@ -234,7 +249,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 15,
+ "nb_grands_mouvements": 16,
  "modele": {
   "actif": false,
   "n_paires": 30,
