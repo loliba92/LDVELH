@@ -68,3 +68,16 @@ modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'appl
 - On ne peut ni se retirer ni se bloquer soi-même, ni retirer le dernier SuperAdmin.
 - La liste des admins est relue à chaque envoi (30 secondes de mémoire au plus) : un retrait est quasi immédiat.
 - Une erreur interne ne renvoie jamais de détail à l'extérieur.
+
+## Session de longue durée (30 jours)
+
+Le relais garde le jeton de renouvellement de Google ; le navigateur n'a qu'un identifiant de session, révocable.
+
+Mise en place :
+1. Console Google Cloud : le client OAuth « Application Web » du site doit avoir les origines JavaScript autorisées du site (déjà le cas). Aucune adresse de redirection à ajouter : la connexion utilise la fenêtre Google (« postmessage »).
+2. Propriétés du script : ajouter `CLIENT_SECRET` (le secret du client OAuth). Ne jamais l'écrire dans le dépôt.
+3. Copier `Code.gs` et `logique.gs`, puis Déployer > Gérer les déploiements > Nouvelle version.
+4. Dans `web/data/admin-config.json`, mettre `"session_relais": true`.
+5. Se connecter une fois. Si Google n'accorde pas de jeton de renouvellement (compte déjà autorisé), retirer l'accès de l'application dans le compte Google (myaccount.google.com/permissions) puis se reconnecter.
+
+Actions du relais : `session_ouvrir` (code Google), `session_renouveler`, `session_fermer` (révoque chez Google). Tests : `node pipeline/test_relais.js`.
