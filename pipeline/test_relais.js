@@ -108,8 +108,9 @@ test('les modifications ne touchent pas au fichier d\'origine', () => {
 });
 test('droits pour les demandes d\'ajout', () => {
   const p = L('peut');
-  assert.ok(p('heros', 'demande')); assert.ok(!p('heros', 'demandes_lire')); assert.ok(!p('heros', 'demande_traiter'));
-  assert.ok(!p('admin', 'demandes_lire')); assert.ok(!p('admin', 'demande_traiter')); assert.ok(p('superadmin', 'demande_traiter'));
+  assert.ok(!p('heros', 'demande')); assert.ok(!p('heros', 'demandes_lire')); assert.ok(!p('heros', 'demande_traiter'));
+  assert.ok(!p('heros', 'ajout_livres')); assert.ok(p('admin', 'ajout_livres')); assert.ok(p('superadmin', 'ajout_livres'));
+  assert.ok(!p('admin', 'demande_traiter')); assert.ok(!p('admin', 'demandes_lire'));
 });
 test('demande : texte nettoyé, trop court refusé', () => {
   const v = L('validerDemande');
@@ -184,3 +185,14 @@ test('nouveaux comptes et avis : droits, validation, limites, courriels', () => 
   assert.ok(J(L('formaterAvis')('M', 'heros', 5, '')).corps.indexOf('pas de commentaire') > 0);
 });
 console.log(n + ' tests passés');
+
+test('ajout de livres : le Zagor n\'est pas limité, le sorcier l\'est (20 ISBN, 3 envois par jour)', () => {
+  const q = L('quotaAjout');
+  assert.strictEqual(q('superadmin', 500, 99).ok, true);
+  assert.strictEqual(q('admin', 20, 0).ok, true);
+  assert.strictEqual(q('admin', 21, 0).ok, false);
+  assert.strictEqual(q('admin', 0, 0).ok, false);
+  assert.strictEqual(q('admin', 5, 2).ok, true);
+  assert.strictEqual(q('admin', 5, 3).ok, false);
+  assert.strictEqual(q('heros', 1, 0).ok, false);
+});

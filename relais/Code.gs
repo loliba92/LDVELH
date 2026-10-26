@@ -58,6 +58,21 @@ function doPost(e) {
 
     if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom });
 
+    if (action === 'ajout_livres') {
+      var lignes = String(q.liste || '').split(/\n|\|/).map(function (x) { return x.trim(); }).filter(function (x) { return x; });
+      var jour = new Date().toISOString().slice(0, 10), cleEnvois = 'aj:' + moi.empreinte + ':' + jour;
+      var props = PropertiesService.getScriptProperties(), envois = Number(props.getProperty(cleEnvois)) || 0;
+      var quota = quotaAjout(moi.role, lignes.length, envois);
+      if (!quota.ok) return reponse({ ok: false, erreur: quota.raison });
+      var lot = validerEnvoi('ajout-isbn.yml', { liste: lignes.join(' | '), releve: 'oui' });
+      if (!lot.ok) return reponse({ ok: false, erreur: lot.raison });
+      lot.entrees.auteur = moi.nom;
+      var go = github('/actions/workflows/ajout-isbn.yml/dispatches', { method: 'post', payload: { ref: 'main', inputs: lot.entrees } });
+      if (go.code !== 204) return reponse({ ok: false, erreur: 'GitHub a refusé le lancement (' + go.code + ')' });
+      if (moi.role !== 'superadmin') props.setProperty(cleEnvois, String(envois + 1));
+      return reponse({ ok: true, nombre: lignes.length });
+    }
+
     if (action === 'butin_lire') {
       var ann = github('/contents/data/processed/annonces.json?ref=main');
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
