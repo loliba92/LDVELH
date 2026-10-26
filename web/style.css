@@ -2000,7 +2000,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rf-nom { fill: var(--muted); font-size: 20px; font-family: var(--f-ui); }
 .rf-detail { min-height: 2.6em; margin: 6px 0 8px; }
 .rf-chiffres summary { cursor: pointer; color: var(--gold); }
-@media (max-width: 700px) { .rf-valeur { font-size: 26px; } .rf-nom { font-size: 24px; } }
+@media (max-width: 700px) { .rf-valeur { font-size: 22px; } .rf-nom { font-size: 18px; } }
 
 /* Niveau affiché à la personne connectée : icône et libellé */
 .compte-niveau { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; }
