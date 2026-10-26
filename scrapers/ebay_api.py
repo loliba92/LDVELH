@@ -519,6 +519,8 @@ def main():
     fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
     for isbn, titre, nb_ed, livre, annees in cat:
         par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
+    import reconciliation_image                                  # réconciliation par image : une annonce vue sous plusieurs éditions va à celle dont la jaquette lui ressemble
+    par_isbn = reconciliation_image.reconcilier(par_isbn, {c[0]: c[3] for c in cat}, RACINE / "web" / "covers")
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     annonces_gardees = []
     for isbn, titre, nb_ed, livre, annees in cat:
