@@ -1128,7 +1128,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .compte-bouton.compte-deconnecte, .compte-bouton.compte-reprendre { border-color: var(--gold); color: var(--gold); }
 .compte-bouton.compte-deconnecte:hover, .compte-bouton.compte-reprendre:hover { background: var(--gold); color: #1a1205; }
 .compte-point { width: 8px; height: 8px; border-radius: 50%; background: transparent; flex: none; }
-.compte-a-jour .compte-point { background: var(--gold); }
+.compte-a-jour .compte-point { background: #4cc16f; }
 .compte-synchro .compte-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
 .compte-reprendre .compte-point { background: #e0a030; }
 .compte-erreur .compte-point, .compte-choix .compte-point { background: #e0604f; }
@@ -1152,7 +1152,8 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 /* Onglet « Compte » de la barre du bas : le point d'état se superpose à l'icône */
 .barre-bas [data-plus] svg { overflow: visible; }
 .barre-bas [data-plus].compte-a-jour::after, .barre-bas [data-plus].compte-synchro::after, .barre-bas [data-plus].compte-reprendre::after, .barre-bas [data-plus].compte-erreur::after { content: ""; position: absolute; top: 8px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--walnut); }
-.barre-bas [data-plus].compte-a-jour::after, .barre-bas [data-plus].compte-synchro::after { background: var(--gold); }
+.barre-bas [data-plus].compte-a-jour::after { background: #4cc16f; }
+.barre-bas [data-plus].compte-synchro::after { background: var(--gold); }
 .barre-bas [data-plus].compte-reprendre::after { background: #e0a030; }
 .barre-bas [data-plus].compte-erreur::after, .barre-bas [data-plus].compte-choix::after { background: #e0604f; }
 .compte-bandeau { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; padding: 8px 14px; background: #3a2a0d; border-bottom: 1px solid var(--gold); color: #fff6e0; font-size: .95rem; text-align: center; }
