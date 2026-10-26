@@ -28,9 +28,9 @@
     else zone.innerHTML = '<p class="sous" role="status">Ce compte n\'a pas les droits nécessaires pour cette page. Demandez-les à la personne qui gère le site.</p>';
   }
   function demarrer() {
-    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
+    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace est momentanément indisponible.</p>'; return; }
     window.Identite.config().then(function (c) {
-      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
+      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace est momentanément indisponible.</p>'; return; }
       document.addEventListener('cdh-compte', evaluer);
       evaluer();
     });

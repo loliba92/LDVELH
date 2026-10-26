@@ -223,17 +223,17 @@ SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
-    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès sorcier</p>
+    <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Espace réservé</p>
     <div class="porte-google" id="porte-google"></div>
   </div>
 </div>
 '''
 
 
-PORTE_CONNECTE = PORTE.replace(" Accès sorcier</p>", " Réservé aux personnes connectées</p>")
+PORTE_CONNECTE = PORTE.replace(" Espace réservé</p>", " Réservé aux personnes connectées</p>")
 
 
-DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
+DEVENIR_ADMIN = '''<p class="surtitre">Accès réservé</p>
 <h1>Devenir sorcier</h1>
 <p class="chapeau">Les sorciers tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir.</p>
 
