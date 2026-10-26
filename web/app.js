@@ -1307,6 +1307,7 @@
 
   // Répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état ; une barre cliquée filtre la liste
   function afficherHistoColl(bl) {
+    if (!$('#coll-histo')) return;                                    // Analyse simple (héros) : pas d'histogramme
     const valeursColl = [];
     bl.lignes.forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
     const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
@@ -1566,21 +1567,26 @@
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
+    const complete = estSorcier();                                     // sorciers et Zagors : toutes les répartitions et plus de pièces
+    const SEG_SIMPLE = ['serie', 'editeur', 'decennie'];
+    const segments = complete ? SEGMENTS : SEGMENTS.filter((x) => SEG_SIMPLE.includes(x[0]));
+    if (!complete && !SEG_SIMPLE.includes(CSEG)) CSEG = 'serie';
+    const nPieces = complete ? 20 : 5;
     const cotes = bl.lignes.filter((x) => x.b.prix[x.c.etat] != null);
-    const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+    const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, nPieces);
     const rang = { tres_rare: 0, rare: 1 };
     const rares = bl.lignes.filter((x) => x.b.rarete && rang[x.b.rarete.niveau] !== undefined && x.b.prix[x.c.etat] != null)
-      .sort((x, y) => rang[x.b.rarete.niveau] - rang[y.b.rarete.niveau] || y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+      .sort((x, y) => rang[x.b.rarete.niveau] - rang[y.b.rarete.niveau] || y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, nPieces);
     const sansInfo = bl.lignes.filter((x) => !x.b.rarete).length;
     const recent = bl.lignes.reduce((t, x) => t + (estActuel(infoPrix(x.b, x.c.etat)) ? (valeurLigne(x.b, x.c) || 0) : 0), 0);
     return `<h3>Répartition de la valeur</h3>
-      <div class="seg-choix"><label for="coll-segment">Répartir par</label><select id="coll-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === CSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div class="seg-choix"><label for="coll-segment">Répartir par</label><select id="coll-segment">${segments.map(([k, nom]) => `<option value="${k}"${k === CSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
       <ul class="seg-liste" id="coll-seg">${barresSegment(bl)}</ul>
-      <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
+      ${complete ? `<h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
       <p class="sous" id="coll-histo-note"></p>
       <div id="coll-histo" class="histo"></div>
       <div class="legende" id="coll-histo-legende"></div>
-      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>
+      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>` : ''}
       <div class="coll-pieces">
         <div><h3>Les plus chères</h3>${chers.length ? `<div class="pieces">${chers.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune cote disponible pour l\'instant.</p>'}</div>
         <div><h3>Les plus rares</h3>${rares.length ? `<div class="pieces">${rares.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune de vos pièces n\'est rare ou très rare.</p>'}
