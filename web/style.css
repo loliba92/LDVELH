@@ -1975,3 +1975,13 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 /* Gestion de la fiche (Zagor) : un seul bloc en bas, séparé de la lecture */
 .fiche-gestion { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--gold); }
 .fiche-gestion-titre { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
+
+/* Roll-forward : tableau dans l'écran, sur téléphone aussi ; cartes en deux colonnes quand il y en a quatre */
+.rf-defile { max-width: 100%; overflow-x: auto; }
+.rf-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .92rem; }
+.rf-table th, .rf-table td { padding: 8px 4px; text-align: left; vertical-align: top; }
+.rf-table th[scope="row"] { width: 24%; }
+.rf-table .num { text-align: right; white-space: nowrap; }
+.rf-table small { display: block; color: var(--muted); font-size: .74rem; }
+@media (max-width: 700px) { .rf-table { font-size: .82rem; } .rf-table th, .rf-table td { padding: 6px 2px; } .hc-cles-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+@media (max-width: 700px) { .rf-table th { font-size: .66rem; letter-spacing: .02em; } .rf-table .num { white-space: normal; } .rf-table th[scope="row"] { width: 20%; } }

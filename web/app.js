@@ -1566,7 +1566,7 @@
     const hausses = mouv.filter((x) => x.delta > 0.004), baisses = mouv.filter((x) => x.delta < -0.004);
     const somme = (liste) => liste.reduce((t, x) => t + x.delta, 0);
     const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
-    const rollforward = `<ul class="coll-cles hc-cles" aria-label="De ${jour(HIST.dates[0], true)} à aujourd'hui">${cle('Valeur au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
+    const rollforward = `<ul class="coll-cles hc-cles hc-cles-4" aria-label="De ${jour(HIST.dates[0], true)} à aujourd'hui">${cle('Valeur au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
       <div class="hc-grille">
@@ -1577,7 +1577,7 @@
       <p class="sous hc-bilan">${bilan}</p>
       ${rollforward}
       <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
-      <div id="rf-tableau">${rollforwardTable(bl)}</div>
+      <div id="rf-tableau" class="rf-defile">${rollforwardTable(bl)}</div>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {

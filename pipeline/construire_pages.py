@@ -225,7 +225,6 @@ AJOUTER = '''<p class="surtitre">Contribuer</p>
 
 <section class="carte" id="aj-carte" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Liste à ajouter</h2>
-  <div class="rv-ajout-actions"><button type="button" class="bouton-clair" id="aj-scan">Scanner un code-barres</button></div>
   <label for="aj-texte">ISBN, un par ligne</label>
   <textarea id="aj-texte" rows="8" spellcheck="false" autocomplete="off" placeholder="9782070583805&#10;9791097577025"></textarea>
   <p class="sous" id="aj-compte" aria-live="polite">0 ISBN</p>
