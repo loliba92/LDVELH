@@ -17,12 +17,17 @@ DECOTE = 0.85   # décote des prix demandés (voir estimation.py)
 
 
 def charger_jours(dossier):
-    """{date: [lignes]} des relevés eBay quotidiens (annonces-AAAA-MM-JJ.csv)."""
+    """{date: [lignes]} des relevés eBay quotidiens (annonces-AAAA-MM-JJ.csv).
+    Seuls les relevés qui ont la colonne « port » sont lus : leur prix est le prix total avec les frais de port.
+    Les relevés d'avant (sans frais de port) ne sont pas mélangés à ceux-ci, pour ne pas fabriquer une hausse artificielle."""
     jours = {}
     for f in sorted(Path(dossier).glob("annonces-????-??-??.csv")):
         jour = date.fromisoformat(f.stem[-10:])
         with open(f, encoding="utf-8", newline="") as h:
-            jours[jour] = list(csv.DictReader(h))
+            lecteur = csv.DictReader(h)
+            if "port" not in (lecteur.fieldnames or []):
+                continue
+            jours[jour] = list(lecteur)
     return jours
 
 

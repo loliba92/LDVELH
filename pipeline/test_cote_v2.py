@@ -23,5 +23,14 @@ class TestCoteV2(unittest.TestCase):
         obs = cote_v2.evenements(jours, "9782070000001", "bon")
         self.assertEqual([o.prix for o in obs if o.type == "prix_demande"], [60.0, 50.0])
 
+    def test_les_releves_sans_colonne_port_sont_ignores(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        (d / "annonces-2026-10-24.csv").write_text("isbn13,etat,prix,titre,lien\n9782070000001,bon,10.00,t,https://x/1\n", encoding="utf-8")
+        (d / "annonces-2026-10-27.csv").write_text("isbn13,etat,prix,titre,lien,port\n9782070000001,bon,14.00,t,https://x/1,4.00\n", encoding="utf-8")
+        jours = cote_v2.charger_jours(d)
+        self.assertEqual(sorted(jours), [date(2026, 10, 27)])
+
+
 if __name__ == "__main__":
     unittest.main()
