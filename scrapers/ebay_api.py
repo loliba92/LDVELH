@@ -294,7 +294,7 @@ def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
             for etat, v in sorted(par_etat.items()) if v["frais"]]
 
 
-CHAMPS_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "etat_suppose"]
+CHAMPS_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "etat_suppose", "port"]    # « prix » = prix total avec les frais de port ; « port » vide si l'annonce n'en indique pas
 
 
 def lignes_annonces(items, isbn13, jour, titre=None, annees=None, ed=None):
@@ -308,7 +308,8 @@ def lignes_annonces(items, isbn13, jour, titre=None, annees=None, ed=None):
         sortie.append({"isbn13": isbn13, "etat": etat, "prix": f"{valeur:.2f}", "titre": str(it.get("title", ""))[:120],
                        "lien": str(it.get("itemWebUrl", "")).split("?")[0], "age_jours": "" if age is None else age,
                        "trouvee_par": "titre" if it.get("_titre_seul") else "isbn",
-                       "etat_suppose": 1 if etat_de(it)[1] else 0})          # 1 : l'annonce ne précise pas l'état, on suppose le très bon état
+                       "etat_suppose": 1 if etat_de(it)[1] else 0,          # 1 : l'annonce ne précise pas l'état, on suppose le très bon état
+                       "port": "" if frais_port(it) is None else f"{frais_port(it):.2f}"})
     return sortie
 
 

@@ -231,6 +231,22 @@ class TestRequetesLdvelh(unittest.TestCase):
         self.assertIn("Les Terres de Légende 9782070335770", ebay_api.requetes_complementaires(ed))
 
 
+class TestPortDansLesAnnonces(unittest.TestCase):
+    def test_colonne_port_et_prix_total(self):
+        from datetime import date as _d
+        it = dict(avec_port(10, 4.5), itemWebUrl="https://www.ebay.fr/itm/1", itemId="1")
+        lignes = ebay_api.lignes_annonces([it], "9782070000001", _d(2026, 10, 26))
+        self.assertEqual(len(lignes), 1)
+        self.assertEqual(lignes[0]["prix"], "14.50")
+        self.assertEqual(lignes[0]["port"], "4.50")
+
+    def test_port_inconnu_reste_vide(self):
+        from datetime import date as _d
+        it = dict(item(10, "3000"), itemWebUrl="https://www.ebay.fr/itm/2", itemId="2")
+        lignes = ebay_api.lignes_annonces([it], "9782070000001", _d(2026, 10, 26))
+        self.assertEqual(lignes[0]["port"], "")
+
+
 class TestFraisPort(unittest.TestCase):
     def test_frais_lus_et_ajoutes_au_prix(self):
         self.assertEqual(ebay_api.frais_port(avec_port(10, 4.5)), 4.5)
