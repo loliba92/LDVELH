@@ -1096,22 +1096,16 @@
       return fetch('https://api.github.com/repos/loliba92/LDVELH/actions/runs?per_page=100', { headers: { Accept: 'application/vnd.github+json' } }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then((d) => { const runs = d.workflow_runs.map((x) => ({ f: x.path.split('/').pop(), st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at })); try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ } return runs; }); };
     lire().then((runs) => {
-      const etat = (r) => (r.st !== 'completed' ? ['en cours…', 'en-cours'] : r.c === 'success' ? ['✓ réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['✗ échec', 'echec']);
-      const lignes = FAMILLES.map(([f, nom]) => ({ nom, r: runs.find((x) => x.f === f) }));
+      const etat = (r) => (r.st !== 'completed' ? ['en cours', 'en-cours'] : r.c === 'success' ? ['réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['échec', 'echec']);
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
-      const releve = lignes[0];
-      const recent = lignes.filter((l) => l.r).sort((a, b) => new Date(b.r.t) - new Date(a.r.t))[0];
-      const vedette = releve.r || recent;
-      if (!vedette) return;
-      const [txt, cls] = etat(vedette.r || vedette);
-      $('#rv-maj-resume').innerHTML = `<strong>${esc(releve.r ? 'Dernier relevé des prix' : recent.nom)}</strong> : ${esc(quand(releve.r || recent.r))} · <span class="rv-lot-${cls}">${esc(txt)}</span>`;
-      $('#rv-maj-liste').innerHTML = lignes.map((l) => { if (!l.r) return `<li><strong>${esc(l.nom)}</strong> : pas d'exécution récente</li>`; const [t, c] = etat(l.r); return `<li><strong>${esc(l.nom)}</strong> : ${esc(quand(l.r))} · <span class="rv-lot-${c}">${esc(t)}</span></li>`; }).join('');
-      const veille = lignes.find((l) => l.nom === 'Veille des parutions'), age = veille && veille.r ? (Date.now() - new Date(veille.r.t).getTime()) / 86400000 : null;
-      if (veille && (age === null || age > 2)) {                    // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        const alerte = age === null ? 'pas encore d\'exécution' : `pas d'exécution depuis ${Math.floor(age)} jours`;
-        $('#rv-maj-resume').innerHTML += ` <span class="rv-lot-echec">⚠ Veille des parutions : ${esc(alerte)}. Lancez-la à la main (Actions, « Veille des parutions »).</span>`;
-        bloc.open = true;
-      }
+      const puces = FAMILLES.map(([f, nom]) => {
+        const r = runs.find((x) => x.f === f);
+        if (!r) return `<li class="maj-puce maj-vide"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">pas d'exécution récente</span></li>`;
+        const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
+        const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
+        return `<li class="maj-puce maj-${retard ? 'echec' : cls}" title="${esc(quand(r))}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">${retard ? `⚠ pas lancée depuis ${Math.floor(jours)} jours` : esc(depuisMin(d))}</span><span class="sr-only"> : ${esc(txt)}, ${esc(quand(r))}</span></li>`;
+      });
+      $('#rv-maj-liste').innerHTML = puces.join('');
       bloc.hidden = false;
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
