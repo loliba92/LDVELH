@@ -143,7 +143,7 @@ def _butin():
             l = l.replace('role="tabpanel">', 'role="tabpanel" hidden>', 1)
         if 'id="pane-pepites"' in l:
             l = l.replace(" hidden>", ">")
-        if l.startswith("<h1>Espace Zagor"):
+        if l.startswith("<h1>Prix et corrections"):
             l = "<h1>Butin</h1>"
         if 'data-pane="pepites"' in l:
             l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">')
@@ -365,7 +365,7 @@ def corps_communaute():
 '''
 
 
-EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Zagor</span></h1>
+EQUIPE = '''<h1>Équipe</h1>
 <p class="chapeau">Les personnes qui peuvent corriger les prix et les fiches. Toute personne connectée avec Google est un Héros ; seul un Zagor corrige les prix et gère l'équipe.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
@@ -402,7 +402,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Z
 '''
 
 
-REVUE = '''<h1>Espace Zagor <span class="badge-admin" title="Réservé aux Zagors">Zagor</span></h1>
+REVUE = '''<h1>Prix et corrections</h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
 <details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">

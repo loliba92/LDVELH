@@ -743,7 +743,7 @@
   const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces().catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au Zagor">Zagor</span></summary>
+    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
   }
   function remplirAnnonces(b) {
@@ -785,7 +785,7 @@
   // Corriger la fiche (titre, série, numéro, suppression) : réservé aux sorciers, envoyé par le relais
   function blocFiche(b) {
     const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
-    return `<details class="corriger-fiche"><summary>Corriger la fiche <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></summary>
+    return `<details class="corriger-fiche"><summary>Corriger la fiche</summary>
       <form class="corriger" id="corriger-fiche" data-id="${esc(b.id)}">
         <p class="sous">Le titre et la série s'appliquent à toutes les éditions de ce livre ; le numéro, à cette édition seulement. Pour une nouvelle série, écrivez simplement son nom.</p>
         <div class="corriger-champs corriger-fiche-champs">
@@ -795,7 +795,7 @@
         </div>
         <datalist id="liste-series">${series.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>
         <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer la fiche</button></div>
-        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris) <span class="badge-admin" title="Réservé au Zagor">Zagor</span></span></label>
+        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
         <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
       </form></details>`;
@@ -832,9 +832,9 @@
   }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
-    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
+    if (!b.isbn13) return '<h3>Corriger les cotes</h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
-    return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3>
+    return `<h3>Corriger les cotes</h3>
         ${derniereRevision(b)}
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
           <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>

@@ -24,7 +24,7 @@ window.Compte = (function () {
   var LIBELLE = { deconnecte: 'Se connecter', reprendre: 'Reconnecter', synchro: '', erreur: '', 'a-jour': '' };
   var SILHOUETTE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>';
 
-  function badge() { return estAdmin() ? ' <span class="badge-admin">Zagor</span>' : ''; }
+  function badge() { return ''; }   // pas de nom de niveau affiché
   // Petites icônes du menu (même trait que la barre d'onglets de la page Vérifier les prix)
   var ICO = {
     collection: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16 5l4 1-3 14-4-1z"/>',
@@ -52,7 +52,7 @@ window.Compte = (function () {
     h += '<ul class="compte-liste">' +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butin</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
-      (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('sorciers') + 'Espace Zagor</a></li>' : '') +
+      (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('sorciers') + 'Prix et corrections</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
@@ -66,7 +66,7 @@ window.Compte = (function () {
       var prenom = window.Cloud && window.Cloud.nom();
       var libelle = e.cle === 'deconnecte' || e.cle === 'reprendre' ? LIBELLE[e.cle] : (prenom || 'Compte');
       haut.innerHTML = '<button type="button" class="compte-bouton compte-' + e.cle + '" id="compte-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="compte-menu">' +
-        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + (estAdmin() ? '<span class="badge-admin">' + 'Zagor</span>' : '') + '<i class="compte-point" aria-hidden="true"></i></button>' +
+        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + '' + '<i class="compte-point" aria-hidden="true"></i></button>' +
         '<div class="compte-menu" id="compte-menu" role="group" aria-label="Mon compte" hidden>' + bloc(e) + '</div>';
     }
     var f = $('#compte-feuille');
