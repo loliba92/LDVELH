@@ -33,5 +33,10 @@ window.Relais = (function () {
   function lireNotes() {
     return pret.then(function () { return URL_RELAIS ? fetch(URL_RELAIS + '?notes=1').then(function (r) { return r.json(); }) : null; });
   }
-  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, pret: pret };
+  // Annonces et Butin : lus par le relais, réservés aux sorciers et aux Zagors. Résultat : les annonces, ou null.
+  function lireAnnonces() {
+    return pret.then(function () { return actif() ? appeler('butin_lire', {}).then(function (r) { return r && r.ok ? r.annonces : null; }) : null; });
+  }
+
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireAnnonces: lireAnnonces, pret: pret };
 })();

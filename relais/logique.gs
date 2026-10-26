@@ -3,19 +3,30 @@
 
 var ROLES = ['heros', 'admin', 'superadmin'];
 var ROLE_DE = { heros: 0, admin: 1, superadmin: 2 };
+var LIMITE_ISBN_ENVOI = 20;         // ISBN au plus par envoi (sorciers)
+var LIMITE_ENVOIS_JOUR = 3;         // envois par jour et par personne (sorciers)
+
+function quotaAjout(role, nombre, envoisDuJour) {   // le Zagor n'est pas limité
+  if (role === 'superadmin') return { ok: true };
+  if (role !== 'admin') return { ok: false, raison: 'réservé aux sorciers et aux Zagors' };
+  if (!(nombre > 0)) return { ok: false, raison: 'la liste est vide' };
+  if (nombre > LIMITE_ISBN_ENVOI) return { ok: false, raison: LIMITE_ISBN_ENVOI + ' ISBN au plus par envoi' };
+  if ((Number(envoisDuJour) || 0) >= LIMITE_ENVOIS_JOUR) return { ok: false, raison: LIMITE_ENVOIS_JOUR + ' envois par jour au plus : réessayez demain' };
+  return { ok: true };
+}
+
 var ACTIONS = {                       // niveau minimal pour chaque action
   moi: 'heros',
-  envoyer: 'admin',
-  journal: 'admin',
+  envoyer: 'superadmin',          // seul le Zagor corrige prix et fiches
+  journal: 'superadmin',
   equipe_lire: 'superadmin',
   equipe_ajouter: 'superadmin',
   equipe_retirer: 'superadmin',
   equipe_bloquer: 'superadmin',
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
-  demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
-  demandes_lire: 'admin',
-  demande_traiter: 'admin',
+  ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
+  butin_lire: 'admin',            // annonces et Butin : sorciers et Zagors seulement (les annonces ne sont plus publiées sur le site)
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel

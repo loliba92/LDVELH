@@ -465,70 +465,6 @@
   initAjout();
   initReglages();
 
-  /* ---------- Demandes d'ajout faites par les personnes connectées (via le relais) ---------- */
-  function initDemandes() {
-    if (!window.Relais) return;
-    window.Identite.config().then((c) => { if (c && c.relais_url) brancherDemandes(); });
-  }
-  function brancherDemandes() {
-    const bloc = $('#rv-demandes'), liste = $('#dm-liste'), msg = $('#dm-msg');
-    const dire = (t, erreur) => { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
-    const lisible = (r) => { const e = (r && r.erreur) || 'erreur inconnue'; return /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : e.charAt(0).toUpperCase() + e.slice(1) + '.'; };
-    function charger() {
-      if (!window.Relais.actif()) return;
-      window.Relais.appeler('demandes_lire').then((r) => {
-        if (!r || !r.ok) { bloc.hidden = false; dire(lisible(r), true); return; }
-        bloc.hidden = false;
-        $('#dm-nb').textContent = r.demandes.length || ''; $('#rv-nav-dm').textContent = r.demandes.length || '';
-        if (!r.demandes.length) { liste.innerHTML = '<li class="sous">Aucune demande en attente.</li>'; return; }
-        liste.innerHTML = r.demandes.map((d) => `<li class="dm-demande" data-n="${d.numero}">
-          <p><strong>${esc(d.texte)}</strong> <span class="sous">demandé par ${esc(d.par || 'une personne connectée')}${d.date ? ', le ' + esc(jour(d.date)) : ''}</span></p>
-          ${d.note ? `<p class="sous">${esc(d.note)}</p>` : ''}
-          <label class="sr-only" for="dm-l-${d.numero}">Ligne à ajouter</label>
-          <input id="dm-l-${d.numero}" type="text" value="${esc(d.texte)}" autocomplete="off">
-          <p class="sous dm-controle" data-controle role="status"></p>
-          <div class="dm-actions"><button type="button" class="bouton" data-dm="accepter">Accepter</button><button type="button" class="bouton bouton-clair" data-dm="refuser">Refuser</button></div></li>`).join('');
-        liste.querySelectorAll('.dm-demande').forEach(controler);
-      }).catch(() => {});
-    }
-    // Indicateur sous le champ : ligne correcte, ISBN invalide ou déjà dans la base
-    function controler(li) {
-      const zone = li.querySelector('[data-controle]');
-      chargerCatalogue().then((cat) => {
-        const c = evaluerLigne(cat, li.querySelector('input').value);
-        zone.textContent = (c.ok ? '✓ ' : '✗ ') + c.texte; zone.classList.toggle('erreur', !c.ok);
-      });
-    }
-    liste.addEventListener('input', (e) => { const li = e.target.closest('.dm-demande'); if (li) controler(li); });
-    liste.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-dm]');
-      if (!b) return;
-      const li = b.closest('.dm-demande'), numero = Number(li.dataset.n), decision = b.dataset.dm;
-      const donnees = { numero, decision };
-      if (decision === 'accepter') {
-        donnees.ligne = li.querySelector('input').value;
-        chargerCatalogue().then((cat) => {
-          const c = evaluerLigne(cat, donnees.ligne);
-          if (!c.ok) { dire(c.texte + (/Déjà/.test(c.texte) ? ' Utilisez « Refuser » pour fermer la demande.' : ' Corrigez la ligne, puis acceptez de nouveau.'), true); return; }
-          envoyerDecision(li, numero, decision, donnees);
-        });
-        return;
-      }
-      const raison = window.prompt('Raison du refus (facultatif, visible publiquement) :', ''); if (raison === null) return; donnees.raison = raison;
-      envoyerDecision(li, numero, decision, donnees);
-    });
-    function envoyerDecision(li, numero, decision, donnees) {
-      li.querySelectorAll('button').forEach((x) => { x.disabled = true; });
-      dire('Enregistrement…');
-      window.Relais.appeler('demande_traiter', donnees).then((r) => {
-        if (r && r.ok) { dire(decision === 'accepter' ? 'Acceptée : le livre est en cours d\'ajout (environ 2 minutes).' : 'Demande refusée et fermée.'); charger(); } else { dire(lisible(r), true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); }
-      }).catch(() => { dire('Le service ne répond pas : vérifiez votre connexion.', true); li.querySelectorAll('button').forEach((x) => { x.disabled = false; }); });
-    }
-    document.addEventListener('cdh-porte-ouverte', charger);
-    if (!$('#main').hidden) charger();
-  }
-  initDemandes();
-
   /* ---------- Tendances : la cote monte-t-elle ou baisse-t-elle, et où ? (données : data/tendances.json) ---------- */
   function initTendances() {
     const pct = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v * 100).toFixed(0).replace('.', ',') + ' %';
@@ -598,11 +534,11 @@
   let ANN = null, annChargees = false;
   const chargerAnnonces = () => {
     if (annChargees) return annChargees;
-    annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    annChargees = window.Relais.lireAnnonces().catch(() => null)
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // les annonces ne sont montrées qu'au Zagor
+  const estSuper = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // annonces et Butin : sorciers et Zagors (les annonces sont lues par le relais)
   const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
   const voirAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
   function annoncesEdition(ed) {
@@ -744,7 +680,7 @@
         if (cible) { e.preventDefault(); cible.focus(); montrer(cible.dataset.pane); }
       });
     });
-    [['tendances', '#rv-tendances'], ['demandes', '#rv-demandes']].forEach(([nom, sel]) => {
+    [['tendances', '#rv-tendances']].forEach(([nom, sel]) => {
       const bloc = $(sel), onglet = boutons.find((b) => b.dataset.pane === nom);
       if (!bloc || !onglet) return;
       const maj = () => { onglet.hidden = bloc.hidden; if (bloc.hidden && onglet.getAttribute('aria-selected') === 'true') montrer('prix'); };

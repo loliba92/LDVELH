@@ -740,10 +740,10 @@
   // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au Zagor.
   const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';
   let ANN = null, annChargees = null;
-  const chargerAnnonces = () => annChargees || (annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+  const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces().catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au Zagor">Zagor</span></summary>
+    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
   }
   function remplirAnnonces(b) {
@@ -772,7 +772,8 @@
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
   // Visible seulement pour un compte Sorcier ou Zagor connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
-  const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveau donné par le relais
+  const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le Zagor corrige (niveau donné par le relais)
+  const estSorcier = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // sorciers et Zagors : l'historique, pas les corrections
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -784,7 +785,7 @@
   // Corriger la fiche (titre, série, numéro, suppression) : réservé aux sorciers, envoyé par le relais
   function blocFiche(b) {
     const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
-    return `<details class="corriger-fiche"><summary>Corriger la fiche <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></summary>
+    return `<details class="corriger-fiche"><summary>Corriger la fiche</summary>
       <form class="corriger" id="corriger-fiche" data-id="${esc(b.id)}">
         <p class="sous">Le titre et la série s'appliquent à toutes les éditions de ce livre ; le numéro, à cette édition seulement. Pour une nouvelle série, écrivez simplement son nom.</p>
         <div class="corriger-champs corriger-fiche-champs">
@@ -794,7 +795,7 @@
         </div>
         <datalist id="liste-series">${series.map((x) => `<option value="${esc(x)}">`).join('')}</datalist>
         <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer la fiche</button></div>
-        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris) <span class="badge-admin" title="Réservé au Zagor">Zagor</span></span></label>
+        ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
         <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
       </form></details>`;
@@ -831,9 +832,9 @@
   }
   function blocCorriger(b) {
     if (!estProprietaire()) return '';
-    if (!b.isbn13) return '<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
+    if (!b.isbn13) return '<h3>Corriger les cotes</h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
-    return `<h3>Corriger les cotes <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h3>
+    return `<h3>Corriger les cotes</h3>
         ${derniereRevision(b)}
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
           <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
@@ -887,6 +888,21 @@
     document.addEventListener('cdh-compte', retenter);
   }
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
+  // Évolution du prix d'une édition dans un état, d'après les relevés (sorciers et Zagors)
+  function blocEvolution(b, etat) {
+    const titre = '<h3>Évolution du prix</h3>';
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return `${titre}<p class="sous">L'évolution se construit avec les relevés : revenez dans quelques jours.</p>`;
+    const a = HIST.cotes[`${b.id}|${etat}`] || [];
+    const points = HIST.dates.map((d, i) => ({ d, v: a[i] })).filter((p) => p.v != null && p.v > 0);
+    if (points.length < 2) return `${titre}<p class="sous">Pas encore assez de relevés pour cet état.</p>`;
+    const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
+    const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? `en hausse de ${(pct * 100).toFixed(1).replace('.', ',')} %` : `en baisse de ${(-pct * 100).toFixed(1).replace('.', ',')} %`;
+    const lignes = points.slice(-10).map((p) => `<tr><th scope="row">${jour(p.d)}</th><td class="num">${fmtE(p.v)}</td></tr>`).join('');
+    return `${titre}<p class="sous">De ${fmtE(debut.v)} le ${jour(debut.d)} à ${fmtE(fin.v)} le ${jour(fin.d)} : ${sens}.</p>
+      <table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table>`;
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -915,16 +931,16 @@
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
-            ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
-            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Niveau de prix</h3>
+            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 5'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Cotes de cette édition</h3>
+        <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
 
           </div>
         </div>
+        ${estSorcier() ? blocEvolution(b, sel.k) : ''}
         ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
@@ -934,14 +950,13 @@
             </dl>
 
         ${blocNeuf(b)}
-        ${estSuper() ? blocAnnonces(b) : ''}
         ${blocRecherche(b)}
-        ${blocCorriger(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
+        ${estSuper() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocCorriger(b)}${blocAnnonces(b)}</section>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
@@ -1039,12 +1054,12 @@
   // Cinq niveaux à seuils fixes (en euros) : moins de 10, 10 à 20, 20 à 40, 40 à 70, 70 et plus. Les mêmes seuils pour les trois états.
   const SEUILS_COTE = [10, 20, 40, 70];
   const niveauCote = (v, k) => (v == null ? 0 : 1 + SEUILS_COTE.filter((x) => v >= x).length);
-  const LEGENDE_NIVEAUX = [['€', '&lt; 10 €'], ['€€', '10–20 €'], ['€€€', '20–40 €'], ['€€€€', '40–70 €'], ['€€€€€', '&gt; 70 €']]
+  const LEGENDE_NIVEAUX = [['€', '&lt; 10'], ['€€', '10–20'], ['€€€', '20–40'], ['€€€€', '40–70'], ['€€€€€', '&gt; 70']]
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
-  // Accès discret au Butin sur l'accueil : Zagor seulement (le rôle arrive après le chargement)
-  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSuper(); };
+  // Accès discret au Butin sur l'accueil : sorciers et Zagors (le rôle arrive après le chargement)
+  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSorcier(); };
   document.addEventListener('cdh-compte', majButin);
   majButin();
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent
@@ -1306,6 +1321,7 @@
 
   // Répartition de la valeur : chaque exemplaire compte pour une unité, au prix de son état ; une barre cliquée filtre la liste
   function afficherHistoColl(bl) {
+    if (!$('#coll-histo')) return;                                    // Analyse simple (héros) : pas d'histogramme
     const valeursColl = [];
     bl.lignes.forEach(({ b, c }) => { if (b.prix[c.etat] != null) for (let i = 0; i < c.qte; i += 1) valeursColl.push(b.prix[c.etat]); });
     const okH = histogramme({ zone: $('#coll-histo'), legende: $('#coll-histo-legende'), note: $('#coll-histo-note'), table: $('#coll-histo-table'),
@@ -1393,7 +1409,7 @@
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > AJ_N ? `<li class="sous">${AJ_N} livres sur ${trouves.length}. <button type="button" class="bouton-lien" data-aj-plus>Afficher les ${Math.min(30, trouves.length - AJ_N)} suivants</button></li>` : '') +
-      (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
+      (!trouves.length ? '<li class="sous">Aucun livre trouvé.</li>' : '');
     if (statut) statut.textContent = trouves.length ? `${trouves.length} livre${trouves.length > 1 ? 's' : ''} trouvé${trouves.length > 1 ? 's' : ''}.` : 'Aucun livre trouvé.';
   }
   // « Retiré. Annuler » : quelques secondes pour revenir sur un retrait fait par erreur
@@ -1433,7 +1449,6 @@
   }
   document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; AJ_N = 30; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-aj-plus]')) { AJ_N += 30; rendreAjoutColl(); } });
-  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
   // Tendance de la valeur de la collection : mêmes livres, mêmes états, cotes publiées à la première et à la dernière date de l'historique
   function flecheValeur(bl) {
@@ -1509,7 +1524,24 @@
     });
     return { n, tot, mouv, suivis };
   }
+  // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
+  let RFSEG = 'decennie', RF_BL = null;
+  function rollforwardTable(bl) {
+    const { mouv } = serieValeur(bl);
+    const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
+    const groupes = new Map();
+    mouv.forEach((x) => {
+      const k = clef(x.b, x.c), g = groupes.get(k) || { nom: k, d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 };
+      g.d += x.d * x.c.qte; g.f += x.f * x.c.qte;
+      if (x.delta > 0.004) { g.hausse += x.delta; g.nh += 1; } else if (x.delta < -0.004) { g.baisse += x.delta; g.nb += 1; }
+      groupes.set(k, g);
+    });
+    const lignes = [...groupes.values()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { numeric: true }));
+    return `<table class="rf-table"><caption class="sr-only">Roll-forward par ${nomSeg.toLowerCase()}</caption><thead><tr><th scope="col">${nomSeg}</th><th scope="col" class="num">Début</th><th scope="col" class="num">Hausses</th><th scope="col" class="num">Baisses</th><th scope="col" class="num">Aujourd'hui</th></tr></thead><tbody>${lignes.map((g) => `<tr><th scope="row">${esc(g.nom)}</th><td class="num">${fmtE(g.d)}</td><td class="num">+ ${fmtE(g.hausse)} <small>(${g.nh})</small></td><td class="num">− ${fmtE(Math.abs(g.baisse))} <small>(${g.nb})</small></td><td class="num">${fmtE(g.f)}</td></tr>`).join('')}</tbody></table>`;
+  }
+
   function historiquePane(bl) {
+    RF_BL = bl;
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
     const { n, tot, mouv, suivis } = serieValeur(bl);
     if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote : l\'historique apparaîtra avec les prochains relevés.</p>';
@@ -1527,7 +1559,14 @@
     const phrase = Math.abs(ev) < 0.005 ? `Valeur stable depuis le ${jour(HIST.dates[0], true)} : ${fmtE(v1)}.` : `De ${fmtE(v0)} le ${jour(HIST.dates[0], true)} à ${fmtE(v1)} le ${jour(HIST.dates[n - 1], true)} (${ev > 0 ? 'hausse' : 'baisse'} de ${pct} %).`;
     const lignes = HIST.dates.map((d, i) => `<tr><td>${jour(d, true)}</td><td class="num">${fmtE(tot[i])}</td><td class="num">${i ? `${tot[i] - tot[i - 1] >= 0 ? '+' : '−'}${fmtE(Math.abs(tot[i] - tot[i - 1]))}` : '—'}</td></tr>`).join('');
     const total = bl.exemplaires, dir = Math.abs(ev) < 0.005 ? '' : ev > 0 ? 'hausse' : 'baisse';
+    const stables = mouv.filter((x) => Math.abs(x.delta) <= 0.004).length, bouges = mouv.length - stables;
+    const bilan = `${bouges} livre${bouges > 1 ? 's ont' : ' a'} bougé et ${stables} n'${stables > 1 ? 'ont' : 'a'} pas bougé depuis le ${jour(HIST.dates[0], true)}.`;
     const cle = (lib, val, cls = '') => `<li class="${cls}"><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
+    // Roll-forward (partie prix) : valeur de départ, hausses, baisses, valeur d'aujourd'hui. Les entrées et sorties ne sont pas suivies ici.
+    const hausses = mouv.filter((x) => x.delta > 0.004), baisses = mouv.filter((x) => x.delta < -0.004);
+    const somme = (liste) => liste.reduce((t, x) => t + x.delta, 0);
+    const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
+    const rollforward = `<ul class="coll-cles hc-cles" aria-label="De ${jour(HIST.dates[0], true)} à aujourd'hui">${cle('Valeur au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
       <div class="hc-grille">
@@ -1535,24 +1574,33 @@
         <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
       </div>
       <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
+      <p class="sous hc-bilan">${bilan}</p>
+      ${rollforward}
+      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div id="rf-tableau">${rollforwardTable(bl)}</div>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
+    const complete = estSorcier();                                     // sorciers et Zagors : toutes les répartitions et plus de pièces
+    const SEG_SIMPLE = ['serie', 'editeur', 'decennie'];
+    const segments = complete ? SEGMENTS : SEGMENTS.filter((x) => SEG_SIMPLE.includes(x[0]));
+    if (!complete && !SEG_SIMPLE.includes(CSEG)) CSEG = 'serie';
+    const nPieces = complete ? 20 : 5;
     const cotes = bl.lignes.filter((x) => x.b.prix[x.c.etat] != null);
-    const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+    const chers = [...cotes].sort((x, y) => y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, nPieces);
     const rang = { tres_rare: 0, rare: 1 };
     const rares = bl.lignes.filter((x) => x.b.rarete && rang[x.b.rarete.niveau] !== undefined && x.b.prix[x.c.etat] != null)
-      .sort((x, y) => rang[x.b.rarete.niveau] - rang[y.b.rarete.niveau] || y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, 5);
+      .sort((x, y) => rang[x.b.rarete.niveau] - rang[y.b.rarete.niveau] || y.b.prix[y.c.etat] - x.b.prix[x.c.etat]).slice(0, nPieces);
     const sansInfo = bl.lignes.filter((x) => !x.b.rarete).length;
     const recent = bl.lignes.reduce((t, x) => t + (estActuel(infoPrix(x.b, x.c.etat)) ? (valeurLigne(x.b, x.c) || 0) : 0), 0);
     return `<h3>Répartition de la valeur</h3>
-      <div class="seg-choix"><label for="coll-segment">Répartir par</label><select id="coll-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === CSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div class="seg-choix"><label for="coll-segment">Répartir par</label><select id="coll-segment">${segments.map(([k, nom]) => `<option value="${k}"${k === CSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
       <ul class="seg-liste" id="coll-seg">${barresSegment(bl)}</ul>
-      <h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
+      ${complete ? `<h3 id="titre-coll-histo">Où se situe la valeur de vos exemplaires</h3>
       <p class="sous" id="coll-histo-note"></p>
       <div id="coll-histo" class="histo"></div>
       <div class="legende" id="coll-histo-legende"></div>
-      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>
+      <details class="chiffres" id="coll-histo-chiffres"><summary>Voir les chiffres</summary><div id="coll-histo-table"></div></details>` : ''}
       <div class="coll-pieces">
         <div><h3>Les plus chères</h3>${chers.length ? `<div class="pieces">${chers.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune cote disponible pour l\'instant.</p>'}</div>
         <div><h3>Les plus rares</h3>${rares.length ? `<div class="pieces">${rares.map(pieceHtml).join('')}</div>` : '<p class="sous">Aucune de vos pièces n\'est rare ou très rare.</p>'}
@@ -1602,7 +1650,7 @@
     e.preventDefault(); ouvrirOnglet(dispo[j]); $('#onglet-coll-' + dispo[j]).focus();
   });
   window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
-  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } });
+  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardTable(RF_BL); } });
   // Une barre de répartition ouvre « Mes livres » filtré sur ce segment
   document.addEventListener('click', (e) => {
     const l = e.target.closest('.seg-clic'); if (!l) return;
@@ -1649,7 +1697,7 @@
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
           <p class="texte">Avec un compte Google, gratuit :</p>
-          <ul class="avantages"><li>Prix estimés</li><li>Scan des codes-barres</li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
+          <ul class="avantages"><li>Prix estimés</li><li>Scan des <span class="nowrap">codes-barres</span></li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
         corps = `<p class="gros">Elle est encore vide</p>
@@ -1714,8 +1762,8 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    if (CTAB === 'historique' && !estProprietaire()) CTAB = 'livres';           // l'historique est réservé aux sorciers
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estProprietaire() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
+    if (CTAB === 'historique' && !estSorcier()) CTAB = 'livres';           // l'historique est réservé aux sorciers et aux Zagors
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estSorcier() ? [['historique', 'Mouvements', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1733,7 +1781,7 @@
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
-      ${estProprietaire() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
+      ${estSorcier() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
@@ -2188,7 +2236,6 @@
     annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)} au total.`);
   }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-lot]')) ouvrirLot(); });
-  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande]') && window.Compte) window.Compte.demanderLivre(S.q); });
 
 
   /* ---------- Inventaire guidé : séries → éditions → listes → bilan ---------- */

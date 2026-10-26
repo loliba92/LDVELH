@@ -34,7 +34,11 @@ from pathlib import Path
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scrapers"))
 import editions
+import reconciliation_image
+
+COUVERTURES = Path(__file__).resolve().parent.parent / "web" / "covers"
 
 SORTIE = Path(__file__).resolve().parent.parent / "data" / "processed" / "prix_neuf.csv"
 OCCASION = Path(__file__).resolve().parent.parent / "data" / "raw" / "occasion"
@@ -63,6 +67,25 @@ def lire_fiche(html):
     return {"prix": None, "disponibilite": "indisponible", "prix_occasion": None}
 
 
+def image_fiche(html):
+    """Adresse de la jaquette affichée sur la fiche, ou None."""
+    m = re.search(r'(?:itemprop="image"\s+content|property="og:image"\s+content)="([^"]+)"', html)
+    return m.group(1) if m else None
+
+
+def fiche_coherente(isbn, html, http=requests):
+    """La jaquette affichée par la fiche est-elle celle de notre édition ? Sans jaquette de notre côté, ou si la fiche
+    ne peut pas être lue, on garde la fiche (on ne retire un prix que s'il y a un désaccord net)."""
+    url, ref = image_fiche(html), reconciliation_image.jaquette_locale(COUVERTURES, isbn)
+    if not url or ref is None:
+        return True
+    try:
+        r = http.get(url, headers={"User-Agent": AGENT}, timeout=30)
+    except requests.RequestException:
+        return True
+    return reconciliation_image.meme_jaquette(r.content, ref)
+
+
 def source_leslibraires(isbn, http=requests, attentes=ESSAIS):
     """Dictionnaire de lire_fiche ; 404 = fiche absente = indisponible ; erreur passagère : on réessaie, puis on lève l'erreur."""
     dernier = None
@@ -76,6 +99,8 @@ def source_leslibraires(isbn, http=requests, attentes=ESSAIS):
                 dernier = requests.HTTPError(f"HTTP {r.status_code}")
                 continue
             r.raise_for_status()
+            if not fiche_coherente(isbn, r.text, http):          # la fiche affiche un autre livre : on n'en tire aucun prix
+                return {"prix": None, "disponibilite": "indisponible", "prix_occasion": None}
             return lire_fiche(r.text)
         except requests.RequestException as e:
             dernier = e

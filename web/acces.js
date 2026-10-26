@@ -6,14 +6,15 @@
   var main = document.getElementById('main');
   if (!porte || !main) return;
   var zone = document.getElementById('porte-google');
-  var exige = main.dataset.niveau || 'admin';
+  var exige = main.dataset.niveau || 'superadmin';
 
   function montrer() { porte.hidden = true; main.hidden = false; document.dispatchEvent(new Event('cdh-porte-ouverte')); }
   var bouton = '<button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button>';
   function evaluer() {
     var C = window.Cloud, niveau = window.Compte ? window.Compte.role() : '';
     var connecte = C && C.lie() && C.actif();
-    var ok = niveau === 'superadmin' || (niveau === 'admin' && exige !== 'superadmin') || (exige === 'heros' && niveau === 'heros');   // « heros » : toute personne connectée
+    var ordre = { heros: 0, admin: 1, superadmin: 2 };   // « heros » : toute personne connectée ; « admin » : sorciers et Zagors
+    var ok = ordre[niveau] !== undefined && ordre[niveau] >= ordre[exige];
     if (connecte && ok) return montrer();
     porte.hidden = false; main.hidden = true; zone.hidden = false;
     if (!connecte) zone.innerHTML = '<p class="sous">Connectez-vous avec votre compte Google pour ' + (exige === 'heros' ? 'voir cette page.' : 'accéder à cet espace.') + '</p>' + bouton;
@@ -27,9 +28,9 @@
     else zone.innerHTML = '<p class="sous" role="status">Ce compte n\'a pas les droits nécessaires pour cette page. Demandez-les à la personne qui gère le site.</p>';
   }
   function demarrer() {
-    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
+    if (!window.Identite) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace est momentanément indisponible.</p>'; return; }
     window.Identite.config().then(function (c) {
-      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace sorcier est momentanément indisponible.</p>'; return; }
+      if (!c || !c.relais_url) { zone.hidden = false; zone.innerHTML = '<p class="sous">L\'espace est momentanément indisponible.</p>'; return; }
       document.addEventListener('cdh-compte', evaluer);
       evaluer();
     });

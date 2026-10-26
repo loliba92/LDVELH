@@ -1501,9 +1501,8 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rang > *, .carte, .carte > * { min-width: 0; }
 .grille-ajouts { max-width: 100%; }
 
-/* Largeurs intermédiaires (tablette) : l'en-tête ne coupe plus aucun mot ; « Offrir un café » reste dans le pied de page et le menu « À propos » */
+/* Largeurs intermédiaires (tablette) : l'en-tête ne coupe plus aucun mot */
 @media (min-width: 701px) and (max-width: 1000px) {
-  .menu a.menu-cafe { display: none; }
   .menu .compte-bouton .compte-libelle { max-width: 13ch; overflow: hidden; text-overflow: ellipsis; }
   .marque-nom, .bandeau nav a, .bandeau nav summary, .bandeau .compte button { white-space: nowrap; }
 }
@@ -1919,7 +1918,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 @media (max-width: 700px) { .dlg-bienvenue .bienvenue-img { height: 76px; border-radius: 15px 15px 0 0; } }
 
 /* Légende des niveaux de prix (visiteur) : cinq repères alignés, chacun d'un seul tenant */
-.niveaux { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-bottom: 6px; }
+.niveaux { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 4px; margin-bottom: 6px; font-size: .8rem; white-space: nowrap; }
 .rv-pas-ann { display: inline-block; margin-top: 4px; }
 .rv-lien-lib { display: inline-block; margin-top: 2px; white-space: nowrap; }
 .rv-titre a.rv-voir-ann { font: 600 .82rem var(--f-ui); color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
@@ -1968,3 +1967,11 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .compte-liste .niv { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .68rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .compte-liste .niv-sorcier { color: var(--gold); border-color: var(--gold); }
 .compte-liste .niv-zagor { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
+
+/* Mot insécable (« codes-barres ») et libellé de section du menu compte (doré, comme les autres libellés de section) */
+.nowrap { white-space: nowrap; }
+.compte-liste .compte-section { list-style: none; color: var(--gold); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: 10px 0 2px; }
+
+/* Gestion de la fiche (Zagor) : un seul bloc en bas, séparé de la lecture */
+.fiche-gestion { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--gold); }
+.fiche-gestion-titre { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }

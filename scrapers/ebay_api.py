@@ -216,6 +216,19 @@ def parle_de_la_collection(titre_annonce, ed):
     return False
 
 
+def frais_port(item):
+    """Frais de port annoncés (en euros), le moins cher des modes de livraison proposés ; None si l'annonce n'en indique pas."""
+    couts = []
+    for option in item.get("shippingOptions") or []:
+        cout = (option.get("shippingCost") or {})
+        if cout.get("currency", "EUR") == "EUR" and cout.get("value") not in (None, ""):
+            try:
+                couts.append(float(cout["value"]))
+            except ValueError:
+                continue
+    return min(couts) if couts else None
+
+
 def retenues(items, jour, titre=None, annees=None, ed=None):
     """Annonces que le relevé garde pour une édition : [(annonce, état, prix, ancienne)]. « ancienne » : plus de MAX_AGE_JOURS jours
     (gardée pour les statistiques, pas pour la cote). Lots, devises étrangères, autres livres et autres années sont écartés."""
@@ -238,7 +251,8 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            sortie.append((it, etat, valeur, ancienne))
+            # Prix total pour l'acheteur : le prix de l'annonce plus les frais de port (0 si l'annonce ne les indique pas)
+            sortie.append((it, etat, valeur + (frais_port(it) or 0.0), ancienne))
     return sortie
 
 
@@ -505,6 +519,8 @@ def main():
     fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
     for isbn, titre, nb_ed, livre, annees in cat:
         par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
+    import reconciliation_image                                  # réconciliation par image : une annonce vue sous plusieurs éditions va à celle dont la jaquette lui ressemble
+    par_isbn = reconciliation_image.reconcilier(par_isbn, {c[0]: c[3] for c in cat}, RACINE / "web" / "covers")
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     annonces_gardees = []
     for isbn, titre, nb_ed, livre, annees in cat:

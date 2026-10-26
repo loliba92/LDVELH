@@ -9,6 +9,10 @@ def item(prix, cond, titre="Le Sorcier de la montagne de feu", devise="EUR"):
     return {"title": titre, "conditionId": cond, "price": {"value": str(prix), "currency": devise}}
 
 
+def avec_port(prix, port):
+    return dict(item(prix, "3000"), shippingOptions=[{"shippingCostType": "FIXED", "shippingCost": {"value": str(port), "currency": "EUR"}}])
+
+
 class Faux:
     def __init__(self, charge): self.charge = charge; self.appels = []
     def post(self, url, **kw): self.appels.append(("post", url)); return self._rep({"access_token": "T"})
@@ -211,6 +215,23 @@ class TestEbay(unittest.TestCase):
 
     def test_aucune_annonce(self):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])
+
+
+class TestFraisPort(unittest.TestCase):
+    def test_frais_lus_et_ajoutes_au_prix(self):
+        self.assertEqual(ebay_api.frais_port(avec_port(10, 4.5)), 4.5)
+        self.assertEqual(ebay_api.frais_port(item(10, "3000")), None)
+        self.assertEqual(ebay_api.frais_port(dict(item(10, "3000"), shippingOptions=[{"shippingCost": {"value": "0.00", "currency": "EUR"}}])), 0.0)
+
+    def test_le_moins_cher_des_modes_de_livraison(self):
+        it = dict(item(10, "3000"), shippingOptions=[{"shippingCost": {"value": "6.90", "currency": "EUR"}}, {"shippingCost": {"value": "3.50", "currency": "EUR"}}])
+        self.assertEqual(ebay_api.frais_port(it), 3.5)
+
+    def test_retenues_donne_le_prix_port_inclus(self):
+        jour = date(2026, 10, 26)
+        sortie = ebay_api.retenues([avec_port(10, 4.5)], jour)
+        self.assertEqual(len(sortie), 1)
+        self.assertAlmostEqual(sortie[0][2], 14.5)
 
 
 if __name__ == "__main__":
