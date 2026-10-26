@@ -813,7 +813,7 @@
       try {
         const r = await window.Relais.envoyerLot('corriger-fiche.yml', { corrections: corrections.join(' | ') });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire("Ce compte n'a pas les droits de sorcier, ou la connexion Google a expiré : reconnectez-vous.");
+        else if (r.status === 401 || r.status === 403) dire("Ce compte n'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.");
         else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
       f.querySelectorAll('button').forEach((x) => { x.disabled = false; });
@@ -870,7 +870,7 @@
       try {
         const r = await window.Relais.envoyerLot('corriger-prix.yml', { corrections: ligne });
         if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas les droits de sorcier, ou la connexion Google a expiré : reconnectez-vous.');
+        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
         else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
       } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
       f.querySelector('button').disabled = false;

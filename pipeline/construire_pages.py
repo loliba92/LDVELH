@@ -36,9 +36,9 @@ def ico(d):
 
 PAGES = {
     "butin.html": ("Butin", "Butin · La Cote du Héros",
-                   "Les bonnes affaires : annonces encore en ligne à moitié prix de la cote ou moins. Réservé aux sorciers et aux Zagors."),
+                   "Les bonnes affaires : annonces encore en ligne à moitié prix de la cote ou moins."),
     "ajouter.html": ("Ajouter des livres", "Ajouter des livres · La Cote du Héros",
-                     "Ajout de livres au guide par scanner ou liste d'ISBN, réservé aux sorciers et aux Zagors."),
+                     "Ajout de livres au guide par scanner ou liste d'ISBN."),
     "revue-prix.html": ("Revue des prix", "Revue des prix · La Cote du Héros",
                         "Outil de revue : archive, relevé eBay et prix publié, côte à côte, pour valider les cotes."),
     "evolutions.html": ("Évolutions", "Évolutions des prix · La Cote du Héros",
@@ -46,15 +46,13 @@ PAGES = {
     "le-projet.html": ("Le projet", "Le projet · La Cote du Héros",
                        "Un outil de collectionneur : tenir sa collection à jour, la suivre dans le temps et trouver les livres qui manquent. Les prix ne sont que des repères."),
     "confidentialite.html": ("Confidentialité", "Confidentialité · La Cote du Héros",
-                             "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive et vos notes dans le relais du site."),
+                             "Ce que La Cote du Héros garde de vous : rien sans compte ; avec un compte Google, votre collection est enregistrée dans votre propre Drive et vos notes dans le service du site."),
     "contact.html": ("Contact", "Contact · La Cote du Héros",
                      "Écrire à La Cote du Héros : une question, une erreur à signaler, un prix constaté, une idée ou un partenariat."),
     "communaute.html": ("Communauté", "Communauté · La Cote du Héros",
                         "Des passionnés de livres dont vous êtes le héros : chaînes, sites, blogs, collectionneurs et boutiques à suivre."),
     "equipe.html": ("Équipe", "Équipe · La Cote du Héros",
-                    "Page réservée aux Zagors : ajouter, retirer ou bloquer les sorciers."),
-    "devenir-admin.html": ("Devenir sorcier", "Devenir sorcier · La Cote du Héros",
-                           "Comment devenir sorcier : les niveaux, la demande, la première connexion avec Google et les bonnes pratiques."),
+                    "Page réservée."),
     "mentions-legales.html": ("Mentions légales", "Mentions légales · La Cote du Héros",
                               "Éditeur, hébergeur et conditions d'utilisation de La Cote du Héros."),
 }
@@ -154,7 +152,7 @@ def _butin():
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
     corps = corps.replace("{ISSUES}", ISSUES)
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html", "evolutions.html", "butin.html", "ajouter.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "evolutions.html", "butin.html", "ajouter.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -221,7 +219,7 @@ def page(nom, corps):
 
 AJOUTER = '''<p class="surtitre">Contribuer</p>
 <h1>Ajouter des livres</h1>
-<p class="chapeau">Pour les sorciers et les Zagors. Scannez les codes-barres un par un, ou collez une liste d'ISBN, un par ligne. Un envoi compte au plus 20 ISBN ; vous pouvez faire 3 envois par jour.</p>
+<p class="chapeau">Scannez les codes-barres un par un, ou collez une liste d'ISBN, un par ligne. Un envoi compte au plus 20 ISBN ; vous pouvez faire 3 envois par jour.</p>
 
 <section class="carte" id="aj-carte" aria-labelledby="aj-titre">
   <h2 id="aj-titre">Liste à ajouter</h2>
@@ -254,42 +252,6 @@ PORTE = '''<div class="porte" id="porte">
 PORTE_CONNECTE = PORTE.replace(" Espace réservé</p>", " Réservé aux personnes connectées</p>")
 
 
-DEVENIR_ADMIN = '''<p class="surtitre">Accès réservé</p>
-<h1>Devenir sorcier</h1>
-<p class="chapeau">Les sorciers tiennent les prix à jour et ajoutent les livres qui manquent. Cette page explique comment le devenir.</p>
-
-<h2>Les niveaux</h2>
-<ul>
-  <li><strong>Héros</strong> : toute personne connectée avec Google. Elle construit sa collection, sauvegardée dans son propre Google Drive.</li>
-  <li><strong>Sorcier</strong> : réservé aux futurs abonnés. Il ne corrige pas les prix ni les fiches.</li>
-  <li><strong>Zagor</strong> : en plus, il vérifie et corrige les prix et les fiches, et gère l'équipe.</li>
-</ul>
-
-<h2>Comment le devenir</h2>
-<ol>
-  <li>Écrivez-nous depuis la <a href="contact.html">page Contact</a>. <strong>N'écrivez pas votre adresse dans un signalement public</strong> : il est lisible par tout le monde.</li>
-  <li>Donnez-lui l'<strong>adresse Google</strong> avec laquelle vous vous connectez et le <strong>nom</strong> à afficher à côté de vos mises à jour (un prénom ou un pseudo).</li>
-  <li>Un Zagor vous ajoute à l'équipe. Il n'y a ni mot de passe ni clé à recevoir : votre compte Google suffit.</li>
-</ol>
-
-<h2>Votre première connexion</h2>
-<ol>
-  <li>Sur le site, cliquez sur <strong>« Se connecter »</strong> (en haut à droite, ou l'onglet « Compte » sur téléphone) et choisissez le compte Google dont vous avez donné l'adresse.</li>
-  <li>Ouvrez le menu de votre compte : votre nom s'affiche avec votre niveau.</li>
-</ol>
-<p class="sous">La connexion dure environ une heure. Si elle expire, la page vous le dit : reconnectez-vous, vos validations en attente sont conservées.</p>
-
-<h2>Les bonnes pratiques</h2>
-<ul>
-  <li><strong>Regardez la « Dernière révision »</strong> affichée sur chaque fiche avant de la revoir : si elle date d'aujourd'hui, un autre sorcier vient de s'en occuper.</li>
-  <li><strong>Ne confirmez que ce que vous avez vérifié.</strong> Confirmer un prix le fige : il prime ensuite sur les relevés automatiques.</li>
-  <li>Une erreur ? Corrigez le prix, ou utilisez « Retirer » tant que la validation n'est pas envoyée.</li>
-  <li><strong>Ne partagez pas votre connexion.</strong> Chaque sorcier a la sienne, et son nom est inscrit sur ses mises à jour.</li>
-</ul>
-
-<h2>Changer d'appareil ou quitter</h2>
-<p>Sur un nouvel appareil, reconnectez-vous avec le même compte Google. Pour ne plus être sorcier, demandez à un Zagor de vous retirer de l'équipe : c'est immédiat pour les envois.</p>
-'''
 
 
 CONTACT = '''<p class="surtitre">Nous écrire</p>
@@ -364,7 +326,7 @@ def corps_communaute():
 
 
 EQUIPE = '''<h1>Équipe</h1>
-<p class="chapeau">Les personnes qui peuvent corriger les prix et les fiches. Toute personne connectée avec Google est un Héros ; seul un Zagor corrige les prix et gère l'équipe.</p>
+<p class="chapeau">Gestion de l'accès au guide.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
@@ -373,9 +335,9 @@ EQUIPE = '''<h1>Équipe</h1>
     <label for="eq-adresse">Adresse Google</label>
     <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
     <label for="eq-nom">Nom affiché sur ses mises à jour</label>
-    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (sorcier)">
+    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Prénom">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="superadmin">Zagor : corrections, équipe</option></select>
+    <select id="eq-niveau"><option value="superadmin">Accès complet</option></select>
     <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
   <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
@@ -551,7 +513,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li>Une <strong>collection</strong> à tenir à jour, avec un inventaire guidé pour la constituer sans tout saisir à la main, et une liste « À trouver ». Les deux sont enregistrées dans votre Google Drive.</li>
   <li>Les <strong>nouveautés</strong> et les livres <strong>à paraître</strong>, repérés chaque jour.</li>
   <li>Pour chaque édition, un repère de prix par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
-  <li>Une page <a href="evolutions.html">Évolutions des prix</a>, pour les sorciers et les Zagors : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
+  <li>Une page <a href="evolutions.html">Évolutions des prix</a>, ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
 </ul>
 
 <h2>Comment les prix sont estimés</h2>
@@ -560,7 +522,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li><strong>L'ancien relevé.</strong> Point de départ du guide : des cotes d'archives, qui ne sont plus tenues à jour. Quand rien de plus récent n'existe, c'est lui qui s'affiche, et la fiche le dit.</li>
   <li><strong>Les annonces actuelles.</strong> Le guide relève régulièrement les annonces en ligne d'une plateforme, par son interface officielle et sous réserve de ses conditions d'utilisation. On n'en garde que des chiffres d'ensemble (nombre, minimum, médiane, maximum) : ni titre d'annonce, ni vendeur. Une annonce est un prix demandé, pas un prix payé : le guide ne la corrige pas et le signale.</li>
   <li><strong>Les prix des éditeurs.</strong> Pour les nouveautés encore en vente neuve, le prix de l'éditeur sert de repère pour le très bon état.</li>
-  <li><strong>Les prix validés.</strong> Un sorcier peut confirmer ou corriger un prix après vérification : ce prix prime alors sur tout le reste, et la fiche indique qu'il a été validé, et quand.</li>
+  <li><strong>Les prix validés.</strong> Un prix peut être confirmé ou corrigé après vérification : ce prix prime alors sur tout le reste, et la fiche indique qu'il a été validé, et quand.</li>
 </ul>
 <p>Quand plusieurs sources existent, la cote est une <strong>médiane pondérée</strong> : une vente réelle compte plus qu'une annonce, qui compte plus qu'une archive, et un prix récent compte plus qu'un prix ancien (le poids est divisé par deux tous les 90 jours, tous les 365 jours pour l'ancien relevé). Un état sans prix est déduit des autres états de la même édition (le bon état vaut environ 60 % du très bon état, le convenable environ 40 %), et la fiche l'indique.</p>
 <p>La fiche de chaque édition précise la nature du prix, le nombre d'observations, leur date et un niveau de confiance.</p>
@@ -585,7 +547,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
     <tr><th scope="row" data-label="Fonction">Suivre la valeur de sa collection et l'analyser</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Séparer ses doubles à vendre et les livres à trouver</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Retrouver sa collection sur tous ses appareils (Google Drive), et une ancienne version si besoin</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Ajouter un livre au guide (sorciers et Zagors)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Ajouter un livre au guide</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Noter les livres de 1 à 5</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
   </tbody>
 </table>
@@ -615,7 +577,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h2>Contribuer</h2>
 <ul>
   <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>.</li>
-  <li><strong>Ajouter un livre :</strong> les sorciers et les Zagors l'ajoutent depuis « Ajouter des livres », dans le menu de leur compte.</li>
+  <li><strong>Ajouter un livre :</strong> la page « Ajouter des livres » est réservée à l'équipe du guide.</li>
   <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
 </ul>
 
@@ -643,7 +605,7 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
     <tr><td data-label="Nom"><code>cdh-cloud-lie</code></td><td data-label="Contenu">Votre prénom Google, pour l'afficher, et le fait que vous êtes connecté</td><td data-label="Pourquoi">Savoir que votre collection est liée à votre compte</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-meta</code></td><td data-label="Contenu">La date de dernière modification de chaque livre</td><td data-label="Pourquoi">Fusionner proprement votre collection entre plusieurs appareils</td></tr>
     <tr><td data-label="Nom"><code>cdh-cloud-jeton</code></td><td data-label="Contenu">Le laissez-passer donné par Google, valable environ une heure</td><td data-label="Pourquoi">Ne pas vous redemander la connexion à chaque page ; effacé à la fin de sa validité ou à la déconnexion</td></tr>
-    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau (Héros, Sorcier ou Zagor) et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
+    <tr><td data-label="Nom"><code>cdh-role</code> et <code>cdh-notes</code></td><td data-label="Contenu">Votre niveau d'accès et les moyennes des notes, gardés dans l'onglet</td><td data-label="Pourquoi">Afficher les bons menus et éviter de redemander les notes pendant dix minutes ; effacés à la fermeture de l'onglet</td></tr>
     <tr><td data-label="Nom"><code>cdh-avis-donne</code>, <code>cdh-avis-ferme</code>, <code>cdh-visites</code> et <code>cdh-bienvenue</code></td><td data-label="Contenu">Le fait que vous avez déjà répondu à « Qu'en pensez-vous ? » ou fermé le bandeau, les dates de vos visites, et le fait que l'accueil a été affiché</td><td data-label="Pourquoi">Ne proposer l'avis qu'aux visiteurs réguliers, une seule fois ; ces données restent sur votre appareil</td></tr>
     <tr><td data-label="Nom"><code>cdh-fiches-vues</code>, <code>cdh-invite-vue</code> et <code>cdh-invite-fiches</code></td><td data-label="Contenu">Les fiches consultées pendant la visite (effacées à la fermeture de l'onglet), et la date à laquelle l'invitation à se connecter a été montrée</td><td data-label="Pourquoi">Proposer la connexion une seule fois, après quelques fiches, et pas plus d'une fois par mois</td></tr>
     <tr><td data-label="Nom"><code>cdh-scan-etat</code>, <code>cdh-coll-pane</code>, <code>cdh-pane</code></td><td data-label="Contenu">Vos réglages d'affichage (état choisi pour le scan, onglet ouvert)</td><td data-label="Pourquoi">Retrouver la page comme vous l'avez laissée</td></tr>
@@ -658,27 +620,24 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Pour ajouter un livre en scannant son code-barres, le site vous demande l'autorisation d'utiliser l'appareil photo, à chaque usage selon votre navigateur. L'image est analysée dans votre navigateur par un composant libre (ZXing) hébergé avec le site : <strong>aucune image ni photo n'est enregistrée ni envoyée</strong>. Seul le numéro lu (l'ISBN) est utilisé, pour retrouver le livre. Vous pouvez refuser l'autorisation et saisir le numéro à la main.</p>
 
 <h2>Si vous vous connectez avec Google</h2>
-<p>Le site demande à Google trois choses : votre prénom, pour l'afficher, votre adresse électronique, pour vous reconnaître (elle n'est lue que par le relais décrit plus bas), et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Votre collection et votre liste « À trouver » vont directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit pas vos autres fichiers. Le laissez-passer donné par Google reste sur cet appareil et s'efface au bout d'une heure ou à la déconnexion ; il n'est envoyé qu'à Google et, quand vous utilisez une fonction qui en a besoin, au relais.</p>
+<p>Le site demande à Google trois choses : votre prénom, pour l'afficher, votre adresse électronique, pour vous reconnaître (elle n'est lue que par le service décrit plus bas), et l'accès à un <strong>espace réservé de votre Google Drive</strong> (le droit « données d'application », que Google classe comme non sensible). Cet espace n'apparaît pas dans vos fichiers, et seul ce site peut l'ouvrir. Votre collection et votre liste « À trouver » vont directement de votre navigateur à votre Drive, sans passer chez l'éditeur, qui ne voit pas vos autres fichiers. Le laissez-passer donné par Google reste sur cet appareil et s'efface au bout d'une heure ou à la déconnexion ; il n'est envoyé qu'à Google et, quand vous utilisez une fonction qui en a besoin, au service.</p>
 <p>Google intervient à votre demande comme prestataire de stockage, selon <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">sa propre politique de confidentialité</a>. Votre navigateur contacte Google quand vous cliquez sur « Se connecter », puis à chaque sauvegarde de votre collection dans votre Drive.</p>
 
-<h2>Le relais du site</h2>
-<p>Certaines fonctions passent par un petit programme géré par l'éditeur et hébergé chez Google (Google Apps Script), appelé le <strong>relais</strong>. Il sert à afficher les moyennes des notes, à enregistrer vos notes, à transmettre vos demandes d'ajout de livres et à permettre aux sorciers d'envoyer des prix.</p>
+<h2>Le service du site</h2>
+<p>Certaines fonctions passent par un service technique géré par l'éditeur et hébergé chez Google. Il sert à afficher les moyennes des notes, à enregistrer vos notes, à transmettre vos demandes d'ajout de livres et à permettre aux sorciers d'envoyer des prix.</p>
 <ul>
-  <li><strong>Sans connexion</strong> : à l'ouverture de la plupart des pages, le site interroge le relais pour afficher les moyennes des notes. Google reçoit alors, comme tout serveur, l'adresse IP et le type de navigateur du visiteur. Aucune donnée sur vous n'est envoyée.</li>
-  <li><strong>Connecté</strong> : votre laissez-passer est transmis au relais, qui le vérifie auprès de Google et en tire une <strong>empreinte</strong>, un code calculé à partir de votre adresse qui ne permet pas de la retrouver. Il s'en sert pour vous reconnaître et pour savoir à quel niveau vous êtes. Le relais ne conserve ni votre adresse ni votre nom : seulement cette empreinte, avec ce que vous lui demandez d'enregistrer (une note, une demande).</li>
+  <li><strong>Sans connexion</strong> : à l'ouverture de la plupart des pages, le site interroge le service pour afficher les moyennes des notes. Google reçoit alors, comme tout serveur, l'adresse IP et le type de navigateur du visiteur. Aucune donnée sur vous n'est envoyée.</li>
+  <li><strong>Connecté</strong> : votre laissez-passer est transmis au service, qui le vérifie auprès de Google et en tire une <strong>empreinte</strong>, un code calculé à partir de votre adresse qui ne permet pas de la retrouver. Il s'en sert pour vous reconnaître et pour savoir à quel niveau vous êtes. Le relais ne conserve ni votre adresse ni votre nom : seulement cette empreinte, avec ce que vous lui demandez d'enregistrer (une note, une demande).</li>
 </ul>
 
 <h2>Notes des livres</h2>
-<p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le relais avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
+<p>Une fois connecté, vous pouvez noter un livre de 1 à 5. Votre note est enregistrée dans le service avec une <strong>empreinte courte de votre compte</strong> : un code qui ne contient ni votre adresse ni votre nom, mais qui permet de reconnaître que vous avez déjà voté, pour que chacun ne vote qu'une fois par livre. La moyenne et le nombre d'avis de chaque livre sont publics ; la note donnée par chaque personne ne l'est pas. Vous pouvez la modifier ou la retirer à tout moment depuis la fiche du livre.</p>
 
 <h2>Première connexion et avis</h2>
-<p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les Zagors peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
+<p>La première fois qu'un compte se connecte, le service l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seul l'éditeur peut consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
 
 <h2>Ajouter un livre</h2>
-<p>Les sorciers et les Zagors ajoutent des livres au guide, un par un avec le scanner ou par une liste d'ISBN. Le nom de la personne qui ajoute apparaît dans l'historique public des modifications, comme pour les corrections.</p>
-
-<h2>Les sorciers</h2>
-<p>Les sorciers sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un sorcier envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
+<p>Des livres sont ajoutés au guide, un par un avec le scanner ou par une liste d'ISBN. Le nom de la personne qui ajoute apparaît dans l'historique public des modifications, comme pour les corrections.</p>
 
 <h2>Soutenir le guide</h2>
 <p>Le lien « Offrir un café » ouvre la page du guide sur Buy Me a Coffee, un service extérieur. Le don se fait chez ce service, selon ses propres règles. Il peut communiquer à l'éditeur les informations de votre don (par exemple le nom et le message que vous laissez). Le guide lui-même ne reçoit rien et n'enregistre rien à ce sujet.</p>
@@ -697,13 +656,13 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <p>Le fichier que vous téléchargez (JSON ou CSV) est créé dans votre navigateur et enregistré chez vous. Quand vous chargez un fichier pour le retrouver, il est lu dans votre navigateur, sans être envoyé nulle part. Vous en restez seul responsable : il contient la liste de vos livres.</p>
 
 <h2>Hébergement et journaux techniques</h2>
-<p>Le site est hébergé par la société indiquée dans les <a href="mentions-legales.html">mentions légales</a> ; la connexion, la sauvegarde dans votre Drive et le relais passent par Google. Comme tout hébergeur, l'hébergeur du site et Google peuvent enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de ces sociétés et non de l'éditeur, qui n'y a pas accès. Elles sont établies aux États-Unis ; leur traitement des données est décrit dans leurs déclarations de confidentialité, dont celle de Google : <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a>.</p>
+<p>Le site est hébergé par la société indiquée dans les <a href="mentions-legales.html">mentions légales</a> ; la connexion, la sauvegarde dans votre Drive et le service passent par Google. Comme tout hébergeur, l'hébergeur du site et Google peuvent enregistrer des informations techniques lors d'une visite, comme l'adresse IP et le type de navigateur, pour assurer le service et sa sécurité. Ces journaux relèvent de ces sociétés et non de l'éditeur, qui n'y a pas accès. Elles sont établies aux États-Unis ; leur traitement des données est décrit dans leurs déclarations de confidentialité, dont celle de Google : <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de confidentialité de Google</a>.</p>
 
 <h2>Ressources et liens externes</h2>
-<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le relais, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook, Amazon et la Fnac, fiches de leslibraires.fr, Buy Me a Coffee. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
+<p>Les polices, les images, les jaquettes et les données sont hébergées avec le site. Pour s'afficher, le guide n'appelle qu'un service extérieur : le service, chez Google, pour les moyennes des notes (voir plus haut). Seuls les liens sur lesquels vous cliquez vous emmènent ailleurs : notice de la BnF, recherches sur Vinted, Leboncoin, eBay, Facebook, Amazon et la Fnac, fiches de leslibraires.fr, Buy Me a Coffee. Ces sites ont leurs propres règles de confidentialité. Les liens vers les sites de vente sont de simples recherches : le guide n'en tire aucun revenu.</p>
 
 <h2>Vos droits</h2>
-<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription de sorcier), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+<p>Votre collection est dans votre Drive : vous pouvez la consulter, la corriger ou l'effacer vous-même. Vos notes se retirent depuis la fiche du livre. Pour exercer vos droits d'accès, de rectification, d'effacement ou d'opposition sur ce que le guide détient (une note, une demande d'ajout, une inscription à l'équipe), ou pour toute question, écrivez à l'éditeur par la page <a href="contact.html">Contact</a>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
 
 <h2>Si cela change</h2>
 <p>Si le guide devait un jour mesurer sa fréquentation ou ajouter un service qui touche à vos données, cette page serait mise à jour avant, et un consentement serait demandé quand la loi l'exige. Dernière mise à jour : {MAJ_LEGAL}.</p>
@@ -727,7 +686,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 </ul>
 
 <h2>Services de connexion et de sauvegarde</h2>
-<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, ajouts de livres, outils des sorciers, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
+<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le service du site (notes, ajouts de livres, outils de l'équipe, hébergé chez Google) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
 <p>Les messages envoyés par le formulaire de la page Contact sont acheminés par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui les transmet à l'éditeur par courriel.</p>
 
 <h2>Propriété intellectuelle</h2>
@@ -910,8 +869,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
-                       ("devenir-admin.html", DEVENIR_ADMIN)):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute())):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
 

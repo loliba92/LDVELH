@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Équipe · La Cote du Héros</title>
-<meta name="description" content="Page réservée aux Zagors : ajouter, retirer ou bloquer les sorciers.">
+<meta name="description" content="Page réservée.">
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="La Cote du Héros">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="Équipe · La Cote du Héros">
-<meta property="og:description" content="Page réservée aux Zagors : ajouter, retirer ou bloquer les sorciers.">
+<meta property="og:description" content="Page réservée.">
 <meta property="og:image" content="https://lacoteduheros.fr/images/partage.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -57,7 +57,7 @@
 </div>
 <main id="main" class="cadre page" hidden data-niveau="superadmin">
 <h1>Équipe</h1>
-<p class="chapeau">Les personnes qui peuvent corriger les prix et les fiches. Toute personne connectée avec Google est un Héros ; seul un Zagor corrige les prix et gère l'équipe.</p>
+<p class="chapeau">Gestion de l'accès au guide.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
@@ -66,9 +66,9 @@
     <label for="eq-adresse">Adresse Google</label>
     <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
     <label for="eq-nom">Nom affiché sur ses mises à jour</label>
-    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (sorcier)">
+    <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Prénom">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="superadmin">Zagor : corrections, équipe</option></select>
+    <select id="eq-niveau"><option value="superadmin">Accès complet</option></select>
     <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
   <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
