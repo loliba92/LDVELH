@@ -1540,35 +1540,42 @@
       if (x.delta > 0.004) { g.hausse += x.delta; g.nh += 1; } else if (x.delta < -0.004) { g.baisse += x.delta; g.nb += 1; }
       groupes.set(k, g);
     });
-    const liste = [...groupes.values()].sort((a, b) => (b.f - b.d) - (a.f - a.d));
-    const debut = liste.reduce((t, g) => t + g.d, 0), fin = liste.reduce((t, g) => t + g.f, 0);
+    const tous = [...groupes.values()].sort((a, b) => Math.abs(b.f - b.d) - Math.abs(a.f - a.d));
+    const debut = tous.reduce((t, g) => t + g.d, 0), fin = tous.reduce((t, g) => t + g.f, 0);
     const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const pas = [{ nom: 'Début', de: 0, a: debut, total: true, detail: `Valeur au ${jour(HIST.dates[0])} : ${fmtE(debut)}.` }];
-    let courant = debut;
+    const detailDe = (g, titre) => `${titre} : ${fmtE(g.d)} → ${fmtE(g.f)}. Hausses + ${fmtE(g.hausse)} (${g.nh} livre${g.nh > 1 ? 's' : ''}), baisses − ${fmtE(Math.abs(g.baisse))} (${g.nb} livre${g.nb > 1 ? 's' : ''}).`;
+    // Les trois segments qui bougent le plus ; le reste est regroupé en « Autres »
+    const liste = tous.slice(0, 3), reste = tous.slice(3);
+    if (reste.length) {
+      const g = reste.reduce((t, x) => ({ d: t.d + x.d, f: t.f + x.f, hausse: t.hausse + x.hausse, nh: t.nh + x.nh, baisse: t.baisse + x.baisse, nb: t.nb + x.nb }), { d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 });
+      liste.push({ ...g, nom: 'Autres', detail: detailDe(g, `Les ${reste.length} autres (${nomSeg.toLowerCase()})`) });
+    }
+    // Départ et arrivée sont des repères (valeur écrite), pas des barres à l'échelle des variations : sinon on ne verrait plus rien
+    const pas = [{ nom: 'Début', de: 0, a: 0, total: true, valeur: debut, detail: `Valeur au ${jour(HIST.dates[0])} : ${fmtE(debut)}.` }];
+    let courant = 0;
     liste.forEach((g) => {
       const delta = g.f - g.d;
-      pas.push({ nom: String(g.nom), de: courant, a: courant + delta, delta,
-        detail: `${g.nom} : ${fmtE(g.d)} → ${fmtE(g.f)}. Hausses + ${fmtE(g.hausse)} (${g.nh} livre${g.nh > 1 ? 's' : ''}), baisses − ${fmtE(Math.abs(g.baisse))} (${g.nb} livre${g.nb > 1 ? 's' : ''}).` });
+      pas.push({ nom: String(g.nom), de: courant, a: courant + delta, delta, detail: g.detail || detailDe(g, g.nom) });
       courant += delta;
     });
-    pas.push({ nom: "Aujourd'hui", de: 0, a: fin, total: true, detail: `Valeur aujourd'hui : ${fmtE(fin)}.` });
+    pas.push({ nom: "Aujourd'hui", de: courant, a: courant, total: true, valeur: fin, detail: `Valeur aujourd'hui : ${fmtE(fin)}.` });
     RF_PAS = pas;
     const valeurs = pas.flatMap((p) => [p.de, p.a]);
-    const vmin = Math.min(...valeurs) * 0.92, vmax = Math.max(...valeurs) * 1.03;
-    const W = 640, H = 280, gh = 26, gb = 50, marge = 10, slot = (W - 2 * marge) / pas.length, bw = slot * 0.62;
-    const Y = (v) => gh + ((vmax - v) / (vmax - vmin)) * (H - gh - gb);
+    const vmin = Math.min(...valeurs), vmax = Math.max(...valeurs), etendue = (vmax - vmin) || 1;
+    const W = 640, H = 280, gh = 34, gb = 50, marge = 10, slot = (W - 2 * marge) / pas.length, bw = slot * 0.62;
+    const Y = (v) => gh + ((vmax - v) / etendue) * (H - gh - gb - 8);
     const barres = pas.map((p, i) => {
       const x = marge + i * slot + (slot - bw) / 2, y1 = Y(Math.max(p.de, p.a)), y2 = Y(Math.min(p.de, p.a));
       const cls = p.total ? 'rf-total' : p.delta >= 0 ? 'rf-hausse' : 'rf-baisse';
-      const valeur = p.total ? fmtE(p.a) : `${p.delta >= 0 ? '+' : '−'} ${fmtE(Math.abs(p.delta))}`;
+      const valeur = p.total ? fmtE(p.valeur) : `${p.delta >= 0 ? '+' : '−'} ${fmtE(Math.abs(p.delta))}`;
       const nom = p.nom.length > 11 ? p.nom.slice(0, 10) + '…' : p.nom;
       return `<g class="rf-barre" tabindex="0" role="button" data-i="${i}" aria-label="${esc(p.nom)} : ${esc(valeur)}">
-        <rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, y2 - y1).toFixed(1)}" rx="2" class="${cls}"/>
+        <rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(p.total ? 4 : 2, y2 - y1).toFixed(1)}" rx="2" class="${cls}"/>
         <text x="${(x + bw / 2).toFixed(1)}" y="${(y1 - 6).toFixed(1)}" text-anchor="middle" class="rf-valeur">${esc(valeur)}</text>
         <text x="${(x + bw / 2).toFixed(1)}" y="${H - 22}" text-anchor="middle" class="rf-nom"><title>${esc(p.nom)}</title>${esc(nom)}</text></g>`;
     }).join('');
     return `<figure class="rf-graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascade de la valeur de la collection, du ${jour(HIST.dates[0])} à aujourd'hui, par ${nomSeg.toLowerCase()}">${barres}</svg></figure>
-      <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. L'axe ne part pas de zéro, pour que les variations se voient.</p>
+      <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. Les trois segments qui bougent le plus ; départ et arrivée en valeur, hors échelle.</p>
       <details class="rf-chiffres"><summary>Voir les chiffres</summary>${rollforwardTable(bl)}</details>`;
   }
 
