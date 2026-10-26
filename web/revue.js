@@ -534,11 +534,20 @@
   let ANN = null, annChargees = false;
   const chargerAnnonces = () => {
     if (annChargees) return annChargees;
-    annChargees = window.Relais.lireAnnonces().catch(() => null)
+    annChargees = window.Relais.lireAnnonces(true).catch(() => null)
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const estSuper = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // annonces et Butin : sorciers et Zagors (les annonces sont lues par le relais)
+  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // toutes les annonces : le Zagor seul (lues par le relais)
+  const estSorcier = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // Butin : sorciers et Zagors
+  // Butin : le relais ne sert aux sorciers que les bonnes affaires (data/processed/butin.json), jamais la liste complète
+  let BUT = null, butChargees = false;
+  const chargerButin = () => {
+    if (butChargees) return butChargees;
+    butChargees = window.Relais.lireAnnonces(false).catch(() => null)
+      .then((a) => { BUT = a && a.annonces ? a : null; return BUT; });
+    return butChargees;
+  };
   const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
   const voirAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
   function annoncesEdition(ed) {
@@ -601,12 +610,12 @@
   let dessinerPepites = () => {};
   function pepites() {
     const lignes = [];
-    if (!ANN) return lignes;
+    if (!BUT) return lignes;
     EDITIONS.forEach((ed) => ETATS.forEach(([cle, lib]) => {
-      const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle];
+      const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && BUT.annonces[ed.isbn] && BUT.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
-        if (vue && (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay) && vue < (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay)) return;                 // plus en ligne au dernier relevé
+        if (vue && (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay) && vue < (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay)) return;                 // plus en ligne au dernier relevé
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
@@ -649,17 +658,53 @@
     };
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
     dessinerPepites = () => {
-      if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
-      etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     solides.addEventListener('change', dessinerPepites);
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estSuper()) chargerAnnonces().then(dessinerPepites); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estSorcier()) chargerButin().then(dessinerPepites); });
     dessinerPepites();
   }
 
   let ouvrirOnglet = () => {};
+  // Onglet « Annonces reçues » (Zagor seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
+  let dessinerRecues = () => {};
+  function initRecues() {
+    const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne');
+    if (!liste) return;
+    let limite = 60;
+    const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'librairie' ? 'librairie' : 'ebay');
+    const NOM = { ebay: 'eBay', leboncoin: 'Leboncoin', librairie: 'Librairie' };
+    dessinerRecues = () => {
+      if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
+      const dateRef = (o) => (o === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
+      const toutes = [];
+      Object.keys(ANN.annonces).forEach((isbn) => {
+        const ed = parIsbn.get(isbn); if (!ed) return;
+        ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue]) => {
+          const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
+          const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
+          toutes.push({ ed, lib, prix, titre, lien, fam: famille(origine), vue, partie, butin });
+        }));
+      });
+      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && !(enligne.checked && a.partie))
+        .sort((a, b) => (b.vue || '').localeCompare(a.vue || '') || a.prix - b.prix);
+      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
+        <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
+        <b class="rc-prix">${eur(a.prix)}</b>
+        <span class="meta rc-meta">${esc(a.ed.serie)} · ${esc(a.ed.version)} · ${esc(a.lib)} · ${NOM[a.fam]}${a.vue ? ' · vue le ' + jour(a.vue) : ''}${a.partie ? ' · plus en ligne' : ''}${a.butin ? ' · <strong>butin</strong>' : ''}</span>
+      </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
+    };
+    liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
+    source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
+    enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estSuper()) chargerAnnonces().then(dessinerRecues); });
+    dessinerRecues();
+  }
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
@@ -693,23 +738,26 @@
   }
   initAnnonces();
   initPepites();
+  initRecues();
   initNav();
   // Annonces : lien et onglet réservés au Zagor (le rôle arrive après la connexion)
   let pepitesOuvertes = false;
   function majAnnonces() {
+    const super_ = estSuper(), sorcier = estSorcier();
+    const maj = document.getElementById('rv-maj'); if (maj) maj.hidden = !super_;          // état des relevés : le Zagor seul
+    const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
-    const super_ = estSuper();
-    if (onglet) {
-      onglet.hidden = !super_;
-      if (!super_ && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
-    }
+    if (onglet) { onglet.hidden = !super_; if (!super_) replier(onglet); }
+    const recues = document.querySelector('#rv-nav [data-pane="recues"]');
+    if (recues) { recues.hidden = !super_; if (!super_) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
     const pep = document.querySelector('#rv-nav [data-pane="pepites"]');
     if (pep) {
-      pep.hidden = !super_;
-      if (!super_ && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
+      pep.hidden = !sorcier;
+      if (!sorcier && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
-    if (super_ && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
-    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerPepites(); });
+    if (sorcier && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
+    if (sorcier) chargerButin().then(dessinerPepites);
+    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
   }
   document.addEventListener('cdh-compte', majAnnonces);

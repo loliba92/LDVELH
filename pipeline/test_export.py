@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees
+from export_site import aligner, annonces_cumulees, extraire_butin
 
 
 def e(prix):
@@ -99,6 +99,18 @@ class TestAnnoncesCumulees(unittest.TestCase):
         self.assertNotIn("111", r)
         self.assertIn("222", r)
         self.assertEqual(annonces_cumulees([]), {})
+
+
+class TestButin(unittest.TestCase):
+    def test_le_butin_ne_garde_que_les_bonnes_affaires(self):
+        ann = {"111": {"bon": [[10.0, "t", "u1", "isbn", "2026-10-25", None], [30.0, "t", "u2", "isbn", "2026-10-25", None], [28.0, "t", "u3", "isbn", "2026-10-25", None]],
+                       "tres_bon": [[2.0, "t", "u4", "isbn", "2026-10-25", None]]},
+               "222": {"bon": [[5.0, "t", "u5", "isbn", "2026-10-25", None]]}}
+        revue = [{"isbn": "111", "etat": "bon", "publie": 40.0}, {"isbn": "111", "etat": "tres_bon", "publie": 4.0}, {"isbn": "222", "etat": "bon", "publie": None}]
+        b = extraire_butin(ann, revue)
+        self.assertEqual([x[2] for x in b["111"]["bon"]], ["u1"])      # 10 € ≤ 50 % de 40 € ; 28 € et 30 € ne sont pas des bonnes affaires
+        self.assertNotIn("tres_bon", b["111"])                          # 2 € sur 4 € : moins de 3 € d'économie
+        self.assertNotIn("222", b)                                      # pas de prix publié : pas de repère
 
 
 if __name__ == "__main__":

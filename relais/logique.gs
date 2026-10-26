@@ -26,7 +26,8 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
-  butin_lire: 'admin',            // annonces et Butin : sorciers et Zagors seulement (les annonces ne sont plus publiées sur le site)
+  butin_lire: 'admin',            // Butin seul (bonnes affaires) : sorciers et Zagors
+  annonces_lire: 'superadmin',    // toutes les annonces reçues : le Zagor seulement
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel

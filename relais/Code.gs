@@ -112,8 +112,8 @@ function doPost(e) {
       return reponse({ ok: true, nombre: lignes.length });
     }
 
-    if (action === 'butin_lire') {
-      var ann = github('/contents/data/processed/annonces.json?ref=main');
+    if (action === 'butin_lire' || action === 'annonces_lire') {      // Butin seul pour les sorciers ; toutes les annonces pour le Zagor
+      var ann = github('/contents/data/processed/' + (action === 'annonces_lire' ? 'annonces' : 'butin') + '.json?ref=main');
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
       var fic = JSON.parse(ann.texte);
       return reponse({ ok: true, annonces: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });

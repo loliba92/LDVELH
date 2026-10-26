@@ -2018,3 +2018,12 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ev-valeur { fill: var(--text); font: 700 20px var(--f-ui); }
 .ev-date { fill: var(--muted); font: 18px var(--f-ui); }
 @media (max-width: 700px) { .ev-valeur { font-size: 24px; } .ev-date { font-size: 22px; } }
+
+/* Annonces reçues (Zagor, page Butin) */
+.rc-liste { display: grid; gap: 8px; }
+.rc-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); }
+.rc-ligne.rc-butin { border-color: var(--gold); }
+.rc-titre { color: var(--text); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.rc-titre:hover { color: var(--accent); }
+.rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rc-meta { grid-column: 1 / -1; }
