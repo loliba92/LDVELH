@@ -744,7 +744,6 @@
   let pepitesOuvertes = false;
   function majAnnonces() {
     const super_ = estSuper(), sorcier = estSorcier();
-    const maj = document.getElementById('rv-maj'); if (maj) maj.hidden = !super_;          // état des relevés : le Zagor seul
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
     if (onglet) { onglet.hidden = !super_; if (!super_) replier(onglet); }
@@ -763,41 +762,6 @@
   document.addEventListener('cdh-compte', majAnnonces);
   majAnnonces();
 
-  // Dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication) : lues dans l'historique public des lots,
-  // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
-  const FAMILLES = [['prix-ebay.yml', 'Relevé des prix'], ['ajout-isbn.yml', 'Ajout de livres'], ['corriger-fiche.yml', 'Correction de fiches'], ['corriger-prix.yml', 'Correction de cotes'], ['pages.yml', 'Publication du site'], ['veille-parutions.yml', 'Veille des parutions']];
-  const depuis = (d) => {
-    const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
-    return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
-  };
-  function initMaj() {
-    const bloc = $('#rv-maj');
-    if (!bloc) return;
-    const CLE = 'cdh-rv-lots';
-    const lire = () => { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return Promise.resolve(c.runs); } catch (e) { /* pas de cache */ }
-      return fetch('https://api.github.com/repos/loliba92/LDVELH/actions/runs?per_page=100', { headers: { Accept: 'application/vnd.github+json' } }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then((d) => { const runs = d.workflow_runs.map((x) => ({ f: x.path.split('/').pop(), st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at })); try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ } return runs; }); };
-    lire().then((runs) => {
-      const etat = (r) => (r.st !== 'completed' ? ['en cours…', 'en-cours'] : r.c === 'success' ? ['✓ réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['✗ échec', 'echec']);
-      const lignes = FAMILLES.map(([f, nom]) => ({ nom, r: runs.find((x) => x.f === f) }));
-      const quand = (r) => { const d = new Date(r.t); return `${depuis(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
-      const releve = lignes[0];
-      const recent = lignes.filter((l) => l.r).sort((a, b) => new Date(b.r.t) - new Date(a.r.t))[0];
-      const vedette = releve.r || recent;
-      if (!vedette) return;
-      const [txt, cls] = etat(vedette.r || vedette);
-      $('#rv-maj-resume').innerHTML = `<strong>${esc(releve.r ? 'Dernier relevé des prix' : recent.nom)}</strong> : ${esc(quand(releve.r || recent.r))} · <span class="rv-lot-${cls}">${esc(txt)}</span>`;
-      $('#rv-maj-liste').innerHTML = lignes.map((l) => { if (!l.r) return `<li><strong>${esc(l.nom)}</strong> : pas d'exécution récente</li>`; const [t, c] = etat(l.r); return `<li><strong>${esc(l.nom)}</strong> : ${esc(quand(l.r))} · <span class="rv-lot-${c}">${esc(t)}</span></li>`; }).join('');
-      const veille = lignes.find((l) => l.nom === 'Veille des parutions'), age = veille && veille.r ? (Date.now() - new Date(veille.r.t).getTime()) / 86400000 : null;
-      if (veille && (age === null || age > 2)) {                    // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        const alerte = age === null ? 'pas encore d\'exécution' : `pas d'exécution depuis ${Math.floor(age)} jours`;
-        $('#rv-maj-resume').innerHTML += ` <span class="rv-lot-echec">⚠ Veille des parutions : ${esc(alerte)}. Lancez-la à la main (Actions, « Veille des parutions »).</span>`;
-        bloc.open = true;
-      }
-      bloc.hidden = false;
-    }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
-  }
-  initMaj();
 
   // La barre d'onglets reste visible sous l'en-tête collant : on lui donne la hauteur réelle de l'en-tête
   const calerOnglets = () => { const h = document.querySelector('.haut'); if (h) document.documentElement.style.setProperty('--haut-h', Math.max(0, Math.round(h.getBoundingClientRect().bottom)) + 'px'); };   // le bas de l'en-tête change quand le bandeau se replie au défilement

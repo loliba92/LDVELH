@@ -385,7 +385,6 @@ EQUIPE = '''<h1>Équipe</h1>
 
 REVUE = '''<h1>Prix et corrections</h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
-<details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="prix" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.2"/></svg><span>Prix</span></button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Tendances</span></button>
