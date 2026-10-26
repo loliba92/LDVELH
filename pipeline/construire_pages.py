@@ -217,7 +217,7 @@ def page(nom, corps):
 
 
 GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
-NIVEAU_PAGE = {"equipe.html": "superadmin", "evolutions.html": "heros"}
+NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
@@ -241,8 +241,8 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
 <h2>Les niveaux</h2>
 <ul>
   <li><strong>Héros</strong> : toute personne connectée avec Google. Elle construit sa collection, sauvegardée dans son propre Google Drive.</li>
-  <li><strong>Sorcier</strong> : en plus, elle vérifie et corrige les prix et ajoute des livres.</li>
-  <li><strong>Zagor</strong> : en plus, elle gère l'équipe (ajouter, retirer, bloquer des sorciers).</li>
+  <li><strong>Sorcier</strong> : réservé aux futurs abonnés. Il ne corrige pas les prix ni les fiches.</li>
+  <li><strong>Zagor</strong> : en plus, il vérifie et corrige les prix et les fiches, traite les demandes d'ajout et gère l'équipe.</li>
 </ul>
 
 <h2>Comment le devenir</h2>
@@ -255,8 +255,7 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
 <h2>Votre première connexion</h2>
 <ol>
   <li>Sur le site, cliquez sur <strong>« Se connecter »</strong> (en haut à droite, ou l'onglet « Compte » sur téléphone) et choisissez le compte Google dont vous avez donné l'adresse.</li>
-  <li>Ouvrez le menu de votre compte : votre nom s'affiche avec un badge <strong>Sorcier</strong>, et une entrée <strong>« Espace des sorciers »</strong> apparaît.</li>
-  <li>Dans l'espace sorcier, corrigez les prix, puis cliquez sur <strong>« Envoyer mes validations »</strong>. Le site est à jour environ deux minutes plus tard.</li>
+  <li>Ouvrez le menu de votre compte : votre nom s'affiche avec votre niveau.</li>
 </ol>
 <p class="sous">La connexion dure environ une heure. Si elle expire, la page vous le dit : reconnectez-vous, vos validations en attente sont conservées.</p>
 
@@ -345,7 +344,7 @@ def corps_communaute():
 
 
 EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Zagor</span></h1>
-<p class="chapeau">Les personnes qui peuvent corriger les prix et ajouter des livres. Toute personne connectée avec Google est un Héros ; un Sorcier a accès à l'espace sorcier ; un Zagor gère aussi l'équipe.</p>
+<p class="chapeau">Les personnes qui peuvent corriger les prix et les fiches. Toute personne connectée avec Google est un Héros ; seul un Zagor corrige les prix et gère l'équipe.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
@@ -356,7 +355,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Z
     <label for="eq-nom">Nom affiché sur ses mises à jour</label>
     <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Marie (sorcier)">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="admin">Sorcier : prix et livres</option><option value="superadmin">Zagor : et gestion de l'équipe</option></select>
+    <select id="eq-niveau"><option value="superadmin">Zagor : corrections, équipe</option></select>
     <button type="submit" class="bouton">Ajouter à l'équipe</button>
   </form>
   <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
@@ -381,7 +380,7 @@ EQUIPE = '''<h1>Équipe <span class="badge-admin" title="Réservé aux Zagors">Z
 '''
 
 
-REVUE = '''<h1>Vérifier les prix <span class="badge-admin" title="Réservé aux sorciers">Sorcier</span></h1>
+REVUE = '''<h1>Espace Zagor <span class="badge-admin" title="Réservé aux Zagors">Zagor</span></h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
 <details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">

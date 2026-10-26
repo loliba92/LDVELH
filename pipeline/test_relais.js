@@ -57,7 +57,7 @@ test('un compte bloqué qui figure dans l\'équipe est refusé', () => {
 test('droits par niveau', () => {
   const p = L('peut');
   assert.ok(p('heros', 'moi')); assert.ok(!p('heros', 'envoyer')); assert.ok(!p('heros', 'equipe_lire'));
-  assert.ok(p('admin', 'envoyer')); assert.ok(p('admin', 'journal')); assert.ok(!p('admin', 'equipe_ajouter')); assert.ok(!p('admin', 'releve'));
+  assert.ok(!p('admin', 'envoyer')); assert.ok(!p('admin', 'journal')); assert.ok(!p('admin', 'equipe_ajouter')); assert.ok(!p('admin', 'releve'));   // un sorcier n'administre rien
   assert.ok(p('superadmin', 'envoyer')); assert.ok(p('superadmin', 'equipe_ajouter')); assert.ok(p('superadmin', 'releve'));
   assert.ok(!p('superadmin', 'inconnue')); assert.ok(!p('inconnu', 'moi'));
 });
@@ -108,7 +108,7 @@ test('les modifications ne touchent pas au fichier d\'origine', () => {
 test('droits pour les demandes d\'ajout', () => {
   const p = L('peut');
   assert.ok(p('heros', 'demande')); assert.ok(!p('heros', 'demandes_lire')); assert.ok(!p('heros', 'demande_traiter'));
-  assert.ok(p('admin', 'demandes_lire')); assert.ok(p('admin', 'demande_traiter')); assert.ok(p('superadmin', 'demande_traiter'));
+  assert.ok(!p('admin', 'demandes_lire')); assert.ok(!p('admin', 'demande_traiter')); assert.ok(p('superadmin', 'demande_traiter'));
 });
 test('demande : texte nettoyé, trop court refusé', () => {
   const v = L('validerDemande');

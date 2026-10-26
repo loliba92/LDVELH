@@ -772,7 +772,7 @@
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
   // Visible seulement pour un compte Sorcier ou Zagor connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
-  const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveau donné par le relais
+  const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le Zagor corrige (niveau donné par le relais)
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));

@@ -5,8 +5,8 @@ var ROLES = ['heros', 'admin', 'superadmin'];
 var ROLE_DE = { heros: 0, admin: 1, superadmin: 2 };
 var ACTIONS = {                       // niveau minimal pour chaque action
   moi: 'heros',
-  envoyer: 'admin',
-  journal: 'admin',
+  envoyer: 'superadmin',          // seul le Zagor corrige prix et fiches
+  journal: 'superadmin',
   equipe_lire: 'superadmin',
   equipe_ajouter: 'superadmin',
   equipe_retirer: 'superadmin',
@@ -14,8 +14,8 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
-  demandes_lire: 'admin',
-  demande_traiter: 'admin',
+  demandes_lire: 'superadmin',
+  demande_traiter: 'superadmin',
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
