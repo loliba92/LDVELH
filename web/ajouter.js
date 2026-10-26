@@ -2,7 +2,7 @@
    Le scanner ajoute chaque ISBN lu à la liste ; on peut aussi coller les ISBN à la main. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
-  var texte = $('#aj-texte'), compte = $('#aj-compte'), msg = $('#aj-msg'), envoyer = $('#aj-envoyer'), scan = $('#aj-scan');
+  var texte = $('#aj-texte'), compte = $('#aj-compte'), msg = $('#aj-msg'), envoyer = $('#aj-envoyer');
   if (!texte) return;
 
   // Un ISBN-13 valide commence par 978 ou 979 et a une clé de contrôle juste (même règle que scan.js)
@@ -24,15 +24,6 @@
   }
 
   texte.addEventListener('input', majCompte);
-  scan.addEventListener('click', function () {
-    if (!window.Scan) return dire('Le lecteur de codes-barres n\'est pas disponible sur cet appareil.');
-    window.Scan.scanner(function (lu) {
-      var n = isbnValide(lu);
-      if (!n) return dire('Code non reconnu : ' + lu);
-      dire(ajouter(n) ? 'Ajouté : ' + n : 'Déjà dans la liste : ' + n);
-    }, {});
-  });
-
   envoyer.addEventListener('click', function () {
     var l = lignes();
     if (!l.length) return dire('La liste est vide.');

@@ -59,7 +59,7 @@ window.Identite = (function () {
         p.appendChild(b); zone.appendChild(p);
         return;
       }
-      p.textContent = 'Connectez-vous avec votre compte Google pour accéder aux fonctions de sorcier : votre nom sera enregistré avec vos mises à jour.';
+      p.textContent = 'Connectez-vous avec votre compte Google pour accéder aux fonctions réservées : votre nom sera enregistré avec vos mises à jour.';
       var bouton = document.createElement('div'); bouton.className = 'g-bouton';
       zone.appendChild(p); zone.appendChild(bouton);
       Promise.all([config(), chargerGoogle()]).then(function (r) {

@@ -443,7 +443,7 @@
   // « jeton() » dit seulement si l'envoi en un clic est possible maintenant : relais en service et connexion encore valable.
   const jeton = () => (window.Relais && window.Relais.actif() ? 'relais' : null);
   const lancer = (lot, inputs) => window.Relais.envoyerLot(lot, (({ identite, ...reste }) => reste)(inputs));
-  const MSG_REFUS = 'Ce compte n\'a pas les droits de sorcier, ou la connexion Google a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.';
+  const MSG_REFUS = 'Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.';
   function etatJeton() {
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }
@@ -472,7 +472,7 @@
     fetch('data/tendances.json', { cache: 'no-store' }).then((x) => (x.ok ? x.json() : null)).catch(() => null).then((T) => {
       if (!T) return;
       let dim = 'decennie', avec = false, ouvert = null;
-      const NAT = { 'validé': 'prix validé par un sorcier', annonces: 'annonces', 'prix éditeur': 'prix éditeur' }, ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+      const NAT = { 'validé': 'prix validé', annonces: 'annonces', 'prix éditeur': 'prix éditeur' }, ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
       const detailGroupe = (l, cle) => {
         const eds = l.ids.map((i) => ({ i, ...T.detail[cle][i] })).sort((a, b) => a.var - b.var);
         return `<p class="sous">${l.n} édition${l.n > 1 ? 's' : ''}, de la plus forte baisse à la plus forte hausse. Chaque ligne montre l'ancienne cote et la cote publiée, par état.</p><ul class="tr-eds">` + eds.map((e) => {
