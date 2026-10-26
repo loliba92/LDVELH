@@ -109,6 +109,6 @@ jobs:
           # Si main a avancé pendant le relevé (une demi-heure), on repart de sa dernière version, on y remet les fichiers du relevé et on reconstruit
           # le site (voir .github/scripts/publier.sh)
           REJOUER='git checkout "$MON_COMMIT" -- data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Relevé des prix actuels du $(date +%F)" data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+            .github/scripts/publier.sh "Relevé des prix actuels du $(date +%F)" data/raw/occasion data/processed/prix_neuf.csv data/processed/calibration.json data/processed/cotes-historique.json web/data data/processed/annonces.json web/evolutions.html web/revue-prix.html
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml

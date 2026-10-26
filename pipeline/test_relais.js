@@ -58,6 +58,7 @@ test('droits par niveau', () => {
   const p = L('peut');
   assert.ok(p('heros', 'moi')); assert.ok(!p('heros', 'envoyer')); assert.ok(!p('heros', 'equipe_lire'));
   assert.ok(!p('admin', 'envoyer')); assert.ok(!p('admin', 'journal')); assert.ok(!p('admin', 'equipe_ajouter')); assert.ok(!p('admin', 'releve'));   // un sorcier n'administre rien
+  assert.ok(!p('heros', 'butin_lire')); assert.ok(p('admin', 'butin_lire')); assert.ok(p('superadmin', 'butin_lire'));
   assert.ok(p('superadmin', 'envoyer')); assert.ok(p('superadmin', 'equipe_ajouter')); assert.ok(p('superadmin', 'releve'));
   assert.ok(!p('superadmin', 'inconnue')); assert.ok(!p('inconnu', 'moi'));
 });

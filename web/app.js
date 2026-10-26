@@ -740,7 +740,7 @@
   // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au Zagor.
   const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';
   let ANN = null, annChargees = null;
-  const chargerAnnonces = () => annChargees || (annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+  const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces().catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
   function blocAnnonces(b) {
     return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues <span class="badge-admin" title="Réservé au Zagor">Zagor</span></summary>

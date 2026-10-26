@@ -58,6 +58,13 @@ function doPost(e) {
 
     if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom });
 
+    if (action === 'butin_lire') {
+      var ann = github('/contents/data/processed/annonces.json?ref=main');
+      if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
+      var fic = JSON.parse(ann.texte);
+      return reponse({ ok: true, annonces: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
+    }
+
     if (action === 'envoyer') {
       var lot = validerEnvoi(String(q.lot || ''), q.entrees);
       if (!lot.ok) return reponse({ ok: false, erreur: lot.raison });

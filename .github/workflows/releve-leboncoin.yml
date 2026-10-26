@@ -55,7 +55,7 @@ jobs:
           git config user.email "releve-leboncoin@users.noreply.github.com"
           AVANT="$(git rev-parse HEAD)"
           REJOUER='python pipeline/importer_leboncoin.py && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Relevé Leboncoin (issue $NUMERO)" data/raw/occasion data/processed/cotes-historique.json web/data web/evolutions.html web/revue-prix.html
+            .github/scripts/publier.sh "Relevé Leboncoin (issue $NUMERO)" data/raw/occasion data/processed/cotes-historique.json web/data data/processed/annonces.json web/evolutions.html web/revue-prix.html
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
       - name: Répondre et fermer l'issue

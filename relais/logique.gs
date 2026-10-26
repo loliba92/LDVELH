@@ -16,6 +16,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   demande: 'heros',               // tout compte connecté peut demander l'ajout d'un livre
   demandes_lire: 'superadmin',
   demande_traiter: 'superadmin',
+  butin_lire: 'admin',            // annonces et Butin : sorciers et Zagors seulement (les annonces ne sont plus publiées sur le site)
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel

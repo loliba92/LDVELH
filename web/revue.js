@@ -598,7 +598,7 @@
   let ANN = null, annChargees = false;
   const chargerAnnonces = () => {
     if (annChargees) return annChargees;
-    annChargees = fetch('data/annonces.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    annChargees = window.Relais.lireAnnonces().catch(() => null)
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
