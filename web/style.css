@@ -2018,3 +2018,28 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ev-valeur { fill: var(--text); font: 700 20px var(--f-ui); }
 .ev-date { fill: var(--muted); font: 18px var(--f-ui); }
 @media (max-width: 700px) { .ev-valeur { font-size: 24px; } .ev-date { font-size: 22px; } }
+
+/* Annonces reçues (Zagor, page Butin) */
+.rc-liste { display: grid; gap: 8px; }
+.rc-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); }
+.rc-ligne.rc-butin { border-color: var(--gold); }
+.rc-titre { color: var(--text); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.rc-titre:hover { color: var(--accent); }
+.rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rc-meta { grid-column: 1 / -1; }
+
+/* Accueil, Zagor : état des mises à jour automatiques, en pastilles */
+.maj-bandeau { margin: 12px 0 0; }
+.maj-puces { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.maj-puce { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .88rem; }
+.maj-nom { font-weight: 700; }
+.maj-quand { color: var(--muted); }
+.maj-point { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--muted); }
+.maj-ok .maj-point { background: #4cc16f; }
+.maj-en-cours .maj-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
+.maj-echec { border-color: #e0604f; }
+.maj-echec .maj-point { background: #e0604f; }
+.maj-echec .maj-quand { color: #f2a0a8; }
+.maj-vide { opacity: .6; }
+@media (prefers-reduced-motion: reduce) { .maj-en-cours .maj-point { animation: none; } }
+@media (max-width: 700px) { .maj-puces { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .maj-puce { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 8px; row-gap: 0; border-radius: 14px; padding: 6px 10px; } .maj-quand { grid-column: 2; font-size: .78rem; line-height: 1.25; } }

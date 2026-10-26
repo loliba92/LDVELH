@@ -84,6 +84,22 @@ JOURS_LEBONCOIN = 3        # une annonce Leboncoin non revue depuis plus de 3 jo
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
 
+def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
+    """Le Butin seul : les annonces à 50 % du prix du site ou moins (3 € d'économie au moins), même édition, même état.
+    Les sorciers ne reçoivent que ce sous-ensemble ; la liste complète des annonces est réservée au Zagor."""
+    publie = {(r["isbn"], r["etat"]): r["publie"] for r in revue if r.get("publie")}
+    butin = {}
+    for isbn, par_etat in annonces.items():
+        for etat, liste in par_etat.items():
+            prix_site = publie.get((isbn, etat))
+            if not prix_site:
+                continue
+            gardees = [a for a in liste if a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini]
+            if gardees:
+                butin.setdefault(isbn, {})[etat] = gardees
+    return butin
+
+
 def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
@@ -348,6 +364,10 @@ def main():
         # Annonces : réservées aux sorciers et aux Zagors. Elles ne sont pas publiées sur le site : le relais les lit dans data/processed/.
         (DB.parent.parent / "processed" / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces},
+                                                         ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        # Butin : seulement les bonnes affaires, pour les sorciers (le relais ne leur sert pas le fichier complet)
+        (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
+                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": extraire_butin(annonces, revue)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),

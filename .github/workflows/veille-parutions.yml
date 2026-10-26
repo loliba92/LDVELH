@@ -47,7 +47,7 @@ jobs:
           git config user.email "veille-parutions@users.noreply.github.com"
           AVANT="$(git rev-parse HEAD)"
           REJOUER='python pipeline/veille_parutions.py && python scrapers/jaquettes_librairie.py || true; python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Veille des parutions du $(date +%F)" data/processed/editions.csv data/processed/veille.json web/covers web/data data/processed/annonces.json web/*.html
+            .github/scripts/publier.sh "Veille des parutions du $(date +%F)" data/processed/editions.csv data/processed/veille.json web/covers web/data data/processed/annonces.json data/processed/butin.json web/*.html
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
           # Un livre ajouté n'a pas encore de prix : le relevé des prix suit

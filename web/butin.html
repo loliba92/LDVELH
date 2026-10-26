@@ -58,9 +58,9 @@
 <main id="main" class="cadre page" hidden data-niveau="admin">
 <h1>Butin</h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
-<details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="pepites" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
+  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces reçues</span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel" hidden>
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
@@ -135,6 +135,22 @@
     </div>
   </div>
   <div id="pp-liste"></div>
+</div>
+<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
+  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, librairies), pas seulement les bonnes affaires. La plus récemment vue en premier.</p>
+  <div class="pp-barre">
+    <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
+    <div class="pp-outils">
+      <label class="pp-tri"><span>Origine</span><select id="rc-source">
+        <option value="tout">Toutes</option>
+        <option value="ebay">eBay</option>
+        <option value="leboncoin">Leboncoin</option>
+        <option value="librairie">Librairies</option>
+      </select></label>
+      <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Encore en ligne seulement</span></label>
+    </div>
+  </div>
+  <div id="rc-liste"></div>
 </div>
 <div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
 <section class="rv-ajout" aria-labelledby="aj-titre">

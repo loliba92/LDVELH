@@ -130,6 +130,25 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
     </nav>'''
 
 
+RECUES_ONGLET = '''  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces reçues</span></button>'''
+RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
+  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, librairies), pas seulement les bonnes affaires. La plus récemment vue en premier.</p>
+  <div class="pp-barre">
+    <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
+    <div class="pp-outils">
+      <label class="pp-tri"><span>Origine</span><select id="rc-source">
+        <option value="tout">Toutes</option>
+        <option value="ebay">eBay</option>
+        <option value="leboncoin">Leboncoin</option>
+        <option value="librairie">Librairies</option>
+      </select></label>
+      <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Encore en ligne seulement</span></label>
+    </div>
+  </div>
+  <div id="rc-liste"></div>
+</div>'''
+
+
 def _butin():
     """Page Butin : la page des prix avec le seul onglet Butin (même code, même données)."""
     lignes = []
@@ -143,7 +162,9 @@ def _butin():
         if l.startswith("<h1>Prix et corrections"):
             l = "<h1>Butin</h1>"
         if 'data-pane="pepites"' in l:
-            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">')
+            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">') + "\n" + RECUES_ONGLET
+        if l.startswith('<div class="rv-pane" id="pane-ajout"'):
+            lignes.append(RECUES_PANNEAU)
         lignes.append(l)
     return "\n".join(lignes)
 
@@ -364,7 +385,6 @@ EQUIPE = '''<h1>Équipe</h1>
 
 REVUE = '''<h1>Prix et corrections</h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
-<details class="rv-maj" id="rv-maj" hidden><summary id="rv-maj-resume"></summary><ul id="rv-maj-liste"></ul></details>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="prix" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.2"/></svg><span>Prix</span></button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Tendances</span></button>
