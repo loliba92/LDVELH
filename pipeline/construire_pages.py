@@ -111,17 +111,8 @@ def feuille(courante, racine_a_propos="./#apropos"):
         return f'<li><a href="{href}"{cur}><b>{titre}</b><small>{detail}</small></a></li>'
     return f'''<dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
-  <div class="feuille-tete"><h2 id="feuille-plus-titre">Compte et infos</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
+  <div class="feuille-tete"><h2 id="feuille-plus-titre">Mon compte</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>
   <div class="compte-feuille" id="compte-feuille"></div>
-  <ul class="feuille-liste">
-    {e("le-projet.html", "Le projet", "Pourquoi ce guide, d'où viennent les prix", "le-projet.html")}
-    {e("confidentialite.html", "Confidentialité", "Ce que le site garde, et où", "confidentialite.html")}
-    {e("mentions-legales.html", "Mentions légales", "Éditeur, hébergeur, conditions d'utilisation", "mentions-legales.html")}
-    {e("communaute.html", "Communauté", "Chaînes, sites et collectionneurs à suivre", "communaute.html")}
-    {e("contact.html", "Contact", "Écrire à La Cote du Héros", "contact.html")}
-    <li><a href="#avis" data-compte="avis"><b>Qu'en pensez-vous ?</b><small>Une note et un petit mot, que je lis moi-même</small></a></li>
-    {e(racine_a_propos, "À propos de la cote", "Ce qu'est la cote, les éditions V1 à V5")}
-  </ul>
 </dialog>'''
 
 

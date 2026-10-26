@@ -175,7 +175,7 @@
     hq.parentNode.insertBefore(b, hq.nextSibling);
     const aide = document.createElement('p');
     aide.className = 'sous scan-aide'; aide.hidden = true;
-    aide.textContent = 'Le scan est réservé aux comptes connectés.';
+    aide.textContent = 'Connectez-vous avec Google pour scanner vos livres.';
     hero.parentNode.insertBefore(aide, hero.nextSibling);
     const majScan = () => { const reserve = !!window.Compte && window.Compte.actif() && !(window.Cloud && window.Cloud.lie()); aide.hidden = !reserve; b.classList.toggle('scan-reserve', reserve); };
     document.addEventListener('cdh-compte', majScan); majScan();

@@ -1968,3 +1968,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .compte-liste .niv { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .68rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 .compte-liste .niv-sorcier { color: var(--gold); border-color: var(--gold); }
 .compte-liste .niv-zagor { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
+
+/* Mot insécable (« codes-barres ») et libellé de section du menu compte (doré, comme les autres libellés de section) */
+.nowrap { white-space: nowrap; }
+.compte-liste .compte-section { list-style: none; color: var(--gold); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: 10px 0 2px; }

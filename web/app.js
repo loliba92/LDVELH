@@ -1650,7 +1650,7 @@
       if (visiteurAccueil) {
         corps = `<p class="gros">Gardez la trace de vos livres</p>
           <p class="texte">Avec un compte Google, gratuit :</p>
-          <ul class="avantages"><li>Prix estimés</li><li>Scan des codes-barres</li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
+          <ul class="avantages"><li>Prix estimés</li><li>Scan des <span class="nowrap">codes-barres</span></li><li>Valeur de la collection</li><li>Doubles à vendre</li><li>Livres à trouver</li><li>Sur tous vos appareils</li></ul>
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
         corps = `<p class="gros">Elle est encore vide</p>

@@ -38,8 +38,6 @@ window.Compte = (function () {
   function ico(nom) { return '<svg class="ico-menu" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[nom] + '</svg>'; }
 
   // Niveau minimum pour voir la ligne : Héros (tout compte connecté), Sorcier, Zagor (qui voit aussi ce qui est réservé aux niveaux d'en dessous)
-  var NIV = { heros: ['Héros', 'Accessible aux Héros, aux Sorciers et aux Zagors'], sorcier: ['Sorcier', 'Accessible aux Sorciers et aux Zagors'], zagor: ['Zagor', 'Réservé aux Zagors'] };
-  function niv(k) { return '<span class="niv niv-' + k + '" title="' + NIV[k][1] + '">' + NIV[k][0] + '</span>'; }
 
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
@@ -52,10 +50,10 @@ window.Compte = (function () {
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
     h += '<ul class="compte-liste">' +
-      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">' + ico('demande') + 'Demander l\'ajout d\'un livre' + niv('heros') + '</button></li>' : '') +
-      (role === 'superadmin' ? '<li><a href="revue-prix.html">' + ico('sorciers') + 'Espace Zagor' + niv('zagor') + '</a></li>' : '') +
-      (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe' + niv('zagor') + '</a></li>' : '') +
-      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant' + niv('heros') + '</button></li>' : '') +
+      (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">' + ico('demande') + 'Demander l\'ajout d\'un livre</button></li>' : '') +
+      (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('sorciers') + 'Espace Zagor</a></li>' : '') +
+      (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
+      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
     return h;
   }
