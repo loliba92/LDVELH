@@ -937,6 +937,7 @@
         <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
+        ${blocCorriger(b)}
 
           </div>
         </div>
@@ -956,7 +957,7 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
-        ${estSuper() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocCorriger(b)}${blocAnnonces(b)}</section>` : ''}
+        ${estSuper() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocAnnonces(b)}</section>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
