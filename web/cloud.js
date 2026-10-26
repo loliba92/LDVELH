@@ -59,8 +59,8 @@
   /* ---------- Connexion Google et Drive (navigateur) ---------- */
 
   var CLE_LIEN = 'cdh-cloud-lie', CLE_META = 'cdh-cloud-meta';
-  var CLE_JETON = 'cdh-cloud-jeton';
-  var derniereErreur = '', cfg = null, jeton = '', expire = 0, auClient = null, auDrive = null, minuterie = null, enCours = false, aRejouer = false, statut = 'hors-ligne';
+  var CLE_JETON = 'cdh-cloud-jeton', CLE_SESSION = 'cdh-cloud-session', CLE_SANS_SESSION = 'cdh-cloud-sans-session';
+  var derniereErreur = '', cfg = null, jeton = '', expire = 0, auClient = null, auDrive = null, minuterie = null, minuterieSession = null, enCours = false, aRejouer = false, statut = 'hors-ligne';
   var ecouteurs = [];
   var lireLoc = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
   var ecrireLoc = function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } };
@@ -95,17 +95,73 @@
     });
   }
 
+  // Session de longue durée (30 jours) : le relais garde le jeton de renouvellement ; le navigateur n'a qu'un identifiant de session révocable.
+  // Activée par « session_relais » dans data/admin-config.json, une fois le relais à jour et sa clé secrète en place.
+  function appelRelais(action, params) {
+    return config().then(function (c) {
+      return fetch(c.relais_url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: action }, params)) }).then(function (r) { return r.json(); });
+    });
+  }
+  function prendreJeton(r) {
+    jeton = r.access_token; expire = Date.now() + (Number(r.expires_in) || 3600) * 1000 - 60000; garderJeton(); planifierRenouvellement();
+  }
+  function planifierRenouvellement() {
+    clearTimeout(minuterieSession);
+    if (!lireLoc(CLE_SESSION)) return;
+    minuterieSession = setTimeout(function () { renouveler().catch(function () { /* la reprise se fera à la prochaine ouverture */ }); }, Math.max(5000, expire - Date.now() - 120000));
+  }
+  function renouveler() {
+    var sid = lireLoc(CLE_SESSION);
+    if (!sid) return Promise.reject(new Error('pas-de-session'));
+    return appelRelais('session_renouveler', { session: sid }).then(function (r) {
+      if (!r.ok) { if (/inconnue|expir/.test(r.erreur || '')) { oterLoc(CLE_SESSION); } throw new Error(r.erreur || 'refus'); }
+      prendreJeton(r); dire('connecte');
+    });
+  }
+  function connecterSession(c) {
+    return new Promise(function (ok, ko) {
+      var client = window.google.accounts.oauth2.initCodeClient({
+        client_id: c.client_id,
+        scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.appdata',
+        ux_mode: 'popup',
+        callback: function (rep) {
+          if (rep.error || !rep.code) return ko(new Error(rep.error || 'refus'));
+          appelRelais('session_ouvrir', { code: rep.code }).then(function (r) {
+            if (!r.ok) throw new Error(r.erreur || 'refus');
+            prendreJeton(r); ecrireLoc(CLE_SESSION, r.session);
+            ecrireLoc(CLE_LIEN, JSON.stringify({ nom: r.nom || 'Compte Google' }));
+            planifierRenouvellement(); dire('connecte'); ok();
+          }).catch(ko);
+        },
+        error_callback: function () { ko(new Error('annule')); }
+      });
+      client.requestCode();
+    });
+  }
+
   // À appeler depuis un clic (le navigateur n'ouvre la fenêtre Google que sur un geste de la personne)
   function connecter() {
     return Promise.all([config(), chargerGoogle()]).then(function (r) {
       if (!r[0].client_id) throw new Error('non-configure');
+      if (r[0].session_relais && r[0].relais_url && !lireLoc(CLE_SANS_SESSION)) {
+        return connecterSession(r[0]).catch(function (e) {
+          // Le relais ne peut pas ouvrir la session (non configuré, renouvellement non accordé…) : la prochaine connexion sera celle d'une heure
+          if (!e || e.message !== 'annule') ecrireLoc(CLE_SANS_SESSION, '1');
+          throw e;
+        });
+      }
+      return connecterJeton(r[0]);
+    });
+  }
+  function connecterJeton(cfgSite) {
+    return Promise.resolve([cfgSite]).then(function (r) {
       return new Promise(function (ok, ko) {
         var client = window.google.accounts.oauth2.initTokenClient({
           client_id: r[0].client_id,
           scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.appdata',
           callback: function (rep) {
             if (rep.error || !rep.access_token) return ko(new Error(rep.error || 'refus'));
-            jeton = rep.access_token; expire = Date.now() + (Number(rep.expires_in) || 3600) * 1000 - 60000; garderJeton();
+            jeton = rep.access_token; expire = Date.now() + (Number(rep.expires_in) || 3600) * 1000 - 60000; garderJeton(); oterLoc(CLE_SESSION);
             fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + jeton } })
               .then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; })
               .then(function (u) {
@@ -122,7 +178,8 @@
   }
 
   function deconnecter() {
-    var j = jeton; jeton = ''; expire = 0; oterLoc(CLE_LIEN); oublierJeton();
+    var j = jeton, sid = lireLoc(CLE_SESSION); jeton = ''; expire = 0; oterLoc(CLE_LIEN); oublierJeton(); oterLoc(CLE_SESSION); clearTimeout(minuterieSession);
+    if (sid) appelRelais('session_fermer', { session: sid }).catch(function () { /* hors ligne : la session expirera d'elle-même */ });
     try { if (j && window.google && window.google.accounts) window.google.accounts.oauth2.revoke(j, function () {}); } catch (e) { /* sans effet */ }
     dire('hors-ligne');
   }
@@ -223,6 +280,14 @@
     return reseau(API + '/' + auDrive + '/revisions/' + encodeURIComponent(id) + '?alt=media', { headers: entetes() }).then(verifier).then(function (r) { return r.json(); });
   }
   function collectionDe(doc) { return doc && doc.items ? versLocal(doc).coll : {}; }
+
+  // Reprise silencieuse : à l'ouverture, ou quand on revient sur la page, si une session existe et que le jeton d'une heure est périmé
+  function reprendreSession() { if (lireLoc(CLE_SESSION) && !actif()) renouveler().catch(function () { /* hors ligne : on réessaiera */ }); }
+  if (typeof document !== 'undefined') {
+    reprendreSession();
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reprendreSession(); });
+    planifierRenouvellement();
+  }
 
   racine.Cloud = {
     config: config, lie: lie, nom: nom, actif: actif, preuve: preuve, connecter: connecter, deconnecter: deconnecter,

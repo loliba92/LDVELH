@@ -196,3 +196,15 @@ test('ajout de livres : le Zagor n\'est pas limité, le sorcier l\'est (20 ISBN,
   assert.strictEqual(q('admin', 5, 3).ok, false);
   assert.strictEqual(q('heros', 1, 0).ok, false);
 });
+
+
+test('session : 30 jours, prolongée à chaque renouvellement, expirée ensuite', () => {
+  const maintenant = 1000000;
+  const s = L('creerSession')('sha256:abc', 'refresh', maintenant);
+  assert.strictEqual(s.x, maintenant + 30 * 86400);
+  assert.strictEqual(L('sessionExpiree')(s, maintenant + 29 * 86400), false);
+  assert.strictEqual(L('sessionExpiree')(s, maintenant + 30 * 86400), true);
+  L('prolongerSession')(s, maintenant + 20 * 86400);
+  assert.strictEqual(L('sessionExpiree')(s, maintenant + 49 * 86400), false);
+  assert.strictEqual(L('sessionExpiree')(null, maintenant), true);
+});

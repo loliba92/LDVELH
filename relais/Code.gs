@@ -48,9 +48,48 @@ function verifierConnexion(jeton) {
   return { identite: decider(infos, admins.contenu, prop('CLIENT_ID'), empreinteDe, Math.floor(Date.now() / 1000)), admins: admins };
 }
 
+var URL_JETON_GOOGLE = 'https://oauth2.googleapis.com/token';
+
+/* Session de longue durée : ouvrir (code Google -> session), renouveler (session -> nouveau jeton d'accès), fermer (révocation).
+   Le jeton de renouvellement reste dans les propriétés du script ; le navigateur n'a que l'identifiant de session. */
+function gererSession(q) {
+  var props = PropertiesService.getScriptProperties(), maintenant = Math.floor(Date.now() / 1000), action = String(q.action);
+  if (action === 'session_ouvrir') {
+    var secret = prop('CLIENT_SECRET');
+    if (!secret) return { ok: false, erreur: 'session non configurée' };
+    var r = UrlFetchApp.fetch(URL_JETON_GOOGLE, { method: 'post', muteHttpExceptions: true, payload: { code: String(q.code || ''), client_id: prop('CLIENT_ID'), client_secret: secret, redirect_uri: 'postmessage', grant_type: 'authorization_code' } });
+    var t = JSON.parse(r.getContentText() || '{}');
+    if (r.getResponseCode() !== 200 || !t.access_token) return { ok: false, erreur: 'code refusé' };
+    if (!t.refresh_token) return { ok: false, erreur: 'renouvellement non accordé' };
+    var v = verifierConnexion(t.access_token);
+    if (!v.identite.ok) return { ok: false, erreur: v.identite.raison };
+    var id = Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('sn:' + id, JSON.stringify(creerSession(v.identite.empreinte, t.refresh_token, maintenant)));
+    return { ok: true, session: id, access_token: t.access_token, expires_in: t.expires_in, nom: v.identite.nom, role: v.identite.role };
+  }
+  var cle = 'sn:' + String(q.session || ''), brut = props.getProperty(cle);
+  if (!brut) return { ok: false, erreur: 'session inconnue' };
+  var session = JSON.parse(brut);
+  if (action === 'session_fermer') {
+    props.deleteProperty(cle);
+    UrlFetchApp.fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(session.r), { method: 'post', muteHttpExceptions: true });
+    return { ok: true };
+  }
+  if (action === 'session_renouveler') {
+    if (sessionExpiree(session, maintenant)) { props.deleteProperty(cle); return { ok: false, erreur: 'session expirée' }; }
+    var r2 = UrlFetchApp.fetch(URL_JETON_GOOGLE, { method: 'post', muteHttpExceptions: true, payload: { refresh_token: session.r, client_id: prop('CLIENT_ID'), client_secret: prop('CLIENT_SECRET'), grant_type: 'refresh_token' } });
+    var t2 = JSON.parse(r2.getContentText() || '{}');
+    if (r2.getResponseCode() !== 200 || !t2.access_token) { if (t2.error === 'invalid_grant') props.deleteProperty(cle); return { ok: false, erreur: 'renouvellement refusé' }; }
+    props.setProperty(cle, JSON.stringify(prolongerSession(session, maintenant)));
+    return { ok: true, access_token: t2.access_token, expires_in: t2.expires_in };
+  }
+  return { ok: false, erreur: 'action inconnue' };
+}
+
 function doPost(e) {
   try {
     var q = JSON.parse(e.postData.contents || '{}');
+    if (/^session_/.test(String(q.action || ''))) return reponse(gererSession(q));
     var v = verifierConnexion(String(q.jeton || ''));
     if (!v.identite.ok) return reponse({ ok: false, erreur: v.identite.raison });
     var moi = v.identite, action = String(q.action || '');

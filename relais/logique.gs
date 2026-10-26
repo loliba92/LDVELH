@@ -202,3 +202,13 @@ function formaterAvis(nom, role, note, texte) {
   var etoiles = new Array(note + 1).join('★') + new Array(6 - note).join('☆');
   return { sujet: 'Avis ' + note + '/5 sur La Cote du Héros', corps: 'De : ' + nom + (role && role !== 'heros' ? ' (' + role + ')' : '') + '\nNote : ' + etoiles + ' (' + note + ' sur 5)' + (texte ? '\n\n' + texte : '\n\n(pas de commentaire)') };
 }
+
+
+/* ---------- Session de longue durée (le relais garde le jeton de renouvellement de Google) ----------
+   Le navigateur ne reçoit qu'un identifiant de session, révocable. La session est prolongée à chaque renouvellement. */
+var SESSION_JOURS = 30;
+function creerSession(empreinte, renouvellement, maintenantSec) {
+  return { e: empreinte, r: renouvellement, x: maintenantSec + SESSION_JOURS * 86400 };
+}
+function sessionExpiree(session, maintenantSec) { return !session || !session.x || maintenantSec >= session.x; }
+function prolongerSession(session, maintenantSec) { session.x = maintenantSec + SESSION_JOURS * 86400; return session; }
