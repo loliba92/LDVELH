@@ -1522,9 +1522,21 @@
     return `<section class="hc-liste"><h4>${titre}</h4>` + (liste.length ? `<ol>${liste.map(({ b, c, d, f, delta, pct }) => `<li><button type="button" class="hc-livre" data-id="${esc(b.id)}" aria-label="Ouvrir la fiche : ${esc(b.titre)}, édition ${esc(b.version)}"><span class="hc-titre">${esc(b.titre)}</span><span class="hc-sous">${esc(b.serie)} · ${esc(b.version)} · ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}</span></button>` +
       `<span class="hc-var fleche-${dir}"><b>${fl} ${signe}${fmt(Math.abs(delta))}</b><small>${fmt(d)} → ${fmt(f)} · ${signe}${(Math.round(Math.abs(pct) * 1000) / 10).toString().replace('.', ',')} %</small></span></li>`).join('')}</ol>` : '<p class="sous">Aucun livre dans ce cas.</p>') + '</section>';
   }
+  // Période du roll-forward : depuis le premier relevé, ou 1, 3, 6 mois, 1 an (proposées seulement quand l'historique est assez long)
+  const PERIODES = [['tout', 'Depuis le début', 0], ['1m', '1 mois', 30], ['3m', '3 mois', 91], ['6m', '6 mois', 182], ['1a', '1 an', 365]];
+  let RFPER = 'tout';
+  const msJour = (d) => new Date(d + 'T12:00:00').getTime();
+  const periodesOffertes = () => { const n = HIST.dates.length, span = (msJour(HIST.dates[n - 1]) - msJour(HIST.dates[0])) / 86400000; return PERIODES.filter(([, , j]) => j === 0 || span >= j * 0.9); };
+  function debutPeriode() {
+    const n = HIST.dates.length, j = (PERIODES.find((x) => x[0] === RFPER) || PERIODES[0])[2];
+    if (!j || !periodesOffertes().some((x) => x[0] === RFPER)) return 0;
+    const limite = msJour(HIST.dates[n - 1]) - j * 86400000;
+    for (let i = 0; i < n; i += 1) if (msJour(HIST.dates[i]) >= limite) return i;
+    return 0;
+  }
   // Valeur de la collection à chaque date de relevé : même calcul pour la courbe, les listes et la flèche de tendance
   function serieValeur(bl) {
-    const n = HIST.dates.length, tot = new Array(n).fill(0), mouv = [];
+    const n = HIST.dates.length, tot = new Array(n).fill(0), mouv = [], i0 = debutPeriode();
     let suivis = 0;
     bl.lignes.forEach(({ b, c }) => {
       const cur = b.prix[c.etat];
@@ -1537,9 +1549,9 @@
       sr[n - 1] = cur;                                                      // le dernier point est la cote du jour : le graphique rejoint toujours le total de l'estimation
       suivis += c.qte;
       sr.forEach((x, k) => { tot[k] += x * c.qte; });
-      mouv.push({ b, c, d: sr[0], f: sr[n - 1], delta: (sr[n - 1] - sr[0]) * c.qte, pct: sr[n - 1] / sr[0] - 1 });
+      mouv.push({ b, c, d: sr[i0], f: sr[n - 1], delta: (sr[n - 1] - sr[i0]) * c.qte, pct: sr[n - 1] / sr[i0] - 1 });
     });
-    return { n, tot, mouv, suivis };
+    return { n, tot, mouv, suivis, i0 };
   }
   // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
   let RFSEG = 'decennie', RF_BL = null;
@@ -1547,7 +1559,7 @@
   // Toucher une barre (ou la sélectionner au clavier) affiche son détail ; le tableau reste dessous.
   let RF_PAS = [];
   function rollforwardGraphique(bl) {
-    const { mouv } = serieValeur(bl);
+    const { mouv, i0 } = serieValeur(bl);
     const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
     const groupes = new Map();
     mouv.forEach((x) => {
@@ -1567,7 +1579,7 @@
       liste.push({ ...g, nom: 'Autres', detail: detailDe(g, `Les ${reste.length} autres (${nomSeg.toLowerCase()})`) });
     }
     // Départ et arrivée sont des repères (valeur écrite), pas des barres à l'échelle des variations : sinon on ne verrait plus rien
-    const pas = [{ nom: 'Début', de: 0, a: 0, total: true, valeur: debut, detail: `Valeur au ${jour(HIST.dates[0])} : ${fmtE(debut)}.` }];
+    const pas = [{ nom: 'Début', de: 0, a: 0, total: true, valeur: debut, detail: `Valeur au ${jour(HIST.dates[i0])} : ${fmtE(debut)}.` }];
     let courant = 0;
     liste.forEach((g) => {
       const delta = g.f - g.d;
@@ -1590,7 +1602,7 @@
         <text x="${(x + bw / 2).toFixed(1)}" y="${(y1 - 6).toFixed(1)}" text-anchor="middle" class="rf-valeur">${esc(valeur)}</text>
         <text x="${(x + bw / 2).toFixed(1)}" y="${H - 22}" text-anchor="middle" class="rf-nom"><title>${esc(p.nom)}</title>${esc(nom)}</text></g>`;
     }).join('');
-    return `<figure class="rf-graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascade de la valeur de la collection, du ${jour(HIST.dates[0])} à aujourd'hui, par ${nomSeg.toLowerCase()}">${barres}</svg></figure>
+    return `<figure class="rf-graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascade de la valeur de la collection, du ${jour(HIST.dates[i0])} à aujourd'hui, par ${nomSeg.toLowerCase()}">${barres}</svg></figure>
       <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. Les trois segments qui bougent le plus ; départ et arrivée en valeur, hors échelle.</p>
       <details class="rf-chiffres"><summary>Voir les chiffres</summary>${rollforwardTable(bl)}</details>`;
   }
@@ -1609,6 +1621,30 @@
     return `<table class="rf-table"><caption class="sr-only">Roll-forward par ${nomSeg.toLowerCase()}</caption><thead><tr><th scope="col">${nomSeg}</th><th scope="col" class="num">Début</th><th scope="col" class="num">Hausses</th><th scope="col" class="num">Baisses</th><th scope="col" class="num">Aujourd'hui</th></tr></thead><tbody>${lignes.map((g) => `<tr><th scope="row">${esc(g.nom)}</th><td class="num">${fmtE(g.d)}</td><td class="num">+ ${fmtE(g.hausse)} <small>(${g.nh})</small></td><td class="num">− ${fmtE(Math.abs(g.baisse))} <small>(${g.nb})</small></td><td class="num">${fmtE(g.f)}</td></tr>`).join('')}</tbody></table>`;
   }
 
+  // Partie du roll-forward qui dépend de la période choisie : bilan, quatre repères, cascade, livres qui ont le plus bougé
+  function rollforwardBloc(bl) {
+    const { mouv, i0 } = serieValeur(bl);
+    const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    const v0 = mouv.reduce((t, x) => t + x.d * x.c.qte, 0), v1 = mouv.reduce((t, x) => t + x.f * x.c.qte, 0);
+    const stables = mouv.filter((x) => Math.abs(x.delta) <= 0.004).length, bouges = mouv.length - stables;
+    const depuis = jour(HIST.dates[i0]);
+    const bilan = `${bouges} livre${bouges > 1 ? 's ont' : ' a'} bougé et ${stables} n'${stables > 1 ? 'ont' : 'a'} pas bougé depuis le ${depuis}.`;
+    const cle = (lib, val) => `<li><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
+    const hausses = mouv.filter((x) => x.delta > 0.004), baisses = mouv.filter((x) => x.delta < -0.004);
+    const somme = (liste) => liste.reduce((t, x) => t + x.delta, 0);
+    const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
+    const cles = `<ul class="coll-cles hc-cles hc-cles-4" aria-label="Du ${depuis} à aujourd'hui">${cle('Valeur au ' + depuis, fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
+    return `<p class="sous hc-bilan">${bilan}</p>${cles}
+      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div id="rf-tableau">${rollforwardGraphique(bl)}</div>
+      <div class="hc-mouv">${listeMouv('Ont le plus progressé', hausses.slice().sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', baisses.slice().sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
+  }
+
+  function selecteurPeriode() {
+    const offertes = periodesOffertes();
+    if (offertes.length < 2) return '<p class="sous">D\'autres périodes (1, 3, 6 mois, 1 an) seront proposées quand l\'historique sera assez long.</p>';
+    return `<div class="seg-choix"><label for="rf-periode">Période</label><select id="rf-periode">${offertes.map(([k, nom]) => `<option value="${k}"${k === RFPER ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>`;
+  }
   function historiquePane(bl) {
     RF_BL = bl;
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
@@ -1628,14 +1664,7 @@
     const phrase = Math.abs(ev) < 0.005 ? `Valeur stable depuis le ${jour(HIST.dates[0], true)} : ${fmtE(v1)}.` : `De ${fmtE(v0)} le ${jour(HIST.dates[0], true)} à ${fmtE(v1)} le ${jour(HIST.dates[n - 1], true)} (${ev > 0 ? 'hausse' : 'baisse'} de ${pct} %).`;
     const lignes = HIST.dates.map((d, i) => `<tr><td>${jour(d, true)}</td><td class="num">${fmtE(tot[i])}</td><td class="num">${i ? `${tot[i] - tot[i - 1] >= 0 ? '+' : '−'}${fmtE(Math.abs(tot[i] - tot[i - 1]))}` : '—'}</td></tr>`).join('');
     const total = bl.exemplaires, dir = Math.abs(ev) < 0.005 ? '' : ev > 0 ? 'hausse' : 'baisse';
-    const stables = mouv.filter((x) => Math.abs(x.delta) <= 0.004).length, bouges = mouv.length - stables;
-    const bilan = `${bouges} livre${bouges > 1 ? 's ont' : ' a'} bougé et ${stables} n'${stables > 1 ? 'ont' : 'a'} pas bougé depuis le ${jour(HIST.dates[0], true)}.`;
     const cle = (lib, val, cls = '') => `<li class="${cls}"><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
-    // Roll-forward (partie prix) : valeur de départ, hausses, baisses, valeur d'aujourd'hui. Les entrées et sorties ne sont pas suivies ici.
-    const hausses = mouv.filter((x) => x.delta > 0.004), baisses = mouv.filter((x) => x.delta < -0.004);
-    const somme = (liste) => liste.reduce((t, x) => t + x.delta, 0);
-    const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
-    const rollforward = `<ul class="coll-cles hc-cles hc-cles-4" aria-label="De ${jour(HIST.dates[0], true)} à aujourd'hui">${cle('Valeur au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
       <div class="hc-grille">
@@ -1643,11 +1672,9 @@
         <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
       </div>
       <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
-      <p class="sous hc-bilan">${bilan}</p>
-      ${rollforward}
-      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
-      <div id="rf-tableau">${rollforwardGraphique(bl)}</div>
-      <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
+      <h3 id="titre-rf">Ce qui a bougé</h3>
+      ${selecteurPeriode()}
+      <div id="rf-bloc">${rollforwardBloc(bl)}</div>`;
   }
   function analysePane(bl) {
     const complete = estSorcier();                                     // sorciers et Zagors : toutes les répartitions et plus de pièces
@@ -1719,7 +1746,7 @@
     e.preventDefault(); ouvrirOnglet(dispo[j]); $('#onglet-coll-' + dispo[j]).focus();
   });
   window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
-  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardGraphique(RF_BL); } });
+  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-periode' && RF_BL) { RFPER = e.target.value; $('#rf-bloc').innerHTML = rollforwardBloc(RF_BL); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardGraphique(RF_BL); } });
   // Cascade : toucher ou sélectionner une barre affiche son détail
   const detailBarre = (e) => { const b = e.target.closest && e.target.closest('.rf-barre'); if (b && RF_PAS[b.dataset.i]) { const d = $('#rf-detail'); if (d) d.textContent = RF_PAS[b.dataset.i].detail; } };
   document.addEventListener('click', detailBarre);
