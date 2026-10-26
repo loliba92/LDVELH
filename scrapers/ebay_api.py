@@ -126,7 +126,7 @@ def requetes_complementaires(ed):
     num = (ed.get("numero") or "").strip().lstrip("0")
     livre = ed.get("livre") or ed.get("titre") or ""
     auteur = (ed.get("auteurs") or "").split(";")[0].strip()
-    q = [" ".join(x for x in (livre, auteur) if x), f"{livre} livre dont vous êtes le héros", " ".join(x for x in (livre, serie, num) if x)]
+    q = [" ".join(x for x in (livre, auteur) if x), f"{livre} livre dont vous êtes le héros", f"{livre} ldvelh", " ".join(x for x in (livre, serie, num) if x)]
     vues, sortie = set(), []
     for t in q:
         if t.strip() and len(mots(livre)) >= 2 and t not in vues:
