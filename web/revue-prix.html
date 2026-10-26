@@ -64,7 +64,6 @@
   <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>
   <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter</span></button>
-  <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel">
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
@@ -161,14 +160,6 @@
       <button type="button" class="bouton-lien" id="aj-telecharger">Télécharger la liste</button>
     </div>
   </div>
-</section>
-</div>
-<div class="rv-pane" id="pane-demandes" role="tabpanel" hidden>
-<section class="rv-ajout" id="rv-demandes" aria-labelledby="dm-titre" hidden>
-  <h2 id="dm-titre">Demandes d'ajout <span class="nb-onglet" id="dm-nb"></span></h2>
-  <p class="sous">Livres demandés par les personnes connectées. Corrigez la ligne si besoin (ISBN, ou « titre ; série ; numéro »), puis acceptez : le livre est ajouté avec sa jaquette. Un refus ferme la demande.</p>
-  <ul class="dm-liste" id="dm-liste"></ul>
-  <p class="rv-ajout-bilan" id="dm-msg" role="status" hidden></p>
 </section>
 </div>
 

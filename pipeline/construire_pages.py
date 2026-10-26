@@ -34,6 +34,8 @@ def ico(d):
 
 
 PAGES = {
+    "ajouter.html": ("Ajouter des livres", "Ajouter des livres · La Cote du Héros",
+                     "Ajout de livres au guide par scanner ou liste d'ISBN, réservé aux sorciers et aux Zagors."),
     "revue-prix.html": ("Revue des prix", "Revue des prix · La Cote du Héros",
                         "Outil de revue : archive, relevé eBay et prix publié, côte à côte, pour valider les cotes."),
     "evolutions.html": ("Évolutions", "Évolutions des prix · La Cote du Héros",
@@ -196,12 +198,29 @@ def page(nom, corps):
 '''
 
 
-GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
-NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros"}
+AJOUTER = '''<p class="surtitre">Contribuer</p>
+<h1>Ajouter des livres</h1>
+<p class="chapeau">Pour les sorciers et les Zagors. Scannez les codes-barres un par un, ou collez une liste d'ISBN, un par ligne. Un envoi compte au plus 20 ISBN ; vous pouvez faire 3 envois par jour.</p>
+
+<section class="carte" id="aj-carte" aria-labelledby="aj-titre">
+  <h2 id="aj-titre">Liste à ajouter</h2>
+  <div class="rv-ajout-actions"><button type="button" class="bouton-clair" id="aj-scan">Scanner un code-barres</button></div>
+  <label for="aj-texte">ISBN, un par ligne</label>
+  <textarea id="aj-texte" rows="8" spellcheck="false" autocomplete="off" placeholder="9782070583805&#10;9791097577025"></textarea>
+  <p class="sous" id="aj-compte" aria-live="polite">0 ISBN</p>
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="aj-envoyer">Ajouter au guide</button></div>
+  <p class="rv-ajout-bilan" id="aj-msg" role="status" hidden></p>
+</section>
+'''
+
+
+GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html", "ajouter.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
+NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros", "ajouter.html": "admin"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
-               "evolutions.html": '\n<script src="acces.js"></script>'}
+               "evolutions.html": '\n<script src="acces.js"></script>',
+               "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Accès sorcier</p>
@@ -222,7 +241,7 @@ DEVENIR_ADMIN = '''<p class="surtitre">Accès sorcier</p>
 <ul>
   <li><strong>Héros</strong> : toute personne connectée avec Google. Elle construit sa collection, sauvegardée dans son propre Google Drive.</li>
   <li><strong>Sorcier</strong> : réservé aux futurs abonnés. Il ne corrige pas les prix ni les fiches.</li>
-  <li><strong>Zagor</strong> : en plus, il vérifie et corrige les prix et les fiches, traite les demandes d'ajout et gère l'équipe.</li>
+  <li><strong>Zagor</strong> : en plus, il vérifie et corrige les prix et les fiches, et gère l'équipe.</li>
 </ul>
 
 <h2>Comment le devenir</h2>
@@ -369,7 +388,6 @@ REVUE = '''<h1>Espace Zagor <span class="badge-admin" title="Réservé aux Zagor
   <button type="button" role="tab" data-pane="annonces" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>
   <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter</span></button>
-  <button type="button" role="tab" data-pane="demandes" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Demandes <span class="nb-onglet" id="rv-nav-dm"></span></span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel">
 <p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
@@ -468,14 +486,6 @@ REVUE = '''<h1>Espace Zagor <span class="badge-admin" title="Réservé aux Zagor
   </div>
 </section>
 </div>
-<div class="rv-pane" id="pane-demandes" role="tabpanel" hidden>
-<section class="rv-ajout" id="rv-demandes" aria-labelledby="dm-titre" hidden>
-  <h2 id="dm-titre">Demandes d'ajout <span class="nb-onglet" id="dm-nb"></span></h2>
-  <p class="sous">Livres demandés par les personnes connectées. Corrigez la ligne si besoin (ISBN, ou « titre ; série ; numéro »), puis acceptez : le livre est ajouté avec sa jaquette. Un refus ferme la demande.</p>
-  <ul class="dm-liste" id="dm-liste"></ul>
-  <p class="rv-ajout-bilan" id="dm-msg" role="status" hidden></p>
-</section>
-</div>
 '''
 
 
@@ -554,7 +564,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
     <tr><th scope="row" data-label="Fonction">Suivre la valeur de sa collection et l'analyser</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Séparer ses doubles à vendre et les livres à trouver</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Retrouver sa collection sur tous ses appareils (Google Drive), et une ancienne version si besoin</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Demander l'ajout d'un livre qui manque</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Ajouter un livre au guide (sorciers et Zagors)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Noter les livres de 1 à 5</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="oui">✓</span></td></tr>
   </tbody>
 </table>
@@ -584,7 +594,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
 <h2>Contribuer</h2>
 <ul>
   <li><strong>Signaler une erreur, proposer un prix :</strong> une édition manquante, une fiche erronée, un prix que vous avez constaté. Écrivez-moi depuis la page <a href="contact.html">Contact</a>.</li>
-  <li><strong>Demander l'ajout d'un livre :</strong> connectez-vous avec Google, puis utilisez « Demander l'ajout d'un livre » dans le menu de votre compte.</li>
+  <li><strong>Ajouter un livre :</strong> les sorciers et les Zagors l'ajoutent depuis « Ajouter des livres », dans le menu de leur compte.</li>
   <li><strong>Faire connaître votre chaîne, votre site ou votre boutique :</strong> voir la page <a href="communaute.html">Communauté</a>.</li>
 </ul>
 
@@ -643,8 +653,8 @@ CONFIDENTIALITE = f'''<p class="surtitre">Vos données</p>
 <h2>Première connexion et avis</h2>
 <p>La première fois qu'un compte se connecte, le relais l'enregistre sous une empreinte courte (jamais l'adresse) pour compter les comptes, et prévient l'éditeur par courriel avec votre <strong>prénom</strong> seulement. Ce prénom et la date de votre arrivée sont aussi gardés dans une liste privée, que seuls l'éditeur et les Zagors peuvent consulter, jamais votre adresse. Si vous répondez à « Qu'en pensez-vous ? » (note de 1 à 5 étoiles et commentaire facultatif), votre réponse est envoyée par courriel à l'éditeur, avec votre prénom et sans votre adresse. L'avis est personnel : il n'est lu que par l'éditeur, il n'est jamais publié et n'est utilisé que pour améliorer le guide.</p>
 
-<h2>Demander l'ajout d'un livre</h2>
-<p>Quand vous demandez l'ajout d'un livre, le relais publie votre demande sur la page publique de suivi du projet, <strong>à votre nom</strong> : votre prénom, suivi de quatre signes de votre empreinte. Votre adresse n'y figure pas. Cette demande est visible de tous et durable : n'y écrivez aucune donnée personnelle. Le nombre de demandes est limité à six par personne toutes les six heures, sauf pour les sorciers.</p>
+<h2>Ajouter un livre</h2>
+<p>Les sorciers et les Zagors ajoutent des livres au guide, un par un avec le scanner ou par une liste d'ISBN. Le nom de la personne qui ajoute apparaît dans l'historique public des modifications, comme pour les corrections.</p>
 
 <h2>Les sorciers</h2>
 <p>Les sorciers sont choisis par l'éditeur. La liste (une empreinte de leur adresse et le prénom ou le pseudonyme qui leur est donné) est un fichier public du projet. Quand un sorcier envoie des prix ou ajoute des livres, son nom apparaît dans l'historique public des modifications. Dans son navigateur, il garde ses validations de prix en attente jusqu'à leur envoi.</p>
@@ -696,7 +706,7 @@ MENTIONS = f'''<p class="surtitre">Informations légales</p>
 </ul>
 
 <h2>Services de connexion et de sauvegarde</h2>
-<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, demandes d'ajout, outils des sorciers, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
+<p>La connexion avec Google, l'enregistrement de votre collection dans votre Google Drive et le relais du site (notes, ajouts de livres, outils des sorciers, hébergé dans Google Apps Script) sont assurés par <strong>Google LLC</strong>, 1600 Amphitheatre Parkway, Mountain View, CA 94043, États-Unis (<a href="https://about.google" target="_blank" rel="noopener">about.google</a>). La page <a href="confidentialite.html">Confidentialité</a> détaille ce qui leur est transmis.</p>
 <p>Les messages envoyés par le formulaire de la page Contact sont acheminés par le service <strong>FormSubmit</strong> (<a href="https://formsubmit.co" target="_blank" rel="noopener">formsubmit.co</a>), qui les transmet à l'éditeur par courriel.</p>
 
 <h2>Propriété intellectuelle</h2>
@@ -879,7 +889,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
                        ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)

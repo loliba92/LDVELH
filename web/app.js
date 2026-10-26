@@ -1394,7 +1394,7 @@
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
     }).join('') + (trouves.length > AJ_N ? `<li class="sous">${AJ_N} livres sur ${trouves.length}. <button type="button" class="bouton-lien" data-aj-plus>Afficher les ${Math.min(30, trouves.length - AJ_N)} suivants</button></li>` : '') +
-      (!trouves.length ? '<li class="sous">Aucun livre trouvé. <button type="button" class="lien" data-demande-coll>Demander son ajout au guide</button></li>' : '');
+      (!trouves.length ? '<li class="sous">Aucun livre trouvé.</li>' : '');
     if (statut) statut.textContent = trouves.length ? `${trouves.length} livre${trouves.length > 1 ? 's' : ''} trouvé${trouves.length > 1 ? 's' : ''}.` : 'Aucun livre trouvé.';
   }
   // « Retiré. Annuler » : quelques secondes pour revenir sur un retrait fait par erreur
@@ -1434,7 +1434,6 @@
   }
   document.addEventListener('input', (e) => { if (e.target.id === 'ca-q') { AJ_Q = e.target.value; AJ_N = 30; const ok = $('#ca-ok'); if (ok) ok.hidden = true; rendreAjoutColl(); } });
   document.addEventListener('click', (e) => { if (e.target.closest('[data-aj-plus]')) { AJ_N += 30; rendreAjoutColl(); } });
-  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande-coll]') && window.Compte) window.Compte.demanderLivre(AJ_Q); });
 
   // Tendance de la valeur de la collection : mêmes livres, mêmes états, cotes publiées à la première et à la dernière date de l'historique
   function flecheValeur(bl) {
@@ -2189,7 +2188,6 @@
     annonce(`${n} exemplaire${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à votre collection, pour ${fmt(total)} au total.`);
   }
   document.addEventListener('click', (e) => { if (e.target.closest('[data-lot]')) ouvrirLot(); });
-  document.addEventListener('click', (e) => { if (e.target.closest('[data-demande]') && window.Compte) window.Compte.demanderLivre(S.q); });
 
 
   /* ---------- Inventaire guidé : séries → éditions → listes → bilan ---------- */

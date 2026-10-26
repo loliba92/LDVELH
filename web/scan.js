@@ -138,7 +138,7 @@
         etats: true,
         traiter(isbn, etat) {
           const livre = window.AjoutRapide.trouver(isbn);
-          if (!livre) return { ok: false, texte: `ISBN ${isbn} : ce livre n'est pas encore dans le guide.`, action: ` <button type="button" class="bouton-lien" data-demander="${isbn}">Demander son ajout</button>` };
+          if (!livre) return { ok: false, texte: `ISBN ${isbn} : ce livre n'est pas encore dans le guide.` };
           const deja = window.AjoutRapide.etat(livre.id);
           if (deja) return { ok: false, texte: `${window.AjoutRapide.titre(livre)} est déjà dans votre collection.` };
           window.AjoutRapide.ajouter(livre.id, etat);
@@ -153,10 +153,6 @@
       if (!window.AjoutRapide || window.AjoutRapide.garde(demarrer)) demarrer();      // sans compte : la fenêtre de connexion s'ouvre, puis on reprend ici
     });
     bloc.appendChild(b);
-    document.addEventListener('click', (e) => {                           // ISBN inconnu : on propose la demande d'ajout
-      const d = e.target.closest('[data-demander]');
-      if (d && dlg) { const isbn = d.dataset.demander; dlg.close(); if (window.Compte) window.Compte.demanderLivre(isbn); }
-    });
   }
 
   // Accueil : scanner un livre pour voir sa cote (rien n'est ajouté à la collection) ; la fiche du livre s'ouvre
