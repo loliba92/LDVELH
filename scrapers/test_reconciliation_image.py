@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 @unittest.skipUnless(ri.disponible(), "OpenCV absent")
 class TestTitreSeul(unittest.TestCase):
-    def test_annonce_titre_seul_avec_la_bonne_photo_est_gardee(self):
+    def test_annonce_avec_la_bonne_photo_est_gardee(self):
         rnd = random.Random(8)
         livres = livres_a_plusieurs_editions()
         isbns = livres[sorted(livres)[0]]
@@ -94,10 +94,10 @@ class TestTitreSeul(unittest.TestCase):
                     status_code = 200
                     content = photo_de(cible, rnd)
                 return R()
-        out = ri.verifier_titre_seul({cible: [dict(item)]}, COVERS, Faux())
+        out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
         self.assertEqual(len(out[cible]), 1)
 
-    def test_annonce_titre_seul_avec_une_autre_photo_est_ecartee(self):
+    def test_annonce_avec_une_autre_photo_est_ecartee(self):
         rnd = random.Random(9)
         livres = livres_a_plusieurs_editions()
         isbns = livres[sorted(livres)[0]]
@@ -110,5 +110,5 @@ class TestTitreSeul(unittest.TestCase):
                     status_code = 200
                     content = photo_de(autre, rnd)
                 return R()
-        out = ri.verifier_titre_seul({cible: [dict(item)]}, COVERS, Faux())
+        out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
         self.assertEqual(out[cible], [])
