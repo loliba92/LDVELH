@@ -51,12 +51,11 @@ window.Compte = (function () {
     if (e.cle === 'reprendre') h += '<button type="button" class="bouton" data-compte="connecter">Reconnecter</button>';
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
-    h += '<ul class="compte-liste"><li><a href="collection.html">' + ico('collection') + 'Ma collection' + niv('heros') + '</a></li>' +
-      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant' + niv('heros') + '</button></li>' : '') +
+    h += '<ul class="compte-liste">' +
       (window.Relais && window.Relais.configure() ? '<li><button type="button" class="bouton-lien" data-compte="demande">' + ico('demande') + 'Demander l\'ajout d\'un livre' + niv('heros') + '</button></li>' : '') +
-      (estAdmin() ? '<li><a href="revue-prix.html">' + ico('sorciers') + 'Espace Zagor' + niv('zagor') + '</a></li>' : '') +
-      (role === 'superadmin' ? '<li><a href="revue-prix.html#pepites">' + ico('butin') + 'Butin' + niv('zagor') + '</a></li>' : '') +
+      (role === 'superadmin' ? '<li><a href="revue-prix.html">' + ico('sorciers') + 'Espace Zagor' + niv('zagor') + '</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe' + niv('zagor') + '</a></li>' : '') +
+      (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant' + niv('heros') + '</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
     return h;
   }
