@@ -916,7 +916,6 @@
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
-            ${estProprietaire() ? blocFiche(b) : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Niveau de prix</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 5'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
@@ -935,14 +934,13 @@
             </dl>
 
         ${blocNeuf(b)}
-        ${estSuper() ? blocAnnonces(b) : ''}
         ${blocRecherche(b)}
-        ${blocCorriger(b)}
         ${autres.length > 1 ? `<h3>Les ${autres.length} éditions de ce livre</h3>
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
+        ${estSuper() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocCorriger(b)}${blocAnnonces(b)}</section>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
