@@ -39,7 +39,7 @@ window.Notes = (function () {
   function etoiles(moyenne) { return '<span class="etoiles" style="--p:' + Math.round(moyenne / 5 * 100) + '%" aria-hidden="true">★★★★★</span>'; }
   function resume(livre) {
     var m = MOY[livre];
-    if (!m || !m[1]) return '<span class="note-vide">Pas encore noté</span>';
+    if (!m || !m[1]) return '<span class="note-vide">Aucune note pour l\'instant</span>';
     return etoiles(m[0]) + ' <strong>' + moy(m[0]) + '</strong><span class="note-sur"> sur 5</span> <span class="note-nb">· ' + m[1] + ' avis</span>';
   }
   // Pastille sur la jaquette d'un livre de l'étagère : la moyenne (☆ tant que personne n'a noté) ; un clic ouvre les cinq étoiles
@@ -99,7 +99,7 @@ window.Notes = (function () {
         }).join('') + '</span>' + (mienne ? '<button type="button" class="bouton-lien" data-note-retirer>Retirer ma note</button>' : '') + '</div>';
     }
     if (window.Cloud && window.Cloud.lie()) return '<div class="note-saisie"><button type="button" class="bouton-lien" data-compte="connecter">Reconnectez-vous pour noter ce livre</button></div>';
-    return '<div class="note-saisie"><button type="button" class="bouton-lien" data-compte="connecter">Se connecter avec Google pour noter ce livre</button></div>';
+    return '';                                                            // visiteur : une seule invitation à se connecter, dans la carte « Dans ma collection »
   }
   function dessiner() {
     if (!zone || !zone.isConnected) return;
