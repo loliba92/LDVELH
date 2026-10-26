@@ -1526,6 +1526,51 @@
   }
   // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
   let RFSEG = 'decennie', RF_BL = null;
+  // Cascade interactive : valeur de départ, puis la contribution de chaque segment, puis valeur d'aujourd'hui.
+  // Toucher une barre (ou la sélectionner au clavier) affiche son détail ; le tableau reste dessous.
+  let RF_PAS = [];
+  function rollforwardGraphique(bl) {
+    const { mouv } = serieValeur(bl);
+    const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
+    const groupes = new Map();
+    mouv.forEach((x) => {
+      const k = clef(x.b, x.c), g = groupes.get(k) || { nom: k, d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 };
+      g.d += x.d * x.c.qte; g.f += x.f * x.c.qte;
+      if (x.delta > 0.004) { g.hausse += x.delta; g.nh += 1; } else if (x.delta < -0.004) { g.baisse += x.delta; g.nb += 1; }
+      groupes.set(k, g);
+    });
+    const liste = [...groupes.values()].sort((a, b) => (b.f - b.d) - (a.f - a.d));
+    const debut = liste.reduce((t, g) => t + g.d, 0), fin = liste.reduce((t, g) => t + g.f, 0);
+    const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const pas = [{ nom: 'Début', de: 0, a: debut, total: true, detail: `Valeur au ${jour(HIST.dates[0])} : ${fmtE(debut)}.` }];
+    let courant = debut;
+    liste.forEach((g) => {
+      const delta = g.f - g.d;
+      pas.push({ nom: String(g.nom), de: courant, a: courant + delta, delta,
+        detail: `${g.nom} : ${fmtE(g.d)} → ${fmtE(g.f)}. Hausses + ${fmtE(g.hausse)} (${g.nh} livre${g.nh > 1 ? 's' : ''}), baisses − ${fmtE(Math.abs(g.baisse))} (${g.nb} livre${g.nb > 1 ? 's' : ''}).` });
+      courant += delta;
+    });
+    pas.push({ nom: "Aujourd'hui", de: 0, a: fin, total: true, detail: `Valeur aujourd'hui : ${fmtE(fin)}.` });
+    RF_PAS = pas;
+    const valeurs = pas.flatMap((p) => [p.de, p.a]);
+    const vmin = Math.min(...valeurs) * 0.92, vmax = Math.max(...valeurs) * 1.03;
+    const W = 640, H = 280, gh = 26, gb = 50, marge = 10, slot = (W - 2 * marge) / pas.length, bw = slot * 0.62;
+    const Y = (v) => gh + ((vmax - v) / (vmax - vmin)) * (H - gh - gb);
+    const barres = pas.map((p, i) => {
+      const x = marge + i * slot + (slot - bw) / 2, y1 = Y(Math.max(p.de, p.a)), y2 = Y(Math.min(p.de, p.a));
+      const cls = p.total ? 'rf-total' : p.delta >= 0 ? 'rf-hausse' : 'rf-baisse';
+      const valeur = p.total ? fmtE(p.a) : `${p.delta >= 0 ? '+' : '−'} ${fmtE(Math.abs(p.delta))}`;
+      const nom = p.nom.length > 11 ? p.nom.slice(0, 10) + '…' : p.nom;
+      return `<g class="rf-barre" tabindex="0" role="button" data-i="${i}" aria-label="${esc(p.nom)} : ${esc(valeur)}">
+        <rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(2, y2 - y1).toFixed(1)}" rx="2" class="${cls}"/>
+        <text x="${(x + bw / 2).toFixed(1)}" y="${(y1 - 6).toFixed(1)}" text-anchor="middle" class="rf-valeur">${esc(valeur)}</text>
+        <text x="${(x + bw / 2).toFixed(1)}" y="${H - 22}" text-anchor="middle" class="rf-nom"><title>${esc(p.nom)}</title>${esc(nom)}</text></g>`;
+    }).join('');
+    return `<figure class="rf-graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascade de la valeur de la collection, du ${jour(HIST.dates[0])} à aujourd'hui, par ${nomSeg.toLowerCase()}">${barres}</svg></figure>
+      <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. L'axe ne part pas de zéro, pour que les variations se voient.</p>
+      <details class="rf-chiffres"><summary>Voir les chiffres</summary>${rollforwardTable(bl)}</details>`;
+  }
+
   function rollforwardTable(bl) {
     const { mouv } = serieValeur(bl);
     const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
@@ -1577,7 +1622,7 @@
       <p class="sous hc-bilan">${bilan}</p>
       ${rollforward}
       <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
-      <div id="rf-tableau" class="rf-defile">${rollforwardTable(bl)}</div>
+      <div id="rf-tableau">${rollforwardGraphique(bl)}</div>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
@@ -1650,7 +1695,11 @@
     e.preventDefault(); ouvrirOnglet(dispo[j]); $('#onglet-coll-' + dispo[j]).focus();
   });
   window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
-  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardTable(RF_BL); } });
+  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardGraphique(RF_BL); } });
+  // Cascade : toucher ou sélectionner une barre affiche son détail
+  const detailBarre = (e) => { const b = e.target.closest && e.target.closest('.rf-barre'); if (b && RF_PAS[b.dataset.i]) { const d = $('#rf-detail'); if (d) d.textContent = RF_PAS[b.dataset.i].detail; } };
+  document.addEventListener('click', detailBarre);
+  document.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('rf-barre')) { e.preventDefault(); detailBarre(e); } });
   // Une barre de répartition ouvre « Mes livres » filtré sur ce segment
   document.addEventListener('click', (e) => {
     const l = e.target.closest('.seg-clic'); if (!l) return;
