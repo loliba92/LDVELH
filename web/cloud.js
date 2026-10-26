@@ -115,7 +115,10 @@
     if (!sid) return Promise.reject(new Error('pas-de-session'));
     return appelRelais('session_renouveler', { session: sid }).then(function (r) {
       if (!r.ok) { if (/inconnue|expir/.test(r.erreur || '')) { oterLoc(CLE_SESSION); } throw new Error(r.erreur || 'refus'); }
-      prendreJeton(r); dire('connecte');
+      prendreJeton(r);
+      return fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + jeton } })      // le prénom vient de Google (met aussi à jour une session ouverte avant ce correctif)
+        .then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; })
+        .then(function (u) { if (u.given_name || u.name) ecrireLoc(CLE_LIEN, JSON.stringify({ nom: u.given_name || u.name })); dire('connecte'); });
     });
   }
   function connecterSession(c) {
@@ -129,8 +132,12 @@
           appelRelais('session_ouvrir', { code: rep.code }).then(function (r) {
             if (!r.ok) throw new Error(r.erreur || 'refus');
             prendreJeton(r); ecrireLoc(CLE_SESSION, r.session);
-            ecrireLoc(CLE_LIEN, JSON.stringify({ nom: r.nom || 'Compte Google' }));
-            planifierRenouvellement(); dire('connecte'); ok();
+            return fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + jeton } })
+              .then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; })
+              .then(function (u) {
+                ecrireLoc(CLE_LIEN, JSON.stringify({ nom: u.given_name || u.name || 'Compte Google' }));
+                planifierRenouvellement(); dire('connecte'); ok();
+              });
           }).catch(ko);
         },
         error_callback: function () { ko(new Error('annule')); }

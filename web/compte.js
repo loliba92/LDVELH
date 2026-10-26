@@ -24,7 +24,21 @@ window.Compte = (function () {
   var LIBELLE = { deconnecte: 'Se connecter', reprendre: 'Reconnecter', synchro: '', erreur: '', 'a-jour': '' };
   var SILHOUETTE = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>';
 
-  function badge() { return ''; }   // pas de nom de niveau affiché
+  // Niveau de la personne : une petite icône et son libellé, dans le menu de son propre compte seulement
+  var NIVEAU_AFFICHE = {
+    heros: ['Héros', '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>'],
+    admin: ['Sorcier', '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>'],
+    superadmin: ['Zagor', '<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>']
+  };
+  function niveauBadge() {
+    var n = NIVEAU_AFFICHE[role];
+    if (!n) return '';
+    return ' <span class="compte-niveau niveau-' + role + '"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + n[1] + '</svg>' + n[0] + '</span>';
+  }
+  function niveauIcone() {
+    var n = NIVEAU_AFFICHE[role];
+    return n ? '<svg class="niveau-icone" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="' + n[0] + '">' + n[1] + '</svg>' : '';
+  }
   // Petites icônes du menu (même trait que la barre d'onglets de la page Vérifier les prix)
   var ICO = {
     collection: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16 5l4 1-3 14-4-1z"/>',
@@ -45,7 +59,7 @@ window.Compte = (function () {
       return '<p class="compte-nom">Votre compte</p><p class="compte-ligne">' + esc(e.ligne) + '</p>' +
         '<button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button>';
     }
-    var h = '<p class="compte-nom">' + esc(nom || 'Compte Google') + badge() + (role && !estAdmin() ? ' <span class="compte-niveau">Héros</span>' : '') + '</p><p class="compte-ligne" role="status">' + esc(e.ligne) + '</p>';
+    var h = '<p class="compte-nom">' + esc(nom || 'Compte Google') + niveauBadge() + '</p><p class="compte-ligne" role="status">' + esc(e.ligne) + '</p>';
     if (e.cle === 'reprendre') h += '<button type="button" class="bouton" data-compte="connecter">Reconnecter</button>';
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
@@ -67,7 +81,7 @@ window.Compte = (function () {
       var prenom = window.Cloud && window.Cloud.nom();
       var libelle = e.cle === 'deconnecte' || e.cle === 'reprendre' ? LIBELLE[e.cle] : (prenom || 'Compte');
       haut.innerHTML = '<button type="button" class="compte-bouton compte-' + e.cle + '" id="compte-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="compte-menu">' +
-        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + '' + '<i class="compte-point" aria-hidden="true"></i></button>' +
+        SILHOUETTE + '<span class="compte-libelle">' + esc(libelle) + '</span>' + (e.cle === 'deconnecte' || e.cle === 'reprendre' ? '' : niveauIcone()) + '<i class="compte-point" aria-hidden="true"></i></button>' +
         '<div class="compte-menu" id="compte-menu" role="group" aria-label="Mon compte" hidden>' + bloc(e) + '</div>';
     }
     var f = $('#compte-feuille');

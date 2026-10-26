@@ -2000,3 +2000,9 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rf-detail { min-height: 2.6em; margin: 6px 0 8px; }
 .rf-chiffres summary { cursor: pointer; color: var(--gold); }
 @media (max-width: 700px) { .rf-valeur { font-size: 26px; } .rf-nom { font-size: 24px; } }
+
+/* Niveau affiché à la personne connectée : icône et libellé */
+.compte-niveau { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; }
+.compte-niveau svg, .niveau-icone { flex: none; }
+.niveau-icone { margin-left: 4px; color: var(--gold); vertical-align: -2px; }
+.niveau-superadmin { color: var(--gold); border-color: var(--gold); }
