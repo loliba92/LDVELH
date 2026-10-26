@@ -1918,7 +1918,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 @media (max-width: 700px) { .dlg-bienvenue .bienvenue-img { height: 76px; border-radius: 15px 15px 0 0; } }
 
 /* Légende des niveaux de prix (visiteur) : cinq repères alignés, chacun d'un seul tenant */
-.niveaux { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-bottom: 6px; }
+.niveaux { display: flex; flex-wrap: nowrap; justify-content: space-between; gap: 4px; margin-bottom: 6px; font-size: .8rem; white-space: nowrap; }
 .rv-pas-ann { display: inline-block; margin-top: 4px; }
 .rv-lien-lib { display: inline-block; margin-top: 2px; white-space: nowrap; }
 .rv-titre a.rv-voir-ann { font: 600 .82rem var(--f-ui); color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }

@@ -1038,7 +1038,7 @@
   // Cinq niveaux à seuils fixes (en euros) : moins de 10, 10 à 20, 20 à 40, 40 à 70, 70 et plus. Les mêmes seuils pour les trois états.
   const SEUILS_COTE = [10, 20, 40, 70];
   const niveauCote = (v, k) => (v == null ? 0 : 1 + SEUILS_COTE.filter((x) => v >= x).length);
-  const LEGENDE_NIVEAUX = [['€', '&lt; 10 €'], ['€€', '10–20 €'], ['€€€', '20–40 €'], ['€€€€', '40–70 €'], ['€€€€€', '&gt; 70 €']]
+  const LEGENDE_NIVEAUX = [['€', '&lt; 10'], ['€€', '10–20'], ['€€€', '20–40'], ['€€€€', '40–70'], ['€€€€€', '&gt; 70']]
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
