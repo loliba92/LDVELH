@@ -9,8 +9,8 @@ import io
 import requests
 from PIL import Image
 
-SEUIL = 12        # distance de Hamming au-delà de laquelle deux images ne sont pas la même jaquette (sur 64 bits)
-MARGE = 6         # la meilleure édition doit être plus proche d'au moins cette distance que la deuxième
+SEUIL = 16        # distance de Hamming au-delà de laquelle deux images ne sont pas la même jaquette (sur 64 bits)
+MARGE = 4         # la meilleure édition doit être plus proche d'au moins cette distance que la deuxième
 DELAI = 10        # secondes
 
 
