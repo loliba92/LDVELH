@@ -9,12 +9,12 @@
   "raison": "pas assez d'éditions comparables (11 sur 20 nécessaires)",
   "fraicheur": {
     "bon": {
-      "rapport": 0.891,
-      "n": 8
+      "rapport": 0.894,
+      "n": 12
     },
     "tres_bon": {
-      "rapport": 1.037,
-      "n": 4
+      "rapport": 1.025,
+      "n": 10
     }
   },
   "sigma_archive": {},
