@@ -60,3 +60,27 @@ def serie(jours, isbn, etat):
         if connus:
             sortie[d] = estimation.lisser(connus, d, decote=DECOTE)
     return sortie
+
+
+def appliquer(brut, cle_isbn, dossier):
+    """Remplace, dans `brut` (observations par édition et par état), les annonces eBay par la v2.
+    Règle : une édition n'a une cote venant d'eBay que si au moins deux annonces sont en ligne le dernier jour ;
+    sinon elle garde son repère (archive). cle_isbn : {isbn13: version_key}. Renvoie le nombre d'observations ajoutées."""
+    jours = charger_jours(dossier)
+    if not jours:
+        return 0
+    dernier = max(jours)
+    isbn_de = {cle: isbn for isbn, cle in cle_isbn.items()}
+    couples = {(r["isbn13"], r["etat"]) for d in jours for r in jours[d] if r.get("isbn13") and r.get("etat")}
+    nb = 0
+    for isbn, etat in sorted(couples):
+        cle = cle_isbn.get(isbn)
+        if cle is None:
+            continue
+        actives = [r for r in jours[dernier] if r.get("isbn13") == isbn and r.get("etat") == etat]
+        if len(actives) < 2:
+            continue                                  # pas de cote sans repère : moins de deux annonces actuelles
+        obs = evenements(jours, isbn, etat)
+        brut.setdefault(cle, {}).setdefault(etat, []).extend(obs)
+        nb += len(obs)
+    return nb

@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
 import calibration
+import cote_v2
 import mouvements
 import rarete
 import veille_parutions
@@ -40,11 +41,12 @@ JOIN DimSerie sr ON sr.serie_key = v.serie_key
 ORDER BY sr.nom, v.numero_serie, v.numero_version
 """
 PRIX = """
-SELECT f.version_key, e.code, t.code, d.date, f.prix, f.nb_annonces
+SELECT f.version_key, e.code, t.code, d.date, f.prix, f.nb_annonces, s.code
 FROM FaitPrix f
 JOIN DimEtat e ON e.etat_key = f.etat_key
 JOIN DimTypePrix t ON t.type_key = f.type_key
 JOIN DimDate d ON d.date_key = f.date_key
+JOIN DimSource s ON s.source_key = f.source_key
 WHERE f.est_lot = 0
 """
 ETATS = ("convenable", "bon", "tres_bon")
@@ -119,7 +121,9 @@ def main():
     cx = sqlite3.connect(args.db)
     cx.row_factory = sqlite3.Row
     brut = {}
-    for cle, etat, type_prix, jour, valeur, nb in cx.execute(PRIX):
+    for cle, etat, type_prix, jour, valeur, nb, source in cx.execute(PRIX):
+        if args.db == DB and source == "ebay_api":
+            continue                                                                  # eBay : remplacé par la cote v2 (pipeline/cote_v2.py)
         brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
     valides = validations.lire()                                                          # prix validés par le propriétaire
     ecart = etats.charger_ecart(DB.parent.parent / "manual" / "ratios_etats.json")                  # écart minimal entre deux états
@@ -134,7 +138,7 @@ def main():
     nb_toutes, decotes = 0, {}
     if args.db == DB:
         cle_isbn = {r["isbn13"]: r["version_key"] for r in cx.execute(REQUETE) if r["isbn13"]}
-        nb_toutes, decotes = calibration.ajouter_toutes_annonces(brut, releves, cle_isbn, fraicheur)
+        cote_v2.appliquer(brut, cle_isbn, DB.parent.parent / "raw" / "occasion")   # eBay : cote v2, une annonce = une observation
     # Auto-apprentissage : le modèle apprend l'écart entre archives et annonces actuelles, et s'en sert de deux façons :
     # 1. l'incertitude de l'archive (par état) règle la confiance que le lissage lui accorde ;
     # 2. s'il bat les archives (validation croisée), il remet à niveau celles des éditions sans relevé actuel.
