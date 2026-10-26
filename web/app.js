@@ -899,8 +899,24 @@
     const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
     const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? `en hausse de ${(pct * 100).toFixed(1).replace('.', ',')} %` : `en baisse de ${(-pct * 100).toFixed(1).replace('.', ',')} %`;
     const lignes = points.slice(-10).map((p) => `<tr><th scope="row">${jour(p.d)}</th><td class="num">${fmtE(p.v)}</td></tr>`).join('');
-    return `${titre}<p class="sous">De ${fmtE(debut.v)} le ${jour(debut.d)} à ${fmtE(fin.v)} le ${jour(fin.d)} : ${sens}.</p>
-      <table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table>`;
+    // Courbe des relevés : l'axe ne part pas de zéro, pour que les variations se voient ; dates réparties selon le temps réel
+    const W = 640, H = 230, gx = 14, gh = 34, gb = 38;
+    const t = (d) => new Date(d + 'T12:00:00').getTime(), t0 = t(points[0].d), dt = (t(points[points.length - 1].d) - t0) || 1;
+    const vals = points.map((q) => q.v), vmin = Math.min(...vals), vmax = Math.max(...vals), marge = ((vmax - vmin) || vmax * 0.1) * 0.25;
+    const lo = vmin - marge, hi = vmax + marge;
+    const X = (d) => gx + 70 + ((t(d) - t0) / dt) * (W - 2 * gx - 140), Y = (v) => gh + ((hi - v) / (hi - lo)) * (H - gh - gb);
+    const trace = points.map((q, i) => `${i ? 'L' : 'M'}${X(q.d).toFixed(1)},${Y(q.v).toFixed(1)}`).join(' ');
+    const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
+    const pts = points.map((q) => `<circle cx="${X(q.d).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="5" class="ev-point"><title>${jour(q.d)} : ${esc(fmtE(q.v))}</title></circle>`).join('');
+    const etiq = (q, ancre) => `<text x="${X(q.d).toFixed(1)}" y="${(Y(q.v) - 12).toFixed(1)}" text-anchor="${ancre}" class="ev-valeur">${esc(fmtE(q.v))}</text>`;
+    const haut = points.reduce((m, q) => (q.v > m.v ? q : m), points[0]), bas = points.reduce((m, q) => (q.v < m.v ? q : m), points[0]);
+    const extremes = [haut, bas].filter((q) => q !== debut && q !== fin && vmax !== vmin).map((q) => etiq(q, 'middle')).join('');
+    const graphe = `<figure class="ev-graph ${couleur}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe du prix de ${esc(fmtE(debut.v))} le ${jour(debut.d)} à ${esc(fmtE(fin.v))} le ${jour(fin.d)}">
+        <path d="${trace}" class="ev-ligne" fill="none"/>${pts}${etiq(debut, 'start')}${etiq(fin, 'end')}${extremes}
+        <text x="${X(debut.d).toFixed(1)}" y="${H - 10}" text-anchor="start" class="ev-date">${jour(debut.d)}</text>
+        <text x="${X(fin.d).toFixed(1)}" y="${H - 10}" text-anchor="end" class="ev-date">${jour(fin.d)}</text></svg></figure>`;
+    return `${titre}<p class="sous">De ${fmtE(debut.v)} le ${jour(debut.d)} à ${fmtE(fin.v)} le ${jour(fin.d)} : ${sens}.</p>${graphe}
+      <details class="rf-chiffres"><summary>Voir les relevés</summary><table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table></details>`;
   }
 
   function ouvrirFiche(id) {
