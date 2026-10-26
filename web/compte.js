@@ -52,6 +52,7 @@ window.Compte = (function () {
     h += '<ul class="compte-liste">' +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butin</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
+      (role === 'admin' || role === 'superadmin' ? '<li><a href="evolutions.html">' + ico('butin') + 'Évolutions des prix</a></li>' : '') +
       (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('sorciers') + 'Prix et corrections</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +

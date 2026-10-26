@@ -1501,9 +1501,8 @@ table.coll-table td[data-label]::before { white-space: nowrap; overflow: hidden;
 .rang > *, .carte, .carte > * { min-width: 0; }
 .grille-ajouts { max-width: 100%; }
 
-/* Largeurs intermédiaires (tablette) : l'en-tête ne coupe plus aucun mot ; « Offrir un café » reste dans le pied de page et le menu « À propos » */
+/* Largeurs intermédiaires (tablette) : l'en-tête ne coupe plus aucun mot */
 @media (min-width: 701px) and (max-width: 1000px) {
-  .menu a.menu-cafe { display: none; }
   .menu .compte-bouton .compte-libelle { max-width: 13ch; overflow: hidden; text-overflow: ellipsis; }
   .marque-nom, .bandeau nav a, .bandeau nav summary, .bandeau .compte button { white-space: nowrap; }
 }

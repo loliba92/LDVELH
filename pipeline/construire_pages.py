@@ -94,6 +94,7 @@ def entete(courante):
       <a class="menu-maison" href="./"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
+      <a class="menu-cafe" href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg><span>Offrir un café</span></a>
       <div class="compte" id="compte-haut"></div>
     </nav>
   </div>
@@ -124,12 +125,10 @@ def feuille(courante, racine_a_propos="./#apropos"):
 BANDEAU = '<aside aria-label="Avis sur le site"><p class="bandeau-chantier"><strong>Site en construction.</strong> Prix en cours de vérification.</p></aside>'
 
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
-      <a href="evolutions.html">Évolutions des prix</a>
       <a href="le-projet.html">Le projet</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
       <a href="contact.html">Contact</a>
-      <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg>Offrir un café</a>
     </nav>'''
 
 
@@ -192,7 +191,7 @@ def page(nom, corps):
 {entete(nom)}
 </div>
 
-{(PORTE_CONNECTE if nom == "evolutions.html" else PORTE) if nom in GARDEES else ""}<main id="main" class="cadre page"{" hidden" if nom in GARDEES else ""}{f' data-niveau="{NIVEAU_PAGE[nom]}"' if nom in NIVEAU_PAGE else ""}>
+{PORTE if nom in GARDEES else ""}<main id="main" class="cadre page"{" hidden" if nom in GARDEES else ""}{f' data-niveau="{NIVEAU_PAGE[nom]}"' if nom in NIVEAU_PAGE else ""}>
 {corps}
 </main>
 
@@ -237,7 +236,7 @@ AJOUTER = '''<p class="surtitre">Contribuer</p>
 
 
 GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html", "ajouter.html", "butin.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
-NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros", "ajouter.html": "admin", "butin.html": "admin"}
+NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "admin", "ajouter.html": "admin", "butin.html": "admin"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
@@ -553,7 +552,7 @@ LE_PROJET = f'''<p class="surtitre">À propos du guide</p>
   <li>Une <strong>collection</strong> à tenir à jour, avec un inventaire guidé pour la constituer sans tout saisir à la main, et une liste « À trouver ». Les deux sont enregistrées dans votre Google Drive.</li>
   <li>Les <strong>nouveautés</strong> et les livres <strong>à paraître</strong>, repérés chaque jour.</li>
   <li>Pour chaque édition, un repère de prix par état : <strong>convenable, bon état, très bon état (TBE)</strong>.</li>
-  <li>Une page <a href="evolutions.html">Évolutions des prix</a>, pour les personnes connectées : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
+  <li>Une page <a href="evolutions.html">Évolutions des prix</a>, pour les sorciers et les Zagors : ce qui monte, ce qui baisse, et d'où viennent les changements.</li>
 </ul>
 
 <h2>Comment les prix sont estimés</h2>
