@@ -947,7 +947,7 @@
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
-              ${ligne('Pages', b.pages)}${ligne('Rareté', b.rarete ? `${RARETE[b.rarete.niveau]} <span class="sous">(${b.rarete.tirages ? 'imprimé ' + b.rarete.tirages + ' fois par Gallimard' : ''}${b.rarete.tirages && b.rarete.pct != null ? ' ; ' : ''}${b.rarete.pct != null ? 'dans ' + b.rarete.pct + ' % des collections saisies sur collection-ldvelh.fr' : ''} ; une information, qui n'entre pas dans la cote)</span>` : '')}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
+              ${ligne('Pages', b.pages)}${ligne('Rareté', b.rarete ? RARETE[b.rarete.niveau] : '')}${ligne('ISBN', esc(b.isbn13))}${ligne('Source', notice)}
             </dl>
 
         ${blocNeuf(b)}

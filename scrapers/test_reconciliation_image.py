@@ -77,3 +77,38 @@ class TestReconciliationImage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(ri.disponible(), "OpenCV absent")
+class TestTitreSeul(unittest.TestCase):
+    def test_annonce_avec_la_bonne_photo_est_gardee(self):
+        rnd = random.Random(8)
+        livres = livres_a_plusieurs_editions()
+        isbns = livres[sorted(livres)[0]]
+        cible = isbns[0]
+        item = {"itemId": "9", "_titre_seul": True, "image": {"imageUrl": "x"}}
+
+        class Faux:
+            def get(self, url, timeout=None):
+                class R:
+                    status_code = 200
+                    content = photo_de(cible, rnd)
+                return R()
+        out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
+        self.assertEqual(len(out[cible]), 1)
+
+    def test_annonce_avec_une_autre_photo_est_ecartee(self):
+        rnd = random.Random(9)
+        livres = livres_a_plusieurs_editions()
+        isbns = livres[sorted(livres)[0]]
+        cible, autre = isbns[0], isbns[-1]
+        item = {"itemId": "9", "_titre_seul": True, "image": {"imageUrl": "x"}}
+
+        class Faux:
+            def get(self, url, timeout=None):
+                class R:
+                    status_code = 200
+                    content = photo_de(autre, rnd)
+                return R()
+        out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
+        self.assertEqual(out[cible], [])

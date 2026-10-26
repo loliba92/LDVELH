@@ -126,7 +126,10 @@ def requetes_complementaires(ed):
     num = (ed.get("numero") or "").strip().lstrip("0")
     livre = ed.get("livre") or ed.get("titre") or ""
     auteur = (ed.get("auteurs") or "").split(";")[0].strip()
-    q = [" ".join(x for x in (livre, auteur) if x), f"{livre} livre dont vous êtes le héros", " ".join(x for x in (livre, serie, num) if x)]
+    isbn = (ed.get("isbn13") or "").strip()
+    q = [" ".join(x for x in (livre, auteur) if x), f"{livre} livre dont vous êtes le héros", f"{livre} livre dont vous êtes le héro", f"{livre} ldvelh", " ".join(x for x in (livre, serie, num) if x)]
+    if isbn:
+        q.append(f"{livre} {isbn}")
     vues, sortie = set(), []
     for t in q:
         if t.strip() and len(mots(livre)) >= 2 and t not in vues:
@@ -521,6 +524,7 @@ def main():
         par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
     import reconciliation_image                                  # réconciliation par image : une annonce vue sous plusieurs éditions va à celle dont la jaquette lui ressemble
     par_isbn = reconciliation_image.reconcilier(par_isbn, {c[0]: c[3] for c in cat}, RACINE / "web" / "covers")
+    par_isbn = reconciliation_image.verifier_photos(par_isbn, RACINE / "web" / "covers")      # toute annonce retenue : la photo doit montrer l'édition à laquelle elle est rattachée
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     annonces_gardees = []
     for isbn, titre, nb_ed, livre, annees in cat:

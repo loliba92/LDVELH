@@ -217,6 +217,20 @@ class TestEbay(unittest.TestCase):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])
 
 
+class TestRequetesLdvelh(unittest.TestCase):
+    def test_titre_plus_ldvelh_est_une_requete(self):
+        ed = {"livre": "Les Terres de Légende", "serie": "Terres de Légende", "numero": "577", "auteurs": "Joe Dever"}
+        self.assertIn("Les Terres de Légende ldvelh", ebay_api.requetes_complementaires(ed))
+
+    def test_orthographe_sans_s_est_une_requete(self):
+        ed = {"livre": "Les Terres de Légende"}
+        self.assertIn("Les Terres de Légende livre dont vous êtes le héro", ebay_api.requetes_complementaires(ed))
+
+    def test_titre_plus_isbn_est_une_requete(self):
+        ed = {"livre": "Les Terres de Légende", "isbn13": "9782070335770"}
+        self.assertIn("Les Terres de Légende 9782070335770", ebay_api.requetes_complementaires(ed))
+
+
 class TestFraisPort(unittest.TestCase):
     def test_frais_lus_et_ajoutes_au_prix(self):
         self.assertEqual(ebay_api.frais_port(avec_port(10, 4.5)), 4.5)
