@@ -222,6 +222,10 @@ class TestRequetesLdvelh(unittest.TestCase):
         ed = {"livre": "Les Terres de Légende", "serie": "Terres de Légende", "numero": "577", "auteurs": "Joe Dever"}
         self.assertIn("Les Terres de Légende ldvelh", ebay_api.requetes_complementaires(ed))
 
+    def test_titre_plus_isbn_est_une_requete(self):
+        ed = {"livre": "Les Terres de Légende", "isbn13": "9782070335770"}
+        self.assertIn("Les Terres de Légende 9782070335770", ebay_api.requetes_complementaires(ed))
+
 
 class TestFraisPort(unittest.TestCase):
     def test_frais_lus_et_ajoutes_au_prix(self):
