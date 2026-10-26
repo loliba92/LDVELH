@@ -222,6 +222,10 @@ class TestRequetesLdvelh(unittest.TestCase):
         ed = {"livre": "Les Terres de Légende", "serie": "Terres de Légende", "numero": "577", "auteurs": "Joe Dever"}
         self.assertIn("Les Terres de Légende ldvelh", ebay_api.requetes_complementaires(ed))
 
+    def test_orthographe_sans_s_est_une_requete(self):
+        ed = {"livre": "Les Terres de Légende"}
+        self.assertIn("Les Terres de Légende livre dont vous êtes le héro", ebay_api.requetes_complementaires(ed))
+
     def test_titre_plus_isbn_est_une_requete(self):
         ed = {"livre": "Les Terres de Légende", "isbn13": "9782070335770"}
         self.assertIn("Les Terres de Légende 9782070335770", ebay_api.requetes_complementaires(ed))
