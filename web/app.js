@@ -1530,6 +1530,11 @@
     const stables = mouv.filter((x) => Math.abs(x.delta) <= 0.004).length, bouges = mouv.length - stables;
     const bilan = `${bouges} livre${bouges > 1 ? 's ont' : ' a'} bougé et ${stables} n'${stables > 1 ? 'ont' : 'a'} pas bougé depuis le ${jour(HIST.dates[0], true)}.`;
     const cle = (lib, val, cls = '') => `<li class="${cls}"><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
+    // Roll-forward (partie prix) : valeur de départ, hausses, baisses, valeur d'aujourd'hui. Les entrées et sorties ne sont pas suivies ici.
+    const hausses = mouv.filter((x) => x.delta > 0.004), baisses = mouv.filter((x) => x.delta < -0.004);
+    const somme = (liste) => liste.reduce((t, x) => t + x.delta, 0);
+    const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
+    const rollforward = `<ul class="coll-cles hc-cles" aria-label="De ${jour(HIST.dates[0], true)} à aujourd'hui">${cle('Valeur au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
       <div class="hc-grille">
@@ -1538,6 +1543,7 @@
       </div>
       <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
       <p class="sous hc-bilan">${bilan}</p>
+      ${rollforward}
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
