@@ -773,6 +773,7 @@
   // Visible seulement pour un compte Sorcier ou Zagor connecté (niveau donné par le relais, voir relais/ et compte.js).
   // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
   const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le Zagor corrige (niveau donné par le relais)
+  const estSorcier = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // sorciers et Zagors : l'historique, pas les corrections
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -1714,8 +1715,8 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    if (CTAB === 'historique' && !estProprietaire()) CTAB = 'livres';           // l'historique est réservé aux sorciers
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estProprietaire() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
+    if (CTAB === 'historique' && !estSorcier()) CTAB = 'livres';           // l'historique est réservé aux sorciers et aux Zagors
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estSorcier() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1733,7 +1734,7 @@
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
-      ${estProprietaire() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
+      ${estSorcier() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
