@@ -888,6 +888,21 @@
     document.addEventListener('cdh-compte', retenter);
   }
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
+  // Évolution du prix d'une édition dans un état, d'après les relevés (sorciers et Zagors)
+  function blocEvolution(b, etat) {
+    const titre = '<h3>Évolution du prix</h3>';
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return `${titre}<p class="sous">L'évolution se construit avec les relevés : revenez dans quelques jours.</p>`;
+    const a = HIST.cotes[`${b.id}|${etat}`] || [];
+    const points = HIST.dates.map((d, i) => ({ d, v: a[i] })).filter((p) => p.v != null && p.v > 0);
+    if (points.length < 2) return `${titre}<p class="sous">Pas encore assez de relevés pour cet état.</p>`;
+    const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
+    const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? `en hausse de ${(pct * 100).toFixed(1).replace('.', ',')} %` : `en baisse de ${(-pct * 100).toFixed(1).replace('.', ',')} %`;
+    const lignes = points.slice(-10).map((p) => `<tr><th scope="row">${jour(p.d)}</th><td class="num">${fmtE(p.v)}</td></tr>`).join('');
+    return `${titre}<p class="sous">De ${fmtE(debut.v)} le ${jour(debut.d)} à ${fmtE(fin.v)} le ${jour(fin.d)} : ${sens}.</p>
+      <table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table>`;
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -925,6 +940,7 @@
 
           </div>
         </div>
+        ${estSorcier() ? blocEvolution(b, sel.k) : ''}
         ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
