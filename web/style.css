@@ -2007,3 +2007,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .compte-niveau svg, .niveau-icone { flex: none; }
 .niveau-icone { margin-left: 4px; color: var(--gold); vertical-align: -2px; }
 .niveau-superadmin { color: var(--gold); border-color: var(--gold); }
+
+/* Fiche : courbe d'évolution du prix (sorciers et Zagors) */
+.ev-graph { margin: 6px 0 4px; max-width: 520px; }
+.ev-graph svg { display: block; width: 100%; height: auto; }
+.ev-ligne { stroke: var(--gold); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.ev-hausse .ev-ligne { stroke: #7fd69c; } .ev-baisse .ev-ligne { stroke: #f08f99; }
+.ev-point { fill: var(--surface, #111); stroke: var(--gold); stroke-width: 2.5; }
+.ev-hausse .ev-point { stroke: #7fd69c; } .ev-baisse .ev-point { stroke: #f08f99; }
+.ev-valeur { fill: var(--text); font: 700 20px var(--f-ui); }
+.ev-date { fill: var(--muted); font: 18px var(--f-ui); }
+@media (max-width: 700px) { .ev-valeur { font-size: 24px; } .ev-date { font-size: 22px; } }
