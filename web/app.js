@@ -1509,7 +1509,24 @@
     });
     return { n, tot, mouv, suivis };
   }
+  // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
+  let RFSEG = 'decennie', RF_BL = null;
+  function rollforwardTable(bl) {
+    const { mouv } = serieValeur(bl);
+    const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
+    const groupes = new Map();
+    mouv.forEach((x) => {
+      const k = clef(x.b, x.c), g = groupes.get(k) || { nom: k, d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 };
+      g.d += x.d * x.c.qte; g.f += x.f * x.c.qte;
+      if (x.delta > 0.004) { g.hausse += x.delta; g.nh += 1; } else if (x.delta < -0.004) { g.baisse += x.delta; g.nb += 1; }
+      groupes.set(k, g);
+    });
+    const lignes = [...groupes.values()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { numeric: true }));
+    return `<table class="rf-table"><caption class="sr-only">Roll-forward par ${nomSeg.toLowerCase()}</caption><thead><tr><th scope="col">${nomSeg}</th><th scope="col" class="num">Début</th><th scope="col" class="num">Hausses</th><th scope="col" class="num">Baisses</th><th scope="col" class="num">Aujourd'hui</th></tr></thead><tbody>${lignes.map((g) => `<tr><th scope="row">${esc(g.nom)}</th><td class="num">${fmtE(g.d)}</td><td class="num">+ ${fmtE(g.hausse)} <small>(${g.nh})</small></td><td class="num">− ${fmtE(Math.abs(g.baisse))} <small>(${g.nb})</small></td><td class="num">${fmtE(g.f)}</td></tr>`).join('')}</tbody></table>`;
+  }
+
   function historiquePane(bl) {
+    RF_BL = bl;
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '<p class="vide-global">L\'historique se construit avec les relevés de prix : revenez dans quelques jours.</p>';
     const { n, tot, mouv, suivis } = serieValeur(bl);
     if (!suivis) return '<p class="vide-global">Aucun de vos livres n\'a encore de cote : l\'historique apparaîtra avec les prochains relevés.</p>';
@@ -1544,6 +1561,8 @@
       <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
       <p class="sous hc-bilan">${bilan}</p>
       ${rollforward}
+      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div id="rf-tableau">${rollforwardTable(bl)}</div>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
@@ -1611,7 +1630,7 @@
     e.preventDefault(); ouvrirOnglet(dispo[j]); $('#onglet-coll-' + dispo[j]).focus();
   });
   window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (ALIAS_ONGLET[h] && $('#collection')) { ouvrirOnglet(ALIAS_ONGLET[h], { aller: true }); } });
-  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } });
+  document.addEventListener('change', (e) => { if (e.target.id === 'coll-segment') { CSEG = e.target.value; $('#coll-seg').innerHTML = barresSegment(bilan()); } if (e.target.id === 'rf-segment' && RF_BL) { RFSEG = e.target.value; $('#rf-tableau').innerHTML = rollforwardTable(RF_BL); } });
   // Une barre de répartition ouvre « Mes livres » filtré sur ce segment
   document.addEventListener('click', (e) => {
     const l = e.target.closest('.seg-clic'); if (!l) return;
