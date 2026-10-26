@@ -189,3 +189,27 @@ def reconcilier(par_isbn, livres, dossier_covers, http=requests):
                 if isbn != retenu:
                     par_isbn[isbn] = [it for it in par_isbn[isbn] if it.get("itemId") != item_id]
     return par_isbn
+
+
+def verifier_titre_seul(par_isbn, dossier_covers, http=requests):
+    """Une annonce trouvée seulement par le titre n'est gardée que si sa photo montre la jaquette de l'édition à laquelle
+    elle est rattachée. Sans photo lisible, ou sans jaquette de notre côté, elle est écartée : on ne la vérifie pas."""
+    if not DISPONIBLE:
+        return par_isbn
+    for isbn, items in par_isbn.items():
+        jaquette = jaquette_locale(dossier_covers, isbn)
+        gardees = []
+        for it in items:
+            if not it.get("_titre_seul"):
+                gardees.append(it)
+                continue
+            if jaquette is None:
+                continue
+            octets = empreinte_annonce(it, http)
+            if octets is None:
+                continue
+            retenu, _ = decider(octets, {isbn: jaquette})
+            if retenu == isbn:
+                gardees.append(it)
+        par_isbn[isbn] = gardees
+    return par_isbn
