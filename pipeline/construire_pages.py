@@ -7,6 +7,7 @@ dans web/index.html, qui reste écrit à la main). Les textes juridiques décriv
 voir docs/CONFORMITE.md pour la vérification faite dans le code.
 """
 import json
+import re
 from pathlib import Path
 
 WEB = Path(__file__).resolve().parent.parent / "web"
@@ -34,6 +35,8 @@ def ico(d):
 
 
 PAGES = {
+    "butin.html": ("Butin", "Butin · La Cote du Héros",
+                   "Les bonnes affaires : annonces encore en ligne à moitié prix de la cote ou moins. Réservé aux sorciers et aux Zagors."),
     "ajouter.html": ("Ajouter des livres", "Ajouter des livres · La Cote du Héros",
                      "Ajout de livres au guide par scanner ou liste d'ISBN, réservé aux sorciers et aux Zagors."),
     "revue-prix.html": ("Revue des prix", "Revue des prix · La Cote du Héros",
@@ -130,10 +133,29 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
     </nav>'''
 
 
+def _butin():
+    """Page Butin : la page des prix avec le seul onglet Butin (même code, même données)."""
+    lignes = []
+    for l in REVUE.split("\n"):
+        if re.search(r'data-pane="(prix|tendances|annonces|ajout)"', l):
+            continue
+        if l.startswith('<div class="rv-pane" id="pane-') and "hidden" not in l and 'id="pane-pepites"' not in l:
+            l = l.replace('role="tabpanel">', 'role="tabpanel" hidden>', 1)
+        if 'id="pane-pepites"' in l:
+            l = l.replace(" hidden>", ">")
+        if l.startswith("<h1>Espace Zagor"):
+            l = "<h1>Butin</h1>"
+        if 'data-pane="pepites"' in l:
+            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">')
+        lignes.append(l)
+    return "\n".join(lignes)
+
+
+
 def page(nom, corps):
     court, titre, desc = PAGES[nom]
     corps = corps.replace("{ISSUES}", ISSUES)
-    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html", "evolutions.html") else ""
+    noindex = '\n<meta name="robots" content="noindex">' if nom in ("mentions-legales.html", "revue-prix.html", "equipe.html", "devenir-admin.html", "evolutions.html", "butin.html", "ajouter.html") else ""
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -214,13 +236,14 @@ AJOUTER = '''<p class="surtitre">Contribuer</p>
 '''
 
 
-GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html", "ajouter.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
-NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros", "ajouter.html": "admin"}
+GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html", "ajouter.html", "butin.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
+NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "heros", "ajouter.html": "admin", "butin.html": "admin"}
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
                "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>',
-               "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>'}
+               "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>',
+               "butin.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Espace réservé</p>
@@ -889,7 +912,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute()),
                        ("devenir-admin.html", DEVENIR_ADMIN)):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)

@@ -1044,8 +1044,8 @@
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
-  // Accès discret au Butin sur l'accueil : Zagor seulement (le rôle arrive après le chargement)
-  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSuper(); };
+  // Accès discret au Butin sur l'accueil : sorciers et Zagors (le rôle arrive après le chargement)
+  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSorcier(); };
   document.addEventListener('cdh-compte', majButin);
   majButin();
   // Le compte change (connexion, expiration, déconnexion) : la collection et la fiche ouverte se redessinent

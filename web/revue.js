@@ -538,7 +538,7 @@
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // les annonces ne sont montrées qu'au Zagor
+  const estSuper = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // annonces et Butin : sorciers et Zagors (les annonces sont lues par le relais)
   const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
   const voirAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
   function annoncesEdition(ed) {
