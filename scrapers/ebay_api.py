@@ -216,6 +216,19 @@ def parle_de_la_collection(titre_annonce, ed):
     return False
 
 
+def frais_port(item):
+    """Frais de port annoncés (en euros), le moins cher des modes de livraison proposés ; None si l'annonce n'en indique pas."""
+    couts = []
+    for option in item.get("shippingOptions") or []:
+        cout = (option.get("shippingCost") or {})
+        if cout.get("currency", "EUR") == "EUR" and cout.get("value") not in (None, ""):
+            try:
+                couts.append(float(cout["value"]))
+            except ValueError:
+                continue
+    return min(couts) if couts else None
+
+
 def retenues(items, jour, titre=None, annees=None, ed=None):
     """Annonces que le relevé garde pour une édition : [(annonce, état, prix, ancienne)]. « ancienne » : plus de MAX_AGE_JOURS jours
     (gardée pour les statistiques, pas pour la cote). Lots, devises étrangères, autres livres et autres années sont écartés."""
@@ -238,7 +251,8 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            sortie.append((it, etat, valeur, ancienne))
+            # Prix total pour l'acheteur : le prix de l'annonce plus les frais de port (0 si l'annonce ne les indique pas)
+            sortie.append((it, etat, valeur + (frais_port(it) or 0.0), ancienne))
     return sortie
 
 
