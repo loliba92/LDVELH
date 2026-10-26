@@ -1527,6 +1527,8 @@
     const phrase = Math.abs(ev) < 0.005 ? `Valeur stable depuis le ${jour(HIST.dates[0], true)} : ${fmtE(v1)}.` : `De ${fmtE(v0)} le ${jour(HIST.dates[0], true)} à ${fmtE(v1)} le ${jour(HIST.dates[n - 1], true)} (${ev > 0 ? 'hausse' : 'baisse'} de ${pct} %).`;
     const lignes = HIST.dates.map((d, i) => `<tr><td>${jour(d, true)}</td><td class="num">${fmtE(tot[i])}</td><td class="num">${i ? `${tot[i] - tot[i - 1] >= 0 ? '+' : '−'}${fmtE(Math.abs(tot[i] - tot[i - 1]))}` : '—'}</td></tr>`).join('');
     const total = bl.exemplaires, dir = Math.abs(ev) < 0.005 ? '' : ev > 0 ? 'hausse' : 'baisse';
+    const stables = mouv.filter((x) => Math.abs(x.delta) <= 0.004).length, bouges = mouv.length - stables;
+    const bilan = `${bouges} livre${bouges > 1 ? 's ont' : ' a'} bougé et ${stables} n'${stables > 1 ? 'ont' : 'a'} pas bougé depuis le ${jour(HIST.dates[0], true)}.`;
     const cle = (lib, val, cls = '') => `<li class="${cls}"><span class="cle-lib">${lib}</span><b>${val}</b></li>`;
     return `<h3 id="titre-historique">Valeur de ma collection dans le temps</h3>
       <p class="hc-phrase" role="status">${phrase}</p>
@@ -1535,6 +1537,7 @@
         <ul class="coll-cles hc-cles" aria-label="Repères">${cle('Au ' + jour(HIST.dates[0], true), fmtE(v0))}${cle('Au ' + jour(HIST.dates[n - 1], true), fmtE(v1))}${cle('Évolution', dir ? `<span class="fleche-${dir}">${ev > 0 ? '▲ +' : '▼ −'}${pct} %</span>` : '0 %')}</ul>
       </div>
       <p class="sous hc-note">Mêmes livres, mêmes états à chaque date : seule la cote change.${suivis < total ? ` ${total - suivis} exemplaire${total - suivis > 1 ? 's' : ''} sans cote ne ${total - suivis > 1 ? 'sont' : 'est'} pas compté${total - suivis > 1 ? 's' : ''}.` : ''} Un livre qui n'avait pas encore de cote garde sa première cote connue.</p>
+      <p class="sous hc-bilan">${bilan}</p>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', mouv.filter((x) => x.delta > 0.004).sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', mouv.filter((x) => x.delta < -0.004).sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
   function analysePane(bl) {
@@ -1715,7 +1718,7 @@
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
     if (CTAB === 'historique' && !estSorcier()) CTAB = 'livres';           // l'historique est réservé aux sorciers et aux Zagors
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estSorcier() ? [['historique', 'Historique', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estSorcier() ? [['historique', 'Mouvements', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
