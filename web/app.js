@@ -1168,19 +1168,26 @@
     if (prix <= 1.5 * pub) return 'dessus';
     return 'cher';
   };
-  const verdictLigne = (a, ed) => {
-    if (a.statut === 'vendu') return '';
-    const pub = ed && ed.prix ? ed.prix[etatDe(a.etat).k] : null, v = verdictImport(a.prix, pub);
-    if (!v) return '<span class="ann-vs"><span class="rc-vs">pas de prix sur le site</span></span>';
-    const ecart = Math.round((a.prix / pub - 1) * 100);
-    return `<span class="ann-vs"><span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span><span class="rc-vs">site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span></span>`;
+  const RANG_IMPORT = { pepite: 0, dessous: 1, dans: 2, dessus: 3, cher: 4 };
+  const infosImport = (a) => {
+    const ed = DATA.find((b) => b.isbn13 === a.isbn), pub = ed && ed.prix ? ed.prix[etatDe(a.etat).k] : null, vendu = a.statut === 'vendu';
+    return { ed, pub, vendu, v: vendu ? null : verdictImport(a.prix, pub) };
+  };
+  // Une annonce : le titre et le prix sur la première ligne, le verdict et le détail sur la seconde ; toute la ligne ouvre l'annonce
+  const ligneImport = (a) => {
+    const { ed, pub, vendu, v } = infosImport(a);
+    const nom = ed ? `${ed.titre} (${ed.version})` : a.isbn;
+    const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
+    const detail = [etatDe(a.etat).long, vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].join(' · ');
+    return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce Leboncoin (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
+      <span class="imp-ligne2">${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
   async function ouvrirImports() {
     let dlg = $('#imp-dialog');
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'imp-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'imp-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Derniers imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="annonces-corps"></div></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Derniers imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'imp-fermer') dlg.close(); });
     }
@@ -1189,13 +1196,13 @@
     dlg.showModal();
     try {
       const imports = await lireImports();
-      const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-      const nbPepites = (im) => im.lignes.filter((a) => a.statut !== 'vendu' && verdictImport(a.prix, (DATA.find((b) => b.isbn13 === a.isbn) || {}).prix ? DATA.find((b) => b.isbn13 === a.isbn).prix[etatDe(a.etat).k] : null) === 'pepite').length;
-      corps.innerHTML = (imports.length ? imports.map((im) => `<h4>${esc(quand(im.t))} · ${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}${nbPepites(im) ? ` · ${nbPepites(im)} pépite${nbPepites(im) > 1 ? 's' : ''}` : ''}</h4><ul>${im.lignes.map((a) => {
-        const ed = DATA.find((b) => b.isbn13 === a.isbn);
-        const nom = ed ? `${ed.titre} (${ed.version})` : a.isbn;
-        return `<li><span class="ann-prix">${fmt(a.prix)}</span><a href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce Leboncoin (nouvel onglet) : ${esc(nom)}">${esc(nom)} ↗</a><span class="ann-ligne"><span class="ann-titre">${esc(etatDe(a.etat).long)}${a.statut === 'vendu' ? ' · vendu' : ''}</span>${verdictLigne(a, ed)}</span></li>`;
-      }).join('')}</ul>`).join('') : '<p class="sous">Aucun import trouvé dans l\'historique récent.</p>')
+      const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
+      const rang = (a) => { const { v, vendu } = infosImport(a); return vendu ? 9 : v ? RANG_IMPORT[v] : 8; };          // les pépites d'abord, les annonces vendues à la fin
+      corps.innerHTML = (imports.length ? imports.map((im) => {
+        const nbPep = im.lignes.filter((a) => infosImport(a).v === 'pepite').length;
+        const lignes = im.lignes.map((a, k) => [a, k]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map((x) => x[0]);
+        return `<h4 class="imp-tete"><span>${esc(quand(im.t))}</span><span class="imp-compte">${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}${nbPep ? ` · <b class="imp-pep">${nbPep} pépite${nbPep > 1 ? 's' : ''}</b>` : ''}</span></h4><ul class="imp-liste">${lignes.map(ligneImport).join('')}</ul>`;
+      }).join('') : '<p class="sous">Aucun import trouvé dans l\'historique récent.</p>')
         + (urlJournalImports ? `<p class="sous"><a href="${esc(urlJournalImports)}" target="_blank" rel="noopener noreferrer">Journal de la dernière exécution ↗</a></p>` : '');
     } catch (e) { corps.innerHTML = '<p class="sous">Impossible de lire l\'historique pour le moment (limite de l\'interface publique de GitHub). Réessayez dans quelques minutes.</p>'; }
   }
