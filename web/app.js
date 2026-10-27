@@ -1563,7 +1563,7 @@
   // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
   // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
   const chargerImage = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
-  const MENTION_CARTE = ['Annonce à vérifier avant d\'acheter.', 'La Cote du Héros ne prend ni marge ni commission · lacoteduheros.fr'];
+  const MENTION_CARTE = ['Annonce à vérifier avant d\'acheter.', 'La Cote du Héros ne prend ni marge ni commission.'];
   async function dessinerCarte(b, x) {
     const L = 1080, H = 1350, c = document.createElement('canvas');
     c.width = L; c.height = H;
@@ -1572,43 +1572,44 @@
     try { await Promise.all([document.fonts.load(`700 64px ${serif}`), document.fonts.load(`700 30px ${ui}`), document.fonts.load(`400 30px ${ui}`)]); } catch (e) { /* polices de secours */ }
     const lettres = (v) => { if ('letterSpacing' in g) g.letterSpacing = v; };
     g.fillStyle = '#000'; g.fillRect(0, 0, L, H);
-    const lueur = g.createRadialGradient(L / 2, 480, 40, L / 2, 480, 780);
+    const lueur = g.createRadialGradient(L / 2, 470, 40, L / 2, 470, 780);
     lueur.addColorStop(0, 'rgba(217,180,95,.22)'); lueur.addColorStop(1, 'rgba(0,0,0,0)');
     g.fillStyle = lueur; g.fillRect(0, 0, L, H);
     g.strokeStyle = or; g.lineWidth = 3; g.strokeRect(28, 28, L - 56, H - 56); g.lineWidth = 1; g.strokeRect(44, 44, L - 88, H - 88);
     g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-    g.fillStyle = or; g.font = `700 36px ${ui}`; lettres('14px'); g.fillText('PÉPITE', L / 2 + 7, 122); lettres('0px');
-    // couverture, dans une boîte de 470 × 640
+    g.fillStyle = or; g.font = `700 52px ${ui}`; lettres('18px'); g.fillText('PÉPITE', L / 2 + 9, 128); lettres('0px');
+    // couverture, dans une boîte de 500 × 690
     const img = b.couverture ? await chargerImage(racine(b.couverture_grande || b.couverture)) : null;
-    const bw = 470, bh = 640, by = 160;
+    const bw = 500, bh = 690, by = 165;
     if (img) {
       const k = Math.min(bw / img.naturalWidth, bh / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k, x0 = (L - w) / 2, y0 = by + (bh - h) / 2;
       g.save(); g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 36; g.shadowOffsetY = 14; g.fillStyle = '#111'; g.fillRect(x0, y0, w, h); g.restore();
       g.drawImage(img, x0, y0, w, h);
       g.strokeStyle = 'rgba(217,180,95,.55)'; g.lineWidth = 2; g.strokeRect(x0, y0, w, h);
     } else {
-      g.fillStyle = '#111'; g.fillRect((L - 420) / 2, by, 420, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 420) / 2, by, 420, bh);
-      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 400);
+      g.fillStyle = '#111'; g.fillRect((L - 440) / 2, by, 440, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 440) / 2, by, 440, bh);
+      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 420);
     }
-    // titre sur une ou deux lignes
-    g.fillStyle = creme; g.font = `700 66px ${serif}`;
+    // titre sur une ou deux lignes, puis la série
+    g.fillStyle = creme; g.font = `700 64px ${serif}`;
     const lignes = []; let cur = '';
     (b.titre || '').split(/\s+/).forEach((m) => { const t = cur ? cur + ' ' + m : m; if (g.measureText(t).width > 900 && cur) { lignes.push(cur); cur = m; } else cur = t; });
     lignes.push(cur);
     if (lignes.length > 2) { let l2 = lignes.slice(1).join(' '); while (g.measureText(l2 + '…').width > 900 && l2.length > 1) l2 = l2.slice(0, -1); lignes.splice(1, lignes.length, l2 + '…'); }
-    lignes.forEach((l, k) => g.fillText(l, L / 2, 880 + k * 68));
+    lignes.forEach((l, k) => g.fillText(l, L / 2, 930 + k * 66));
+    const yS = 930 + (lignes.length - 1) * 66 + 54;
     g.fillStyle = sourd; g.font = `400 32px ${ui}`;
-    g.fillText(`${b.serie || ''}${numero(b)} · ${b.version} · ${x.etat}`, L / 2, 880 + (lignes.length - 1) * 68 + 68);
-    // prix de l'annonce, puis cote et économie
-    g.fillStyle = or; g.font = `700 150px ${serif}`; g.fillText(fmt(x.prix), L / 2, 1105);
-    const morceaux = [[x.pub ? `au lieu de ${fmt(x.pub)}` : 'annonce trouvée', sourd]];
-    if (x.pct != null) { morceaux.push(['  ·  ', sourd]); morceaux.push([`−${x.pct} %`, or]); }
-    g.font = `600 40px ${ui}`; g.textAlign = 'left';
-    const total = morceaux.reduce((t, [m]) => t + g.measureText(m).width, 0); let px = (L - total) / 2;
-    morceaux.forEach(([m, col]) => { g.fillStyle = col; g.fillText(m, px, 1190); px += g.measureText(m).width; });
-    // mention : le guide ne prend ni marge ni commission
-    g.textAlign = 'center'; g.fillStyle = sourd; g.font = `400 26px ${ui}`;
-    g.fillText(MENTION_CARTE[0], L / 2, 1240); g.fillText(MENTION_CARTE[1], L / 2, 1274);
+    g.fillText(`${b.serie || ''}${numero(b)} · ${b.version}`, L / 2, yS);
+    // macaron : l'économie en pourcentage, sans prix ni cote
+    const mot = x.pct != null ? `−${x.pct} % sous la cote` : 'sous la cote';
+    g.font = `700 48px ${ui}`;
+    const mw = g.measureText(mot).width + 80, my = yS + 34;
+    g.fillStyle = or; g.beginPath(); g.roundRect((L - mw) / 2, my, mw, 76, 38); g.fill();
+    g.fillStyle = '#000'; g.fillText(mot, L / 2, my + 53);
+    // appel et mention
+    g.fillStyle = or; g.font = `600 32px ${ui}`; g.fillText('Voir la fiche sur lacoteduheros.fr', L / 2, 1240);
+    g.fillStyle = sourd; g.font = `400 25px ${ui}`;
+    g.fillText(MENTION_CARTE[0], L / 2, 1272); g.fillText(MENTION_CARTE[1], L / 2, 1298);
     return new Promise((ok) => c.toBlob(ok, 'image/png'));
   }
   let CARTE = null, urlCarte = '';
@@ -1630,7 +1631,7 @@
         $('#carte-msg').textContent = 'Image enregistrée. Ajoutez-la à votre publication.';
       } else if (e.target.closest('[data-carte-partager]')) {
         const f = new File([CARTE.blob], CARTE.nom, { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'La Cote du Héros', text: CARTE.texte + ' ' + CARTE.url }).catch(() => {});
+        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'La Cote du Héros', text: CARTE.texte }).catch(() => {});
         else if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: CARTE.texte, url: CARTE.url }).catch(() => {});
         else { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(CARTE.url) + '&quote=' + encodeURIComponent(CARTE.texte), '_blank', 'noopener'); $('#carte-msg').textContent = 'Enregistrez aussi l\'image pour l\'ajouter à votre publication.'; }
       }
@@ -1642,7 +1643,7 @@
     const t = e.target.closest('[data-partager]'); if (!t) return;
     const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
     const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html' : 'index.html#fiche=' + encodeURIComponent(b.id));
-    const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}. À vérifier avant d'acheter. La Cote du Héros ne prend ni marge ni commission.`;
+    const texte = `Pépite sur La Cote du Héros : ${b.titre} (${b.serie}${numero(b)}, ${b.version})${x.pct != null ? ', une annonce à ' + x.pct + ' % sous la cote' : ''}. Voir la fiche : ${url}. À vérifier avant d'acheter. La Cote du Héros ne prend ni marge ni commission.`;
     const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
     CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de la carte…';
     d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = true; });
