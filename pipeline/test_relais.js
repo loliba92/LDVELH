@@ -23,6 +23,35 @@ test('liste des comptes : du plus récent au plus ancien, arrivées du jour comp
   assert.strictEqual(r.aujourdhui, 2); assert.strictEqual(r.connus, 3);
   assert.strictEqual(J(L('listerComptes')([{ rang: 1, valeur: 'A|2026-10-22' }, { rang: 2, valeur: 'B|2026-10-22' }], '2026-10-22', 1)).liste.length, 1);
 });
+test('un sorcier dont la date de fin est passée redevient Héros ; sans date ou à venir, il reste sorcier', () => {
+  const f = (fin) => ({ equipe: { [ADM]: { nom: 'Marie', role: 'admin', fin } }, bloques: [] });
+  const jour = L('jourDe')(NOW);
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f(undefined)).role, 'admin');
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f('2999-01-01')).role, 'admin');
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f(jour)).role, 'admin');          // valable jusqu'à la fin du jour
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f('2000-01-01')).role, 'heros');
+  const zagor = { equipe: { [SUPER]: { nom: 'loliba', role: 'superadmin', fin: '2000-01-01' } }, bloques: [] };
+  assert.strictEqual(decider(infos({ email: 'chef@gmail.com' }), zagor).role, 'superadmin');         // un Zagor n'expire jamais
+});
+test('ajouter un sorcier avec une date de fin : contrôles', () => {
+  const ajouter = (role, fin) => J(L('ajouterMembre')(fichier(), h('neuf@gmail.com'), 'Neuf', role, SUPER, fin, '2026-10-27'));
+  const ok = ajouter('admin', '2027-01-31');
+  assert.strictEqual(ok.ok, true); assert.deepStrictEqual(ok.fichier.equipe[h('neuf@gmail.com')], { nom: 'Neuf', role: 'admin', depuis: '2026-10-27', fin: '2027-01-31' });
+  assert.strictEqual(ajouter('admin', '').fichier.equipe[h('neuf@gmail.com')].fin, undefined);
+  assert.strictEqual(ajouter('admin', '2026-10-01').ok, false);       // déjà passée
+  assert.strictEqual(ajouter('admin', '31/01/2027').ok, false);       // format
+  assert.strictEqual(ajouter('admin', '2027-02-30').ok, false);       // date impossible
+  assert.strictEqual(ajouter('superadmin', '2027-01-31').ok, false);  // pas de fin pour un Zagor
+});
+test('changer ou effacer la date de fin ; Zagor refusé ; le « depuis » est gardé', () => {
+  const f = { equipe: { [ADM]: { nom: 'Marie', role: 'admin', depuis: '2026-09-01', fin: '2026-12-31' }, [SUPER]: { nom: 'chef', role: 'superadmin' } }, bloques: [] };
+  assert.strictEqual(J(L('changerFin')(f, ADM, '2027-03-01', '2026-10-27')).fichier.equipe[ADM].fin, '2027-03-01');
+  assert.strictEqual(J(L('changerFin')(f, ADM, '', '2026-10-27')).fichier.equipe[ADM].fin, undefined);
+  assert.strictEqual(L('changerFin')(f, SUPER, '2027-03-01', '2026-10-27').ok, false);
+  assert.strictEqual(L('changerFin')(f, h('inconnu'), '2027-03-01', '2026-10-27').ok, false);
+  assert.strictEqual(J(L('ajouterMembre')(f, ADM, 'Marie', 'admin', SUPER, '2027-01-01', '2026-10-27')).fichier.equipe[ADM].depuis, '2026-09-01');
+  assert.strictEqual(L('peut')('superadmin', 'equipe_fin'), true); assert.strictEqual(L('peut')('admin', 'equipe_fin'), false);
+});
 test('un compte inconnu est un Héros, avec un suffixe qui le distingue', () => {
   const d = decider(infos()); assert.strictEqual(d.ok, true); assert.strictEqual(d.role, 'heros');
   assert.strictEqual(d.nom, 'Paul #' + h('inconnu@gmail.com').slice(7, 11));

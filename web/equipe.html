@@ -57,35 +57,41 @@
 </div>
 <main id="main" class="cadre page" hidden data-niveau="superadmin">
 <h1>Équipe</h1>
-<p class="chapeau">Gestion de l'accès au guide.</p>
+<p class="chapeau">Qui a accès à quoi, par personnage.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
-
+<div class="eq-tuiles" id="eq-tuiles" hidden></div>
+<section class="eq-bloc" aria-labelledby="eq-t-zagor">
+  <h2 id="eq-t-zagor">Zagors</h2>
+  <ul class="eq-liste" id="eq-zagors"></ul>
+</section>
+<section class="eq-bloc" aria-labelledby="eq-t-sorciers">
+  <h2 id="eq-t-sorciers">Sorciers</h2>
+  <ul class="eq-liste" id="eq-sorciers"></ul>
+</section>
+<section class="eq-bloc" aria-labelledby="eq-t-heros">
+  <h2 id="eq-t-heros">Héros</h2>
+  <p class="sous" id="eq-comptes-etat" role="status">Chargement…</p>
+  <ul class="eq-liste eq-comptes" id="eq-comptes"></ul>
+</section>
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
   <h2 id="eq-t-ajout">Ajouter une personne</h2>
   <form id="eq-ajout" class="eq-form">
     <label for="eq-adresse">Adresse Google</label>
     <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
-    <label for="eq-nom">Nom affiché sur ses mises à jour</label>
+    <label for="eq-nom">Nom affiché</label>
     <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Prénom">
     <label for="eq-niveau">Niveau</label>
-    <select id="eq-niveau"><option value="superadmin">Accès complet</option></select>
-    <button type="submit" class="bouton">Ajouter à l'équipe</button>
+    <select id="eq-niveau"><option value="admin">Sorcier</option><option value="superadmin">Zagor</option></select>
+    <div id="eq-fin-champ">
+      <label for="eq-fin">Date de fin (facultative)</label>
+      <input id="eq-fin" type="date">
+      <p class="sous">Après cette date, le sorcier redevient Héros. Vide : sans limite.</p>
+    </div>
+    <button type="submit" class="bouton">Ajouter</button>
   </form>
-  <p class="sous">L'adresse n'est jamais enregistrée en clair : seule son empreinte illisible est gardée dans le dépôt. Ajouter une adresse bloquée la débloque.</p>
+  <p class="sous">L'adresse n'est jamais gardée en clair, seulement son empreinte. Ajouter une adresse bloquée la débloque.</p>
   <p class="rv-ajout-bilan" id="eq-msg" role="status" hidden></p>
 </section>
-
-<section class="eq-bloc" aria-labelledby="eq-t-liste">
-  <h2 id="eq-t-liste">Membres</h2>
-  <ul class="eq-liste" id="eq-liste"></ul>
-</section>
-
-<section class="eq-bloc" aria-labelledby="eq-t-comptes">
-  <h2 id="eq-t-comptes">Comptes</h2>
-  <p class="sous" id="eq-comptes-etat" role="status">Chargement…</p>
-  <ul class="eq-liste eq-comptes" id="eq-comptes"></ul>
-</section>
-
 <section class="eq-bloc" aria-labelledby="eq-t-bloques">
   <h2 id="eq-t-bloques">Comptes bloqués</h2>
   <p class="sous" id="eq-bloques"></p>

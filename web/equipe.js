@@ -1,41 +1,77 @@
-/* Page « Équipe » (niveau 3) : ajouter, retirer ou bloquer des niveau 2, par le service technique (voir service technique/).
+/* Page « Équipe » (niveau 3) : les Zagors, les sorciers (avec une date de fin possible) et les héros, par le service technique (voir relais/).
    Le relais vérifie à chaque demande que la personne est niveau 3 ; cette page n'est qu'une commande à distance. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-  var NIVEAU = { admin: 'Accès', superadmin: 'Accès complet' };
-  var etat = $('#eq-etat'), msg = $('#eq-msg');
+  var ICONES = {
+    heros: '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/>',
+    admin: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
+    superadmin: '<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>'
+  };
+  var NOMS = { heros: 'Héros', admin: 'Sorcier', superadmin: 'Zagor' };
+  var etat = $('#eq-etat'), msg = $('#eq-msg'), TOTAL = null, EQUIPE = null;
   var dire = function (t, erreur) { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
+  var icone = function (r) { return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONES[r] + '</svg>'; };
+  var jour = function (d) { return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); };
 
   function erreurLisible(r) {
     var e = (r && r.erreur) || 'erreur inconnue';
-    return e === 'droits insuffisants' ? 'Ce compte n\'a pas accès à cette page.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+    return e === 'droits insuffisants' ? 'Ce compte n\'a pas accès à cette page.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : /action inconnue/.test(e) ? 'Mettez à jour le relais (relais/Code.gs) : cette action n\'existe pas encore.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+  }
+
+  function tuiles() {
+    if (!EQUIPE) return;
+    var zagors = EQUIPE.equipe.filter(function (m) { return m.role === 'superadmin'; }).length;
+    var sorciers = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && !m.echu; }).length;
+    var heros = TOTAL == null ? null : Math.max(0, TOTAL - zagors - sorciers);
+    var t = $('#eq-tuiles');
+    t.innerHTML = [['superadmin', zagors, 'Zagor' + (zagors > 1 ? 's' : '')], ['admin', sorciers, 'Sorcier' + (sorciers > 1 ? 's' : '')], ['heros', heros, 'Héros']].map(function (x) {
+      return '<div class="eq-tuile niveau-' + x[0] + '">' + icone(x[0]) + '<strong>' + (x[1] == null ? '…' : x[1]) + '</strong><span>' + x[2] + '</span></div>';
+    }).join('');
+    t.hidden = false;
+  }
+
+  function carte(m) {
+    var infos = [];
+    if (m.depuis) infos.push('depuis le ' + jour(m.depuis));
+    var fin = '';
+    if (m.role === 'admin') {
+      fin = m.echu ? '<span class="eq-fin eq-fin-passee">Terminé le ' + esc(jour(m.fin)) + ' : redevenu Héros</span>'
+        : m.fin ? '<span class="eq-fin">Jusqu\'au ' + esc(jour(m.fin)) + '</span>' : '<span class="eq-fin">Sans date de fin</span>';
+    }
+    var actions = m.role === 'superadmin' ? '<p class="sous">Protégé : ni retiré ni bloqué.</p>' :
+      '<form class="eq-fin-form" data-e="' + esc(m.empreinte) + '"><label>Date de fin <input type="date" name="fin" value="' + esc(m.fin || '') + '"></label>' +
+      '<button type="submit" class="bouton bouton-clair">Enregistrer</button></form>' +
+      '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
+      '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>';
+    return '<li class="eq-membre eq-carte"><div class="eq-profil"><span class="eq-avatar niveau-' + (m.echu ? 'heros' : m.role) + '">' + icone(m.echu ? 'heros' : m.role) + '</span>' +
+      '<div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau niveau-' + m.role + '">' + NOMS[m.role] + '</span>' +
+      (fin ? '<div>' + fin + '</div>' : '') + (infos.length ? '<span class="sous">' + esc(infos.join(' · ')) + '</span>' : '') +
+      '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div></div>' + actions + '</li>';
   }
 
   function dessiner(r) {
-    var liste = $('#eq-liste');
-    liste.innerHTML = r.equipe.length ? r.equipe.map(function (m) {
-      return '<li class="eq-membre"><div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau">' + esc(NIVEAU[m.role] || m.role) + '</span>' +
-        '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>' +
-        (m.role === 'superadmin' ? '<p class="sous">Protégé : ce compte ne peut être ni retiré ni bloqué.</p>' :
-          '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
-          '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>') + '</li>';
-    }).join('') : '<li class="sous">Aucun membre.</li>';
+    EQUIPE = r;
+    var z = r.equipe.filter(function (m) { return m.role === 'superadmin'; }), s = r.equipe.filter(function (m) { return m.role === 'admin'; });
+    s.sort(function (a, b) { return (a.echu ? 1 : 0) - (b.echu ? 1 : 0); });
+    $('#eq-zagors').innerHTML = z.length ? z.map(carte).join('') : '<li class="sous">Aucun Zagor.</li>';
+    $('#eq-sorciers').innerHTML = s.length ? s.map(carte).join('') : '<li class="sous">Aucun sorcier pour l\'instant.</li>';
     var n = r.bloques.length;
-    $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse à l\'équipe.' : 'Aucun compte bloqué.';
-    etat.textContent = r.equipe.length + ' membre' + (r.equipe.length > 1 ? 's' : '') + ' dans l\'équipe.';
+    $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
+    etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
+    tuiles();
   }
 
   function comptes() {
     var etatC = $('#eq-comptes-etat'), ul = $('#eq-comptes');
-    if (!etatC) return;
     window.Relais.appeler('comptes_lire').then(function (r) {
-      if (!r || !r.ok) { etatC.textContent = /action inconnue/.test((r && r.erreur) || '') ? 'Mettez à jour le relais (relais/Code.gs) pour voir les comptes.' : erreurLisible(r); return; }
+      if (!r || !r.ok) { etatC.textContent = erreurLisible(r); return; }
+      TOTAL = r.total; tuiles();
       var sans = Math.max(0, r.total - r.connus);
-      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ', dont ' + r.aujourdhui + ' arrivé' + (r.aujourdhui > 1 ? 's' : '') + ' aujourd\'hui.' +
-        (sans ? ' Les ' + sans + ' premiers comptes sont arrivés avant la liste : leurs prénoms ne sont pas gardés.' : '');
+      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ' au total (héros, sorciers et Zagors), dont ' + r.aujourdhui + ' arrivé' + (r.aujourdhui > 1 ? 's' : '') + ' aujourd\'hui. Derniers arrivés :' +
+        (sans ? ' (les ' + sans + ' premiers n\'ont pas de prénom gardé)' : '');
       ul.innerHTML = r.liste.length ? r.liste.map(function (c) {
-        return '<li class="eq-membre"><div><strong>' + esc(c.nom) + '</strong> <span class="sous">· ' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '') + ' · compte n° ' + esc(c.rang) + '</span></div></li>';
+        return '<li class="eq-membre"><div class="eq-profil"><span class="eq-avatar niveau-heros">' + icone('heros') + '</span><div><strong>' + esc(c.nom) + '</strong><span class="sous eq-date">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '') + ' · compte n° ' + esc(c.rang) + '</span></div></div></li>';
       }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant : la liste se remplit à chaque nouveau compte.</li>';
     }).catch(function () { etatC.textContent = 'Le relais ne répond pas : vérifiez votre connexion.'; });
   }
@@ -49,30 +85,45 @@
     }).catch(function () { etat.textContent = 'Le relais ne répond pas : vérifiez votre connexion.'; });
   }
 
+  function champFin() { $('#eq-fin-champ').hidden = $('#eq-niveau').value !== 'admin'; }
+  $('#eq-niveau').addEventListener('change', champFin); champFin();
+
   $('#eq-ajout').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var adresse = $('#eq-adresse').value.trim(), nom = $('#eq-nom').value.trim(), role = $('#eq-niveau').value;
+    var adresse = $('#eq-adresse').value.trim(), nom = $('#eq-nom').value.trim(), role = $('#eq-niveau').value, fin = role === 'admin' ? $('#eq-fin').value : '';
     dire('Enregistrement…');
-    window.Relais.appeler('equipe_ajouter', { adresse: adresse, nom: nom, role: role }).then(function (r) {
+    window.Relais.appeler('equipe_ajouter', { adresse: adresse, nom: nom, role: role, fin: fin }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
-      dire(nom + ' fait maintenant partie de l\'équipe (' + (NIVEAU[role] || role) + ').');
-      $('#eq-adresse').value = ''; $('#eq-nom').value = '';
+      dire(nom + ' : ' + NOMS[role] + (fin ? ', jusqu\'au ' + jour(fin) : '') + '.');
+      $('#eq-adresse').value = ''; $('#eq-nom').value = ''; $('#eq-fin').value = '';
       charger();
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   });
 
-  $('#eq-liste').addEventListener('click', function (ev) {
+  function actions(ev) {
     var b = ev.target.closest('[data-act]');
     if (!b) return;
     var bloquer = b.dataset.act === 'equipe_bloquer';
-    if (!window.confirm(bloquer ? 'Bloquer ce compte ? Il sera retiré de l\'équipe et ne pourra plus rien envoyer, même s\'il redevient Héros.' : 'Retirer cette personne de l\'équipe ? Elle redeviendra Héros.')) return;
+    if (!window.confirm(bloquer ? 'Bloquer ce compte ? Il sera retiré de l\'équipe et ne pourra plus rien envoyer, même comme Héros.' : 'Retirer cette personne ? Elle redeviendra Héros.')) return;
     dire('Enregistrement…');
     window.Relais.appeler(b.dataset.act, { empreinte: b.dataset.e }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
-      dire(bloquer ? 'Compte bloqué.' : 'Personne retirée de l\'équipe.');
+      dire(bloquer ? 'Compte bloqué.' : 'Personne retirée.');
       charger();
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
-  });
+  }
+  function nouvelleFin(ev) {
+    var f = ev.target.closest('.eq-fin-form');
+    if (!f) return;
+    ev.preventDefault();
+    dire('Enregistrement…');
+    window.Relais.appeler('equipe_fin', { empreinte: f.dataset.e, fin: f.elements.fin.value }).then(function (r) {
+      if (!r || !r.ok) return dire(erreurLisible(r), true);
+      dire(f.elements.fin.value ? 'Date de fin enregistrée.' : 'Date de fin effacée.');
+      charger();
+    }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
+  }
+  ['#eq-zagors', '#eq-sorciers'].forEach(function (s) { $(s).addEventListener('click', actions); $(s).addEventListener('submit', nouvelleFin); });
 
   // La porte ouvre la page une fois le niveau niveau 3 confirmé par le service technique
   document.addEventListener('cdh-porte-ouverte', charger);

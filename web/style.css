@@ -2090,3 +2090,21 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .coll-sous .coll-ligne .fiche-marque { width: auto; flex: 1 1 auto; }
 .coll-sous .fiche-qte input { width: 56px; }
 .coll-sous .valeur-ex { margin: 0; font-size: 1.05rem; }
+
+/* Page Équipe : profils par personnage */
+.eq-tuiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 640px; margin: 0 0 24px; }
+.eq-tuile { display: grid; justify-items: center; gap: 2px; padding: 12px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); color: var(--gold); }
+.eq-tuile strong { font: 700 1.8rem var(--f-display); color: var(--text); line-height: 1.1; }
+.eq-tuile span { font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.eq-profil { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.eq-profil > div { min-width: 0; overflow-wrap: anywhere; }
+.eq-avatar { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); color: var(--gold); }
+.eq-carte { align-items: flex-start; }
+.eq-fin { display: inline-block; margin: 2px 0; font: 700 .85rem var(--f-ui); color: var(--gold); }
+.eq-fin-passee { color: var(--muted); }
+.eq-fin-form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin: 0; }
+.eq-fin-form label { display: grid; gap: 4px; font: 700 .78rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.eq-fin-form input { min-height: 40px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.eq-fin-form .bouton { min-height: 40px; padding: 4px 14px; }
+.eq-carte .eq-actions, .eq-carte .eq-fin-form { width: 100%; }
+.eq-date { display: block; }

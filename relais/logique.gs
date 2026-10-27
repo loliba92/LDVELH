@@ -23,6 +23,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   equipe_ajouter: 'superadmin',
   equipe_retirer: 'superadmin',
   equipe_bloquer: 'superadmin',
+  equipe_fin: 'superadmin',       // date de fin d'un sorcier (ou aucune)
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
@@ -36,6 +37,15 @@ var ACTIONS = {                       // niveau minimal pour chaque action
 var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
+
+/* Date de fin d'un sorcier (AAAA-MM-JJ, valable jusqu'à la fin de ce jour, heure UTC). Sans date : sans limite. Un Zagor n'en a jamais. */
+function jourDe(secondes) { return new Date(secondes * 1000).toISOString().slice(0, 10); }
+function estEchu(membre, aujourdhui) { return !!(membre && membre.role === 'admin' && membre.fin && membre.fin < aujourdhui); }
+function dateValide(t) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return false;
+  var d = new Date(t + 'T00:00:00Z');
+  return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === t;
+}
 
 function nettoyerNom(brut) {
   return String(brut == null ? '' : brut).replace(/[\u0000-\u001f|;\s]+/g, ' ').trim().slice(0, 30);
@@ -58,6 +68,7 @@ function decider(infos, fichier, clientId, empreinteDe, maintenantSec) {
   if (bloques.indexOf(adresse) >= 0 || bloques.indexOf(empreinte) >= 0) return { ok: false, raison: 'compte bloqué' };
   var equipe = fichier.equipe || {}, membre = null;
   Object.keys(equipe).forEach(function (k) { var c = minuscules(k); if (c === adresse || c === empreinte) membre = equipe[k]; });
+  if (membre && estEchu(membre, jourDe(maintenantSec))) membre = null;          // la date de fin d'un sorcier est passée : il redevient Héros
   if (membre && ROLE_DE[membre.role] != null) return { ok: true, role: membre.role, nom: nettoyerNom(membre.nom) || 'Admin', empreinte: empreinte };
   var prenom = nettoyerNom(infos.given_name || infos.name || adresse.split('@')[0]).slice(0, 20) || 'Héros';
   return { ok: true, role: 'heros', nom: prenom + ' #' + empreinte.slice(7, 11), empreinte: empreinte };
@@ -88,15 +99,40 @@ function copie(o) { return JSON.parse(JSON.stringify(o)); }
 function nbSuperAdmins(equipe) { return Object.keys(equipe).filter(function (k) { return equipe[k].role === 'superadmin'; }).length; }
 
 /* Modifications de data/admins.json : renvoient { ok, fichier } ou { ok:false, raison }. `par` est l'empreinte de l'auteur. */
-function ajouterMembre(fichier, empreinte, nom, role, par) {
+function ajouterMembre(fichier, empreinte, nom, role, par, fin, aujourdhui) {
   if (!/^sha256:[0-9a-f]{64}$/.test(empreinte)) return { ok: false, raison: 'empreinte invalide' };
   if (role !== 'admin' && role !== 'superadmin') return { ok: false, raison: 'niveau invalide' };
   var n = nettoyerNom(nom);
   if (!n) return { ok: false, raison: 'nom manquant' };
+  fin = String(fin || '').trim();
+  if (fin) {
+    if (role !== 'admin') return { ok: false, raison: 'un Zagor n\'a pas de date de fin' };
+    if (!dateValide(fin)) return { ok: false, raison: 'date de fin invalide' };
+    if (aujourdhui && fin < aujourdhui) return { ok: false, raison: 'la date de fin est déjà passée' };
+  }
   var f = copie(fichier); f.equipe = f.equipe || {};
-  if (f.equipe[empreinte] && f.equipe[empreinte].role === 'superadmin' && role !== 'superadmin') return { ok: false, raison: 'un SuperAdmin ne peut pas être rétrogradé' };
-  f.equipe[empreinte] = { nom: n, role: role };
+  var ancien = f.equipe[empreinte];
+  if (ancien && ancien.role === 'superadmin' && role !== 'superadmin') return { ok: false, raison: 'un SuperAdmin ne peut pas être rétrogradé' };
+  var m = { nom: n, role: role };
+  var depuis = (ancien && ancien.depuis) || aujourdhui;
+  if (depuis) m.depuis = depuis;
+  if (fin) m.fin = fin;
+  f.equipe[empreinte] = m;
   f.bloques = (f.bloques || []).filter(function (b) { return minuscules(b) !== empreinte; });
+  return { ok: true, fichier: f };
+}
+/* Change ou efface (fin vide) la date de fin d'un sorcier. */
+function changerFin(fichier, empreinte, fin, aujourdhui) {
+  var f = copie(fichier); f.equipe = f.equipe || {};
+  var m = f.equipe[empreinte];
+  if (!m) return { ok: false, raison: 'membre introuvable' };
+  if (m.role !== 'admin') return { ok: false, raison: 'seul un sorcier a une date de fin' };
+  fin = String(fin || '').trim();
+  if (fin) {
+    if (!dateValide(fin)) return { ok: false, raison: 'date de fin invalide' };
+    if (aujourdhui && fin < aujourdhui) return { ok: false, raison: 'la date de fin est déjà passée' };
+    m.fin = fin;
+  } else delete m.fin;
   return { ok: true, fichier: f };
 }
 function retirerMembre(fichier, empreinte, par) {
