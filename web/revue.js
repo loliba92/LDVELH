@@ -693,6 +693,7 @@
       const ecart = Math.round((prix / pub - 1) * 100);
       return `<span class="rc-pastille ${VERDICTS[v][1]}">${VERDICTS[v][0]}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
+    const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     dessinerRecues = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
@@ -703,7 +704,7 @@
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, lib, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin });
+          toutes.push({ ed, lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin });
         }));
       });
       const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value) && !(enligne.checked && a.partie))
@@ -711,8 +712,8 @@
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
-        <span class="rc-droite"><b class="rc-prix">${eur(a.prix)}</b>${comparaison(a.prix, a.pub, a.v)}</span>
-        <span class="meta rc-meta">${esc(a.ed.serie)} · ${esc(a.ed.version)} · ${esc(a.lib)} · ${NOM[a.fam]}${a.vue ? ' · vue le ' + jour(a.vue) : ''}${a.partie ? ' · non revue au dernier relevé' : ''}${a.butin ? ' · <strong>butin</strong>' : ''}</span>
+        <b class="rc-prix">${eur(a.prix)}</b>
+        <span class="rc-ligne2">${comparaison(a.prix, a.pub, a.v)}<span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${a.vue ? ' · ' + jourCourt(a.vue) : ''}${a.partie ? ' · non revue' : ''}</span></span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
