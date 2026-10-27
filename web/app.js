@@ -754,18 +754,18 @@
       const par = ANN && b.isbn13 ? ANN.annonces[b.isbn13] : null;
       const nb = par ? ETATS.reduce((n, e) => n + ((par[e.k] || []).length), 0) : 0;
       const resume = $('#annonces-fiche summary');
-      const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
+      const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => origine !== 'leboncoin' && origine !== 'librairie' && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && nb) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''} `;
       if (!nb) { zone.innerHTML = `<p class="sous">${ANN ? 'Aucune annonce retenue pour cette édition.' : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       zone.innerHTML = ETATS.map((e) => {
         const l = par[e.k];
         if (!l || !l.length) return '';
         const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-        const partie = ([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : pas retrouvée par la recherche (retirée, vendue ou simplement manquée)
+        const partie = ([, , , origine, vue]) => origine !== 'leboncoin' && origine !== 'librairie' && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : pas retrouvée par la recherche (retirée, vendue ou simplement manquée)
         const nbPartie = l.filter(partie).length;
         return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => {
           const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${origine === 'leboncoin' ? 'Leboncoin' : origine === 'librairie' ? 'librairie' : 'eBay'}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${origine === 'leboncoin' ? 'Leboncoin' : origine === 'librairie' ? 'Librairie' : 'eBay'}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
       }).join('') + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
     });
   }

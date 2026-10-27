@@ -556,7 +556,7 @@
       const l = par[cle];
       if (!l || !l.length) return '';
       const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-      const dateRef = (origine) => (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
+      const dateRef = (origine) => (origine === 'leboncoin' || origine === 'librairie' ? null : ANN.date_ebay);          // Leboncoin : en ligne tant que non signalée vendue (le bot ne revoit pas les anciennes)
       const partie = ([, , , origine, vue]) => !!(vue && dateRef(origine) && vue < dateRef(origine));          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
       const nbPartie = l.filter(partie).length;
       return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} non revue${nbPartie > 1 ? 's' : ''} au dernier relevé)` : ''}${disp}</h4><ul>${l.map((a) => { const [prix, titre, lien, origine, vue] = a; return `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? ` <span class="rv-ann-titre">non revue au dernier relevé · vue le ${jour(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
@@ -617,7 +617,7 @@
       const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && BUT.annonces[ed.isbn] && BUT.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
-        if (vue && (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay) && vue < (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay)) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
+        if (origine !== 'leboncoin' && origine !== 'librairie' && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
@@ -701,7 +701,7 @@
     dessinerRecues = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
-      const dateRef = (o) => (o === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
+      const dateRef = (o) => (o === 'leboncoin' || o === 'librairie' ? null : ANN.date_ebay);
       const toutes = [], sw = souhaits();
       Object.keys(ANN.annonces).forEach((isbn) => {
         const ed = parIsbn.get(isbn); if (!ed) return;

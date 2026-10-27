@@ -81,7 +81,7 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
     return sum(1 for e in ordre if par_etat[e].get("ajuste"))
 
 
-JOURS_LEBONCOIN = 3        # une annonce Leboncoin non revue depuis plus de 3 jours avant le dernier relevé est écartée (elles partent vite)
+JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n'est pas signalée vendue : le bot ne revoit que les 50 plus récentes, une annonce plus ancienne n'y reparaît pas. Écartée après 14 jours sans être revue
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
 
@@ -115,8 +115,7 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
                 if origine == "librairie":
                     lib += 1
                 elif origine == "leboncoin":
-                    if not (date_lbc and vue and vue < date_lbc):
-                        lbc += 1
+                    lbc += 1                         # en ligne jusqu'à preuve du contraire (voir JOURS_LEBONCOIN) : la liste a déjà retiré les vendues
                 elif not (date_ebay and vue and vue < date_ebay):
                     ebay += 1
         if ebay or lbc or lib:
@@ -373,9 +372,15 @@ def main():
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
     fichiers_lbc = sorted(dossier_occasion.glob("annonces-leboncoin-20*.csv"))
     lots = importer_leboncoin.charger_lots()
+    liens_vendus = set()                                  # annonces Leboncoin signalées vendues par le bot : elles ne sont plus en ligne
+    for f in dossier_occasion.glob("vendus-leboncoin-20*.csv"):
+        with open(f, newline="", encoding="utf-8") as fh:
+            liens_vendus.update(r["lien"] for r in csv.DictReader(fh))
     for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN).items():
         for etat, liste in par_etat.items():
-            annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+            liste = [a for a in liste if a[2] not in liens_vendus]
+            if liste:
+                annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
