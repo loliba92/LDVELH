@@ -1552,16 +1552,13 @@
   };
   const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'librairie' ? 'librairie' : 'eBay');
   const nbLivresAPepite = () => Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter((b) => b && pepitesDe(b).length).length;
-  // Badge « ★ N » sur « Ma collection » (barre du bas) : N livres de la liste « à trouver » ont une pépite ; il mène à la liste
+  // Menu du bas : « À trouver » porte un badge avec le nombre de livres de la liste qui ont une pépite
   function majBadgePepites() {
-    const lien = $('.barre-bas .barre-centre');
-    if (!lien) return;
+    const b = $('#nb-pep-bas');
+    if (!b) return;
     const n = estNiveau2() && OFFRE ? nbLivresAPepite() : 0;
-    let b = $('#nb-pep-bas');
-    if (!b) { b = document.createElement('b'); b.id = 'nb-pep-bas'; b.className = 'nb-pep'; lien.appendChild(b); }
-    b.textContent = n ? '★' + n : '';
+    b.textContent = n ? String(n) : '';
     b.setAttribute('aria-label', n ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : '');
-    lien.setAttribute('href', n ? 'collection.html#trouver' : 'collection.html');
   }
   function rafraichirPepites() {
     if (!estNiveau2()) return;
