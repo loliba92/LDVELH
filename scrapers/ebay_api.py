@@ -504,7 +504,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
-    p.add_argument("--diagnostic", help="ISBN : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
+    p.add_argument("--diagnostic", help="ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
@@ -518,7 +518,9 @@ def main():
     except RuntimeError as e:
         sys.exit(str(e))
     if a.diagnostic:
-        diagnostiquer(a.diagnostic.strip(), token)
+        for isbn in a.diagnostic.replace(",", " ").split():          # plusieurs ISBN possibles, séparés par des espaces
+            diagnostiquer(isbn.strip(), token)
+            print("\n" + "=" * 70 + "\n")
         return
     if a.controle:
         controler(a, token)
