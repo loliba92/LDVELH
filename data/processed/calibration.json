@@ -1,20 +1,20 @@
 {
   "actif": false,
-  "n_paires": 11,
-  "calcule_le": "2026-10-26",
+  "n_paires": 13,
+  "calcule_le": "2026-10-27",
   "par_etat": {},
   "erreur_modele": null,
   "erreur_archives": null,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (11 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (13 sur 20 nécessaires)",
   "fraicheur": {
     "bon": {
-      "rapport": 0.894,
-      "n": 12
+      "rapport": 0.915,
+      "n": 18
     },
     "tres_bon": {
-      "rapport": 1.025,
-      "n": 10
+      "rapport": 0.913,
+      "n": 16
     }
   },
   "sigma_archive": {},
