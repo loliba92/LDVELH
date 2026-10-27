@@ -1561,7 +1561,22 @@
     if (pjChargee) return;
     pjChargee = true;
     fetch('data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
-      .then((d) => { PJ = d; majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
+      .then((d) => { PJ = d; majBadgePepites(); try { dessinerPepiteAccueil(); } catch (e) { /* les livres ne sont pas encore chargés : le prochain dessin s'en charge */ } if ($('#coll-corps')) afficherCollection(); });
+  }
+  chargerPepiteJour();
+  // Accueil : la pépite du jour est publique (c'est la vitrine du site), avec le lien de l'annonce ; le reste des pépites reste réservé aux sorciers
+  function dessinerPepiteAccueil() {
+    const z = $('#pepite-accueil-zone');
+    if (!z) return;
+    const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13);
+    if (!b) { z.innerHTML = ''; return; }
+    const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    z.innerHTML = `<section class="carte pep-accueil" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
+      <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
+        <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
+          <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
+      <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
+      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
   }
   // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
   function majBadgePepites() {
@@ -1574,7 +1589,7 @@
   // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
   // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
   const chargerImage = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
-  const MENTION_CARTE = ['Prix constatés sur des annonces publiques, à titre indicatif.', 'La Cote du Héros ne prend ni marge ni commission.'];
+  const MENTION_CARTE = ['Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.', 'La Cote du Héros ne prend ni marge ni commission.'];
   async function dessinerCarte(b, x) {
     const L = 1080, H = 1350, c = document.createElement('canvas');
     c.width = L; c.height = H;
@@ -1588,37 +1603,38 @@
     g.fillStyle = lueur; g.fillRect(0, 0, L, H);
     g.strokeStyle = or; g.lineWidth = 3; g.strokeRect(28, 28, L - 56, H - 56); g.lineWidth = 1; g.strokeRect(44, 44, L - 88, H - 88);
     g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-    g.fillStyle = or; g.font = `700 52px ${ui}`; lettres('18px'); g.fillText('PÉPITE', L / 2 + 9, 128); lettres('0px');
-    // couverture, dans une boîte de 500 × 690
+    g.fillStyle = or; g.font = `700 44px ${ui}`; lettres('14px'); g.fillText('PÉPITE DU JOUR', L / 2 + 7, 122); lettres('0px');
+    // couverture, dans une boîte de 440 × 600
     const img = b.couverture ? await chargerImage(racine(b.couverture_grande || b.couverture)) : null;
-    const bw = 500, bh = 690, by = 165;
+    const bw = 440, bh = 600, by = 150;
     if (img) {
       const k = Math.min(bw / img.naturalWidth, bh / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k, x0 = (L - w) / 2, y0 = by + (bh - h) / 2;
       g.save(); g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 36; g.shadowOffsetY = 14; g.fillStyle = '#111'; g.fillRect(x0, y0, w, h); g.restore();
       g.drawImage(img, x0, y0, w, h);
       g.strokeStyle = 'rgba(217,180,95,.55)'; g.lineWidth = 2; g.strokeRect(x0, y0, w, h);
     } else {
-      g.fillStyle = '#111'; g.fillRect((L - 440) / 2, by, 440, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 440) / 2, by, 440, bh);
-      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 420);
+      g.fillStyle = '#111'; g.fillRect((L - 400) / 2, by, 400, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 400) / 2, by, 400, bh);
+      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 380);
     }
-    // titre sur une ou deux lignes, puis la série
-    g.fillStyle = creme; g.font = `700 64px ${serif}`;
+    // titre sur une ou deux lignes, puis la série et l'état
+    g.fillStyle = creme; g.font = `700 62px ${serif}`;
     const lignes = []; let cur = '';
     (b.titre || '').split(/\s+/).forEach((m) => { const t = cur ? cur + ' ' + m : m; if (g.measureText(t).width > 900 && cur) { lignes.push(cur); cur = m; } else cur = t; });
     lignes.push(cur);
     if (lignes.length > 2) { let l2 = lignes.slice(1).join(' '); while (g.measureText(l2 + '…').width > 900 && l2.length > 1) l2 = l2.slice(0, -1); lignes.splice(1, lignes.length, l2 + '…'); }
-    lignes.forEach((l, k) => g.fillText(l, L / 2, 930 + k * 66));
-    const yS = 930 + (lignes.length - 1) * 66 + 54;
-    g.fillStyle = sourd; g.font = `400 32px ${ui}`;
-    g.fillText(`${b.serie || ''}${numero(b)} · ${b.version}`, L / 2, yS);
-    // macaron : l'économie en pourcentage, sans prix ni cote
+    lignes.forEach((l, k) => g.fillText(l, L / 2, 825 + k * 64));
+    const yS = 825 + (lignes.length - 1) * 64 + 50;
+    g.fillStyle = sourd; g.font = `400 30px ${ui}`;
+    g.fillText(`${b.serie || ''}${numero(b)} · ${b.version}${x.etat ? ' · ' + x.etat : ''}`, L / 2, yS);
+    // prix de l'annonce, puis l'économie en pourcentage (jamais la cote : elle reste réservée aux comptes connectés)
+    g.fillStyle = or; g.font = `700 128px ${serif}`; g.fillText(fmt(x.prix), L / 2, yS + 125);
     const mot = x.pct != null ? `−${x.pct} % sous la cote` : 'sous la cote';
-    g.font = `700 48px ${ui}`;
-    const mw = g.measureText(mot).width + 80, my = yS + 34;
-    g.fillStyle = or; g.beginPath(); g.roundRect((L - mw) / 2, my, mw, 76, 38); g.fill();
-    g.fillStyle = '#000'; g.fillText(mot, L / 2, my + 53);
+    g.font = `700 42px ${ui}`;
+    const mw = g.measureText(mot).width + 72, my = yS + 190;
+    g.fillStyle = or; g.beginPath(); g.roundRect((L - mw) / 2, my, mw, 68, 34); g.fill();
+    g.fillStyle = '#000'; g.fillText(mot, L / 2, my + 48);
     // appel et mention
-    g.fillStyle = or; g.font = `600 32px ${ui}`; g.fillText('Cote exacte et évolution : lacoteduheros.fr', L / 2, 1240);
+    g.fillStyle = or; g.font = `600 32px ${ui}`; g.fillText('Voir l\'annonce sur lacoteduheros.fr', L / 2, 1240);
     g.fillStyle = sourd; g.font = `400 25px ${ui}`;
     g.fillText(MENTION_CARTE[0], L / 2, 1272); g.fillText(MENTION_CARTE[1], L / 2, 1298);
     return new Promise((ok) => c.toBlob(ok, 'image/png'));
@@ -1651,10 +1667,10 @@
     return d;
   }
   document.addEventListener('click', async (e) => {
-    const t = e.target.closest('[data-partager]'); if (!t || !estNiveau3()) return;
-    const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
-    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html?pepite=1' : 'index.html#fiche=' + encodeURIComponent(b.id));
-    const texte = `Pépite repérée sur La Cote du Héros : ${b.titre} (${b.serie}${numero(b)}, ${b.version})${x.pct != null ? ', une annonce à ' + x.pct + ' % sous la cote' : ''}. Cote exacte et évolution : ${url} · Prix indicatifs. La Cote du Héros ne prend ni marge ni commission.`;
+    const t = e.target.closest('[data-partager-jour]'); if (!t || !estNiveau3()) return;
+    const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13), x = p; if (!b) return;
+    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'livre/' + b.isbn13 + '.html';
+    const texte = `Pépite du jour sur La Cote du Héros : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pct != null ? ', soit ' + x.pct + ' % sous la cote' : ''}. Voir l'annonce : ${url} · Prix indicatif. La Cote du Héros ne prend ni marge ni commission.`;
     const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
     CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de la carte…';
     d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = true; });
@@ -1687,7 +1703,7 @@
         ${estNiveau3() ? '<button type="button" class="retirer" data-pepite-retirer>Retirer</button>' : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
       </li></ul>
-      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.</p>`;
+      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;
   }
   document.addEventListener('click', (e) => {
     if (!e.target.closest('[data-pepite-retirer]') || !estNiveau3() || !window.Relais) return;
@@ -1702,7 +1718,7 @@
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}${estNiveau3() ? `<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Créer la carte à partager</button>` : ''}</div>` : ''; })()}</li>`).join('')}</ul>`;
+        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
   // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
@@ -2102,6 +2118,7 @@
       </div>`;
   function afficherCollection() {
     setTimeout(atterrirATrouver, 0);
+    dessinerPepiteAccueil();
     rendreAjoutColl();
     const bl = bilan();
     const n = bl.exemplaires, nPastille = cotesMasquees() ? 0 : n;          // sans compte, la copie gardée sur l'appareil n'est pas affichée

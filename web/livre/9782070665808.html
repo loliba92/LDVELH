@@ -57,7 +57,7 @@
   <p class="chapeau">« L&#x27;Œil d&#x27;Émeraude » est l&#x27;édition V4 du livre dont vous êtes le héros, Défis Fantastiques, publiée chez Gallimard Jeunesse en 2015, écrit par Ian Livingstone.</p>
   <dl class="livre-faits"><dt>Série</dt><dd>Défis Fantastiques</dd><dt>Édition</dt><dd>V4</dd><dt>Auteurs</dt><dd>Ian Livingstone</dd><dt>Illustrations</dt><dd>Martin McKenna</dd><dt>Traduction</dt><dd>C. Degolf</dd><dt>Éditeur</dt><dd>Gallimard Jeunesse · Défis fantastiques</dd><dt>Année</dt><dd>2015</dd><dt>ISBN-13</dt><dd>9782070665808</dd></dl>
 </div>
-<aside class="livre-pepite" id="pepite" hidden><p><strong>Pépite repérée.</strong> Une annonce de ce livre est nettement sous sa cote. Connectez-vous, c'est gratuit : vous verrez sa cote exacte et pourrez l'ajouter à votre liste « À trouver ».</p></aside>
+<aside class="livre-pepite" id="pepite" hidden></aside>
 <p class="actions"><a class="bouton" href="../index.html#fiche=9782070665808">Voir la cote exacte</a> <a class="bouton bouton-clair" href="https://www.facebook.com/sharer/sharer.php?u=https://lacoteduheros.fr/livre/9782070665808.html" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
 <h2>Niveau de prix</h2><ul class="livre-niveaux" aria-label="Niveau de prix selon l'état"><li><span class="petit">C</span><span class="valeur repere" aria-label="niveau de prix 1 sur 5">€</span></li><li><span class="petit">BE</span><span class="valeur repere" aria-label="niveau de prix 1 sur 5">€</span></li><li><span class="petit">TBE</span><span class="valeur repere" aria-label="niveau de prix 1 sur 5">€</span></li></ul><p class="sous">C : convenable, BE : bon état, TBE : très bon état. € : moins de 10 € · €€ : 10 à 20 € · €€€ : 20 à 40 € · €€€€ : 40 à 70 € · €€€€€ : plus de 70 €. Les prix exacts, l'évolution de la cote et la liste « À trouver » sont réservés aux comptes connectés : la connexion avec Google est gratuite. La Cote du Héros ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>
 <h2>Autres éditions de ce livre</h2><ul><li><a href="9782075237246.html">V5</a> · Gallimard Jeunesse · 2026</li><li><a href="9782070573226.html">V3</a> · Gallimard Jeunesse · 2007</li></ul>
@@ -99,6 +99,24 @@
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
-<script>if (/[?&]pepite=1/.test(location.search)) document.getElementById('pepite').hidden = false;</script>
+<script>
+(function () {
+  var isbn = "9782070665808", zone = document.getElementById('pepite');
+  fetch('../data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
+    var hier = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    if (!p || p.isbn13 !== isbn || !p.lien || p.date < hier || !/^https:\/\//.test(p.lien)) return;
+    var prix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.prix);
+    var t = document.createElement('p'), s = document.createElement('strong'), a = document.createElement('a');
+    s.textContent = 'Pépite du jour. ';
+    t.appendChild(s);
+    t.appendChild(document.createTextNode('Une annonce de ce livre à ' + prix + (p.pct != null ? ', soit ' + p.pct + ' % sous sa cote' : '') + '. Prix indicatif : elle peut déjà être vendue. '));
+    a.href = p.lien; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = "Voir l'annonce ↗";
+    t.appendChild(a);
+    var u = document.createElement('p');
+    u.textContent = "Connectez-vous, c'est gratuit : vous verrez la cote exacte du livre et pourrez l'ajouter à votre liste « À trouver ».";
+    zone.appendChild(t); zone.appendChild(u); zone.hidden = false;
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

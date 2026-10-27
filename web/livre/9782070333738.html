@@ -57,7 +57,7 @@
   <p class="chapeau">« La Vengeance du Ninja » est l&#x27;édition V1 du livre dont vous êtes le héros, La Voie du Tigre n° 373, publiée chez Gallimard en 1987, écrit par Jamie Thomson et Mark Smith.</p>
   <dl class="livre-faits"><dt>Série</dt><dd>La Voie du Tigre n° 373</dd><dt>Édition</dt><dd>V1</dd><dt>Auteurs</dt><dd>Jamie Thomson ; Mark Smith</dd><dt>Éditeur</dt><dd>Gallimard · Folio junior</dd><dt>Année</dt><dd>1987</dd><dt>Pages</dt><dd>319</dd><dt>ISBN-13</dt><dd>9782070333738</dd></dl>
 </div>
-<aside class="livre-pepite" id="pepite" hidden><p><strong>Pépite repérée.</strong> Une annonce de ce livre est nettement sous sa cote. Connectez-vous, c'est gratuit : vous verrez sa cote exacte et pourrez l'ajouter à votre liste « À trouver ».</p></aside>
+<aside class="livre-pepite" id="pepite" hidden></aside>
 <p class="actions"><a class="bouton" href="../index.html#fiche=9782070333738">Voir la cote exacte</a> <a class="bouton bouton-clair" href="https://www.facebook.com/sharer/sharer.php?u=https://lacoteduheros.fr/livre/9782070333738.html" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
 <h2>Niveau de prix</h2><ul class="livre-niveaux" aria-label="Niveau de prix selon l'état"><li><span class="petit">C</span><span class="valeur repere" aria-label="niveau de prix 1 sur 5">€</span></li><li><span class="petit">BE</span><span class="valeur repere" aria-label="niveau de prix 2 sur 5">€€</span></li><li><span class="petit">TBE</span><span class="valeur repere" aria-label="niveau de prix 3 sur 5">€€€</span></li></ul><p class="sous">C : convenable, BE : bon état, TBE : très bon état. € : moins de 10 € · €€ : 10 à 20 € · €€€ : 20 à 40 € · €€€€ : 40 à 70 € · €€€€€ : plus de 70 €. Les prix exacts, l'évolution de la cote et la liste « À trouver » sont réservés aux comptes connectés : la connexion avec Google est gratuite. La Cote du Héros ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>
 
@@ -99,6 +99,24 @@
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
-<script>if (/[?&]pepite=1/.test(location.search)) document.getElementById('pepite').hidden = false;</script>
+<script>
+(function () {
+  var isbn = "9782070333738", zone = document.getElementById('pepite');
+  fetch('../data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
+    var hier = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    if (!p || p.isbn13 !== isbn || !p.lien || p.date < hier || !/^https:\/\//.test(p.lien)) return;
+    var prix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.prix);
+    var t = document.createElement('p'), s = document.createElement('strong'), a = document.createElement('a');
+    s.textContent = 'Pépite du jour. ';
+    t.appendChild(s);
+    t.appendChild(document.createTextNode('Une annonce de ce livre à ' + prix + (p.pct != null ? ', soit ' + p.pct + ' % sous sa cote' : '') + '. Prix indicatif : elle peut déjà être vendue. '));
+    a.href = p.lien; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = "Voir l'annonce ↗";
+    t.appendChild(a);
+    var u = document.createElement('p');
+    u.textContent = "Connectez-vous, c'est gratuit : vous verrez la cote exacte du livre et pourrez l'ajouter à votre liste « À trouver ».";
+    zone.appendChild(t); zone.appendChild(u); zone.hidden = false;
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>
