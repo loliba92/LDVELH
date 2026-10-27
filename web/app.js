@@ -1553,7 +1553,7 @@
   const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'librairie' ? 'librairie' : 'eBay');
   const nbLivresAPepite = () => Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter((b) => b && pepitesDe(b).length).length;
   // Pépite du jour : choisie par le Zagor, offerte aux Héros (fichier public data/pepite-du-jour.json, écrit par le service technique)
-  let PJ = null, pjChargee = false;
+  let PJ = null, pjChargee = false, pjAtterri = false;
   const jourParis = (retard = 0) => new Date(Date.now() - retard * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
   const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date >= jourParis(1) ? PJ : null);          // valable aujourd'hui et demain matin
   const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif() && (!estNiveau2() || estNiveau3());       // les sorciers ont déjà toutes les pépites ; le Zagor voit celle qu'il a offerte
@@ -1571,12 +1571,13 @@
     const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13);
     if (!b) { z.innerHTML = ''; return; }
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-    z.innerHTML = `<section class="carte pep-accueil" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
+    z.innerHTML = `<section class="carte pep-accueil" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
       <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
         <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
           <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
       <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
       <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
+    if (location.hash === '#pepite-jour' && !pjAtterri) { pjAtterri = true; const bloc = $('#pepite-jour'); if (bloc) bloc.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
   // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
   function majBadgePepites() {
@@ -1650,12 +1651,9 @@
   // Texte du post Facebook, prêt à coller : la pépite, le lien de l'annonce, puis l'invitation à se connecter (modifiable avant de copier)
   const ETAT_MOTS = { C: 'état convenable', BE: 'bon état', TBE: 'très bon état' };
   const textePost = (b, p) => [
-    `Je vous ai déniché une pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), en ${ETAT_MOTS[p.etat] || 'bon état'}, à ${fmt(p.prix)}.${p.pct != null ? ` C'est ${p.pct} % sous la cote.` : ''}`,
-    `L'annonce : ${p.lien}`,
-    'Elle peut déjà être vendue : pensez à vérifier avant d\'acheter.',
-    '',
-    `Pour suivre votre collection et, bientôt, être au courant des dernières pépites, connectez-vous sur La Cote du Héros : ${SITE_PUBLIC}`,
-    'La Cote du Héros ne prend ni marge ni commission.',
+    `Je vous ai déniché une pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), à ${fmt(p.prix)}${p.pct != null ? `, soit ${p.pct} % sous la cote` : ''}.`,
+    `Toutes les infos sur La Cote du Héros : ${SITE_PUBLIC}/#pepite-jour`,
+    'Connectez-vous pour suivre votre collection et, bientôt, recevoir les dernières pépites.',
   ].join('\n');
   function boiteCarte() {
     let d = $('#carte-partage');
