@@ -1658,7 +1658,7 @@
     d.innerHTML = `<div class="carte-cadre"><div class="scan-tete"><p class="surtitre" id="carte-titre">Post à publier</p><button type="button" class="bouton bouton-clair" data-carte-fermer>Fermer</button></div>
       <img class="carte-img" alt="Image de la pépite, prête à publier" width="540" height="675">
       <label class="sous" for="carte-texte">Texte du post (modifiable)</label>
-      <textarea id="carte-texte" rows="8" spellcheck="true"></textarea>
+      <textarea id="carte-texte" rows="12" spellcheck="true"></textarea>
       <p class="sous" id="carte-msg" role="status" aria-live="polite"></p>
       <div class="carte-actions"><button type="button" class="bouton" data-carte-copier disabled>Copier le texte</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button>${navigator.share ? '<button type="button" class="bouton bouton-clair" data-carte-partager disabled>Partager…</button>' : ''}</div></div>`;
     document.body.appendChild(d);
