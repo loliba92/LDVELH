@@ -2153,3 +2153,10 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-vs { color: var(--muted); font-size: .82rem; white-space: nowrap; }
 .rc-ecart { font-style: normal; font-weight: 700; color: var(--muted); }
 .rc-ecart.rc-moins { color: #7fd69c; } .rc-ecart.rc-plus-cher { color: #f08f99; }
+
+.rc-pastille { padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .76rem var(--f-ui); letter-spacing: .04em; color: var(--muted); }
+.rc-pastille.rc-v-pepite { color: #1b1403; background: var(--gold); border-color: var(--gold); }
+.rc-pastille.rc-v-dessous { color: #7fd69c; border-color: #7fd69c; }
+.rc-pastille.rc-v-dans { color: var(--text); }
+.rc-pastille.rc-v-dessus { color: #e8b86b; border-color: #e8b86b; }
+.rc-pastille.rc-v-cher { color: #f08f99; border-color: #f08f99; }
