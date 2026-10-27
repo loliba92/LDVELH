@@ -153,6 +153,9 @@
       if (!window.AjoutRapide || window.AjoutRapide.garde(demarrer)) demarrer();      // sans compte : la fenêtre de connexion s'ouvre, puis on reprend ici
     });
     bloc.appendChild(b);
+    // Tuile « Scanner » de la collection, ou arrivée par le lien de l'accueil (#scanner)
+    document.addEventListener('click', (e) => { if (e.target.closest('[data-scanner]')) b.click(); });
+    if (location.hash === '#scanner') { history.replaceState(null, '', location.pathname + location.search); setTimeout(() => b.click(), 400); }
   }
 
   // Accueil : scanner un livre pour voir sa cote (rien n'est ajouté à la collection) ; la fiche du livre s'ouvre
