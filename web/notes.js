@@ -1,5 +1,5 @@
 /* Notes des livres : une note de 1 à 5 par compte et par livre (le livre, toutes éditions confondues). La moyenne est visible de tous ;
-   seuls les comptes connectés notent. Les notes vivent dans le relais (dossier relais/) : le site ne garde que la moyenne et la note de la personne. */
+   seuls les comptes connectés notent. Les notes vivent dans le service technique (dossier relais/) : le site ne garde que la moyenne et la note de la personne. */
 window.Notes = (function () {
   var MOY = {}, MIENNES = {}, chargees = false, miennesChargees = false, zone = null, livreOuvert = '';
   var CLE = 'cdh-notes', DUREE = 10 * 60 * 1000;
@@ -122,7 +122,7 @@ window.Notes = (function () {
     var ancienne = MIENNES[livre] || 0;
     if (note === ancienne) return;                                   // même note : rien à envoyer
     var parler = function (texte, erreur) { if (surFiche) dire(texte, erreur); else if (window.Compte && window.Compte.annoncer) window.Compte.annoncer(texte); };
-    if (note) MIENNES[livre] = note; else delete MIENNES[livre];     // affichage immédiat, annulé si le relais refuse
+    if (note) MIENNES[livre] = note; else delete MIENNES[livre];     // affichage immédiat, annulé si le service technique refuse
     if (surFiche) { dessiner(); dire('Enregistrement…'); }
     window.Relais.appeler('noter', { livre: livre, note: note }).then(function (r) {
       if (r && r.ok) {

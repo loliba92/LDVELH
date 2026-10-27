@@ -1,5 +1,5 @@
-/* Compte : un seul point d'entrée pour se connecter avec Google, voir l'état de la sauvegarde et, selon son niveau, accéder à l'espace des sorciers.
-   Niveaux : visiteur (non connecté), Héros (connecté), Sorcier, Zagor (le niveau vient du relais, voir relais/).
+/* Compte : un seul point d'entrée pour se connecter avec Google, voir l'état de la sauvegarde et, selon son niveau, accéder à l'espace des niveau 2.
+   Niveaux : visiteur (non connecté), Héros (connecté), niveau 2, niveau 3 (le niveau vient du service technique, voir relais/).
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
@@ -9,7 +9,7 @@ window.Compte = (function () {
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
   var ecrireSession = function (k, v) { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) { /* sans effet */ } };
   var NIVEAUX = { heros: 'Héros', admin: 'Sorcier', superadmin: 'Zagor' };
-  var estAdmin = function () { return role === 'superadmin'; };   // les sorciers ne sont plus administrateurs
+  var estAdmin = function () { return role === 'superadmin'; };   // les niveau 2 ne sont plus administrateurs
 
   /* ---------- État affiché ---------- */
   function etat() {
@@ -44,14 +44,14 @@ window.Compte = (function () {
     collection: '<path d="M4 4h4v16H4zM10 4h4v16h-4z"/><path d="M16 5l4 1-3 14-4-1z"/>',
     sync: '<path d="M20 11a8 8 0 0 0-14-4M4 5v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 19v-4h-4"/>',
     demande: '<path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M12 9v6M9 12h6"/>',
-    sorciers: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
+    espace: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
     butin: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/>',
     equipe: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2 .6 3 2.5 3 5"/>',
     deconnecter: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
   };
   function ico(nom) { return '<svg class="ico-menu" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[nom] + '</svg>'; }
 
-  // Niveau minimum pour voir la ligne : Héros (tout compte connecté), Sorcier, Zagor (qui voit aussi ce qui est réservé aux niveaux d'en dessous)
+  // Niveau minimum pour voir la ligne : Héros (tout compte connecté), niveau 2, niveau 3 (qui voit aussi ce qui est réservé aux niveaux d'en dessous)
 
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
@@ -67,7 +67,7 @@ window.Compte = (function () {
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butin</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="evolutions.html">' + ico('butin') + 'Évolutions des prix</a></li>' : '') +
-      (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('sorciers') + 'Prix et corrections</a></li>' : '') +
+      (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('espace') + 'Prix et corrections</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
       '<li><button type="button" class="bouton-lien" data-compte="deconnecter">' + ico('deconnecter') + 'Se déconnecter</button></li></ul>';
@@ -108,9 +108,9 @@ window.Compte = (function () {
     var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
   }
 
-  /* ---------- Niveau (Héros, Sorcier, Zagor) ---------- */
-  // Premier passage d'un compte : le relais le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
-  function signalerCompte() {                     // une fois par session : c'est le relais qui reconnaît un compte déjà compté
+  /* ---------- Niveau (Héros, niveau 2, niveau 3) ---------- */
+  // Premier passage d'un compte : le service technique le compte une fois et prévient l'éditeur (prénom et empreinte courte, jamais l'adresse)
+  function signalerCompte() {                     // une fois par session : c'est le service technique qui reconnaît un compte déjà compté
     var qui = window.Cloud.nom() || '1';            // le signal est lié au compte connecté : changer de compte dans le même onglet le renvoie
     if (lireSession('cdh-bienvenue') === qui) return;
     window.Relais.appeler('bienvenue').then(function (r) {

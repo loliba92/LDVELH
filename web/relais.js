@@ -1,5 +1,5 @@
-/* Envois vers GitHub par le relais (dossier relais/) : le site transmet la connexion Google de la personne, le relais vérifie son niveau
-   (Héros, Admin, Zagor) dans data/admins.json puis lance lui-même le lot. La clé GitHub n'est jamais dans le navigateur.
+/* Envois vers GitHub par le service technique (dossier relais/) : le site transmet la connexion Google de la personne, le service technique vérifie son niveau
+   (Héros, Admin, niveau 3) dans data/admins.json puis lance lui-même le lot. La clé GitHub n'est jamais dans le navigateur.
    Actif quand web/data/admin-config.json contient « relais_url » ; sinon l'ancien envoi par clé continue de fonctionner. */
 window.Relais = (function () {
   var URL_RELAIS = '';
@@ -29,11 +29,11 @@ window.Relais = (function () {
       return { status: 400, erreur: r.erreur };
     });
   }
-  // Moyennes des notes : lecture publique, sans connexion. Renvoie { ok, notes: { livre: [moyenne, nombre] } } ou null si le relais n'est pas configuré.
+  // Moyennes des notes : lecture publique, sans connexion. Renvoie { ok, notes: { livre: [moyenne, nombre] } } ou null si le service technique n'est pas configuré.
   function lireNotes() {
     return pret.then(function () { return URL_RELAIS ? fetch(URL_RELAIS + '?notes=1').then(function (r) { return r.json(); }) : null; });
   }
-  // Butin (bonnes affaires seulement, sorciers et Zagors) ou toutes les annonces (Zagor seul) : lus par le relais. Résultat : les annonces, ou null.
+  // Butin (bonnes affaires seulement, niveaux 2 et 3) ou toutes les annonces (niveau 3 seul) : lus par le service technique. Résultat : les annonces, ou null.
   function lireAnnonces(toutes) {
     return pret.then(function () { return actif() ? appeler(toutes ? 'annonces_lire' : 'butin_lire', {}).then(function (r) { return r && r.ok ? r.annonces : null; }) : null; });
   }

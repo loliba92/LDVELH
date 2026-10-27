@@ -143,7 +143,7 @@
     const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
-      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${voirAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estSuper() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${voirAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estNiveau3() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
       `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
       `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
@@ -439,7 +439,7 @@
     });
   }
 
-  // Les envois passent par le relais (connexion Google du site, voir relais.js) : aucune clé GitHub sur l'appareil.
+  // Les envois passent par le service technique (connexion Google du site, voir relais.js) : aucune clé GitHub sur l'appareil.
   // « jeton() » dit seulement si l'envoi en un clic est possible maintenant : relais en service et connexion encore valable.
   const jeton = () => (window.Relais && window.Relais.actif() ? 'relais' : null);
   const lancer = (lot, inputs) => window.Relais.envoyerLot(lot, (({ identite, ...reste }) => reste)(inputs));
@@ -538,9 +538,9 @@
       .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
     return annChargees;
   };
-  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';        // toutes les annonces : le Zagor seul (lues par le relais)
-  const estSorcier = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // Butin : sorciers et Zagors
-  // Butin : le relais ne sert aux sorciers que les bonnes affaires (data/processed/butin.json), jamais la liste complète
+  const estNiveau3 = () => !!window.Compte && window.Compte.role() === 'superadmin';        // toutes les annonces : le niveau 3 seul (lues par le service technique)
+  const estNiveau2 = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // Butin : niveaux 2 et 3
+  // Butin : le service technique ne sert aux niveau 2 que les bonnes affaires (data/processed/butin.json), jamais la liste complète
   let BUT = null, butChargees = false;
   const chargerButin = () => {
     if (butChargees) return butChargees;
@@ -548,8 +548,8 @@
       .then((a) => { BUT = a && a.annonces ? a : null; return BUT; });
     return butChargees;
   };
-  const aDesAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
-  const voirAnnonces = (ed) => estSuper() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
+  const aDesAnnonces = (ed) => estNiveau3() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);
+  const voirAnnonces = (ed) => estNiveau3() && !!(ANN && ed.isbn);          // le lien est toujours là : sans annonce retenue, la fenêtre dit d'où vient le prix
   function annoncesEdition(ed) {
     const par = ANN.annonces[ed.isbn] || {};
     const blocs = ETATS.map(([cle, lib]) => {
@@ -600,11 +600,11 @@
       liste.innerHTML = trouves.map((ed) => `<article class="rv-edition">${annoncesEdition(ed)}</article>`).join('');
     };
     champ.addEventListener('input', dessiner);
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'annonces' && estSuper()) chargerAnnonces().then(dessiner); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'annonces' && estNiveau3()) chargerAnnonces().then(dessiner); });
     dessiner();
   }
 
-  // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au Zagor comme les annonces.
+  // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au niveau 3 comme les annonces.
   // « Solide » : exemplaire de librairie, ou trouvée par l'ISBN avec l'état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   let dessinerPepites = () => {};
@@ -664,12 +664,12 @@
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     solides.addEventListener('change', dessinerPepites);
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estSorcier()) chargerButin().then(dessinerPepites); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estNiveau2()) chargerButin().then(dessinerPepites); });
     dessinerPepites();
   }
 
   let ouvrirOnglet = () => {};
-  // Onglet « Annonces reçues » (Zagor seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
+  // Onglet « Annonces reçues » (niveau 3 seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
   let dessinerRecues = () => {};
   function initRecues() {
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne');
@@ -702,7 +702,7 @@
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estSuper()) chargerAnnonces().then(dessinerRecues); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
   }
   function initNav() {
@@ -740,10 +740,10 @@
   initPepites();
   initRecues();
   initNav();
-  // Annonces : lien et onglet réservés au Zagor (le rôle arrive après la connexion)
+  // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
   let pepitesOuvertes = false;
   function majAnnonces() {
-    const super_ = estSuper(), sorcier = estSorcier();
+    const super_ = estNiveau3(), niveau2 = estNiveau2();
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
     if (onglet) { onglet.hidden = !super_; if (!super_) replier(onglet); }
@@ -751,11 +751,11 @@
     if (recues) { recues.hidden = !super_; if (!super_) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
     const pep = document.querySelector('#rv-nav [data-pane="pepites"]');
     if (pep) {
-      pep.hidden = !sorcier;
-      if (!sorcier && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
+      pep.hidden = !niveau2;
+      if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
-    if (sorcier && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
-    if (sorcier) chargerButin().then(dessinerPepites);
+    if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
+    if (niveau2) chargerButin().then(dessinerPepites);
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
   }

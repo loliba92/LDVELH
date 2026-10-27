@@ -177,7 +177,7 @@
     document.addEventListener('cdh-compte', majScan); majScan();
   }
 
-  // Espace des sorciers, « Ajouter des livres » : l'ISBN lu est ajouté à la liste, une ligne par livre
+  // Espace des niveau 2, « Ajouter des livres » : l'ISBN lu est ajouté à la liste, une ligne par livre
   const texte = $('#aj-texte');
   if (texte) {
     const b = bouton('scan-liste');
