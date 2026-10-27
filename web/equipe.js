@@ -94,7 +94,21 @@
     var n = r.bloques.length;
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
     etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
-    try { tuiles(); dessinerComptes(); } catch (e) { /* les compteurs ne doivent pas gêner le reste */ }
+    try { bandeau(); tuiles(); dessinerComptes(); } catch (e) { /* les compteurs ne doivent pas gêner le reste */ }
+  }
+
+  // Bandeau en haut : sorciers dont l'accès se termine dans les 14 prochains jours
+  function bandeau() {
+    var b = $('#eq-bandeau'), auj = EQUIPE_JOUR || EQUIPE.aujourdhui;
+    if (!auj) { b.hidden = true; return; }
+    var proches = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && m.fin && !m.echu; }).map(function (m) {
+      return { m: m, n: Math.round((Date.parse(m.fin) - Date.parse(auj)) / 86400000) };
+    }).filter(function (x) { return x.n >= 0 && x.n <= 14; }).sort(function (a, c) { return a.n - c.n; });
+    if (!proches.length) { b.hidden = true; return; }
+    b.innerHTML = '<strong>Bientôt la fin</strong>' + proches.map(function (x) {
+      return '<span>' + esc(x.m.nom) + ' : ' + (x.n === 0 ? 'aujourd\'hui' : x.n === 1 ? 'demain' : 'dans ' + x.n + ' jours') + ' (' + esc(jour(x.m.fin)) + ')</span>';
+    }).join('');
+    b.hidden = false;
   }
 
   var COMPTES = null;
