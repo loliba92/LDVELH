@@ -9,16 +9,18 @@ Méthode reprise de la vérification photo du bot Leboncoin (dépôt privé lbc-
 En cas de doute, la fonction renvoie None et l'annonce garde l'attribution d'avant."""
 import io
 
-import numpy as np
 import requests
-from PIL import Image
 
+# numpy, Pillow et OpenCV ne sont installés que par le relevé eBay. Les autres lots (corrections, ajout de livres, veille…) importent ce module
+# sans eux (via prix_neuf) : sans ces bibliothèques, la comparaison des photos reste simplement inactive, sans erreur.
 try:
     import cv2
+    import numpy as np
+    from PIL import Image
 
     DISPONIBLE = hasattr(cv2, "SIFT_create")
-except Exception:  # noqa: BLE001 - OpenCV absent : la réconciliation reste inactive, sans erreur
-    cv2 = None
+except Exception:  # noqa: BLE001 - bibliothèque absente : la réconciliation reste inactive, sans erreur
+    cv2 = np = Image = None
     DISPONIBLE = False
 
 SEUIL_INLIERS = 12          # points concordants minimaux pour décider

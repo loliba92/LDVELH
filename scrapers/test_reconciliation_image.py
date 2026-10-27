@@ -128,5 +128,17 @@ class TestTitreSeul(unittest.TestCase):
         self.assertEqual(len(out[cible]), 1)
 
 
+class TestSansBibliotheques(unittest.TestCase):
+    def test_le_module_s_importe_sans_numpy_ni_opencv(self):
+        """Les lots autres que le relevé eBay n'installent ni numpy ni OpenCV : l'import ne doit pas échouer (le 26 octobre, il a fait échouer une correction de cotes)."""
+        import subprocess
+        code = ("import sys; sys.modules['numpy']=None; sys.modules['cv2']=None; sys.modules['PIL']=None; "
+                "sys.path[:0]=['scrapers','pipeline']; import reconciliation_image as r; import prix_neuf, importer_isbn; "
+                "assert r.disponible() is False; assert r.decider(b'x', {'1': 'y'}) == (None, {})")
+        rac = Path(__file__).resolve().parent.parent
+        res = subprocess.run([sys.executable, "-c", code], cwd=rac, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, res.stderr[-500:])
+
+
 if __name__ == "__main__":
     unittest.main()
