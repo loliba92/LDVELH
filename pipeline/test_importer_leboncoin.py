@@ -24,6 +24,16 @@ def lire(d, nom):
         return list(csv.DictReader(f))
 
 
+class TestEtalerLots(unittest.TestCase):
+    def test_chaque_livre_du_lot_recoit_sa_part(self):
+        lots = {"L": {"isbns": ["a", "b"], "poids": {"a": 10, "b": 30}}}
+        annonces = {"a": {"bon": [[40.0, "Mes livres", "L", "leboncoin", "2026-10-24", None]]}, "c": {"bon": [[5.0, "Autre", "M", "leboncoin", "2026-10-24", None]]}}
+        imp.etaler_lots(annonces, lots)
+        self.assertEqual(annonces["a"]["bon"], [[10.0, "Lot de 2 livres · Mes livres", "L", "leboncoin", "2026-10-24", None]])
+        self.assertEqual(annonces["b"]["bon"], [[30.0, "Lot de 2 livres · Mes livres", "L", "leboncoin", "2026-10-24", None]])
+        self.assertEqual(annonces["c"]["bon"][0][1], "Autre")
+
+
 class TestImporter(unittest.TestCase):
     def test_import_ecrit_les_quatre_fichiers(self):
         with tempfile.TemporaryDirectory() as d:
