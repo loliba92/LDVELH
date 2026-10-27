@@ -1,3 +1,4 @@
+// Version du 2026-10-27 11:21 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
