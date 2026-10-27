@@ -634,10 +634,11 @@
   // Première apparition : une date-heure (UTC) pour les annonces apparues depuis que le site la retient, une date seule pour les plus anciennes
   const heureConnue = (p) => !!p.premiere && p.premiere.length > 10 && !Number.isNaN(Date.parse(p.premiere));
   const nouvelle = (p) => heureConnue(p) && Date.now() - Date.parse(p.premiere) < 24 * 3600 * 1000;
+  // Date et heure concises (heure de Paris) : « Repérée 27 oct. · 14:30 » quand l'heure est connue, sinon « Vue le 27 oct. » (dernière observation)
   const reperee = (p) => {
-    if (!heureConnue(p)) return '';
-    const m = Math.max(0, Math.round((Date.now() - Date.parse(p.premiere)) / 60000));
-    return m < 2 ? "repérée à l'instant" : m < 60 ? `repérée il y a ${m} min` : m < 36 * 60 ? `repérée il y a ${Math.round(m / 60)} h` : `repérée il y a ${Math.round(m / 1440)} jours`;
+    if (heureConnue(p)) return 'Repérée ' + new Date(p.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).replace(',', ' ·');
+    const j = p.premiere || p.vue;
+    return j && /^\d{4}-\d\d-\d\d$/.test(j) ? 'Vue le ' + new Date(j + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
   };
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
