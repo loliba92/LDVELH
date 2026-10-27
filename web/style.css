@@ -2059,3 +2059,12 @@ a.maj-ligne:hover { background: var(--surface-2); }
 @media (prefers-reduced-motion: reduce) { .maj-en-cours .maj-point, .maj-en-cours-global .maj-resume .maj-point { animation: none; } .maj-fleche { transition: none; } }
 button.maj-ligne { width: 100%; background: none; border: 0; font: inherit; font-size: .9rem; text-align: left; cursor: pointer; }
 button.maj-ligne:hover { background: var(--surface-2); }
+
+/* Fiche : offre d'occasion (niveaux 2 et 3) */
+.fiche-offre { margin: 14px 0; }
+.fo-ligne { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin: 4px 0; }
+.fo-jauge { display: inline-flex; gap: 3px; }
+.fo-jauge i { width: 18px; height: 8px; border-radius: 2px; background: var(--line-strong); }
+.fo-jauge i.on { background: var(--gold); }
+.fo-niveau { font-size: 1.05rem; }
+.fo-note { margin: 4px 0 0; }

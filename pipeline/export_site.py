@@ -101,6 +101,30 @@ def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
     return butin
 
 
+def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
+    """Offre d'occasion par édition : nombre d'annonces en ligne au dernier relevé de chaque source (eBay, Leboncoin, exemplaires d'occasion en librairie)
+    et âge médian des annonces eBay, en jours. Une annonce de lot n'est pas l'offre d'un livre seul : elle n'est pas comptée.
+    Servi avec le Butin (niveaux 2 et 3) : seulement des décomptes, jamais de lien ni de titre."""
+    offre = {}
+    for isbn, par_etat in annonces.items():
+        ebay = lbc = lib = 0
+        for liste in par_etat.values():
+            for prix, titre, lien, origine, vue, suppose in liste:
+                if str(titre).startswith("Lot de "):
+                    continue
+                if origine == "librairie":
+                    lib += 1
+                elif origine == "leboncoin":
+                    if not (date_lbc and vue and vue < date_lbc):
+                        lbc += 1
+                elif not (date_ebay and vue and vue < date_ebay):
+                    ebay += 1
+        if ebay or lbc or lib:
+            ages = [a for a in ages_ebay.get(isbn, []) if a is not None]
+            offre[isbn] = {"ebay": ebay, "lbc": lbc, "lib": lib, "age": int(statistics.median(ages)) if ages else None}
+    return offre
+
+
 def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
@@ -370,9 +394,18 @@ def main():
         (DB.parent.parent / "processed" / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-        # Butin : seulement les bonnes affaires, pour les sorciers (le relais ne leur sert pas le fichier complet)
+        ages_ebay = {}
+        if fichiers_ann:
+            with open(fichiers_ann[-1], newline="", encoding="utf-8") as fh:
+                for r_ in csv.DictReader(fh):
+                    try:
+                        ages_ebay.setdefault(r_["isbn13"], []).append(int(float(r_["age_jours"])))
+                    except (KeyError, ValueError):
+                        pass
+        # Butin : seulement les bonnes affaires, pour les niveaux 2 et 3 (le relais ne leur sert pas le fichier complet)
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": extraire_butin(annonces, revue)},
+                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": extraire_butin(annonces, revue),
+                                                          "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),

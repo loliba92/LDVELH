@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, extraire_butin
+from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre
 
 
 def e(prix):
@@ -111,6 +111,19 @@ class TestButin(unittest.TestCase):
         self.assertEqual([x[2] for x in b["111"]["bon"]], ["u1"])      # 10 € ≤ 50 % de 40 € ; 28 € et 30 € ne sont pas des bonnes affaires
         self.assertNotIn("tres_bon", b["111"])                          # 2 € sur 4 € : moins de 3 € d'économie
         self.assertNotIn("222", b)                                      # pas de prix publié : pas de repère
+
+
+class TestOffre(unittest.TestCase):
+    def test_offre_compte_les_annonces_en_ligne_par_source(self):
+        ann = {"111": {"bon": [[10, "a", "u1", "isbn", "2026-10-26", None], [12, "b", "u2", "titre", "2026-10-26", None],
+                               [11, "c", "u3", "isbn", "2026-10-20", None],            # eBay non revue au dernier relevé : pas comptée
+                               [9, "d", "u4", "leboncoin", "2026-10-27", None],
+                               [90, "Lot de 6 livres · e", "u5", "leboncoin", "2026-10-27", None]],      # un lot n'est pas l'offre d'un livre
+                       "tres_bon": [[4, "f", "u6", "librairie", None, 1]]},
+               "222": {"bon": [[5, "g", "u7", "isbn", "2026-10-19", None]]}}
+        o = calculer_offre(ann, {"111": [10, 30, 50]}, "2026-10-26", "2026-10-27")
+        self.assertEqual(o["111"], {"ebay": 2, "lbc": 1, "lib": 1, "age": 30})
+        self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
 
 
 if __name__ == "__main__":
