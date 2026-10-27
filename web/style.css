@@ -2028,25 +2028,32 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
 
-/* Accueil, niveau 3 : état des mises à jour automatiques, en pastilles */
-.maj-bandeau { margin: 12px 0 0; }
-.maj-puces { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.maj-puce { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .88rem; }
-.maj-nom { font-weight: 700; }
-.maj-quand { color: var(--muted); }
+/* Accueil, niveau 3 : état des mises à jour automatiques. Une ligne de synthèse (44 px mini), le détail se déplie. */
+.maj { margin: 10px 0 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.maj-echec-global { border-color: #e0604f; }
+.maj-resume { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; cursor: pointer; list-style: none; }
+.maj-resume::-webkit-details-marker { display: none; }
+.maj-resume:focus-visible, .maj-ligne:focus-visible, .maj-aide summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.maj-texte { display: grid; gap: 1px; min-width: 0; flex: 1; }
+.maj-etiq { color: var(--gold); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.maj-etat { font-weight: 700; font-size: .95rem; line-height: 1.3; }
+.maj-echec-global .maj-etat { color: #f2a0a8; }
+.maj-fleche { width: 9px; height: 9px; flex: none; margin: 0 4px 3px 0; border: solid var(--muted); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .2s; }
+.maj[open] > .maj-resume .maj-fleche { transform: rotate(-135deg); margin-bottom: -3px; }
 .maj-point { width: 10px; height: 10px; flex: none; border-radius: 50%; background: var(--muted); }
-.maj-ok .maj-point { background: #4cc16f; }
-.maj-en-cours .maj-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
-.maj-echec { border-color: #e0604f; }
-.maj-echec .maj-point { background: #e0604f; }
+.maj-ok .maj-point, .maj-resume .maj-point { background: #4cc16f; }
+.maj-echec-global .maj-resume .maj-point, .maj-echec .maj-point { background: #e0604f; }
+.maj-en-cours-global .maj-resume .maj-point, .maj-en-cours .maj-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
+.maj-liste { margin: 0; padding: 0 6px 4px; list-style: none; border-top: 1px solid var(--line); }
+.maj-liste li { margin: 0; break-inside: avoid; }
+.maj-ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 4px; color: var(--text); text-decoration: none; font-size: .9rem; }
+a.maj-ligne:hover { background: var(--surface-2); }
+.maj-nom { font-weight: 700; }
+.maj-quand { color: var(--muted); font-size: .85rem; text-align: right; }
 .maj-echec .maj-quand { color: #f2a0a8; }
-.maj-vide { opacity: .6; }
-@media (prefers-reduced-motion: reduce) { .maj-en-cours .maj-point { animation: none; } }
-@media (max-width: 700px) { .maj-puces { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .maj-puce { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 8px; row-gap: 0; border-radius: 14px; padding: 6px 10px; } .maj-quand { grid-column: 2; font-size: .78rem; line-height: 1.25; } }
-.maj-puce { color: var(--text); text-decoration: none; }
-a.maj-puce:hover { border-color: var(--gold); }
-a.maj-puce:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.maj-puces > li { margin: 0; display: contents; }
-.maj-aide { margin: 10px 0 0; font-size: .9rem; }
+.maj-vide { opacity: .65; }
+.maj-aide { margin: 0; padding: 0 14px 4px; font-size: .9rem; border-top: 1px solid var(--line); }
 .maj-aide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--gold); }
-.maj-aide ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+.maj-aide ul { margin: 6px 0 8px; padding-left: 18px; display: grid; gap: 6px; }
+@media (min-width: 700px) { .maj-liste { column-count: 2; column-gap: 12px; padding: 4px 10px; } }
+@media (prefers-reduced-motion: reduce) { .maj-en-cours .maj-point, .maj-en-cours-global .maj-resume .maj-point { animation: none; } .maj-fleche { transition: none; } }
