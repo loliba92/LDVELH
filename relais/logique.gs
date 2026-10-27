@@ -1,4 +1,4 @@
-// Version du 2026-10-27 11:21 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-27 11:34 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -73,7 +73,7 @@ function decider(infos, fichier, clientId, empreinteDe, maintenantSec) {
   var equipe = fichier.equipe || {}, membre = null;
   Object.keys(equipe).forEach(function (k) { var c = minuscules(k); if (c === adresse || c === empreinte) membre = equipe[k]; });
   if (membre && !estEnPeriode(membre, jourDe(maintenantSec))) membre = null;     // sorcier avant son début ou après sa fin : Héros
-  if (membre && ROLE_DE[membre.role] != null) return { ok: true, role: membre.role, nom: nettoyerNom(membre.nom) || 'Admin', empreinte: empreinte };
+  if (membre && ROLE_DE[membre.role] != null) return { ok: true, role: membre.role, nom: nettoyerNom(membre.nom) || 'Admin', empreinte: empreinte, fin: membre.role === 'admin' ? (membre.fin || '') : '' };
   var prenom = nettoyerNom(infos.given_name || infos.name || adresse.split('@')[0]).slice(0, 20) || 'Héros';
   return { ok: true, role: 'heros', nom: prenom + ' #' + empreinte.slice(7, 11), empreinte: empreinte };
 }
