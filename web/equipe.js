@@ -11,6 +11,12 @@
   var NOMS = { heros: 'Héros', admin: 'Sorcier', superadmin: 'Zagor' };
   var etat = $('#eq-etat'), msg = $('#eq-msg'), TOTAL = null, EQUIPE = null;
   var dire = function (t, erreur) { msg.textContent = t; msg.hidden = false; msg.classList.toggle('erreur', !!erreur); };
+  // Message au bon endroit : dans le profil modifié (le message général est tout en bas de la page, hors de vue)
+  var direMembre = function (empreinte, t, erreur) {
+    var f = document.querySelector('.eq-fin-form[data-e="' + empreinte + '"]'), m = f && f.closest('.eq-corps').querySelector('.eq-msg-ligne');
+    if (!m) return dire(t, erreur);
+    m.textContent = t; m.hidden = false; m.classList.toggle('erreur', !!erreur);
+  };
   var icone = function (r) { return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONES[r] + '</svg>'; };
   var jour = function (d) { return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); };
 
@@ -44,7 +50,7 @@
       '<button type="submit" class="bouton bouton-clair">Enregistrer</button></form>' +
       '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
       '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>' +
-      '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>';
+      '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p><span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>';
     return '<li class="eq-ligne"><div class="eq-haut"><span class="eq-avatar niveau-' + (hors ? 'heros' : m.role) + '">' + icone(hors ? 'heros' : m.role) + '</span>' +
       '<div class="eq-texte"><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau niveau-' + m.role + '">' + NOMS[m.role] + '</span>' +
       '<span class="eq-fin' + (hors ? ' eq-fin-passee' : '') + '">' + esc(etatTexte) + '</span></div>' + bouton + '</div>' + corps + '</li>';
@@ -133,28 +139,28 @@
     if (!b) return;
     var bloquer = b.dataset.act === 'equipe_bloquer';
     if (!window.confirm(bloquer ? 'Bloquer ce compte ? Il sera retiré de l\'équipe et ne pourra plus rien envoyer, même comme Héros.' : 'Retirer cette personne ? Elle redeviendra Héros.')) return;
-    dire('Enregistrement…');
+    direMembre(b.dataset.e, 'Enregistrement…');
     window.Relais.appeler(b.dataset.act, { empreinte: b.dataset.e }).then(function (r) {
-      if (!r || !r.ok) return dire(erreurLisible(r), true);
+      if (!r || !r.ok) return direMembre(b.dataset.e, erreurLisible(r), true);
       dire(bloquer ? 'Compte bloqué.' : 'Personne retirée.');
       EQUIPE.equipe = EQUIPE.equipe.filter(function (x) { return x.empreinte !== b.dataset.e; });
       if (bloquer) EQUIPE.bloques.push(b.dataset.e);
       dessiner(EQUIPE);
-    }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
+    }).catch(function () { direMembre(b.dataset.e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   function nouvelleFin(ev) {
     var f = ev.target.closest('.eq-fin-form');
     if (!f) return;
     ev.preventDefault();
-    var debut = f.elements.debut.value, fin = f.elements.fin.value;
-    dire('Enregistrement…');
-    window.Relais.appeler('equipe_periode', { empreinte: f.dataset.e, debut: debut, fin: fin }).then(function (r) {
-      if (!r || !r.ok) return dire(erreurLisible(r), true);
-      var m = EQUIPE.equipe.filter(function (x) { return x.empreinte === f.dataset.e; })[0];
+    var e = f.dataset.e, debut = f.elements.debut.value, fin = f.elements.fin.value;
+    direMembre(e, 'Enregistrement…');
+    window.Relais.appeler('equipe_periode', { empreinte: e, debut: debut, fin: fin }).then(function (r) {
+      if (!r || !r.ok) return direMembre(e, erreurLisible(r), true);
+      var m = EQUIPE.equipe.filter(function (x) { return x.empreinte === e; })[0];
       if (m) { m.debut = debut; m.fin = fin; m.echu = !!fin && fin < EQUIPE.aujourdhui; m.avenir = !!debut && debut > EQUIPE.aujourdhui; }
       dessiner(EQUIPE);                                      // affichage tout de suite, sans relire : GitHub peut renvoyer l'ancienne liste pendant quelques secondes
-      dire('Dates enregistrées.');
-    }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
+      direMembre(e, 'Dates enregistrées.');
+    }).catch(function () { direMembre(e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   ['#eq-zagors', '#eq-sorciers'].forEach(function (s) { $(s).addEventListener('click', actions); $(s).addEventListener('submit', nouvelleFin); });
 
