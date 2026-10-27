@@ -626,11 +626,19 @@
           if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
         }
-        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue });
+        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue, premiere: (BUT.premieres && BUT.premieres[lien]) || vue });
       });
     }));
     return lignes.sort((x, y) => (y.pub - y.prix) - (x.pub - x.prix));
   }
+  // Première apparition : une date-heure (UTC) pour les annonces apparues depuis que le site la retient, une date seule pour les plus anciennes
+  const heureConnue = (p) => !!p.premiere && p.premiere.length > 10 && !Number.isNaN(Date.parse(p.premiere));
+  const nouvelle = (p) => heureConnue(p) && Date.now() - Date.parse(p.premiere) < 24 * 3600 * 1000;
+  const reperee = (p) => {
+    if (!heureConnue(p)) return '';
+    const m = Math.max(0, Math.round((Date.now() - Date.parse(p.premiere)) / 60000));
+    return m < 2 ? "repérée à l'instant" : m < 60 ? `repérée il y a ${m} min` : m < 36 * 60 ? `repérée il y a ${Math.round(m / 60)} h` : `repérée il y a ${Math.round(m / 1440)} jours`;
+  };
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
@@ -640,10 +648,12 @@
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
       `<span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>` +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
+      (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
       `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></span>` +
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
+      (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
       (estNiveau3() ? `<button type="button" class="bouton-lien pp-offrir" data-offrir="${esc(p.ed.id)}|${esc(p.cle)}|${esc(p.lien)}">Offrir</button>` : '') + `</article>`;
@@ -657,7 +667,7 @@
       if (cle === 'solides') return l;
       const eco = (p) => p.pub - p.prix, pct = (p) => 1 - p.prix / p.pub;
       const f = { eco: (a, b) => eco(b) - eco(a), pct: (a, b) => pct(b) - pct(a), prix: (a, b) => a.prix - b.prix,
-        date: (a, b) => (b.vue || '').localeCompare(a.vue || ''), titre: (a, b) => a.ed.titre.localeCompare(b.ed.titre, 'fr') }[cle];
+        date: (a, b) => (b.premiere || '').localeCompare(a.premiere || '') || pct(b) - pct(a), titre: (a, b) => a.ed.titre.localeCompare(b.ed.titre, 'fr') }[cle];
       return [...l].sort((a, b) => f(a, b) || eco(b) - eco(a));
     };
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });

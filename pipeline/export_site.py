@@ -11,7 +11,7 @@ import json
 import sqlite3
 import statistics
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -99,6 +99,30 @@ def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
             if gardees:
                 butin.setdefault(isbn, {})[etat] = gardees
     return butin
+
+
+def premieres_vues(annonces, anciennes, maintenant):
+    """Première apparition de chaque annonce (reconnue à son lien) : {lien: date ou date-heure UTC}.
+    Une annonce déjà connue garde sa première apparition. Une annonce nouvelle reçoit la date et l'heure du relevé.
+    Au tout premier passage (`anciennes` est None : le fichier n'enregistrait pas encore cette information), les annonces déjà en ligne
+    prennent leur date de dernière observation, sans heure : on ne sait pas quand elles sont apparues, elles ne seront jamais « nouvelles ».
+    Seules les annonces actuelles sont gardées (une annonce disparue puis revenue repart de zéro)."""
+    premieres = {}
+    for par_etat in annonces.values():
+        for liste in par_etat.values():
+            for ligne in liste:
+                lien, vue = ligne[2], ligne[4]
+                if lien in premieres:
+                    continue
+                if anciennes is not None and lien in anciennes:
+                    premieres[lien] = anciennes[lien]
+                elif anciennes is None:
+                    premieres[lien] = vue or maintenant[:10]
+                elif ligne[3] == "librairie":
+                    premieres[lien] = maintenant[:10]                 # une page de librairie n'est pas une annonce qui apparaît : pas d'heure
+                else:
+                    premieres[lien] = maintenant
+    return premieres
 
 
 def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
@@ -394,9 +418,15 @@ def main():
         fichiers_lib = sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv"))
         date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:] + fichiers_lbc[-1:]])
         # Annonces : réservées aux sorciers et aux Zagors. Elles ne sont pas publiées sur le site : le relais les lit dans data/processed/.
-        (DB.parent.parent / "processed" / "annonces.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces},
-                                                         ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        chemin_ann = DB.parent.parent / "processed" / "annonces.json"
+        try:
+            anciennes = json.loads(chemin_ann.read_text(encoding="utf-8")).get("premieres")        # None : fichier d'avant cette information
+        except (OSError, ValueError):
+            anciennes = None
+        premieres = premieres_vues(annonces, anciennes, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
+        chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "premieres": premieres},
+                                         ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
         if fichiers_ann:
             with open(fichiers_ann[-1], newline="", encoding="utf-8") as fh:
@@ -407,7 +437,8 @@ def main():
                         pass
         # Butin : seulement les bonnes affaires, pour les niveaux 2 et 3 (le relais ne leur sert pas le fichier complet)
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": extraire_butin(annonces, revue),
+                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := extraire_butin(annonces, revue)),
+                                                          "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
