@@ -16,13 +16,13 @@
 
   function erreurLisible(r) {
     var e = (r && r.erreur) || 'erreur inconnue';
-    return e === 'droits insuffisants' ? 'Ce compte n\'a pas accès à cette page.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : /action inconnue/.test(e) ? 'Mettez à jour le relais (relais/Code.gs) : cette action n\'existe pas encore.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
+    return e === 'droits insuffisants' ? 'Ce compte n\'a pas accès à cette page.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : /action inconnue/.test(e) ? 'Mettez à jour le relais (relais/Code.gs et logique.gs) : cette action n\'existe pas encore.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
   }
 
   function tuiles() {
     if (!EQUIPE) return;
     var zagors = EQUIPE.equipe.filter(function (m) { return m.role === 'superadmin'; }).length;
-    var sorciers = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && !m.echu; }).length;
+    var sorciers = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && !m.echu && !m.avenir; }).length;
     var heros = TOTAL == null ? null : Math.max(0, TOTAL - zagors - sorciers);
     var t = $('#eq-tuiles');
     t.innerHTML = [['superadmin', zagors, 'Zagor' + (zagors > 1 ? 's' : '')], ['admin', sorciers, 'Sorcier' + (sorciers > 1 ? 's' : '')], ['heros', heros, 'Héros']].map(function (x) {
@@ -36,15 +36,17 @@
     if (m.depuis) infos.push('depuis le ' + jour(m.depuis));
     var fin = '';
     if (m.role === 'admin') {
+      var periode = m.debut && m.fin ? 'Du ' + jour(m.debut) + ' au ' + jour(m.fin) : m.debut ? 'À partir du ' + jour(m.debut) : m.fin ? 'Jusqu\'au ' + jour(m.fin) : 'Sans date de début ni de fin';
       fin = m.echu ? '<span class="eq-fin eq-fin-passee">Terminé le ' + esc(jour(m.fin)) + ' : redevenu Héros</span>'
-        : m.fin ? '<span class="eq-fin">Jusqu\'au ' + esc(jour(m.fin)) + '</span>' : '<span class="eq-fin">Sans date de fin</span>';
+        : m.avenir ? '<span class="eq-fin eq-fin-passee">Commence le ' + esc(jour(m.debut)) + ' (Héros d\'ici là)</span>'
+        : '<span class="eq-fin">' + esc(periode) + '</span>';
     }
     var actions = m.role === 'superadmin' ? '<p class="sous">Protégé : ni retiré ni bloqué.</p>' :
-      '<form class="eq-fin-form" data-e="' + esc(m.empreinte) + '"><label>Date de fin <input type="date" name="fin" value="' + esc(m.fin || '') + '"></label>' +
+      '<form class="eq-fin-form" data-e="' + esc(m.empreinte) + '"><label>Début <input type="date" name="debut" value="' + esc(m.debut || '') + '"></label><label>Fin <input type="date" name="fin" value="' + esc(m.fin || '') + '"></label>' +
       '<button type="submit" class="bouton bouton-clair">Enregistrer</button></form>' +
       '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
       '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>';
-    return '<li class="eq-membre eq-carte"><div class="eq-profil"><span class="eq-avatar niveau-' + (m.echu ? 'heros' : m.role) + '">' + icone(m.echu ? 'heros' : m.role) + '</span>' +
+    return '<li class="eq-membre eq-carte"><div class="eq-profil"><span class="eq-avatar niveau-' + ((m.echu || m.avenir) ? 'heros' : m.role) + '">' + icone((m.echu || m.avenir) ? 'heros' : m.role) + '</span>' +
       '<div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau niveau-' + m.role + '">' + NOMS[m.role] + '</span>' +
       (fin ? '<div>' + fin + '</div>' : '') + (infos.length ? '<span class="sous">' + esc(infos.join(' · ')) + '</span>' : '') +
       '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div></div>' + actions + '</li>';
@@ -53,7 +55,7 @@
   function dessiner(r) {
     EQUIPE = r;
     var z = r.equipe.filter(function (m) { return m.role === 'superadmin'; }), s = r.equipe.filter(function (m) { return m.role === 'admin'; });
-    s.sort(function (a, b) { return (a.echu ? 1 : 0) - (b.echu ? 1 : 0); });
+    s.sort(function (a, b) { return ((a.echu ? 1 : 0) + (a.avenir ? 1 : 0)) - ((b.echu ? 1 : 0) + (b.avenir ? 1 : 0)); });
     $('#eq-zagors').innerHTML = z.length ? z.map(carte).join('') : '<li class="sous">Aucun Zagor.</li>';
     $('#eq-sorciers').innerHTML = s.length ? s.map(carte).join('') : '<li class="sous">Aucun sorcier pour l\'instant.</li>';
     var n = r.bloques.length;
@@ -90,12 +92,12 @@
 
   $('#eq-ajout').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var adresse = $('#eq-adresse').value.trim(), nom = $('#eq-nom').value.trim(), role = $('#eq-niveau').value, fin = role === 'admin' ? $('#eq-fin').value : '';
+    var adresse = $('#eq-adresse').value.trim(), nom = $('#eq-nom').value.trim(), role = $('#eq-niveau').value, fin = role === 'admin' ? $('#eq-fin').value : '', debut = role === 'admin' ? $('#eq-debut').value : '';
     dire('Enregistrement…');
-    window.Relais.appeler('equipe_ajouter', { adresse: adresse, nom: nom, role: role, fin: fin }).then(function (r) {
+    window.Relais.appeler('equipe_ajouter', { adresse: adresse, nom: nom, role: role, debut: debut, fin: fin }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
-      dire(nom + ' : ' + NOMS[role] + (fin ? ', jusqu\'au ' + jour(fin) : '') + '.');
-      $('#eq-adresse').value = ''; $('#eq-nom').value = ''; $('#eq-fin').value = '';
+      dire(nom + ' : ' + NOMS[role] + (debut ? ', à partir du ' + jour(debut) : '') + (fin ? ', jusqu\'au ' + jour(fin) : '') + '.');
+      $('#eq-adresse').value = ''; $('#eq-nom').value = ''; $('#eq-fin').value = ''; $('#eq-debut').value = '';
       charger();
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   });
@@ -117,9 +119,9 @@
     if (!f) return;
     ev.preventDefault();
     dire('Enregistrement…');
-    window.Relais.appeler('equipe_fin', { empreinte: f.dataset.e, fin: f.elements.fin.value }).then(function (r) {
+    window.Relais.appeler('equipe_periode', { empreinte: f.dataset.e, debut: f.elements.debut.value, fin: f.elements.fin.value }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
-      dire(f.elements.fin.value ? 'Date de fin enregistrée.' : 'Date de fin effacée.');
+      dire('Dates enregistrées.');
       charger();
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   }

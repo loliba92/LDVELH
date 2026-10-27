@@ -82,10 +82,12 @@
     <input id="eq-nom" type="text" maxlength="30" autocomplete="off" required placeholder="Prénom">
     <label for="eq-niveau">Niveau</label>
     <select id="eq-niveau"><option value="admin">Sorcier</option><option value="superadmin">Zagor</option></select>
-    <div id="eq-fin-champ">
-      <label for="eq-fin">Date de fin (facultative)</label>
+    <div id="eq-fin-champ" class="eq-dates">
+      <label for="eq-debut">Début (facultatif)</label>
+      <input id="eq-debut" type="date">
+      <label for="eq-fin">Fin (facultative)</label>
       <input id="eq-fin" type="date">
-      <p class="sous">Après cette date, le sorcier redevient Héros. Vide : sans limite.</p>
+      <p class="sous">Avant le début et après la fin, le sorcier est Héros. Vide : sans limite.</p>
     </div>
     <button type="submit" class="bouton">Ajouter</button>
   </form>

@@ -228,7 +228,7 @@ function doPost(e) {
 
     if (action === 'equipe_lire') {
       var eq = v.admins.contenu.equipe || {}, auj = jourDe(Math.floor(Date.now() / 1000));
-      return reponse({ ok: true, aujourdhui: auj, equipe: Object.keys(eq).map(function (k) { return { empreinte: k, nom: eq[k].nom, role: eq[k].role, depuis: eq[k].depuis || '', fin: eq[k].fin || '', echu: estEchu(eq[k], auj) }; }), bloques: v.admins.contenu.bloques || [] });
+      return reponse({ ok: true, aujourdhui: auj, equipe: Object.keys(eq).map(function (k) { return { empreinte: k, nom: eq[k].nom, role: eq[k].role, depuis: eq[k].depuis || '', debut: eq[k].debut || '', fin: eq[k].fin || '', echu: estEchu(eq[k], auj), avenir: estAVenir(eq[k], auj) }; }), bloques: v.admins.contenu.bloques || [] });
     }
 
     if (action === 'comptes_lire') {               // SuperAdmin : total, arrivées du jour et prénoms (comptes arrivés depuis l'ajout de cette liste)
@@ -238,11 +238,11 @@ function doPost(e) {
       return reponse({ ok: true, total: Number(tout['u:total']) || 0, aujourdhui: lc.aujourdhui, connus: lc.connus, liste: lc.liste });
     }
 
-    if (action === 'equipe_ajouter' || action === 'equipe_retirer' || action === 'equipe_bloquer' || action === 'equipe_fin') {
+    if (action === 'equipe_ajouter' || action === 'equipe_retirer' || action === 'equipe_bloquer' || action === 'equipe_periode') {
       var cible = q.adresse ? empreinteDe(minuscules(q.adresse)) : String(q.empreinte || ''), aujourd = jourDe(Math.floor(Date.now() / 1000));
-      var res = action === 'equipe_ajouter' ? ajouterMembre(v.admins.contenu, cible, q.nom, String(q.role || 'admin'), moi.empreinte, q.fin, aujourd)
+      var res = action === 'equipe_ajouter' ? ajouterMembre(v.admins.contenu, cible, q.nom, String(q.role || 'admin'), moi.empreinte, q.fin, aujourd, q.debut)
         : action === 'equipe_retirer' ? retirerMembre(v.admins.contenu, cible, moi.empreinte)
-        : action === 'equipe_fin' ? changerFin(v.admins.contenu, cible, q.fin, aujourd)
+        : action === 'equipe_periode' ? changerPeriode(v.admins.contenu, cible, q.debut, q.fin, aujourd)
         : bloquerCompte(v.admins.contenu, cible, moi.empreinte);
       if (!res.ok) return reponse({ ok: false, erreur: res.raison });
       ecrireAdmins(res.fichier, v.admins.sha, 'Équipe : ' + action.replace('equipe_', '') + ' par ' + moi.nom);

@@ -45,12 +45,31 @@ test('ajouter un sorcier avec une date de fin : contrôles', () => {
 });
 test('changer ou effacer la date de fin ; Zagor refusé ; le « depuis » est gardé', () => {
   const f = { equipe: { [ADM]: { nom: 'Marie', role: 'admin', depuis: '2026-09-01', fin: '2026-12-31' }, [SUPER]: { nom: 'chef', role: 'superadmin' } }, bloques: [] };
-  assert.strictEqual(J(L('changerFin')(f, ADM, '2027-03-01', '2026-10-27')).fichier.equipe[ADM].fin, '2027-03-01');
-  assert.strictEqual(J(L('changerFin')(f, ADM, '', '2026-10-27')).fichier.equipe[ADM].fin, undefined);
-  assert.strictEqual(L('changerFin')(f, SUPER, '2027-03-01', '2026-10-27').ok, false);
-  assert.strictEqual(L('changerFin')(f, h('inconnu'), '2027-03-01', '2026-10-27').ok, false);
+  assert.strictEqual(J(L('changerPeriode')(f, ADM, '', '2027-03-01', '2026-10-27')).fichier.equipe[ADM].fin, '2027-03-01');
+  assert.strictEqual(J(L('changerPeriode')(f, ADM, '', '', '2026-10-27')).fichier.equipe[ADM].fin, undefined);
+  assert.strictEqual(L('changerPeriode')(f, SUPER, '', '2027-03-01', '2026-10-27').ok, false);
+  assert.strictEqual(L('changerPeriode')(f, h('inconnu'), '', '2027-03-01', '2026-10-27').ok, false);
   assert.strictEqual(J(L('ajouterMembre')(f, ADM, 'Marie', 'admin', SUPER, '2027-01-01', '2026-10-27')).fichier.equipe[ADM].depuis, '2026-09-01');
-  assert.strictEqual(L('peut')('superadmin', 'equipe_fin'), true); assert.strictEqual(L('peut')('admin', 'equipe_fin'), false);
+  assert.strictEqual(L('peut')('superadmin', 'equipe_periode'), true); assert.strictEqual(L('peut')('admin', 'equipe_periode'), false);
+});
+test('sorcier : la période commence à sa date de début et finit à sa date de fin', () => {
+  const f = (debut, fin) => ({ equipe: { [ADM]: { nom: 'Marie', role: 'admin', debut, fin } }, bloques: [] });
+  const role = (d, fi) => decider(infos({ email: 'admin@gmail.com' }), f(d, fi)).role, jour = L('jourDe')(NOW);
+  assert.strictEqual(role('2999-01-01', undefined), 'heros');      // pas encore commencé
+  assert.strictEqual(role(jour, undefined), 'admin');              // commence aujourd'hui
+  assert.strictEqual(role('2000-01-01', '2999-01-01'), 'admin');
+  assert.strictEqual(role('2000-01-01', '2000-06-01'), 'heros');
+});
+test('début et fin : cohérence, Zagor refusé, effacement', () => {
+  const aj = (role, debut, fin) => J(L('ajouterMembre')(fichier(), h('neuf@gmail.com'), 'Neuf', role, SUPER, fin, '2026-10-27', debut));
+  const m = aj('admin', '2026-11-01', '2027-01-31').fichier.equipe[h('neuf@gmail.com')];
+  assert.deepStrictEqual([m.debut, m.fin], ['2026-11-01', '2027-01-31']);
+  assert.strictEqual(aj('admin', '2027-02-01', '2027-01-31').ok, false);   // fin avant le début
+  assert.strictEqual(aj('admin', '2026-13-01', '').ok, false);
+  assert.strictEqual(aj('superadmin', '2026-11-01', '').ok, false);
+  const f = { equipe: { [ADM]: { nom: 'Marie', role: 'admin', debut: '2026-01-01', fin: '2026-12-31' } }, bloques: [] };
+  const efface = J(L('changerPeriode')(f, ADM, '', '', '2026-10-27')).fichier.equipe[ADM];
+  assert.deepStrictEqual([efface.debut, efface.fin], [undefined, undefined]);
 });
 test('un compte inconnu est un Héros, avec un suffixe qui le distingue', () => {
   const d = decider(infos()); assert.strictEqual(d.ok, true); assert.strictEqual(d.role, 'heros');

@@ -2103,6 +2103,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .eq-fin { display: inline-block; margin: 2px 0; font: 700 .85rem var(--f-ui); color: var(--gold); }
 .eq-fin-passee { color: var(--muted); }
 .eq-fin-form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin: 0; }
+.eq-dates { display: grid; gap: 8px; }
 .eq-fin-form label { display: grid; gap: 4px; font: 700 .78rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .eq-fin-form input { min-height: 40px; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
 .eq-fin-form .bouton { min-height: 40px; padding: 4px 14px; }
