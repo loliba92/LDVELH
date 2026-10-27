@@ -2288,3 +2288,4 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .menu .nb-butin:empty { display: none; }
 .imp-resume { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
 .imp-resume b { color: var(--text); }
+@media (max-width: 899px) { .barre-bas #nb-butin-bas { position: absolute; top: 4px; left: calc(50% + 6px); right: auto; margin: 0; } }
