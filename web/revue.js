@@ -544,8 +544,8 @@
   let BUT = null, butChargees = false;
   const chargerButin = () => {
     if (butChargees) return butChargees;
-    butChargees = window.Relais.lireAnnonces(false).catch(() => null)
-      .then((a) => { BUT = a && a.annonces ? a : null; return BUT; });
+    butChargees = window.Relais.lireButin((cache) => { if (!BUT && cache && cache.annonces) { BUT = cache; dessinerPepites(); } }).catch(() => null)          // le Butin gardé s'affiche tout de suite
+      .then((a) => { if (a && a.annonces) BUT = a; else if (!BUT) butChargees = null; return BUT; });
     return butChargees;
   };
   const aDesAnnonces = (ed) => estNiveau3() && !!(ANN && ed.isbn && ANN.annonces[ed.isbn]);

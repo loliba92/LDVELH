@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre, premieres_vues
+from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis
 
 
 def e(prix):
@@ -148,6 +148,32 @@ class TestPremieresVues(unittest.TestCase):
     def test_librairie_sans_heure_et_annonce_disparue_oubliee(self):
         r = premieres_vues(self.ann(("https://l", "librairie")), {"https://vieux": "2026-10-01T10:00Z"}, "2026-10-27T15:30Z")
         self.assertEqual(r, {"https://l": "2026-10-27"})
+
+
+
+class TestMinis(unittest.TestCase):
+    def setUp(self):
+        from PIL import Image
+        self.dossier = Path(tempfile.mkdtemp())
+        (self.dossier / "small").mkdir()
+        Image.new("RGB", (320, 480), (200, 30, 30)).save(self.dossier / "small" / "111.webp", "WEBP")
+        self.Image = Image
+
+    def test_miniature_creee_puis_laissee_telle_quelle(self):
+        self.assertEqual(fabriquer_minis(self.dossier), 1)
+        mini = self.dossier / "mini" / "111.webp"
+        self.assertEqual(self.Image.open(mini).size, (160, 240))
+        avant = mini.read_bytes()
+        self.assertEqual(fabriquer_minis(self.dossier), 0)                     # jaquette inchangée : rien n'est réécrit
+        self.assertEqual(mini.read_bytes(), avant)
+
+    def test_miniature_refaite_si_la_jaquette_change_et_supprimee_si_elle_disparait(self):
+        fabriquer_minis(self.dossier)
+        self.Image.new("RGB", (320, 480), (30, 200, 30)).save(self.dossier / "small" / "111.webp", "WEBP")
+        self.assertEqual(fabriquer_minis(self.dossier), 1)
+        (self.dossier / "small" / "111.webp").unlink()
+        fabriquer_minis(self.dossier)
+        self.assertFalse((self.dossier / "mini" / "111.webp").exists())
 
 
 if __name__ == "__main__":

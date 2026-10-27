@@ -7,6 +7,7 @@ observations hors lots : natures, fraîcheur, nombre d'annonces). Sans relevé a
 """
 import argparse
 import csv
+import hashlib
 import json
 import sqlite3
 import statistics
@@ -173,6 +174,45 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     return sortie
 
 
+MINI_LARGEUR, MINI_QUALITE = 160, 65          # miniatures des petites vignettes (listes, rangées de 40 à 80 px d'affichage, nettes jusqu'à 2 fois la densité)
+
+
+def fabriquer_minis(couvertures=None):
+    """Miniatures (web/covers/mini/ISBN.webp, 160 px de large) tirées des jaquettes « small » : environ 5 Ko au lieu de 26 Ko.
+    Une miniature est refaite seulement si sa jaquette source a changé (empreinte gardée dans web/covers/mini/sources.json) :
+    pas de réécriture inutile, donc pas de bruit dans les envois. Sans Pillow, rien n'est fait. Renvoie le nombre de miniatures écrites."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return 0
+    couvertures = couvertures or COVERS
+    src, dst = couvertures / "small", couvertures / "mini"
+    if not src.exists():
+        return 0
+    dst.mkdir(exist_ok=True)
+    registre = dst / "sources.json"
+    try:
+        connus = json.loads(registre.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        connus = {}
+    ecrites, a_jour = 0, {}
+    for f in sorted(src.glob("*.webp")):
+        empreinte = hashlib.sha1(f.read_bytes()).hexdigest()
+        cible = dst / f.name
+        if connus.get(f.name) != empreinte or not cible.exists():
+            with Image.open(f) as im:
+                h = max(1, round(im.height * MINI_LARGEUR / im.width))
+                im.convert("RGB").resize((MINI_LARGEUR, h), Image.LANCZOS).save(cible, "WEBP", quality=MINI_QUALITE, method=6)
+            ecrites += 1
+        a_jour[f.name] = empreinte
+    for f in dst.glob("*.webp"):                      # miniature dont la jaquette a disparu
+        if f.name not in a_jour:
+            f.unlink()
+    if a_jour != connus:
+        registre.write_text(json.dumps(a_jour, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+    return ecrites
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--db", type=Path, default=DB)
@@ -296,6 +336,7 @@ def main():
 
     dates_maj = {x["id"]: x["date_maj"] for x in editions.load(None)}      # date d'ajout (ou de dernière mise à jour) de la fiche
 
+    fabriquer_minis()
     versions = []
     cle_de = {}
     nb_valides = 0
@@ -307,6 +348,7 @@ def main():
         image = editions.cle_image(r["id"], isbn)                  # ISBN, ou identifiant simplifié pour une fiche sans ISBN
         petite = f"covers/small/{image}.webp" if (COVERS / "small" / f"{image}.webp").exists() else None
         grande = f"covers/medium/{image}.webp" if (COVERS / "medium" / f"{image}.webp").exists() else None
+        mini = f"covers/mini/{image}.webp" if (COVERS / "mini" / f"{image}.webp").exists() else None
         versions.append({
             "id": r["id"], "isbn13": r["isbn13"], "titre": r["titre_version"], "livre_id": r["livre_id"],
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
@@ -315,7 +357,7 @@ def main():
             "en_vente": 1 if r["isbn13"] in en_stock else (None if (r["isbn13"] in hors_manuel or (r["isbn13"] in hors_vente and r["en_vente"] != 1)) else r["en_vente"]), "annee": r["annee"], "annee_bnf": r["annee_bnf"],
             "editeur": r["editeur"], "collection": r["collection_editeur"], "pages": r["pages"],
             "auteurs": r["auteurs"], "traducteur": r["traducteur"], "illustrateur": r["illustrateur"],
-            "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, "statut": r["statut"],
+            "notice": r["notice_bnf"], "couverture": petite, "couverture_grande": grande, **({"couverture_mini": mini} if mini else {}), "statut": r["statut"],
             "maj": dates_maj.get(r["id"]),
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
