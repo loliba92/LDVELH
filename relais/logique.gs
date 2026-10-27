@@ -1,4 +1,4 @@
-// Version du 2026-10-27 11:34 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-27 16:40 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -30,6 +30,8 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
   butin_lire: 'admin',            // Butin seul (bonnes affaires) : sorciers et Zagors
   annonces_lire: 'superadmin',    // toutes les annonces reçues : le Zagor seulement
+  pepite_offrir: 'superadmin',    // le Zagor choisit la pépite du jour offerte aux Héros
+  pepite_retirer: 'superadmin',   // et peut la retirer
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
@@ -97,6 +99,24 @@ function validerEnvoi(lot, entrees) {
   }
   if (!propres[permis[0]]) return { ok: false, raison: 'champ manquant : ' + permis[0] };
   return { ok: true, entrees: propres };
+}
+
+/* Pépite du jour : le Zagor offre une annonce aux Héros. Le fichier public data/pepite-du-jour.json est écrit par le relais ;
+   on n'accepte que des champs connus, un lien https et des valeurs plausibles. */
+var ORIGINES_PEPITE = ['leboncoin', 'ebay', 'librairie', 'isbn', 'titre'];
+function validerPepite(q) {
+  q = q || {};
+  var isbn = String(q.isbn13 || ''), prix = Number(q.prix), pub = q.pub == null || q.pub === '' ? null : Number(q.pub);
+  var pct = q.pct == null || q.pct === '' ? null : Number(q.pct), lien = String(q.lien || '');
+  if (!/^\d{13}$/.test(isbn)) return { ok: false, raison: 'ISBN invalide' };
+  if (!(prix > 0 && prix < 10000)) return { ok: false, raison: 'prix invalide' };
+  if (pub !== null && !(pub > 0 && pub < 10000)) return { ok: false, raison: 'cote invalide' };
+  if (pct !== null && !(pct >= 0 && pct <= 100 && pct % 1 === 0)) return { ok: false, raison: 'pourcentage invalide' };
+  if (['C', 'BE', 'TBE'].indexOf(String(q.etat)) < 0) return { ok: false, raison: 'état invalide' };
+  if (ORIGINES_PEPITE.indexOf(String(q.origine)) < 0) return { ok: false, raison: 'origine invalide' };
+  if (!/^https:\/\/[^\s"<>]{4,480}$/.test(lien)) return { ok: false, raison: 'lien invalide' };
+  return { ok: true, pepite: { isbn13: isbn, prix: Math.round(prix * 100) / 100, pub: pub === null ? null : Math.round(pub * 100) / 100, pct: pct,
+    etat: String(q.etat), origine: String(q.origine), lien: lien, solide: q.solide === true } };
 }
 
 function copie(o) { return JSON.parse(JSON.stringify(o)); }

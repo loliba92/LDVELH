@@ -185,3 +185,10 @@ Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`,
 - Les chaînes qui publient le site (`.github/workflows/*.yml`) envoient `web/livre`, `web/sitemap.xml` et `web/robots.txt` avec le reste. Un nouvel atelier qui régénère les pages doit faire de même.
 - Garde-fou : `pipeline/test_pages_livres.py` (une page par édition, aucune en trop, contenu conforme au générateur, aucun prix exact).
 - Les 5 titres sans ISBN (L'Œil Noir, identifiants `LOCAL-…`) n'ont pas de page.
+
+## Pépite du jour (offerte aux Héros) et partage
+
+- Le Zagor choisit l'annonce : bouton « Offrir aux Héros aujourd'hui » sur chaque carte du Butin. Le service technique (action `pepite_offrir`, Zagor seul) écrit `web/data/pepite-du-jour.json` ; `pepite_retirer` le vide. Le fichier est public : l'annonce, son prix, son lien, la date.
+- Les Héros connectés voient la carte « Pépite du jour » en tête de « À trouver » ; le badge de l'étoile du menu affiche 1. Elle reste valable aujourd'hui et jusqu'au lendemain (jour de Paris). Les sorciers voient déjà toutes les pépites ; le Zagor voit celle qu'il a offerte, avec « Retirer ».
+- La carte de partage (« Créer la carte à partager ») est réservée au Zagor. Elle ne montre ni prix ni cote : « Pépite », la couverture, « −N % sous la cote » et un renvoi vers la page publique du livre.
+- Après toute modification de `relais/Code.gs` ou `relais/logique.gs`, le propriétaire redéploie le service technique à la main (première ligne : date et heure de version).
