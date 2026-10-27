@@ -838,11 +838,11 @@
     return `<h3>Corriger les cotes</h3>
         ${derniereRevision(b)}
         <form class="corriger" id="corriger" data-isbn="${esc(b.isbn13)}">
-          <p class="sous">Le plus simple : la <strong>fourchette observée</strong>. Le prix le plus bas est compté en convenable, le plus haut en très bon état, et le bon état en est déduit. Un seul prix est compté en très bon état.</p>
+          <p class="sous"><strong>Fourchette observée</strong> : le bas vaut convenable, le haut très bon état.</p>
           <div class="corriger-fourchette"><label>De<input type="text" inputmode="decimal" name="mini" autocomplete="off" placeholder="€"></label>
             <label>à<input type="text" inputmode="decimal" name="maxi" autocomplete="off" placeholder="€"></label></div>
           <details class="corriger-detail"><summary>Ou fixer chaque état</summary>
-          <p class="sous">Les états laissés vides en sont déduits ; votre prix prime ensuite sur tout le reste.</p>
+          <p class="sous">Un état vide est déduit des autres. Votre prix prime.</p>
           <div class="corriger-champs">${[['convenable', 'Convenable'], ['bon', 'Bon état'], ['tres_bon', 'Très bon état']].map(champ).join('')}</div></details>
           <div class="corriger-actions"><button type="submit" class="bouton">Enregistrer ces prix</button></div>
           <p class="corriger-msg" id="corriger-msg" role="status" hidden></p>
