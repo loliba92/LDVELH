@@ -375,10 +375,8 @@ def main():
     lots = importer_leboncoin.charger_lots()
     for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN).items():
         for etat, liste in par_etat.items():
-            for a in liste:
-                if a[2] in lots:                       # annonce d'un lot : son prix n'est pas celui d'un livre (voir importer_leboncoin.repartir_lot)
-                    a[1] = f"Lot de {len(lots[a[2]]['isbns'])} livres · {a[1]}"
             annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+    importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():

@@ -125,6 +125,25 @@ def repartir_lot(prix, lot):
     return [(i, prix * w / total) for i, w in zip(lot["isbns"], poids)]
 
 
+def etaler_lots(annonces, lots):
+    """Présentation des annonces de lot : chaque livre du lot reçoit une ligne « Lot de N livres », au prix de sa part.
+    `annonces` : {isbn: {état: [[prix, titre, lien, origine, vue, supposé]]}} (modifié en place). Sans cela, l'annonce n'apparaîtrait
+    que sous un seul des livres alors que sa part est comptée dans la cote de tous."""
+    vues = [(isbn, etat, list(a)) for isbn, par in annonces.items() for etat, liste in par.items() for a in liste if a[2] in lots]
+    for isbn, etat, a in vues:
+        lot = lots[a[2]]
+        prefixe = "Lot de %d livres · " % len(lot["isbns"])
+        titre = prefixe + str(a[1]).removeprefix(prefixe)
+        part_de = dict(repartir_lot(a[0], lot))
+        for i in lot["isbns"]:
+            liste = annonces.setdefault(i, {}).setdefault(etat, [])
+            ligne = next((x for x in liste if x[2] == a[2]), None)
+            if ligne is None:
+                liste.append([round(part_de[i], 2), titre, a[2], a[3], a[4], a[5]])
+            else:
+                ligne[0], ligne[1] = round(part_de[i], 2), titre
+
+
 def _agreger(lignes, jour, lots=None):
     """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier."""
     lots = lots or {}
