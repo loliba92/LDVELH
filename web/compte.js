@@ -115,7 +115,7 @@ window.Compte = (function () {
       var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
     }
     var quand = reste === 0 ? 'aujourd\'hui' : reste === 1 ? 'demain' : 'dans ' + reste + ' jours';
-    b.innerHTML = '<span>Votre accès se termine <strong>' + quand + '</strong> (' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + ').</span>';
+    b.innerHTML = '<span>Votre accès sorcier va bientôt se terminer : <strong>' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '</strong> (' + quand + ').</span>';
     b.hidden = false;
   }
 
