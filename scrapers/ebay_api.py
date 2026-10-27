@@ -506,6 +506,7 @@ def main():
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
     p.add_argument("--diagnostic", help="ISBN : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
+    p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
     cid, secret = (os.environ.get("EBAY_CLIENT_ID") or "").strip(), (os.environ.get("EBAY_CLIENT_SECRET") or "").strip()
@@ -524,6 +525,10 @@ def main():
         return
     if a.essais:
         essayer(a, token)
+        return
+    if a.essai_photos:
+        import essai_photos
+        essai_photos.essayer(a, token, catalogue, chercher, concorde, RACINE / "web" / "covers")
         return
     cat = catalogue()[: a.limite]
     isbns = [c[0] for c in cat]
