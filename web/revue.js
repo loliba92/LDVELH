@@ -645,7 +645,8 @@
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + `</span>` +
-      `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a></article>`;
+      `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
+      (estNiveau3() ? `<button type="button" class="bouton-lien pp-offrir" data-offrir="${esc(p.ed.id)}|${esc(p.cle)}|${esc(p.lien)}">Offrir aux Héros aujourd'hui</button>` : '') + `</article>`;
   }
   function initPepites() {
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri'), trouver = $('#pp-trouver');
@@ -666,6 +667,17 @@
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
+    // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
+    liste.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-offrir]'); if (!b) return;
+      const [id, cle, lien] = b.dataset.offrir.split('|'), p = pepites().find((x) => x.ed.id === id && x.cle === cle && x.lien === lien);
+      if (!p || !window.Relais) return;
+      b.disabled = true; etat.textContent = 'Envoi de la pépite du jour…';
+      const pct = Math.round((1 - p.prix / p.pub) * 100), ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+      window.Relais.appeler('pepite_offrir', { isbn13: p.ed.isbn, prix: p.prix, pub: p.pub, pct, etat: ABR[p.cle], origine: p.origine === 'leboncoin' ? 'leboncoin' : p.origine === 'librairie' ? 'librairie' : p.origine === 'titre' ? 'titre' : p.origine === 'isbn' ? 'isbn' : 'ebay', lien: p.lien, solide: !p.raisons.length })
+        .then((r) => { etat.textContent = r && r.ok ? `✓ « ${p.ed.titre} » est offerte aux Héros aujourd'hui (visible d'ici quelques minutes).` : `Échec : ${(r && r.erreur) || 'réponse inattendue'}.`; })
+        .catch(() => { etat.textContent = 'Échec : service injoignable.'; }).then(() => { b.disabled = false; });
+    });
     solides.addEventListener('change', dessinerPepites);
     trouver.addEventListener('change', dessinerPepites);
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estNiveau2()) chargerButin().then(dessinerPepites); });

@@ -1,4 +1,4 @@
-// Version du 2026-10-27 11:34 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-27 16:40 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -120,6 +120,20 @@ function doPost(e) {
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
       var fic = JSON.parse(ann.texte);
       return reponse({ ok: true, annonces: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
+    }
+
+    if (action === 'pepite_offrir' || action === 'pepite_retirer') {      // pépite du jour : fichier public lu par tous les Héros
+      var chemin = '/contents/web/data/pepite-du-jour.json', contenuPep = {};
+      if (action === 'pepite_offrir') {
+        var vp = validerPepite(q);
+        if (!vp.ok) return reponse({ ok: false, erreur: vp.raison });
+        contenuPep = vp.pepite; contenuPep.date = Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd');
+      }
+      var actuel = github(chemin + '?ref=main'), shaPep = actuel.code === 200 ? JSON.parse(actuel.texte).sha : undefined;
+      var ecrit = github(chemin, { method: 'put', payload: { message: 'Pépite du jour : ' + (action === 'pepite_offrir' ? contenuPep.isbn13 : 'retirée') + ' par ' + moi.nom, branch: 'main', sha: shaPep,
+        content: Utilities.base64Encode(JSON.stringify(contenuPep, null, 2) + '\n', Utilities.Charset.UTF_8) } });
+      if (ecrit.code !== 200 && ecrit.code !== 201) return reponse({ ok: false, erreur: 'écriture refusée (' + ecrit.code + ')' });
+      return reponse({ ok: true });
     }
 
     if (action === 'envoyer') {

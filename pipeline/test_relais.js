@@ -11,6 +11,18 @@ const infos = (sur = {}) => Object.assign({ aud: CLIENT, iss: 'https://accounts.
 const decider = (i, f = fichier()) => L('decider')(i, f, CLIENT, h, NOW);
 let n = 0; const test = (nom, f) => { f(); n++; console.log('ok  ' + nom); };
 
+test('pépite du jour : réservée au Zagor, champs vérifiés', () => {
+  assert.strictEqual(L('peut')('superadmin', 'pepite_offrir'), true);
+  assert.strictEqual(L('peut')('superadmin', 'pepite_retirer'), true);
+  assert.strictEqual(L('peut')('admin', 'pepite_offrir'), false);
+  assert.strictEqual(L('peut')('heros', 'pepite_offrir'), false);
+  const bonne = { isbn13: '9782010116988', prix: 3.8, pub: 15.1, pct: 75, etat: 'TBE', origine: 'librairie', lien: 'https://exemple.fr/a?b=1', solide: true };
+  const ok = J(L('validerPepite')(bonne));
+  assert.strictEqual(ok.ok, true); assert.strictEqual(ok.pepite.solide, true); assert.strictEqual(ok.pepite.prix, 3.8);
+  for (const [champ, valeur] of [['isbn13', '12'], ['prix', 0], ['prix', 'x'], ['pub', -1], ['pct', 101], ['pct', 12.5], ['etat', 'XX'], ['origine', 'autre'], ['lien', 'http://exemple.fr'], ['lien', 'javascript:alert(1)'], ['lien', 'https://a"b.fr']])
+    assert.strictEqual(L('validerPepite')(Object.assign({}, bonne, { [champ]: valeur })).ok, false, champ + ' = ' + valeur);
+  assert.strictEqual(J(L('validerPepite')(Object.assign({}, bonne, { solide: 'oui' }))).pepite.solide, false);
+});
 test('comptes_lire est réservé au SuperAdmin', () => {
   assert.strictEqual(L('peut')('superadmin', 'comptes_lire'), true);
   assert.strictEqual(L('peut')('admin', 'comptes_lire'), false);

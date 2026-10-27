@@ -1552,13 +1552,24 @@
   };
   const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'librairie' ? 'librairie' : 'eBay');
   const nbLivresAPepite = () => Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter((b) => b && pepitesDe(b).length).length;
-  // Menu du bas : « À trouver » porte un badge avec le nombre de livres de la liste qui ont une pépite
+  // Pépite du jour : choisie par le Zagor, offerte aux Héros (fichier public data/pepite-du-jour.json, écrit par le service technique)
+  let PJ = null, pjChargee = false;
+  const jourParis = (retard = 0) => new Date(Date.now() - retard * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+  const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date >= jourParis(1) ? PJ : null);          // valable aujourd'hui et demain matin
+  const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif() && (!estNiveau2() || estNiveau3());       // les sorciers ont déjà toutes les pépites ; le Zagor voit celle qu'il a offerte
+  function chargerPepiteJour() {
+    if (pjChargee) return;
+    pjChargee = true;
+    fetch('data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+      .then((d) => { PJ = d; majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
+  }
+  // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
   function majBadgePepites() {
     const b = $('#nb-pep-bas');
     if (!b) return;
-    const n = estNiveau2() && OFFRE ? nbLivresAPepite() : 0;
+    const n = estNiveau2() ? (OFFRE ? nbLivresAPepite() : 0) : (voitPepiteJour() && pepiteJour() ? 1 : 0);
     b.textContent = n ? String(n) : '';
-    b.setAttribute('aria-label', n ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : '');
+    b.setAttribute('aria-label', n ? (estNiveau2() ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : 'Une pépite du jour') : '');
   }
   // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
   // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
@@ -1640,7 +1651,7 @@
     return d;
   }
   document.addEventListener('click', async (e) => {
-    const t = e.target.closest('[data-partager]'); if (!t) return;
+    const t = e.target.closest('[data-partager]'); if (!t || !estNiveau3()) return;
     const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
     const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html?pepite=1' : 'index.html#fiche=' + encodeURIComponent(b.id));
     const texte = `Pépite repérée sur La Cote du Héros : ${b.titre} (${b.serie}${numero(b)}, ${b.version})${x.pct != null ? ', une annonce à ' + x.pct + ' % sous la cote' : ''}. Cote exacte et évolution : ${url} · Prix indicatifs. La Cote du Héros ne prend ni marge ni commission.`;
@@ -1658,9 +1669,30 @@
     d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = false; });
   });
   function rafraichirPepites() {
+    chargerPepiteJour();
+    majBadgePepites();
     if (!estNiveau2()) return;
     chargerOffre().then(() => { majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
   }
+
+  function htmlPepiteJour() {
+    const p = voitPepiteJour() && pepiteJour();
+    const b = p && DATA.find((x) => x.isbn13 === p.isbn13);
+    if (!b) return '';
+    const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    return `<h3 id="titre-pepite-jour">Pépite du jour <span class="sous">· ${esc(quand)}</span></h3>
+      <ul class="a-trouver"><li>
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
+        ${estNiveau3() ? '<button type="button" class="retirer" data-pepite-retirer>Retirer</button>' : ''}
+        <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
+      </li></ul>
+      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.</p>`;
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-pepite-retirer]') || !estNiveau3() || !window.Relais) return;
+    window.Relais.appeler('pepite_retirer').then((r) => { if (r && r.ok) { PJ = null; majBadgePepites(); afficherCollection(); } });
+  });
 
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
@@ -1670,7 +1702,7 @@
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Créer la carte à partager</button></div>` : ''; })()}</li>`).join('')}</ul>`;
+        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}${estNiveau3() ? `<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Créer la carte à partager</button>` : ''}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
   // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
@@ -2013,19 +2045,19 @@
       if (b) { b.setAttribute('aria-selected', String(k === nom)); b.tabIndex = k === nom ? 0 : -1; }
       if (pan) pan.hidden = k !== nom;
     });
-    if (aller) { const t = (nom === 'trouver' && $('#titre-a-trouver')) || $('#coll-nav'); if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
+    if (aller) { const t = (nom === 'trouver' && ($('#titre-pepite-jour') || $('#titre-a-trouver'))) || $('#coll-nav'); if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
   // Arrivée par le menu « À trouver » : la page s'ouvre directement sur le titre de la liste, sans défiler (tant que la personne n'a pas touché à la page)
   let ancreTrouver = /^#(trouver|titre-a-trouver)$/.test(location.hash);
   ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach((ev) => window.addEventListener(ev, () => { ancreTrouver = false; }, { passive: true }));
   const atterrirATrouver = () => {
     if (!ancreTrouver) return;
-    const t = $('#titre-a-trouver');
+    const t = $('#titre-pepite-jour') || $('#titre-a-trouver');
     if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' });
   };
   document.addEventListener('click', (e) => {
     const l = e.target.closest('a[href$="collection.html#trouver"]');
-    const t = l && $('#collection') && $('#titre-a-trouver');
+    const t = l && $('#collection') && ($('#titre-pepite-jour') || $('#titre-a-trouver'));
     if (t) { e.preventDefault(); ancreTrouver = false; t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   });
   document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b && $('#collection')) ouvrirOnglet(b.dataset.onglet, { aller: true }); });
@@ -2143,7 +2175,7 @@
     if (!n) {
       const imp00 = $('#importer');                       // le panneau d'import est remis à l'abri avant de redessiner
       if (imp00 && zone.contains(imp00)) $('#collection').insertBefore(imp00, $('#coll-prive'));
-      zone.innerHTML = `<div class="coll-vide"><p>Deux façons d'ajouter vos livres :</p>${tuilesAjout()}</div>${htmlATrouver()}${blocGerer(true)}`;
+      zone.innerHTML = `<div class="coll-vide"><p>Deux façons d'ajouter vos livres :</p>${tuilesAjout()}</div>${htmlPepiteJour()}${htmlATrouver()}${blocGerer(true)}`;
       const imp2 = $('#importer'), dang2 = $('.gerer-danger');
       if (imp2 && dang2) dang2.before(imp2);
       return;
@@ -2180,7 +2212,7 @@
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
       ${estNiveau2() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
-      <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
+      <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlPepiteJour()}${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
     const imp1 = $('#importer'), dang = $('.gerer-danger');
     if (imp1 && dang) dang.before(imp1);
