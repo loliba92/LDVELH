@@ -1660,7 +1660,7 @@
       <label class="sous" for="carte-texte">Texte du post (modifiable)</label>
       <textarea id="carte-texte" rows="12" spellcheck="true"></textarea>
       <p class="sous" id="carte-msg" role="status" aria-live="polite"></p>
-      <div class="carte-actions"><button type="button" class="bouton" data-carte-copier disabled>Copier le texte</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button>${navigator.share ? '<button type="button" class="bouton bouton-clair" data-carte-partager disabled>Partager…</button>' : ''}</div></div>`;
+      <div class="carte-actions"><button type="button" class="bouton" data-carte-copier disabled>Copier le texte</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button><button type="button" class="bouton bouton-clair" data-carte-facebook disabled>Ouvrir Facebook</button>${navigator.share ? '<button type="button" class="bouton bouton-clair" data-carte-partager disabled>Partager…</button>' : ''}</div></div>`;
     document.body.appendChild(d);
     d.addEventListener('click', (e) => {
       if (e.target === d || e.target.closest('[data-carte-fermer]')) { d.close(); return; }
@@ -1673,6 +1673,10 @@
         const ok = () => { msg.textContent = 'Texte copié. Collez-le dans votre publication.'; };
         if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texte()).then(ok).catch(() => { $('#carte-texte').select(); msg.textContent = 'Copie impossible : sélectionnez le texte et copiez-le.'; });
         else { $('#carte-texte').select(); msg.textContent = 'Texte sélectionné : copiez-le.'; }
+      } else if (e.target.closest('[data-carte-facebook]')) {          // le texte est copié, puis Facebook s'ouvre : il ne reste qu'à coller et à ajouter l'image enregistrée
+        window.open('https://www.facebook.com/', '_blank', 'noopener');
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texte()).then(() => { msg.textContent = 'Texte copié. Collez-le dans Facebook et ajoutez l\'image enregistrée.'; }).catch(() => { msg.textContent = 'Copiez le texte ci-dessus avant de publier.'; });
+        else msg.textContent = 'Copiez le texte ci-dessus avant de publier.';
       } else if (e.target.closest('[data-carte-partager]')) {
         const f = new File([CARTE.blob], CARTE.nom, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], text: texte() }).catch(() => {});
@@ -1688,7 +1692,7 @@
     const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
     CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de l\'image…';
     $('#carte-texte').value = textePost(b, p);
-    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier]').forEach((x2) => { x2.disabled = true; });
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier],[data-carte-facebook]').forEach((x2) => { x2.disabled = true; });
     if (!d.open) d.showModal();
     const blob = await dessinerCarte(b, p);
     if (!d.open) return;
@@ -1697,7 +1701,7 @@
     urlCarte = URL.createObjectURL(blob);
     CARTE = { blob, nom: `pepite-du-jour-${b.isbn13 || b.id}.png` };
     img.src = urlCarte; msg.textContent = '';
-    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier]').forEach((x2) => { x2.disabled = false; });
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier],[data-carte-facebook]').forEach((x2) => { x2.disabled = false; });
   });
   function rafraichirPepites() {
     chargerPepiteJour();
