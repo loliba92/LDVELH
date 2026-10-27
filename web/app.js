@@ -1560,14 +1560,99 @@
     b.textContent = n ? String(n) : '';
     b.setAttribute('aria-label', n ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : '');
   }
-  // Partage d'une pépite : la meilleure annonce est résumée, avec le lien de la fiche du livre (jamais celui de l'annonce)
-  document.addEventListener('click', (e) => {
+  // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
+  // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
+  const chargerImage = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
+  async function dessinerCarte(b, x) {
+    const L = 1080, H = 1350, c = document.createElement('canvas');
+    c.width = L; c.height = H;
+    const g = c.getContext('2d'), or = (getComputedStyle(document.documentElement).getPropertyValue('--gold') || '#d9b45f').trim();
+    const serif = '"Cormorant Garamond", Georgia, serif', ui = '"Source Sans 3", system-ui, sans-serif', creme = '#f3e9d2', sourd = '#cdbf9f';
+    try { await Promise.all([document.fonts.load(`700 64px ${serif}`), document.fonts.load(`700 30px ${ui}`), document.fonts.load(`400 30px ${ui}`)]); } catch (e) { /* polices de secours */ }
+    const lettres = (v) => { if ('letterSpacing' in g) g.letterSpacing = v; };
+    g.fillStyle = '#000'; g.fillRect(0, 0, L, H);
+    const lueur = g.createRadialGradient(L / 2, 480, 40, L / 2, 480, 780);
+    lueur.addColorStop(0, 'rgba(217,180,95,.22)'); lueur.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = lueur; g.fillRect(0, 0, L, H);
+    g.strokeStyle = or; g.lineWidth = 3; g.strokeRect(28, 28, L - 56, H - 56); g.lineWidth = 1; g.strokeRect(44, 44, L - 88, H - 88);
+    g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    g.fillStyle = or; g.font = `700 36px ${ui}`; lettres('14px'); g.fillText('PÉPITE', L / 2 + 7, 122); lettres('0px');
+    // couverture, dans une boîte de 470 × 640
+    const img = b.couverture ? await chargerImage(racine(b.couverture_grande || b.couverture)) : null;
+    const bw = 470, bh = 640, by = 160;
+    if (img) {
+      const k = Math.min(bw / img.naturalWidth, bh / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k, x0 = (L - w) / 2, y0 = by + (bh - h) / 2;
+      g.save(); g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 36; g.shadowOffsetY = 14; g.fillStyle = '#111'; g.fillRect(x0, y0, w, h); g.restore();
+      g.drawImage(img, x0, y0, w, h);
+      g.strokeStyle = 'rgba(217,180,95,.55)'; g.lineWidth = 2; g.strokeRect(x0, y0, w, h);
+    } else {
+      g.fillStyle = '#111'; g.fillRect((L - 420) / 2, by, 420, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 420) / 2, by, 420, bh);
+      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 400);
+    }
+    // titre sur une ou deux lignes
+    g.fillStyle = creme; g.font = `700 66px ${serif}`;
+    const lignes = []; let cur = '';
+    (b.titre || '').split(/\s+/).forEach((m) => { const t = cur ? cur + ' ' + m : m; if (g.measureText(t).width > 900 && cur) { lignes.push(cur); cur = m; } else cur = t; });
+    lignes.push(cur);
+    if (lignes.length > 2) { let l2 = lignes.slice(1).join(' '); while (g.measureText(l2 + '…').width > 900 && l2.length > 1) l2 = l2.slice(0, -1); lignes.splice(1, lignes.length, l2 + '…'); }
+    lignes.forEach((l, k) => g.fillText(l, L / 2, 880 + k * 68));
+    g.fillStyle = sourd; g.font = `400 32px ${ui}`;
+    g.fillText(`${b.serie || ''}${numero(b)} · ${b.version} · ${x.etat}`, L / 2, 880 + (lignes.length - 1) * 68 + 68);
+    // prix de l'annonce, puis cote et économie
+    g.fillStyle = or; g.font = `700 150px ${serif}`; g.fillText(fmt(x.prix), L / 2, 1135);
+    const morceaux = [[x.pub ? `au lieu de ${fmt(x.pub)}` : 'annonce trouvée', sourd]];
+    if (x.pct != null) { morceaux.push(['  ·  ', sourd]); morceaux.push([`−${x.pct} %`, or]); }
+    g.font = `600 40px ${ui}`; g.textAlign = 'left';
+    const total = morceaux.reduce((t, [m]) => t + g.measureText(m).width, 0); let px = (L - total) / 2;
+    morceaux.forEach(([m, col]) => { g.fillStyle = col; g.fillText(m, px, 1236); px += g.measureText(m).width; });
+    g.textAlign = 'center'; g.fillStyle = sourd; g.font = `600 30px ${ui}`; lettres('2px');
+    g.fillText('La Cote du Héros  ·  lacoteduheros.fr', L / 2, 1296); lettres('0px');
+    return new Promise((ok) => c.toBlob(ok, 'image/png'));
+  }
+  let CARTE = null, urlCarte = '';
+  function boiteCarte() {
+    let d = $('#carte-partage');
+    if (d) return d;
+    d = document.createElement('dialog');
+    d.id = 'carte-partage'; d.className = 'carte-dialog'; d.setAttribute('aria-labelledby', 'carte-titre');
+    d.innerHTML = `<div class="carte-cadre"><div class="scan-tete"><p class="surtitre" id="carte-titre">Carte de partage</p><button type="button" class="bouton bouton-clair" data-carte-fermer>Fermer</button></div>
+      <img class="carte-img" alt="Carte de la pépite, prête à partager" width="540" height="675">
+      <p class="sous" id="carte-msg" role="status" aria-live="polite"></p>
+      <div class="carte-actions"><button type="button" class="bouton" data-carte-partager disabled>Partager</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button></div></div>`;
+    document.body.appendChild(d);
+    d.addEventListener('click', (e) => {
+      if (e.target === d || e.target.closest('[data-carte-fermer]')) { d.close(); return; }
+      if (!CARTE) return;
+      if (e.target.closest('[data-carte-enregistrer]')) {
+        const a = document.createElement('a'); a.href = urlCarte; a.download = CARTE.nom; document.body.appendChild(a); a.click(); a.remove();
+        $('#carte-msg').textContent = 'Image enregistrée. Ajoutez-la à votre publication.';
+      } else if (e.target.closest('[data-carte-partager]')) {
+        const f = new File([CARTE.blob], CARTE.nom, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'La Cote du Héros', text: CARTE.texte + ' ' + CARTE.url }).catch(() => {});
+        else if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: CARTE.texte, url: CARTE.url }).catch(() => {});
+        else { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(CARTE.url) + '&quote=' + encodeURIComponent(CARTE.texte), '_blank', 'noopener'); $('#carte-msg').textContent = 'Enregistrez aussi l\'image pour l\'ajouter à votre publication.'; }
+      }
+    });
+    d.addEventListener('close', () => { if (urlCarte) URL.revokeObjectURL(urlCarte); urlCarte = ''; CARTE = null; });
+    return d;
+  }
+  document.addEventListener('click', async (e) => {
     const t = e.target.closest('[data-partager]'); if (!t) return;
     const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
     const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html' : 'index.html#fiche=' + encodeURIComponent(b.id));
     const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}.`;
-    if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: texte, url }).catch(() => {});
-    else window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(texte), '_blank', 'noopener');
+    const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
+    CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de la carte…';
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = true; });
+    if (!d.open) d.showModal();
+    const blob = await dessinerCarte(b, x);
+    if (!d.open) return;
+    if (!blob) { msg.textContent = 'La carte n\'a pas pu être créée.'; return; }
+    if (urlCarte) URL.revokeObjectURL(urlCarte);
+    urlCarte = URL.createObjectURL(blob);
+    CARTE = { blob, texte, url, nom: `pepite-${b.isbn13 || b.id}.png` };
+    img.src = urlCarte; msg.textContent = '';
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = false; });
   });
   function rafraichirPepites() {
     if (!estNiveau2()) return;
@@ -1582,7 +1667,7 @@
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Partager cette pépite</button></div>` : ''; })()}</li>`).join('')}</ul>`;
+        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Créer la carte à partager</button></div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
   // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
