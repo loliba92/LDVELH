@@ -1116,16 +1116,28 @@
     lire().then((runs) => {
       const etat = (r) => (r.st !== 'completed' ? ['en cours', 'en-cours'] : r.c === 'success' ? ['réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['échec', 'echec']);
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
-      const puces = FAMILLES.map(([f, nom, aide]) => {
+      const lots = FAMILLES.map(([f, nom, aide]) => {
         const r = runs[f];
-        if (!r) return `<li><span class="maj-puce maj-vide" title="${esc(aide)}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">pas d'exécution récente</span></span></li>`;
+        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '' };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        return `<li><a class="maj-puce maj-${retard ? 'echec' : cls}" href="${esc(r.u)}" target="_blank" rel="noopener noreferrer" title="${esc(aide)}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">${retard ? `⚠ pas lancée depuis ${Math.floor(jours)} jours` : esc(depuisMin(d))}</span><span class="sr-only"> : ${esc(txt)}, ${esc(quand(r))}. Ouvrir le détail (nouvel onglet)</span></a></li>`;
+        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r) };
       });
-      $('#rv-maj-liste').innerHTML = puces.join('');
-      $('#rv-maj-aide').innerHTML = '<summary>À quoi servent ces pastilles ?</summary><p class="sous">Une pastille par lot automatique du site. Touchez-en une pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
-        + FAMILLES.map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul>';
+      const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
+      const global = mal.length ? 'echec' : enCours.length ? 'en-cours' : 'ok';
+      const bilan = mal.length ? `${mal.length} problème${mal.length > 1 ? 's' : ''} : ${mal.map((l) => esc(l.nom)).join(', ')}`
+        : `Tout va bien${enCours.length ? ` · ${enCours.length} en cours` : ''}`;
+      const rang = { echec: 0, 'en-cours': 1 };                              // les problèmes d'abord, puis ce qui tourne
+      const lignes = lots.map((l, i) => [l, i]).sort((a, b) => (rang[a[0].cls] ?? 2) - (rang[b[0].cls] ?? 2) || a[1] - b[1]).map(([l]) => {
+        const corps = `<span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(l.nom)}</span><span class="maj-quand">${esc(l.quand)}</span>`;
+        return l.u
+          ? `<li><a class="maj-ligne maj-${l.cls}" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Ouvrir le détail (nouvel onglet)</span></a></li>`
+          : `<li><div class="maj-ligne maj-vide" title="${esc(l.aide)}">${corps}</div></li>`;
+      });
+      bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
+        + `<ul class="maj-liste">${lignes.join('')}</ul>`
+        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
+        + FAMILLES.map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
