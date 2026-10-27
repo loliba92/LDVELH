@@ -1107,7 +1107,8 @@
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
   // Accès discret au Butin sur l'accueil : niveaux 2 et 3 (le rôle arrive après le chargement)
-  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estNiveau2(); };
+  let nbButinNouveaux = 0;          // quand le bandeau « nouvelles annonces au Butin » est affiché, le bouton « Butin » de la carte est masqué (pas de doublon)
+  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estNiveau2() || nbButinNouveaux > 0; };
   document.addEventListener('cdh-compte', majButin);
   majButin();
   // Accueil, niveau 3 seul : dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication), lues dans l'historique public des lots,
@@ -1732,11 +1733,32 @@
     img.src = urlCarte; msg.textContent = '';
     d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier],[data-carte-facebook]').forEach((x2) => { x2.disabled = false; });
   });
+  // Nouveaux butins (sorciers et Zagor) : annonces du Butin apparues depuis la dernière ouverture de la page Butin (24 h au premier passage).
+  // Dits sur l'accueil (bandeau) et dans le menu du haut ; « premieres » vient du Butin servi par le service technique.
+  const CLE_BUTIN_VU = 'cdh-butin-vu';
+  const butinVuLe = () => { try { return Number(localStorage.getItem(CLE_BUTIN_VU)) || Date.now() - 86400000; } catch (e) { return Date.now() - 86400000; } };
+  const nbNouveauxButin = () => {
+    if (!estNiveau2() || !OFFRE || !OFFRE.premieres) return 0;
+    const depuis = butinVuLe();
+    return Object.values(OFFRE.premieres).filter((t) => typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;
+  };
+  function majAlerteButin() {
+    const n = nbNouveauxButin(), niv2 = estNiveau2();
+    nbButinNouveaux = n; majButin();
+    document.querySelectorAll('.menu-butin').forEach((l) => {
+      l.hidden = !niv2;
+      const b = l.querySelector('.nb-butin');
+      if (b) { b.textContent = n ? String(n) : ''; b.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
+      if (n) l.setAttribute('href', 'butin.html?tri=date'); else l.setAttribute('href', 'butin.html');
+    });
+    const z = $('#butin-alerte-zone');
+    if (z) z.innerHTML = n ? `<a class="butin-alerte" href="butin.html?tri=date"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span><b>${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''} au Butin</b><small>Voir les dernières bonnes affaires</small></span></a>` : '';
+  }
   function rafraichirPepites() {
     chargerPepiteJour();
     majBadgePepites();
     if (!estNiveau2()) return;
-    chargerOffre().then(() => { majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
+    chargerOffre().then(() => { majBadgePepites(); majAlerteButin(); if ($('#coll-corps')) afficherCollection(); });
   }
 
   function htmlPepiteJour() {

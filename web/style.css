@@ -2274,3 +2274,15 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-ligne2 { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: .85rem; color: var(--muted); }
 .imp-ligne2 .rc-pastille { font-size: .72rem; line-height: 1.5; white-space: nowrap; }
 .imp-vendu { opacity: .55; }
+
+/* Nouveaux butins : bandeau de l'accueil et entrée « Butin » du menu du haut (sorciers et Zagor) */
+#butin-alerte-zone:empty { display: none; }
+.butin-alerte { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; padding: 12px 16px; border: 1px solid var(--gold); border-left-width: 4px; border-radius: var(--r); background: rgba(217, 180, 95, .12); color: var(--text); text-decoration: none; }
+.butin-alerte svg { flex: none; color: var(--gold); }
+.butin-alerte span { display: grid; gap: 2px; min-width: 0; }
+.butin-alerte b { font: 700 1.05rem var(--f-ui); color: var(--gold); }
+.butin-alerte small { color: var(--muted); font-size: .85rem; }
+.butin-alerte:hover, .butin-alerte:focus-visible { background: rgba(217, 180, 95, .2); }
+.butin-alerte:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.menu a.menu-butin[hidden] { display: none !important; }
+.menu .nb-butin:empty { display: none; }
