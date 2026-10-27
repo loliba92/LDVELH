@@ -262,11 +262,11 @@ def _version():          # même numéro que le service worker : les scripts cha
 
 V = _version()
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
-               "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
+               "revue-prix.html": '\n<script src="acces.js?v=' + V + '"></script>\n<script src="revue.js?v=' + V + '"></script>',
                "equipe.html": '\n<script src="acces.js?v=' + V + '"></script>\n<script src="equipe.js?v=' + V + '"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>',
                "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>',
-               "butin.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>'}
+               "butin.html": '\n<script src="acces.js?v=' + V + '"></script>\n<script src="revue.js?v=' + V + '"></script>'}
 PORTE = '''<div class="porte" id="porte">
   <div class="porte-boite">
     <p class="porte-etiquette"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> Espace réservé</p>
