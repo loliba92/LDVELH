@@ -2029,8 +2029,7 @@
     if (!n) {
       const imp00 = $('#importer');                       // le panneau d'import est remis à l'abri avant de redessiner
       if (imp00 && zone.contains(imp00)) $('#collection').insertBefore(imp00, $('#coll-prive'));
-      zone.innerHTML = `<div class="coll-vide"><p>Constituez ici votre collection pour la suivre dans le temps.</p>
-        <p>Le plus rapide : l'<strong>inventaire guidé</strong>. Vous indiquez vos séries, vos éditions, puis vous cochez vos couvertures. Vous pouvez aussi toucher <strong>C, BE ou TBE</strong> sur une jaquette de l'étagère, ou importer une liste d'ISBN ci-dessous.</p>
+      zone.innerHTML = `<div class="coll-vide"><p>Suivez la valeur de vos livres. Le plus rapide : l'<strong>inventaire guidé</strong>.</p>
         <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}${blocGerer()}`;
       const imp2 = $('#importer'), dang2 = $('.gerer-danger');
       if (imp2 && dang2) dang2.before(imp2);
