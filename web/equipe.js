@@ -95,7 +95,7 @@
       if (!r || !r.ok) return dire(erreurLisible(r), true);
       dire(nom + ' : ' + NOMS[role] + (debut ? ', à partir du ' + jour(debut) : '') + (fin ? ', jusqu\'au ' + jour(fin) : '') + '.');
       $('#eq-adresse').value = ''; $('#eq-nom').value = ''; $('#eq-fin').value = ''; $('#eq-debut').value = '';
-      charger();
+      setTimeout(charger, 2500);                              // laisse à GitHub le temps de servir la nouvelle liste
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   });
 
@@ -114,18 +114,23 @@
     window.Relais.appeler(b.dataset.act, { empreinte: b.dataset.e }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
       dire(bloquer ? 'Compte bloqué.' : 'Personne retirée.');
-      charger();
+      EQUIPE.equipe = EQUIPE.equipe.filter(function (x) { return x.empreinte !== b.dataset.e; });
+      if (bloquer) EQUIPE.bloques.push(b.dataset.e);
+      dessiner(EQUIPE);
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   function nouvelleFin(ev) {
     var f = ev.target.closest('.eq-fin-form');
     if (!f) return;
     ev.preventDefault();
+    var debut = f.elements.debut.value, fin = f.elements.fin.value;
     dire('Enregistrement…');
-    window.Relais.appeler('equipe_periode', { empreinte: f.dataset.e, debut: f.elements.debut.value, fin: f.elements.fin.value }).then(function (r) {
+    window.Relais.appeler('equipe_periode', { empreinte: f.dataset.e, debut: debut, fin: fin }).then(function (r) {
       if (!r || !r.ok) return dire(erreurLisible(r), true);
+      var m = EQUIPE.equipe.filter(function (x) { return x.empreinte === f.dataset.e; })[0];
+      if (m) { m.debut = debut; m.fin = fin; m.echu = !!fin && fin < EQUIPE.aujourdhui; m.avenir = !!debut && debut > EQUIPE.aujourdhui; }
+      dessiner(EQUIPE);                                      // affichage tout de suite, sans relire : GitHub peut renvoyer l'ancienne liste pendant quelques secondes
       dire('Dates enregistrées.');
-      charger();
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   ['#eq-zagors', '#eq-sorciers'].forEach(function (s) { $(s).addEventListener('click', actions); $(s).addEventListener('submit', nouvelleFin); });

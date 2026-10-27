@@ -36,8 +36,10 @@ function ecrireAdmins(contenu, sha, message) {
   var r = github('/contents/data/admins.json', { method: 'put', payload: {
     message: message, branch: 'main', sha: sha,
     content: Utilities.base64Encode(JSON.stringify(contenu, null, 2) + '\n', Utilities.Charset.UTF_8) } });
-  CacheService.getScriptCache().remove('admins');
-  if (r.code !== 200 && r.code !== 201) throw new Error('écriture refusée (' + r.code + ')');
+  if (r.code !== 200 && r.code !== 201) { CacheService.getScriptCache().remove('admins'); throw new Error('écriture refusée (' + r.code + ')'); }
+  // La liste qui vient d'être écrite devient la version connue (30 s) : relire GitHub tout de suite pourrait renvoyer l'ancienne.
+  try { CacheService.getScriptCache().put('admins', JSON.stringify({ contenu: contenu, sha: JSON.parse(r.texte).content.sha }), 30); }
+  catch (e) { CacheService.getScriptCache().remove('admins'); }
 }
 
 function verifierConnexion(jeton) {
