@@ -1089,6 +1089,8 @@
     if (window.Cloud) window.Cloud.planifier(toutSynchro, adopterCloud);
     document.dispatchEvent(new Event('cdh-collection'));
   };
+  document.addEventListener('cdh-compte', rafraichirPepites);
+  window.addEventListener('load', rafraichirPepites);
   window.AppCollection = { lire: toutSynchro, adopter: adopterCloud, nb: () => Object.keys(COLL).length, pret: () => COLL_PRET };
   // Construire sa collection exige un compte Google (consulter reste libre). `suite` est rejouée après la connexion.
   const garde = (suite) => !window.Compte || window.Compte.exiger(suite);
@@ -1534,6 +1536,38 @@
     const nb = Object.keys(SOUH).filter((id) => !COLL[id] && livreDe(id)).length;
     return nb ? `<p class="sous lien-a-trouver"><a href="#titre-a-trouver">À trouver : ${nb} livre${nb > 1 ? 's' : ''} ↓</a></p>` : '';
   };
+  // Pépites des livres « à trouver » (niveaux 2 et 3) : annonces à 50 % du prix du site ou moins, lues dans le Butin servi par le service technique.
+  // Une annonce de librairie, ou trouvée par l'ISBN avec l'état indiqué, est « solide » ; sinon « à vérifier ».
+  const pepitesDe = (b) => {
+    if (!estNiveau2() || !OFFRE || !OFFRE.annonces || !b.isbn13) return [];
+    const par = OFFRE.annonces[b.isbn13];
+    if (!par) return [];
+    const lignes = [];
+    ETATS.forEach((e) => (par[e.k] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
+      if (origine !== 'leboncoin' && origine !== 'librairie' && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;      // eBay non revue au dernier relevé : plus retenue
+      const pub = b.prix[e.k], solide = origine === 'librairie' || (origine === 'isbn' && suppose === 0);
+      lignes.push({ prix, lien, origine, etat: ABREGE[e.k], pct: pub ? Math.round((1 - prix / pub) * 100) : null, solide });
+    }));
+    return lignes.sort((x, y) => x.prix - y.prix);
+  };
+  const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'librairie' ? 'librairie' : 'eBay');
+  const nbLivresAPepite = () => Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter((b) => b && pepitesDe(b).length).length;
+  // Badge « ★ N » sur « Ma collection » (barre du bas) : N livres de la liste « à trouver » ont une pépite ; il mène à la liste
+  function majBadgePepites() {
+    const lien = $('.barre-bas .barre-centre');
+    if (!lien) return;
+    const n = estNiveau2() && OFFRE ? nbLivresAPepite() : 0;
+    let b = $('#nb-pep-bas');
+    if (!b) { b = document.createElement('b'); b.id = 'nb-pep-bas'; b.className = 'nb-pep'; lien.appendChild(b); }
+    b.textContent = n ? '★' + n : '';
+    b.setAttribute('aria-label', n ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : '');
+    lien.setAttribute('href', n ? 'collection.html#trouver' : 'collection.html');
+  }
+  function rafraichirPepites() {
+    if (!estNiveau2()) return;
+    chargerOffre().then(() => { majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
+  }
+
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
@@ -1541,7 +1575,8 @@
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
-        <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button></li>`).join('')}</ul>`;
+        <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
+        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
   // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
@@ -2039,6 +2074,8 @@
     if (imp1 && dang) dang.before(imp1);
     afficherHistoColl(bl);
     brancherFiltresColl();
+    const nbPep = estNiveau2() && OFFRE ? nbLivresAPepite() : 0, ot = $('#onglet-coll-trouver');
+    if (ot && nbPep) ot.insertAdjacentHTML('beforeend', ` <b class="nb-pep" aria-label="${nbPep} avec une pépite">★${nbPep}</b>`);
   }
   let limiteColl = 30;
 
