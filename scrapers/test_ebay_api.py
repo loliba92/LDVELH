@@ -217,6 +217,25 @@ class TestEbay(unittest.TestCase):
         self.assertEqual(ebay_api.agreger([], "9782070583805", date(2026, 10, 11)), [])
 
 
+class Refus429:
+    status_code = 429
+
+    def raise_for_status(self):
+        raise AssertionError("ne doit pas être appelé : le 429 est traité avant")
+
+
+class Http429:
+    def get(self, *a, **k):
+        return Refus429()
+
+
+class TestQuota(unittest.TestCase):
+    def test_429_donne_un_message_clair(self):
+        with self.assertRaises(ebay_api.QuotaEbay) as c:
+            ebay_api.annonces("9782070333226", "T", http=Http429())
+        self.assertIn("Limite d'appels eBay", str(c.exception))
+
+
 class TestRequetesLdvelh(unittest.TestCase):
     def test_titre_plus_ldvelh_est_une_requete(self):
         ed = {"livre": "Les Terres de Légende", "serie": "Terres de Légende", "numero": "577", "auteurs": "Joe Dever"}

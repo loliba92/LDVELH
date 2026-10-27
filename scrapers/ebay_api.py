@@ -98,10 +98,17 @@ def jeton(client_id, secret, http=requests):
     return r.json()["access_token"]
 
 
+class QuotaEbay(RuntimeError):
+    """eBay répond 429 : la limite d'appels du jour est atteinte (environ 5 000 ; un relevé complet en fait environ 2 400)."""
+
+
 def annonces(isbn, token, http=requests):
     """Annonces à prix fixe pour une requête (un ISBN, ou un titre suivi de l'ISBN)."""
     r = http.get(URL_RECHERCHE, params={"q": isbn, "limit": 50, "filter": "buyingOptions:{FIXED_PRICE}"},
                  headers={"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_FR"}, timeout=30)
+    if getattr(r, "status_code", 200) == 429:
+        raise QuotaEbay("Limite d'appels eBay atteinte pour aujourd'hui (erreur 429). Aucun enregistrement. "
+                        "Ne lancez pas deux relevés complets le même jour ; réessayez demain.")
     r.raise_for_status()
     return r.json().get("itemSummaries", [])
 
@@ -562,4 +569,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except QuotaEbay as e:
+        sys.exit(str(e))
