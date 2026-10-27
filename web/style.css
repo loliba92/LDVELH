@@ -2258,8 +2258,9 @@ button.maj-ligne:hover { background: var(--surface-2); }
 
 /* Derniers imports Leboncoin : deux lignes par annonce, pépites d'abord, toute la ligne ouvre l'annonce */
 .imp-corps { padding: 0 0 6px; }
-.imp-tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin: 18px 0 2px; padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); font: 700 .8rem var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.imp-tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin: 20px 0 2px; padding-bottom: 7px; border-bottom: 2px solid var(--gold); font: 700 .8rem var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .imp-tete:first-child { margin-top: 6px; }
+.imp-quand { font: 700 1.15rem/1.2 var(--f-ui); letter-spacing: 0; text-transform: none; color: var(--text); }
 .imp-compte { letter-spacing: 0; text-transform: none; font-weight: 600; }
 .imp-liste { list-style: none; margin: 0; padding: 0; }
 .imp-li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 14px; padding: 9px 0; border-bottom: 1px solid var(--line); }
