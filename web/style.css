@@ -2189,6 +2189,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .pep { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; padding: 4px 8px; border: 1px solid var(--gold); border-radius: var(--r); background: rgba(200, 160, 60, .1); color: var(--text); text-decoration: none; font-size: .9rem; }
 .pep:hover { background: rgba(200, 160, 60, .2); }
 .pep b { color: var(--gold); }
+.pep-partager { justify-self: start; margin-top: 2px; font-size: .85rem; }
 .pep .pep-d { color: var(--muted); font-size: .82rem; }
 .pep .pep-v { margin-left: auto; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .72rem/1.6 var(--f-ui); color: var(--muted); }
 .pep .pep-v.solide { color: #7fd69c; border-color: #7fd69c; }
