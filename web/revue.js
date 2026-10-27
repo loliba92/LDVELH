@@ -559,7 +559,7 @@
       const dateRef = (origine) => (origine === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
       const partie = ([, , , origine, vue]) => !!(vue && dateRef(origine) && vue < dateRef(origine));          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
       const nbPartie = l.filter(partie).length;
-      return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} plus en ligne)` : ''}${disp}</h4><ul>${l.map((a) => { const [prix, titre, lien, origine, vue] = a; return `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? ` <span class="rv-ann-titre">plus en ligne · vue le ${jour(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+      return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} non revue${nbPartie > 1 ? 's' : ''} au dernier relevé)` : ''}${disp}</h4><ul>${l.map((a) => { const [prix, titre, lien, origine, vue] = a; return `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? ` <span class="rv-ann-titre">non revue au dernier relevé · vue le ${jour(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
     }).join('');
     const raisons = ETATS.map(([cle, lib]) => { const l = ed.etats[cle], o = l ? origine(l) : ''; return o ? `<li>${lib} : ${esc(o)}</li>` : ''; }).join('');
     return `<h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs || `<p class="sous">Aucune annonce retenue pour cette édition.</p>${raisons ? `<p class="sous">D'où viennent ses prix :</p><ul>${raisons}</ul>` : ''}`}`;
@@ -615,7 +615,7 @@
       const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && BUT.annonces[ed.isbn] && BUT.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
-        if (vue && (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay) && vue < (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay)) return;                 // plus en ligne au dernier relevé
+        if (vue && (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay) && vue < (origine === 'leboncoin' ? BUT.date_lbc : BUT.date_ebay)) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
@@ -696,7 +696,7 @@
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="meta rc-meta">${esc(a.ed.serie)} · ${esc(a.ed.version)} · ${esc(a.lib)} · ${NOM[a.fam]}${a.vue ? ' · vue le ' + jour(a.vue) : ''}${a.partie ? ' · plus en ligne' : ''}${a.butin ? ' · <strong>butin</strong>' : ''}</span>
+        <span class="meta rc-meta">${esc(a.ed.serie)} · ${esc(a.ed.version)} · ${esc(a.lib)} · ${NOM[a.fam]}${a.vue ? ' · vue le ' + jour(a.vue) : ''}${a.partie ? ' · non revue au dernier relevé' : ''}${a.butin ? ' · <strong>butin</strong>' : ''}</span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });

@@ -762,9 +762,9 @@
         const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
         const partie = ([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
         const nbPartie = l.filter(partie).length;
-        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} plus en ligne)` : ''}${disp}</h4><ul>${l.map((a) => {
+        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} non revue${nbPartie > 1 ? 's' : ''} au dernier relevé)` : ''}${disp}</h4><ul>${l.map((a) => {
           const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus en ligne · vue le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">non revue au dernier relevé · vue le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
       }).join('') + `<p class="sous">Dernier relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. Prix demandés, pas des prix payés. Ouvrez une annonce pour vérifier le livre et son état.</p>`;
     });
   }

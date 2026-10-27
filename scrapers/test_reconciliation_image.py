@@ -75,8 +75,6 @@ class TestReconciliationImage(unittest.TestCase):
         self.assertEqual(gardes, [cible])
 
 
-if __name__ == "__main__":
-    unittest.main()
 
 
 @unittest.skipUnless(ri.disponible(), "OpenCV absent")
@@ -112,3 +110,23 @@ class TestTitreSeul(unittest.TestCase):
                 return R()
         out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
         self.assertEqual(out[cible], [])
+
+    def test_annonce_trouvee_par_l_isbn_est_gardee_meme_sans_photo_concluante(self):
+        rnd = random.Random(9)
+        livres = livres_a_plusieurs_editions()
+        isbns = livres[sorted(livres)[0]]
+        cible, autre = isbns[0], isbns[-1]
+        item = {"itemId": "9", "image": {"imageUrl": "x"}}          # pas de « _titre_seul » : trouvée par l'ISBN
+
+        class Faux:
+            def get(self, url, timeout=None):
+                class R:
+                    status_code = 200
+                    content = photo_de(autre, rnd)               # photo qui ne montre pas notre jaquette
+                return R()
+        out = ri.verifier_photos({cible: [dict(item)]}, COVERS, Faux())
+        self.assertEqual(len(out[cible]), 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
