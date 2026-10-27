@@ -109,7 +109,7 @@ def page_livre(b, freres, web, frag):
             for c, _, n in niveaux)
         prix_html = (f'<h2>Niveau de prix</h2><ul class="livre-niveaux" aria-label="Niveau de prix selon l\'état">{cases}</ul>'
                      f'<p class="sous">C : convenable, BE : bon état, TBE : très bon état. '
-                     + " · ".join(f"{e(s)} : {e(t)}" for s, t in LEGENDE) + '. Les prix exacts sont réservés aux comptes connectés. La Cote du Héros ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>')
+                     + " · ".join(f"{e(s)} : {e(t)}" for s, t in LEGENDE) + '. Les prix exacts, l\'évolution de la cote et la liste « À trouver » sont réservés aux comptes connectés : la connexion avec Google est gratuite. La Cote du Héros ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>')
     else:
         prix_html = "<h2>Niveau de prix</h2><p>Cette édition n'a pas encore de prix : il manque des annonces récentes pour en établir un.</p>"
 
@@ -193,7 +193,8 @@ def page_livre(b, freres, web, frag):
   <p class="chapeau">{e(chapeau)}</p>
   <dl class="livre-faits">{faits_html}</dl>
 </div>
-<p class="actions"><a class="bouton" href="../index.html#fiche={e(b["id"])}">Ouvrir la fiche dans le guide</a> <a class="bouton bouton-clair" href="{e(partage)}" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
+<aside class="livre-pepite" id="pepite" hidden><p><strong>Pépite repérée.</strong> Une annonce de ce livre est nettement sous sa cote. Connectez-vous, c'est gratuit : vous verrez sa cote exacte et pourrez l'ajouter à votre liste « À trouver ».</p></aside>
+<p class="actions"><a class="bouton" href="../index.html#fiche={e(b["id"])}">Voir la cote exacte</a> <a class="bouton bouton-clair" href="{e(partage)}" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
 {prix_html}
 {autres}
 {lien_serie}
@@ -218,6 +219,7 @@ def page_livre(b, freres, web, frag):
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
+<script>if (/[?&]pepite=1/.test(location.search)) document.getElementById('pepite').hidden = false;</script>
 </body>
 </html>
 '''
