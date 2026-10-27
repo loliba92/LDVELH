@@ -1925,8 +1925,21 @@
       if (b) { b.setAttribute('aria-selected', String(k === nom)); b.tabIndex = k === nom ? 0 : -1; }
       if (pan) pan.hidden = k !== nom;
     });
-    if (aller) { const t = $('#coll-nav'); if (t) t.scrollIntoView({ behavior: 'auto', block: 'start' }); }
+    if (aller) { const t = (nom === 'trouver' && $('#titre-a-trouver')) || $('#coll-nav'); if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
+  // Arrivée par le menu « À trouver » : la page s'ouvre directement sur le titre de la liste, sans défiler (tant que la personne n'a pas touché à la page)
+  let ancreTrouver = /^#(trouver|titre-a-trouver)$/.test(location.hash);
+  ['wheel', 'touchmove', 'keydown', 'mousedown'].forEach((ev) => window.addEventListener(ev, () => { ancreTrouver = false; }, { passive: true }));
+  const atterrirATrouver = () => {
+    if (!ancreTrouver) return;
+    const t = $('#titre-a-trouver');
+    if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' });
+  };
+  document.addEventListener('click', (e) => {
+    const l = e.target.closest('a[href$="collection.html#trouver"]');
+    const t = l && $('#collection') && $('#titre-a-trouver');
+    if (t) { e.preventDefault(); ancreTrouver = false; t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
+  });
   document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b && $('#collection')) ouvrirOnglet(b.dataset.onglet, { aller: true }); });
   document.addEventListener('keydown', (e) => {
     const t = e.target.closest && e.target.closest('#coll-nav [role="tab"]');
@@ -1968,6 +1981,7 @@
         <div class="gerer-danger" role="group" aria-label="Danger zone"><span class="danger-texte"><b class="danger-titre">Danger zone</b>Effacer toute la collection, y compris dans votre compte. Définitif : pensez à l'exporter avant.</span><button type="button" class="bouton bouton-danger" id="coll-vider">Tout effacer</button></div>
       </div>`;
   function afficherCollection() {
+    setTimeout(atterrirATrouver, 0);
     rendreAjoutColl();
     const bl = bilan();
     const n = bl.exemplaires, nPastille = cotesMasquees() ? 0 : n;          // sans compte, la copie gardée sur l'appareil n'est pas affichée
