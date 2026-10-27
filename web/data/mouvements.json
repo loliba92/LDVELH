@@ -69,6 +69,51 @@
  ],
  "baisses": [
   {
+   "id": "9782070335770",
+   "isbn13": "9782070335770",
+   "titre": "Les Terres de Légende",
+   "serie": "Les Terres de Légende",
+   "numero": "577",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 68.3,
+   "apres": 30.74,
+   "pct": -0.55,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070335770",
+   "isbn13": "9782070335770",
+   "titre": "Les Terres de Légende",
+   "serie": "Les Terres de Légende",
+   "numero": "577",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 73.05,
+   "apres": 42.0,
+   "pct": -0.425,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070335770",
+   "isbn13": "9782070335770",
+   "titre": "Les Terres de Légende",
+   "serie": "Les Terres de Légende",
+   "numero": "577",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 39.42,
+   "apres": 25.0,
+   "pct": -0.366,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070335855",
    "isbn13": "9782070335855",
    "titre": "La Nuit des Mutants",
@@ -81,21 +126,6 @@
    "pct": -0.17,
    "nature": "archives",
    "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782070335770",
-   "isbn13": "9782070335770",
-   "titre": "Les Terres de Légende",
-   "serie": "Les Terres de Légende",
-   "numero": "577",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 68.3,
-   "apres": 57.16,
-   "pct": -0.163,
-   "nature": "annonces",
-   "nb": 3,
    "recalibre": false
   },
   {
@@ -114,7 +144,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 7,
+ "nb_grands_mouvements": 9,
  "modele": {
   "actif": false,
   "n_paires": 13,
