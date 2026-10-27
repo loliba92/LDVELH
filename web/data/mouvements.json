@@ -2,7 +2,7 @@
  "date": "2026-10-27",
  "precedent": "2026-10-26",
  "nb_comparees": 1494,
- "nb_modifiees": 524,
+ "nb_modifiees": 528,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -60,10 +60,10 @@
    "version": "V1",
    "etat": "bon",
    "avant": 8.98,
-   "apres": 10.16,
-   "pct": 0.131,
+   "apres": 10.06,
+   "pct": 0.12,
    "nature": "annonces",
-   "nb": 3,
+   "nb": 4,
    "recalibre": false
   }
  ],
