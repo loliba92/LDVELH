@@ -175,8 +175,14 @@
     window.Relais.appeler('equipe_periode', { empreinte: e, debut: debut, fin: fin }).then(function (r) {
       if (!r || !r.ok) return direMembre(e, erreurLisible(r), true);
       MODIFS[e] = { debut: debut, fin: fin, t: Date.now() };
+      delete OUVERTS[e];                                     // enregistré : le profil se referme
       dessiner(EQUIPE);                                      // affichage tout de suite, sans relire : GitHub peut renvoyer l'ancienne liste pendant quelques secondes
-      direMembre(e, 'Dates enregistrées.');
+      var f2 = document.querySelector('.eq-fin-form[data-e="' + e + '"]'), ligne = f2 && f2.closest('.eq-ligne');
+      if (ligne) {                                           // confirmation brève sur la ligne du profil
+        var ok = document.createElement('span'); ok.className = 'eq-ok'; ok.textContent = '✓ Enregistré';
+        ligne.querySelector('.eq-texte').appendChild(ok);
+        setTimeout(function () { if (ok.parentNode) ok.parentNode.removeChild(ok); }, 4000);
+      }
     }).catch(function () { direMembre(e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   ['#eq-zagors', '#eq-sorciers'].forEach(function (s) { $(s).addEventListener('click', actions); $(s).addEventListener('submit', nouvelleFin); });

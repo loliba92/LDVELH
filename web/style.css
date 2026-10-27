@@ -2146,3 +2146,5 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .eq-ajouter .eq-form { margin-top: 10px; }
 @media (min-width: 701px) { .eq-form { grid-template-columns: 1fr 1fr; max-width: 640px; column-gap: 14px; } .eq-form > input, .eq-form > select { margin-bottom: 4px; } .eq-form #eq-fin-champ, .eq-form .bouton { grid-column: 1 / -1; } .eq-dates { grid-template-columns: 1fr 1fr; column-gap: 14px; } .eq-dates .sous { grid-column: 1 / -1; margin: 0; } }
 .eq-corps[hidden] { display: none; }
+
+.eq-ok { display: inline-block; margin-left: 8px; padding: 1px 8px; border: 1px solid #7fd69c; border-radius: 999px; color: #7fd69c; font: 700 .78rem var(--f-ui); }
