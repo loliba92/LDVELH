@@ -56,28 +56,45 @@
       '<span class="eq-fin' + (hors ? ' eq-fin-passee' : '') + '">' + esc(etatTexte) + '</span></div>' + bouton + '</div>' + corps + '</li>';
   }
 
-  function rouvrir(ouverts) {          // les profils dépliés avant le nouveau dessin le restent
-    ouverts.forEach(function (e) {
-      var f = document.querySelector('.eq-fin-form[data-e="' + e + '"]');
-      var ligne = f && f.closest('.eq-ligne');
-      if (!ligne) return;
-      ligne.querySelector('.eq-corps').hidden = false;
-      var g = ligne.querySelector('[data-gerer]'); g.setAttribute('aria-expanded', 'true'); g.textContent = 'Fermer';
+  // Profils dépliés et modifications récentes, gardés en mémoire : une relecture de la liste (GitHub peut encore renvoyer l'ancienne version
+  // pendant quelques secondes) ne referme pas un profil et n'efface pas ce qui vient d'être enregistré.
+  var OUVERTS = {}, MODIFS = {}, RETIRES = {}, DELAI_MEMOIRE = 120000;
+  function plier(ligne, ouvre) {
+    var corps = ligne.querySelector('.eq-corps'), g = ligne.querySelector('[data-gerer]');
+    if (!corps || !g) return;
+    corps.hidden = !ouvre; g.setAttribute('aria-expanded', ouvre ? 'true' : 'false'); g.textContent = ouvre ? 'Fermer' : 'Gérer';
+  }
+  function rouvrir() {
+    Object.keys(OUVERTS).forEach(function (e) {
+      var f = document.querySelector('.eq-fin-form[data-e="' + e + '"]'), ligne = f && f.closest('.eq-ligne');
+      if (ligne) plier(ligne, true);
+    });
+  }
+  function etatPeriode(m) {
+    m.echu = !!m.fin && m.fin < EQUIPE_JOUR; m.avenir = !!m.debut && m.debut > EQUIPE_JOUR;
+  }
+  var EQUIPE_JOUR = '';
+  function appliquerMemoire(r) {
+    var maintenant = Date.now();
+    EQUIPE_JOUR = r.aujourdhui || EQUIPE_JOUR;
+    r.equipe = r.equipe.filter(function (m) { return !(RETIRES[m.empreinte] && maintenant - RETIRES[m.empreinte] < DELAI_MEMOIRE); });
+    r.equipe.forEach(function (m) {
+      var x = MODIFS[m.empreinte];
+      if (x && maintenant - x.t < DELAI_MEMOIRE) { m.debut = x.debut; m.fin = x.fin; etatPeriode(m); }
     });
   }
   function dessiner(r) {
-    var ouverts = [].map.call(document.querySelectorAll('.eq-corps:not([hidden]) .eq-fin-form'), function (f) { return f.dataset.e; });
     EQUIPE = r;
+    appliquerMemoire(r);
     var z = r.equipe.filter(function (m) { return m.role === 'superadmin'; }), s = r.equipe.filter(function (m) { return m.role === 'admin'; });
     s.sort(function (a, b) { return ((a.echu ? 1 : 0) + (a.avenir ? 1 : 0)) - ((b.echu ? 1 : 0) + (b.avenir ? 1 : 0)); });
     $('#eq-zagors').innerHTML = z.length ? z.map(carte).join('') : '<li class="sous">Aucun Zagor.</li>';
     $('#eq-sorciers').innerHTML = s.length ? s.map(carte).join('') : '<li class="sous">Aucun sorcier pour l\'instant.</li>';
+    rouvrir();                                              // tout de suite : rien de ce qui suit ne doit pouvoir empêcher de rouvrir les profils
     var n = r.bloques.length;
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
     etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
-    tuiles();
-    dessinerComptes();
-    rouvrir(ouverts);
+    try { tuiles(); dessinerComptes(); } catch (e) { /* les compteurs ne doivent pas gêner le reste */ }
   }
 
   var COMPTES = null;
@@ -131,8 +148,9 @@
   function actions(ev) {
     var g = ev.target.closest('[data-gerer]');
     if (g) {
-      var corps = g.closest('.eq-ligne').querySelector('.eq-corps'), ouvre = corps.hidden;
-      corps.hidden = !ouvre; g.setAttribute('aria-expanded', ouvre ? 'true' : 'false'); g.textContent = ouvre ? 'Fermer' : 'Gérer';
+      var ligne = g.closest('.eq-ligne'), ouvre = ligne.querySelector('.eq-corps').hidden, e = ligne.querySelector('.eq-fin-form').dataset.e;
+      plier(ligne, ouvre);
+      if (ouvre) OUVERTS[e] = true; else delete OUVERTS[e];
       return;
     }
     var b = ev.target.closest('[data-act]');
@@ -143,7 +161,7 @@
     window.Relais.appeler(b.dataset.act, { empreinte: b.dataset.e }).then(function (r) {
       if (!r || !r.ok) return direMembre(b.dataset.e, erreurLisible(r), true);
       dire(bloquer ? 'Compte bloqué.' : 'Personne retirée.');
-      EQUIPE.equipe = EQUIPE.equipe.filter(function (x) { return x.empreinte !== b.dataset.e; });
+      RETIRES[b.dataset.e] = Date.now();
       if (bloquer) EQUIPE.bloques.push(b.dataset.e);
       dessiner(EQUIPE);
     }).catch(function () { direMembre(b.dataset.e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
@@ -156,8 +174,7 @@
     direMembre(e, 'Enregistrement…');
     window.Relais.appeler('equipe_periode', { empreinte: e, debut: debut, fin: fin }).then(function (r) {
       if (!r || !r.ok) return direMembre(e, erreurLisible(r), true);
-      var m = EQUIPE.equipe.filter(function (x) { return x.empreinte === e; })[0];
-      if (m) { m.debut = debut; m.fin = fin; m.echu = !!fin && fin < EQUIPE.aujourdhui; m.avenir = !!debut && debut > EQUIPE.aujourdhui; }
+      MODIFS[e] = { debut: debut, fin: fin, t: Date.now() };
       dessiner(EQUIPE);                                      // affichage tout de suite, sans relire : GitHub peut renvoyer l'ancienne liste pendant quelques secondes
       direMembre(e, 'Dates enregistrées.');
     }).catch(function () { direMembre(e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
