@@ -1058,24 +1058,6 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
-  "9782070567874|bon": {
-   "prix": 38.24,
-   "decision": "corrige",
-   "le": "2026-10-27",
-   "par": "loliba (superadmin)"
-  },
-  "9782070567874|convenable": {
-   "prix": 25.0,
-   "decision": "corrige",
-   "le": "2026-10-27",
-   "par": "loliba (superadmin)"
-  },
-  "9782070567874|tres_bon": {
-   "prix": 65.0,
-   "decision": "corrige",
-   "le": "2026-10-27",
-   "par": "loliba (superadmin)"
-  },
   "9782070567898|bon": {
    "prix": 23.41,
    "decision": "confirme",

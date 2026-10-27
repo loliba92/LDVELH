@@ -2,7 +2,7 @@
  "date": "2026-10-27",
  "precedent": "2026-10-26",
  "nb_comparees": 1473,
- "nb_modifiees": 548,
+ "nb_modifiees": 545,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -144,21 +144,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070567874",
-   "isbn13": "9782070567874",
-   "titre": "L'Héritage de Vashna",
-   "serie": "Loup Solitaire",
-   "numero": "681",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 62.98,
-   "apres": 38.24,
-   "pct": -0.393,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782070335770",
    "isbn13": "9782070335770",
    "titre": "Les Terres de Légende",
@@ -169,21 +154,6 @@
    "avant": 39.42,
    "apres": 25.0,
    "pct": -0.366,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070567874",
-   "isbn13": "9782070567874",
-   "titre": "L'Héritage de Vashna",
-   "serie": "Loup Solitaire",
-   "numero": "681",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 39.0,
-   "apres": 25.0,
-   "pct": -0.359,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -204,21 +174,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070567874",
-   "isbn13": "9782070567874",
-   "titre": "L'Héritage de Vashna",
-   "serie": "Loup Solitaire",
-   "numero": "681",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 75.59,
-   "apres": 65.0,
-   "pct": -0.14,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782070335510",
    "isbn13": "9782070335510",
    "titre": "Les Créatures de l'Ombre",
@@ -234,7 +189,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 15,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 13,
