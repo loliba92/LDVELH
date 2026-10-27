@@ -1,5 +1,5 @@
-/* Page « Équipe » (Zagor) : ajouter, retirer ou bloquer des sorciers, par le relais (voir relais/).
-   Le relais vérifie à chaque demande que la personne est Zagor ; cette page n'est qu'une commande à distance. */
+/* Page « Équipe » (niveau 3) : ajouter, retirer ou bloquer des niveau 2, par le service technique (voir service technique/).
+   Le relais vérifie à chaque demande que la personne est niveau 3 ; cette page n'est qu'une commande à distance. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -74,7 +74,7 @@
     }).catch(function () { dire('Le relais ne répond pas : vérifiez votre connexion.', true); });
   });
 
-  // La porte ouvre la page une fois le niveau Zagor confirmé par le relais
+  // La porte ouvre la page une fois le niveau niveau 3 confirmé par le service technique
   document.addEventListener('cdh-porte-ouverte', charger);
   if (!document.getElementById('main').hidden) charger();
 })();

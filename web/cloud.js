@@ -95,8 +95,8 @@
     });
   }
 
-  // Session de longue durée (30 jours) : le relais garde le jeton de renouvellement ; le navigateur n'a qu'un identifiant de session révocable.
-  // Activée par « session_relais » dans data/admin-config.json, une fois le relais à jour et sa clé secrète en place.
+  // Session de longue durée (30 jours) : le service technique garde le jeton de renouvellement ; le navigateur n'a qu'un identifiant de session révocable.
+  // Activée par « session_relais » dans data/admin-config.json, une fois le service technique à jour et sa clé secrète en place.
   function appelRelais(action, params) {
     return config().then(function (c) {
       return fetch(c.relais_url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action: action }, params)) }).then(function (r) { return r.json(); });

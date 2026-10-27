@@ -288,7 +288,7 @@
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
-  let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un sorcier)
+  let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un niveau2)
   function lireAdresse() {
     const p = new URLSearchParams(location.hash.slice(1));
     FICHE_URL = p.get('fiche') || ''; CORR_URL = p.get('corriger') === '1';
@@ -736,9 +736,9 @@
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
-  /* ---------- Annonces retenues (Zagor) ---------- */
-  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au Zagor.
-  const estSuper = () => !!window.Compte && window.Compte.role() === 'superadmin';
+  /* ---------- Annonces retenues (niveau 3) ---------- */
+  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au niveau 3.
+  const estNiveau3Brut = () => !!window.Compte && window.Compte.role() === 'superadmin';
   let ANN = null, annChargees = null;
   const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
@@ -770,10 +770,10 @@
   }
 
   /* ---------- Correction des cotes depuis la fiche (propriétaire) ---------- */
-  // Visible seulement pour un compte Sorcier ou Zagor connecté (niveau donné par le relais, voir relais/ et compte.js).
-  // L'envoi lance le lot « Corriger des cotes » par le relais : aucune clé n'est dans le navigateur.
-  const estProprietaire = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le Zagor corrige (niveau donné par le relais)
-  const estSorcier = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // sorciers et Zagors : l'historique, pas les corrections
+  // Visible seulement pour un compte niveau 2 ou 3 connecté (niveau donné par le service technique, voir relais/ et compte.js).
+  // L'envoi lance le lot « Corriger des cotes » par le service technique : aucune clé n'est dans le navigateur.
+  const estNiveau3 = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le niveau 3 corrige (niveau donné par le service technique)
+  const estNiveau2 = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveaux 2 et 3 : l'historique, pas les corrections
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -782,7 +782,7 @@
     const quand = ecart <= 0 ? 'aujourd\'hui' : ecart === 1 ? 'hier' : 'le ' + dateCourte(i.date);
     return `<p class="sous corriger-revision">Dernière révision : <strong>${esc(quand)}</strong>${i.par ? ', par ' + esc(i.par) : ''}.</p>`;
   }
-  // Corriger la fiche (titre, série, numéro, suppression) : réservé aux sorciers, envoyé par le relais
+  // Corriger la fiche (titre, série, numéro, suppression) : réservé aux niveau 2, envoyé par le service technique
   function blocFiche(b) {
     const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
     return `<details class="corriger-fiche"><summary>Corriger la fiche</summary>
@@ -831,7 +831,7 @@
     if ($('#corriger-suppr')) $('#corriger-suppr').addEventListener('click', () => { if (window.confirm(`Supprimer « ${b.titre} » (${b.version}) de la base ? Cette action est définitive.`)) envoyer([`${b.id} ; supprimer`]); });
   }
   function blocCorriger(b) {
-    if (!estProprietaire()) return '';
+    if (!estNiveau3()) return '';
     if (!b.isbn13) return '<h3>Corriger les cotes</h3><p class="sous">Cette fiche n\'a pas d\'ISBN : la correction des cotes n\'est pas possible ici.</p>';
     const champ = ([k, nom]) => `<label>${nom}<input type="text" inputmode="decimal" name="${k}" autocomplete="off" placeholder="${b.prix[k] == null ? '—' : String(b.prix[k]).replace('.', ',')}"></label>`;
     return `<h3>Corriger les cotes</h3>
@@ -884,11 +884,11 @@
     if (!CORR_URL) return;
     const ouvrir = () => { const d = $('.corriger-fiche'); if (d) d.open = true; return !!d; };
     if (ouvrir()) return;
-    const retenter = () => { if (!estProprietaire()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de sorcier arrive après le chargement
+    const retenter = () => { if (!estNiveau3()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de niveau 2 arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
   }
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
-  // Évolution du prix d'une édition dans un état, d'après les relevés (sorciers et Zagors)
+  // Évolution du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3)
   function blocEvolution(b, etat) {
     const titre = '<h3>Évolution du prix</h3>';
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return `${titre}<p class="sous">L'évolution se construit avec les relevés : revenez dans quelques jours.</p>`;
@@ -957,7 +957,7 @@
 
           </div>
         </div>
-        ${estSorcier() ? blocEvolution(b, sel.k) : ''}
+        ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
@@ -973,13 +973,13 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
-        ${estSuper() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocAnnonces(b)}</section>` : ''}
+        ${estNiveau3Brut() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocAnnonces(b)}</section>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
     brancherFicheCollection(b);
     brancherCorriger();
-    if (estSuper()) remplirAnnonces(b);
+    if (estNiveau3Brut()) remplirAnnonces(b);
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));
@@ -1075,16 +1075,16 @@
     .map(([n, t]) => `<span class="nowrap"><strong>${n}</strong> ${t}</span>`).join('');
   const repere = (v, k) => (v == null ? '—' : '€'.repeat(niveauCote(v, k)));
   const coteTxt = (v, k, court) => (cotesMasquees() ? repere(v, k, court) : fmt(v));
-  // Accès discret au Butin sur l'accueil : sorciers et Zagors (le rôle arrive après le chargement)
-  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estSorcier(); };
+  // Accès discret au Butin sur l'accueil : niveaux 2 et 3 (le rôle arrive après le chargement)
+  const majButin = () => { const l = $('#hero-butin'); if (l) l.hidden = !estNiveau2(); };
   document.addEventListener('cdh-compte', majButin);
   majButin();
-  // Accueil, Zagor seul : dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication), lues dans l'historique public des lots,
+  // Accueil, niveau 3 seul : dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication), lues dans l'historique public des lots,
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
-  // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, Zagor seul)
+  // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, niveau 3 seul)
   const FAMILLES = [
-    ['prix-ebay.yml', 'Relevé des prix', 'Lit les annonces eBay et le prix du neuf en librairie, puis recalcule les cotes. Un jour sur deux, vers 6 h, ou à la demande. Dure environ 1 h 30.'],
-    ['releve-leboncoin.yml', 'Import Leboncoin', 'Reçoit le relevé que le bot Leboncoin envoie chaque soir, l\'enregistre et met la cote à jour. La date est celle de la dernière réception.'],
+    ['prix-ebay.yml', 'Relevé des prix', 'Met à jour les cotes à partir des annonces eBay et des prix en librairie. Un jour sur deux, vers 6 h, ou à la demande ; environ 1 h 30.'],
+    ['releve-leboncoin.yml', 'Import Leboncoin', 'Met la cote à jour avec les annonces Leboncoin reçues chaque soir. La date est celle de la dernière réception.'],
     ['ajout-isbn.yml', 'Ajout de livres', 'Ajoute au site les livres envoyés depuis la page « Ajouter des livres ».'],
     ['corriger-fiche.yml', 'Correction de fiches', 'Applique une correction de titre, de série ou de numéro faite depuis une fiche.'],
     ['corriger-prix.yml', 'Correction de cotes', 'Applique une cote corrigée ou confirmée depuis le site (« Confirmer ces prix »).'],
@@ -1098,7 +1098,7 @@
   let majFaite = false;
   function initMaj() {
     const bloc = $('#rv-maj');
-    if (!bloc || majFaite || !estProprietaire()) return;
+    if (!bloc || majFaite || !estNiveau3()) return;
     majFaite = true;
     // Dernière exécution de chaque lot, lue dans l'historique public de GitHub (une demande par lot : un lot rare, comme l'import du soir,
     // ne se perd pas derrière les publications). Gardé cinq minutes dans le navigateur.
@@ -1139,7 +1139,7 @@
     afficher();
     if (etaitSansCompte !== null && etaitSansCompte !== sans && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSansCompte = sans;
-    const super_ = estSuper();           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
+    const super_ = estNiveau3Brut();           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
     if (etaitSuper !== null && etaitSuper !== super_ && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSuper = super_;
     if (window.Compte) window.Compte.accueillir();
@@ -1729,7 +1729,7 @@
       <div id="rf-bloc">${rollforwardBloc(bl)}</div>`;
   }
   function analysePane(bl) {
-    const complete = estSorcier();                                     // sorciers et Zagors : toutes les répartitions et plus de pièces
+    const complete = estNiveau2();                                     // niveaux 2 et 3 : toutes les répartitions et plus de pièces
     const SEG_SIMPLE = ['serie', 'editeur', 'decennie'];
     const segments = complete ? SEGMENTS : SEGMENTS.filter((x) => SEG_SIMPLE.includes(x[0]));
     if (!complete && !SEG_SIMPLE.includes(CSEG)) CSEG = 'serie';
@@ -1777,7 +1777,7 @@
     try { const m = sessionStorage.getItem('cdh-coll-pane'); if (ONGLETS_COLL.includes(m)) CTAB = m; } catch (e) { /* sans stockage : « Mes livres » */ }
   })();
   function ouvrirOnglet(nom, { aller = false } = {}) {
-    if (!ONGLETS_COLL.includes(nom) || !$('#onglet-coll-' + nom)) return;          // un onglet réservé aux sorciers n'existe pas pour les autres
+    if (!ONGLETS_COLL.includes(nom) || !$('#onglet-coll-' + nom)) return;          // un onglet réservé aux niveau 2 n'existe pas pour les autres
     CTAB = nom;
     try { sessionStorage.setItem('cdh-coll-pane', nom); } catch (e) { /* sans effet */ }
     if ($('#collection') && /^(#(livres|analyse|vendre|trouver|titre-[a-z-]+|coll-analyse)?)?$/.test(location.hash)) history.replaceState(null, '', '#' + nom);
@@ -1914,8 +1914,8 @@
       ['Médiane', fmtE(medianeEx(bl)), 'd\'un exemplaire', ''],
       ['Plancher', fmtE(bl.bas), 'tout en convenable', ''],
       ['Plafond', fmtE(bl.haut), 'tout en très bon état', '']];
-    if (CTAB === 'historique' && !estSorcier()) CTAB = 'livres';           // l'historique est réservé aux sorciers et aux Zagors
-    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estSorcier() ? [['historique', 'Mouvements', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
+    if (CTAB === 'historique' && !estNiveau2()) CTAB = 'livres';           // l'historique est réservé aux niveau 2 et aux niveau 3
+    const onglets = [['livres', 'Mes livres', bl.exemplaires], ['analyse', 'Analyse', null], ...(estNiveau2() ? [['historique', 'Mouvements', null]] : []), ['vendre', 'À vendre', exV], ['trouver', 'À trouver', nbTrouver], ['gerer', 'Gérer', null]];
     const vide = (t) => `<p class="coll-vide-onglet">${t}</p>`;
     const imp0 = $('#importer');                         // le panneau d'import vit dans « Gérer ma collection » : on le remet à l'abri avant de redessiner
     if (imp0 && zone.contains(imp0)) $('#collection').insertBefore(imp0, $('#coll-prive'));
@@ -1933,7 +1933,7 @@
         <div id="coll-plus-zone">${boutonPlus(lst.reste)}</div>
       </div>
       <div class="coll-pane" id="pane-coll-analyse" role="tabpanel" aria-labelledby="onglet-coll-analyse"${CTAB === 'analyse' ? '' : ' hidden'}>${analysePane(bl)}</div>
-      ${estSorcier() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
+      ${estNiveau2() ? `<div class="coll-pane" id="pane-coll-historique" role="tabpanel" aria-labelledby="onglet-coll-historique"${CTAB === 'historique' ? '' : ' hidden'}>${historiquePane(bl)}</div>` : ''}
       <div class="coll-pane" id="pane-coll-vendre" role="tabpanel" aria-labelledby="onglet-coll-vendre"${CTAB === 'vendre' ? '' : ' hidden'}>${htmlAVendre(bl) || vide('Aucun livre à vendre pour l\'instant. Dans « Mes livres », touchez « À vendre » sous un exemplaire pour le placer ici.')}</div>
       <div class="coll-pane" id="pane-coll-trouver" role="tabpanel" aria-labelledby="onglet-coll-trouver"${CTAB === 'trouver' ? '' : ' hidden'}>${htmlATrouver() || vide('Aucun livre à trouver pour l\'instant. Sur l\'étagère, touchez « À trouver » sous une jaquette pour l\'ajouter ici.')}</div>
       <div class="coll-pane" id="pane-coll-gerer" role="tabpanel" aria-labelledby="onglet-coll-gerer"${CTAB === 'gerer' ? '' : ' hidden'}>${blocGerer()}</div>`;
@@ -2285,7 +2285,7 @@
       dlg.innerHTML = `<div class="lot-cadre">
         <div class="parcours-tete"><h2 id="lot-titre">Ajouter un lot acheté</h2><button type="button" class="bouton bouton-clair" id="lot-fermer">Fermer</button></div>
         <p class="sous">Vous avez acheté plusieurs livres pour un seul prix, par exemple sur un site de vente en ligne ? Choisissez-les, indiquez le prix total : le site répartit ce prix d'après les cotes. Vous pouvez corriger chaque prix.</p>
-        <div class="champ"><label for="lot-q">Chercher un livre (titre, auteur ou ISBN)</label><input type="search" id="lot-q" autocomplete="off" placeholder="Par exemple : sorcier, Dever, 978…"></div>
+        <div class="champ"><label for="lot-q">Chercher un livre (titre, auteur ou ISBN)</label><input type="search" id="lot-q" autocomplete="off" placeholder="Par exemple : niveau2, Dever, 978…"></div>
         <ul class="lot-res" id="lot-res" aria-live="polite"></ul>
         <h3 id="lot-h">Dans le lot</h3>
         <div id="lot-lignes"></div>

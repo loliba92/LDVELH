@@ -1,4 +1,4 @@
-/* Ajouter des livres : sorciers et Zagors. La liste part au relais (action ajout_livres), qui vérifie le niveau et le quota.
+/* Ajouter des livres : niveaux 2 et 3. La liste part au relais (action ajout_livres), qui vérifie le niveau et le quota.
    Le scanner ajoute chaque ISBN lu à la liste ; on peut aussi coller les ISBN à la main. */
 (function () {
   var $ = function (s) { return document.querySelector(s); };

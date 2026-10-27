@@ -1966,14 +1966,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pp-tri select { min-height: 40px; padding: 4px 10px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; font: 600 .95rem var(--f-ui); }
 .pp-tri span { white-space: nowrap; text-transform: none; letter-spacing: 0; font: 600 .95rem var(--f-ui); color: var(--muted); }
 .compte-liste .niv { margin-left: auto; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .68rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-.compte-liste .niv-sorcier { color: var(--gold); border-color: var(--gold); }
-.compte-liste .niv-zagor { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
+.compte-liste .niv-2 { color: var(--gold); border-color: var(--gold); }
+.compte-liste .niv-3 { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
 
 /* Mot insécable (« codes-barres ») et libellé de section du menu compte (doré, comme les autres libellés de section) */
 .nowrap { white-space: nowrap; }
 .compte-liste .compte-section { list-style: none; color: var(--gold); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; padding: 10px 0 2px; }
 
-/* Gestion de la fiche (Zagor) : un seul bloc en bas, séparé de la lecture */
+/* Gestion de la fiche (niveau 3) : un seul bloc en bas, séparé de la lecture */
 .fiche-gestion { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--gold); }
 .fiche-gestion-titre { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
 
@@ -1987,7 +1987,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 @media (max-width: 700px) { .rf-table { font-size: .82rem; } .rf-table th, .rf-table td { padding: 6px 2px; } .hc-cles-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
 @media (max-width: 700px) { .rf-table th { font-size: .66rem; letter-spacing: .02em; } .rf-table .num { white-space: normal; } .rf-table th[scope="row"] { width: 20%; } }
 
-/* Cascade du roll-forward (sorciers et Zagors) */
+/* Cascade du roll-forward (niveaux 2 et 3) */
 .rf-graph { margin: 8px 0 4px; }
 .rf-graph svg { display: block; width: 100%; height: auto; }
 .rf-barre { cursor: pointer; outline: none; }
@@ -2008,7 +2008,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .niveau-icone { margin-left: 4px; color: var(--gold); vertical-align: -2px; }
 .niveau-superadmin { color: var(--gold); border-color: var(--gold); }
 
-/* Fiche : courbe d'évolution du prix (sorciers et Zagors) */
+/* Fiche : courbe d'évolution du prix (niveaux 2 et 3) */
 .ev-graph { margin: 6px 0 4px; max-width: 520px; }
 .ev-graph svg { display: block; width: 100%; height: auto; }
 .ev-ligne { stroke: var(--gold); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
@@ -2019,7 +2019,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ev-date { fill: var(--muted); font: 18px var(--f-ui); }
 @media (max-width: 700px) { .ev-valeur { font-size: 24px; } .ev-date { font-size: 22px; } }
 
-/* Annonces reçues (Zagor, page Butin) */
+/* Annonces reçues (niveau 3, page Butin) */
 .rc-liste { display: grid; gap: 8px; }
 .rc-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); }
 .rc-ligne.rc-butin { border-color: var(--gold); }
@@ -2028,7 +2028,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
 
-/* Accueil, Zagor : état des mises à jour automatiques, en pastilles */
+/* Accueil, niveau 3 : état des mises à jour automatiques, en pastilles */
 .maj-bandeau { margin: 12px 0 0; }
 .maj-puces { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .maj-puce { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 6px 14px 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .88rem; }

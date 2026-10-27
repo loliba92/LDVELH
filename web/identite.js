@@ -1,4 +1,4 @@
-/* Identité des sorciers : connexion avec Google.
+/* Identité des niveau 2 : connexion avec Google.
    Le bouton remet à la page un jeton signé par Google (valable environ une heure). Il est joint aux envois (champ « identite ») :
    c'est le lot GitHub qui le vérifie et qui décide si l'adresse est autorisée (data/admins.json, voir pipeline/identite.py).
    Le nom lu ici dans le jeton ne sert qu'à l'affichage. Tant que web/data/admin-config.json n'a pas de « client_id »,
@@ -20,7 +20,7 @@ window.Identite = (function () {
   function jeton() { var v = lire(); return v ? v.jwt : ''; }
   function nom() { var v = lire(); return v ? v.nom : ''; }
   function connecte() { return !!lire(); }
-  // Les fonctions réservées aux sorciers (fiches, page de revue) exigent la connexion Google dès que le site en demande une.
+  // Les fonctions réservées aux niveau 2 (fiches, page de revue) exigent la connexion Google dès que le site en demande une.
   // Tant que la configuration n'est pas lue, la réponse est « non » : on ne montre rien par défaut.
   function accesAutorise() { return connecte() || (CFG !== null && !CFG.client_id); }
   function actif() { return config().then(function (c) { return !!c.client_id; }); }

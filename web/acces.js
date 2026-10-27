@@ -1,6 +1,6 @@
-/* Porte de la page admin : le niveau (Sorcier ou Zagor) vient du relais (voir relais/), après la connexion Google du site.
+/* Porte de la page admin : le niveau (niveau 2 ou 3) vient du service technique (voir service technique/), après la connexion Google du site.
    Plus de mot de passe. Une page peut exiger un niveau plus élevé avec data-niveau="superadmin" sur <main>.
-   Protection légère côté navigateur : la vraie vérification est faite par le relais à chaque envoi. */
+   Protection légère côté navigateur : la vraie vérification est faite par le service technique à chaque envoi. */
 (function () {
   var porte = document.getElementById('porte');
   var main = document.getElementById('main');
@@ -13,7 +13,7 @@
   function evaluer() {
     var C = window.Cloud, niveau = window.Compte ? window.Compte.role() : '';
     var connecte = C && C.lie() && C.actif();
-    var ordre = { heros: 0, admin: 1, superadmin: 2 };   // « heros » : toute personne connectée ; « admin » : sorciers et Zagors
+    var ordre = { heros: 0, admin: 1, superadmin: 2 };   // « heros » : toute personne connectée ; « admin » : niveaux 2 et 3
     var ok = ordre[niveau] !== undefined && ordre[niveau] >= ordre[exige];
     if (connecte && ok) return montrer();
     porte.hidden = false; main.hidden = true; zone.hidden = false;
