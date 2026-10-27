@@ -255,9 +255,15 @@ AJOUTER = '''<p class="surtitre">Contribuer</p>
 
 GARDEES = ("revue-prix.html", "equipe.html", "evolutions.html", "ajouter.html", "butin.html")      # pages derrière la porte : Sorcier, Zagor, ou toute personne connectée (évolutions)
 NIVEAU_PAGE = {"equipe.html": "superadmin", "revue-prix.html": "superadmin", "evolutions.html": "admin", "ajouter.html": "admin", "butin.html": "admin"}
+def _version():          # même numéro que le service worker : les scripts changés ne restent pas en cache sur les pages gardées
+    m = re.search(r"cdh-v(\d+)", (WEB / "sw.js").read_text(encoding="utf-8"))
+    return m.group(1) if m else "0"
+
+
+V = _version()
 SCRIPT_PAGE = {"contact.html": '\n<script src="contact.js"></script>',
                "revue-prix.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>',
-               "equipe.html": '\n<script src="acces.js"></script>\n<script src="equipe.js"></script>',
+               "equipe.html": '\n<script src="acces.js?v=' + V + '"></script>\n<script src="equipe.js?v=' + V + '"></script>',
                "evolutions.html": '\n<script src="acces.js"></script>',
                "ajouter.html": '\n<script src="acces.js"></script>\n<script src="ajouter.js"></script>',
                "butin.html": '\n<script src="acces.js"></script>\n<script src="revue.js"></script>'}
