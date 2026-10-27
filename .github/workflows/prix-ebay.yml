@@ -19,7 +19,7 @@ on:
         description: "Contrôle SANS enregistrement sur N éditions (comptages seulement) : vérifie le rattachement aux éditions"
         required: false
       diagnostic:
-        description: "ISBN : liste les annonces trouvées avec leur lien dans le journal (aucun enregistrement)"
+        description: "ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées avec leur lien dans le journal (aucun enregistrement)"
         required: false
       essai_photos:
         description: "Essai de la comparaison de photos sur de vraies annonces (SANS enregistrement) : nombre d'éditions tirées au hasard (200 conseillé)"
