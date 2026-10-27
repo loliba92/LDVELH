@@ -142,6 +142,14 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="leboncoin">Leboncoin</option>
         <option value="librairie">Librairies</option>
       </select></label>
+      <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
+        <option value="tout">Tous</option>
+        <option value="pepite">Pépites</option>
+        <option value="dessous">En dessous</option>
+        <option value="dans">Dans les prix</option>
+        <option value="dessus">Au-dessus</option>
+        <option value="cher">Très chers</option>
+      </select></label>
       <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
     </div>
   </div>
