@@ -118,11 +118,12 @@ class TestOffre(unittest.TestCase):
         ann = {"111": {"bon": [[10, "a", "u1", "isbn", "2026-10-26", None], [12, "b", "u2", "titre", "2026-10-26", None],
                                [11, "c", "u3", "isbn", "2026-10-20", None],            # eBay non revue au dernier relevé : pas comptée
                                [9, "d", "u4", "leboncoin", "2026-10-27", None],
+                               [8, "d2", "u8", "leboncoin", "2026-10-24", None],           # Leboncoin plus ancienne que le dernier relevé : le bot ne revoit que les plus récentes, elle reste en ligne
                                [90, "Lot de 6 livres · e", "u5", "leboncoin", "2026-10-27", None]],      # un lot n'est pas l'offre d'un livre
                        "tres_bon": [[4, "f", "u6", "librairie", None, 1]]},
                "222": {"bon": [[5, "g", "u7", "isbn", "2026-10-19", None]]}}
         o = calculer_offre(ann, {"111": [10, 30, 50]}, "2026-10-26", "2026-10-27")
-        self.assertEqual(o["111"], {"ebay": 2, "lbc": 1, "lib": 1, "age": 30})
+        self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "lib": 1, "age": 30})
         self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
 
 
