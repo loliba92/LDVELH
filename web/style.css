@@ -2148,3 +2148,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .eq-corps[hidden] { display: none; }
 
 .eq-ok { display: inline-block; margin-left: 8px; padding: 1px 8px; border: 1px solid #7fd69c; border-radius: 999px; color: #7fd69c; font: 700 .78rem var(--f-ui); }
+
+.rc-droite { display: grid; justify-items: end; gap: 1px; }
+.rc-vs { color: var(--muted); font-size: .82rem; white-space: nowrap; }
+.rc-ecart { font-style: normal; font-weight: 700; color: var(--muted); }
+.rc-ecart.rc-moins { color: #7fd69c; } .rc-ecart.rc-plus-cher { color: #f08f99; }
