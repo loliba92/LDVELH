@@ -646,7 +646,7 @@
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
-      (estNiveau3() ? `<button type="button" class="bouton-lien pp-offrir" data-offrir="${esc(p.ed.id)}|${esc(p.cle)}|${esc(p.lien)}">Offrir aux Héros aujourd'hui</button>` : '') + `</article>`;
+      (estNiveau3() ? `<button type="button" class="bouton-lien pp-offrir" data-offrir="${esc(p.ed.id)}|${esc(p.cle)}|${esc(p.lien)}">Offrir</button>` : '') + `</article>`;
   }
   function initPepites() {
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri'), trouver = $('#pp-trouver');
