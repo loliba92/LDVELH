@@ -81,3 +81,9 @@ Mise en place :
 5. Se connecter une fois. Si Google n'accorde pas de jeton de renouvellement (compte déjà autorisé), retirer l'accès de l'application dans le compte Google (myaccount.google.com/permissions) puis se reconnecter.
 
 Actions du relais : `session_ouvrir` (code Google), `session_renouveler`, `session_fermer` (révoque chez Google). Tests : `node pipeline/test_relais.js`.
+
+## Rapidité de la reconnexion
+
+- Le service vérifie un jeton auprès de Google : cette vérification est gardée 5 minutes, les appels qui se suivent (niveau, Butin, notes) sont donc plus rapides. L'expiration du jeton et la liste des admins restent contrôlées à chaque appel.
+- Action `ping` : réveille le service sans aucune donnée.
+- Déclencheur facultatif : dans Apps Script, icône « Déclencheurs » (horloge) > Ajouter un déclencheur > fonction `garderEveille`, source « Selon l'heure », « Minuteur », « Toutes les 5 minutes ». Il garde la liste des admins en mémoire. Google ne garantit pas qu'il évite le temps de réveil du service : à constater à l'usage, et à retirer s'il ne change rien.

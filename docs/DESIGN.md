@@ -205,3 +205,10 @@ Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`,
 - Une annonce du Butin est « nouvelle » si sa première apparition (`premieres`, voir plus haut) est postérieure à la dernière ouverture de la page Butin sur cet appareil (clé `cdh-butin-vu`, 24 h au premier passage).
 - Le nombre est dit sur l'accueil (bandeau « N nouvelles annonces au Butin », qui remplace le petit bouton « Butin » de la carte) et dans le menu du haut (entrée « Butin » avec pastille). Les deux mènent au Butin trié « Nouvelles annonces d'abord » (`butin.html?tri=date`). Ouvrir le Butin remet le compte à zéro.
 - Les Héros et les visiteurs ne voient rien de cela.
+
+## Reconnexion plus rapide
+
+- Reconnexion automatique (jeton d'une heure périmé, session de 30 jours valable) : l'écran dit « Connexion en cours » (prénom et point doré qui pulse) au lieu de « Reconnecter ».
+- Le niveau de la personne est relu dès que la connexion est prête, en même temps que le Drive (avant : après la fin de la synchronisation). Le prénom arrive en parallèle (événement `cdh-nom`).
+- Dernier niveau connu gardé sur l'appareil (`cdh-role-vu`, 7 jours) : affiché tout de suite, puis revérifié (Zagor : si la vérification date de plus de 10 minutes ; sorcier : à chaque page). Il ne donne aucun accès : les données ne sont servies qu'après vérification par le service technique. Effacé à la déconnexion.
+- Service technique (`relais/Code.gs`) : la réponse de Google à la vérification d'un jeton est gardée 5 minutes ; action `ping` ; fonction `garderEveille` pour un déclencheur toutes les 5 minutes (voir `relais/LISEZMOI.md`).
