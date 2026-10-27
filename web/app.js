@@ -1092,10 +1092,65 @@
     ['veille-parutions.yml', 'Veille des parutions', 'Cherche chaque jour les livres annoncés et pas encore parus.'],
   ];
   const DISCRET = 'pages.yml';          // lot affiché seulement quand il échoue
+  const IMPORTS = 'releve-leboncoin.yml';          // lot dont la ligne ouvre la liste des derniers imports (au lieu du journal)
+  let urlJournalImports = '';
   const depuisMin = (d) => {
     const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
     return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
   };
+  // Derniers imports Leboncoin : lus dans les demandes que le bot envoie chaque soir (historique public du dépôt), gardées cinq minutes
+  const csvLignes = (texte) => {
+    const lignes = []; let champ = '', ligne = [], entre = false;
+    for (let i = 0; i < texte.length; i += 1) {
+      const c = texte[i];
+      if (entre) { if (c === '"' && texte[i + 1] === '"') { champ += '"'; i += 1; } else if (c === '"') entre = false; else champ += c; }
+      else if (c === '"') entre = true;
+      else if (c === ',') { ligne.push(champ); champ = ''; }
+      else if (c === '\n') { ligne.push(champ); lignes.push(ligne); ligne = []; champ = ''; }
+      else if (c !== '\r') champ += c;
+    }
+    if (champ || ligne.length) { ligne.push(champ); lignes.push(ligne); }
+    return lignes;
+  };
+  async function lireImports() {
+    const CLE = 'cdh-imports-lbc';
+    try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports; } catch (e) { /* pas de cache */ }
+    const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/issues?state=all&per_page=40&sort=created&direction=desc', { headers: { Accept: 'application/vnd.github+json' } });
+    if (!r.ok) throw new Error(r.status);
+    const imports = (await r.json()).filter((x) => !x.pull_request && /^Relevé Leboncoin/.test(x.title || '')).slice(0, 8).map((x) => {
+      const m = /```csv\s*\n([\s\S]*?)```/.exec(x.body || '');
+      const l = m ? csvLignes(m[1].trim()) : [];
+      const [tete, ...corps] = l;
+      const col = (nom) => (tete || []).indexOf(nom);
+      return { t: x.created_at, lignes: corps.filter((c) => c.length > 4).map((c) => ({ isbn: c[col('isbn13')], etat: c[col('etat')], prix: parseFloat(c[col('prix')]), titre: c[col('titre')], lien: c[col('lien')], statut: c[col('statut')] })) };
+    });
+    try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports })); } catch (e) { /* idem */ }
+    return imports;
+  }
+  async function ouvrirImports() {
+    let dlg = $('#imp-dialog');
+    if (!dlg) {
+      dlg = document.createElement('dialog');
+      dlg.id = 'imp-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'imp-titre');
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Derniers imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="annonces-corps"></div></div>';
+      document.body.appendChild(dlg);
+      dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'imp-fermer') dlg.close(); });
+    }
+    const corps = $('#imp-corps');
+    corps.innerHTML = '<p class="sous">Chargement…</p>';
+    dlg.showModal();
+    try {
+      const imports = await lireImports();
+      const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+      corps.innerHTML = (imports.length ? imports.map((im) => `<h4>${esc(quand(im.t))} · ${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}</h4><ul>${im.lignes.map((a) => {
+        const ed = DATA.find((b) => b.isbn13 === a.isbn);
+        const nom = ed ? `${ed.titre} (${ed.version})` : a.isbn;
+        return `<li><span class="ann-prix">${fmt(a.prix)}</span><a href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce Leboncoin (nouvel onglet) : ${esc(nom)}">${esc(nom)} ↗</a><span class="ann-titre">${esc(etatDe(a.etat).long)}${a.statut === 'vendu' ? ' · vendu' : ''}</span></li>`;
+      }).join('')}</ul>`).join('') : '<p class="sous">Aucun import trouvé dans l\'historique récent.</p>')
+        + (urlJournalImports ? `<p class="sous"><a href="${esc(urlJournalImports)}" target="_blank" rel="noopener noreferrer">Journal de la dernière exécution ↗</a></p>` : '');
+    } catch (e) { corps.innerHTML = '<p class="sous">Impossible de lire l\'historique pour le moment (limite de l\'interface publique de GitHub). Réessayez dans quelques minutes.</p>'; }
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-imports]')) ouvrirImports(); });
   let majFaite = false;
   function initMaj() {
     const bloc = $('#rv-maj');
@@ -1119,10 +1174,10 @@
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
       const lots = FAMILLES.map(([f, nom, aide]) => {
         const r = runs[f];
-        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET };
+        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET, imports: f === IMPORTS };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET };
+        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET, imports: f === IMPORTS };
       }).filter((l) => !l.discret || l.cls === 'echec');         // la publication du site n'apparaît qu'en cas d'échec : sinon le site ne se met plus à jour, sans aucun signe visible
       const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
       const global = mal.length ? 'echec' : enCours.length ? 'en-cours' : 'ok';
@@ -1131,6 +1186,7 @@
       const rang = { echec: 0, 'en-cours': 1 };                              // les problèmes d'abord, puis ce qui tourne
       const lignes = lots.map((l, i) => [l, i]).sort((a, b) => (rang[a[0].cls] ?? 2) - (rang[b[0].cls] ?? 2) || a[1] - b[1]).map(([l]) => {
         const corps = `<span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(l.nom)}</span><span class="maj-quand">${esc(l.quand)}</span>`;
+        if (l.imports && l.u) { urlJournalImports = l.u; return `<li><button type="button" class="maj-ligne maj-${l.cls}" data-imports title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Voir les derniers imports</span></button></li>`; }
         return l.u
           ? `<li><a class="maj-ligne maj-${l.cls}" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Ouvrir le détail (nouvel onglet)</span></a></li>`
           : `<li><div class="maj-ligne maj-vide" title="${esc(l.aide)}">${corps}</div></li>`;
