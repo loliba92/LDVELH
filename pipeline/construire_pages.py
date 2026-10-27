@@ -361,10 +361,10 @@ EQUIPE = '''<h1>Équipe</h1>
 <section class="eq-bloc" aria-labelledby="eq-t-heros">
   <h2 id="eq-t-heros">Héros</h2>
   <p class="sous" id="eq-comptes-etat" role="status">Chargement…</p>
-  <ul class="eq-liste eq-comptes" id="eq-comptes"></ul>
+  <ul class="eq-comptes" id="eq-comptes"></ul>
 </section>
 <section class="eq-bloc" aria-labelledby="eq-t-ajout">
-  <h2 id="eq-t-ajout">Ajouter une personne</h2>
+  <details class="eq-ajouter"><summary><h2 id="eq-t-ajout">Ajouter une personne</h2></summary>
   <form id="eq-ajout" class="eq-form">
     <label for="eq-adresse">Adresse Google</label>
     <input id="eq-adresse" type="email" autocomplete="off" required placeholder="prenom@gmail.com">
@@ -382,6 +382,7 @@ EQUIPE = '''<h1>Équipe</h1>
     <button type="submit" class="bouton">Ajouter</button>
   </form>
   <p class="sous">L'adresse n'est jamais gardée en clair, seulement son empreinte. Ajouter une adresse bloquée la débloque.</p>
+  </details>
   <p class="rv-ajout-bilan" id="eq-msg" role="status" hidden></p>
 </section>
 <section class="eq-bloc" aria-labelledby="eq-t-bloques">
