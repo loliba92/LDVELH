@@ -2198,3 +2198,25 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 899px) { .barre-bas .nb-pep { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; } }
 .a-trouver .l-livre { flex: 1 1 0; min-width: 0; }
 .a-trouver li > .retirer { flex: none; }
+
+/* Pages publiques « un livre » (livre/<isbn>.html) et « Tous les livres » */
+.livre-tete { display: grid; grid-template-columns: 200px minmax(0, 1fr); grid-template-areas: "couv chapeau" "couv faits"; grid-template-rows: auto 1fr; gap: 0 24px; align-items: start; margin: 12px 0 18px; }
+.livre-couv { grid-area: couv; }
+.livre-couv img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.page .livre-tete .chapeau { grid-area: chapeau; margin: 0 0 8px; }
+.livre-faits { grid-area: faits; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0; font-size: 1rem; align-content: start; }
+.livre-faits dt { color: var(--muted); }
+.livre-faits dd { margin: 0; overflow-wrap: anywhere; }
+.page .livre-niveaux { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0; margin: 0 0 12px; }
+.page .livre-niveaux li { display: grid; gap: 2px; justify-items: center; margin: 0; padding: 10px 6px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.livre-niveaux .valeur { color: var(--gold); font-size: 1.3rem; }
+.page .livre-liste { list-style: none; padding: 0; columns: 2 320px; column-gap: 28px; }
+.page .livre-liste li { break-inside: avoid; margin: 0 0 6px; }
+.page h2[id] { scroll-margin-top: 8px; }
+.page a.bouton { color: #000; text-decoration: none; }
+.page a.bouton-clair { color: var(--gold); }
+@media (max-width: 600px) {
+  .livre-tete { grid-template-columns: 110px minmax(0, 1fr); grid-template-areas: "couv chapeau" "faits faits"; gap: 0 14px; }
+  .livre-faits { margin-top: 14px; font-size: .95rem; gap: 4px 12px; }
+  .page .livre-tete .chapeau { font-size: .95rem; }
+}

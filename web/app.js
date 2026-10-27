@@ -1564,7 +1564,7 @@
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-partager]'); if (!t) return;
     const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
-    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html#fiche=' + encodeURIComponent(b.id);
+    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html' : 'index.html#fiche=' + encodeURIComponent(b.id));
     const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}.`;
     if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: texte, url }).catch(() => {});
     else window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(texte), '_blank', 'noopener');

@@ -6,6 +6,7 @@
      l'emporte pour chaque livre ; un livre retiré est gardé en « supprimé » pour ne pas revenir), puis on réécrit.
    La fusion (fusionner, etatLocal) est du calcul pur, testé par pipeline/test_cloud_fusion.js. */
 (function (racine) {
+  var BASE = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, '') : '';   // les pages du dossier livre/ chargent les scripts de la racine
   var VERSION = 1, FICHIER = 'collection.json', OUBLI_JOURS = 90;
 
   /* ---------- Calcul pur ---------- */
@@ -76,7 +77,7 @@
   })();
 
   function config() {
-    if (!cfg) cfg = fetch('data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+    if (!cfg) cfg = fetch(BASE + 'data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
     return cfg;
   }
   function dire(s, detail) { statut = s; ecouteurs.forEach(function (f) { f(s, detail); }); }
