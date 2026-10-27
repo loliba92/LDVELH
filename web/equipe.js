@@ -32,24 +32,22 @@
   }
 
   function carte(m) {
-    var infos = [];
-    if (m.depuis) infos.push('depuis le ' + jour(m.depuis));
-    var fin = '';
+    var etatTexte = '', hors = m.echu || m.avenir;
     if (m.role === 'admin') {
-      var periode = m.debut && m.fin ? 'Du ' + jour(m.debut) + ' au ' + jour(m.fin) : m.debut ? 'À partir du ' + jour(m.debut) : m.fin ? 'Jusqu\'au ' + jour(m.fin) : 'Sans date de début ni de fin';
-      fin = m.echu ? '<span class="eq-fin eq-fin-passee">Terminé le ' + esc(jour(m.fin)) + ' : redevenu Héros</span>'
-        : m.avenir ? '<span class="eq-fin eq-fin-passee">Commence le ' + esc(jour(m.debut)) + ' (Héros d\'ici là)</span>'
-        : '<span class="eq-fin">' + esc(periode) + '</span>';
-    }
-    var actions = m.role === 'superadmin' ? '<p class="sous">Protégé : ni retiré ni bloqué.</p>' :
+      var periode = m.debut && m.fin ? jour(m.debut) + ' → ' + jour(m.fin) : m.debut ? 'dès le ' + jour(m.debut) : m.fin ? 'jusqu\'au ' + jour(m.fin) : 'sans limite';
+      etatTexte = m.echu ? 'Terminé le ' + jour(m.fin) + ' : redevenu Héros' : m.avenir ? 'Commence le ' + jour(m.debut) + ' (Héros d\'ici là)' : periode;
+    } else etatTexte = 'protégé';
+    var bouton = m.role === 'superadmin' ? '' : '<button type="button" class="eq-btn-gerer" data-gerer aria-expanded="false">Gérer</button>';
+    var corps = m.role === 'superadmin' ? '' :
+      '<div class="eq-corps" hidden>' +
       '<form class="eq-fin-form" data-e="' + esc(m.empreinte) + '"><label>Début <input type="date" name="debut" value="' + esc(m.debut || '') + '"></label><label>Fin <input type="date" name="fin" value="' + esc(m.fin || '') + '"></label>' +
       '<button type="submit" class="bouton bouton-clair">Enregistrer</button></form>' +
       '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="equipe_retirer" data-e="' + esc(m.empreinte) + '">Retirer</button>' +
-      '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>';
-    return '<li class="eq-membre eq-carte"><div class="eq-profil"><span class="eq-avatar niveau-' + ((m.echu || m.avenir) ? 'heros' : m.role) + '">' + icone((m.echu || m.avenir) ? 'heros' : m.role) + '</span>' +
-      '<div><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau niveau-' + m.role + '">' + NOMS[m.role] + '</span>' +
-      (fin ? '<div>' + fin + '</div>' : '') + (infos.length ? '<span class="sous">' + esc(infos.join(' · ')) + '</span>' : '') +
-      '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div></div>' + actions + '</li>';
+      '<button type="button" class="bouton bouton-clair" data-act="equipe_bloquer" data-e="' + esc(m.empreinte) + '">Bloquer</button></div>' +
+      '<span class="sous eq-empreinte">empreinte ' + esc(m.empreinte.slice(7, 15)) + '…</span></div>';
+    return '<li class="eq-ligne"><div class="eq-haut"><span class="eq-avatar niveau-' + (hors ? 'heros' : m.role) + '">' + icone(hors ? 'heros' : m.role) + '</span>' +
+      '<div class="eq-texte"><strong>' + esc(m.nom) + '</strong> <span class="compte-niveau niveau-' + m.role + '">' + NOMS[m.role] + '</span>' +
+      '<span class="eq-fin' + (hors ? ' eq-fin-passee' : '') + '">' + esc(etatTexte) + '</span></div>' + bouton + '</div>' + corps + '</li>';
   }
 
   function dessiner(r) {
@@ -70,11 +68,10 @@
       if (!r || !r.ok) { etatC.textContent = erreurLisible(r); return; }
       TOTAL = r.total; tuiles();
       var sans = Math.max(0, r.total - r.connus);
-      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ' au total (héros, sorciers et Zagors), dont ' + r.aujourdhui + ' arrivé' + (r.aujourdhui > 1 ? 's' : '') + ' aujourd\'hui. Derniers arrivés :' +
-        (sans ? ' (les ' + sans + ' premiers n\'ont pas de prénom gardé)' : '');
+      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
       ul.innerHTML = r.liste.length ? r.liste.map(function (c) {
-        return '<li class="eq-membre"><div class="eq-profil"><span class="eq-avatar niveau-heros">' + icone('heros') + '</span><div><strong>' + esc(c.nom) + '</strong><span class="sous eq-date">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '') + ' · compte n° ' + esc(c.rang) + '</span></div></div></li>';
-      }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant : la liste se remplit à chaque nouveau compte.</li>';
+        return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span></li>';
+      }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant.</li>';
     }).catch(function () { etatC.textContent = 'Le relais ne répond pas : vérifiez votre connexion.'; });
   }
 
@@ -103,6 +100,12 @@
   });
 
   function actions(ev) {
+    var g = ev.target.closest('[data-gerer]');
+    if (g) {
+      var corps = g.closest('.eq-ligne').querySelector('.eq-corps'), ouvre = corps.hidden;
+      corps.hidden = !ouvre; g.setAttribute('aria-expanded', ouvre ? 'true' : 'false'); g.textContent = ouvre ? 'Fermer' : 'Gérer';
+      return;
+    }
     var b = ev.target.closest('[data-act]');
     if (!b) return;
     var bloquer = b.dataset.act === 'equipe_bloquer';
