@@ -74,8 +74,30 @@ def titre_complet(b):
     return f"{b['titre']} ({b.get('serie') or 'hors série'}{numero(b)}, {b['version']})"
 
 
+JS_PEPITE = r'''<script>
+(function () {
+  var isbn = "{isbn}", zone = document.getElementById('pepite');
+  fetch('../data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
+    var hier = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    if (!p || p.isbn13 !== isbn || !p.lien || p.date < hier || !/^https:\/\//.test(p.lien)) return;
+    var prix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.prix);
+    var t = document.createElement('p'), s = document.createElement('strong'), a = document.createElement('a');
+    s.textContent = 'Pépite du jour. ';
+    t.appendChild(s);
+    t.appendChild(document.createTextNode('Une annonce de ce livre à ' + prix + (p.pct != null ? ', soit ' + p.pct + ' % sous sa cote' : '') + '. Prix indicatif : elle peut déjà être vendue. '));
+    a.href = p.lien; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = "Voir l'annonce ↗";
+    t.appendChild(a);
+    var u = document.createElement('p');
+    u.textContent = "Connectez-vous, c'est gratuit : vous verrez la cote exacte du livre et pourrez l'ajouter à votre liste « À trouver ».";
+    zone.appendChild(t); zone.appendChild(u); zone.hidden = false;
+  }).catch(function () {});
+})();
+</script>'''
+
+
 def page_livre(b, freres, web, frag):
     isbn = b["isbn13"]
+    script_pepite = JS_PEPITE.replace("{isbn}", isbn)
     url = f"{SITE}/livre/{isbn}.html"
     serie, titre = b.get("serie") or "", b["titre"]
     cov = couverture(web, b)
@@ -193,7 +215,7 @@ def page_livre(b, freres, web, frag):
   <p class="chapeau">{e(chapeau)}</p>
   <dl class="livre-faits">{faits_html}</dl>
 </div>
-<aside class="livre-pepite" id="pepite" hidden><p><strong>Pépite repérée.</strong> Une annonce de ce livre est nettement sous sa cote. Connectez-vous, c'est gratuit : vous verrez sa cote exacte et pourrez l'ajouter à votre liste « À trouver ».</p></aside>
+<aside class="livre-pepite" id="pepite" hidden></aside>
 <p class="actions"><a class="bouton" href="../index.html#fiche={e(b["id"])}">Voir la cote exacte</a> <a class="bouton bouton-clair" href="{e(partage)}" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
 {prix_html}
 {autres}
@@ -219,7 +241,7 @@ def page_livre(b, freres, web, frag):
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
-<script>if (/[?&]pepite=1/.test(location.search)) document.getElementById('pepite').hidden = false;</script>
+{script_pepite}
 </body>
 </html>
 '''

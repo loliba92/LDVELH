@@ -57,7 +57,7 @@
   <p class="chapeau">« Fleurir en hiver » est l&#x27;édition V2 du livre dont vous êtes le héros, Littéraction, publiée chez Alkonost en 2022, écrit par Romain Baudry.</p>
   <dl class="livre-faits"><dt>Série</dt><dd>Littéraction</dd><dt>Édition</dt><dd>V2</dd><dt>Auteurs</dt><dd>Romain Baudry</dd><dt>Illustrations</dt><dd>Olivier Raynaud</dd><dt>Éditeur</dt><dd>Alkonost · Litteraction</dd><dt>Année</dt><dd>2022</dd><dt>Pages</dt><dd>342</dd><dt>ISBN-13</dt><dd>9791097577353</dd></dl>
 </div>
-<aside class="livre-pepite" id="pepite" hidden><p><strong>Pépite repérée.</strong> Une annonce de ce livre est nettement sous sa cote. Connectez-vous, c'est gratuit : vous verrez sa cote exacte et pourrez l'ajouter à votre liste « À trouver ».</p></aside>
+<aside class="livre-pepite" id="pepite" hidden></aside>
 <p class="actions"><a class="bouton" href="../index.html#fiche=9791097577353">Voir la cote exacte</a> <a class="bouton bouton-clair" href="https://www.facebook.com/sharer/sharer.php?u=https://lacoteduheros.fr/livre/9791097577353.html" target="_blank" rel="noopener noreferrer">Partager sur Facebook</a></p>
 <h2>Niveau de prix</h2><p>Cette édition n'a pas encore de prix : il manque des annonces récentes pour en établir un.</p>
 <h2>Autres éditions de ce livre</h2><ul><li><a href="9791097577070.html">V1</a> · Alkonost · 2018</li></ul>
@@ -99,6 +99,24 @@
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
-<script>if (/[?&]pepite=1/.test(location.search)) document.getElementById('pepite').hidden = false;</script>
+<script>
+(function () {
+  var isbn = "9791097577353", zone = document.getElementById('pepite');
+  fetch('../data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
+    var hier = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    if (!p || p.isbn13 !== isbn || !p.lien || p.date < hier || !/^https:\/\//.test(p.lien)) return;
+    var prix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.prix);
+    var t = document.createElement('p'), s = document.createElement('strong'), a = document.createElement('a');
+    s.textContent = 'Pépite du jour. ';
+    t.appendChild(s);
+    t.appendChild(document.createTextNode('Une annonce de ce livre à ' + prix + (p.pct != null ? ', soit ' + p.pct + ' % sous sa cote' : '') + '. Prix indicatif : elle peut déjà être vendue. '));
+    a.href = p.lien; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = "Voir l'annonce ↗";
+    t.appendChild(a);
+    var u = document.createElement('p');
+    u.textContent = "Connectez-vous, c'est gratuit : vous verrez la cote exacte du livre et pourrez l'ajouter à votre liste « À trouver ».";
+    zone.appendChild(t); zone.appendChild(u); zone.hidden = false;
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

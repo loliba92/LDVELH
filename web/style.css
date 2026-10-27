@@ -2231,3 +2231,16 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .livre-pepite { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--gold); border-radius: var(--r); background: rgba(217, 180, 95, .12); }
 .livre-pepite[hidden] { display: none; }
 .page .livre-pepite p { margin: 0; }
+
+/* Pépite du jour (accueil, publique) */
+#pepite-accueil-zone:empty { display: none; }
+.pep-accueil { margin: 14px 0 6px; display: grid; gap: 10px; border-color: var(--gold); }
+.pep-accueil .surtitre { margin: 0; }
+.pa-corps { display: flex; gap: 14px; align-items: center; }
+.pa-corps img { flex: none; width: 80px; height: 112px; object-fit: cover; border: 1px solid var(--line-strong); border-radius: 4px; }
+.pa-titre { margin: 0; font: 700 1.35rem/1.15 var(--f-display); }
+.pep-accueil .sous { margin: 2px 0 0; }
+.pa-prix { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.pa-prix b { font: 700 2rem/1 var(--f-display); color: var(--gold); }
+.pa-prix span { color: var(--gold); font-weight: 700; }
+.pep-accueil .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
