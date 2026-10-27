@@ -70,19 +70,31 @@
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
     etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
     tuiles();
+    dessinerComptes();
     rouvrir(ouverts);
   }
 
+  var COMPTES = null;
+  // La liste des comptes contient tout le monde. Un membre de l'équipe y est reconnu à ses quatre signes d'empreinte (« Prénom #ab12 »)
+  // et n'est pas compté dans les héros, sauf si sa période est finie ou pas commencée.
+  function dessinerComptes() {
+    var r = COMPTES, etatC = $('#eq-comptes-etat'), ul = $('#eq-comptes');
+    if (!r) return;
+    var actifs = {};
+    if (EQUIPE) EQUIPE.equipe.forEach(function (m) { if (!m.echu && !m.avenir) actifs[m.empreinte.slice(7, 11)] = true; });
+    var liste = r.liste.filter(function (c) { var k = /#([0-9a-f]{4})$/.exec(c.nom); return !(k && actifs[k[1]]); });
+    var sans = Math.max(0, r.total - r.connus);
+    etatC.textContent = TOTAL + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers héros arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
+    ul.innerHTML = liste.length ? liste.map(function (c) {
+      return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span></li>';
+    }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant.</li>';
+  }
+
   function comptes() {
-    var etatC = $('#eq-comptes-etat'), ul = $('#eq-comptes');
+    var etatC = $('#eq-comptes-etat');
     window.Relais.appeler('comptes_lire').then(function (r) {
       if (!r || !r.ok) { etatC.textContent = erreurLisible(r); return; }
-      TOTAL = r.total; tuiles();
-      var sans = Math.max(0, r.total - r.connus);
-      etatC.textContent = r.total + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
-      ul.innerHTML = r.liste.length ? r.liste.map(function (c) {
-        return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span></li>';
-      }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant.</li>';
+      TOTAL = r.total; COMPTES = r; tuiles(); dessinerComptes();
     }).catch(function () { etatC.textContent = 'Le relais ne répond pas : vérifiez votre connexion.'; });
   }
 
