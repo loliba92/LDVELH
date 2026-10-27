@@ -2222,12 +2222,6 @@ button.maj-ligne:hover { background: var(--surface-2); }
 }
 
 /* Carte de partage d'une pépite */
-.carte-dialog { max-width: 520px; width: calc(100% - 24px); overflow-y: auto; }
-.carte-cadre { padding: 16px 18px 18px; display: grid; gap: 12px; }
-.carte-img { display: block; width: 100%; max-width: min(380px, 38vh); height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
-.carte-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.carte-actions .bouton { flex: 1 1 160px; }
-.carte-cadre .sous { margin: 0; min-height: 1.4em; }
 .livre-pepite { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--gold); border-radius: var(--r); background: rgba(217, 180, 95, .12); }
 .livre-pepite[hidden] { display: none; }
 .page .livre-pepite p { margin: 0; }
@@ -2244,4 +2238,14 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .pa-prix b { font: 700 2rem/1 var(--f-display); color: var(--gold); }
 .pa-prix span { color: var(--gold); font-weight: 700; }
 .pep-accueil .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
-.carte-cadre textarea { width: 100%; min-height: 9.5em; box-sizing: border-box; font: inherit; padding: 8px 10px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); resize: vertical; }
+
+/* Fenêtre « Post à publier » : tout tient à l'écran, rien n'est coupé (en-tête et boutons fixes, le texte prend la place restante) */
+.carte-dialog { width: min(520px, calc(100vw - 20px)); max-height: calc(100dvh - 20px); overflow: hidden; }
+.carte-dialog[open] { display: flex; flex-direction: column; }
+.carte-cadre { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px 16px; max-height: calc(100dvh - 22px); }
+.carte-img { flex: 0 1 auto; display: block; width: auto; max-width: 100%; height: auto; max-height: 27dvh; aspect-ratio: 4 / 5; align-self: center; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.carte-cadre label.sous { margin: 0; }
+.carte-cadre textarea { flex: 1 1 auto; width: 100%; min-height: 5.5em; box-sizing: border-box; font: inherit; font-size: .88rem; line-height: 1.35; padding: 8px 10px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); resize: none; overflow-y: auto; }
+.carte-cadre .sous { margin: 0; min-height: 1.2em; }
+.carte-actions { flex: none; display: flex; flex-wrap: wrap; gap: 8px; }
+.carte-actions .bouton { flex: 1 1 140px; }
