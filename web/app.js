@@ -1546,7 +1546,7 @@
     ETATS.forEach((e) => (par[e.k] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
       if (origine !== 'leboncoin' && origine !== 'librairie' && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;      // eBay non revue au dernier relevé : plus retenue
       const pub = b.prix[e.k], solide = origine === 'librairie' || (origine === 'isbn' && suppose === 0);
-      lignes.push({ prix, lien, origine, etat: ABREGE[e.k], pct: pub ? Math.round((1 - prix / pub) * 100) : null, solide });
+      lignes.push({ prix, lien, origine, etat: ABREGE[e.k], pub, pct: pub ? Math.round((1 - prix / pub) * 100) : null, solide });
     }));
     return lignes.sort((x, y) => x.prix - y.prix);
   };
@@ -1560,6 +1560,15 @@
     b.textContent = n ? String(n) : '';
     b.setAttribute('aria-label', n ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : '');
   }
+  // Partage d'une pépite : la meilleure annonce est résumée, avec le lien de la fiche du livre (jamais celui de l'annonce)
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-partager]'); if (!t) return;
+    const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
+    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'index.html#fiche=' + encodeURIComponent(b.id);
+    const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}.`;
+    if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: texte, url }).catch(() => {});
+    else window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + encodeURIComponent(texte), '_blank', 'noopener');
+  });
   function rafraichirPepites() {
     if (!estNiveau2()) return;
     chargerOffre().then(() => { majBadgePepites(); if ($('#coll-corps')) afficherCollection(); });
@@ -1573,7 +1582,7 @@
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
+        ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}<button type="button" class="bouton-lien pep-partager" data-partager="${esc(b.id)}">Partager cette pépite</button></div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
   // Exemplaires de la collection marqués « à vendre » : isolés dans leur propre liste, hors de « Vos exemplaires »
