@@ -149,7 +149,7 @@ window.Compte = (function () {
     if (rolePromesse) return rolePromesse;                                   // une seule demande à la fois
     if (Date.now() - derniereRole < 60000 && role) return Promise.resolve();          // vérifié il y a moins d'une minute
     rolePromesse = window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); garderRole(); signalerCompte(); }
+      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); garderRole(); if (role !== 'admin' && role !== 'superadmin' && window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
     }).catch(function () { echecRole = 'relais'; }).then(function () { rolePromesse = null; dessiner(); });
     return rolePromesse;
@@ -447,7 +447,7 @@ window.Compte = (function () {
       if (!role && vu && window.Cloud.lie()) { role = vu.r; finAcces = vu.fin || ''; }          // dernier niveau connu, en attendant la vérification
       bandeau(); dessiner();
       if (window.Cloud.actif() && (!role || role === 'admin' || (role === 'superadmin' && !(vu && Date.now() - vu.t < 600000)))) chargerRole();   // un sorcier relit son niveau à chaque page : sa période peut avoir changé      // connexion reprise sans nouvel onglet : le niveau est relu
-      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); oublierRole(); role = ''; finAcces = ''; } dessiner(); if (st === 'connecte' || window.Cloud.statut() === 'a-jour') chargerRole(); });          // le niveau est relu dès que la connexion est prête, en même temps que le Drive
+      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); oublierRole(); if (window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); role = ''; finAcces = ''; } dessiner(); if (st === 'connecte' || window.Cloud.statut() === 'a-jour') chargerRole(); });          // le niveau est relu dès que la connexion est prête, en même temps que le Drive
       document.addEventListener('cdh-nom', dessiner);
       document.addEventListener('cdh-collection', dessiner);
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)

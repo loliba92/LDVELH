@@ -38,5 +38,19 @@ window.Relais = (function () {
     return pret.then(function () { return actif() ? appeler(toutes ? 'annonces_lire' : 'butin_lire', {}).then(function (r) { return r && r.ok ? r.annonces : null; }) : null; });
   }
 
-  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireAnnonces: lireAnnonces, pret: pret };
+  // Butin avec affichage immédiat : la dernière réponse gardée sur l'appareil (12 h au plus, niveaux 2 et 3 seulement) est donnée tout de suite à surCache,
+  // puis la réponse fraîche est renvoyée (et gardée). Effacée à la déconnexion et si la personne n'est plus de niveau 2 ou 3.
+  var CLE_BUTIN = 'cdh-butin-cache';
+  function butinGarde() { try { var o = JSON.parse(localStorage.getItem(CLE_BUTIN) || 'null'); return o && o.a && Date.now() - o.t < 12 * 3600000 ? o.a : null; } catch (e) { return null; } }
+  function oublierButin() { try { localStorage.removeItem(CLE_BUTIN); } catch (e) { /* rien à oublier */ } }
+  function lireButin(surCache) {
+    var role = window.Compte && window.Compte.role && window.Compte.role();
+    if (surCache && (role === 'admin' || role === 'superadmin')) { var c = butinGarde(); if (c) surCache(c); }
+    return lireAnnonces(false).then(function (a) {
+      if (a) { try { localStorage.setItem(CLE_BUTIN, JSON.stringify({ t: Date.now(), a: a })); } catch (e) { /* stockage plein ou indisponible */ } }
+      return a;
+    });
+  }
+
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireAnnonces: lireAnnonces, lireButin: lireButin, oublierButin: oublierButin, pret: pret };
 })();

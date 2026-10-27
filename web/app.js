@@ -640,7 +640,7 @@
     const avecNotes = !!window.Notes && window.Notes.disponible();      // colonne Note seulement quand les notes sont en service
     const lignes = vus.map((b) => `
       <tr class="cliquable" data-id="${esc(b.id)}">
-        <td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <td class="principal"><div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div class="l-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous" style="display:block">${esc(b.serie)}${esc(numero(b))}</span></div>${avecNotes ? window.Notes.etiquette(b.livre_id) : ''}</div></td>
         <td data-label="Édition"><span class="badge">${esc(b.version)}</span></td>
         <td data-label="Année">${b.annee ?? '—'}</td>
@@ -775,6 +775,7 @@
   // L'envoi lance le lot « Corriger des cotes » par le service technique : aucune clé n'est dans le navigateur.
   const estNiveau3 = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';   // seul le niveau 3 corrige (niveau donné par le service technique)
   const estNiveau2 = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());   // niveaux 2 et 3 : l'historique, pas les corrections
+  const niveau2Connu = () => !!window.Cloud && window.Cloud.lie() && !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());          // niveau connu, même si la connexion se refait : pour afficher ce qui est déjà gardé sur l'appareil
   // Dernière révision d'une fiche : validation la plus récente de l'un de ses états (aujourd'hui, hier ou la date)
   function derniereRevision(b) {
     const infos = ['convenable', 'bon', 'tres_bon'].map((k) => infoPrix(b, k)).filter((i) => i && i.valide && i.date).sort((x, y) => (x.date < y.date ? 1 : -1));
@@ -924,8 +925,10 @@
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
   let OFFRE = null, offreChargee = null;
-  const chargerOffre = () => offreChargee || (offreChargee = window.Relais.lireAnnonces(false).catch(() => null)
-    .then((a) => { OFFRE = a && a.offre ? a : null; return OFFRE; }));
+  // Le Butin gardé sur l'appareil s'affiche tout de suite (badges, bandeau, pépites), puis la réponse fraîche le remplace ; sans réponse fraîche (connexion pas prête), on réessaiera
+  const apresOffre = () => { majBadgePepites(); majAlerteButin(); if ($('#coll-corps')) afficherCollection(); };
+  const chargerOffre = () => offreChargee || (offreChargee = window.Relais.lireButin((cache) => { if (!OFFRE && cache && cache.offre) { OFFRE = cache; apresOffre(); } }).catch(() => null)
+    .then((a) => { if (a && a.offre) OFFRE = a; else offreChargee = null; return OFFRE; }));
   const blocOffre = () => '<section class="fiche-offre fiche-carte" id="fo-zone" aria-labelledby="fo-titre"><h3 id="fo-titre">Offre d\'occasion</h3><div id="fo-corps"><p class="sous">Chargement…</p></div></section>';
   function remplirOffre(b) {
     chargerOffre().then(() => {
@@ -1482,7 +1485,7 @@
       const v = valeurLigne(b, c);
       const nom = `${esc(b.titre)}, édition ${esc(b.version)}`;
       return `<li class="ex" data-ligne="${esc(b.id)}">
-        <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div class="ex-livre"><button type="button" class="retirer" data-retirer="${esc(b.id)}" title="Retirer de ma collection" aria-label="Retirer ${nom} de ma collection">×</button>${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="48" height="68" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div class="ex-titre"><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div>
           <div class="ex-droite"><span class="ex-valeur${v == null ? ' nul' : ''}" title="Valeur estimée">${v == null ? 'sans cote' : fmt(v)}</span></div></div>
         <div class="ex-regl">
@@ -1578,7 +1581,7 @@
   // Pépites des livres « à trouver » (niveaux 2 et 3) : annonces à 50 % du prix du site ou moins, lues dans le Butin servi par le service technique.
   // Une annonce de librairie, ou trouvée par l'ISBN avec l'état indiqué, est « solide » ; sinon « à vérifier ».
   const pepitesDe = (b) => {
-    if (!estNiveau2() || !OFFRE || !OFFRE.annonces || !b.isbn13) return [];
+    if (!niveau2Connu() || !OFFRE || !OFFRE.annonces || !b.isbn13) return [];
     const par = OFFRE.annonces[b.isbn13];
     if (!par) return [];
     const lignes = [];
@@ -1611,7 +1614,7 @@
     if (!b) { z.innerHTML = ''; return; }
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
     z.innerHTML = `<section class="carte pep-accueil" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
-      <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
+      <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
         <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
           <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
       <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
@@ -1622,9 +1625,9 @@
   function majBadgePepites() {
     const b = $('#nb-pep-bas');
     if (!b) return;
-    const n = estNiveau2() ? (OFFRE ? nbLivresAPepite() : 0) : (voitPepiteJour() && pepiteJour() ? 1 : 0);
+    const n = niveau2Connu() ? (OFFRE ? nbLivresAPepite() : 0) : (voitPepiteJour() && pepiteJour() ? 1 : 0);
     b.textContent = n ? String(n) : '';
-    b.setAttribute('aria-label', n ? (estNiveau2() ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : 'Une pépite du jour') : '');
+    b.setAttribute('aria-label', n ? (niveau2Connu() ? `${n} livre${n > 1 ? 's' : ''} à trouver avec une pépite` : 'Une pépite du jour') : '');
   }
   // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
   // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
@@ -1752,12 +1755,12 @@
   const CLE_BUTIN_VU = 'cdh-butin-vu';
   const butinVuLe = () => { try { return Number(localStorage.getItem(CLE_BUTIN_VU)) || Date.now() - 86400000; } catch (e) { return Date.now() - 86400000; } };
   const nbNouveauxButin = () => {
-    if (!estNiveau2() || !OFFRE || !OFFRE.premieres) return 0;
+    if (!niveau2Connu() || !OFFRE || !OFFRE.premieres) return 0;
     const depuis = butinVuLe();
     return Object.values(OFFRE.premieres).filter((t) => typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;
   };
   function majAlerteButin() {
-    const n = nbNouveauxButin(), niv2 = estNiveau2();
+    const n = nbNouveauxButin(), niv2 = niveau2Connu();
     nbButinNouveaux = n; majButin();
     const bb = $('#nb-butin-bas');          // pastille sur « Accueil » dans la barre du bas (téléphone) : nouveaux butins, sorciers et Zagor seulement
     if (bb) { bb.textContent = n ? String(n) : ''; bb.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
@@ -1773,7 +1776,7 @@
   function rafraichirPepites() {
     chargerPepiteJour();
     majBadgePepites();
-    if (!estNiveau2()) return;
+    if (!niveau2Connu()) return;
     chargerOffre().then(() => { majBadgePepites(); majAlerteButin(); if ($('#coll-corps')) afficherCollection(); });
   }
 
@@ -1784,7 +1787,7 @@
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
     return `<h3 id="titre-pepite-jour">Pépite du jour <span class="sous">· ${esc(quand)}</span></h3>
       <ul class="a-trouver"><li>
-        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         ${estNiveau3() ? '<button type="button" class="retirer" data-pepite-retirer>Retirer</button>' : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
@@ -1801,7 +1804,7 @@
     if (!lignes.length) return '';
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
-        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span><span class="pep-v${x.solide ? ' solide' : ''}">${x.solide ? 'Solide' : 'À vérifier'}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
@@ -1814,7 +1817,7 @@
     return `<h3 id="titre-a-vendre">À vendre <span class="sous">(${lignes.length})</span></h3>
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
-        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
+        <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
@@ -1834,7 +1837,7 @@
       .sort((x, y) => x.serie.localeCompare(y.serie, 'fr') || (parseInt(x.numero, 10) || 0) - (parseInt(y.numero, 10) || 0) || x.version_n - y.version_n);
     liste.innerHTML = trouves.slice(0, AJ_N).map((b) => {
       const poss = COLL[b.id];
-      return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
+      return `<li class="ca-ligne"><span class="ca-couv">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="44" height="62" loading="lazy" decoding="async">` : ''}</span>
         <span class="ca-texte"><strong>${esc(b.titre)}</strong><span class="sous">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span>${b.annee ? ` · ${b.annee}` : ''}</span></span>
         <span class="ca-etats" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</span></li>`;
@@ -2239,7 +2242,7 @@
           <p class="actions"><a class="bouton" href="collection.html#scanner">Scanner</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Pas à pas</button></p>`;
       } else {
         const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
-        const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
+        const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture_mini || b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
         const pct = Math.max(2, Math.round(100 * bl.lignes.length / (META.nb_versions || 1)));
         corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) + flecheValeur(bl) : 'prix à venir'}</b></p>
           <p class="texte petit">${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}</p></div></div>
@@ -2884,7 +2887,7 @@
         const modele = [...e.edit.values()].flat().filter((b) => b.couverture).sort((x, y) => x.version_n - y.version_n || numDe(x) - numDe(y))[0];
         const on = P.series.has(e.nom);
         return `<button type="button" class="tuile-serie" data-serie="${esc(e.nom)}" aria-pressed="${on}">
-          ${modele ? `<img src="${esc(racine(modele.couverture))}" alt="" width="44" height="62" loading="lazy" data-i="${esc(e.nom.charAt(0).toUpperCase())}">` : `<span class="jaq-vide" aria-hidden="true">${esc(e.nom.charAt(0).toUpperCase())}</span>`}
+          ${modele ? `<img src="${esc(racine(modele.couverture_mini || modele.couverture))}" alt="" width="44" height="62" loading="lazy" data-i="${esc(e.nom.charAt(0).toUpperCase())}">` : `<span class="jaq-vide" aria-hidden="true">${esc(e.nom.charAt(0).toUpperCase())}</span>`}
           <span><b>${esc(e.nom)}</b><small>${pl(e.livres.size, 'titre')} · ${[...e.edit.keys()].sort().join(', ')}</small></span></button>`;
       }).join('')}</div>`;
     majPiedSeries();
