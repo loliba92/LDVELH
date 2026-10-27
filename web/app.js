@@ -1563,7 +1563,7 @@
   // Carte de partage d'une pépite : une image 1080 × 1350 dessinée sur place (couverture, prix de l'annonce, cote), sans lien vers l'annonce.
   // Le texte et le lien partagés mènent à la page publique du livre ; l'image se partage telle quelle depuis un téléphone.
   const chargerImage = (src) => new Promise((ok) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
-  const MENTION_CARTE = ['Annonce à vérifier avant d\'acheter. La Cote du Héros ne vend rien,', 'ne prend ni marge ni commission · lacoteduheros.fr'];
+  const MENTION_CARTE = ['Annonce à vérifier avant d\'acheter.', 'La Cote du Héros ne prend ni marge ni commission · lacoteduheros.fr'];
   async function dessinerCarte(b, x) {
     const L = 1080, H = 1350, c = document.createElement('canvas');
     c.width = L; c.height = H;
@@ -1606,7 +1606,7 @@
     g.font = `600 40px ${ui}`; g.textAlign = 'left';
     const total = morceaux.reduce((t, [m]) => t + g.measureText(m).width, 0); let px = (L - total) / 2;
     morceaux.forEach(([m, col]) => { g.fillStyle = col; g.fillText(m, px, 1190); px += g.measureText(m).width; });
-    // mention : le guide ne vend rien et ne prend rien
+    // mention : le guide ne prend ni marge ni commission
     g.textAlign = 'center'; g.fillStyle = sourd; g.font = `400 26px ${ui}`;
     g.fillText(MENTION_CARTE[0], L / 2, 1240); g.fillText(MENTION_CARTE[1], L / 2, 1274);
     return new Promise((ok) => c.toBlob(ok, 'image/png'));
@@ -1642,7 +1642,7 @@
     const t = e.target.closest('[data-partager]'); if (!t) return;
     const b = livreDe(t.dataset.partager), x = b && pepitesDe(b)[0]; if (!x) return;
     const url = location.origin + location.pathname.replace(/[^/]*$/, '') + (b.isbn13 ? 'livre/' + b.isbn13 + '.html' : 'index.html#fiche=' + encodeURIComponent(b.id));
-    const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}. À vérifier avant d'acheter. La Cote du Héros ne vend rien et ne prend ni marge ni commission.`;
+    const texte = `Pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pub ? ' pour une cote de ' + fmt(x.pub) : ''}. À vérifier avant d'acheter. La Cote du Héros ne prend ni marge ni commission.`;
     const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
     CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de la carte…';
     d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = true; });

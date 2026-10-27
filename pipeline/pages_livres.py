@@ -109,7 +109,7 @@ def page_livre(b, freres, web, frag):
             for c, _, n in niveaux)
         prix_html = (f'<h2>Niveau de prix</h2><ul class="livre-niveaux" aria-label="Niveau de prix selon l\'état">{cases}</ul>'
                      f'<p class="sous">C : convenable, BE : bon état, TBE : très bon état. '
-                     + " · ".join(f"{e(s)} : {e(t)}" for s, t in LEGENDE) + '. Les prix exacts sont réservés aux comptes connectés. La Cote du Héros ne vend rien et ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>')
+                     + " · ".join(f"{e(s)} : {e(t)}" for s, t in LEGENDE) + '. Les prix exacts sont réservés aux comptes connectés. La Cote du Héros ne prend ni marge ni commission : le guide donne un repère, pas un prix de vente.</p>')
     else:
         prix_html = "<h2>Niveau de prix</h2><p>Cette édition n'a pas encore de prix : il manque des annonces récentes pour en établir un.</p>"
 
