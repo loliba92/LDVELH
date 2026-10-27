@@ -919,6 +919,30 @@
       <details class="rf-chiffres"><summary>Voir les relevés</summary><table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table></details>`;
   }
 
+  // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
+  let OFFRE = null, offreChargee = null;
+  const chargerOffre = () => offreChargee || (offreChargee = window.Relais.lireAnnonces(false).catch(() => null)
+    .then((a) => { OFFRE = a && a.offre ? a : null; return OFFRE; }));
+  const blocOffre = () => '<section class="fiche-offre" id="fo-zone" aria-labelledby="fo-titre"><h3 id="fo-titre">Offre d\'occasion</h3><div id="fo-corps"><p class="sous">Chargement…</p></div></section>';
+  function remplirOffre(b) {
+    chargerOffre().then(() => {
+      const zone = $('#fo-corps');
+      if (ficheOuverte !== b.id || !zone) return;
+      if (!OFFRE) { zone.innerHTML = '<p class="sous">Pas encore de relevé d\'annonces.</p>'; return; }
+      if (!b.isbn13) { zone.innerHTML = '<p class="sous">Pas de relevé pour une édition sans ISBN.</p>'; return; }
+      const o = OFFRE.offre[b.isbn13] || { ebay: 0, lbc: 0, lib: 0, age: null };
+      const n = o.ebay + o.lbc + o.lib, niv = n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : 3;
+      const neuf = b.en_vente === 1;
+      const nom = neuf && n === 0 ? 'Disponible neuf' : ['Introuvable', 'Rare', 'Courante', 'Abondante'][niv];
+      const barres = neuf && n === 0 ? 3 : niv;
+      const parties = [o.ebay && `${o.ebay} sur eBay`, o.lbc && `${o.lbc} sur Leboncoin`, o.lib && `${o.lib} en librairie (occasion)`].filter(Boolean);
+      const age = o.age == null ? '' : o.age >= 14 ? ` Les annonces eBay sont en ligne depuis ${Math.round(o.age / 7)} semaines en général.` : ` Les annonces eBay sont en ligne depuis ${o.age} jour${o.age > 1 ? 's' : ''} en général.`;
+      zone.innerHTML = `<p class="fo-ligne"><span class="fo-jauge" aria-hidden="true">${[1, 2, 3].map((i) => `<i${i <= barres ? ' class="on"' : ''}></i>`).join('')}</span><strong class="fo-niveau">${nom}</strong><span class="sous">${n ? `${n} annonce${n > 1 ? 's' : ''} : ${esc(parties.join(' · '))}` : 'aucune annonce en ligne'}</span></p>`
+        + (neuf && n > 0 ? '<p class="sous">Encore en vente neuve.</p>' : '')
+        + `<p class="sous fo-note">${esc(age.trim())} Compté au relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}. Plus il y a d'annonces, plus le livre est facile à trouver ; la vitesse de revente sera ajoutée avec le recul des relevés.</p>`;
+    });
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -958,6 +982,7 @@
           </div>
         </div>
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
+        ${estNiveau2() ? blocOffre() : ''}
         ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
@@ -980,6 +1005,7 @@
     brancherFicheCollection(b);
     brancherCorriger();
     if (estNiveau3Brut()) remplirAnnonces(b);
+    if (estNiveau2()) remplirOffre(b);
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));
