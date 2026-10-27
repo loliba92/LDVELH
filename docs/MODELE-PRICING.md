@@ -94,3 +94,9 @@ Pour un livre à faible liquidité, on utilise le bas de fourchette plutôt que 
 ## Mise en œuvre
 
 Le modèle est codé dans `pipeline/estimation.py` et appliqué par `pipeline/export_site.py`. Détails, sources et démarches : [PRIX-ACTUELS.md](PRIX-ACTUELS.md).
+
+## Disparition d'une annonce = vente probable : garde-fous (27 octobre 2026)
+Une annonce absente d'un relevé n'est pas forcément vendue : la recherche peut en avoir raté. La cote v2 (`pipeline/cote_v2.py`) ne compte une vente probable que si
+- l'annonce manque à **deux relevés de suite**, et
+- ces deux relevés sont **complets** : au moins 85 % des annonces du relevé précédent (`COUVERTURE_MINI`).
+L'observation est datée du deuxième relevé sans l'annonce (le jour où l'on en a la preuve). Test de sensibilité fait avant la règle : si le dernier relevé manquait 10 % des annonces au hasard, 11 % des cotes bougeaient de plus de 10 %.

@@ -3,7 +3,10 @@
 Événements, lus dans les relevés quotidiens data/raw/occasion/annonces-AAAA-MM-JJ.csv :
 - apparition d'une annonce (premier jour où elle est vue) : une observation « prix demandé » ;
 - changement de prix : une nouvelle observation « prix demandé » ;
-- disparition (vue la veille, plus le lendemain) : une observation « vente probable » au dernier prix.
+- disparition : une observation « vente probable » au dernier prix, seulement si l'annonce manque à DEUX relevés de suite et que ces
+  relevés sont complets (voir COUVERTURE_MINI). Une annonce absente une seule fois, ou absente d'un relevé incomplet (recherche qui
+  a raté des annonces), n'est pas comptée vendue : on ne sait pas. L'observation est datée du deuxième relevé sans l'annonce,
+  jour où l'on en a la preuve.
 Une annonce qui reste en ligne ne pèse pas une deuxième fois, quel que soit le nombre de relevés.
 Le prix du jour est le filtre de lissage de estimation.lisser, avec sa mémoire de la veille.
 """
@@ -14,6 +17,7 @@ from pathlib import Path
 import estimation
 
 DECOTE = 0.85   # décote des prix demandés (voir estimation.py)
+COUVERTURE_MINI = 0.85    # un relevé est complet s'il compte au moins 85 % des annonces du relevé précédent
 
 
 def charger_jours(dossier):
@@ -31,12 +35,23 @@ def charger_jours(dossier):
     return jours
 
 
+def releves_complets(jours):
+    """Ensemble des dates dont le relevé est complet : au moins COUVERTURE_MINI du nombre d'annonces du relevé précédent.
+    Le premier relevé n'a rien à qui se comparer : il est tenu pour complet."""
+    dates = sorted(jours)
+    complets = set()
+    for i, d in enumerate(dates):
+        if i == 0 or len(jours[d]) >= COUVERTURE_MINI * len(jours[dates[i - 1]]):
+            complets.add(d)
+    return complets
+
+
 def evenements(jours, isbn, etat):
     """Observations (Obs) d'une édition et d'un état, à partir des relevés. Une annonce est repérée par son lien."""
     dates = sorted(jours)
     if not dates:
         return []
-    dernier = dates[-1]
+    complets = releves_complets(jours)
     vues = {}                      # lien -> {date: prix}
     for d in dates:
         for r in jours[d]:
@@ -51,8 +66,9 @@ def evenements(jours, isbn, etat):
                 obs.append(estimation.Obs(par_jour[d], "prix_demande", d, 1))     # apparition ou changement de prix
             prec = par_jour[d]
         derniere_vue = jours_vus[-1]
-        if derniere_vue < dernier:                                                # disparue : probablement vendue
-            obs.append(estimation.Obs(par_jour[derniere_vue], "vente_probable", derniere_vue + timedelta(days=1), 1))
+        absents = [d for d in dates if d > derniere_vue]                          # relevés faits depuis, sans l'annonce
+        if len(absents) >= 2 and absents[0] in complets and absents[1] in complets:
+            obs.append(estimation.Obs(par_jour[derniere_vue], "vente_probable", absents[1], 1))     # absente deux fois de suite, relevés complets : probablement vendue
     return sorted(obs, key=lambda o: o.date)
 
 
