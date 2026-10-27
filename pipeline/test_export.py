@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre
+from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre, premieres_vues
 
 
 def e(prix):
@@ -125,6 +125,29 @@ class TestOffre(unittest.TestCase):
         o = calculer_offre(ann, {"111": [10, 30, 50]}, "2026-10-26", "2026-10-27")
         self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "lib": 1, "age": 30})
         self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
+
+
+
+class TestPremieresVues(unittest.TestCase):
+    def ann(self, *liens):
+        return {"978": {"bon": [[5.0, "t", l, o, "2026-10-27", 1] for l, o in liens]}}
+
+    def test_premier_passage_prend_la_date_sans_heure(self):
+        r = premieres_vues(self.ann(("https://a", "leboncoin")), None, "2026-10-27T15:30Z")
+        self.assertEqual(r, {"https://a": "2026-10-27"})
+
+    def test_annonce_connue_garde_sa_premiere_apparition(self):
+        r = premieres_vues(self.ann(("https://a", "leboncoin")), {"https://a": "2026-10-20T08:00Z"}, "2026-10-27T15:30Z")
+        self.assertEqual(r["https://a"], "2026-10-20T08:00Z")
+
+    def test_annonce_nouvelle_recoit_date_et_heure(self):
+        r = premieres_vues(self.ann(("https://a", "leboncoin"), ("https://b", "isbn")), {"https://a": "2026-10-27"}, "2026-10-27T15:30Z")
+        self.assertEqual(r["https://a"], "2026-10-27")
+        self.assertEqual(r["https://b"], "2026-10-27T15:30Z")
+
+    def test_librairie_sans_heure_et_annonce_disparue_oubliee(self):
+        r = premieres_vues(self.ann(("https://l", "librairie")), {"https://vieux": "2026-10-01T10:00Z"}, "2026-10-27T15:30Z")
+        self.assertEqual(r, {"https://l": "2026-10-27"})
 
 
 if __name__ == "__main__":

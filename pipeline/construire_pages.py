@@ -486,7 +486,7 @@ REVUE = '''<h1>Prix et corrections</h1>
         <option value="eco">Plus grosse économie</option>
         <option value="pct">Plus forte réduction</option>
         <option value="prix">Prix de l'annonce, croissant</option>
-        <option value="date">Vues le plus récemment</option>
+        <option value="date">Nouvelles annonces d'abord</option>
         <option value="titre">Titre, de A à Z</option>
       </select></label>
       <label class="case"><input type="checkbox" id="pp-trouver"><span>Mes « à trouver » seulement</span></label>

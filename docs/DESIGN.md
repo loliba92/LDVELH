@@ -193,3 +193,9 @@ Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`,
 - Les Héros connectés la voient aussi en tête de « À trouver » ; le badge de l'étoile du menu affiche 1. Elle reste valable aujourd'hui et jusqu'au lendemain (jour de Paris). Les sorciers voient déjà toutes les pépites ; le Zagor voit celle qu'il a offerte, avec « Retirer ».
 - La carte de partage (« Créer la carte à partager », sous la pépite du jour) est réservée au Zagor. L'image montre la couverture, le prix de l'annonce et « −N % sous la cote », jamais la cote. La fenêtre propose aussi le texte du post (court, modifiable, à copier) : la pépite, puis le lien vers le bloc « Pépite du jour » de l'accueil (`/#pepite-jour`), qui renvoie vers l'annonce, et l'invitation à se connecter. Le trafic passe ainsi par le site. Le Zagor publie lui-même sur Facebook ; le site ne publie rien à sa place.
 - Après toute modification de `relais/Code.gs` ou `relais/logique.gs`, le propriétaire redéploie le service technique à la main (première ligne : date et heure de version).
+
+## Butin : première apparition des annonces
+
+- `pipeline/export_site.py` mémorise la première apparition de chaque annonce (clé : son lien) dans `premieres`, dans `annonces.json` (toutes) et `butin.json` (celles du Butin). Une annonce déjà connue garde sa première apparition ; une annonce nouvelle reçoit la date et l'heure (UTC) de la génération. Au premier passage, les annonces déjà en ligne prennent leur date de dernière observation, sans heure : elles ne seront jamais « nouvelles ».
+- Le Butin trie « Nouvelles annonces d'abord » sur cette date (à égalité : plus forte réduction), affiche l'étiquette « Nouveau » pendant 24 heures et « repérée il y a … ».
+- Garde-fou : `pipeline/test_export.py` (`TestPremieresVues`).

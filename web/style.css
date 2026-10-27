@@ -2186,6 +2186,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 
 .pp-trouver { display: inline-block; padding: 0 8px; border: 1px solid var(--gold); border-radius: 999px; background: rgba(200, 160, 60, .18); color: var(--gold); font: 700 .72rem/1.5 var(--f-ui); white-space: nowrap; }
 .pp-carte .couv { position: relative; }
+.pp-nouveau { position: absolute; top: 6px; right: 6px; padding: 1px 9px; border-radius: 999px; background: #fff; color: #000; font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .05em; text-transform: uppercase; }
+.pp-reperee { color: var(--muted); }
 .pp-carte .pp-trouver { position: absolute; left: 4px; bottom: 34px; background: #1b1403; }
 .rc-ligne2 .rc-trouver { flex: none; }
 
