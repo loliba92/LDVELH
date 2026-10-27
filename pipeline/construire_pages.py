@@ -10,6 +10,8 @@ import json
 import re
 from pathlib import Path
 
+import pages_livres
+
 WEB = Path(__file__).resolve().parent.parent / "web"
 _MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 _AUJ = __import__("datetime").date.today()
@@ -125,6 +127,7 @@ BANDEAU = '<aside aria-label="Avis sur le site"><p class="bandeau-chantier"><str
 
 PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
       <a href="le-projet.html">Le projet</a>
+      <a href="livre/">Tous les livres</a>
       <a href="confidentialite.html">Confidentialité</a>
       <a href="mentions-legales.html">Mentions légales</a>
       <a href="contact.html">Contact</a>
@@ -918,6 +921,9 @@ def main():
                        ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute())):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
+    n = pages_livres.ecrire(WEB, {"bandeau": BANDEAU, "entete": entete("livre"), "pied": PIED_LIENS, "barre": barre("livre"),
+                                  "feuille": feuille("livre"), "variante": variante})
+    print("écrit :", n, "pages de livres, livre/index.html, sitemap.xml et robots.txt")
 
 
 if __name__ == "__main__":

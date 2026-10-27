@@ -176,3 +176,12 @@ Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`,
 ## Accueil : bloc « Ma collection » et frais de port d'un lot
 - L'accueil affiche, sous la recherche, un bloc **Ma collection** : « vide pour l'instant » ou nombre de titres et d'exemplaires, valeur estimée et somme investie, avec le bouton « Voir ma collection » (vers `collection.html`) et « Constituer / Compléter pas à pas ».
 - **Frais de port d'un lot** : ils sont comptés dans le prix payé. On saisit le prix total payé, livraison comprise ; il est réparti en entier sur les livres du lot (un lot de 20 € dont 5 € de port donne 20 € répartis et 20 € investis). Il n'y a pas de champ séparé pour le port. Une version intermédiaire gardait le port à part (champ `port`) : à la lecture, ce port est ajouté au prix du livre.
+
+## Pages publiques des livres (référencement)
+
+- Une page par édition (`web/livre/<isbn13>.html`), une page « Tous les livres » (`web/livre/index.html`), `web/sitemap.xml` et `web/robots.txt`.
+- Source unique : `web/data/versions.json`, la même liste que la fiche du guide. Tout est généré par `pipeline/pages_livres.py`, appelé par `pipeline/construire_pages.py` (donc après chaque export des données). On ne modifie jamais ces fichiers à la main : un livre créé, modifié ou supprimé dans les données crée, met à jour ou supprime sa page.
+- Les prix exacts restent réservés aux comptes connectés : la page ne montre que le niveau de prix (€ à €€€€€, mêmes seuils que `SEUILS_COTE` dans `web/app.js`). Aucune annonce, aucune pépite.
+- Les chaînes qui publient le site (`.github/workflows/*.yml`) envoient `web/livre`, `web/sitemap.xml` et `web/robots.txt` avec le reste. Un nouvel atelier qui régénère les pages doit faire de même.
+- Garde-fou : `pipeline/test_pages_livres.py` (une page par édition, aucune en trop, contenu conforme au générateur, aucun prix exact).
+- Les 5 titres sans ISBN (L'Œil Noir, identifiants `LOCAL-…`) n'ont pas de page.

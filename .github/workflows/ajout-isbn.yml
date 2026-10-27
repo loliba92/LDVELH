@@ -74,7 +74,7 @@ jobs:
           AVANT="$(git rev-parse HEAD)"
           # Si main a avancé pendant le lot, on repart de sa dernière version et on rejoue l'ajout (voir .github/scripts/publier.sh)
           REJOUER='printf "%s\n" "$LISTE" > liste-isbn.txt; python pipeline/importer_isbn.py liste-isbn.txt; rm liste-isbn.txt; python scrapers/jaquettes_librairie.py || true; python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Livres ajoutés par liste d'ISBN du $(date +%F)${AUTEUR:+ par $AUTEUR}" data/processed/editions.csv web/covers web/data data/processed/annonces.json data/processed/butin.json web/revue-prix.html web/evolutions.html
+            .github/scripts/publier.sh "Livres ajoutés par liste d'ISBN du $(date +%F)${AUTEUR:+ par $AUTEUR}" data/processed/editions.csv web/covers web/data data/processed/annonces.json data/processed/butin.json web/revue-prix.html web/evolutions.html web/livre web/sitemap.xml web/robots.txt
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
           if [ "$RELEVE" != "non" ]; then gh workflow run prix-ebay.yml; fi

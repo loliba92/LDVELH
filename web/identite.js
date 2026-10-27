@@ -4,11 +4,12 @@
    Le nom lu ici dans le jeton ne sert qu'à l'affichage. Tant que web/data/admin-config.json n'a pas de « client_id »,
    rien n'est demandé. */
 window.Identite = (function () {
+  var BASE = (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^\/]*$/, '') : '';   // les pages du dossier livre/ chargent les scripts de la racine
   var CLE = 'cdh-google';
   var chargement = null, CFG = null;
 
   function config() {
-    if (!chargement) chargement = fetch('data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (c) { CFG = c; return c; });
+    if (!chargement) chargement = fetch(BASE + 'data/admin-config.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (c) { CFG = c; return c; });
     return chargement;
   }
   function decoder(jwt) {
