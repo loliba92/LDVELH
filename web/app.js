@@ -1648,12 +1648,13 @@
   let CARTE = null, urlCarte = '';
   const SITE_PUBLIC = 'https://lacoteduheros.fr';
   // Texte du post Facebook, prêt à coller : la pépite, le lien de l'annonce, puis l'invitation à se connecter (modifiable avant de copier)
+  const ETAT_MOTS = { C: 'état convenable', BE: 'bon état', TBE: 'très bon état' };
   const textePost = (b, p) => [
-    `Pépite du jour : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), à ${fmt(p.prix)}${p.pct != null ? ', soit ' + p.pct + ' % sous la cote' : ''}.`,
-    `Voir l'annonce : ${p.lien}`,
-    'Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.',
+    `Je vous ai déniché une pépite : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), en ${ETAT_MOTS[p.etat] || 'bon état'}, à ${fmt(p.prix)}.${p.pct != null ? ` C'est ${p.pct} % sous la cote.` : ''}`,
+    `L'annonce : ${p.lien}`,
+    'Elle peut déjà être vendue : pensez à vérifier avant d\'acheter.',
     '',
-    `Connectez-vous sur La Cote du Héros pour suivre votre collection et, bientôt, être au courant des dernières pépites : ${SITE_PUBLIC}`,
+    `Pour suivre votre collection et, bientôt, être au courant des dernières pépites, connectez-vous sur La Cote du Héros : ${SITE_PUBLIC}`,
     'La Cote du Héros ne prend ni marge ni commission.',
   ].join('\n');
   function boiteCarte() {
