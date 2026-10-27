@@ -8,7 +8,8 @@
     },
     "sha256:c5b16ff256e587ebbfee4417c9cf258c54c8d82f00f0490c9d46698d9e1ed54f": {
       "nom": "Bertrand Chalaye",
-      "role": "admin"
+      "role": "admin",
+      "fin": "2026-10-28"
     }
   },
   "bloques": []
