@@ -983,6 +983,7 @@
         </div>
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${estNiveau2() ? blocOffre() : ''}
+        ${estNiveau3Brut() ? blocAnnonces(b) : ''}
         ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
@@ -998,7 +999,7 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
-        ${estNiveau3Brut() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}${blocAnnonces(b)}</section>` : ''}
+        ${estNiveau3Brut() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}</section>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
