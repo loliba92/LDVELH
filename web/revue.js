@@ -606,6 +606,8 @@
 
   // Onglet « Butin » : annonces encore en ligne à 50 % du prix du site ou moins (même édition, même état), réservé au niveau 3 comme les annonces.
   // « Solide » : exemplaire de librairie, ou trouvée par l'ISBN avec l'état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
+  // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
+  const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   let dessinerPepites = () => {};
   function pepites() {
@@ -637,6 +639,7 @@
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
       `<span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>` +
+      (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></span>` +
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
@@ -645,7 +648,7 @@
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a></article>`;
   }
   function initPepites() {
-    const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri');
+    const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri'), trouver = $('#pp-trouver');
     if (!liste) return;
     try { const m = localStorage.getItem('cdh-butin-tri'); if (m && [...tri.options].some((o) => o.value === m)) tri.value = m; } catch (e) { /* sans stockage : tri par défaut */ }
     // Les listes arrivent classées « solides d'abord, puis économie » ; les autres choix reclassent toute la liste (à égalité : l'économie la plus grande d'abord)
@@ -659,11 +662,12 @@
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
     dessinerPepites = () => {
       if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
-      const toutes = pepites(), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
+      const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     solides.addEventListener('change', dessinerPepites);
+    trouver.addEventListener('change', dessinerPepites);
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estNiveau2()) chargerButin().then(dessinerPepites); });
     dessinerPepites();
   }
@@ -672,14 +676,14 @@
   // Onglet « Annonces reçues » (niveau 3 seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
   let dessinerRecues = () => {};
   function initRecues() {
-    const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict');
+    const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver');
     if (!liste) return;
     let limite = 60;
     const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'librairie' ? 'librairie' : 'ebay');
     const NOM = { ebay: 'eBay', leboncoin: 'Leboncoin', librairie: 'Librairie' };
     // Position du prix de l'annonce par rapport au prix actuel du site (même état) : mêmes mots que le bot Leboncoin.
     // Pépite : la moitié du prix du site ou moins (règle du Butin) ; dans les prix : à 10 % près ; très cher : plus de 1,5 fois le prix du site.
-    const VERDICTS = { pepite: ['Pépite', 'rc-v-pepite'], dessous: ['En dessous', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Au-dessus', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
+    const VERDICTS = { pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
     const verdictDe = (prix, pub) => {
       if (pub == null) return null;
       if (prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI) return 'pepite';
@@ -698,28 +702,29 @@
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
       const dateRef = (o) => (o === 'leboncoin' ? ANN.date_lbc : ANN.date_ebay);
-      const toutes = [];
+      const toutes = [], sw = souhaits();
       Object.keys(ANN.annonces).forEach((isbn) => {
         const ed = parIsbn.get(isbn); if (!ed) return;
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin });
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin });
         }));
       });
-      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value) && !(enligne.checked && a.partie))
+      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
         .sort((a, b) => (b.vue || '').localeCompare(a.vue || '') || a.prix - b.prix);
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${comparaison(a.prix, a.pub, a.v)}<span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${a.vue ? ' · ' + jourCourt(a.vue) : ''}${a.partie ? ' · non revue' : ''}</span></span>
+        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}<span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${a.vue ? ' · ' + jourCourt(a.vue) : ''}${a.partie ? ' · non revue' : ''}</span></span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
+    trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
   }
