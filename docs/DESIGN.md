@@ -199,3 +199,9 @@ Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`,
 - `pipeline/export_site.py` mémorise la première apparition de chaque annonce (clé : son lien) dans `premieres`, dans `annonces.json` (toutes) et `butin.json` (celles du Butin). Une annonce déjà connue garde sa première apparition ; une annonce nouvelle reçoit la date et l'heure (UTC) de la génération. Au premier passage, les annonces déjà en ligne prennent leur date de dernière observation, sans heure : elles ne seront jamais « nouvelles ».
 - Le Butin trie « Nouvelles annonces d'abord » sur cette date (à égalité : plus forte réduction), affiche l'étiquette « Nouveau » pendant 24 heures et « repérée il y a … ».
 - Garde-fou : `pipeline/test_export.py` (`TestPremieresVues`).
+
+## Nouveaux butins (sorciers et Zagor)
+
+- Une annonce du Butin est « nouvelle » si sa première apparition (`premieres`, voir plus haut) est postérieure à la dernière ouverture de la page Butin sur cet appareil (clé `cdh-butin-vu`, 24 h au premier passage).
+- Le nombre est dit sur l'accueil (bandeau « N nouvelles annonces au Butin », qui remplace le petit bouton « Butin » de la carte) et dans le menu du haut (entrée « Butin » avec pastille). Les deux mènent au Butin trié « Nouvelles annonces d'abord » (`butin.html?tri=date`). Ouvrir le Butin remet le compte à zéro.
+- Les Héros et les visiteurs ne voient rien de cela.

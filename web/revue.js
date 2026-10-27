@@ -662,6 +662,8 @@
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri'), trouver = $('#pp-trouver');
     if (!liste) return;
     try { const m = localStorage.getItem('cdh-butin-tri'); if (m && [...tri.options].some((o) => o.value === m)) tri.value = m; } catch (e) { /* sans stockage : tri par défaut */ }
+    const triUrl = new URLSearchParams(location.search).get('tri');
+    if (triUrl && [...tri.options].some((o) => o.value === triUrl)) tri.value = triUrl;          // arrivée par « nouvelles annonces au Butin »
     // Les listes arrivent classées « solides d'abord, puis économie » ; les autres choix reclassent toute la liste (à égalité : l'économie la plus grande d'abord)
     const ordonner = (l, cle) => {
       if (cle === 'solides') return l;
@@ -675,6 +677,7 @@
       if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
+      try { localStorage.setItem('cdh-butin-vu', String(Date.now())); } catch (e) { /* tant pis */ }          // les nouveautés comptées sur l'accueil repartent de zéro
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
@@ -690,7 +693,7 @@
     });
     solides.addEventListener('change', dessinerPepites);
     trouver.addEventListener('change', dessinerPepites);
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estNiveau2()) chargerButin().then(dessinerPepites); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'pepites' && estNiveau2()) chargerButin().then(() => dessinerPepites()); });
     dessinerPepites();
   }
 
@@ -800,7 +803,7 @@
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
-    if (niveau2) chargerButin().then(dessinerPepites);
+    if (niveau2) chargerButin().then(() => dessinerPepites());
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
   }
