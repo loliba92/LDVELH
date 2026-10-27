@@ -743,7 +743,7 @@
   const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
+    return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
   }
   function remplirAnnonces(b) {
@@ -754,7 +754,8 @@
       const par = ANN && b.isbn13 ? ANN.annonces[b.isbn13] : null;
       const nb = par ? ETATS.reduce((n, e) => n + ((par[e.k] || []).length), 0) : 0;
       const resume = $('#annonces-fiche summary');
-      if (resume && nb) resume.firstChild.textContent = `Annonces retenues (${nb}) `;
+      const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
+      if (resume && nb) resume.firstChild.textContent = `Annonces retenues : ${nb - nbParties} en ligne${nbParties ? `, ${nbParties} retirée${nbParties > 1 ? 's' : ''} ou vendue${nbParties > 1 ? 's' : ''}` : ''} `;
       if (!nb) { zone.innerHTML = `<p class="sous">${ANN ? 'Aucune annonce retenue pour cette édition.' : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       zone.innerHTML = ETATS.map((e) => {
         const l = par[e.k];
@@ -762,9 +763,9 @@
         const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
         const partie = ([, , , , vue]) => !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
         const nbPartie = l.filter(partie).length;
-        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} non revue${nbPartie > 1 ? 's' : ''} au dernier relevé)` : ''}${disp}</h4><ul>${l.map((a) => {
+        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} retirée${nbPartie > 1 ? 's' : ''} ou vendue${nbPartie > 1 ? 's' : ''})` : ''}${disp}</h4><ul>${l.map((a) => {
           const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">non revue au dernier relevé · vue le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce sur eBay (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">retirée ou vendue · vue le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
       }).join('') + `<p class="sous">Dernier relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. Prix demandés, pas des prix payés. Ouvrez une annonce pour vérifier le livre et son état.</p>`;
     });
   }
@@ -891,39 +892,41 @@
   // Évolution du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3)
   function blocEvolution(b, etat) {
     const titre = '<h3>Évolution du prix</h3>';
-    if (!HIST || !HIST.dates || HIST.dates.length < 2) return `${titre}<p class="sous">L'évolution se construit avec les relevés : revenez dans quelques jours.</p>`;
+    const carte = (corps) => `<section class="fiche-carte fiche-evolution">${titre}${corps}</section>`;
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return carte('<p class="sous">L\'évolution se construit avec les relevés : revenez dans quelques jours.</p>');
     const a = HIST.cotes[`${b.id}|${etat}`] || [];
     const points = HIST.dates.map((d, i) => ({ d, v: a[i] })).filter((p) => p.v != null && p.v > 0);
-    if (points.length < 2) return `${titre}<p class="sous">Pas encore assez de relevés pour cet état.</p>`;
+    if (points.length < 2) return carte('<p class="sous">Pas encore assez de relevés pour cet état.</p>');
     const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    const eur = (v) => `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €`;     // sans arrondi à l'euro : les prix bas varient de quelques centimes
     const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
-    const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? `en hausse de ${(pct * 100).toFixed(1).replace('.', ',')} %` : `en baisse de ${(-pct * 100).toFixed(1).replace('.', ',')} %`;
+    const pctTxt = `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')} %`;
+    const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? 'hausse' : 'baisse';
     const lignes = points.slice(-10).map((p) => `<tr><th scope="row">${jour(p.d)}</th><td class="num">${fmtE(p.v)}</td></tr>`).join('');
     // Courbe des relevés : l'axe ne part pas de zéro, pour que les variations se voient ; dates réparties selon le temps réel
-    const W = 640, H = 230, gx = 14, gh = 34, gb = 38;
+    const W = 640, H = 250, gl = 92, gr = 26, gh = 22, gb = 46;
     const t = (d) => new Date(d + 'T12:00:00').getTime(), t0 = t(points[0].d), dt = (t(points[points.length - 1].d) - t0) || 1;
-    const vals = points.map((q) => q.v), vmin = Math.min(...vals), vmax = Math.max(...vals), marge = ((vmax - vmin) || vmax * 0.1) * 0.25;
+    const vals = points.map((q) => q.v), vmin = Math.min(...vals), vmax = Math.max(...vals), marge = ((vmax - vmin) || vmax * 0.1) * 0.2;
     const lo = vmin - marge, hi = vmax + marge;
-    const X = (d) => gx + 70 + ((t(d) - t0) / dt) * (W - 2 * gx - 140), Y = (v) => gh + ((hi - v) / (hi - lo)) * (H - gh - gb);
+    const X = (d) => gl + ((t(d) - t0) / dt) * (W - gl - gr), Y = (v) => gh + ((hi - v) / (hi - lo)) * (H - gh - gb);
     const trace = points.map((q, i) => `${i ? 'L' : 'M'}${X(q.d).toFixed(1)},${Y(q.v).toFixed(1)}`).join(' ');
+    const aire = `${trace} L${X(fin.d).toFixed(1)},${H - gb} L${X(debut.d).toFixed(1)},${H - gb} Z`;
     const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
-    const pts = points.map((q) => `<circle cx="${X(q.d).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="5" class="ev-point"><title>${jour(q.d)} : ${esc(fmtE(q.v))}</title></circle>`).join('');
-    const etiq = (q, ancre) => `<text x="${X(q.d).toFixed(1)}" y="${(Y(q.v) - 12).toFixed(1)}" text-anchor="${ancre}" class="ev-valeur">${esc(fmtE(q.v))}</text>`;
-    const haut = points.reduce((m, q) => (q.v > m.v ? q : m), points[0]), bas = points.reduce((m, q) => (q.v < m.v ? q : m), points[0]);
-    const extremes = [haut, bas].filter((q) => q !== debut && q !== fin && vmax !== vmin).map((q) => etiq(q, 'middle')).join('');
+    const pts = points.map((q) => `<circle cx="${X(q.d).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="${q === fin ? 8 : 4.5}" class="ev-point${q === fin ? ' ev-fin' : ''}"><title>${jour(q.d)} : ${esc(fmtE(q.v))}</title></circle>`).join('');
+    const reperes = (vmax === vmin ? [vmax] : [vmax, vmin]).map((v) => `<line x1="${gl}" x2="${W - gr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="ev-grille"/><text x="${gl - 12}" y="${(Y(v) + 7).toFixed(1)}" text-anchor="end" class="ev-axe">${esc(eur(v))}</text>`).join('');
     const graphe = `<figure class="ev-graph ${couleur}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe du prix de ${esc(fmtE(debut.v))} le ${jour(debut.d)} à ${esc(fmtE(fin.v))} le ${jour(fin.d)}">
-        <path d="${trace}" class="ev-ligne" fill="none"/>${pts}${etiq(debut, 'start')}${etiq(fin, 'end')}${extremes}
-        <text x="${X(debut.d).toFixed(1)}" y="${H - 10}" text-anchor="start" class="ev-date">${jour(debut.d)}</text>
-        <text x="${X(fin.d).toFixed(1)}" y="${H - 10}" text-anchor="end" class="ev-date">${jour(fin.d)}</text></svg></figure>`;
-    return `${titre}<p class="sous">De ${fmtE(debut.v)} le ${jour(debut.d)} à ${fmtE(fin.v)} le ${jour(fin.d)} : ${sens}.</p>${graphe}
-      <details class="rf-chiffres"><summary>Voir les relevés</summary><table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table></details>`;
+        ${reperes}<path d="${aire}" class="ev-aire"/><path d="${trace}" class="ev-ligne" fill="none"/>${pts}
+        <text x="${X(debut.d).toFixed(1)}" y="${H - 12}" text-anchor="start" class="ev-date">${jour(debut.d)}</text>
+        <text x="${X(fin.d).toFixed(1)}" y="${H - 12}" text-anchor="end" class="ev-date">${jour(fin.d)}</text></svg></figure>`;
+    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span></p>${graphe}
+      <details class="rf-chiffres"><summary>Voir les relevés</summary><table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table></details>`);
   }
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
   let OFFRE = null, offreChargee = null;
   const chargerOffre = () => offreChargee || (offreChargee = window.Relais.lireAnnonces(false).catch(() => null)
     .then((a) => { OFFRE = a && a.offre ? a : null; return OFFRE; }));
-  const blocOffre = () => '<section class="fiche-offre" id="fo-zone" aria-labelledby="fo-titre"><h3 id="fo-titre">Offre d\'occasion</h3><div id="fo-corps"><p class="sous">Chargement…</p></div></section>';
+  const blocOffre = () => '<section class="fiche-offre fiche-carte" id="fo-zone" aria-labelledby="fo-titre"><h3 id="fo-titre">Offre d\'occasion</h3><div id="fo-corps"><p class="sous">Chargement…</p></div></section>';
   function remplirOffre(b) {
     chargerOffre().then(() => {
       const zone = $('#fo-corps');
