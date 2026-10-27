@@ -50,7 +50,7 @@ def etat_de(item):
     if code in CODES_NON_PRECISES:
         return ETAT_SUPPOSE, True
     return None, False
-LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes)\b", re.I)
+LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes|au choix|a choisir|à choisir|votre choix|au choix parmi|plusieurs titres)\b", re.I)    # « au choix » : une annonce unique pour plusieurs livres, le prix ne dit rien d'un titre précis
 CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 
 
@@ -219,6 +219,13 @@ def parle_de_la_collection(titre_annonce, ed):
     return False
 
 
+def titre_ambigu(titre, ed):
+    """Vrai quand le titre du livre n'est que le nom (ou une partie du nom) de sa série : « Les Terres de Légende » dans la série
+    « Les Terres de Légende ». Une annonce qui porte ce titre peut concerner n'importe quel tome de la série."""
+    t, serie = _norm(titre), _norm((ed or {}).get("serie"))
+    return len(t) >= 4 and f" {t} " in f" {serie} "
+
+
 def frais_port(item):
     """Frais de port annoncés (en euros), le moins cher des modes de livraison proposés ; None si l'annonce n'en indique pas."""
     couts = []
@@ -241,6 +248,8 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
             continue
         if it.get("_titre_seul") and not parle_de_la_collection(it.get("title", ""), ed):
             continue
+        if it.get("_titre_seul") and titre_ambigu(titre, ed):
+            continue                       # titre = nom de la série : l'annonce peut parler de n'importe quel tome ; seul l'ISBN tranche
         if not annee_compatible(it.get("title", ""), annees):
             continue
         age = age_jours(it, jour)

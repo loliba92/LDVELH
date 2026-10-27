@@ -257,6 +257,22 @@ class TestFraisPort(unittest.TestCase):
         it = dict(item(10, "3000"), shippingOptions=[{"shippingCost": {"value": "6.90", "currency": "EUR"}}, {"shippingCost": {"value": "3.50", "currency": "EUR"}}])
         self.assertEqual(ebay_api.frais_port(it), 3.5)
 
+    def test_annonce_au_choix_ecartee(self):
+        a = item(60, "3000", titre="Livre Dont Vous Êtes Le Héros - Les Terres De Légende - Folio Junior - AU CHOIX")
+        self.assertEqual(ebay_api.retenues([a], date(2026, 10, 26), titre="Les Terres de Légende", ed={"serie": "Les Terres de Légende"}), [])
+
+    def test_titre_egal_a_la_serie_ne_se_rattache_pas_par_le_titre_seul(self):
+        ed = {"serie": "Les Terres de Légende", "titre": "Les Terres de Légende"}
+        a = dict(item(30, "3000", titre="Les Terres de Légende - Livre dont vous êtes le héros"), _titre_seul=True)
+        self.assertEqual(ebay_api.retenues([a], date(2026, 10, 26), titre="Les Terres de Légende", ed=ed), [])
+        # trouvée par l'ISBN : gardée
+        b = item(30, "3000", titre="Les Terres de Légende - Livre dont vous êtes le héros")
+        self.assertEqual(len(ebay_api.retenues([b], date(2026, 10, 26), titre="Les Terres de Légende", ed=ed)), 1)
+        # un titre propre (différent de la série) reste trouvable par le titre
+        ed2 = {"serie": "Défis Fantastiques", "titre": "Le Sorcier de la montagne de feu"}
+        c = dict(item(30, "3000", titre="Le Sorcier de la montagne de feu - Défis Fantastiques"), _titre_seul=True)
+        self.assertEqual(len(ebay_api.retenues([c], date(2026, 10, 26), titre="Le Sorcier de la montagne de feu", ed=ed2)), 1)
+
     def test_retenues_donne_le_prix_port_inclus(self):
         jour = date(2026, 10, 26)
         sortie = ebay_api.retenues([avec_port(10, 4.5)], jour)

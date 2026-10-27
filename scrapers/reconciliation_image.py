@@ -192,21 +192,36 @@ def reconcilier(par_isbn, livres, dossier_covers, http=requests):
 
 
 def verifier_photos(par_isbn, dossier_covers, http=requests):
-    """Chaque annonce retenue doit avoir une photo qui montre la jaquette de l'édition à laquelle elle est rattachée,
-    quel que soit le nombre d'annonces de l'édition. Sans photo lisible, ou sans jaquette de notre côté, elle est écartée."""
+    """Une annonce trouvée par le seul titre doit avoir une photo qui montre la jaquette de l'édition à laquelle elle est
+    rattachée ; sans photo lisible, ou sans jaquette de notre côté, elle est écartée.
+    Une annonce trouvée par l'ISBN est gardée : l'ISBN désigne l'édition, et une photo de vendeur (livre de travers, sur une table,
+    en lot de photos) donne souvent trop peu de points communs avec la jaquette pour conclure. Le 26 octobre, écarter sur ce seul motif
+    a fait disparaître une trentaine d'annonces bien en ligne. Le rattachement d'une annonce vue sous plusieurs éditions reste décidé
+    par la photo (voir `reconcilier`).
+    Le journal garde le décompte et le lien des annonces écartées, pour pouvoir les vérifier une à une."""
     if not DISPONIBLE:
         return par_isbn
+    bilan = {"gardées par l'ISBN": 0, "titre : photo confirmée": 0, "sans jaquette": 0, "photo illisible": 0, "autre livre": 0}
+    ecartees = []
     for isbn, items in par_isbn.items():
         jaquette = jaquette_locale(dossier_covers, isbn)
         gardees = []
         for it in items:
+            if not it.get("_titre_seul"):
+                gardees.append(it); bilan["gardées par l'ISBN"] += 1; continue
+            lien = it.get("itemWebUrl") or it.get("itemId") or "?"
             if jaquette is None:
-                continue
+                bilan["sans jaquette"] += 1; ecartees.append((isbn, "sans jaquette", lien)); continue
             octets = empreinte_annonce(it, http)
             if octets is None:
-                continue
+                bilan["photo illisible"] += 1; ecartees.append((isbn, "photo illisible", lien)); continue
             retenu, _ = decider(octets, {isbn: jaquette})
             if retenu == isbn:
-                gardees.append(it)
+                gardees.append(it); bilan["titre : photo confirmée"] += 1
+            else:
+                bilan["autre livre"] += 1; ecartees.append((isbn, "photo d'un autre livre", lien))
         par_isbn[isbn] = gardees
+    print("Photos : " + ", ".join(f"{k} {v}" for k, v in bilan.items()))
+    for isbn, raison, lien in ecartees[:60]:
+        print(f"  photo écartée ({raison}) : {isbn} {lien}")
     return par_isbn
