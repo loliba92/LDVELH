@@ -1634,33 +1634,49 @@
     g.fillStyle = or; g.beginPath(); g.roundRect((L - mw) / 2, my, mw, 68, 34); g.fill();
     g.fillStyle = '#000'; g.fillText(mot, L / 2, my + 48);
     // appel et mention
-    g.fillStyle = or; g.font = `600 32px ${ui}`; g.fillText('Voir l\'annonce sur lacoteduheros.fr', L / 2, 1240);
+    g.fillStyle = or; g.font = `600 32px ${ui}`; g.fillText('Votre collection, sa cote : lacoteduheros.fr', L / 2, 1240);
     g.fillStyle = sourd; g.font = `400 25px ${ui}`;
     g.fillText(MENTION_CARTE[0], L / 2, 1272); g.fillText(MENTION_CARTE[1], L / 2, 1298);
     return new Promise((ok) => c.toBlob(ok, 'image/png'));
   }
   let CARTE = null, urlCarte = '';
+  const SITE_PUBLIC = 'https://lacoteduheros.fr';
+  // Texte du post Facebook, prêt à coller : la pépite, le lien de l'annonce, puis l'invitation à se connecter (modifiable avant de copier)
+  const textePost = (b, p) => [
+    `Pépite du jour : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), à ${fmt(p.prix)}${p.pct != null ? ', soit ' + p.pct + ' % sous la cote' : ''}.`,
+    `Voir l'annonce : ${p.lien}`,
+    'Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.',
+    '',
+    `Connectez-vous sur La Cote du Héros pour suivre votre collection et, bientôt, être au courant des dernières pépites : ${SITE_PUBLIC}`,
+    'La Cote du Héros ne prend ni marge ni commission.',
+  ].join('\n');
   function boiteCarte() {
     let d = $('#carte-partage');
     if (d) return d;
     d = document.createElement('dialog');
     d.id = 'carte-partage'; d.className = 'carte-dialog'; d.setAttribute('aria-labelledby', 'carte-titre');
-    d.innerHTML = `<div class="carte-cadre"><div class="scan-tete"><p class="surtitre" id="carte-titre">Carte de partage</p><button type="button" class="bouton bouton-clair" data-carte-fermer>Fermer</button></div>
-      <img class="carte-img" alt="Carte de la pépite, prête à partager" width="540" height="675">
+    d.innerHTML = `<div class="carte-cadre"><div class="scan-tete"><p class="surtitre" id="carte-titre">Post à publier</p><button type="button" class="bouton bouton-clair" data-carte-fermer>Fermer</button></div>
+      <img class="carte-img" alt="Image de la pépite, prête à publier" width="540" height="675">
+      <label class="sous" for="carte-texte">Texte du post (modifiable)</label>
+      <textarea id="carte-texte" rows="8" spellcheck="true"></textarea>
       <p class="sous" id="carte-msg" role="status" aria-live="polite"></p>
-      <div class="carte-actions"><button type="button" class="bouton" data-carte-partager disabled>Partager</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button></div></div>`;
+      <div class="carte-actions"><button type="button" class="bouton" data-carte-copier disabled>Copier le texte</button><button type="button" class="bouton bouton-clair" data-carte-enregistrer disabled>Enregistrer l'image</button>${navigator.share ? '<button type="button" class="bouton bouton-clair" data-carte-partager disabled>Partager…</button>' : ''}</div></div>`;
     document.body.appendChild(d);
     d.addEventListener('click', (e) => {
       if (e.target === d || e.target.closest('[data-carte-fermer]')) { d.close(); return; }
       if (!CARTE) return;
+      const msg = $('#carte-msg'), texte = () => $('#carte-texte').value;
       if (e.target.closest('[data-carte-enregistrer]')) {
         const a = document.createElement('a'); a.href = urlCarte; a.download = CARTE.nom; document.body.appendChild(a); a.click(); a.remove();
-        $('#carte-msg').textContent = 'Image enregistrée. Ajoutez-la à votre publication.';
+        msg.textContent = 'Image enregistrée.';
+      } else if (e.target.closest('[data-carte-copier]')) {
+        const ok = () => { msg.textContent = 'Texte copié. Collez-le dans votre publication.'; };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texte()).then(ok).catch(() => { $('#carte-texte').select(); msg.textContent = 'Copie impossible : sélectionnez le texte et copiez-le.'; });
+        else { $('#carte-texte').select(); msg.textContent = 'Texte sélectionné : copiez-le.'; }
       } else if (e.target.closest('[data-carte-partager]')) {
         const f = new File([CARTE.blob], CARTE.nom, { type: 'image/png' });
-        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'La Cote du Héros', text: CARTE.texte }).catch(() => {});
-        else if (navigator.share) navigator.share({ title: 'La Cote du Héros', text: CARTE.texte, url: CARTE.url }).catch(() => {});
-        else { window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(CARTE.url) + '&quote=' + encodeURIComponent(CARTE.texte), '_blank', 'noopener'); $('#carte-msg').textContent = 'Enregistrez aussi l\'image pour l\'ajouter à votre publication.'; }
+        if (navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], text: texte() }).catch(() => {});
+        else navigator.share({ text: texte() }).catch(() => {});
       }
     });
     d.addEventListener('close', () => { if (urlCarte) URL.revokeObjectURL(urlCarte); urlCarte = ''; CARTE = null; });
@@ -1668,21 +1684,20 @@
   }
   document.addEventListener('click', async (e) => {
     const t = e.target.closest('[data-partager-jour]'); if (!t || !estNiveau3()) return;
-    const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13), x = p; if (!b) return;
-    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'livre/' + b.isbn13 + '.html';
-    const texte = `Pépite du jour sur La Cote du Héros : ${b.titre} (${b.serie}${numero(b)}, ${b.version}), une annonce à ${fmt(x.prix)}${x.pct != null ? ', soit ' + x.pct + ' % sous la cote' : ''}. Voir l'annonce : ${url} · Prix indicatif. La Cote du Héros ne prend ni marge ni commission.`;
+    const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13); if (!b) return;
     const d = boiteCarte(), img = d.querySelector('.carte-img'), msg = d.querySelector('#carte-msg');
-    CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de la carte…';
-    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = true; });
+    CARTE = null; img.removeAttribute('src'); msg.textContent = 'Préparation de l\'image…';
+    $('#carte-texte').value = textePost(b, p);
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier]').forEach((x2) => { x2.disabled = true; });
     if (!d.open) d.showModal();
-    const blob = await dessinerCarte(b, x);
+    const blob = await dessinerCarte(b, p);
     if (!d.open) return;
-    if (!blob) { msg.textContent = 'La carte n\'a pas pu être créée.'; return; }
+    if (!blob) { msg.textContent = 'L\'image n\'a pas pu être créée.'; return; }
     if (urlCarte) URL.revokeObjectURL(urlCarte);
     urlCarte = URL.createObjectURL(blob);
-    CARTE = { blob, texte, url, nom: `pepite-${b.isbn13 || b.id}.png` };
+    CARTE = { blob, nom: `pepite-du-jour-${b.isbn13 || b.id}.png` };
     img.src = urlCarte; msg.textContent = '';
-    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer]').forEach((x2) => { x2.disabled = false; });
+    d.querySelectorAll('[data-carte-partager],[data-carte-enregistrer],[data-carte-copier]').forEach((x2) => { x2.disabled = false; });
   });
   function rafraichirPepites() {
     chargerPepiteJour();
