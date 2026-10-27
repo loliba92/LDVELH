@@ -85,6 +85,28 @@ class TestImporter(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(imp.importer(ENTETE + ligne(), JOUR, d, CONNUES)["acceptees"], 1)
 
+    def test_un_lot_repartit_son_prix_entre_ses_livres(self):
+        lien = "https://www.leboncoin.fr/ad/livres/77"
+        lot = {"isbns": [ISBN_A, ISBN_B], "poids": {ISBN_A: 10.0, ISBN_B: 30.0}}
+        self.assertEqual([(i, round(p, 2)) for i, p in imp.repartir_lot(40.0, lot)], [(ISBN_A, 10.0), (ISBN_B, 30.0)])
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="40", lien=lien), ligne(isbn=ISBN_B, prix="28", lien="https://www.leboncoin.fr/ad/livres/78")), JOUR, d, CONNUES)
+            avant = {r["isbn13"]: r["prix_median"] for r in lire(d, "leboncoin-2026-10-24.csv")}
+            self.assertEqual(avant[ISBN_A], "40.00")                      # sans registre : le prix entier
+            imp.reagreger(d, {lien: lot})
+            apres = {r["isbn13"]: r for r in lire(d, "leboncoin-2026-10-24.csv")}
+            self.assertEqual(apres[ISBN_A]["prix_median"], "10.00")       # sa part du lot
+            self.assertEqual(apres[ISBN_B]["nb_annonces"], "2")           # sa part du lot + son annonce seule
+            self.assertEqual(apres[ISBN_B]["prix_min"], "28.00")
+            self.assertEqual(apres[ISBN_B]["prix_max"], "30.00")
+            imp.reagreger(d, {lien: lot})                                  # rejouer donne le même résultat
+            self.assertEqual({r["isbn13"]: r for r in lire(d, "leboncoin-2026-10-24.csv")}, apres)
+
+    def test_les_lots_enregistres_sont_valides(self):
+        for lien, lot in imp.charger_lots().items():
+            self.assertTrue(lien.startswith("https://www.leboncoin.fr/"))
+            self.assertTrue(set(lot["isbns"]) <= set(lot["poids"]) and all(float(v) > 0 for v in lot["poids"].values()))
+
 
 if __name__ == "__main__":
     unittest.main()

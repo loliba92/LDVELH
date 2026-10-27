@@ -19,6 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
+import importer_leboncoin
 
 ROOT = editions.ROOT
 DB = ROOT / "data" / "warehouse" / "ldvelh.sqlite"
@@ -285,6 +286,7 @@ def main():
         n_ebay, dbl_ebay, err_ebay, nb_fichiers, ecart_ebay = load_ebay(cx, a.occasion)
         n_lib, dbl_lib, err_lib, nb_lib, ecart_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires")
         # Relevés agrégés Leboncoin (voir pipeline/importer_leboncoin.py) : annonces actives, puis annonces vendues (« vente probable »)
+        importer_leboncoin.reagreger(a.occasion)          # lots (data/manual/lots_annonces.json) : leur prix est réparti entre les livres du lot
         n_lbc, dbl_lbc, err_lbc, nb_lbc, ecart_lbc = load_ebay(cx, a.occasion, "leboncoin-20*.csv", "leboncoin")
         n_lbv, dbl_lbv, err_lbv, nb_lbv, ecart_lbv = load_ebay(cx, a.occasion, "leboncoin-vendus-20*.csv", "leboncoin", "vente_probable")
         n_ebay += n_lib + n_lbc + n_lbv

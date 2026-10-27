@@ -19,6 +19,7 @@ import editions
 from estimation import Obs, estimer
 import calibration
 import cote_v2
+import importer_leboncoin
 import mouvements
 import rarete
 import veille_parutions
@@ -94,7 +95,7 @@ def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
             prix_site = publie.get((isbn, etat))
             if not prix_site:
                 continue
-            gardees = [a for a in liste if a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini]
+            gardees = [a for a in liste if a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini and not str(a[1]).startswith("Lot de ")]
             if gardees:
                 butin.setdefault(isbn, {})[etat] = gardees
     return butin
@@ -347,8 +348,12 @@ def main():
     # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
     fichiers_lbc = sorted(dossier_occasion.glob("annonces-leboncoin-20*.csv"))
+    lots = importer_leboncoin.charger_lots()
     for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN).items():
         for etat, liste in par_etat.items():
+            for a in liste:
+                if a[2] in lots:                       # annonce d'un lot : son prix n'est pas celui d'un livre (voir importer_leboncoin.repartir_lot)
+                    a[1] = f"Lot de {len(lots[a[2]]['isbns'])} livres · {a[1]}"
             annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
