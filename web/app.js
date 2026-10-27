@@ -1603,10 +1603,16 @@
     g.fillStyle = lueur; g.fillRect(0, 0, L, H);
     g.strokeStyle = or; g.lineWidth = 3; g.strokeRect(28, 28, L - 56, H - 56); g.lineWidth = 1; g.strokeRect(44, 44, L - 88, H - 88);
     g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-    g.fillStyle = or; g.font = `700 44px ${ui}`; lettres('14px'); g.fillText('PÉPITE DU JOUR', L / 2 + 7, 122); lettres('0px');
-    // couverture, dans une boîte de 440 × 600
+    // en-tête : logo et nom du site, puis « PÉPITE DU JOUR »
+    const logo = await chargerImage('icons/icon-192.png');
+    g.font = `700 50px ${serif}`;
+    const nom = 'La Cote du Héros', lw = g.measureText(nom).width, tot = (logo ? 60 + 16 : 0) + lw, x0n = (L - tot) / 2;
+    if (logo) g.drawImage(logo, x0n, 62, 60, 60);
+    g.textAlign = 'left'; g.fillStyle = creme; g.fillText(nom, x0n + (logo ? 76 : 0), 108);
+    g.textAlign = 'center'; g.fillStyle = or; g.font = `700 36px ${ui}`; lettres('12px'); g.fillText('PÉPITE DU JOUR', L / 2 + 6, 172); lettres('0px');
+    // couverture, dans une boîte de 440 × 555
     const img = b.couverture ? await chargerImage(racine(b.couverture_grande || b.couverture)) : null;
-    const bw = 440, bh = 600, by = 150;
+    const bw = 440, bh = 555, by = 195;
     if (img) {
       const k = Math.min(bw / img.naturalWidth, bh / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k, x0 = (L - w) / 2, y0 = by + (bh - h) / 2;
       g.save(); g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 36; g.shadowOffsetY = 14; g.fillStyle = '#111'; g.fillRect(x0, y0, w, h); g.restore();
@@ -1614,7 +1620,7 @@
       g.strokeStyle = 'rgba(217,180,95,.55)'; g.lineWidth = 2; g.strokeRect(x0, y0, w, h);
     } else {
       g.fillStyle = '#111'; g.fillRect((L - 400) / 2, by, 400, bh); g.strokeStyle = or; g.lineWidth = 2; g.strokeRect((L - 400) / 2, by, 400, bh);
-      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 380);
+      g.fillStyle = or; g.font = `700 200px ${serif}`; g.fillText((b.serie || b.titre || '?').trim().charAt(0).toUpperCase(), L / 2, by + 350);
     }
     // titre sur une ou deux lignes, puis la série et l'état
     g.fillStyle = creme; g.font = `700 62px ${serif}`;
