@@ -354,7 +354,6 @@ def corps_communaute():
 
 EQUIPE = '''<h1>Équipe</h1>
 <p class="chapeau">Qui a accès à quoi, par personnage.</p>
-<div class="eq-bandeau" id="eq-bandeau" role="status" hidden></div>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
 <div class="eq-tuiles" id="eq-tuiles" hidden></div>
 <section class="eq-bloc" aria-labelledby="eq-t-zagor">

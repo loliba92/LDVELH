@@ -71,6 +71,13 @@ test('début et fin : cohérence, Zagor refusé, effacement', () => {
   const efface = J(L('changerPeriode')(f, ADM, '', '', '2026-10-27')).fichier.equipe[ADM];
   assert.deepStrictEqual([efface.debut, efface.fin], [undefined, undefined]);
 });
+test('la date de fin est renvoyée au sorcier concerné, jamais à un Héros ni à un Zagor', () => {
+  const f = (m) => ({ equipe: { [ADM]: m, [SUPER]: { nom: 'chef', role: 'superadmin', fin: '2027-01-01' } }, bloques: [] });
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f({ nom: 'Marie', role: 'admin', fin: '2999-01-01' })).fin, '2999-01-01');
+  assert.strictEqual(decider(infos({ email: 'admin@gmail.com' }), f({ nom: 'Marie', role: 'admin' })).fin, '');
+  assert.strictEqual(decider(infos({ email: 'chef@gmail.com' }), f({ nom: 'Marie', role: 'admin' })).fin, '');
+  assert.strictEqual(decider(infos()).fin, undefined);
+});
 test('un compte inconnu est un Héros, avec un suffixe qui le distingue', () => {
   const d = decider(infos()); assert.strictEqual(d.ok, true); assert.strictEqual(d.role, 'heros');
   assert.strictEqual(d.nom, 'Paul #' + h('inconnu@gmail.com').slice(7, 11));

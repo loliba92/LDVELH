@@ -3,7 +3,7 @@
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
-  var configure = null, configPrete = false, exigeCompte = false, role = '', echecRole = '', intention = null, reprisEnCours = false;
+  var configure = null, configPrete = false, exigeCompte = false, role = '', finAcces = '', echecRole = '', intention = null, reprisEnCours = false;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -95,10 +95,29 @@ window.Compte = (function () {
     }
     var ban = $('#compte-bandeau');
     if (ban) ban.hidden = !(e.cle === 'reprendre' && enCours());
+    bandeauFin();
     document.dispatchEvent(new CustomEvent('cdh-compte', { detail: { etat: e.cle, role: role } }));
   }
   // Le bandeau « connexion expirée » n'apparaît que s'il y a des changements pas encore envoyés au Drive
   var enCours = function () { return !!window.AppCollection && window.Cloud.enAttente(window.AppCollection.lire()); };
+
+  // Accès à durée limitée : un bandeau prévient la personne concernée pendant les 14 derniers jours
+  function bandeauFin() {
+    var b = $('#compte-fin'), reste = null;
+    if (role === 'admin' && finAcces) {
+      var d = new Date(), auj = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+      reste = Math.round((Date.parse(finAcces) - Date.parse(auj)) / 86400000);
+    }
+    var visible = reste !== null && reste >= 0 && reste <= 14;
+    if (!visible) { if (b) b.hidden = true; return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'compte-fin'; b.className = 'compte-bandeau'; b.setAttribute('role', 'status');
+      var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
+    }
+    var quand = reste === 0 ? 'aujourd\'hui' : reste === 1 ? 'demain' : 'dans ' + reste + ' jours';
+    b.innerHTML = '<span>Votre accès se termine <strong>' + quand + '</strong> (' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + ').</span>';
+    b.hidden = false;
+  }
 
   function bandeau() {
     if ($('#compte-bandeau')) return;
@@ -121,7 +140,7 @@ window.Compte = (function () {
   function chargerRole() {
     if (!window.Relais || !window.Relais.configure() || !window.Cloud || !window.Cloud.actif()) return Promise.resolve();
     return window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; echecRole = ''; ecrireSession(CLE_ROLE, role); signalerCompte(); }
+      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
     }).catch(function () { echecRole = 'relais'; }).then(dessiner);
   }
@@ -389,7 +408,7 @@ window.Compte = (function () {
       }
       else if (a === 'deconnecter') {
         fermerMenu();
-        if (window.confirm('Votre collection reste dans votre Drive. Sur cet appareil, vous ne pourrez plus la modifier tant que vous ne vous reconnectez pas. Se déconnecter ?')) { window.Cloud.deconnecter(); role = ''; ecrireSession(CLE_ROLE, ''); dessiner(); }
+        if (window.confirm('Votre collection reste dans votre Drive. Sur cet appareil, vous ne pourrez plus la modifier tant que vous ne vous reconnectez pas. Se déconnecter ?')) { window.Cloud.deconnecter(); role = ''; finAcces = ''; ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); dessiner(); }
       }
       return;
     }
@@ -413,10 +432,10 @@ window.Compte = (function () {
       exigeCompte = !!(c && c.client_id && c.collection === true);
       configPrete = true;
       if (!configure) { ['#compte-haut', '#compte-feuille'].forEach(function (s) { var n = $(s); if (n) n.hidden = true; }); return; }
-      role = lireSession(CLE_ROLE);
+      role = lireSession(CLE_ROLE); finAcces = lireSession('cdh-fin') || '';
       bandeau(); dessiner();
-      if (window.Cloud.actif() && !role) chargerRole();      // connexion reprise sans nouvel onglet : le niveau est relu
-      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); role = ''; } dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
+      if (window.Cloud.actif() && (!role || role === 'admin')) chargerRole();   // un sorcier relit son niveau à chaque page : sa période peut avoir changé      // connexion reprise sans nouvel onglet : le niveau est relu
+      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); role = ''; finAcces = ''; } dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
       document.addEventListener('cdh-collection', dessiner);
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)
       var derniere = 0;
