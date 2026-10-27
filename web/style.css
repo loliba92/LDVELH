@@ -2182,3 +2182,18 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .pp-carte .couv { position: relative; }
 .pp-carte .pp-trouver { position: absolute; left: 4px; bottom: 34px; background: #1b1403; }
 .rc-ligne2 .rc-trouver { flex: none; }
+
+/* Pépites des livres « à trouver » */
+.a-trouver li { flex-wrap: wrap; }
+.pep-liste { flex: 1 1 100%; display: grid; gap: 4px; padding-top: 4px; border-top: 1px dashed var(--line); }
+.pep { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; padding: 4px 8px; border: 1px solid var(--gold); border-radius: var(--r); background: rgba(200, 160, 60, .1); color: var(--text); text-decoration: none; font-size: .9rem; }
+.pep:hover { background: rgba(200, 160, 60, .2); }
+.pep b { color: var(--gold); }
+.pep .pep-d { color: var(--muted); font-size: .82rem; }
+.pep .pep-v { margin-left: auto; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .72rem/1.6 var(--f-ui); color: var(--muted); }
+.pep .pep-v.solide { color: #7fd69c; border-color: #7fd69c; }
+.nb-pep { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--gold); color: #000; font: 700 .72rem/20px var(--f-ui); }
+.nb-pep:empty { display: none; }
+@media (max-width: 899px) { .barre-bas .nb-pep { position: absolute; top: 4px; right: calc(50% + 14px); margin: 0; } }
+.a-trouver .l-livre { flex: 1 1 0; min-width: 0; }
+.a-trouver li > .retirer { flex: none; }
