@@ -1912,6 +1912,11 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .annonces-corps li { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); column-gap: 10px; align-items: baseline; line-height: 1.35; font-size: .92rem; overflow-wrap: anywhere; }
 .annonces-corps li a { color: var(--text); text-underline-offset: 3px; }
 .annonces-corps .ann-prix { font-weight: 700; color: var(--gold); text-align: right; }
+.annonces-corps .ann-ligne { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; margin-top: 2px; min-width: 0; }
+.annonces-corps .ann-ligne .ann-titre { grid-column: auto; }
+.annonces-corps .ann-vs { display: contents; font-size: .8rem; }
+.annonces-corps .ann-vs .rc-pastille { font-size: .72rem; line-height: 1.5; white-space: nowrap; }
+.annonces-corps .ann-vs .rc-vs { color: var(--muted); }
 .annonces-corps .ann-titre { grid-column: 2; justify-self: start; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: .78rem; }
 
 /* Fenêtre de bienvenue : bandeau illustré en haut (même illustration que l'accueil) */
