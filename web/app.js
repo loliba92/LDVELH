@@ -1091,6 +1091,7 @@
     ['pages.yml', 'Publication du site', 'Met en ligne la dernière version du site. Suit chaque changement : environ 2 minutes.'],
     ['veille-parutions.yml', 'Veille des parutions', 'Cherche chaque jour les livres annoncés et pas encore parus.'],
   ];
+  const DISCRET = 'pages.yml';          // lot affiché seulement quand il échoue
   const depuisMin = (d) => {
     const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
     return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
@@ -1118,11 +1119,11 @@
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
       const lots = FAMILLES.map(([f, nom, aide]) => {
         const r = runs[f];
-        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '' };
+        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r) };
-      });
+        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET };
+      }).filter((l) => !l.discret || l.cls === 'echec');         // la publication du site n'apparaît qu'en cas d'échec : sinon le site ne se met plus à jour, sans aucun signe visible
       const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
       const global = mal.length ? 'echec' : enCours.length ? 'en-cours' : 'ok';
       const bilan = mal.length ? `${mal.length} problème${mal.length > 1 ? 's' : ''} : ${mal.map((l) => esc(l.nom)).join(', ')}`
@@ -1137,7 +1138,7 @@
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
         + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
-        + FAMILLES.map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
+        + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
