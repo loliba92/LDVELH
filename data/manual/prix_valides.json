@@ -151,6 +151,42 @@
    "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
+  "9782070333110|bon": {
+   "prix": 9.11,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333110|convenable": {
+   "prix": 7.59,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333110|tres_bon": {
+   "prix": 10.93,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333349|bon": {
+   "prix": 13.28,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333349|convenable": {
+   "prix": 8.0,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333349|tres_bon": {
+   "prix": 21.04,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
   "9782070333370|bon": {
    "prix": 16.44,
    "decision": "confirme",
@@ -510,6 +546,24 @@
   "9782070335770|tres_bon": {
    "prix": 42.0,
    "decision": "corrige",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335855|bon": {
+   "prix": 50.1,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335855|convenable": {
+   "prix": 41.75,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335855|tres_bon": {
+   "prix": 93.36,
+   "decision": "confirme",
    "le": "2026-10-27",
    "par": "loliba (superadmin)"
   },
@@ -1186,6 +1240,24 @@
    "prix": 52.0,
    "decision": "corrige",
    "le": "2026-10-20",
+   "par": "loliba (superadmin)"
+  },
+  "9782070610327|bon": {
+   "prix": 4.19,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070610327|convenable": {
+   "prix": 2.8,
+   "decision": "confirme",
+   "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070610327|tres_bon": {
+   "prix": 4.84,
+   "decision": "confirme",
+   "le": "2026-10-27",
    "par": "loliba (superadmin)"
   },
   "9782070610341|bon": {

@@ -2,10 +2,25 @@
  "date": "2026-10-27",
  "precedent": "2026-10-26",
  "nb_comparees": 1473,
- "nb_modifiees": 545,
+ "nb_modifiees": 544,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782070335855",
+   "isbn13": "9782070335855",
+   "titre": "La Nuit des Mutants",
+   "serie": "Défis Fantastiques",
+   "numero": "585",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 53.9,
+   "apres": 93.36,
+   "pct": 0.732,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070333110",
    "isbn13": "9782070333110",
@@ -17,8 +32,8 @@
    "avant": 7.88,
    "apres": 10.93,
    "pct": 0.387,
-   "nature": "annonces",
-   "nb": 10,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -32,7 +47,7 @@
    "avant": 7.19,
    "apres": 9.11,
    "pct": 0.267,
-   "nature": "archives",
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -47,8 +62,38 @@
    "avant": 6.08,
    "apres": 7.59,
    "pct": 0.248,
-   "nature": "annonces",
-   "nb": 4,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333349",
+   "isbn13": "9782070333349",
+   "titre": "Les Maîtres du Mal",
+   "serie": "Loup*Ardent",
+   "numero": "334",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 16.87,
+   "apres": 21.04,
+   "pct": 0.247,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070610327",
+   "isbn13": "9782070610327",
+   "titre": "Le Sorcier de la Montagne de Feu",
+   "serie": "Défis Fantastiques",
+   "numero": "252",
+   "version": "V3",
+   "etat": "bon",
+   "avant": 3.53,
+   "apres": 4.19,
+   "pct": 0.187,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -124,8 +169,8 @@
    "avant": 50.28,
    "apres": 41.75,
    "pct": -0.17,
-   "nature": "archives",
-   "nb": 1,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -144,7 +189,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 13,
