@@ -50,7 +50,17 @@
       '<span class="eq-fin' + (hors ? ' eq-fin-passee' : '') + '">' + esc(etatTexte) + '</span></div>' + bouton + '</div>' + corps + '</li>';
   }
 
+  function rouvrir(ouverts) {          // les profils dépliés avant le nouveau dessin le restent
+    ouverts.forEach(function (e) {
+      var f = document.querySelector('.eq-fin-form[data-e="' + e + '"]');
+      var ligne = f && f.closest('.eq-ligne');
+      if (!ligne) return;
+      ligne.querySelector('.eq-corps').hidden = false;
+      var g = ligne.querySelector('[data-gerer]'); g.setAttribute('aria-expanded', 'true'); g.textContent = 'Fermer';
+    });
+  }
   function dessiner(r) {
+    var ouverts = [].map.call(document.querySelectorAll('.eq-corps:not([hidden]) .eq-fin-form'), function (f) { return f.dataset.e; });
     EQUIPE = r;
     var z = r.equipe.filter(function (m) { return m.role === 'superadmin'; }), s = r.equipe.filter(function (m) { return m.role === 'admin'; });
     s.sort(function (a, b) { return ((a.echu ? 1 : 0) + (a.avenir ? 1 : 0)) - ((b.echu ? 1 : 0) + (b.avenir ? 1 : 0)); });
@@ -60,6 +70,7 @@
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
     etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
     tuiles();
+    rouvrir(ouverts);
   }
 
   function comptes() {
