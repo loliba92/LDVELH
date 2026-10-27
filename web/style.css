@@ -2261,7 +2261,6 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-tete { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin: 18px 0 2px; padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); font: 700 .8rem var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .imp-tete:first-child { margin-top: 6px; }
 .imp-compte { letter-spacing: 0; text-transform: none; font-weight: 600; }
-.imp-pep { color: var(--gold); }
 .imp-liste { list-style: none; margin: 0; padding: 0; }
 .imp-li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 14px; padding: 9px 0; border-bottom: 1px solid var(--line); }
 .imp-li:last-child { border-bottom: 0; }

@@ -1199,9 +1199,8 @@
       const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
       const rang = (a) => { const { v, vendu } = infosImport(a); return vendu ? 9 : v ? RANG_IMPORT[v] : 8; };          // les pépites d'abord, les annonces vendues à la fin
       corps.innerHTML = (imports.length ? imports.map((im) => {
-        const nbPep = im.lignes.filter((a) => infosImport(a).v === 'pepite').length;
         const lignes = im.lignes.map((a, k) => [a, k]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map((x) => x[0]);
-        return `<h4 class="imp-tete"><span>${esc(quand(im.t))}</span><span class="imp-compte">${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}${nbPep ? ` · <b class="imp-pep">${nbPep} pépite${nbPep > 1 ? 's' : ''}</b>` : ''}</span></h4><ul class="imp-liste">${lignes.map(ligneImport).join('')}</ul>`;
+        return `<h4 class="imp-tete"><span>${esc(quand(im.t))}</span><span class="imp-compte">${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}</span></h4><ul class="imp-liste">${lignes.map(ligneImport).join('')}</ul>`;
       }).join('') : '<p class="sous">Aucun import trouvé dans l\'historique récent.</p>')
         + (urlJournalImports ? `<p class="sous"><a href="${esc(urlJournalImports)}" target="_blank" rel="noopener noreferrer">Journal de la dernière exécution ↗</a></p>` : '');
     } catch (e) { corps.innerHTML = '<p class="sous">Impossible de lire l\'historique pour le moment (limite de l\'interface publique de GitHub). Réessayez dans quelques minutes.</p>'; }
