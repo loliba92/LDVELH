@@ -2222,9 +2222,9 @@ button.maj-ligne:hover { background: var(--surface-2); }
 }
 
 /* Carte de partage d'une pépite */
-.carte-dialog { max-width: 520px; width: calc(100% - 24px); }
+.carte-dialog { max-width: 520px; width: calc(100% - 24px); overflow-y: auto; }
 .carte-cadre { padding: 16px 18px 18px; display: grid; gap: 12px; }
-.carte-img { display: block; width: 100%; max-width: 380px; height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
+.carte-img { display: block; width: 100%; max-width: min(380px, 38vh); height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); }
 .carte-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .carte-actions .bouton { flex: 1 1 160px; }
 .carte-cadre .sous { margin: 0; min-height: 1.4em; }
@@ -2244,3 +2244,4 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .pa-prix b { font: 700 2rem/1 var(--f-display); color: var(--gold); }
 .pa-prix span { color: var(--gold); font-weight: 700; }
 .pep-accueil .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.carte-cadre textarea { width: 100%; min-height: 9.5em; box-sizing: border-box; font: inherit; padding: 8px 10px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); resize: vertical; }
