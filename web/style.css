@@ -2043,3 +2043,10 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .maj-vide { opacity: .6; }
 @media (prefers-reduced-motion: reduce) { .maj-en-cours .maj-point { animation: none; } }
 @media (max-width: 700px) { .maj-puces { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } .maj-puce { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 8px; row-gap: 0; border-radius: 14px; padding: 6px 10px; } .maj-quand { grid-column: 2; font-size: .78rem; line-height: 1.25; } }
+.maj-puce { color: var(--text); text-decoration: none; }
+a.maj-puce:hover { border-color: var(--gold); }
+a.maj-puce:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.maj-puces > li { margin: 0; display: contents; }
+.maj-aide { margin: 10px 0 0; font-size: .9rem; }
+.maj-aide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--gold); }
+.maj-aide ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 6px; }

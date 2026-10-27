@@ -17,6 +17,7 @@ Usage : CORPS="$texte" python pipeline/importer_leboncoin.py [--aujourdhui AAAA-
 import argparse
 import csv
 import io
+import json
 import os
 import re
 import statistics
@@ -28,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 
 DOSSIER = editions.ROOT / "data" / "raw" / "occasion"
+LOTS = editions.ROOT / "data" / "manual" / "lots_annonces.json"
 ETATS = ("convenable", "bon", "tres_bon")
 STATUTS = ("actif", "vendu")
 MAX_LIGNES = 300
@@ -106,13 +108,50 @@ def _ecrire(chemin, colonnes, lignes):
         w.writerows(lignes)
 
 
-def _agreger(lignes, jour):
+def charger_lots(chemin=None):
+    """Annonces qui vendent plusieurs livres d'un coup : {lien: {"isbns": [...], "poids": {isbn: prix de référence}}}.
+    Le fichier data/manual/lots_annonces.json est tenu à la main (le titre de l'annonce ne dit pas toujours que c'est un lot)."""
+    chemin = Path(chemin or LOTS)
+    if not chemin.exists():
+        return {}
+    brut = json.loads(chemin.read_text(encoding="utf-8"))
+    return {x["lien"]: {"isbns": x["isbns"], "poids": x["poids"]} for x in brut if x.get("lien") and x.get("isbns") and x.get("poids")}
+
+
+def repartir_lot(prix, lot):
+    """Prix d'un lot réparti entre ses livres au prorata de leur prix de référence : [(isbn, part)]."""
+    poids = [float(lot["poids"][i]) for i in lot["isbns"]]
+    total = sum(poids)
+    return [(i, prix * w / total) for i, w in zip(lot["isbns"], poids)]
+
+
+def _agreger(lignes, jour, lots=None):
+    """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier."""
+    lots = lots or {}
     groupes = {}
     for r in lignes:
+        lot = lots.get(r["lien"])
+        if lot:
+            for isbn, part in repartir_lot(float(r["prix"]), lot):
+                groupes.setdefault((isbn, r["etat"]), []).append(round(part, 2))
+            continue
         groupes.setdefault((r["isbn13"], r["etat"]), []).append(float(r["prix"]))
     return [{"isbn13": i, "date": jour, "etat": e, "nb_annonces": len(p), "prix_min": f"{min(p):.2f}",
              "prix_median": f"{statistics.median(p):.2f}", "prix_max": f"{max(p):.2f}"}
             for (i, e), p in sorted(groupes.items())]
+
+
+def reagreger(dossier=None, lots=None):
+    """Recalcule les agrégats (leboncoin-*.csv, leboncoin-vendus-*.csv) à partir des annonces de chaque jour, en tenant compte des lots.
+    Appelé à chaque construction de la base : un lot ajouté au fichier agit sur tous les jours déjà importés."""
+    dossier = Path(dossier or DOSSIER)
+    lots = charger_lots() if lots is None else lots
+    for fic in sorted(dossier.glob("annonces-leboncoin-20*.csv")):
+        jour = fic.stem[-10:]
+        _ecrire(dossier / f"leboncoin-{jour}.csv", COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
+    for fic in sorted(dossier.glob("vendus-leboncoin-20*.csv")):
+        jour = fic.stem[-10:]
+        _ecrire(dossier / f"leboncoin-vendus-{jour}.csv", COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
 
 
 def importer(corps, aujourdhui=None, dossier=None, connues=None):
@@ -149,8 +188,9 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
         dossier.mkdir(parents=True, exist_ok=True)
         _ecrire(dossier / f"annonces-leboncoin-{jour}.csv", COLONNES_ANNONCES, list(actives.values()))
         _ecrire(dossier / f"vendus-leboncoin-{jour}.csv", COLONNES_ANNONCES, list(vendues.values()))
-        _ecrire(dossier / f"leboncoin-{jour}.csv", COLONNES_AGREGAT, _agreger(actives.values(), jour))
-        _ecrire(dossier / f"leboncoin-vendus-{jour}.csv", COLONNES_AGREGAT, _agreger(vendues.values(), jour))
+        lots = charger_lots()
+        _ecrire(dossier / f"leboncoin-{jour}.csv", COLONNES_AGREGAT, _agreger(actives.values(), jour, lots))
+        _ecrire(dossier / f"leboncoin-vendus-{jour}.csv", COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots))
         bilan["jours"].append(jour)
     return bilan
 

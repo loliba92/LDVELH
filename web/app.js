@@ -1081,7 +1081,16 @@
   majButin();
   // Accueil, Zagor seul : dernières mises à jour automatiques du site (relevé des prix, ajouts, corrections, publication), lues dans l'historique public des lots,
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
-  const FAMILLES = [['prix-ebay.yml', 'Relevé des prix'], ['ajout-isbn.yml', 'Ajout de livres'], ['corriger-fiche.yml', 'Correction de fiches'], ['corriger-prix.yml', 'Correction de cotes'], ['pages.yml', 'Publication du site'], ['veille-parutions.yml', 'Veille des parutions']];
+  // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, Zagor seul)
+  const FAMILLES = [
+    ['prix-ebay.yml', 'Relevé des prix', 'Lit les annonces eBay et le prix du neuf en librairie, puis recalcule les cotes. Un jour sur deux, vers 6 h, ou à la demande. Dure environ 1 h 30.'],
+    ['releve-leboncoin.yml', 'Import Leboncoin', 'Reçoit le relevé que le bot Leboncoin envoie chaque soir, l\'enregistre et met la cote à jour. La date est celle de la dernière réception.'],
+    ['ajout-isbn.yml', 'Ajout de livres', 'Ajoute au site les livres envoyés depuis la page « Ajouter des livres ».'],
+    ['corriger-fiche.yml', 'Correction de fiches', 'Applique une correction de titre, de série ou de numéro faite depuis une fiche.'],
+    ['corriger-prix.yml', 'Correction de cotes', 'Applique une cote corrigée ou confirmée depuis le site (« Confirmer ces prix »).'],
+    ['pages.yml', 'Publication du site', 'Met en ligne la dernière version du site. Suit chaque changement : environ 2 minutes.'],
+    ['veille-parutions.yml', 'Veille des parutions', 'Cherche chaque jour les livres annoncés et pas encore parus.'],
+  ];
   const depuisMin = (d) => {
     const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
     return m < 2 ? 'à l\'instant' : m < 60 ? `il y a ${m} min` : m < 36 * 60 ? `il y a ${Math.round(m / 60)} h` : `il y a ${Math.round(m / 1440)} jours`;
@@ -1091,21 +1100,32 @@
     const bloc = $('#rv-maj');
     if (!bloc || majFaite || !estProprietaire()) return;
     majFaite = true;
-    const CLE = 'cdh-rv-lots';
+    // Dernière exécution de chaque lot, lue dans l'historique public de GitHub (une demande par lot : un lot rare, comme l'import du soir,
+    // ne se perd pas derrière les publications). Gardé cinq minutes dans le navigateur.
+    const CLE = 'cdh-rv-lots2';
     const lire = () => { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return Promise.resolve(c.runs); } catch (e) { /* pas de cache */ }
-      return fetch('https://api.github.com/repos/loliba92/LDVELH/actions/runs?per_page=100', { headers: { Accept: 'application/vnd.github+json' } }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then((d) => { const runs = d.workflow_runs.map((x) => ({ f: x.path.split('/').pop(), st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at })); try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ } return runs; }); };
+      return Promise.all(FAMILLES.map(([f]) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${f}/runs?per_page=1`, { headers: { Accept: 'application/vnd.github+json' } })
+        .then((r) => (r.ok ? r.json() : { workflow_runs: [] })).then((d) => d.workflow_runs[0] || null).catch(() => null)))
+        .then((l) => {
+          const runs = {};
+          l.forEach((x, i) => { if (x) runs[FAMILLES[i][0]] = { st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at, u: x.html_url }; });
+          if (!Object.keys(runs).length) throw new Error('indisponible');
+          try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ }
+          return runs;
+        }); };
     lire().then((runs) => {
       const etat = (r) => (r.st !== 'completed' ? ['en cours', 'en-cours'] : r.c === 'success' ? ['réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['échec', 'echec']);
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
-      const puces = FAMILLES.map(([f, nom]) => {
-        const r = runs.find((x) => x.f === f);
-        if (!r) return `<li class="maj-puce maj-vide"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">pas d'exécution récente</span></li>`;
+      const puces = FAMILLES.map(([f, nom, aide]) => {
+        const r = runs[f];
+        if (!r) return `<li><span class="maj-puce maj-vide" title="${esc(aide)}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">pas d'exécution récente</span></span></li>`;
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
-        return `<li class="maj-puce maj-${retard ? 'echec' : cls}" title="${esc(quand(r))}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">${retard ? `⚠ pas lancée depuis ${Math.floor(jours)} jours` : esc(depuisMin(d))}</span><span class="sr-only"> : ${esc(txt)}, ${esc(quand(r))}</span></li>`;
+        return `<li><a class="maj-puce maj-${retard ? 'echec' : cls}" href="${esc(r.u)}" target="_blank" rel="noopener noreferrer" title="${esc(aide)}"><span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(nom)}</span><span class="maj-quand">${retard ? `⚠ pas lancée depuis ${Math.floor(jours)} jours` : esc(depuisMin(d))}</span><span class="sr-only"> : ${esc(txt)}, ${esc(quand(r))}. Ouvrir le détail (nouvel onglet)</span></a></li>`;
       });
       $('#rv-maj-liste').innerHTML = puces.join('');
+      $('#rv-maj-aide').innerHTML = '<summary>À quoi servent ces pastilles ?</summary><p class="sous">Une pastille par lot automatique du site. Touchez-en une pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
+        + FAMILLES.map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul>';
       bloc.hidden = false;
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
