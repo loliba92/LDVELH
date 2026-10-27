@@ -1144,18 +1144,28 @@
     if (champ || ligne.length) { ligne.push(champ); lignes.push(ligne); }
     return lignes;
   };
+  // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
   async function lireImports() {
-    const CLE = 'cdh-imports-lbc';
+    const CLE = 'cdh-imports-lbc-24h';
     try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports; } catch (e) { /* pas de cache */ }
-    const r = await fetch('https://api.github.com/repos/loliba92/LDVELH/issues?state=all&per_page=40&sort=created&direction=desc', { headers: { Accept: 'application/vnd.github+json' } });
-    if (!r.ok) throw new Error(r.status);
-    const imports = (await r.json()).filter((x) => !x.pull_request && /^Relevé Leboncoin/.test(x.title || '')).slice(0, 8).map((x) => {
+    const limite = Date.now() - 24 * 3600 * 1000;
+    let demandes = [];
+    for (let page = 1; page <= 2; page += 1) {
+      const r = await fetch(`https://api.github.com/repos/loliba92/LDVELH/issues?state=all&per_page=100&page=${page}&sort=created&direction=desc`, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!r.ok) { if (page === 1) throw new Error(r.status); break; }
+      const lot = await r.json();
+      demandes = demandes.concat(lot);
+      if (lot.length < 100 || (lot.length && Date.parse(lot[lot.length - 1].created_at) < limite)) break;          // on a remonté au-delà de 24 heures
+    }
+    const tous = demandes.filter((x) => !x.pull_request && /^Relevé Leboncoin/.test(x.title || '')).map((x) => {
       const m = /```csv\s*\n([\s\S]*?)```/.exec(x.body || '');
       const l = m ? csvLignes(m[1].trim()) : [];
       const [tete, ...corps] = l;
       const col = (nom) => (tete || []).indexOf(nom);
       return { t: x.created_at, lignes: corps.filter((c) => c.length > 4).map((c) => ({ isbn: c[col('isbn13')], etat: c[col('etat')], prix: parseFloat(c[col('prix')]), titre: c[col('titre')], lien: c[col('lien')], statut: c[col('statut')] })) };
     });
+    const recents = tous.filter((im) => Date.parse(im.t) >= limite);
+    const imports = recents.length ? recents : tous.slice(0, 3);
     try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports })); } catch (e) { /* idem */ }
     return imports;
   }
@@ -1188,7 +1198,7 @@
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'imp-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'imp-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Derniers imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'imp-fermer') dlg.close(); });
     }
@@ -1199,10 +1209,14 @@
       const imports = await lireImports();
       const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
       const rang = (a) => { const { v, vendu } = infosImport(a); return vendu ? 9 : v ? RANG_IMPORT[v] : 8; };          // les pépites d'abord, les annonces vendues à la fin
-      corps.innerHTML = (imports.length ? imports.map((im) => {
+      const avecAnnonces = imports.filter((im) => im.lignes.length), sans = imports.length - avecAnnonces.length;
+      const total = avecAnnonces.reduce((t, im) => t + im.lignes.length, 0);
+      const resume = imports.length ? `<p class="imp-resume"><b>24 dernières heures</b> · ${imports.length} import${imports.length > 1 ? 's' : ''} · ${total} annonce${total > 1 ? 's' : ''}</p>` : '';
+      corps.innerHTML = resume + (avecAnnonces.length ? avecAnnonces.map((im) => {
         const lignes = im.lignes.map((a, k) => [a, k]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map((x) => x[0]);
         return `<h4 class="imp-tete"><span class="imp-quand">${esc(quand(im.t))}</span><span class="imp-compte">${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}</span></h4><ul class="imp-liste">${lignes.map(ligneImport).join('')}</ul>`;
-      }).join('') : '<p class="sous">Aucun import trouvé dans l\'historique récent.</p>')
+      }).join('') : '<p class="sous">Aucun import avec des annonces dans l\'historique récent.</p>')
+        + (sans ? `<p class="sous">${sans} import${sans > 1 ? 's' : ''} sans nouvelle annonce.</p>` : '')
         + (urlJournalImports ? `<p class="sous"><a href="${esc(urlJournalImports)}" target="_blank" rel="noopener noreferrer">Journal de la dernière exécution ↗</a></p>` : '');
     } catch (e) { corps.innerHTML = '<p class="sous">Impossible de lire l\'historique pour le moment (limite de l\'interface publique de GitHub). Réessayez dans quelques minutes.</p>'; }
   }

@@ -2286,3 +2286,5 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .butin-alerte:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .menu a.menu-butin[hidden] { display: none !important; }
 .menu .nb-butin:empty { display: none; }
+.imp-resume { margin: 4px 0 0; color: var(--muted); font-size: .9rem; }
+.imp-resume b { color: var(--text); }
