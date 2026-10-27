@@ -1944,9 +1944,15 @@
   });
 
   // « Gérer ma collection » : importer, exporter, effacer. Toujours affiché, même quand la collection est vide (c'est là qu'on la retrouve).
-  const blocGerer = () => `<div class="coll-gerer"><h3>Gérer ma collection</h3>
+  // Deux façons d'ajouter des livres : scanner, ou cocher ses séries pas à pas
+  const tuilesAjout = () => `<div class="gerer-grille">
+          <button type="button" class="gerer-tuile" data-scanner><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 9v6M10.5 9v6M14 9v6M17 9v6"/></svg><span><b>Scanner</b><small>Le code-barres de chaque livre</small></span></button>
+          <button type="button" class="gerer-tuile" data-parcours><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span><b>Pas à pas</b><small>Cocher vos séries, une par une</small></span></button>
+        </div>`;
+  const blocGerer = (sansAjout) => `<div class="coll-gerer"><h3>Gérer ma collection</h3>
         <div class="gerer-grille">
-          <button type="button" class="gerer-tuile" data-parcours><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span><b>Compléter pas à pas</b><small>Indiquer les séries que vous possédez</small></span></button>
+          ${sansAjout ? '' : `<button type="button" class="gerer-tuile" data-scanner><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 9v6M10.5 9v6M14 9v6M17 9v6"/></svg><span><b>Scanner</b><small>Le code-barres de chaque livre</small></span></button>`}
+          ${sansAjout ? '' : `<button type="button" class="gerer-tuile" data-parcours><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span><b>Pas à pas</b><small>Cocher vos séries, une par une</small></span></button>`}
           <button type="button" class="gerer-tuile" id="imp-ouvrir"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg><span><b>Importer un fichier</b><small>JSON, CSV ou liste d'ISBN</small></span></button>
           <button type="button" class="gerer-tuile" data-importer-liste aria-expanded="false" aria-controls="importer"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span><b>Importer une liste</b><small>Coller des ISBN</small></span></button>
           <button type="button" class="gerer-tuile" data-exporter aria-expanded="false" aria-controls="exporter-choix"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5"/><path d="M4 5h16"/></svg><span><b>Exporter ma collection</b><small>Fichier JSON ou tableur</small></span></button>
@@ -1986,8 +1992,8 @@
           <p class="actions"><button type="button" class="bouton" data-compte="connecter">Se connecter avec Google</button></p>`;
       } else if (!n) {
         corps = `<p class="gros">Elle est encore vide</p>
-          <p class="texte">Indiquez les séries que vous possédez : le guide calcule la valeur pour vous.</p>
-          <p class="actions"><button type="button" class="bouton" data-parcours id="hero-parcours">Constituer pas à pas</button></p>`;
+          <p class="texte">Ajoutez vos livres, le guide calcule la valeur pour vous.</p>
+          <p class="actions"><a class="bouton" href="collection.html#scanner">Scanner</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Pas à pas</button></p>`;
       } else {
         const couvs = Object.keys(COLL).map((id) => livreDe(id)).filter((b) => b && b.couverture).sort((x, y) => (valeurLigne(y, COLL[y.id]) || 0) - (valeurLigne(x, COLL[x.id]) || 0)).slice(0, 4);
         const eventail = couvs.length ? `<div class="eventail" aria-hidden="true">${couvs.map((b, i) => `<img src="${esc(b.couverture)}" alt="" style="--i:${i}" width="50" height="75">`).join('')}</div>` : '';
@@ -1995,7 +2001,7 @@
         corps = `<div class="coll-resume">${eventail}<div><p class="valeur"><span>Valeur estimée</span><b>${bl.total > 0 ? fmtE(bl.total) + flecheValeur(bl) : 'prix à venir'}</b></p>
           <p class="texte petit">${n} livre${n > 1 ? 's' : ''} · ${bl.titres} titre${bl.titres > 1 ? 's' : ''}</p></div></div>
           <div class="coll-prog"><div class="prog-barre" role="img" aria-label="${bl.lignes.length} éditions sur ${META.nb_versions}"><i style="width:${pct}%"></i></div><span>${bl.lignes.length} édition${bl.lignes.length > 1 ? 's' : ''} sur ${META.nb_versions}</span></div>
-          <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Compléter pas à pas</button></p>`;
+          <p class="actions"><a class="bouton" href="collection.html" id="hc-voir">Voir ma collection</a><button type="button" class="bouton bouton-clair" data-parcours id="hero-parcours">Pas à pas</button></p>`;
       }
       $('#hc-corps').innerHTML = corps;
     }
@@ -2029,8 +2035,7 @@
     if (!n) {
       const imp00 = $('#importer');                       // le panneau d'import est remis à l'abri avant de redessiner
       if (imp00 && zone.contains(imp00)) $('#collection').insertBefore(imp00, $('#coll-prive'));
-      zone.innerHTML = `<div class="coll-vide"><p>Suivez la valeur de vos livres. Le plus rapide : l'<strong>inventaire guidé</strong>.</p>
-        <p><button type="button" class="bouton" data-parcours>Constituer ma collection pas à pas</button></p></div>${htmlATrouver()}${blocGerer()}`;
+      zone.innerHTML = `<div class="coll-vide"><p>Deux façons d'ajouter vos livres :</p>${tuilesAjout()}</div>${htmlATrouver()}${blocGerer(true)}`;
       const imp2 = $('#importer'), dang2 = $('.gerer-danger');
       if (imp2 && dang2) dang2.before(imp2);
       return;
