@@ -117,9 +117,14 @@
     return appelRelais('session_renouveler', { session: sid }).then(function (r) {
       if (!r.ok) { if (/inconnue|expir/.test(r.erreur || '')) { oterLoc(CLE_SESSION); } throw new Error(r.erreur || 'refus'); }
       prendreJeton(r);
+      dire('connecte');          // la suite (collection du Drive, niveau de la personne) démarre tout de suite ; le prénom arrive en parallèle
       return fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + jeton } })      // le prénom vient de Google (met aussi à jour une session ouverte avant ce correctif)
         .then(function (x) { return x.ok ? x.json() : {}; }).catch(function () { return {}; })
-        .then(function (u) { if (u.given_name || u.name) ecrireLoc(CLE_LIEN, JSON.stringify({ nom: u.given_name || u.name })); dire('connecte'); });
+        .then(function (u) {
+          var avant = nom();
+          if (u.given_name || u.name) ecrireLoc(CLE_LIEN, JSON.stringify({ nom: u.given_name || u.name }));
+          if (nom() !== avant && typeof document !== 'undefined') document.dispatchEvent(new CustomEvent('cdh-nom'));
+        });
     });
   }
   function connecterSession(c) {
@@ -290,7 +295,12 @@
   function collectionDe(doc) { return doc && doc.items ? versLocal(doc).coll : {}; }
 
   // Reprise silencieuse : à l'ouverture, ou quand on revient sur la page, si une session existe et que le jeton d'une heure est périmé
-  function reprendreSession() { if (lireLoc(CLE_SESSION) && !actif()) renouveler().catch(function () { /* hors ligne : on réessaiera */ }); }
+  var enReprise = false;          // reconnexion automatique en cours : l'écran dit « connexion en cours » au lieu de demander de se reconnecter
+  function reprendreSession() {
+    if (!lireLoc(CLE_SESSION) || actif() || enReprise) return;
+    enReprise = true; dire('reprise');
+    renouveler().catch(function () { /* hors ligne : on réessaiera */ }).then(function () { enReprise = false; if (!actif()) dire('a-reprendre'); });
+  }
   if (typeof document !== 'undefined') {
     reprendreSession();
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reprendreSession(); });
@@ -298,6 +308,7 @@
   }
 
   racine.Cloud = {
+    reprise: function () { return enReprise; },
     config: config, lie: lie, nom: nom, actif: actif, preuve: preuve, connecter: connecter, deconnecter: deconnecter,
     synchroniser: synchroniser, planifier: planifier, apercu: apercu, premiereFois: premiereFois, enAttente: enAttente, supprimerDrive: supprimerDrive, statut: function () { return statut; },
     surChangement: function (f) { ecouteurs.push(f); }, derniereErreur: function () { return derniereErreur; }, versionsDrive: versionsDrive, lireVersion: lireVersion, collectionDe: collectionDe

@@ -15,6 +15,7 @@ window.Compte = (function () {
   function etat() {
     if (!window.Cloud || !window.Cloud.lie()) return { cle: 'deconnecte', ligne: 'Non connecté. Les fiches et la recherche restent libres ; les prix estimés et le scan sont réservés aux comptes.' };
     var s = window.Cloud.statut();
+    if (!window.Cloud.actif() && window.Cloud.reprise && window.Cloud.reprise()) return { cle: 'reprise', ligne: 'Connexion en cours…' };
     if (!window.Cloud.actif() || s === 'a-reprendre') return { cle: 'reprendre', ligne: 'Votre connexion a expiré. Vos changements sont gardés sur cet appareil.' };
     if (s === 'connecte' && !reprisEnCours && window.Cloud.premiereFois()) return { cle: 'choix', ligne: 'Votre collection n\'est pas encore enregistrée dans votre compte : il reste un choix à faire.' };
     if (s === 'synchro' || s === 'connecte') return { cle: 'synchro', ligne: 'Enregistrement en cours…' };
@@ -90,7 +91,7 @@ window.Compte = (function () {
     if (tab) {                       // onglet du bas : « Compte » (« Reconnexion » si la connexion a expiré)
       var span = tab.querySelector('span');
       if (span) span.textContent = e.cle === 'reprendre' ? 'Reconnexion' : e.cle === 'erreur' ? 'Erreur' : e.cle === 'choix' ? 'À finir' : 'Compte';
-      tab.classList.remove('compte-deconnecte', 'compte-reprendre', 'compte-synchro', 'compte-erreur', 'compte-a-jour', 'compte-choix');
+      tab.classList.remove('compte-deconnecte', 'compte-reprendre', 'compte-reprise', 'compte-synchro', 'compte-erreur', 'compte-a-jour', 'compte-choix');
       tab.classList.add('compte-' + e.cle);
     }
     var ban = $('#compte-bandeau');
@@ -137,12 +138,21 @@ window.Compte = (function () {
     }).catch(function () { /* nouvel essai à la prochaine page */ });
   }
 
+  // Dernier niveau connu, gardé sur l'appareil : il s'affiche tout de suite à l'ouverture, pendant que la connexion se refait et que le service technique le revérifie.
+  // Il ne donne aucun accès (les données restent servies seulement après vérification par le service technique).
+  var CLE_ROLE_VU = 'cdh-role-vu', rolePromesse = null, derniereRole = 0;
+  function roleVu() { try { var o = JSON.parse(localStorage.getItem(CLE_ROLE_VU) || 'null'); return o && o.r && Date.now() - o.t < 7 * 86400000 ? o : null; } catch (e) { return null; } }
+  function garderRole() { try { localStorage.setItem(CLE_ROLE_VU, JSON.stringify({ r: role, fin: finAcces, t: Date.now() })); } catch (e) { /* stockage indisponible */ } }
+  function oublierRole() { try { localStorage.removeItem(CLE_ROLE_VU); } catch (e) { /* rien à oublier */ } }
   function chargerRole() {
     if (!window.Relais || !window.Relais.configure() || !window.Cloud || !window.Cloud.actif()) return Promise.resolve();
-    return window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); signalerCompte(); }
+    if (rolePromesse) return rolePromesse;                                   // une seule demande à la fois
+    if (Date.now() - derniereRole < 60000 && role) return Promise.resolve();          // vérifié il y a moins d'une minute
+    rolePromesse = window.Relais.appeler('moi').then(function (r) {
+      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); garderRole(); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
-    }).catch(function () { echecRole = 'relais'; }).then(dessiner);
+    }).catch(function () { echecRole = 'relais'; }).then(function () { rolePromesse = null; dessiner(); });
+    return rolePromesse;
   }
 
   /* ---------- Connexion et première reprise ---------- */
@@ -433,9 +443,12 @@ window.Compte = (function () {
       configPrete = true;
       if (!configure) { ['#compte-haut', '#compte-feuille'].forEach(function (s) { var n = $(s); if (n) n.hidden = true; }); return; }
       role = lireSession(CLE_ROLE); finAcces = lireSession('cdh-fin') || '';
+      var vu = roleVu();
+      if (!role && vu && window.Cloud.lie()) { role = vu.r; finAcces = vu.fin || ''; }          // dernier niveau connu, en attendant la vérification
       bandeau(); dessiner();
-      if (window.Cloud.actif() && (!role || role === 'admin')) chargerRole();   // un sorcier relit son niveau à chaque page : sa période peut avoir changé      // connexion reprise sans nouvel onglet : le niveau est relu
-      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); role = ''; finAcces = ''; } dessiner(); if (window.Cloud.statut() === 'a-jour') chargerRole(); });
+      if (window.Cloud.actif() && (!role || role === 'admin' || (role === 'superadmin' && !(vu && Date.now() - vu.t < 600000)))) chargerRole();   // un sorcier relit son niveau à chaque page : sa période peut avoir changé      // connexion reprise sans nouvel onglet : le niveau est relu
+      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); oublierRole(); role = ''; finAcces = ''; } dessiner(); if (st === 'connecte' || window.Cloud.statut() === 'a-jour') chargerRole(); });          // le niveau est relu dès que la connexion est prête, en même temps que le Drive
+      document.addEventListener('cdh-nom', dessiner);
       document.addEventListener('cdh-collection', dessiner);
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)
       var derniere = 0;

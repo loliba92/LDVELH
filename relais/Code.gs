@@ -1,4 +1,4 @@
-// Version du 2026-10-27 16:40 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-27 20:57 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -45,11 +45,22 @@ function ecrireAdmins(contenu, sha, message) {
 
 function verifierConnexion(jeton) {
   var champ = /^ya29\./.test(jeton) ? 'access_token' : 'id_token';        // le site envoie un jeton d'accès (ya29.…)
-  var r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?' + champ + '=' + encodeURIComponent(jeton), { muteHttpExceptions: true });
-  var infos = {}; try { infos = JSON.parse(r.getContentText()); } catch (e) { /* réponse illisible : refus plus bas */ }
+  // La réponse de Google est gardée 5 minutes (sous une empreinte du jeton) : les appels qui se suivent (niveau, Butin, notes…) ne redemandent pas à Google.
+  // L'expiration du jeton reste vérifiée à chaque appel par decider(), et la liste des admins est relue à chaque fois (30 s de cache).
+  var cache = CacheService.getScriptCache(), cleGoogle = 'ti:' + empreinteDe(jeton).slice(7, 47), infos = null;
+  try { var connu = cache.get(cleGoogle); if (connu) infos = JSON.parse(connu); } catch (e) { infos = null; }
+  if (!infos) {
+    var r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?' + champ + '=' + encodeURIComponent(jeton), { muteHttpExceptions: true });
+    try { infos = JSON.parse(r.getContentText()); } catch (e) { infos = {}; /* réponse illisible : refus plus bas */ }
+    if (r.getResponseCode() === 200 && infos && infos.aud) { try { cache.put(cleGoogle, JSON.stringify(infos), 300); } catch (e) { /* trop gros ou cache indisponible */ } }
+  }
   var admins = lireAdmins();
   return { identite: decider(infos, admins.contenu, prop('CLIENT_ID'), empreinteDe, Math.floor(Date.now() / 1000)), admins: admins };
 }
+
+/* À brancher sur un déclencheur « toutes les 5 minutes » (relais/LISEZMOI.md) : garde le service éveillé et la liste des admins en mémoire.
+   L'effet sur la rapidité n'est pas garanti par Google : à constater à l'usage. */
+function garderEveille() { try { lireAdmins(); } catch (e) { /* tant pis */ } }
 
 var URL_JETON_GOOGLE = 'https://oauth2.googleapis.com/token';
 
@@ -92,6 +103,7 @@ function gererSession(q) {
 function doPost(e) {
   try {
     var q = JSON.parse(e.postData.contents || '{}');
+    if (q.action === 'ping') return reponse({ ok: true });                  // réveille le service, sans aucune donnée
     if (/^session_/.test(String(q.action || ''))) return reponse(gererSession(q));
     var v = verifierConnexion(String(q.jeton || ''));
     if (!v.identite.ok) return reponse({ ok: false, erreur: v.identite.raison });
