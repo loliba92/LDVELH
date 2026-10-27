@@ -966,9 +966,9 @@
       ${fond ? '<div class="fiche-fond" aria-hidden="true"></div>' : ''}
       <div class="fiche">
         <div class="fiche-haut">
-          <div class="fiche-couv">${b.couverture_grande
+          <div class="fiche-couv"><div class="couv-cadre">${b.couverture_grande
             ? `<img src="${esc(racine(b.couverture_grande))}" alt="Jaquette de ${esc(b.titre)}" width="300" height="420" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
-            : tuile(b)}</div>
+            : tuile(b)}<div class="coll-surimage" id="coll-sur">${collEtats(b)}</div></div><div class="coll-sous" id="coll-sous">${collSous(b)}</div></div>
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
@@ -987,7 +987,6 @@
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${estNiveau2() ? blocOffre() : ''}
         ${estNiveau3Brut() ? blocAnnonces(b) : ''}
-        ${blocCollectionFiche(b)}
         <h3>Détails du livre</h3>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
@@ -2310,31 +2309,28 @@
   }
 
   // Fiche : bloc « dans ma collection »
-  function blocCollectionFiche(b) {
-    if (sansCompte()) {
-      return `<div class="coll-fiche"><h3>Dans ma collection</h3><p class="sous">Les fiches restent consultables sans compte. Pour garder vos livres, connectez-vous : Google les enregistre dans un espace réservé de votre Drive.</p>
-        <button type="button" class="bouton" data-compte="connecter">Se connecter pour ajouter à ma collection</button></div>`;
-    }
+  // Collection depuis la fiche : les trois états sont posés sur la jaquette ; en dessous, « À trouver » (ou « À vendre », la quantité et la valeur)
+  function collEtats(b) {
+    if (sansCompte()) return '';
+    const c = COLL[b.id];
+    return `<div class="ex-etats" role="group" aria-label="Ajouter à ma collection : état de mon exemplaire">${ETATS.map((x) => `<button type="button" data-fe="${x.k}" aria-pressed="${!!c && c.etat === x.k}" title="${x.long}" aria-label="${x.long}${c && c.etat === x.k ? ' : retirer de ma collection' : ''}">${ABREGE[x.k]}</button>`).join('')}</div>`;
+  }
+  function collSous(b) {
+    if (sansCompte()) return '<button type="button" class="fiche-marque" data-compte="connecter">Ajouter à ma collection</button>';
     const c = COLL[b.id], v = c ? valeurLigne(b, c) : null;
-    const etats = ETATS.map((x) => `<button type="button" data-fe="${x.k}" aria-pressed="${!!c && c.etat === x.k}" title="${x.long}" aria-label="${x.long}${c && c.etat === x.k ? ' : retirer de ma collection' : ''}">${ABREGE[x.k]}</button>`).join('');
-    const action = c
-      ? `<button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button>`
-      : `<button type="button" class="fiche-marque trouver${SOUH[b.id] ? ' actif' : ''}" data-fe-trouver aria-pressed="${!!SOUH[b.id]}">À trouver</button>`;
-    return `<div class="coll-fiche"><h3>Dans ma collection</h3>
-      <p class="sous">${c ? 'Touchez l\'état de votre exemplaire. Toucher le même état le retire.' : 'Choisissez l\'état de votre exemplaire pour l\'ajouter.'}</p>
-      <div class="coll-ligne"><div class="ex-etats" role="group" aria-label="État de mon exemplaire">${etats}</div>
-        ${c ? `<label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label>` : ''}${action}</div>
-      ${c ? `<p class="valeur-ex">${v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`}</p>` : ''}</div>`;
+    if (!c) return `<button type="button" class="fiche-marque trouver${SOUH[b.id] ? ' actif' : ''}" data-fe-trouver aria-pressed="${!!SOUH[b.id]}">À trouver</button>`;
+    return `<div class="coll-ligne"><label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label>
+      <button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button></div>
+      <p class="valeur-ex">${v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`}</p>`;
   }
   function brancherFicheCollection(b) {
-    const zone = $('.coll-fiche');
-    if (!zone || !zone.querySelector('[data-fe]')) return;           // visiteur sans compte : le bloc ne contient que l'invitation
+    const zone = $('.fiche-couv');
+    if (!zone || !zone.querySelector('[data-fe]')) return;           // visiteur sans compte : seulement l'invitation à se connecter
     let enCours = false;
-    const rafraichir = () => {                                       // la zone reste en place : seul son contenu est remplacé
+    const rafraichir = () => {                                       // seules les deux zones changent : la jaquette reste en place
       if (enCours) return;                                           // le retrait d'un champ actif déclenche un « change » : on l'ignore
       enCours = true;
-      const t = document.createElement('div'); t.innerHTML = blocCollectionFiche(b);
-      zone.replaceChildren(...t.firstElementChild.childNodes); afficher();
+      $('#coll-sur').innerHTML = collEtats(b); $('#coll-sous').innerHTML = collSous(b); afficher();
       enCours = false;
     };
     zone.addEventListener('click', (e) => {

@@ -2078,3 +2078,15 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fo-niveau { font-size: 1.05rem; }
 .fo-note { margin: 4px 0 0; }
 .annonces-fiche.fiche-carte { padding: 0 16px; }
+
+/* Collection sur la jaquette (fiche) : les trois états posés en bas de l'image, le reste en dessous */
+.couv-cadre { position: relative; }
+.coll-surimage .ex-etats { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; box-shadow: 0 2px 10px rgba(0, 0, 0, .55); border-radius: var(--r); }
+.coll-surimage .ex-etats button { flex: 1; min-width: 0; padding: 0 4px; background: rgba(12, 12, 12, .86); }
+.coll-surimage .ex-etats button[aria-pressed="true"] { background: var(--accent); }
+.coll-sous { margin-top: 8px; display: grid; gap: 8px; justify-items: stretch; }
+.coll-sous .coll-ligne { gap: 6px 10px; }
+.coll-sous .fiche-marque { width: 100%; padding: 0 10px; }
+.coll-sous .coll-ligne .fiche-marque { width: auto; flex: 1 1 auto; }
+.coll-sous .fiche-qte input { width: 56px; }
+.coll-sous .valeur-ex { margin: 0; font-size: 1.05rem; }
