@@ -132,24 +132,68 @@ def variations_par_serie(avant, apres, observes, groupe_de, serie_de):
     return par
 
 
-def cascade_du_dernier_jour(historique, observes, groupe_de, serie_de, annonces_de=None):
-    """Pour le dernier jour : pour chaque groupe, la variation moyenne (en %) et sa part de chaque série.
-    Les parts s'additionnent exactement à la variation moyenne (somme des variations logarithmiques / nombre de prix).
+MAX_SERIES = 5      # séries affichées dans le détail ; les autres sont regroupées dans un bloc « Autres séries »
+
+
+def cascade_de_la_periode(historique, observes, groupe_de, serie_de, annonces_de=None):
+    """Pour chaque groupe : la variation moyenne depuis le début de sa mesure (en %) et la part de chaque série.
+    Chaque jour, la variation moyenne du groupe se découpe par série (somme des variations logarithmiques de la série / nombre de prix du groupe).
+    Les parts de tous les jours s'additionnent ; elles sont ensuite ramenées à des % qui s'additionnent exactement à la variation du groupe.
     Pour chaque série : les livres distincts, leurs annonces actuelles et le nombre de prix observés."""
     annonces_de = annonces_de or {}
-    avant, apres = historique[-2]["prix"], historique[-1]["prix"]
-    par = variations_par_serie(avant, apres, observes, groupe_de, serie_de)
+    cumul, propre, debut, isbns, cles = {}, {}, {}, {}, {}
+    for i in range(1, len(historique)):
+        avant, apres = historique[i - 1]["prix"], historique[i]["prix"]
+        par = variations_par_serie(avant, apres, observes, groupe_de, serie_de)
+        for groupe, series in par.items():
+            n = sum(len(v) for v in series.values())
+            debut.setdefault(groupe, historique[i - 1]["date"])
+            for nom, v in series.items():
+                cumul.setdefault(groupe, {}).setdefault(nom, 0.0)
+                cumul[groupe][nom] += sum(x for _, x in v) / n
+                propre.setdefault((groupe, nom), []).append((sum(x for _, x in v), len(v)))   # par jour : somme des variations et nombre de prix
+                isbns.setdefault((groupe, nom), set()).update(isbn for isbn, _ in v)
+    # prix distincts mesurés sur la période, par groupe
+    for i in range(1, len(historique)):
+        for cle, p1 in historique[i]["prix"].items():
+            p0 = historique[i - 1]["prix"].get(cle)
+            groupe = groupe_de.get(cle.split("|")[0])
+            if groupe in cumul and cle in observes and p0 and p1 and p0 > 0 and p1 > 0:
+                cles.setdefault(groupe, set()).add(cle)
     sortie = {}
-    for groupe, series in par.items():
-        n = sum(len(v) for v in series.values())
+    for groupe, series in cumul.items():
+        total_log = sum(series.values())
+        total_pct = (math.exp(total_log) - 1) * 100
+        echelle = total_pct / total_log if abs(total_log) > 1e-9 else 100.0
+
+        # indice propre d'une ou plusieurs séries : chaque jour, somme des variations / nombre de prix (jours alignés par rang)
+        def indice_propre(noms):
+            par_jour = {}
+            for n in noms:
+                for k, (somme, nombre) in enumerate(propre[(groupe, n)]):
+                    d, t = par_jour.get(k, (0.0, 0))
+                    par_jour[k] = (d + somme, t + nombre)
+            return sum(d / t for d, t in par_jour.values() if t)
+
         parts = []
-        for nom, v in series.items():
-            isbns = {isbn for isbn, _ in v}
-            parts.append({"serie": nom, "livres": len(isbns), "annonces": sum(annonces_de.get(i, 0) for i in isbns),
-                          "prix": len(v), "contribution_pct": round(sum(x for _, x in v) / n * 100, 2)})
-        parts.sort(key=lambda x: x["contribution_pct"])
-        sortie[groupe] = {"date": historique[-1]["date"], "variation_pct": round(sum(x for v in series.values() for _, x in v) / n * 100, 2),
-                          "prix_observes": n, "series": parts}
+        for nom, valeur in series.items():
+            parts.append({"serie": nom, "livres": len(isbns[(groupe, nom)]), "annonces": sum(annonces_de.get(i, 0) for i in isbns[(groupe, nom)]),
+                          "contribution_pct": round(valeur * echelle, 2), "noms": [nom]})
+        parts.sort(key=lambda x: -abs(x["contribution_pct"]))
+        if len(parts) > MAX_SERIES + 1:
+            reste = parts[MAX_SERIES:]
+            parts = parts[:MAX_SERIES] + [{"serie": f"Autres séries ({len(reste)})", "autres": True,
+                                           "livres": len({i for x in reste for i in isbns[(groupe, x['noms'][0])]}),
+                                           "annonces": sum(x["annonces"] for x in reste),
+                                           "contribution_pct": round(sum(x["contribution_pct"] for x in reste), 2),
+                                           "noms": [n for x in reste for n in x["noms"]]}]
+        for x in parts:
+            log = indice_propre(x.pop("noms"))
+            x["debut"], x["fin"], x["variation_pct"] = 100.0, round(100 * math.exp(log), 2), round((math.exp(log) - 1) * 100, 2)
+        # les cinq premières par variation, le bloc « Autres » toujours en dernier
+        parts.sort(key=lambda x: (x.get("autres", False), x["variation_pct"]))
+        sortie[groupe] = {"depuis": debut[groupe], "date": historique[-1]["date"], "variation_pct": round(total_pct, 2),
+                          "debut": 100.0, "fin": round(100 * math.exp(total_log), 2), "prix_observes": len(cles.get(groupe, ())), "series": parts}
     return sortie
 
 
@@ -215,7 +259,7 @@ def main():
     for groupe, valeur in moyennes.items():
         if groupe in resultat["groupes"]:
             resultat["groupes"][groupe]["indice_moyenne"] = valeur
-    resultat["cascade"] = cascade_du_dernier_jour(historique_observes, observes, groupe_de, series_depuis(), annonces_par_isbn(ANNONCES))
+    resultat["cascade"] = cascade_de_la_periode(historique_observes, observes, groupe_de, series_depuis(), annonces_par_isbn(ANNONCES))
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")
     return 0

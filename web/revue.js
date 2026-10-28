@@ -800,19 +800,14 @@
       const editeurs = Object.entries(parEditeur).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
       // Une ligne par édition qui bouge. Les éditions stables sont repliées en bas : elles ne disent rien de plus.
       // Cascade (waterfall) : chaque série fait monter ou descendre la variation du jour, de 0 au total
+      // Détail par série, façon « roll-forward » : indice de départ (100), indice d'arrivée et variation, série par série, depuis le début de la mesure
       const cascadeHtml = (c) => {
-        if (!c || !c.series || !c.series.length) return '<p class="ind-vide">Aucun détail pour ce jour.</p>';
-        let cum = 0;
-        const pas = c.series.map((x) => { const debut = cum; cum += x.contribution_pct; return { x, debut, fin: cum }; });
-        const bornes = [0, cum, ...pas.flatMap((p) => [p.debut, p.fin])];
-        const lo = Math.min(...bornes), hi = Math.max(...bornes), etendue = hi - lo || 1;
-        const pos = (v) => (((v - lo) / etendue) * 100).toFixed(2);
-        const lignesWf = pas.map((p) => {
-          const bas = Math.min(p.debut, p.fin), haut = Math.max(p.debut, p.fin), signe = p.x.contribution_pct < 0 ? 'baisse' : p.x.contribution_pct > 0 ? 'hausse' : 'stable';
-          return `<li class="ind-wf"><div class="ind-wf-haut"><span class="ind-wf-nom">${esc(p.x.serie)} <span class="ind-meta">${nb(p.x.livres, 'livre')} · ${nb(p.x.annonces || 0, 'annonce')}</span></span><b class="ind-var ${signe}">${p.x.contribution_pct > 0 ? '+' : p.x.contribution_pct < 0 ? '−' : ''}${virgule(Math.abs(p.x.contribution_pct), 2)} %</b></div><div class="ind-wf-piste" aria-hidden="true"><span class="ind-wf-zero" style="left:${pos(0)}%"></span><span class="ind-wf-barre ${signe}" style="left:${pos(bas)}%;width:${Math.max(0.6, pos(haut) - pos(bas))}%"></span></div></li>`;
-        }).join('');
-        const total = c.variation_pct > 0 ? '+' : c.variation_pct < 0 ? '−' : '';
-        return `<p class="ind-wf-total">Veille → aujourd'hui : <b>${total}${virgule(Math.abs(c.variation_pct), 2)} %</b> sur ${nb(c.prix_observes, 'prix observé')}</p><ul class="ind-wf-liste">${lignesWf}</ul>`;
+        if (!c || !c.series || !c.series.length) return '<p class="ind-vide">Aucun détail disponible.</p>';
+        const signe = (v) => (v < 0 ? 'baisse' : v > 0 ? 'hausse' : 'stable');
+        const pct = (v) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${virgule(Math.abs(v), 1)} %`;
+        const ligneRf = (nom, meta, debut, fin, variation, classe) => `<li class="ind-rf-ligne ${classe || ''}"><span class="ind-rf-nom">${esc(nom)}${meta ? ` <span class="ind-meta">${meta}</span>` : ''}</span><span class="ind-rf-n">${virgule(debut, 1)}</span><span class="ind-rf-n">${virgule(fin, 1)}</span><b class="ind-var ${signe(variation)}">${pct(variation)}</b></li>`;
+        const lignes = c.series.map((x) => ligneRf(x.serie, `${nb(x.livres, 'livre')} · ${nb(x.annonces || 0, 'annonce')}`, x.debut, x.fin, x.variation_pct)).join('');
+        return `<p class="ind-wf-total">Depuis le ${jour(c.depuis)}, sur ${nb(c.prix_observes, 'prix observé')}</p><ul class="ind-rf"><li class="ind-rf-ligne ind-rf-tete"><span class="ind-rf-nom">Série</span><span class="ind-rf-n">Début</span><span class="ind-rf-n">Fin</span><span class="ind-rf-n">Variation</span></li>${lignes}${ligneRf('Ensemble de l\'édition', '', c.debut, c.fin, c.variation_pct, 'ind-rf-total')}</ul>`;
       };
       const ligne = (l) => {
         const variation = l.sens === 'stable' ? 'stable' : `${virgule(Math.abs(l.ecart), 1)} %`;

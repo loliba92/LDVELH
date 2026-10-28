@@ -58,17 +58,32 @@ class TestObserves(unittest.TestCase):
 
 
 class TestCascade(unittest.TestCase):
-    def test_les_parts_par_serie_font_la_variation_du_groupe(self):
-        avant = {"111|bon": 10.0, "111|tres_bon": 20.0, "222|bon": 10.0}
-        apres = {"111|bon": 9.0, "111|tres_bon": 20.0, "222|bon": 11.0}
+    def test_les_parts_par_serie_font_la_variation_depuis_le_debut(self):
+        j1 = {"111|bon": 10.0, "111|tres_bon": 20.0, "222|bon": 10.0}
+        j2 = {"111|bon": 9.0, "111|tres_bon": 20.0, "222|bon": 11.0}
+        j3 = {"111|bon": 8.0, "111|tres_bon": 18.0, "222|bon": 11.0}
         groupe = {"111": "V1 · Gallimard", "222": "V1 · Gallimard"}
         serie = {"111": "Folio junior", "222": "Défis fantastiques"}
-        c = im.cascade_du_dernier_jour([{"date": "d1", "prix": avant}, {"date": "d2", "prix": apres}], {"111|bon", "111|tres_bon", "222|bon"}, groupe, serie, {"111": 5, "222": 2})
+        historique = [{"date": "d1", "prix": j1}, {"date": "d2", "prix": j2}, {"date": "d3", "prix": j3}]
+        c = im.cascade_de_la_periode(historique, {"111|bon", "111|tres_bon", "222|bon"}, groupe, serie, {"111": 5, "222": 2})
         g = c["V1 · Gallimard"]
+        self.assertEqual(g["depuis"], "d1")
         self.assertAlmostEqual(sum(p["contribution_pct"] for p in g["series"]), g["variation_pct"], places=1)
-        self.assertEqual(g["prix_observes"], 3)
         folio = next(p for p in g["series"] if p["serie"] == "Folio junior")
-        self.assertEqual((folio["livres"], folio["prix"], folio["annonces"]), (1, 2, 5))   # un livre, deux prix, ses annonces
+        self.assertEqual((folio["livres"], folio["annonces"]), (1, 5))   # un livre dans deux états, ses annonces
+        self.assertEqual(g["prix_observes"], 3)
+
+    def test_au_plus_cinq_series_puis_un_bloc_autres(self):
+        isbns = [str(100 + i) for i in range(8)]
+        j1 = {f"{i}|bon": 10.0 for i in isbns}
+        j2 = {f"{i}|bon": 10.0 + k for k, i in enumerate(isbns)}
+        groupe = {i: "V1 · Gallimard" for i in isbns}
+        serie = {i: f"Série {k}" for k, i in enumerate(isbns)}
+        c = im.cascade_de_la_periode([{"date": "d1", "prix": j1}, {"date": "d2", "prix": j2}], set(j1), groupe, serie)
+        lignes = c["V1 · Gallimard"]["series"]
+        self.assertEqual(len(lignes), im.MAX_SERIES + 1)
+        self.assertTrue(lignes[-1].get("autres"))
+        self.assertEqual(lignes[-1]["livres"], 8 - im.MAX_SERIES)
 
 
 if __name__ == "__main__":
