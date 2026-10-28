@@ -809,7 +809,7 @@
         const pos = (v) => (((v - lo) / etendue) * 100).toFixed(2);
         const lignesWf = pas.map((p) => {
           const bas = Math.min(p.debut, p.fin), haut = Math.max(p.debut, p.fin), signe = p.x.contribution_pct < 0 ? 'baisse' : p.x.contribution_pct > 0 ? 'hausse' : 'stable';
-          return `<li class="ind-wf"><div class="ind-wf-haut"><span class="ind-wf-nom">${esc(p.x.serie)} <span class="ind-meta">${nb(p.x.livres, 'livre')}</span></span><b class="ind-var ${signe}">${p.x.contribution_pct > 0 ? '+' : p.x.contribution_pct < 0 ? '−' : ''}${virgule(Math.abs(p.x.contribution_pct), 2)} %</b></div><div class="ind-wf-piste" aria-hidden="true"><span class="ind-wf-zero" style="left:${pos(0)}%"></span><span class="ind-wf-barre ${signe}" style="left:${pos(bas)}%;width:${Math.max(0.6, pos(haut) - pos(bas))}%"></span></div></li>`;
+          return `<li class="ind-wf"><div class="ind-wf-haut"><span class="ind-wf-nom">${esc(p.x.serie)} <span class="ind-meta">${nb(p.x.livres, 'livre')} · ${nb(p.x.annonces || 0, 'annonce')}</span></span><b class="ind-var ${signe}">${p.x.contribution_pct > 0 ? '+' : p.x.contribution_pct < 0 ? '−' : ''}${virgule(Math.abs(p.x.contribution_pct), 2)} %</b></div><div class="ind-wf-piste" aria-hidden="true"><span class="ind-wf-zero" style="left:${pos(0)}%"></span><span class="ind-wf-barre ${signe}" style="left:${pos(bas)}%;width:${Math.max(0.6, pos(haut) - pos(bas))}%"></span></div></li>`;
         }).join('');
         const total = c.variation_pct > 0 ? '+' : c.variation_pct < 0 ? '−' : '';
         return `<p class="ind-wf-total">Veille → aujourd'hui : <b>${total}${virgule(Math.abs(c.variation_pct), 2)} %</b> sur ${nb(c.prix_observes, 'prix observé')}</p><ul class="ind-wf-liste">${lignesWf}</ul>`;

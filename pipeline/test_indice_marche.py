@@ -63,10 +63,12 @@ class TestCascade(unittest.TestCase):
         apres = {"111|bon": 9.0, "111|tres_bon": 20.0, "222|bon": 11.0}
         groupe = {"111": "V1 · Gallimard", "222": "V1 · Gallimard"}
         serie = {"111": "Folio junior", "222": "Défis fantastiques"}
-        c = im.cascade_du_dernier_jour([{"date": "d1", "prix": avant}, {"date": "d2", "prix": apres}], {"111|bon", "111|tres_bon", "222|bon"}, groupe, serie)
+        c = im.cascade_du_dernier_jour([{"date": "d1", "prix": avant}, {"date": "d2", "prix": apres}], {"111|bon", "111|tres_bon", "222|bon"}, groupe, serie, {"111": 5, "222": 2})
         g = c["V1 · Gallimard"]
         self.assertAlmostEqual(sum(p["contribution_pct"] for p in g["series"]), g["variation_pct"], places=1)
         self.assertEqual(g["prix_observes"], 3)
+        folio = next(p for p in g["series"] if p["serie"] == "Folio junior")
+        self.assertEqual((folio["livres"], folio["prix"], folio["annonces"]), (1, 2, 5))   # un livre, deux prix, ses annonces
 
 
 if __name__ == "__main__":

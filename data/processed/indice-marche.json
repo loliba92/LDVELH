@@ -1411,122 +1411,170 @@
    "series": [
     {
      "serie": "L'Œil Noir",
-     "livres": 33,
+     "livres": 20,
+     "annonces": 51,
+     "prix": 33,
      "contribution_pct": -0.28
     },
     {
      "serie": "Loup Solitaire",
-     "livres": 47,
+     "livres": 22,
+     "annonces": 110,
+     "prix": 47,
      "contribution_pct": -0.21
     },
     {
      "serie": "Les Terres de Légende",
-     "livres": 12,
+     "livres": 6,
+     "annonces": 25,
+     "prix": 12,
      "contribution_pct": -0.16
     },
     {
      "serie": "Défis Fantastiques",
-     "livres": 116,
+     "livres": 52,
+     "annonces": 264,
+     "prix": 116,
      "contribution_pct": -0.09
     },
     {
      "serie": "Quête du Graal",
-     "livres": 17,
+     "livres": 7,
+     "annonces": 42,
+     "prix": 17,
      "contribution_pct": -0.03
     },
     {
      "serie": "Chroniques Crétoises",
-     "livres": 5,
+     "livres": 3,
+     "annonces": 11,
+     "prix": 5,
      "contribution_pct": -0.02
     },
     {
      "serie": "Double Jeu",
-     "livres": 14,
+     "livres": 6,
+     "annonces": 23,
+     "prix": 14,
      "contribution_pct": -0.02
     },
     {
      "serie": "L'Epée de Légende",
-     "livres": 9,
+     "livres": 5,
+     "annonces": 22,
+     "prix": 9,
      "contribution_pct": -0.02
     },
     {
      "serie": "La Voie du Tigre",
-     "livres": 12,
+     "livres": 5,
+     "annonces": 20,
+     "prix": 12,
      "contribution_pct": -0.02
     },
     {
      "serie": "Sherlock Holmes",
-     "livres": 15,
+     "livres": 8,
+     "annonces": 24,
+     "prix": 15,
      "contribution_pct": -0.02
     },
     {
      "serie": "Destins",
-     "livres": 4,
+     "livres": 2,
+     "annonces": 7,
+     "prix": 4,
      "contribution_pct": -0.01
     },
     {
      "serie": "Le Maître du Destin",
-     "livres": 5,
+     "livres": 2,
+     "annonces": 5,
+     "prix": 5,
      "contribution_pct": -0.01
     },
     {
      "serie": "Les Portes Interdites",
-     "livres": 4,
+     "livres": 2,
+     "annonces": 7,
+     "prix": 4,
      "contribution_pct": -0.01
     },
     {
      "serie": "Astre d'Or",
-     "livres": 9,
+     "livres": 4,
+     "annonces": 18,
+     "prix": 9,
      "contribution_pct": -0.0
     },
     {
      "serie": "Epouvante!",
-     "livres": 4,
+     "livres": 2,
+     "annonces": 6,
+     "prix": 4,
      "contribution_pct": 0.0
     },
     {
      "serie": "Les Messagers du Temps",
-     "livres": 8,
+     "livres": 4,
+     "annonces": 13,
+     "prix": 8,
      "contribution_pct": -0.0
     },
     {
      "serie": "Métamorphose",
-     "livres": 4,
+     "livres": 2,
+     "annonces": 7,
+     "prix": 4,
      "contribution_pct": 0.0
     },
     {
      "serie": "Neige d'Automne",
-     "livres": 2,
+     "livres": 1,
+     "annonces": 3,
+     "prix": 2,
      "contribution_pct": 0.0
     },
     {
      "serie": "Défis et Sortilèges",
-     "livres": 22,
+     "livres": 8,
+     "annonces": 42,
+     "prix": 22,
      "contribution_pct": 0.01
     },
     {
      "serie": "Histoire",
-     "livres": 8,
+     "livres": 5,
+     "annonces": 16,
+     "prix": 8,
      "contribution_pct": 0.01
     },
     {
      "serie": "Loup*Ardent",
-     "livres": 11,
+     "livres": 4,
+     "annonces": 35,
+     "prix": 11,
      "contribution_pct": 0.01
     },
     {
      "serie": "Super Sherlock",
-     "livres": 3,
+     "livres": 2,
+     "annonces": 4,
+     "prix": 3,
      "contribution_pct": 0.01
     },
     {
      "serie": "Dragon d'Or",
-     "livres": 14,
+     "livres": 6,
+     "annonces": 34,
+     "prix": 14,
      "contribution_pct": 0.02
     },
     {
      "serie": "Sorcellerie!",
-     "livres": 9,
+     "livres": 3,
+     "annonces": 18,
+     "prix": 9,
      "contribution_pct": 0.02
     }
    ]
@@ -1539,16 +1587,22 @@
     {
      "serie": "Destins",
      "livres": 1,
+     "annonces": 1,
+     "prix": 1,
      "contribution_pct": 0.0
     },
     {
      "serie": "Forge divine",
      "livres": 1,
+     "annonces": 1,
+     "prix": 1,
      "contribution_pct": 0.0
     },
     {
      "serie": "Les Contes",
      "livres": 2,
+     "annonces": 3,
+     "prix": 2,
      "contribution_pct": 0.0
     }
    ]
@@ -1560,7 +1614,9 @@
    "series": [
     {
      "serie": "Destins",
-     "livres": 4,
+     "livres": 3,
+     "annonces": 4,
+     "prix": 4,
      "contribution_pct": 0.0
     }
    ]
@@ -1572,57 +1628,79 @@
    "series": [
     {
      "serie": "Dragon d'Or",
-     "livres": 11,
+     "livres": 6,
+     "annonces": 15,
+     "prix": 11,
      "contribution_pct": -0.07
     },
     {
      "serie": "Défis Fantastiques",
-     "livres": 41,
+     "livres": 30,
+     "annonces": 52,
+     "prix": 41,
      "contribution_pct": -0.06
     },
     {
      "serie": "Loup Solitaire",
-     "livres": 35,
+     "livres": 24,
+     "annonces": 43,
+     "prix": 35,
      "contribution_pct": -0.05
     },
     {
      "serie": "Quête du Graal",
-     "livres": 6,
+     "livres": 5,
+     "annonces": 7,
+     "prix": 6,
      "contribution_pct": -0.03
     },
     {
      "serie": "Epouvante!",
      "livres": 2,
+     "annonces": 3,
+     "prix": 2,
      "contribution_pct": -0.01
     },
     {
      "serie": "Destins",
-     "livres": 2,
+     "livres": 1,
+     "annonces": 2,
+     "prix": 2,
      "contribution_pct": -0.0
     },
     {
      "serie": "Défis de l'Histoire",
-     "livres": 3,
+     "livres": 2,
+     "annonces": 3,
+     "prix": 3,
      "contribution_pct": 0.0
     },
     {
      "serie": "Sherlock Holmes",
-     "livres": 4,
+     "livres": 2,
+     "annonces": 4,
+     "prix": 4,
      "contribution_pct": 0.0
     },
     {
      "serie": "Super Sherlock",
-     "livres": 3,
+     "livres": 1,
+     "annonces": 4,
+     "prix": 3,
      "contribution_pct": 0.0
     },
     {
      "serie": "Loup*Ardent",
-     "livres": 6,
+     "livres": 4,
+     "annonces": 9,
+     "prix": 6,
      "contribution_pct": 0.01
     },
     {
      "serie": "Sorcellerie!",
-     "livres": 3,
+     "livres": 2,
+     "annonces": 4,
+     "prix": 3,
      "contribution_pct": 0.04
     }
    ]
@@ -1635,6 +1713,8 @@
     {
      "serie": "Destiny Quest",
      "livres": 1,
+     "annonces": 1,
+     "prix": 1,
      "contribution_pct": 0.0
     }
    ]
@@ -1646,12 +1726,16 @@
    "series": [
     {
      "serie": "Loup Solitaire",
-     "livres": 20,
+     "livres": 14,
+     "annonces": 26,
+     "prix": 20,
      "contribution_pct": -0.02
     },
     {
      "serie": "Défis Fantastiques",
-     "livres": 16,
+     "livres": 10,
+     "annonces": 21,
+     "prix": 16,
      "contribution_pct": 0.05
     }
    ]
@@ -1663,17 +1747,23 @@
    "series": [
     {
      "serie": "Loup Solitaire",
-     "livres": 25,
+     "livres": 16,
+     "annonces": 36,
+     "prix": 25,
      "contribution_pct": -1.74
     },
     {
      "serie": "Sorcellerie!",
-     "livres": 8,
+     "livres": 4,
+     "annonces": 14,
+     "prix": 8,
      "contribution_pct": -0.26
     },
     {
      "serie": "Défis Fantastiques",
-     "livres": 25,
+     "livres": 15,
+     "annonces": 42,
+     "prix": 25,
      "contribution_pct": 0.16
     }
    ]
@@ -1685,17 +1775,23 @@
    "series": [
     {
      "serie": "Loup Solitaire",
-     "livres": 19,
+     "livres": 13,
+     "annonces": 24,
+     "prix": 19,
      "contribution_pct": -1.38
     },
     {
      "serie": "Quête du Graal",
-     "livres": 4,
+     "livres": 3,
+     "annonces": 4,
+     "prix": 4,
      "contribution_pct": -0.02
     },
     {
      "serie": "Défis Fantastiques",
-     "livres": 21,
+     "livres": 12,
+     "annonces": 28,
+     "prix": 21,
      "contribution_pct": -0.01
     }
    ]
@@ -1707,7 +1803,9 @@
    "series": [
     {
      "serie": "La Saga du Prêtre Jean",
-     "livres": 10,
+     "livres": 4,
+     "annonces": 15,
+     "prix": 10,
      "contribution_pct": 0.0
     }
    ]
@@ -1720,6 +1818,8 @@
     {
      "serie": "Non classée",
      "livres": 1,
+     "annonces": 4,
+     "prix": 1,
      "contribution_pct": 1.34
     }
    ]
@@ -1731,7 +1831,9 @@
    "series": [
     {
      "serie": "RPG BooK",
-     "livres": 3,
+     "livres": 2,
+     "annonces": 5,
+     "prix": 3,
      "contribution_pct": 0.0
     }
    ]
@@ -1743,7 +1845,9 @@
    "series": [
     {
      "serie": "RPG BooK",
-     "livres": 2,
+     "livres": 1,
+     "annonces": 2,
+     "prix": 2,
      "contribution_pct": 0.0
     }
    ]
@@ -1755,7 +1859,9 @@
    "series": [
     {
      "serie": "Reine",
-     "livres": 2,
+     "livres": 1,
+     "annonces": 2,
+     "prix": 2,
      "contribution_pct": 0.0
     }
    ]

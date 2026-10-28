@@ -99,6 +99,15 @@ def annonces_par_groupe(chemin_annonces, groupe_de):
     return compte
 
 
+def annonces_par_isbn(chemin_annonces):
+    """{isbn13: nombre d'annonces actuelles (toutes sources, tous états)}."""
+    try:
+        donnees = json.loads(chemin_annonces.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {isbn: sum(len(liste) for liste in par_etat.values()) for isbn, par_etat in (donnees.get("annonces") or {}).items()}
+
+
 def series_depuis(chemin=RACINE / "web" / "data" / "versions.json"):
     """{isbn13: série (même champ que l'étagère), ou « sans série »}, pour la décomposition par série."""
     try:
@@ -109,7 +118,7 @@ def series_depuis(chemin=RACINE / "web" / "data" / "versions.json"):
 
 
 def variations_par_serie(avant, apres, observes, groupe_de, serie_de):
-    """Variations logarithmiques des prix observés, rangées par groupe puis par série."""
+    """Variations logarithmiques des prix observés, rangées par groupe puis par série : [(isbn, variation), ...]."""
     par = {}
     for cle, p1 in apres.items():
         p0 = avant.get(cle)
@@ -119,21 +128,27 @@ def variations_par_serie(avant, apres, observes, groupe_de, serie_de):
         groupe = groupe_de.get(isbn)
         if groupe is None:
             continue
-        par.setdefault(groupe, {}).setdefault(serie_de.get(isbn, "sans série"), []).append(math.log(p1 / p0))
+        par.setdefault(groupe, {}).setdefault(serie_de.get(isbn, "sans série"), []).append((isbn, math.log(p1 / p0)))
     return par
 
 
-def cascade_du_dernier_jour(historique, observes, groupe_de, serie_de):
+def cascade_du_dernier_jour(historique, observes, groupe_de, serie_de, annonces_de=None):
     """Pour le dernier jour : pour chaque groupe, la variation moyenne (en %) et sa part de chaque série.
-    Les parts s'additionnent exactement à la variation moyenne (somme des variations logarithmiques / nombre de prix)."""
+    Les parts s'additionnent exactement à la variation moyenne (somme des variations logarithmiques / nombre de prix).
+    Pour chaque série : les livres distincts, leurs annonces actuelles et le nombre de prix observés."""
+    annonces_de = annonces_de or {}
     avant, apres = historique[-2]["prix"], historique[-1]["prix"]
     par = variations_par_serie(avant, apres, observes, groupe_de, serie_de)
     sortie = {}
     for groupe, series in par.items():
         n = sum(len(v) for v in series.values())
-        parts = [{"serie": s, "livres": len(v), "contribution_pct": round(sum(v) / n * 100, 2)} for s, v in series.items()]
+        parts = []
+        for nom, v in series.items():
+            isbns = {isbn for isbn, _ in v}
+            parts.append({"serie": nom, "livres": len(isbns), "annonces": sum(annonces_de.get(i, 0) for i in isbns),
+                          "prix": len(v), "contribution_pct": round(sum(x for _, x in v) / n * 100, 2)})
         parts.sort(key=lambda x: x["contribution_pct"])
-        sortie[groupe] = {"date": historique[-1]["date"], "variation_pct": round(sum(sum(v) for v in series.values()) / n * 100, 2),
+        sortie[groupe] = {"date": historique[-1]["date"], "variation_pct": round(sum(x for v in series.values() for _, x in v) / n * 100, 2),
                           "prix_observes": n, "series": parts}
     return sortie
 
@@ -200,7 +215,7 @@ def main():
     for groupe, valeur in moyennes.items():
         if groupe in resultat["groupes"]:
             resultat["groupes"][groupe]["indice_moyenne"] = valeur
-    resultat["cascade"] = cascade_du_dernier_jour(historique_observes, observes, groupe_de, series_depuis())
+    resultat["cascade"] = cascade_du_dernier_jour(historique_observes, observes, groupe_de, series_depuis(), annonces_par_isbn(ANNONCES))
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")
     return 0
