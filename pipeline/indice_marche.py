@@ -6,8 +6,7 @@ Principe :
   - chaque jour, on compare le prix de chaque livre et de chaque état à la veille (en logarithme) ;
   - la variation d'un groupe est la médiane de ces variations ;
   - l'indice se chaîne d'un jour à l'autre, base 100 au premier jour où le groupe est mesuré.
-Tout groupe qui a au moins une variation fait bouger son indice. Sa fiabilité dépend du nombre de livres mesurés (voir confiance()) :
-un groupe de quatre livres bouge, mais on le lit avec prudence.
+Tout groupe qui a au moins une variation fait bouger son indice, quel que soit son nombre de livres.
 Le nombre d'annonces actuelles par groupe est donné à côté, pour lire une baisse de prix avec l'offre.
 
     python pipeline/indice_marche.py
@@ -24,15 +23,6 @@ HISTO = RACINE / "data" / "processed" / "cotes-historique.json"
 EDITIONS = RACINE / "data" / "processed" / "editions.csv"
 ANNONCES = RACINE / "data" / "processed" / "annonces.json"
 SORTIE = RACINE / "data" / "processed" / "indice-marche.json"
-MIN_LIVRES = 10          # en dessous : confiance faible
-MOYENNE_LIVRES = 50      # à partir de là : confiance élevée, entre les deux : moyenne
-
-
-def confiance(livres):
-    """Niveau de confiance d'un indice, selon le nombre de livres mesurés."""
-    if livres < MIN_LIVRES:
-        return "faible"
-    return "moyenne" if livres < MOYENNE_LIVRES else "élevée"
 
 
 def groupes(chemin=EDITIONS):
@@ -97,7 +87,7 @@ def main():
     resultat = {"date": historique[-1]["date"], "groupes": {}}
     for groupe, serie in sorted(courbes.items()):
         dernier = serie[-1]
-        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"], "confiance": confiance(dernier["livres"]),
+        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"], 
                                        "annonces": annonces.get(groupe, 0), "historique": [[s["date"], s["indice"]] for s in serie]}
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")

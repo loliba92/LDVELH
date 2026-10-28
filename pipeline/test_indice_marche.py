@@ -40,10 +40,6 @@ class TestChainer(unittest.TestCase):
         courbe = im.chainer(self.historique([j1, j2]), {"111": "V1 · Gallimard"})
         self.assertEqual(courbe["V1 · Gallimard"][0]["indice"], 50.0)
         self.assertEqual(courbe["V1 · Gallimard"][0]["livres"], 1)
-        self.assertEqual(im.confiance(1), "faible")
-
-    def test_niveaux_de_confiance_selon_le_nombre_de_livres(self):
-        self.assertEqual([im.confiance(n) for n in (9, 10, 49, 50, 576)], ["faible", "moyenne", "moyenne", "élevée", "élevée"])
 
 
 if __name__ == "__main__":

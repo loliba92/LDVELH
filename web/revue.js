@@ -766,12 +766,11 @@
       if (!etat || !liste) return;
       if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
       const lignes = Object.entries(INDICE.groupes || {}).sort((a, b) => b[1].livres - a[1].livres);
-      etat.textContent = `${lignes.length} groupes au ${jour(INDICE.date)}. Plus il y a de livres mesurés, plus l'indice est fiable.`;
+      etat.textContent = `${lignes.length} groupes au ${jour(INDICE.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + lignes.map(([nom, g]) => {
         const ecart = Math.round((g.indice - 100) * 10) / 10;
         const texte = `${g.indice.toFixed(1).replace('.', ',')} (${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${String(Math.abs(ecart)).replace('.', ',')} %)`;
-        const confiance = g.confiance || (g.livres < 10 ? 'faible' : g.livres < 50 ? 'moyenne' : 'élevée');
-        return `<article class="rc-ligne"><span class="rc-titre ind-nom">${esc(nom)}</span><b class="rc-prix">${texte}</b><span class="rc-ligne2 ind-meta">${g.livres} livre${g.livres > 1 ? 's' : ''} mesuré${g.livres > 1 ? 's' : ''} · confiance ${confiance} · ${g.annonces} annonce${g.annonces > 1 ? 's' : ''}</span></article>`;
+        return `<article class="rc-ligne"><span class="rc-titre ind-nom">${esc(nom)}</span><b class="rc-prix">${texte}</b><span class="rc-ligne2 ind-meta">${g.livres} livre${g.livres > 1 ? 's' : ''} mesuré${g.livres > 1 ? 's' : ''} · ${g.annonces} annonce${g.annonces > 1 ? 's' : ''}</span></article>`;
       }).join('') + '</div>';
     };
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
