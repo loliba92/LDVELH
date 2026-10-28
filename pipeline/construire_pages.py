@@ -135,6 +135,19 @@ PIED_LIENS = '''<nav class="pied-liens" aria-label="Informations">
     </nav>'''
 
 
+
+def _revue_prix():
+    """Page Prix et corrections : l'onglet Indice (Zagor seulement) vient après l'onglet Ajout."""
+    lignes = []
+    for l in REVUE.split("\n"):
+        if l.startswith('<div class="rv-pane" id="pane-ajout"'):
+            lignes.append(INDICE_PANNEAU)
+        lignes.append(l)
+        if 'data-pane="ajout"' in l and 'role="tab"' in l:
+            lignes.append(INDICE_ONGLET)
+    return "\n".join(lignes)
+
+
 RECUES_ONGLET = '''  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces reçues</span></button>'''
 INDICE_ONGLET = '''  <button type="button" role="tab" data-pane="indice" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Indice</span></button>'''
 INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden>
@@ -182,9 +195,8 @@ def _butin():
         if l.startswith("<h1>Prix et corrections"):
             l = "<h1>Butin</h1>"
         if 'data-pane="pepites"' in l:
-            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">') + "\n" + RECUES_ONGLET + "\n" + INDICE_ONGLET
+            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">') + "\n" + RECUES_ONGLET
         if l.startswith('<div class="rv-pane" id="pane-ajout"'):
-            lignes.append(INDICE_PANNEAU)
             lignes.append(RECUES_PANNEAU)
         lignes.append(l)
     return "\n".join(lignes)
@@ -926,7 +938,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", REVUE), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute())):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", _revue_prix()), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute())):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
     n = pages_livres.ecrire(WEB, {"bandeau": BANDEAU, "entete": entete("livre"), "pied": PIED_LIENS, "barre": barre("livre"),
