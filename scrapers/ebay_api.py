@@ -270,7 +270,7 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            # Prix total pour l'acheteur : le prix de l'annonce plus ses frais de port (4,50 € si l'annonce ne les indique pas)
+            # Prix total pour l'acheteur : le prix de l'annonce plus ses frais de port (0 € si l'annonce ne les indique pas)
             sortie.append((it, etat, valeur + port_retenu(it), ancienne))
     return sortie
 
@@ -294,7 +294,7 @@ def ecarter_aberrantes(liste):
     return [x for x in liste if x[1] not in bornes or bornes[x[1]][0] <= x[2] <= bornes[x[1]][1]]
 
 
-FRAIS_EBAY_DEFAUT = 4.50          # annonce qui n'indique pas ses frais : on compte les mêmes frais que chez une librairie
+FRAIS_EBAY_DEFAUT = 0.0           # annonce qui n'indique pas ses frais : gratuit (le relevé montre que la plupart des annonces sans frais l'indiquent à 0)
 
 
 def port_retenu(item):
