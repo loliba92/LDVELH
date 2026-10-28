@@ -2045,6 +2045,8 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-titre:hover { color: var(--accent); }
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
+.ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
+.rc-ligne .rc-titre.ind-nom { white-space: normal; overflow: visible; text-overflow: clip; }
 
 /* Accueil, niveau 3 : état des mises à jour automatiques. Une ligne de synthèse (44 px mini), le détail se déplie. */
 .maj { margin: 10px 0 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }

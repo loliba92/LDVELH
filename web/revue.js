@@ -758,6 +758,22 @@
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
+    // Indice de marché (Zagor seulement) : lu par le relais, affiché en tableau court
+    let INDICE = null, indiceCharge = null;
+    const chargerIndice = () => indiceCharge || (indiceCharge = window.Relais.appeler('indice_lire', {}).then((r) => { INDICE = r && r.ok ? r.indice : null; return INDICE; }).catch(() => null));
+    const dessinerIndice = () => {
+      const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
+      if (!etat || !liste) return;
+      if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
+      const lignes = Object.entries(INDICE.groupes || {}).sort((a, b) => b[1].livres - a[1].livres);
+      etat.textContent = `${lignes.length} groupes au ${jour(INDICE.date)}.`;
+      liste.innerHTML = '<div class="rc-liste">' + lignes.map(([nom, g]) => {
+        const ecart = Math.round((g.indice - 100) * 10) / 10;
+        const texte = `${g.indice.toFixed(1).replace('.', ',')} (${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${String(Math.abs(ecart)).replace('.', ',')} %)`;
+        return `<article class="rc-ligne"><span class="rc-titre ind-nom">${esc(nom)}</span><b class="rc-prix">${texte}</b><span class="rc-ligne2 ind-meta">${g.livres} livre${g.livres > 1 ? 's' : ''} mesuré${g.livres > 1 ? 's' : ''} · ${g.annonces} annonce${g.annonces > 1 ? 's' : ''}</span></article>`;
+      }).join('') + '</div>';
+    };
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
     dessinerRecues();
   }
   function initNav() {
@@ -802,6 +818,8 @@
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
     const onglet = document.querySelector('#rv-nav [data-pane="annonces"]');
     if (onglet) { onglet.hidden = !super_; if (!super_) replier(onglet); }
+    const indice = document.querySelector('#rv-nav [data-pane="indice"]');
+    if (indice) { indice.hidden = !super_; if (!super_) replier(indice); }
     const recues = document.querySelector('#rv-nav [data-pane="recues"]');
     if (recues) { recues.hidden = !super_; if (!super_) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
     const pep = document.querySelector('#rv-nav [data-pane="pepites"]');

@@ -6,7 +6,7 @@ Principe :
   - chaque jour, on compare le prix de chaque livre et de chaque état à la veille (en logarithme) ;
   - la variation d'un groupe est la médiane de ces variations ;
   - l'indice se chaîne d'un jour à l'autre, base 100 au premier jour où le groupe est mesuré.
-Un groupe qui compte moins de MIN_LIVRES variations un jour ne fait pas bouger son indice ce jour-là.
+Tout groupe qui a au moins une variation fait bouger son indice, quel que soit son nombre de livres.
 Le nombre d'annonces actuelles par groupe est donné à côté, pour lire une baisse de prix avec l'offre.
 
     python pipeline/indice_marche.py
@@ -23,7 +23,6 @@ HISTO = RACINE / "data" / "processed" / "cotes-historique.json"
 EDITIONS = RACINE / "data" / "processed" / "editions.csv"
 ANNONCES = RACINE / "data" / "processed" / "annonces.json"
 SORTIE = RACINE / "data" / "processed" / "indice-marche.json"
-MIN_LIVRES = 10
 
 
 def groupes(chemin=EDITIONS):
@@ -61,8 +60,7 @@ def chainer(historique, groupe_de):
         var = variations(historique[i - 1]["prix"], historique[i]["prix"], groupe_de)
         for groupe, valeurs in var.items():
             niveau.setdefault(groupe, 100.0)
-            if len(valeurs) >= MIN_LIVRES:
-                niveau[groupe] *= math.exp(statistics.median(valeurs))
+            niveau[groupe] *= math.exp(statistics.median(valeurs))
             sortie.setdefault(groupe, []).append({"date": date, "indice": round(niveau[groupe], 2), "livres": len(valeurs)})
     return sortie
 
@@ -86,10 +84,10 @@ def main():
     groupe_de = groupes()
     courbes = chainer(historique, groupe_de)
     annonces = annonces_par_groupe(ANNONCES, groupe_de)
-    resultat = {"date": historique[-1]["date"], "min_livres": MIN_LIVRES, "groupes": {}}
+    resultat = {"date": historique[-1]["date"], "groupes": {}}
     for groupe, serie in sorted(courbes.items()):
         dernier = serie[-1]
-        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"],
+        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"], 
                                        "annonces": annonces.get(groupe, 0), "historique": [[s["date"], s["indice"]] for s in serie]}
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")

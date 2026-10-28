@@ -1,4 +1,4 @@
-// Version du 2026-10-27 20:57 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-28 21:05 (heure de Paris) : pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -125,6 +125,13 @@ function doPost(e) {
       if (go.code !== 204) return reponse({ ok: false, erreur: 'GitHub a refusé le lancement (' + go.code + ')' });
       if (moi.role !== 'superadmin') props.setProperty(cleEnvois, String(envois + 1));
       return reponse({ ok: true, nombre: lignes.length });
+    }
+
+    if (action === 'indice_lire') {      // indice de marché par version et éditeur : le Zagor seulement, suivi interne
+      var ind = github('/contents/data/processed/indice-marche.json?ref=main');
+      if (ind.code !== 200) return reponse({ ok: false, erreur: 'indice indisponible (' + ind.code + ')' });
+      var fic = JSON.parse(ind.texte);
+      return reponse({ ok: true, indice: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
     }
 
     if (action === 'butin_lire' || action === 'annonces_lire') {      // Butin seul pour les sorciers ; toutes les annonces pour le Zagor
