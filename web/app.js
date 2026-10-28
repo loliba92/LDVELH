@@ -213,7 +213,9 @@
       lireAdresse(); synchroniser(); afficher();
     });
     let attente;
-    window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
+    // Seule une variation de largeur redessine : l'ouverture du clavier virtuel ne change que la hauteur et ferait perdre le champ en cours de saisie
+    let largeurVue = innerWidth;
+    window.addEventListener('resize', () => { if (innerWidth === largeurVue) return; largeurVue = innerWidth; clearTimeout(attente); attente = setTimeout(afficher, 150); });
   }
 
   function synchroniser() {
@@ -2333,7 +2335,9 @@
     brancherCollection();
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
     let attente;
-    window.addEventListener('resize', () => { clearTimeout(attente); attente = setTimeout(afficher, 150); });
+    // Seule une variation de largeur redessine : l'ouverture du clavier virtuel ne change que la hauteur et ferait perdre le champ en cours de saisie
+    let largeurVue = innerWidth;
+    window.addEventListener('resize', () => { if (innerWidth === largeurVue) return; largeurVue = innerWidth; clearTimeout(attente); attente = setTimeout(afficher, 150); });
     afficher();
     recevoirLien();
     if (new URLSearchParams(location.search).has('inventaire')) {
