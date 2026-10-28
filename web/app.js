@@ -1636,7 +1636,7 @@
         <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
           <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
       <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
-      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
+      <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
     if (location.hash === '#pepite-jour' && !pjAtterri) { pjAtterri = true; const bloc = $('#pepite-jour'); if (bloc) bloc.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
   // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
@@ -1810,7 +1810,7 @@
         ${estNiveau3() ? '<button type="button" class="retirer" data-pepite-retirer>Retirer</button>' : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
       </li></ul>
-      <p class="sous">Offerte par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;
+      <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;
   }
   document.addEventListener('click', (e) => {
     if (!e.target.closest('[data-pepite-retirer]') || !estNiveau3() || !window.Relais) return;
