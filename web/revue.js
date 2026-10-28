@@ -781,18 +781,26 @@
         const compte = (s) => lignes.filter((l) => l.sens === s).length;
         etat.textContent = `Au ${jour(INDICE.date)} : ${nb(compte('baisse'), 'édition')} en baisse, ${nb(compte('hausse'), 'édition')} en hausse, ${nb(compte('stable'), 'édition')} stable${compte('stable') > 1 ? 's' : ''}.`;
         const fleche = { baisse: '↓', hausse: '↑', stable: '→' };
-        // Barre centrée sur 100 : à gauche une baisse, à droite une hausse. L'échelle est celle de la plus forte variation.
-        const max = Math.max(1, ...lignes.map((l) => Math.abs(l.ecart)));
-        const cartes = ['baisse', 'stable', 'hausse'].map((k) => `<div class="ind-carte ${k}"><b>${compte(k)}</b><span>${k === 'baisse' ? 'en baisse' : k === 'hausse' ? 'en hausse' : 'stables'}</span></div>`).join('');
-        liste.innerHTML = `<div class="ind-cartes">${cartes}</div><div class="ind-liste">` + lignes.map((l) => {
-          const variation = l.sens === 'stable' ? 'stable' : `${l.sens} ${virgule(Math.abs(l.ecart), 1)} %`;
-          const largeur = (Math.abs(l.ecart) / max) * 50;
-          const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
-          const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
-          return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)} <span class="ind-ed">${esc(l.editeur)}</span></span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></article>`;
-        }).join('') + '</div>';
+      // Barre centrée sur 100 : à gauche une baisse, à droite une hausse. L'échelle est celle de la plus forte variation.
+      const max = Math.max(1, ...lignes.map((l) => Math.abs(l.ecart)));
+      const cartes = ['baisse', 'stable', 'hausse'].map((k) => `<div class="ind-carte ${k}"><b>${compte(k)}</b><span>${k === 'baisse' ? 'en baisse' : k === 'hausse' ? 'en hausse' : 'stables'}</span></div>`).join('');
+      // Par éditeur d'abord (le plus de livres en premier), puis les éditions de l'éditeur (plus fortes baisses d'abord)
+      const parEditeur = {};
+      lignes.forEach((l) => { (parEditeur[l.editeur] = parEditeur[l.editeur] || []).push(l); });
+      const editeurs = Object.entries(parEditeur).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
+      const ligne = (l) => {
+        const variation = l.sens === 'stable' ? 'stable' : `${l.sens} ${virgule(Math.abs(l.ecart), 1)} %`;
+        const largeur = (Math.abs(l.ecart) / max) * 50;
+        const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
+        const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
+        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></article>`;
       };
-      document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
+      liste.innerHTML = `<div class="ind-cartes">${cartes}</div>` + editeurs.map((e) => {
+        const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
+        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)} <span class="ind-meta">${nb(ed.length, 'édition')} · ${nb(e.livres, 'livre')}</span></h3><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
+      }).join('');
+    };
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
   }
 
   function initNav() {
