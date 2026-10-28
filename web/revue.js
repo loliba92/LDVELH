@@ -830,13 +830,14 @@
       const familles = {};
       editeursBouge.forEach((e) => { (familles[FAM(e.nom)] = familles[FAM(e.nom)] || []).push(e); });
       const blocsBouge = Object.entries(familles).map(([fam, imprints]) => {
-        const sousBlocs = imprints.map((e) => {
-          const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
+        if (imprints.length === 1) {
+          const e = imprints[0], ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
           return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)}</h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
-        }).join('');
-        return imprints.length > 1
-          ? `<section class="ind-famille"><h2 class="ind-fam-titre">${esc(fam)}</h2><div class="ind-ed-indice">${indiceFamille(fam)}</div>${sousBlocs}</section>`
-          : sousBlocs;
+        }
+        // Une seule maison : toutes ses éditions dans une même liste. Le nom de l'imprint suit le numéro de version (V4 existe chez les deux).
+        const tout = imprints.flatMap((e) => e.ed.map((l) => ({ ...l, edition: `${l.edition} · ${l.editeur === 'Gallimard Jeunesse' ? 'Jeunesse' : 'Gallimard'}` })));
+        tout.sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
+        return `<section class="ind-famille"><h2 class="ind-fam-titre">${esc(fam)}</h2><div class="ind-ed-indice">${indiceFamille(fam)}</div><div class="ind-liste">${tout.map(ligne).join('')}</div></section>`;
       }).join('');
       const parEditeurStable = {};
       stables.forEach((l) => { (parEditeurStable[l.editeur] = parEditeurStable[l.editeur] || []).push(l.edition); });
