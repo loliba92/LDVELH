@@ -21,6 +21,9 @@ on:
       diagnostic:
         description: "ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées avec leur lien dans le journal (aucun enregistrement)"
         required: false
+      essai_version:
+        description: "Essai en deux étapes (titre, description, image) sur N éditions « archive seule » : comptages seulement, rien n'est enregistré (50 conseillé)"
+        required: false
       essai_photos:
         description: "Essai de la comparaison de photos sur de vraies annonces (SANS enregistrement) : nombre d'éditions tirées au hasard (200 conseillé)"
         required: false
@@ -76,14 +79,17 @@ jobs:
       - name: Essai de la comparaison de photos (sans enregistrement)
         if: ${{ inputs.essai_photos != '' }}
         run: python scrapers/ebay_api.py --essai-photos ${{ inputs.essai_photos }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Essai en deux étapes (sans enregistrement)
+        if: ${{ inputs.essai_version != '' }}
+        run: python scrapers/ebay_api.py --essai-version ${{ inputs.essai_version }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Essai de requêtes (sans enregistrement)
         if: ${{ inputs.essais != '' }}
         run: python scrapers/ebay_api.py --essais ${{ inputs.essais }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Relevé eBay
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
       - name: Prix du neuf et disponibilité des éditions en vente
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         continue-on-error: true
         run: |
           # Relevé complet des fiches de leslibraires.fr (prix du neuf + exemplaires d'occasion) : au plus une fois par semaine (7 jours minimum) sur l'horaire,
@@ -103,13 +109,13 @@ jobs:
           fi
           python pipeline/prix_neuf.py
       - name: Base et données du site
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
           python pipeline/build_db.py
           python pipeline/export_site.py
           python pipeline/construire_pages.py
       - name: Enregistrer et republier
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"

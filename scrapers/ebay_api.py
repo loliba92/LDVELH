@@ -521,6 +521,7 @@ def main():
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
     p.add_argument("--diagnostic", help="ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
+    p.add_argument("--essai-version", dest="essai_version", type=int, help="essai en deux étapes (titre, description, image) sur N éditions « archive seule » (aucun enregistrement)")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
     a = p.parse_args()
@@ -542,6 +543,11 @@ def main():
         return
     if a.essais:
         essayer(a, token)
+        return
+    if a.essai_version:
+        import essai_version
+        import editions
+        essai_version.essayer(a, token, catalogue, chercher_elargi, concorde, RACINE / "web" / "covers", lambda: editions.load())
         return
     if a.essai_photos:
         import essai_photos
