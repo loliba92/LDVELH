@@ -2053,6 +2053,9 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ind-carte.baisse b { color: var(--accent); }
 .ind-liste { display: grid; gap: 8px; }
 .ind-editeur { margin-top: 18px; }
+.ind-famille { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ind-fam-titre { margin: 0 0 4px; font-size: 1.1rem; color: var(--accent); font-weight: 700; }
+.ind-famille .ind-editeur { margin-top: 12px; padding-left: 12px; }
 .ind-ed-titre { margin: 0 0 8px; font-size: 1rem; color: var(--accent); font-weight: 600; }
 .ind-ed-titre .ind-meta { font-weight: 400; font-size: .8rem; color: var(--muted); }
 .ind-ed-indice { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: -4px 0 8px; font-size: .9rem; }
