@@ -125,6 +125,11 @@ class TestEtatNonPrecise(unittest.TestCase):
         for code in ("1000", "1500", "7000"):
             self.assertEqual(ebay_api.etat_de({"conditionId": code}), (None, False))
 
+    def test_agreger_donne_la_mediane_nue_sans_les_frais_de_port(self):
+        # Trois annonces à 10 € + 5 € de port, 12 € + 5 € de port, 14 € sans port : prix livrés 15, 17, 14 ; prix nus 10, 12, 14
+        l = ebay_api.agreger([avec_port(10, 5), avec_port(12, 5), item(14, "3000")], "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
+        self.assertEqual((l[0]["prix_median"], l[0]["prix_median_nu"]), ("15.00", "12.00"))
+
     def test_agreger_compte_les_annonces_sans_etat_en_tres_bon_etat(self):
         sans_etat = {"title": "Le Sorcier de la montagne de feu", "price": {"value": "14", "currency": "EUR"}}
         l = ebay_api.agreger([sans_etat, item(10, "5000"), item(30, "1000")], "9782070583805", date(2026, 10, 14))

@@ -51,7 +51,7 @@ def etat_de(item):
         return ETAT_SUPPOSE, True
     return None, False
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes|au choix|a choisir|à choisir|votre choix|au choix parmi|plusieurs titres)\b", re.I)    # « au choix » : une annonce unique pour plusieurs livres, le prix ne dit rien d'un titre précis
-CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
+CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes", "prix_median_nu"]
 
 
 MOTS_VIDES = {"les", "des", "dans", "avec", "pour", "livre", "dont", "vous", "etes", "heros", "poche", "folio", "junior", "gallimard", "jeunesse"}
@@ -298,15 +298,17 @@ def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for _it, etat, valeur, ancienne in ecarter_aberrantes(retenues(items, jour, titre, annees, ed)):
-        par_etat.setdefault(etat, {"frais": [], "toutes": []})
+        par_etat.setdefault(etat, {"frais": [], "toutes": [], "nus": []})
         par_etat[etat]["toutes"].append(valeur)
         if not ancienne:
             par_etat[etat]["frais"].append(valeur)
+            par_etat[etat]["nus"].append(round(valeur - (frais_port(_it) or 0.0), 2))     # prix sans frais de port : la cote est un prix nu
     # La cote n'utilise que les annonces récentes. Les statistiques de toutes les annonces sont gardées à côté :
     # le modèle d'auto-apprentissage en tire de combien les annonces anciennes surestiment les prix.
     return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v["frais"]),
              "prix_min": f"{min(v['frais']):.2f}", "prix_median": f"{statistics.median(v['frais']):.2f}", "prix_max": f"{max(v['frais']):.2f}",
-             "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}"}
+             "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}",
+             "prix_median_nu": f"{statistics.median(v['nus']):.2f}"}
             for etat, v in sorted(par_etat.items()) if v["frais"]]
 
 

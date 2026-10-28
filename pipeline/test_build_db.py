@@ -15,13 +15,20 @@ ENTETE = "isbn13,date,etat,nb_annonces,prix_min,prix_median,prix_max,nb_toutes,p
 ISBN_SUPPRIME = "9782070666614"      # valide, mais absente de la base de test
 
 
-class TestFraisDeLibrairie(unittest.TestCase):
-    def test_le_prix_de_la_librairie_inclut_les_frais_de_port(self):
+class TestPrixNuDansLaCote(unittest.TestCase):
+    def charger(self, entete_lignes):
         d = Path(tempfile.mkdtemp())
-        (d / "libraires-2026-10-27.csv").write_text(ENTETE + "9782070574940,2026-10-27,convenable,1,4.98,4.98,4.98,1,4.98\n", encoding="utf-8")
+        (d / "libraires-2026-10-27.csv").write_text(entete_lignes, encoding="utf-8")
         with mock.patch.object(build_db, "insert_fait", return_value=1) as ins, mock.patch.object(build_db.editions, "normalize_isbn", return_value=("9782070574940",)):
-            build_db.load_ebay(mock.Mock(), d, "libraires-*.csv", "libraires", ajout=build_db.FRAIS_LIBRAIRIE)
-        self.assertEqual(ins.call_args[0][6], 9.48)
+            build_db.load_ebay(mock.Mock(), d, "libraires-*.csv", "libraires")
+        return ins.call_args[0][6]
+
+    def test_la_librairie_garde_son_prix_sans_ajouter_les_frais(self):
+        self.assertEqual(self.charger(ENTETE + "9782070574940,2026-10-27,convenable,1,4.98,4.98,4.98,1,4.98\n"), 4.98)
+
+    def test_la_cote_prend_le_prix_nu_quand_il_existe(self):
+        entete = ENTETE.strip() + ",prix_median_nu\n"
+        self.assertEqual(self.charger(entete + "9782070574940,2026-10-27,convenable,1,5.00,5.00,5.00,1,5.00,3.50\n"), 3.5)
 
 
 class TestReleveEditionSupprimee(unittest.TestCase):

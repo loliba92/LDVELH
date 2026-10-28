@@ -412,7 +412,7 @@ def main():
     for f in sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv")):
         with open(f, newline="", encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
-                libraires[(r["isbn13"], r["etat"])] = float(r["prix_median"]) + FRAIS_LIBRAIRIE          # prix livré
+                libraires[(r["isbn13"], r["etat"])] = float(r["prix_median"])          # prix nu : la cote est nue, l'annonce est comparée livrée (+ 4,50 €)
     revue = []
     for v in versions:
         cle = cle_de[v["id"]]
@@ -429,7 +429,7 @@ def main():
                      "confiance": info.get("confiance"), "ajuste": bool(info.get("ajuste")), "recalibre": bool(info.get("recalibre")),
                      "deduit": bool(info.get("deduit")), "repartition": bool(info.get("repartition")), "neuf": bool(info.get("neuf"))}
             if (v["isbn13"], e) in libraires:
-                ligne["lib_prix"] = libraires[(v["isbn13"], e)]
+                ligne["lib_prix"] = libraires[(v["isbn13"], e)] + FRAIS_LIBRAIRIE          # prix livré, comparé à la cote nue
             if info.get("valide"):
                 ligne.update({"valide": True, "valide_le": info.get("date"), "calcule": info.get("calcule"), "decision": info.get("decision"), "valide_par": info.get("par")})
             if eb:
@@ -461,7 +461,7 @@ def main():
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
         if isbn in titres:
-            annonces.setdefault(isbn, {}).setdefault(etat, []).append([prix, f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie", None, 1])      # une librairie n'indique pas l'état : supposé
+            annonces.setdefault(isbn, {}).setdefault(etat, []).append([round(prix + FRAIS_LIBRAIRIE, 2), f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie", None, 1])      # une librairie n'indique pas l'état : supposé
     if annonces:
         for par_etat in annonces.values():
             for liste in par_etat.values():
