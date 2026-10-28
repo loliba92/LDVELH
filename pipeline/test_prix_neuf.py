@@ -28,10 +28,22 @@ class TestPrixNeuf(unittest.TestCase):
 
     def test_exemplaire_d_occasion(self):
         r = p.lire_fiche(FICHE.format(dispo="InStock", etat="UsedCondition"))
-        self.assertEqual(r, {"prix": None, "disponibilite": "indisponible", "prix_occasion": 13.5})        # pas du neuf : prix neuf vide
+        self.assertEqual(r, {"prix": None, "disponibilite": "indisponible", "prix_occasion": 13.5, "etat_occasion": None})        # pas du neuf : prix neuf vide
         ligne = p.ligne_occasion({"isbn13": "1", "date": "2026-10-15", "prix_occasion": 3.5})
         self.assertEqual((ligne["etat"], ligne["nb_annonces"], ligne["prix_median"]), ("tres_bon", 1, "3.50"))
         self.assertIsNone(p.ligne_occasion({"isbn13": "1", "date": "2026-10-15", "prix_occasion": None}))
+
+    def test_etat_de_l_exemplaire_lu_sur_la_fiche(self):
+        # Fiche réelle (leslibraires.fr) : « Un peu abîmé » ne doit jamais devenir « très bon état »
+        abime = FICHE.format(dispo="InStock", etat="UsedCondition") + "<p>État de l'exemplaire</p><span>Occasion - Etat Correct - Un peu abîmé - 0, 0</span>"
+        self.assertEqual(p.lire_fiche(abime)["etat_occasion"], "convenable")
+        tb = FICHE.format(dispo="InStock", etat="UsedCondition") + "<p>État de l&#39;exemplaire</p><span>Occasion - Etat Très bon - 1997</span>"
+        self.assertEqual(p.lire_fiche(tb)["etat_occasion"], "tres_bon")
+        bon = FICHE.format(dispo="InStock", etat="UsedCondition") + "<p>État de l'exemplaire</p><span>Occasion - Bon état</span>"
+        self.assertEqual(p.lire_fiche(bon)["etat_occasion"], "bon")
+        ligne = p.ligne_occasion({"isbn13": "1", "date": "2026-10-28", "prix_occasion": 4.98, "etat_occasion": "convenable"})
+        self.assertEqual(ligne["etat"], "convenable")
+        self.assertEqual(p.ligne_occasion({"isbn13": "1", "date": "2026-10-28", "prix_occasion": 4.98, "etat_occasion": None})["etat"], "tres_bon")
 
     def test_fiche_absente(self):
         self.assertEqual(p.source_leslibraires("9782075123150", Faux(Rep(404)), attentes=())["disponibilite"], "indisponible")
