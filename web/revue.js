@@ -798,17 +798,26 @@
       const parEditeur = {};
       lignes.forEach((l) => { (parEditeur[l.editeur] = parEditeur[l.editeur] || []).push(l); });
       const editeurs = Object.entries(parEditeur).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
+      // Une ligne par édition qui bouge. Les éditions stables sont repliées en bas : elles ne disent rien de plus.
       const ligne = (l) => {
-        const variation = l.sens === 'stable' ? 'stable' : `${l.sens} ${virgule(Math.abs(l.ecart), 1)} %`;
-        const largeur = (Math.abs(l.ecart) / max) * 50;
-        const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
-        const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
-        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-droite"><b class="ind-val">${virgule(l.g.indice, 1)}</b><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span></span><div class="ind-barre" aria-hidden="true">${barre}</div><div class="ind-pied"><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span>${mini(l.g.historique)}</div></article>`;
+        const variation = l.sens === 'stable' ? 'stable' : `${virgule(Math.abs(l.ecart), 1)} %`;
+        return `<article class="ind-ligne ${l.sens}"><div class="ind-haut"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-chiffre"><b class="ind-val">${virgule(l.g.indice, 1)}</b><span class="ind-chip ${l.sens}">${fleche[l.sens]} ${variation}</span></span></div><div class="ind-bas">${mini(l.g.historique)}<span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></div></article>`;
       };
-      liste.innerHTML = `<div class="ind-cartes">${cartes}</div>` + editeurs.map((e) => {
+      const bouge = lignes.filter((l) => l.sens !== 'stable');
+      const stables = lignes.filter((l) => l.sens === 'stable');
+      const parEditeurBouge = {};
+      bouge.forEach((l) => { (parEditeurBouge[l.editeur] = parEditeurBouge[l.editeur] || []).push(l); });
+      const editeursBouge = Object.entries(parEditeurBouge).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
+      const blocsBouge = editeursBouge.map((e) => {
         const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
-        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)} <span class="ind-meta">${nb(ed.length, 'édition')} · ${nb(e.livres, 'livre')}</span></h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
+        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)}</h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
       }).join('');
+      const parEditeurStable = {};
+      stables.forEach((l) => { (parEditeurStable[l.editeur] = parEditeurStable[l.editeur] || []).push(l.edition); });
+      const listeStables = Object.entries(parEditeurStable).map(([nom, eds]) => `<p class="ind-stables-ed"><b>${esc(nom)}</b> : ${eds.map(esc).join(', ')}</p>`).join('');
+      const vide = bouge.length ? '' : '<p class="ind-vide">Aucune édition ne bouge pour l\'instant.</p>';
+      liste.innerHTML = `<div class="ind-cartes">${cartes}</div>${vide}${blocsBouge}` +
+        (stables.length ? `<details class="ind-stables"><summary>${nb(stables.length, 'édition')} stable${stables.length > 1 ? 's' : ''} (indice 100)</summary>${listeStables}</details>` : '');
     };
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
   }
