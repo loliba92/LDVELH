@@ -1631,12 +1631,12 @@
     const p = voitPepiteJour() ? pepiteJour() : null, b = p && DATA.find((x) => x.isbn13 === p.isbn13);      // réservée au compte connecté : jamais aux visiteurs
     if (!b) { z.innerHTML = ''; return; }
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-    z.innerHTML = `<section class="carte pep-accueil" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
+    z.innerHTML = `<section class="carte pep-accueil${p.vendue ? ' pep-vendue' : ''}" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}${p.vendue ? ' · <b>Vendue</b>' : ''}</p>
       <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
         <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
           <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
-      <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
-      <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
+      <p class="actions">${p.vendue ? '' : `<a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a>`}<a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
+      <p class="sous">Déniché par La Cote du Héros.${p.vendue ? '' : ' Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.'} La Cote du Héros ne prend ni marge ni commission.</p></section>`;
     if (location.hash === '#pepite-jour' && !pjAtterri) { pjAtterri = true; const bloc = $('#pepite-jour'); if (bloc) bloc.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
   // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
@@ -1807,12 +1807,16 @@
       <ul class="a-trouver"><li>
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
-        ${estNiveau3() ? '<button type="button" class="retirer" data-pepite-retirer>Retirer</button>' : ''}
+        ${estNiveau3() ? `<button type="button" class="retirer" data-pepite-retirer>Retirer</button>${p.vendue ? '' : ' <button type="button" class="retirer" data-pepite-vendre>Marquer vendue</button>'}` : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
       </li></ul>
       <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;
   }
   document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-pepite-vendre]') && estNiveau3() && window.Relais && PJ) {
+      window.Relais.appeler('pepite_vendre').then((r) => { if (r && r.ok) { PJ = Object.assign({}, PJ, { vendue: true }); dessinerPepiteAccueil(); afficherCollection(); } });
+      return;
+    }
     if (!e.target.closest('[data-pepite-retirer]') || !estNiveau3() || !window.Relais) return;
     window.Relais.appeler('pepite_retirer').then((r) => { if (r && r.ok) { PJ = null; majBadgePepites(); afficherCollection(); } });
   });

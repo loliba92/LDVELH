@@ -134,7 +134,7 @@ function doPost(e) {
       return reponse({ ok: true, annonces: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
     }
 
-    if (action === 'pepite_offrir' || action === 'pepite_retirer') {      // pépite du jour : fichier public lu par tous les Héros
+    if (action === 'pepite_offrir' || action === 'pepite_retirer' || action === 'pepite_vendre') {      // pépite du jour : fichier public lu par tous les Héros
       var chemin = '/contents/web/data/pepite-du-jour.json', contenuPep = {};
       if (action === 'pepite_offrir') {
         var vp = validerPepite(q);
@@ -142,7 +142,15 @@ function doPost(e) {
         contenuPep = vp.pepite; contenuPep.date = Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd');
       }
       var actuel = github(chemin + '?ref=main'), shaPep = actuel.code === 200 ? JSON.parse(actuel.texte).sha : undefined;
-      var ecrit = github(chemin, { method: 'put', payload: { message: 'Pépite du jour : ' + (action === 'pepite_offrir' ? contenuPep.isbn13 : 'retirée') + ' par ' + moi.nom, branch: 'main', sha: shaPep,
+      if (action === 'pepite_vendre') {                                     // on garde la pépite et on la marque vendue
+        if (actuel.code !== 200) return reponse({ ok: false, erreur: 'pépite introuvable' });
+        var fichierPep = JSON.parse(actuel.texte);
+        contenuPep = JSON.parse(Utilities.newBlob(Utilities.base64Decode(fichierPep.content.replace(/\n/g, ''))).getDataAsString('UTF-8'));
+        if (!contenuPep.isbn13) return reponse({ ok: false, erreur: 'aucune pépite à marquer' });
+        contenuPep.vendue = true;
+      }
+      var libelle = action === 'pepite_offrir' ? contenuPep.isbn13 : action === 'pepite_vendre' ? 'vendue' : 'retirée';
+      var ecrit = github(chemin, { method: 'put', payload: { message: 'Pépite du jour : ' + libelle + ' par ' + moi.nom, branch: 'main', sha: shaPep,
         content: Utilities.base64Encode(JSON.stringify(contenuPep, null, 2) + '\n', Utilities.Charset.UTF_8) } });
       if (ecrit.code !== 200 && ecrit.code !== 201) return reponse({ ok: false, erreur: 'écriture refusée (' + ecrit.code + ')' });
       return reponse({ ok: true });

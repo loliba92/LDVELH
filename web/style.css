@@ -2244,6 +2244,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .pa-corps img { flex: none; width: 80px; height: 112px; object-fit: cover; border: 1px solid var(--line-strong); border-radius: 4px; }
 .pa-titre { margin: 0; font: 700 1.35rem/1.15 var(--f-display); }
 .pep-accueil .sous { margin: 2px 0 0; }
+.pep-vendue .pa-titre, .pep-vendue .pa-prix { text-decoration: line-through; opacity: .6; }   /* pépite vendue : barrée */
 .pa-prix { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .pa-prix b { font: 700 2rem/1 var(--f-display); color: var(--gold); }
 .pa-prix span { color: var(--gold); font-weight: 700; }
