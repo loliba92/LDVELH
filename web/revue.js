@@ -617,6 +617,7 @@
       const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && BUT.annonces[ed.isbn] && BUT.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
+        if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
         if (origine !== 'leboncoin' && origine !== 'librairie' && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
