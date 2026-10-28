@@ -24,6 +24,8 @@ class TestVersionIndiquee(unittest.TestCase):
         self.assertEqual(ev.version_titre("La Porte d'Ombre V2 Gallimard"), "V2")
         self.assertEqual(ev.version_titre("Loup Solitaire v 3"), "V3")
         self.assertIsNone(ev.version_titre("La Porte d'Ombre"))
+        self.assertIsNone(ev.version_titre(""))
+        self.assertIsNone(ev.version_titre(None))
 
     def test_texte_vide_ou_sans_version(self):
         self.assertIsNone(ev.version_indiquee("", EDITIONS))
