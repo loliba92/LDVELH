@@ -803,7 +803,7 @@
         const largeur = (Math.abs(l.ecart) / max) * 50;
         const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
         const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
-        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><div class="ind-pied"><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span>${mini(l.g.historique)}</div></article>`;
+        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-droite"><b class="ind-val">${virgule(l.g.indice, 1)}</b><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span></span><div class="ind-barre" aria-hidden="true">${barre}</div><div class="ind-pied"><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span>${mini(l.g.historique)}</div></article>`;
       };
       liste.innerHTML = `<div class="ind-cartes">${cartes}</div>` + editeurs.map((e) => {
         const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
