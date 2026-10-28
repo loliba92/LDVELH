@@ -100,11 +100,19 @@ def main():
     groupe_de = groupes()
     courbes = chainer(historique, groupe_de)
     annonces = annonces_par_groupe(ANNONCES, groupe_de)
-    resultat = {"date": historique[-1]["date"], "groupes": {}}
+    resultat = {"date": historique[-1]["date"], "groupes": {}, "editeurs": {}}
     for groupe, serie in sorted(courbes.items()):
         dernier = serie[-1]
-        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"], 
+        resultat["groupes"][groupe] = {"indice": dernier["indice"], "livres": dernier["livres"],
                                        "annonces": annonces.get(groupe, 0), "historique": [[s["date"], s["indice"]] for s in serie]}
+    # Indice par éditeur : même calcul, en regroupant toutes les éditions de l'éditeur
+    editeur_de = {isbn: g.split(" · ", 1)[1] for isbn, g in groupe_de.items() if " · " in g}
+    courbes_editeurs = chainer(historique, editeur_de)
+    for editeur, serie in sorted(courbes_editeurs.items()):
+        dernier = serie[-1]
+        nb_annonces = sum(v["annonces"] for k, v in resultat["groupes"].items() if k.split(" · ", 1)[1] == editeur)
+        resultat["editeurs"][editeur] = {"indice": dernier["indice"], "livres": dernier["livres"], "annonces": nb_annonces,
+                                         "historique": [[s["date"], s["indice"]] for s in serie]}
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")
     return 0
