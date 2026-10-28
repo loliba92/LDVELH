@@ -20,20 +20,16 @@ class TestVersionIndiquee(unittest.TestCase):
     def test_plusieurs_versions_donnent_rien(self):
         self.assertIsNone(ev.version_indiquee("V1 et V2 mélangées", EDITIONS))
 
+    def test_version_du_titre(self):
+        self.assertEqual(ev.version_titre("La Porte d'Ombre V2 Gallimard"), "V2")
+        self.assertEqual(ev.version_titre("Loup Solitaire v 3"), "V3")
+        self.assertIsNone(ev.version_titre("La Porte d'Ombre"))
+        self.assertIsNone(ev.version_titre(""))
+        self.assertIsNone(ev.version_titre(None))
+
     def test_texte_vide_ou_sans_version(self):
         self.assertIsNone(ev.version_indiquee("", EDITIONS))
         self.assertIsNone(ev.version_indiquee("Très bon état, envoi rapide", EDITIONS))
-
-
-class TestVersionTitre(unittest.TestCase):
-    def test_version_dans_le_titre(self):
-        self.assertEqual(ev.version_titre("La Porte d'Ombre V3 Gallimard"), "V3")
-        self.assertEqual(ev.version_titre("Le Sorcier v 2"), "V2")
-
-    def test_pas_de_version(self):
-        self.assertIsNone(ev.version_titre("Le Sorcier de Zagor"))
-        self.assertIsNone(ev.version_titre(""))
-        self.assertIsNone(ev.version_titre(None))
 
 
 if __name__ == "__main__":
