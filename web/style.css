@@ -2081,6 +2081,14 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ind-ligne > .ind-detail > .ind-wf-total { margin-top: 6px; }
 .ind-detail summary { cursor: pointer; color: var(--accent); font-size: .85rem; }
 .ind-wf-total { margin: 8px 0; font-size: .9rem; color: var(--muted); }
+.ind-rf { list-style: none; margin: 0; padding: 0; }
+.ind-rf-ligne { display: grid; grid-template-columns: minmax(0, 1fr) 3rem 3rem 4.4rem; gap: 6px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--accent-soft); font-size: .9rem; }
+.ind-rf-ligne .ind-meta { display: block; grid-column: auto; }
+.ind-rf-n { text-align: right; font-variant-numeric: tabular-nums; }
+.ind-rf-ligne .ind-var { text-align: right; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ind-rf-tete { border-top: 0; color: var(--accent); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+.ind-rf-tete span { font-weight: 600; }
+.ind-rf-total { border-top: 2px solid var(--accent); font-weight: 700; }
 .ind-wf-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .ind-wf-haut { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .9rem; }
 .ind-wf-haut .ind-var { white-space: nowrap; font-weight: 600; }

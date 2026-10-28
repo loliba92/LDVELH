@@ -1405,464 +1405,422 @@
  },
  "cascade": {
   "V1 · Gallimard": {
+   "depuis": "2026-10-11",
    "date": "2026-10-28",
-   "variation_pct": -0.82,
+   "variation_pct": -0.99,
+   "debut": 100.0,
+   "fin": 99.01,
    "prix_observes": 387,
    "series": [
+    {
+     "serie": "Sorcellerie!",
+     "livres": 3,
+     "annonces": 18,
+     "contribution_pct": -0.47,
+     "debut": 100.0,
+     "fin": 81.6,
+     "variation_pct": -18.4
+    },
     {
      "serie": "L'Œil Noir",
      "livres": 20,
      "annonces": 51,
-     "prix": 33,
-     "contribution_pct": -0.28
+     "contribution_pct": -1.1,
+     "debut": 100.0,
+     "fin": 87.89,
+     "variation_pct": -12.11
     },
     {
      "serie": "Loup Solitaire",
      "livres": 22,
      "annonces": 110,
-     "prix": 47,
-     "contribution_pct": -0.21
-    },
-    {
-     "serie": "Les Terres de Légende",
-     "livres": 6,
-     "annonces": 25,
-     "prix": 12,
-     "contribution_pct": -0.16
-    },
-    {
-     "serie": "Défis Fantastiques",
-     "livres": 52,
-     "annonces": 264,
-     "prix": 116,
-     "contribution_pct": -0.09
-    },
-    {
-     "serie": "Quête du Graal",
-     "livres": 7,
-     "annonces": 42,
-     "prix": 17,
-     "contribution_pct": -0.03
-    },
-    {
-     "serie": "Chroniques Crétoises",
-     "livres": 3,
-     "annonces": 11,
-     "prix": 5,
-     "contribution_pct": -0.02
-    },
-    {
-     "serie": "Double Jeu",
-     "livres": 6,
-     "annonces": 23,
-     "prix": 14,
-     "contribution_pct": -0.02
-    },
-    {
-     "serie": "L'Epée de Légende",
-     "livres": 5,
-     "annonces": 22,
-     "prix": 9,
-     "contribution_pct": -0.02
-    },
-    {
-     "serie": "La Voie du Tigre",
-     "livres": 5,
-     "annonces": 20,
-     "prix": 12,
-     "contribution_pct": -0.02
+     "contribution_pct": -0.65,
+     "debut": 100.0,
+     "fin": 94.8,
+     "variation_pct": -5.2
     },
     {
      "serie": "Sherlock Holmes",
      "livres": 8,
      "annonces": 24,
-     "prix": 15,
-     "contribution_pct": -0.02
-    },
-    {
-     "serie": "Destins",
-     "livres": 2,
-     "annonces": 7,
-     "prix": 4,
-     "contribution_pct": -0.01
-    },
-    {
-     "serie": "Le Maître du Destin",
-     "livres": 2,
-     "annonces": 5,
-     "prix": 5,
-     "contribution_pct": -0.01
-    },
-    {
-     "serie": "Les Portes Interdites",
-     "livres": 2,
-     "annonces": 7,
-     "prix": 4,
-     "contribution_pct": -0.01
-    },
-    {
-     "serie": "Astre d'Or",
-     "livres": 4,
-     "annonces": 18,
-     "prix": 9,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "Epouvante!",
-     "livres": 2,
-     "annonces": 6,
-     "prix": 4,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Les Messagers du Temps",
-     "livres": 4,
-     "annonces": 13,
-     "prix": 8,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "Métamorphose",
-     "livres": 2,
-     "annonces": 7,
-     "prix": 4,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Neige d'Automne",
-     "livres": 1,
-     "annonces": 3,
-     "prix": 2,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Défis et Sortilèges",
-     "livres": 8,
-     "annonces": 42,
-     "prix": 22,
-     "contribution_pct": 0.01
-    },
-    {
-     "serie": "Histoire",
-     "livres": 5,
-     "annonces": 16,
-     "prix": 8,
-     "contribution_pct": 0.01
+     "contribution_pct": 0.44,
+     "debut": 100.0,
+     "fin": 111.98,
+     "variation_pct": 11.98
     },
     {
      "serie": "Loup*Ardent",
      "livres": 4,
      "annonces": 35,
-     "prix": 11,
-     "contribution_pct": 0.01
+     "contribution_pct": 0.52,
+     "debut": 100.0,
+     "fin": 119.99,
+     "variation_pct": 19.99
     },
     {
-     "serie": "Super Sherlock",
-     "livres": 2,
-     "annonces": 4,
-     "prix": 3,
-     "contribution_pct": 0.01
-    },
-    {
-     "serie": "Dragon d'Or",
-     "livres": 6,
-     "annonces": 34,
-     "prix": 14,
-     "contribution_pct": 0.02
-    },
-    {
-     "serie": "Sorcellerie!",
-     "livres": 3,
-     "annonces": 18,
-     "prix": 9,
-     "contribution_pct": 0.02
-    }
-   ]
-  },
-  "V1 · Alkonost": {
-   "date": "2026-10-28",
-   "variation_pct": 0.0,
-   "prix_observes": 4,
-   "series": [
-    {
-     "serie": "Destins",
-     "livres": 1,
-     "annonces": 1,
-     "prix": 1,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Forge divine",
-     "livres": 1,
-     "annonces": 1,
-     "prix": 1,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Les Contes",
-     "livres": 2,
-     "annonces": 3,
-     "prix": 2,
-     "contribution_pct": 0.0
-    }
-   ]
-  },
-  "V2 · Alkonost": {
-   "date": "2026-10-28",
-   "variation_pct": 0.0,
-   "prix_observes": 4,
-   "series": [
-    {
-     "serie": "Destins",
-     "livres": 3,
-     "annonces": 4,
-     "prix": 4,
-     "contribution_pct": 0.0
+     "serie": "Autres séries (19)",
+     "autres": true,
+     "livres": 124,
+     "annonces": 569,
+     "contribution_pct": 0.3,
+     "debut": 100.0,
+     "fin": 100.39,
+     "variation_pct": 0.39
     }
    ]
   },
   "V2 · Gallimard": {
+   "depuis": "2026-10-11",
    "date": "2026-10-28",
-   "variation_pct": -0.16,
+   "variation_pct": -2.49,
+   "debut": 100.0,
+   "fin": 97.51,
    "prix_observes": 116,
    "series": [
-    {
-     "serie": "Dragon d'Or",
-     "livres": 6,
-     "annonces": 15,
-     "prix": 11,
-     "contribution_pct": -0.07
-    },
-    {
-     "serie": "Défis Fantastiques",
-     "livres": 30,
-     "annonces": 52,
-     "prix": 41,
-     "contribution_pct": -0.06
-    },
-    {
-     "serie": "Loup Solitaire",
-     "livres": 24,
-     "annonces": 43,
-     "prix": 35,
-     "contribution_pct": -0.05
-    },
-    {
-     "serie": "Quête du Graal",
-     "livres": 5,
-     "annonces": 7,
-     "prix": 6,
-     "contribution_pct": -0.03
-    },
     {
      "serie": "Epouvante!",
      "livres": 2,
      "annonces": 3,
-     "prix": 2,
-     "contribution_pct": -0.01
-    },
-    {
-     "serie": "Destins",
-     "livres": 1,
-     "annonces": 2,
-     "prix": 2,
-     "contribution_pct": -0.0
+     "contribution_pct": -0.55,
+     "debut": 100.0,
+     "fin": 72.41,
+     "variation_pct": -27.59
     },
     {
      "serie": "Défis de l'Histoire",
      "livres": 2,
      "annonces": 3,
-     "prix": 3,
-     "contribution_pct": 0.0
+     "contribution_pct": -0.67,
+     "debut": 100.0,
+     "fin": 76.84,
+     "variation_pct": -23.16
     },
     {
-     "serie": "Sherlock Holmes",
-     "livres": 2,
-     "annonces": 4,
-     "prix": 4,
-     "contribution_pct": 0.0
+     "serie": "Défis Fantastiques",
+     "livres": 30,
+     "annonces": 52,
+     "contribution_pct": -1.71,
+     "debut": 100.0,
+     "fin": 95.23,
+     "variation_pct": -4.77
+    },
+    {
+     "serie": "Loup Solitaire",
+     "livres": 24,
+     "annonces": 43,
+     "contribution_pct": 1.08,
+     "debut": 100.0,
+     "fin": 103.69,
+     "variation_pct": 3.69
     },
     {
      "serie": "Super Sherlock",
      "livres": 1,
      "annonces": 4,
-     "prix": 3,
-     "contribution_pct": 0.0
+     "contribution_pct": 0.36,
+     "debut": 100.0,
+     "fin": 115.18,
+     "variation_pct": 15.18
     },
     {
-     "serie": "Loup*Ardent",
-     "livres": 4,
-     "annonces": 9,
-     "prix": 6,
-     "contribution_pct": 0.01
-    },
-    {
-     "serie": "Sorcellerie!",
-     "livres": 2,
-     "annonces": 4,
-     "prix": 3,
-     "contribution_pct": 0.04
-    }
-   ]
-  },
-  "V1 · Bragelonne": {
-   "date": "2026-10-28",
-   "variation_pct": 0.0,
-   "prix_observes": 1,
-   "series": [
-    {
-     "serie": "Destiny Quest",
-     "livres": 1,
-     "annonces": 1,
-     "prix": 1,
-     "contribution_pct": 0.0
+     "serie": "Autres séries (6)",
+     "autres": true,
+     "livres": 20,
+     "annonces": 41,
+     "contribution_pct": -0.99,
+     "debut": 100.0,
+     "fin": 96.41,
+     "variation_pct": -3.59
     }
    ]
   },
   "V3 · Gallimard": {
+   "depuis": "2026-10-11",
    "date": "2026-10-28",
-   "variation_pct": 0.03,
+   "variation_pct": 3.05,
+   "debut": 100.0,
+   "fin": 103.05,
    "prix_observes": 36,
    "series": [
-    {
-     "serie": "Loup Solitaire",
-     "livres": 14,
-     "annonces": 26,
-     "prix": 20,
-     "contribution_pct": -0.02
-    },
     {
      "serie": "Défis Fantastiques",
      "livres": 10,
      "annonces": 21,
-     "prix": 16,
-     "contribution_pct": 0.05
+     "contribution_pct": -1.31,
+     "debut": 100.0,
+     "fin": 97.15,
+     "variation_pct": -2.85
+    },
+    {
+     "serie": "Loup Solitaire",
+     "livres": 14,
+     "annonces": 26,
+     "contribution_pct": 4.35,
+     "debut": 100.0,
+     "fin": 108.02,
+     "variation_pct": 8.02
     }
    ]
   },
   "V4 · Gallimard": {
+   "depuis": "2026-10-11",
    "date": "2026-10-28",
-   "variation_pct": -1.84,
+   "variation_pct": 1.52,
+   "debut": 100.0,
+   "fin": 101.52,
    "prix_observes": 58,
    "series": [
+    {
+     "serie": "Défis Fantastiques",
+     "livres": 15,
+     "annonces": 42,
+     "contribution_pct": -0.92,
+     "debut": 100.0,
+     "fin": 97.91,
+     "variation_pct": -2.09
+    },
     {
      "serie": "Loup Solitaire",
      "livres": 16,
      "annonces": 36,
-     "prix": 25,
-     "contribution_pct": -1.74
+     "contribution_pct": 0.03,
+     "debut": 100.0,
+     "fin": 100.06,
+     "variation_pct": 0.06
     },
     {
      "serie": "Sorcellerie!",
      "livres": 4,
      "annonces": 14,
-     "prix": 8,
-     "contribution_pct": -0.26
-    },
-    {
-     "serie": "Défis Fantastiques",
-     "livres": 15,
-     "annonces": 42,
-     "prix": 25,
-     "contribution_pct": 0.16
+     "contribution_pct": 2.4,
+     "debut": 100.0,
+     "fin": 118.89,
+     "variation_pct": 18.89
     }
    ]
   },
   "V5 · Gallimard Jeunesse": {
+   "depuis": "2026-10-11",
    "date": "2026-10-28",
-   "variation_pct": -1.41,
-   "prix_observes": 44,
+   "variation_pct": -3.97,
+   "debut": 100.0,
+   "fin": 96.03,
+   "prix_observes": 45,
    "series": [
     {
      "serie": "Loup Solitaire",
-     "livres": 13,
-     "annonces": 24,
-     "prix": 19,
-     "contribution_pct": -1.38
+     "livres": 14,
+     "annonces": 25,
+     "contribution_pct": -3.25,
+     "debut": 100.0,
+     "fin": 92.8,
+     "variation_pct": -7.2
     },
     {
      "serie": "Quête du Graal",
      "livres": 3,
      "annonces": 4,
-     "prix": 4,
-     "contribution_pct": -0.02
+     "contribution_pct": -0.47,
+     "debut": 100.0,
+     "fin": 94.27,
+     "variation_pct": -5.73
     },
     {
      "serie": "Défis Fantastiques",
      "livres": 12,
      "annonces": 28,
-     "prix": 21,
-     "contribution_pct": -0.01
+     "contribution_pct": -0.25,
+     "debut": 100.0,
+     "fin": 99.36,
+     "variation_pct": -0.64
+    }
+   ]
+  },
+  "V1 · Alkonost": {
+   "depuis": "2026-10-15",
+   "date": "2026-10-28",
+   "variation_pct": 2.49,
+   "debut": 100.0,
+   "fin": 102.49,
+   "prix_observes": 5,
+   "series": [
+    {
+     "serie": "Destins",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
+    },
+    {
+     "serie": "Forge divine",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
+    },
+    {
+     "serie": "Les Contes",
+     "livres": 2,
+     "annonces": 3,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
+    },
+    {
+     "serie": "Littéraction",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 2.49,
+     "debut": 100.0,
+     "fin": 113.07,
+     "variation_pct": 13.07
+    }
+   ]
+  },
+  "V2 · Alkonost": {
+   "depuis": "2026-10-15",
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "debut": 100.0,
+   "fin": 100.0,
+   "prix_observes": 5,
+   "series": [
+    {
+     "serie": "Destins",
+     "livres": 3,
+     "annonces": 4,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
+    },
+    {
+     "serie": "Littéraction",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
     }
    ]
   },
   "V1 · Hachette": {
+   "depuis": "2026-10-15",
    "date": "2026-10-28",
-   "variation_pct": 0.0,
+   "variation_pct": -13.44,
+   "debut": 100.0,
+   "fin": 86.56,
    "prix_observes": 10,
    "series": [
     {
      "serie": "La Saga du Prêtre Jean",
      "livres": 4,
      "annonces": 15,
-     "prix": 10,
-     "contribution_pct": 0.0
-    }
-   ]
-  },
-  "V1 · Jean-Pierre Pécau": {
-   "date": "2026-10-28",
-   "variation_pct": 1.34,
-   "prix_observes": 1,
-   "series": [
-    {
-     "serie": "Non classée",
-     "livres": 1,
-     "annonces": 4,
-     "prix": 1,
-     "contribution_pct": 1.34
+     "contribution_pct": -13.44,
+     "debut": 100.0,
+     "fin": 86.56,
+     "variation_pct": -13.44
     }
    ]
   },
   "V1 · Elder Craft": {
+   "depuis": "2026-10-17",
    "date": "2026-10-28",
-   "variation_pct": 0.0,
+   "variation_pct": -22.22,
+   "debut": 100.0,
+   "fin": 77.78,
    "prix_observes": 3,
    "series": [
     {
      "serie": "RPG BooK",
      "livres": 2,
      "annonces": 5,
-     "prix": 3,
-     "contribution_pct": 0.0
+     "contribution_pct": -22.22,
+     "debut": 100.0,
+     "fin": 77.78,
+     "variation_pct": -22.22
     }
    ]
   },
   "V2 · Elder Craft": {
+   "depuis": "2026-10-17",
    "date": "2026-10-28",
    "variation_pct": 0.0,
+   "debut": 100.0,
+   "fin": 100.0,
    "prix_observes": 2,
    "series": [
     {
      "serie": "RPG BooK",
      "livres": 1,
      "annonces": 2,
-     "prix": 2,
-     "contribution_pct": 0.0
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
     }
    ]
   },
   "V1 · Sarbacane": {
+   "depuis": "2026-10-19",
    "date": "2026-10-28",
-   "variation_pct": 0.0,
+   "variation_pct": -3.15,
+   "debut": 100.0,
+   "fin": 96.85,
    "prix_observes": 2,
    "series": [
     {
      "serie": "Reine",
      "livres": 1,
      "annonces": 2,
-     "prix": 2,
-     "contribution_pct": 0.0
+     "contribution_pct": -3.15,
+     "debut": 100.0,
+     "fin": 96.85,
+     "variation_pct": -3.15
+    }
+   ]
+  },
+  "V1 · Bragelonne": {
+   "depuis": "2026-10-22",
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "debut": 100.0,
+   "fin": 100.0,
+   "prix_observes": 1,
+   "series": [
+    {
+     "serie": "Destiny Quest",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 0.0,
+     "debut": 100.0,
+     "fin": 100.0,
+     "variation_pct": 0.0
+    }
+   ]
+  },
+  "V1 · Jean-Pierre Pécau": {
+   "depuis": "2026-10-24",
+   "date": "2026-10-28",
+   "variation_pct": 6.0,
+   "debut": 100.0,
+   "fin": 106.0,
+   "prix_observes": 1,
+   "series": [
+    {
+     "serie": "Non classée",
+     "livres": 1,
+     "annonces": 4,
+     "contribution_pct": 6.0,
+     "debut": 100.0,
+     "fin": 106.0,
+     "variation_pct": 6.0
     }
    ]
   }
