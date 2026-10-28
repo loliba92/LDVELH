@@ -95,9 +95,26 @@ def annonces_par_groupe(chemin_annonces, groupe_de):
     return compte
 
 
+def garder_observes(historique, observes):
+    """Ne garde, chaque jour, que les prix des livres observés (une annonce actuelle pour leur état).
+    Les autres livres sont extrapolés plus tard, à partir du mouvement observé : ils ne pèsent pas dans l'indice."""
+    return [{"date": h["date"], "prix": {k: v for k, v in h["prix"].items() if k in observes}} for h in historique]
+
+
+def observes_depuis(chemin_annonces):
+    """Clés « isbn|état » ayant au moins une annonce actuelle."""
+    try:
+        donnees = json.loads(chemin_annonces.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    return {f"{isbn}|{etat}" for isbn, par_etat in (donnees.get("annonces") or {}).items() for etat, liste in par_etat.items() if liste}
+
+
 def main():
     historique = json.loads(HISTO.read_text(encoding="utf-8"))
     groupe_de = groupes()
+    observes = observes_depuis(ANNONCES)
+    historique = garder_observes(historique, observes)
     courbes = chainer(historique, groupe_de)
     annonces = annonces_par_groupe(ANNONCES, groupe_de)
     resultat = {"date": historique[-1]["date"], "groupes": {}, "editeurs": {}}
