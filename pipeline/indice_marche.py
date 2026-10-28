@@ -25,6 +25,10 @@ ANNONCES = RACINE / "data" / "processed" / "annonces.json"
 SORTIE = RACINE / "data" / "processed" / "indice-marche.json"
 
 
+# Imprints rattachés à leur maison : même éditeur, numérotation de versions propre à chaque imprint
+FAMILLE = {"Gallimard Jeunesse": "Gallimard"}
+
+
 def groupes(chemin=EDITIONS):
     """{isbn13: « version · éditeur »}. Une valeur absente devient « sans version » ou « éditeur inconnu »."""
     par_isbn = {}
@@ -130,6 +134,14 @@ def main():
         nb_annonces = sum(v["annonces"] for k, v in resultat["groupes"].items() if k.split(" · ", 1)[1] == editeur)
         resultat["editeurs"][editeur] = {"indice": dernier["indice"], "livres": dernier["livres"], "annonces": nb_annonces,
                                          "historique": [[s["date"], s["indice"]] for s in serie]}
+    # Familles d'éditeurs : un imprint rattaché à sa maison (Gallimard Jeunesse → Gallimard), indice calculé sur l'ensemble
+    famille_de = {isbn: FAMILLE.get(e, e) for isbn, e in editeur_de.items()}
+    courbes_familles = chainer(historique, famille_de)
+    for famille, serie in sorted(courbes_familles.items()):
+        dernier = serie[-1]
+        nb_annonces = sum(v["annonces"] for k, v in resultat["groupes"].items() if FAMILLE.get(k.split(" · ", 1)[1], k.split(" · ", 1)[1]) == famille)
+        resultat.setdefault("familles", {})[famille] = {"indice": dernier["indice"], "livres": dernier["livres"], "annonces": nb_annonces,
+                                                        "historique": [[s["date"], s["indice"]] for s in serie]}
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")
     return 0

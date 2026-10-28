@@ -808,9 +808,19 @@
       const parEditeurBouge = {};
       bouge.forEach((l) => { (parEditeurBouge[l.editeur] = parEditeurBouge[l.editeur] || []).push(l); });
       const editeursBouge = Object.entries(parEditeurBouge).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
-      const blocsBouge = editeursBouge.map((e) => {
-        const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
-        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)}</h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
+      // Une maison (Gallimard) regroupe ses imprints (Gallimard, Gallimard Jeunesse) : l'indice de la maison d'abord, puis chaque imprint
+      const FAM = (n) => (n === 'Gallimard Jeunesse' ? 'Gallimard' : n);
+      const indiceFamille = (fam) => { const x = (INDICE.familles || {})[fam]; if (!x) return ''; const ecart = Math.round((x.indice - 100) * 10) / 10; return `<b>${virgule(x.indice, 1)}</b> <span class="ind-var ${ecart < 0 ? 'baisse' : ecart > 0 ? 'hausse' : 'stable'}">${ecart === 0 ? 'stable' : (ecart < 0 ? '↓' : '↑') + ' ' + virgule(Math.abs(ecart), 1) + ' %'}</span> ${mini(x.historique)}`; };
+      const familles = {};
+      editeursBouge.forEach((e) => { (familles[FAM(e.nom)] = familles[FAM(e.nom)] || []).push(e); });
+      const blocsBouge = Object.entries(familles).map(([fam, imprints]) => {
+        const sousBlocs = imprints.map((e) => {
+          const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
+          return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)}</h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
+        }).join('');
+        return imprints.length > 1
+          ? `<section class="ind-famille"><h2 class="ind-fam-titre">${esc(fam)}</h2><div class="ind-ed-indice">${indiceFamille(fam)}</div>${sousBlocs}</section>`
+          : sousBlocs;
       }).join('');
       const parEditeurStable = {};
       stables.forEach((l) => { (parEditeurStable[l.editeur] = parEditeurStable[l.editeur] || []).push(l.edition); });
