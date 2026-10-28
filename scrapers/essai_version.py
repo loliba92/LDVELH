@@ -34,6 +34,12 @@ def description(item_id, token, http=requests):
         return ""
 
 
+def version_titre(titre):
+    """Version écrite dans le titre d'une annonce (« V2 », « v 3 »…), en majuscules sans espace, ou None."""
+    m = re.search(r"\bV\s?([1-9])\b", titre or "", flags=re.I)
+    return f"V{m.group(1)}" if m else None
+
+
 def version_indiquee(texte, editions):
     """Version dite par la description : « V2 », ou l'année d'une édition connue. None si rien ou plusieurs versions."""
     trouvees = set()
@@ -72,7 +78,16 @@ def essayer(a, token, catalogue, chercher_elargi, concorde, dossier_covers, edit
     for isbn, titre, nb_ed, livre, annees in echantillon:
         ed = next((r for r in rows if r.get("isbn13") == isbn), {})
         compte["editions"] += 1
-        items = [it for it in chercher_elargi(isbn, titre, token, ed=ed) if concorde(it.get("title", ""), titre)]
+        ver_ed = (ed.get("version") or "").upper().replace(" ", "")
+        items = []
+        for it in chercher_elargi(isbn, titre, token, ed=ed):
+            if not concorde(it.get("title", ""), titre):
+                continue
+            vt = version_titre(it.get("title", ""))
+            if vt and ver_ed and vt != ver_ed:                 # l'annonce dit une autre version : elle ne vaut pas pour cette édition
+                compte["rejetees_version_titre"] += 1
+                continue
+            items.append(it)
         compte["annonces_titre_concordant"] += len(items)
         if not items:
             continue
@@ -97,7 +112,7 @@ def essayer(a, token, catalogue, chercher_elargi, concorde, dossier_covers, edit
             if not v_desc and not v_img:
                 compte["sans_version"] += 1
     print(f"Essai version sur {compte['editions']} éditions « archive seule » (comptages seulement)")
-    for cle in ("editions_avec_annonce", "annonces_titre_concordant", "annonces_lues", "descriptions_non_vides",
+    for cle in ("editions_avec_annonce", "annonces_titre_concordant", "rejetees_version_titre", "annonces_lues", "descriptions_non_vides",
                 "version_par_description", "version_par_image", "description_et_image_concordent",
                 "description_et_image_contradictoires", "sans_version"):
         print(f"- {cle} : {compte[cle]}")
