@@ -761,17 +761,44 @@
     // Indice de marché (Zagor seulement) : lu par le relais, affiché en tableau court
     let INDICE = null, indiceCharge = null;
     const chargerIndice = () => indiceCharge || (indiceCharge = window.Relais.appeler('indice_lire', {}).then((r) => { INDICE = r && r.ok ? r.indice : null; return INDICE; }).catch(() => null));
+    // Versions du catalogue (éditeur, version, prix par état), lues une fois pour l'arbre de l'indice
+    let VERSIONS_IND = null;
+    const chargerVersions = () => VERSIONS_IND || (VERSIONS_IND = fetch('data/versions.json').then((r) => r.json()).catch(() => []));
+    const cleIndice = (version, editeur) => `${(version || '').trim() || 'sans version'} · ${(editeur || '').trim() || 'éditeur inconnu'}`;
+    const virgule = (x, n) => x.toFixed(n).replace('.', ',');
     const dessinerIndice = () => {
       const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
       if (!etat || !liste) return;
       if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
-      const lignes = Object.entries(INDICE.groupes || {}).sort((a, b) => b[1].livres - a[1].livres);
-      etat.textContent = `${lignes.length} groupes au ${jour(INDICE.date)}.`;
-      liste.innerHTML = '<div class="rc-liste">' + lignes.map(([nom, g]) => {
-        const ecart = Math.round((g.indice - 100) * 10) / 10;
-        const texte = `${g.indice.toFixed(1).replace('.', ',')} (${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${String(Math.abs(ecart)).replace('.', ',')} %)`;
-        return `<article class="rc-ligne"><span class="rc-titre ind-nom">${esc(nom)}</span><b class="rc-prix">${texte}</b><span class="rc-ligne2 ind-meta">${g.livres} livre${g.livres > 1 ? 's' : ''} mesuré${g.livres > 1 ? 's' : ''} · ${g.annonces} annonce${g.annonces > 1 ? 's' : ''}</span></article>`;
-      }).join('') + '</div>';
+      chargerVersions().then((versions) => {
+        const parCle = {};
+        versions.forEach((v) => { const c = cleIndice(v.version, v.editeur); (parCle[c] = parCle[c] || []).push(v); });
+        // Arbre : éditeur, puis version (édition), puis livres. La clé d'un groupe est « version · éditeur », comme dans le calcul.
+        const arbre = {};
+        Object.entries(INDICE.groupes || {}).forEach(([cle, g]) => {
+          const i = cle.indexOf(' · ');
+          const version = cle.slice(0, i), editeur = cle.slice(i + 3);
+          const noeud = (arbre[editeur] = arbre[editeur] || { versions: [], livres: 0 });
+          noeud.versions.push({ version, g, livres: parCle[cle] || [] });
+          noeud.livres += g.livres;
+        });
+        const editeurs = Object.entries(arbre).sort((a, b) => b[1].livres - a[1].livres);
+        etat.textContent = `${editeurs.length} éditeurs au ${jour(INDICE.date)}. Ouvrez un éditeur, puis une édition.`;
+        liste.innerHTML = '<div class="ind-arbre">' + editeurs.map(([nom, n]) => {
+          const versions = n.versions.sort((a, b) => b.g.livres - a.g.livres);
+          return `<details><summary><span class="ind-nom ind-ed">${esc(nom)}</span><span class="ind-meta">${versions.length} édition${versions.length > 1 ? 's' : ''} · ${n.livres} livre${n.livres > 1 ? 's' : ''}</span></summary><div class="ind-corps">` +
+            versions.map((v) => {
+              const ecart = Math.round((v.g.indice - 100) * 10) / 10;
+              const texte = `${virgule(v.g.indice, 1)} (${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${virgule(Math.abs(ecart), 1)} %)`;
+              const livres = v.livres.slice().sort((a, b) => (a.titre || '').localeCompare(b.titre || '', 'fr')).map((l) => {
+                const prix = Object.keys(ABR_ETAT).filter((e) => l.prix && l.prix[e] != null).map((e) => `${ABR_ETAT[e]} ${eur(l.prix[e])}`).join(' · ');
+                return `<li><span class="ind-nom">${esc(l.titre)}</span><span class="ind-meta">${prix || 'pas de prix'}</span></li>`;
+              }).join('');
+              return `<details class="ind-ver"><summary><span class="ind-nom">${esc(v.version)}</span><b class="rc-prix">${texte}</b><span class="ind-meta">${v.g.livres} livre${v.g.livres > 1 ? 's' : ''} mesuré${v.g.livres > 1 ? 's' : ''} · ${v.g.annonces} annonce${v.g.annonces > 1 ? 's' : ''}</span></summary>` +
+                `<ul class="ind-livres">${livres || '<li><span class="ind-meta">Aucun livre listé</span></li>'}</ul></details>`;
+            }).join('') + '</div></details>';
+        }).join('') + '</div>';
+      });
     };
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
     dessinerRecues();

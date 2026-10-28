@@ -2046,6 +2046,17 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
 .ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
+.ind-arbre details { border-bottom: 1px solid var(--line); }
+.ind-arbre summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 10px 2px; cursor: pointer; list-style: none; }
+.ind-arbre summary::-webkit-details-marker { display: none; }
+.ind-arbre summary::before { content: "▸"; color: var(--accent); width: 1em; }
+.ind-arbre details[open] > summary::before { content: "▾"; }
+.ind-arbre .ind-ed { color: var(--accent); font-weight: 600; }
+.ind-arbre .ind-corps { padding: 0 0 8px 14px; }
+.ind-arbre .ind-ver { border-bottom: 0; }
+.ind-arbre .ind-ver summary { padding-left: 0; }
+.ind-livres { list-style: none; margin: 4px 0 8px 14px; padding: 0; display: grid; gap: 4px; }
+.ind-livres li { display: flex; flex-wrap: wrap; gap: 0 10px; font-size: .9rem; }
 .rc-ligne .rc-titre.ind-nom { white-space: normal; overflow: visible; text-overflow: clip; }
 
 /* Accueil, niveau 3 : état des mises à jour automatiques. Une ligne de synthèse (44 px mini), le détail se déplie. */
