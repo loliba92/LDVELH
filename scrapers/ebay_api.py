@@ -329,6 +329,9 @@ def lignes_annonces(items, isbn13, jour, titre=None, annees=None, ed=None):
     return sortie
 
 
+CIBLES_ESSAIS = Path(__file__).resolve().parent.parent / "data" / "manual" / "essais_archives.txt"   # ISBN des éditions « archive seule » (mode --essais)
+
+
 def catalogue():
     """[(isbn13, titre, nb d'éditions du livre, livre, années de parution)] : le titre sert à vérifier la concordance ;
     le nombre d'éditions, le livre et l'année servent à ne pas confondre les éditions d'un même titre."""
@@ -445,6 +448,9 @@ def essayer(a, token):
     jour = date.today()
     rows = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
     cat = catalogue()
+    if CIBLES_ESSAIS.exists():                                             # essais ciblés : seulement les éditions de la liste (archive seule)
+        voulus = set(CIBLES_ESSAIS.read_text(encoding="utf-8").split())
+        cat = [c for c in cat if c[0] in voulus]
     pas = max(1, len(cat) // a.essais)
     echantillon = cat[::pas][: a.essais]                                  # réparti sur tout le catalogue
     valables = collections.defaultdict(dict)                              # nom de requête -> {isbn: {itemId}}
