@@ -623,8 +623,8 @@
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
           if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
-          if (origine === 'leboncoin') raisons.push("annonce Leboncoin : vérifier l'édition et l'état");
-          if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
+          if (origine === 'leboncoin') raisons.push("annonce Leboncoin : vérifier l'édition et l'état");        // dit déjà que l'état reste à confirmer
+          else if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
         }
         lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue, premiere: (BUT.premieres && BUT.premieres[lien]) || vue });
