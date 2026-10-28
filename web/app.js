@@ -1282,10 +1282,11 @@
       const limite = Date.now() - 24 * 3600 * 1000;
       const imports = await lireImports();
       const recents = imports.filter((im) => Date.parse(im.t) >= limite);
-      const n = recents.reduce((t, im) => t + im.lignes.length, 0);
+      const lignes = recents.flatMap((im) => im.lignes);
+      const n = lignes.length, p = lignes.filter((a) => infosImport(a).v === 'pepite').length;
       const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
       const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
-      cible.textContent = `${quand} · ${n ? `${n} livre${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` : 'aucun livre ajouté'} sur 24 h`;
+      cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
     } catch (e) { /* historique indisponible : la ligne garde son libellé d'origine */ }
   }
   document.addEventListener('cdh-compte', initMaj);
