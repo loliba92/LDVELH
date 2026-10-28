@@ -2046,17 +2046,23 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
 .ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
-.ind-arbre details { border-bottom: 1px solid var(--line); }
-.ind-arbre summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 10px 2px; cursor: pointer; list-style: none; }
-.ind-arbre summary::-webkit-details-marker { display: none; }
-.ind-arbre summary::before { content: "▸"; color: var(--accent); width: 1em; }
-.ind-arbre details[open] > summary::before { content: "▾"; }
-.ind-arbre .ind-ed { color: var(--accent); font-weight: 600; }
-.ind-arbre .ind-corps { padding: 0 0 8px 14px; }
-.ind-arbre .ind-ver { border-bottom: 0; }
-.ind-arbre .ind-ver summary { padding-left: 0; }
-.ind-livres { list-style: none; margin: 4px 0 8px 14px; padding: 0; display: grid; gap: 4px; }
-.ind-livres li { display: flex; flex-wrap: wrap; gap: 0 10px; font-size: .9rem; }
+.ind-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.ind-carte { display: grid; justify-items: center; gap: 2px; padding: 10px 6px; border: 1px solid var(--line); border-radius: var(--r); text-align: center; }
+.ind-carte b { font-size: 1.5rem; line-height: 1; }
+.ind-carte span { font-size: .8rem; color: var(--muted); }
+.ind-carte.baisse b { color: var(--accent); }
+.ind-liste { display: grid; gap: 8px; }
+.ind-barre { position: relative; grid-column: 1 / -1; height: 8px; background: var(--accent-soft); border-radius: 4px; }
+.ind-barre .ind-axe { position: absolute; left: 50%; top: -3px; width: 2px; height: 14px; background: var(--muted); transform: translateX(-1px); }
+.ind-barre .ind-fill { position: absolute; top: 0; height: 100%; border-radius: 4px; background: var(--muted); }
+.ind-barre .ind-fill.baisse { background: var(--accent); }
+.ind-barre .ind-fill.hausse { background: var(--text); }
+.ind-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: baseline; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r); }
+.ind-ligne .ind-titre { font-weight: 600; overflow-wrap: anywhere; }
+.ind-ligne .ind-ed { display: block; color: var(--accent); font-size: .8rem; font-weight: 400; }
+.ind-ligne .ind-var { font-weight: 600; white-space: nowrap; text-align: right; }
+.ind-ligne .ind-var.baisse { color: var(--accent); }
+.ind-ligne .ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
 .rc-ligne .rc-titre.ind-nom { white-space: normal; overflow: visible; text-overflow: clip; }
 
 /* Accueil, niveau 3 : état des mises à jour automatiques. Une ligne de synthèse (44 px mini), le détail se déplie. */
