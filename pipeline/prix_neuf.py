@@ -46,6 +46,7 @@ OCCASION = Path(__file__).resolve().parent.parent / "data" / "raw" / "occasion"
 URL = "https://www.leslibraires.fr/livre/{isbn}"
 CHAMPS = ["isbn13", "prix", "disponibilite", "prix_occasion", "date", "source"]
 CHAMPS_OCCASION = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
+FRAIS_LIBRAIRIE = 4.50          # frais de port systématiques chez les librairies de leslibraires.fr (livraison à domicile, standard ou suivie)
 ETAT_OCCASION = "tres_bon"   # fiche sans état lisible : très bon état (règle du propriétaire)
 PAUSE = 2.0
 ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
