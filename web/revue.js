@@ -758,39 +758,43 @@
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
-    // Indice de marché (Zagor seulement) : lu par le relais, affiché en tableau court
-    let INDICE = null, indiceCharge = null;
-    const chargerIndice = () => indiceCharge || (indiceCharge = window.Relais.appeler('indice_lire', {}).then((r) => { INDICE = r && r.ok ? r.indice : null; return INDICE; }).catch(() => null));
-    // Indice de marché : une ligne par édition, les plus fortes baisses d'abord. Pas de liste de livres : elle n'apporte rien au groupe.
-    const virgule = (x, n) => x.toFixed(n).replace('.', ',');
-    const nb = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
-    const dessinerIndice = () => {
-      const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
-      if (!etat || !liste) return;
-      if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
-      const lignes = Object.entries(INDICE.groupes || {}).map(([cle, g]) => {
-        const i = cle.indexOf(' · ');
-        const ecart = Math.round((g.indice - 100) * 10) / 10;
-        const sens = ecart < 0 ? 'baisse' : ecart > 0 ? 'hausse' : 'stable';
-        return { edition: cle.slice(0, i), editeur: cle.slice(i + 3), ecart, sens, g };
-      }).sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
-      const compte = (s) => lignes.filter((l) => l.sens === s).length;
-      etat.textContent = `Au ${jour(INDICE.date)} : ${nb(compte('baisse'), 'édition')} en baisse, ${nb(compte('hausse'), 'édition')} en hausse, ${nb(compte('stable'), 'édition')} stable${compte('stable') > 1 ? 's' : ''}.`;
-      const fleche = { baisse: '↓', hausse: '↑', stable: '→' };
-      // Barre centrée sur 100 : à gauche une baisse, à droite une hausse. L'échelle est celle de la plus forte variation.
-      const max = Math.max(1, ...lignes.map((l) => Math.abs(l.ecart)));
-      const cartes = ['baisse', 'stable', 'hausse'].map((k) => `<div class="ind-carte ${k}"><b>${compte(k)}</b><span>${k === 'baisse' ? 'en baisse' : k === 'hausse' ? 'en hausse' : 'stables'}</span></div>`).join('');
-      liste.innerHTML = `<div class="ind-cartes">${cartes}</div><div class="ind-liste">` + lignes.map((l) => {
-        const variation = l.sens === 'stable' ? 'stable' : `${l.sens} ${virgule(Math.abs(l.ecart), 1)} %`;
-        const largeur = (Math.abs(l.ecart) / max) * 50;
-        const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
-        const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
-        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)} <span class="ind-ed">${esc(l.editeur)}</span></span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></article>`;
-      }).join('') + '</div>';
-    };
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
     dessinerRecues();
   }
+  // Indice de marché : sur toutes les pages qui ont l'onglet Indice (pas seulement celles qui ont Annonces reçues)
+  function initIndice() {
+      // Indice de marché (Zagor seulement) : lu par le relais, affiché en tableau court
+      let INDICE = null, indiceCharge = null;
+      const chargerIndice = () => indiceCharge || (indiceCharge = window.Relais.appeler('indice_lire', {}).then((r) => { INDICE = r && r.ok ? r.indice : null; return INDICE; }).catch(() => null));
+      // Indice de marché : une ligne par édition, les plus fortes baisses d'abord. Pas de liste de livres : elle n'apporte rien au groupe.
+      const virgule = (x, n) => x.toFixed(n).replace('.', ',');
+      const nb = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+      const dessinerIndice = () => {
+        const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
+        if (!etat || !liste) return;
+        if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
+        const lignes = Object.entries(INDICE.groupes || {}).map(([cle, g]) => {
+          const i = cle.indexOf(' · ');
+          const ecart = Math.round((g.indice - 100) * 10) / 10;
+          const sens = ecart < 0 ? 'baisse' : ecart > 0 ? 'hausse' : 'stable';
+          return { edition: cle.slice(0, i), editeur: cle.slice(i + 3), ecart, sens, g };
+        }).sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
+        const compte = (s) => lignes.filter((l) => l.sens === s).length;
+        etat.textContent = `Au ${jour(INDICE.date)} : ${nb(compte('baisse'), 'édition')} en baisse, ${nb(compte('hausse'), 'édition')} en hausse, ${nb(compte('stable'), 'édition')} stable${compte('stable') > 1 ? 's' : ''}.`;
+        const fleche = { baisse: '↓', hausse: '↑', stable: '→' };
+        // Barre centrée sur 100 : à gauche une baisse, à droite une hausse. L'échelle est celle de la plus forte variation.
+        const max = Math.max(1, ...lignes.map((l) => Math.abs(l.ecart)));
+        const cartes = ['baisse', 'stable', 'hausse'].map((k) => `<div class="ind-carte ${k}"><b>${compte(k)}</b><span>${k === 'baisse' ? 'en baisse' : k === 'hausse' ? 'en hausse' : 'stables'}</span></div>`).join('');
+        liste.innerHTML = `<div class="ind-cartes">${cartes}</div><div class="ind-liste">` + lignes.map((l) => {
+          const variation = l.sens === 'stable' ? 'stable' : `${l.sens} ${virgule(Math.abs(l.ecart), 1)} %`;
+          const largeur = (Math.abs(l.ecart) / max) * 50;
+          const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
+          const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
+          return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)} <span class="ind-ed">${esc(l.editeur)}</span></span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></article>`;
+        }).join('') + '</div>';
+      };
+      document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
+  }
+
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
     const montrer = (nom) => {
@@ -825,6 +829,7 @@
   initAnnonces();
   initPepites();
   initRecues();
+  initIndice();
   initNav();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
   let pepitesOuvertes = false;
