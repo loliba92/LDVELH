@@ -1965,8 +1965,10 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .pp-badge { position: absolute; top: 6px; left: 6px; padding: 1px 9px; border-radius: 999px; font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .05em; text-transform: uppercase; }
 .pp-badge.solide { background: var(--gold); color: #000; border: 1px solid var(--gold); }
 .pp-badge.verifier { background: rgba(0, 0, 0, .82); border: 1px solid var(--gold); color: #fff; }
-.pp-ouvrir { display: flex; align-items: center; min-height: 44px; color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
+.pp-ouvrir { display: flex; align-items: center; min-height: 44px; margin-top: auto; color: var(--accent); font-weight: 700; text-underline-offset: 3px; white-space: nowrap; }
 .rayon .pp-carte .infos .titre { min-height: 0; }
+.pp-offrir { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 8px; padding: 0 12px; border: 1px solid var(--gold); border-radius: 8px; color: var(--gold); font: 700 .92rem var(--f-ui); text-decoration: none; white-space: nowrap; }
+.pp-offrir:disabled { opacity: .55; cursor: default; }
 .pp-outils { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
 .pp-tri { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .95rem; }
 .pp-tri select { min-height: 40px; padding: 4px 10px; color: var(--text); background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 8px; font: 600 .95rem var(--f-ui); }
