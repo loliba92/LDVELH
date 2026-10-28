@@ -636,7 +636,7 @@
   const nouvelle = (p) => heureConnue(p) && Date.now() - Date.parse(p.premiere) < 24 * 3600 * 1000;
   // Date et heure concises (heure de Paris) : « Repérée 27 oct. · 14:30 » quand l'heure est connue, sinon « Vue le 27 oct. » (dernière observation)
   const reperee = (p) => {
-    if (heureConnue(p)) return 'Repérée ' + new Date(p.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).replace(',', ' ·');
+    if (heureConnue(p)) return 'Repérée ' + new Date(p.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
     const j = p.premiere || p.vue;
     return j && /^\d{4}-\d\d-\d\d$/.test(j) ? 'Vue le ' + new Date(j + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
   };

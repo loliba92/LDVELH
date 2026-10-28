@@ -145,6 +145,18 @@ class TestPremieresVues(unittest.TestCase):
         self.assertEqual(r["https://a"], "2026-10-27")
         self.assertEqual(r["https://b"], "2026-10-27T15:30Z")
 
+    def test_historique_donne_l_heure_aux_annonces_connues_par_leur_date(self):
+        hist = {"https://a": "2026-10-27T13:30Z", "https://b": "2026-10-20T08:00Z", "https://c": "2026-10-29T09:00Z"}
+        ann = self.ann(("https://a", "leboncoin"), ("https://b", "isbn"), ("https://c", "leboncoin"))
+        r = premieres_vues(ann, {"https://a": "2026-10-27", "https://b": "2026-10-27", "https://c": "2026-10-27"}, "2026-10-28T10:00Z", hist)
+        self.assertEqual(r["https://a"], "2026-10-27T13:30Z")                  # même jour : heure retrouvée
+        self.assertEqual(r["https://b"], "2026-10-20T08:00Z")                  # plus ancienne : première apparition réelle
+        self.assertEqual(r["https://c"], "2026-10-27")                         # historique postérieur à la date connue : incohérent, ignoré
+        r2 = premieres_vues(self.ann(("https://a", "leboncoin")), None, "2026-10-28T10:00Z", hist)
+        self.assertEqual(r2["https://a"], "2026-10-27T13:30Z")                 # premier passage : l'historique prime sur la simple date
+        r3 = premieres_vues(self.ann(("https://a", "leboncoin")), {"https://a": "2026-10-27T15:00Z"}, "2026-10-28T10:00Z", hist)
+        self.assertEqual(r3["https://a"], "2026-10-27T15:00Z")                 # une heure déjà connue n'est pas remplacée
+
     def test_librairie_sans_heure_et_annonce_disparue_oubliee(self):
         r = premieres_vues(self.ann(("https://l", "librairie")), {"https://vieux": "2026-10-01T10:00Z"}, "2026-10-27T15:30Z")
         self.assertEqual(r, {"https://l": "2026-10-27"})
