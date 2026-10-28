@@ -1628,7 +1628,7 @@
   function dessinerPepiteAccueil() {
     const z = $('#pepite-accueil-zone');
     if (!z) return;
-    const p = pepiteJour(), b = p && DATA.find((x) => x.isbn13 === p.isbn13);
+    const p = voitPepiteJour() ? pepiteJour() : null, b = p && DATA.find((x) => x.isbn13 === p.isbn13);      // réservée au compte connecté : jamais aux visiteurs
     if (!b) { z.innerHTML = ''; return; }
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
     z.innerHTML = `<section class="carte pep-accueil" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
