@@ -684,13 +684,16 @@
     // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
     liste.addEventListener('click', (e) => {
       const b = e.target.closest('[data-offrir]'); if (!b) return;
+      // Le retour s'affiche sur la carte elle-même : la ligne d'état est en haut de la liste, hors de vue
+      const dire = (texte) => { let r = b.parentElement.querySelector('.pp-retour'); if (!r) { r = document.createElement('p'); r.className = 'sous pp-retour'; r.setAttribute('role', 'status'); b.insertAdjacentElement('afterend', r); } r.textContent = texte; };
       const [id, cle, lien] = b.dataset.offrir.split('|'), p = pepites().find((x) => x.ed.id === id && x.cle === cle && x.lien === lien);
-      if (!p || !window.Relais) return;
-      b.disabled = true; etat.textContent = 'Envoi de la pépite du jour…';
+      if (!p) return dire('Annonce introuvable : rechargez la page.');
+      if (!window.Relais) return dire("Échec : le service technique n'est pas chargé. Rechargez la page.");
+      b.disabled = true; dire('Envoi de la pépite du jour…');
       const pct = Math.round((1 - p.prix / p.pub) * 100), ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
       window.Relais.appeler('pepite_offrir', { isbn13: p.ed.isbn, prix: p.prix, pub: p.pub, pct, etat: ABR[p.cle], origine: p.origine === 'leboncoin' ? 'leboncoin' : p.origine === 'librairie' ? 'librairie' : p.origine === 'titre' ? 'titre' : p.origine === 'isbn' ? 'isbn' : 'ebay', lien: p.lien, solide: !p.raisons.length })
-        .then((r) => { etat.textContent = r && r.ok ? `✓ « ${p.ed.titre} » est offerte aux Héros aujourd'hui (visible d'ici quelques minutes).` : `Échec : ${(r && r.erreur) || 'réponse inattendue'}.`; })
-        .catch(() => { etat.textContent = 'Échec : service injoignable.'; }).then(() => { b.disabled = false; });
+        .then((r) => { dire(r && r.ok ? `✓ Offerte aux Héros aujourd'hui (visible d'ici quelques minutes).` : `Échec : ${(r && r.erreur) || 'réponse inattendue'}.`); })
+        .catch(() => { dire('Échec : service injoignable. Vérifiez la connexion, puis réessayez.'); }).then(() => { b.disabled = false; });
     });
     solides.addEventListener('change', dessinerPepites);
     trouver.addEventListener('change', dessinerPepites);
