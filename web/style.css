@@ -2055,6 +2055,11 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ind-editeur { margin-top: 18px; }
 .ind-ed-titre { margin: 0 0 8px; font-size: 1rem; color: var(--accent); font-weight: 600; }
 .ind-ed-titre .ind-meta { font-weight: 400; font-size: .8rem; color: var(--muted); }
+.ind-ed-indice { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: -4px 0 8px; font-size: .9rem; }
+.ind-ed-indice .ind-var { font-weight: 600; }
+.ind-pied { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ind-mini { width: 80px; height: 24px; flex: none; }
+.ind-mini polyline { fill: none; stroke: var(--accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .ind-barre { position: relative; grid-column: 1 / -1; height: 8px; background: var(--accent-soft); border-radius: 4px; }
 .ind-barre .ind-axe { position: absolute; left: 50%; top: -3px; width: 2px; height: 14px; background: var(--muted); transform: translateX(-1px); }
 .ind-barre .ind-fill { position: absolute; top: 0; height: 100%; border-radius: 4px; background: var(--muted); }

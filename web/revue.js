@@ -768,6 +768,15 @@
       // Indice de marché : une ligne par édition, les plus fortes baisses d'abord. Pas de liste de livres : elle n'apporte rien au groupe.
       const virgule = (x, n) => x.toFixed(n).replace('.', ',');
       const nb = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+
+      // Mini-courbe de l'indice (historique quotidien), sans bibliothèque : une ligne SVG
+      const mini = (serie) => {
+        if (!serie || serie.length < 2) return '';
+        const v = serie.map((p) => p[1]), min = Math.min(...v), max = Math.max(...v), w = 80, h = 24;
+        const y = (x) => (max === min ? h / 2 : h - 2 - ((x - min) / (max - min)) * (h - 4));
+        const pts = v.map((x, i) => `${(i * w / (v.length - 1)).toFixed(1)},${y(x).toFixed(1)}`).join(' ');
+        return `<svg class="ind-mini" viewBox="0 0 ${w} ${h}" aria-hidden="true" preserveAspectRatio="none"><polyline points="${pts}"/></svg>`;
+      };
       const dessinerIndice = () => {
         const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
         if (!etat || !liste) return;
@@ -785,6 +794,7 @@
       const max = Math.max(1, ...lignes.map((l) => Math.abs(l.ecart)));
       const cartes = ['baisse', 'stable', 'hausse'].map((k) => `<div class="ind-carte ${k}"><b>${compte(k)}</b><span>${k === 'baisse' ? 'en baisse' : k === 'hausse' ? 'en hausse' : 'stables'}</span></div>`).join('');
       // Par éditeur d'abord (le plus de livres en premier), puis les éditions de l'éditeur (plus fortes baisses d'abord)
+      const indiceEditeur = (nom) => { const x = (INDICE.editeurs || {})[nom]; if (!x) return ''; const ecart = Math.round((x.indice - 100) * 10) / 10; return `<b>${virgule(x.indice, 1)}</b> <span class="ind-var ${ecart < 0 ? 'baisse' : ecart > 0 ? 'hausse' : 'stable'}">${ecart === 0 ? 'stable' : (ecart < 0 ? '↓' : '↑') + ' ' + virgule(Math.abs(ecart), 1) + ' %'}</span> ${mini(x.historique)}`; };
       const parEditeur = {};
       lignes.forEach((l) => { (parEditeur[l.editeur] = parEditeur[l.editeur] || []).push(l); });
       const editeurs = Object.entries(parEditeur).map(([nom, ed]) => ({ nom, ed, livres: ed.reduce((t, l) => t + l.g.livres, 0) })).sort((x, y) => y.livres - x.livres);
@@ -793,11 +803,11 @@
         const largeur = (Math.abs(l.ecart) / max) * 50;
         const gauche = l.sens === 'baisse' ? 50 - largeur : 50;
         const barre = l.sens === 'stable' ? '<span class="ind-axe"></span>' : `<span class="ind-fill ${l.sens}" style="left:${gauche}%;width:${largeur}%"></span>`;
-        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></article>`;
+        return `<article class="ind-ligne"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-var ${l.sens}">${fleche[l.sens]} ${variation}</span><div class="ind-barre" aria-hidden="true">${barre}</div><div class="ind-pied"><span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span>${mini(l.g.historique)}</div></article>`;
       };
       liste.innerHTML = `<div class="ind-cartes">${cartes}</div>` + editeurs.map((e) => {
         const ed = e.ed.slice().sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
-        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)} <span class="ind-meta">${nb(ed.length, 'édition')} · ${nb(e.livres, 'livre')}</span></h3><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
+        return `<section class="ind-editeur"><h3 class="ind-ed-titre">${esc(e.nom)} <span class="ind-meta">${nb(ed.length, 'édition')} · ${nb(e.livres, 'livre')}</span></h3><div class="ind-ed-indice">${indiceEditeur(e.nom)}</div><div class="ind-liste">${ed.map(ligne).join('')}</div></section>`;
       }).join('');
     };
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'indice' && estNiveau3()) chargerIndice().then(dessinerIndice); });
