@@ -32,6 +32,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   annonces_lire: 'superadmin',    // toutes les annonces reçues : le Zagor seulement
   pepite_offrir: 'superadmin',    // le Zagor choisit la pépite du jour offerte aux Héros
   pepite_retirer: 'superadmin',   // et peut la retirer
+  pepite_vendre: 'superadmin',    // ou la marquer vendue (barrée sur le site, plus proposée)
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
