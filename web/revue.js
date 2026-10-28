@@ -645,6 +645,7 @@
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
     const lieu = p.origine === 'librairie' ? ' de la librairie' : p.origine === 'leboncoin' ? ' sur Leboncoin' : ' sur eBay';
+    const source = p.origine === 'librairie' ? 'Librairie' : p.origine === 'leboncoin' ? 'Leboncoin' : 'eBay';          // libellé visible de la source
     const img = JAQ[p.ed.id] ? `<img src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">`
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
@@ -655,6 +656,7 @@
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
+      `<span class="meta pp-source">Source : ${source}</span>` +
       (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
