@@ -48,5 +48,14 @@ class TestChainer(unittest.TestCase):
         self.assertEqual(courbe["V1 · Gallimard"][0]["livres"], 1)
 
 
+class TestObserves(unittest.TestCase):
+    def test_un_prix_sans_annonce_ne_pese_pas(self):
+        historique = [{"date": "d1", "prix": {"111|bon": 10.0, "222|bon": 10.0}}, {"date": "d2", "prix": {"111|bon": 5.0, "222|bon": 20.0}}]
+        gardes = im.garder_observes(historique, {"111|bon"})
+        self.assertEqual(gardes[1]["prix"], {"111|bon": 5.0})
+        courbe = im.chainer(gardes, {"111": "V1 · Gallimard", "222": "V1 · Gallimard"})
+        self.assertEqual(courbe["V1 · Gallimard"][0]["indice"], 50.0)
+
+
 if __name__ == "__main__":
     unittest.main()
