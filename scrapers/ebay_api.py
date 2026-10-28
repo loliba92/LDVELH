@@ -270,8 +270,8 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            # Prix total pour l'acheteur : le prix de l'annonce plus les frais de port (0 si l'annonce ne les indique pas)
-            sortie.append((it, etat, valeur + (frais_port(it) or 0.0), ancienne))
+            # Prix total pour l'acheteur : le prix de l'annonce plus ses frais de port (4,50 € si l'annonce ne les indique pas)
+            sortie.append((it, etat, valeur + port_retenu(it), ancienne))
     return sortie
 
 
@@ -294,6 +294,15 @@ def ecarter_aberrantes(liste):
     return [x for x in liste if x[1] not in bornes or bornes[x[1]][0] <= x[2] <= bornes[x[1]][1]]
 
 
+FRAIS_EBAY_DEFAUT = 4.50          # annonce qui n'indique pas ses frais : on compte les mêmes frais que chez une librairie
+
+
+def port_retenu(item):
+    """Frais de port retenus pour une annonce eBay : ceux qu'elle indique, sinon FRAIS_EBAY_DEFAUT."""
+    p = frais_port(item)
+    return FRAIS_EBAY_DEFAUT if p is None else p
+
+
 def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
@@ -302,7 +311,7 @@ def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
         par_etat[etat]["toutes"].append(valeur)
         if not ancienne:
             par_etat[etat]["frais"].append(valeur)
-            par_etat[etat]["nus"].append(round(valeur - (frais_port(_it) or 0.0), 2))     # prix sans frais de port : la cote est un prix nu
+            par_etat[etat]["nus"].append(round(valeur - port_retenu(_it), 2))     # prix sans frais de port : la cote est un prix nu
     # La cote n'utilise que les annonces récentes. Les statistiques de toutes les annonces sont gardées à côté :
     # le modèle d'auto-apprentissage en tire de combien les annonces anciennes surestiment les prix.
     return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v["frais"]),

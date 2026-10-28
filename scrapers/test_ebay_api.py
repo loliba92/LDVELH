@@ -52,12 +52,12 @@ class TestRechercheElargie(unittest.TestCase):
         carte = {"itemId": "3", "_titre_seul": True, **item(548, "5000", "Carte Pokémon La Tour de Cristal : Entei, promotion du 10e film")}
         dvd = {"itemId": "4", "_titre_seul": True, **item(817, "5000", "DVD Pokemon le film : Empereur de la Tour de Cristal")}
         l = ebay_api.agreger([livre, auteur, inverse, carte, dvd], "9782070512690", date(2026, 10, 21), "La Tour de Cristal", None, ed)
-        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 3, "20.00")])
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 3, "24.50")])
 
     def test_les_prix_aberrants_sont_ecartes_quand_il_y_a_assez_d_annonces(self):
         items = [{"itemId": str(i), **item(p, "5000", "Le Sorcier de la montagne de feu - Défis Fantastiques")} for i, p in enumerate((18, 20, 22, 21, 250, 3))]
         l = ebay_api.agreger(items, "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
-        self.assertEqual([(x["nb_annonces"], x["prix_min"], x["prix_max"]) for x in l], [(4, "18.00", "22.00")])
+        self.assertEqual([(x["nb_annonces"], x["prix_min"], x["prix_max"]) for x in l], [(4, "22.50", "26.50")])
 
     def test_le_fichier_des_annonces_dit_si_l_etat_est_precise_ou_suppose(self):
         titre = "Le Sorcier de la montagne de feu - Défis Fantastiques"
@@ -128,12 +128,12 @@ class TestEtatNonPrecise(unittest.TestCase):
     def test_agreger_donne_la_mediane_nue_sans_les_frais_de_port(self):
         # Trois annonces à 10 € + 5 € de port, 12 € + 5 € de port, 14 € sans port : prix livrés 15, 17, 14 ; prix nus 10, 12, 14
         l = ebay_api.agreger([avec_port(10, 5), avec_port(12, 5), item(14, "3000")], "9782070583805", date(2026, 10, 21), "Le Sorcier de la montagne de feu")
-        self.assertEqual((l[0]["prix_median"], l[0]["prix_median_nu"]), ("15.00", "12.00"))
+        self.assertEqual((l[0]["prix_median"], l[0]["prix_median_nu"]), ("17.00", "12.00"))
 
     def test_agreger_compte_les_annonces_sans_etat_en_tres_bon_etat(self):
         sans_etat = {"title": "Le Sorcier de la montagne de feu", "price": {"value": "14", "currency": "EUR"}}
         l = ebay_api.agreger([sans_etat, item(10, "5000"), item(30, "1000")], "9782070583805", date(2026, 10, 14))
-        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_median"]) for x in l], [("bon", 1, "10.00"), ("tres_bon", 1, "14.00")])    # le neuf (30 €) reste écarté
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_median"]) for x in l], [("bon", 1, "14.50"), ("tres_bon", 1, "18.50")])    # le neuf (30 €) reste écarté
 
 
 class TestFraicheur(unittest.TestCase):
@@ -149,8 +149,8 @@ class TestFraicheur(unittest.TestCase):
         ancienne = {**item(40, "5000"), "itemCreationDate": "2025-06-01T00:00:00.000Z"}
         sans_date = item(12, "5000")
         l = ebay_api.agreger([recente, ancienne, sans_date], "9782070583805", self.JOUR)
-        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 2, "12.00")])
-        self.assertEqual((l[0]["nb_toutes"], l[0]["prix_median_toutes"]), (3, "12.00"))     # toutes les annonces, anciennes comprises
+        self.assertEqual([(x["etat"], x["nb_annonces"], x["prix_max"]) for x in l], [("bon", 2, "16.50")])
+        self.assertEqual((l[0]["nb_toutes"], l[0]["prix_median_toutes"]), (3, "16.50"))     # toutes les annonces, anciennes comprises
 
     def test_etat_sans_annonce_recente_pas_de_ligne(self):
         ancienne = {**item(40, "5000"), "itemCreationDate": "2025-06-01T00:00:00.000Z"}
@@ -178,7 +178,7 @@ class TestEbay(unittest.TestCase):
         lignes = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11))
         par = {l["etat"]: l for l in lignes}
         self.assertEqual((par["bon"]["nb_annonces"], par["bon"]["prix_median"], par["bon"]["prix_min"], par["bon"]["prix_max"]),
-                         (3, "12.00", "10.00", "20.00"))
+                         (3, "16.50", "14.50", "24.50"))
         self.assertEqual(set(par), {"bon", "tres_bon", "convenable"})
 
     def test_ecarte_lots_devises_et_etats_inconnus(self):
@@ -186,7 +186,7 @@ class TestEbay(unittest.TestCase):
                  item(9, "1000"), item(9, "3000"), item(15, "5000", "Collection complète"), item(11, "5000")]
         lignes = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11))
         # 11 € (état précisé) + 9 € (« d'occasion » sans détail, 3000, supposé TBE) ; neuf (1000), lot, collection et dollars écartés
-        self.assertEqual([(l["etat"], l["nb_annonces"], l["prix_median"]) for l in lignes], [("bon", 1, "11.00"), ("tres_bon", 1, "9.00")])
+        self.assertEqual([(l["etat"], l["nb_annonces"], l["prix_median"]) for l in lignes], [("bon", 1, "15.50"), ("tres_bon", 1, "13.50")])
 
     def test_appels_http(self):
         faux = Faux({"itemSummaries": [item(10, "5000")]})
@@ -208,7 +208,7 @@ class TestEbay(unittest.TestCase):
         self.assertTrue(ebay_api.annee_compatible("La Forêt du Dragon 2005", ()))          # année de l'édition inconnue
         lignes = ebay_api.agreger([item(10, "5000", "La Forêt du Dragon 1989"), item(40, "5000", "La Forêt du Dragon 2005")],
                                   "9782070335749", date(2026, 10, 14), "La Forêt du Dragon", ("1989",))
-        self.assertEqual([(l["nb_annonces"], l["prix_median"]) for l in lignes], [(1, "10.00")])
+        self.assertEqual([(l["nb_annonces"], l["prix_median"]) for l in lignes], [(1, "14.50")])
 
     def test_annonce_trouvee_sous_deux_editions_du_meme_livre_est_ecartee(self):
         a, b = {**item(10, "5000"), "itemId": "A"}, {**item(12, "5000"), "itemId": "B"}
