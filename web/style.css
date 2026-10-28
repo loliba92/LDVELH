@@ -2064,6 +2064,8 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ind-ligne .ind-titre { font-weight: 600; overflow-wrap: anywhere; }
 .ind-ligne .ind-ed { display: block; color: var(--accent); font-size: .8rem; font-weight: 400; }
 .ind-ligne .ind-var { font-weight: 600; white-space: nowrap; text-align: right; }
+.ind-ligne .ind-val { font-size: 1.05rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+.ind-droite { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 2px 10px; text-align: right; }
 .ind-ligne .ind-var.baisse { color: var(--accent); }
 .ind-ligne .ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
 .rc-ligne .rc-titre.ind-nom { white-space: normal; overflow: visible; text-overflow: clip; }
