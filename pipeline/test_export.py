@@ -93,13 +93,13 @@ class TestAnnoncesCumulees(unittest.TestCase):
         r = annonces_cumulees([f])["111"]
         self.assertEqual((r["bon"][0][5], r["tres_bon"][0][5]), (0, 1))
 
-    def test_le_prix_affiche_est_le_prix_livre(self):
+    def test_le_prix_du_relevé_a_port_est_deja_le_prix_livre(self):
+        # Depuis le relevé à colonne « port », le prix est déjà le total : on ne rajoute pas les frais une seconde fois
         d = Path(tempfile.mkdtemp())
         f = d / "annonces-2026-10-22.csv"
         f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,etat_suppose,port\n"
-                     "111,bon,10.00,Avec port,http://a,3,isbn,0,2.78\n111,bon,6.48,Sans port,http://b,3,isbn,0,0.00\n", encoding="utf-8")
-        r = sorted(annonces_cumulees([f])["111"]["bon"])
-        self.assertEqual([x[0] for x in r], [6.48, 12.78])
+                     "111,bon,13.58,Avec port,http://a,3,isbn,0,2.78\n", encoding="utf-8")
+        self.assertEqual(annonces_cumulees([f])["111"]["bon"][0][0], 13.58)
 
     def test_une_tres_vieille_annonce_est_ecartee(self):
         f = self.fichiers(**{"2026_01_01": ["111,bon,10.00,Vieille,http://v,3,isbn"], "2026_10_22": ["222,bon,5.00,Recente,http://r,1,isbn"]})

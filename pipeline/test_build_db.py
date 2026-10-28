@@ -2,6 +2,7 @@
     python -m unittest pipeline.test_build_db"""
 import sqlite3
 import subprocess
+from unittest import mock
 import sys
 import tempfile
 import unittest
@@ -12,6 +13,15 @@ import build_db
 
 ENTETE = "isbn13,date,etat,nb_annonces,prix_min,prix_median,prix_max,nb_toutes,prix_median_toutes\n"
 ISBN_SUPPRIME = "9782070666614"      # valide, mais absente de la base de test
+
+
+class TestFraisDeLibrairie(unittest.TestCase):
+    def test_le_prix_de_la_librairie_inclut_les_frais_de_port(self):
+        d = Path(tempfile.mkdtemp())
+        (d / "libraires-2026-10-27.csv").write_text(ENTETE + "9782070574940,2026-10-27,convenable,1,4.98,4.98,4.98,1,4.98\n", encoding="utf-8")
+        with mock.patch.object(build_db, "insert_fait", return_value=1) as ins, mock.patch.object(build_db.editions, "normalize_isbn", return_value=("9782070574940",)):
+            build_db.load_ebay(mock.Mock(), d, "libraires-*.csv", "libraires", ajout=build_db.FRAIS_LIBRAIRIE)
+        self.assertEqual(ins.call_args[0][6], 9.48)
 
 
 class TestReleveEditionSupprimee(unittest.TestCase):

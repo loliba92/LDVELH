@@ -18,6 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
+from prix_neuf import FRAIS_LIBRAIRIE
 import calibration
 import cote_v2
 import importer_leboncoin
@@ -159,8 +160,8 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
 def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
-    Chaque ligne : [prix livré, titre, lien, trouvée par, date de dernière observation, état supposé]. Le prix livré = prix + frais de port
-    (eBay : colonne « port » ; Leboncoin : pas de frais relevés, prix seul). « état supposé » : 1 si l'annonce ne précise
+    Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation, état supposé]. Depuis le relevé à colonne « port »,
+    le prix eBay est le prix livré (frais de port compris). « état supposé » : 1 si l'annonce ne précise
     pas son état (on suppose le très bon état), 0 s'il est indiqué, None pour les relevés d'avant l'enregistrement de cette information.
     Une annonce non revue depuis plus de `jours` jours
     avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}."""
@@ -173,9 +174,7 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
         with open(f, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh):
                 supp = (r.get("etat_suppose") or "").strip()
-                port = (r.get("port") or "").strip()                 # frais de port eBay (colonne « port ») : le prix affiché est le prix livré
-                prix = float(r["prix"]) + (float(port) if port else 0)
-                vues[(r["isbn13"], r["lien"])] = (r["etat"], round(prix, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
+                vues[(r["isbn13"], r["lien"])] = (r["etat"], float(r["prix"]), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
     sortie = {}
     for (isbn, lien), (etat, prix, titre, par, jour, supp) in vues.items():
@@ -184,7 +183,6 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     return sortie
 
 
-FRAIS_LIBRAIRIE = 4.50          # frais de port systématiques chez les librairies de leslibraires.fr (livraison à domicile, standard ou suivie)
 MINI_LARGEUR, MINI_QUALITE = 160, 65          # miniatures des petites vignettes (listes, rangées de 40 à 80 px d'affichage, nettes jusqu'à 2 fois la densité)
 
 
@@ -414,7 +412,7 @@ def main():
     for f in sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv")):
         with open(f, newline="", encoding="utf-8") as fh:
             for r in csv.DictReader(fh):
-                libraires[(r["isbn13"], r["etat"])] = float(r["prix_median"])
+                libraires[(r["isbn13"], r["etat"])] = float(r["prix_median"]) + FRAIS_LIBRAIRIE          # prix livré
     revue = []
     for v in versions:
         cle = cle_de[v["id"]]
@@ -463,7 +461,7 @@ def main():
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
         if isbn in titres:
-            annonces.setdefault(isbn, {}).setdefault(etat, []).append([round(prix + FRAIS_LIBRAIRIE, 2), f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie", None, 1])      # une librairie n'indique pas l'état : supposé
+            annonces.setdefault(isbn, {}).setdefault(etat, []).append([prix, f"{titres[isbn]} · librairie indépendante", f"https://www.leslibraires.fr/livre/{isbn}", "librairie", None, 1])      # une librairie n'indique pas l'état : supposé
     if annonces:
         for par_etat in annonces.values():
             for liste in par_etat.values():
