@@ -1410,18 +1410,48 @@
    "prix_observes": 387,
    "series": [
     {
-     "serie": "Folio junior",
-     "livres": 295,
-     "contribution_pct": -0.58
+     "serie": "L'Œil Noir",
+     "livres": 33,
+     "contribution_pct": -0.28
     },
     {
-     "serie": "Loup solitaire",
-     "livres": 13,
+     "serie": "Loup Solitaire",
+     "livres": 47,
      "contribution_pct": -0.21
     },
     {
-     "serie": "L'épée de légende",
-     "livres": 8,
+     "serie": "Les Terres de Légende",
+     "livres": 12,
+     "contribution_pct": -0.16
+    },
+    {
+     "serie": "Défis Fantastiques",
+     "livres": 116,
+     "contribution_pct": -0.09
+    },
+    {
+     "serie": "Quête du Graal",
+     "livres": 17,
+     "contribution_pct": -0.03
+    },
+    {
+     "serie": "Chroniques Crétoises",
+     "livres": 5,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Double Jeu",
+     "livres": 14,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "L'Epée de Légende",
+     "livres": 9,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "La Voie du Tigre",
+     "livres": 12,
      "contribution_pct": -0.02
     },
     {
@@ -1435,54 +1465,69 @@
      "contribution_pct": -0.01
     },
     {
-     "serie": "Folio Junior",
+     "serie": "Le Maître du Destin",
+     "livres": 5,
+     "contribution_pct": -0.01
+    },
+    {
+     "serie": "Les Portes Interdites",
+     "livres": 4,
+     "contribution_pct": -0.01
+    },
+    {
+     "serie": "Astre d'Or",
+     "livres": 9,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Epouvante!",
      "livres": 4,
      "contribution_pct": 0.0
     },
     {
-     "serie": "Défis fantastiques",
-     "livres": 23,
+     "serie": "Les Messagers du Temps",
+     "livres": 8,
      "contribution_pct": -0.0
     },
     {
-     "serie": "Folio-junior",
-     "livres": 5,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Folio junior, un livre dont vous êtes le héros. Défis fantastiques",
-     "livres": 2,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "sans série",
-     "livres": 2,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "Le maître du destin",
-     "livres": 2,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "Folio junior. Un livre dont vous êtes le héros. Les Messagers du temps",
-     "livres": 5,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Métamorphoses",
+     "serie": "Métamorphose",
      "livres": 4,
      "contribution_pct": 0.0
     },
     {
-     "serie": "Grand Format Littérature",
+     "serie": "Neige d'Automne",
      "livres": 2,
      "contribution_pct": 0.0
+    },
+    {
+     "serie": "Défis et Sortilèges",
+     "livres": 22,
+     "contribution_pct": 0.01
+    },
+    {
+     "serie": "Histoire",
+     "livres": 8,
+     "contribution_pct": 0.01
+    },
+    {
+     "serie": "Loup*Ardent",
+     "livres": 11,
+     "contribution_pct": 0.01
     },
     {
      "serie": "Super Sherlock",
      "livres": 3,
      "contribution_pct": 0.01
+    },
+    {
+     "serie": "Dragon d'Or",
+     "livres": 14,
+     "contribution_pct": 0.02
+    },
+    {
+     "serie": "Sorcellerie!",
+     "livres": 9,
+     "contribution_pct": 0.02
     }
    ]
   },
@@ -1492,23 +1537,18 @@
    "prix_observes": 4,
    "series": [
     {
-     "serie": "sans série",
+     "serie": "Destins",
      "livres": 1,
      "contribution_pct": 0.0
     },
     {
-     "serie": "Forge Divine",
-     "livres": 1,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Livre-Jeu",
+     "serie": "Forge divine",
      "livres": 1,
      "contribution_pct": 0.0
     },
     {
      "serie": "Les Contes",
-     "livres": 1,
+     "livres": 2,
      "contribution_pct": 0.0
     }
    ]
@@ -1531,34 +1571,59 @@
    "prix_observes": 116,
    "series": [
     {
-     "serie": "sans série",
-     "livres": 90,
-     "contribution_pct": -0.12
+     "serie": "Dragon d'Or",
+     "livres": 11,
+     "contribution_pct": -0.07
     },
     {
-     "serie": "Défis fantastiques",
-     "livres": 7,
+     "serie": "Défis Fantastiques",
+     "livres": 41,
      "contribution_pct": -0.06
     },
     {
-     "serie": "Loup solitaire",
-     "livres": 10,
+     "serie": "Loup Solitaire",
+     "livres": 35,
+     "contribution_pct": -0.05
+    },
+    {
+     "serie": "Quête du Graal",
+     "livres": 6,
+     "contribution_pct": -0.03
+    },
+    {
+     "serie": "Epouvante!",
+     "livres": 2,
      "contribution_pct": -0.01
     },
     {
-     "serie": "Défis de l'histoire",
+     "serie": "Destins",
+     "livres": 2,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Défis de l'Histoire",
      "livres": 3,
      "contribution_pct": 0.0
     },
     {
-     "serie": "Un livre dont vous êtes le héros",
-     "livres": 1,
+     "serie": "Sherlock Holmes",
+     "livres": 4,
      "contribution_pct": 0.0
     },
     {
-     "serie": "Folio junior",
-     "livres": 5,
-     "contribution_pct": 0.03
+     "serie": "Super Sherlock",
+     "livres": 3,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Loup*Ardent",
+     "livres": 6,
+     "contribution_pct": 0.01
+    },
+    {
+     "serie": "Sorcellerie!",
+     "livres": 3,
+     "contribution_pct": 0.04
     }
    ]
   },
@@ -1568,7 +1633,7 @@
    "prix_observes": 1,
    "series": [
     {
-     "serie": "Fantasy",
+     "serie": "Destiny Quest",
      "livres": 1,
      "contribution_pct": 0.0
     }
@@ -1580,12 +1645,12 @@
    "prix_observes": 36,
    "series": [
     {
-     "serie": "Un livre dont vous êtes le héros",
+     "serie": "Loup Solitaire",
      "livres": 20,
      "contribution_pct": -0.02
     },
     {
-     "serie": "Défis fantastiques",
+     "serie": "Défis Fantastiques",
      "livres": 16,
      "contribution_pct": 0.05
     }
@@ -1597,34 +1662,19 @@
    "prix_observes": 58,
    "series": [
     {
-     "serie": "Un livre dont vous êtes le héros",
-     "livres": 19,
-     "contribution_pct": -1.98
+     "serie": "Loup Solitaire",
+     "livres": 25,
+     "contribution_pct": -1.74
     },
     {
-     "serie": "Défis fantastiques",
-     "livres": 15,
-     "contribution_pct": -0.02
+     "serie": "Sorcellerie!",
+     "livres": 8,
+     "contribution_pct": -0.26
     },
     {
-     "serie": "sans série",
-     "livres": 1,
-     "contribution_pct": -0.02
-    },
-    {
-     "serie": "Folio-junior",
-     "livres": 2,
-     "contribution_pct": 0.0
-    },
-    {
-     "serie": "Loup solitaire",
-     "livres": 3,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "Folio junior",
-     "livres": 18,
-     "contribution_pct": 0.17
+     "serie": "Défis Fantastiques",
+     "livres": 25,
+     "contribution_pct": 0.16
     }
    ]
   },
@@ -1634,24 +1684,19 @@
    "prix_observes": 44,
    "series": [
     {
-     "serie": "Un livre dont vous êtes le héros",
-     "livres": 20,
-     "contribution_pct": -1.4
-    },
-    {
-     "serie": "Défis fantastiques",
+     "serie": "Loup Solitaire",
      "livres": 19,
+     "contribution_pct": -1.38
+    },
+    {
+     "serie": "Quête du Graal",
+     "livres": 4,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Défis Fantastiques",
+     "livres": 21,
      "contribution_pct": -0.01
-    },
-    {
-     "serie": "Loup solitaire",
-     "livres": 3,
-     "contribution_pct": -0.0
-    },
-    {
-     "serie": "sans série",
-     "livres": 2,
-     "contribution_pct": 0.0
     }
    ]
   },
@@ -1661,7 +1706,7 @@
    "prix_observes": 10,
    "series": [
     {
-     "serie": "Haute tension",
+     "serie": "La Saga du Prêtre Jean",
      "livres": 10,
      "contribution_pct": 0.0
     }
@@ -1673,7 +1718,7 @@
    "prix_observes": 1,
    "series": [
     {
-     "serie": "Presses pocket",
+     "serie": "Non classée",
      "livres": 1,
      "contribution_pct": 1.34
     }
@@ -1685,7 +1730,7 @@
    "prix_observes": 3,
    "series": [
     {
-     "serie": "sans série",
+     "serie": "RPG BooK",
      "livres": 3,
      "contribution_pct": 0.0
     }
@@ -1697,7 +1742,7 @@
    "prix_observes": 2,
    "series": [
     {
-     "serie": "sans série",
+     "serie": "RPG BooK",
      "livres": 2,
      "contribution_pct": 0.0
     }
@@ -1709,7 +1754,7 @@
    "prix_observes": 2,
    "series": [
     {
-     "serie": "Exprim'",
+     "serie": "Reine",
      "livres": 2,
      "contribution_pct": 0.0
     }

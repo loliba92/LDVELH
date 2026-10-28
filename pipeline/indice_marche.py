@@ -100,12 +100,12 @@ def annonces_par_groupe(chemin_annonces, groupe_de):
 
 
 def series_depuis(chemin=RACINE / "web" / "data" / "versions.json"):
-    """{isbn13: série (collection), ou « sans série »}, pour la décomposition par série."""
+    """{isbn13: série (même champ que l'étagère), ou « sans série »}, pour la décomposition par série."""
     try:
         donnees = json.loads(chemin.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
-    return {v["isbn13"]: (v.get("collection") or "sans série").strip() for v in donnees if v.get("isbn13")}
+    return {v["isbn13"]: (v.get("serie") or "sans série").strip() for v in donnees if v.get("isbn13")}
 
 
 def variations_par_serie(avant, apres, observes, groupe_de, serie_de):
