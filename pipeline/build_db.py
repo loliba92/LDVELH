@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 import importer_leboncoin
+from prix_neuf import FRAIS_LIBRAIRIE
 
 ROOT = editions.ROOT
 DB = ROOT / "data" / "warehouse" / "ldvelh.sqlite"
@@ -235,11 +236,12 @@ def load_manuel(cx, chemin):
     return n, doublons, erreurs
 
 
-def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api", type_prix="prix_demande"):
+def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api", type_prix="prix_demande", ajout=0.0):
     """Relevés d'annonces agrégés : data/raw/occasion/ebay-AAAA-MM-JJ.csv (eBay) et libraires-AAAA-MM-JJ.csv (exemplaires d'occasion
     des librairies, même format, une annonce par ligne).
 
     Une ligne par livre et par état : isbn13, date, etat, nb_annonces, prix_min, prix_median, prix_max.
+    `ajout` s'ajoute au prix de chaque ligne (frais de port des librairies : le prix de la cote est un prix livré).
     Seule la médiane entre dans la base (nature « prix demandé » par défaut, ou `type_prix`, ex. « vente_probable » pour des annonces vendues ;
     nombre d'annonces conservé).
     Une ligne dont l'édition n'est plus dans la base est écartée (renvoyée dans le 5e élément) : ce n'est pas une erreur.
@@ -255,7 +257,7 @@ def load_ebay(cx, dossier, motif="ebay-*.csv", source="ebay_api", type_prix="pri
                     if prix is None or prix <= 0 or nb < 1:
                         raise ValueError(f"valeurs invalides (prix {r['prix_median']}, annonces {r['nb_annonces']})")
                     ajoute = insert_fait(cx, ident, date.fromisoformat(r["date"]), source, type_prix,
-                                         r["etat"], round(prix, 2), nb=nb)
+                                         r["etat"], round(prix + ajout, 2), nb=nb)
                     n += ajoute
                     doublons += 1 - ajoute
                 except EditionInconnue:
@@ -284,7 +286,7 @@ def main():
         n_hist, ignores, orphelins = load_historique(cx)
         n_man, doublons, erreurs = load_manuel(cx, a.manual)
         n_ebay, dbl_ebay, err_ebay, nb_fichiers, ecart_ebay = load_ebay(cx, a.occasion)
-        n_lib, dbl_lib, err_lib, nb_lib, ecart_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires")
+        n_lib, dbl_lib, err_lib, nb_lib, ecart_lib = load_ebay(cx, a.occasion, "libraires-*.csv", "libraires", ajout=FRAIS_LIBRAIRIE)
         # Relevés agrégés Leboncoin (voir pipeline/importer_leboncoin.py) : annonces actives, puis annonces vendues (« vente probable »)
         importer_leboncoin.reagreger(a.occasion)          # lots (data/manual/lots_annonces.json) : leur prix est réparti entre les livres du lot
         n_lbc, dbl_lbc, err_lbc, nb_lbc, ecart_lbc = load_ebay(cx, a.occasion, "leboncoin-20*.csv", "leboncoin")
