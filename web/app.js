@@ -944,10 +944,10 @@
       const nom = neuf && n === 0 ? 'Disponible neuf' : ['Introuvable', 'Rare', 'Courante', 'Abondante'][niv];
       const barres = neuf && n === 0 ? 3 : niv;
       const parties = [o.ebay && `${o.ebay} sur eBay`, o.lbc && `${o.lbc} sur Leboncoin`, o.lib && `${o.lib} en librairie (occasion)`].filter(Boolean);
-      const age = o.age == null ? '' : o.age >= 14 ? ` Les annonces eBay sont en ligne depuis ${Math.round(o.age / 7)} semaines en général.` : ` Les annonces eBay sont en ligne depuis ${o.age} jour${o.age > 1 ? 's' : ''} en général.`;
+      const age = o.age == null ? '' : o.age >= 14 ? ` Annonces eBay en ligne depuis environ ${Math.round(o.age / 7)} semaines.` : ` Annonces eBay en ligne depuis ${o.age} jour${o.age > 1 ? 's' : ''}.`;
       zone.innerHTML = `<p class="fo-ligne"><span class="fo-jauge" aria-hidden="true">${[1, 2, 3].map((i) => `<i${i <= barres ? ' class="on"' : ''}></i>`).join('')}</span><strong class="fo-niveau">${nom}</strong><span class="sous">${n ? `${n} annonce${n > 1 ? 's' : ''} : ${esc(parties.join(' · '))}` : 'aucune annonce trouvée au relevé'}</span></p>`
         + (neuf && n > 0 ? '<p class="sous">Encore en vente neuve.</p>' : '')
-        + `<p class="sous fo-note">${esc(age.trim())} Compté au relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}. Plus il y a d'annonces, plus le livre est facile à trouver ; la vitesse de revente sera ajoutée avec le recul des relevés.</p>`;
+        + `<p class="sous fo-note">${esc(age.trim())} Relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}.</p>`;
     });
   }
 
