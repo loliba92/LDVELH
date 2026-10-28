@@ -437,6 +437,7 @@ def requetes_candidates(isbn13, ed):
     q["titre_auteur"] = " ".join(x for x in (livre, auteur) if x)
     q["titre_livre_heros"] = f"{livre} livre dont vous êtes le héros"
     q["titre_ldvelh"] = f"{livre} ldvelh"
+    q["ldvelh"] = "ldvelh"
     return q
 
 
