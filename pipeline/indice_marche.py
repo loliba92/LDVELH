@@ -51,17 +51,33 @@ def variations(avant, apres, groupe_de):
     return par_groupe
 
 
+def livres_mesures(avant, apres, groupe_de):
+    """Nombre de livres distincts (un même livre dans plusieurs états ne compte qu'une fois) mesurés par groupe."""
+    isbns = {}
+    for cle, p1 in apres.items():
+        p0 = avant.get(cle)
+        if not p0 or not p1 or p0 <= 0 or p1 <= 0:
+            continue
+        isbn = cle.split("|")[0]
+        groupe = groupe_de.get(isbn)
+        if groupe is not None:
+            isbns.setdefault(groupe, set()).add(isbn)
+    return {groupe: len(ensemble) for groupe, ensemble in isbns.items()}
+
+
 def chainer(historique, groupe_de):
     """Indice par groupe et par jour. Renvoie {groupe: [{date, indice, livres}, ...]} ; indice None tant qu'il n'est pas mesuré."""
     niveau = {}
     sortie = {}
     for i in range(1, len(historique)):
         date = historique[i]["date"]
-        var = variations(historique[i - 1]["prix"], historique[i]["prix"], groupe_de)
+        avant, apres = historique[i - 1]["prix"], historique[i]["prix"]
+        var = variations(avant, apres, groupe_de)
+        nombre = livres_mesures(avant, apres, groupe_de)
         for groupe, valeurs in var.items():
             niveau.setdefault(groupe, 100.0)
             niveau[groupe] *= math.exp(statistics.median(valeurs))
-            sortie.setdefault(groupe, []).append({"date": date, "indice": round(niveau[groupe], 2), "livres": len(valeurs)})
+            sortie.setdefault(groupe, []).append({"date": date, "indice": round(niveau[groupe], 2), "livres": nombre[groupe]})
     return sortie
 
 

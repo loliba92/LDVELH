@@ -34,6 +34,12 @@ class TestChainer(unittest.TestCase):
         courbe = im.chainer(self.historique([j1, j2]), {"111": "V1 · Gallimard"})
         self.assertEqual([s["indice"] for s in courbe["V1 · Gallimard"]], [90.0])
 
+    def test_un_livre_dans_trois_etats_compte_pour_un_livre(self):
+        j1 = {"111|convenable": 3.48, "111|bon": 5.23, "111|tres_bon": 9.01}
+        j2 = {"111|convenable": 3.58, "111|bon": 5.38, "111|tres_bon": 9.26}
+        courbe = im.chainer(self.historique([j1, j2]), {"111": "V1 · Gallimard"})
+        self.assertEqual(courbe["V1 · Gallimard"][0]["livres"], 1)
+
     def test_un_petit_groupe_bouge_aussi_mais_il_est_peu_fiable(self):
         j1 = {"111|bon": 10.0}
         j2 = {"111|bon": 5.0}
