@@ -1271,7 +1271,22 @@
         + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
         + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
+      majLigneImports();
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
+  }
+  // Ligne « Import Leboncoin » de l'accueil : dernier import et livres ajoutés sur 24 h (même source que la liste des imports)
+  async function majLigneImports() {
+    const cible = document.querySelector('[data-imports] .maj-quand');
+    if (!cible) return;
+    try {
+      const limite = Date.now() - 24 * 3600 * 1000;
+      const imports = await lireImports();
+      const recents = imports.filter((im) => Date.parse(im.t) >= limite);
+      const n = recents.reduce((t, im) => t + im.lignes.length, 0);
+      const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
+      const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
+      cible.textContent = `${quand} · ${n ? `${n} livre${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}` : 'aucun livre ajouté'} sur 24 h`;
+    } catch (e) { /* historique indisponible : la ligne garde son libellé d'origine */ }
   }
   document.addEventListener('cdh-compte', initMaj);
   initMaj();
