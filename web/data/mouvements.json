@@ -2,7 +2,7 @@
  "date": "2026-10-28",
  "precedent": "2026-10-27",
  "nb_comparees": 1470,
- "nb_modifiees": 535,
+ "nb_modifiees": 538,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 21,
  "hausses": [
@@ -39,6 +39,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070649495",
+   "isbn13": "9782070649495",
+   "titre": "La Métropole de la peur",
+   "serie": "Loup Solitaire",
+   "numero": "472",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 42.36,
+   "apres": 18.0,
+   "pct": -0.575,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070649495",
+   "isbn13": "9782070649495",
+   "titre": "La Métropole de la peur",
+   "serie": "Loup Solitaire",
+   "numero": "472",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 22.51,
+   "apres": 9.86,
+   "pct": -0.562,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333790",
    "isbn13": "9782070333790",
    "titre": "Les Esclaves d'Al Anfa",
@@ -49,6 +79,21 @@
    "avant": 89.65,
    "apres": 52.48,
    "pct": -0.415,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070649495",
+   "isbn13": "9782070649495",
+   "titre": "La Métropole de la peur",
+   "serie": "Loup Solitaire",
+   "numero": "472",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 8.52,
+   "apres": 6.0,
+   "pct": -0.296,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -69,7 +114,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 4,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
   "n_paires": 13,
