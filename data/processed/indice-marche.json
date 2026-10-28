@@ -3,7 +3,7 @@
  "groupes": {
   "V1 · Alkonost": {
    "indice": 100.0,
-   "livres": 54,
+   "livres": 18,
    "annonces": 6,
    "historique": [
     [
@@ -58,7 +58,7 @@
   },
   "V1 · Bragelonne": {
    "indice": 100.0,
-   "livres": 3,
+   "livres": 1,
    "annonces": 1,
    "historique": [
     [
@@ -89,7 +89,7 @@
   },
   "V1 · Elder Craft": {
    "indice": 100.0,
-   "livres": 6,
+   "livres": 2,
    "annonces": 5,
    "historique": [
     [
@@ -140,7 +140,7 @@
   },
   "V1 · Gallimard": {
    "indice": 100.0,
-   "livres": 576,
+   "livres": 192,
    "annonces": 804,
    "historique": [
     [
@@ -203,7 +203,7 @@
   },
   "V1 · Gallimard Jeunesse": {
    "indice": 100.0,
-   "livres": 3,
+   "livres": 1,
    "annonces": 3,
    "historique": [
     [
@@ -250,7 +250,7 @@
   },
   "V1 · Hachette": {
    "indice": 100.07,
-   "livres": 12,
+   "livres": 4,
    "annonces": 15,
    "historique": [
     [
@@ -305,7 +305,7 @@
   },
   "V1 · Jean-Pierre Pécau": {
    "indice": 102.65,
-   "livres": 3,
+   "livres": 1,
    "annonces": 4,
    "historique": [
     [
@@ -328,7 +328,7 @@
   },
   "V1 · Sarbacane": {
    "indice": 100.0,
-   "livres": 3,
+   "livres": 1,
    "annonces": 2,
    "historique": [
     [
@@ -371,7 +371,7 @@
   },
   "V1 · Scriptarium": {
    "indice": 100.0,
-   "livres": 15,
+   "livres": 5,
    "annonces": 0,
    "historique": [
     [
@@ -398,7 +398,7 @@
   },
   "V2 · Alkonost": {
    "indice": 100.0,
-   "livres": 54,
+   "livres": 18,
    "annonces": 5,
    "historique": [
     [
@@ -453,7 +453,7 @@
   },
   "V2 · Elder Craft": {
    "indice": 100.0,
-   "livres": 3,
+   "livres": 1,
    "annonces": 2,
    "historique": [
     [
@@ -504,7 +504,7 @@
   },
   "V2 · Gallimard": {
    "indice": 100.0,
-   "livres": 264,
+   "livres": 88,
    "annonces": 110,
    "historique": [
     [
@@ -567,7 +567,7 @@
   },
   "V2 · Gallimard Jeunesse": {
    "indice": 100.0,
-   "livres": 69,
+   "livres": 23,
    "annonces": 36,
    "historique": [
     [
@@ -630,7 +630,7 @@
   },
   "V3 · Alkonost": {
    "indice": 100.0,
-   "livres": 9,
+   "livres": 3,
    "annonces": 0,
    "historique": [
     [
@@ -685,7 +685,7 @@
   },
   "V3 · Gallimard Jeunesse": {
    "indice": 100.0,
-   "livres": 114,
+   "livres": 38,
    "annonces": 47,
    "historique": [
     [
@@ -748,7 +748,7 @@
   },
   "V4 · Alkonost": {
    "indice": 100.0,
-   "livres": 3,
+   "livres": 1,
    "annonces": 0,
    "historique": [
     [
@@ -803,7 +803,7 @@
   },
   "V4 · Gallimard": {
    "indice": 100.0,
-   "livres": 54,
+   "livres": 18,
    "annonces": 35,
    "historique": [
     [
@@ -866,7 +866,7 @@
   },
   "V4 · Gallimard Jeunesse": {
    "indice": 100.0,
-   "livres": 96,
+   "livres": 32,
    "annonces": 57,
    "historique": [
     [
@@ -929,7 +929,7 @@
   },
   "V5 · Gallimard": {
    "indice": 68.18,
-   "livres": 3,
+   "livres": 1,
    "annonces": 1,
    "historique": [
     [
@@ -992,7 +992,7 @@
   },
   "V5 · Gallimard Jeunesse": {
    "indice": 85.71,
-   "livres": 126,
+   "livres": 42,
    "annonces": 56,
    "historique": [
     [
