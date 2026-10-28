@@ -25,5 +25,16 @@ class TestVersionIndiquee(unittest.TestCase):
         self.assertIsNone(ev.version_indiquee("Très bon état, envoi rapide", EDITIONS))
 
 
+class TestVersionTitre(unittest.TestCase):
+    def test_version_dans_le_titre(self):
+        self.assertEqual(ev.version_titre("La Porte d'Ombre V3 Gallimard"), "V3")
+        self.assertEqual(ev.version_titre("Le Sorcier v 2"), "V2")
+
+    def test_pas_de_version(self):
+        self.assertIsNone(ev.version_titre("Le Sorcier de Zagor"))
+        self.assertIsNone(ev.version_titre(""))
+        self.assertIsNone(ev.version_titre(None))
+
+
 if __name__ == "__main__":
     unittest.main()

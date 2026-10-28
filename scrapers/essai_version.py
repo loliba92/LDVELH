@@ -34,6 +34,12 @@ def description(item_id, token, http=requests):
         return ""
 
 
+def version_titre(titre):
+    """Version écrite dans le titre d'une annonce (« V2 », « v 3 »…), en majuscules sans espace, ou None."""
+    m = re.search(r"\bV\s?([1-9])\b", titre or "", flags=re.I)
+    return f"V{m.group(1)}" if m else None
+
+
 def version_indiquee(texte, editions):
     """Version dite par la description : « V2 », ou l'année d'une édition connue. None si rien ou plusieurs versions."""
     trouvees = set()
@@ -76,11 +82,26 @@ def essayer(a, token, catalogue, chercher_elargi, concorde, dossier_covers, edit
         compte["annonces_titre_concordant"] += len(items)
         if not items:
             continue
-        compte["editions_avec_annonce"] += 1
         meme_livre = [r for r in rows if r.get("livre") == livre and r.get("isbn13")]
         jaquettes = {r["isbn13"]: ri.jaquette_locale(dossier_covers, r["isbn13"]) for r in meme_livre}
         jaquettes = {k: v for k, v in jaquettes.items() if v}
-        for it in items[:PAR_EDITION]:
+        ver_ed = (ed.get("version") or "").upper().replace(" ", "")
+        lues = 0
+        for it in items:
+            if lues >= PAR_EDITION:
+                break
+            octets = ri.empreinte_annonce(it, http)
+            v_img, _ = ri.decider(octets, jaquettes) if octets else (None, {})
+            vt = version_titre(it.get("title", ""))
+            if vt and ver_ed and vt != ver_ed:
+                # Le titre dit une autre version : on n'écarte l'annonce que si la photo désigne clairement une autre édition.
+                if v_img and v_img != isbn:
+                    compte["rejetees_version_image"] += 1
+                    continue
+                compte["version_titre_gardee"] += 1
+            if not lues:
+                compte["editions_avec_annonce"] += 1
+            lues += 1
             compte["annonces_lues"] += 1
             texte = description(it.get("itemId", ""), token, http)
             if texte.strip():
@@ -88,8 +109,6 @@ def essayer(a, token, catalogue, chercher_elargi, concorde, dossier_covers, edit
             v_desc = version_indiquee(texte, meme_livre) if texte else None
             if v_desc:
                 compte["version_par_description"] += 1
-            octets = ri.empreinte_annonce(it, http)
-            v_img, _ = ri.decider(octets, jaquettes) if octets else (None, {})
             if v_img:
                 compte["version_par_image"] += 1
             if v_desc and v_img:
@@ -97,7 +116,7 @@ def essayer(a, token, catalogue, chercher_elargi, concorde, dossier_covers, edit
             if not v_desc and not v_img:
                 compte["sans_version"] += 1
     print(f"Essai version sur {compte['editions']} éditions « archive seule » (comptages seulement)")
-    for cle in ("editions_avec_annonce", "annonces_titre_concordant", "annonces_lues", "descriptions_non_vides",
-                "version_par_description", "version_par_image", "description_et_image_concordent",
-                "description_et_image_contradictoires", "sans_version"):
+    for cle in ("editions_avec_annonce", "annonces_titre_concordant", "rejetees_version_image", "version_titre_gardee",
+                "annonces_lues", "descriptions_non_vides", "version_par_description", "version_par_image",
+                "description_et_image_concordent", "description_et_image_contradictoires", "sans_version"):
         print(f"- {cle} : {compte[cle]}")
