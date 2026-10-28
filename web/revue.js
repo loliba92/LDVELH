@@ -763,8 +763,17 @@
   // Indice de marché : sur toutes les pages qui ont l'onglet Indice (pas seulement celles qui ont Annonces reçues)
   function initIndice() {
       // Indice de marché (Zagor seulement) : lu par le relais, affiché en tableau court
-      let INDICE = null, indiceCharge = null;
-      const chargerIndice = () => indiceCharge || (indiceCharge = window.Relais.appeler('indice_lire', {}).then((r) => { INDICE = r && r.ok ? r.indice : null; return INDICE; }).catch(() => null));
+      let INDICE = null, indiceCharge = null, indiceMotif = '';
+      // Le motif de l'échec reste affiché à la place d'une page vide (service non configuré, connexion, droits, relais injoignable)
+      const chargerIndice = () => indiceCharge || (indiceCharge = (() => {
+        if (!window.Relais || !window.Relais.configure()) { indiceMotif = 'le service technique n\'est pas configuré sur ce site'; return Promise.resolve(null); }
+        if (!window.Relais.actif()) { indiceMotif = 'vous n\'êtes pas connecté'; return Promise.resolve(null); }
+        return window.Relais.appeler('indice_lire', {}).then((r) => {
+          if (r && r.ok) { INDICE = r.indice; return INDICE; }
+          indiceMotif = (r && r.erreur) || 'réponse vide du service technique';
+          return null;
+        }).catch(() => { indiceMotif = 'le service technique ne répond pas (vérifiez le déploiement du relais)'; return null; });
+      })());
       // Indice de marché : une ligne par édition, les plus fortes baisses d'abord. Pas de liste de livres : elle n'apporte rien au groupe.
       const virgule = (x, n) => x.toFixed(n).replace('.', ',');
       const nb = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
@@ -780,7 +789,7 @@
       const dessinerIndice = () => {
         const etat = document.getElementById('ind-etat'), liste = document.getElementById('ind-liste');
         if (!etat || !liste) return;
-        if (!INDICE) { etat.textContent = 'Indice indisponible pour le moment.'; liste.innerHTML = ''; return; }
+        if (!INDICE) { etat.textContent = `Indice indisponible : ${indiceMotif || 'raison inconnue'}.`; liste.innerHTML = ''; return; }
         const lignes = Object.entries(INDICE.groupes || {}).map(([cle, g]) => {
           const i = cle.indexOf(' · ');
           const ecart = Math.round((g.indice - 100) * 10) / 10;
