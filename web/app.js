@@ -1616,7 +1616,7 @@
   let PJ = null, pjChargee = false, pjAtterri = false;
   const jourParis = (retard = 0) => new Date(Date.now() - retard * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
   const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date >= jourParis(1) ? PJ : null);          // valable aujourd'hui et demain matin
-  const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif() && (!estNiveau2() || estNiveau3());       // les sorciers ont déjà toutes les pépites ; le Zagor voit celle qu'il a offerte
+  const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif();       // tout compte connecté (Héros, sorcier, Zagor) ; jamais un visiteur
   function chargerPepiteJour() {
     if (pjChargee) return;
     pjChargee = true;
