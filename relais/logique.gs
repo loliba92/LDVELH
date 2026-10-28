@@ -1,4 +1,4 @@
-// Version du 2026-10-27 20:57 (heure de Paris) : si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-28 21:05 (heure de Paris) : pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
