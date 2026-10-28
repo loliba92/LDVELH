@@ -57,5 +57,17 @@ class TestObserves(unittest.TestCase):
         self.assertEqual(courbe["V1 · Gallimard"][0]["indice"], 50.0)
 
 
+class TestCascade(unittest.TestCase):
+    def test_les_parts_par_serie_font_la_variation_du_groupe(self):
+        avant = {"111|bon": 10.0, "111|tres_bon": 20.0, "222|bon": 10.0}
+        apres = {"111|bon": 9.0, "111|tres_bon": 20.0, "222|bon": 11.0}
+        groupe = {"111": "V1 · Gallimard", "222": "V1 · Gallimard"}
+        serie = {"111": "Folio junior", "222": "Défis fantastiques"}
+        c = im.cascade_du_dernier_jour([{"date": "d1", "prix": avant}, {"date": "d2", "prix": apres}], {"111|bon", "111|tres_bon", "222|bon"}, groupe, serie)
+        g = c["V1 · Gallimard"]
+        self.assertAlmostEqual(sum(p["contribution_pct"] for p in g["series"]), g["variation_pct"], places=1)
+        self.assertEqual(g["prix_observes"], 3)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -99,6 +99,58 @@ def annonces_par_groupe(chemin_annonces, groupe_de):
     return compte
 
 
+def series_depuis(chemin=RACINE / "web" / "data" / "versions.json"):
+    """{isbn13: série (collection), ou « sans série »}, pour la décomposition par série."""
+    try:
+        donnees = json.loads(chemin.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return {v["isbn13"]: (v.get("collection") or "sans série").strip() for v in donnees if v.get("isbn13")}
+
+
+def variations_par_serie(avant, apres, observes, groupe_de, serie_de):
+    """Variations logarithmiques des prix observés, rangées par groupe puis par série."""
+    par = {}
+    for cle, p1 in apres.items():
+        p0 = avant.get(cle)
+        if cle not in observes or not p0 or not p1 or p0 <= 0 or p1 <= 0:
+            continue
+        isbn = cle.split("|")[0]
+        groupe = groupe_de.get(isbn)
+        if groupe is None:
+            continue
+        par.setdefault(groupe, {}).setdefault(serie_de.get(isbn, "sans série"), []).append(math.log(p1 / p0))
+    return par
+
+
+def cascade_du_dernier_jour(historique, observes, groupe_de, serie_de):
+    """Pour le dernier jour : pour chaque groupe, la variation moyenne (en %) et sa part de chaque série.
+    Les parts s'additionnent exactement à la variation moyenne (somme des variations logarithmiques / nombre de prix)."""
+    avant, apres = historique[-2]["prix"], historique[-1]["prix"]
+    par = variations_par_serie(avant, apres, observes, groupe_de, serie_de)
+    sortie = {}
+    for groupe, series in par.items():
+        n = sum(len(v) for v in series.values())
+        parts = [{"serie": s, "livres": len(v), "contribution_pct": round(sum(v) / n * 100, 2)} for s, v in series.items()]
+        parts.sort(key=lambda x: x["contribution_pct"])
+        sortie[groupe] = {"date": historique[-1]["date"], "variation_pct": round(sum(sum(v) for v in series.values()) / n * 100, 2),
+                          "prix_observes": n, "series": parts}
+    return sortie
+
+
+def chainer_moyenne(historique, groupe_de):
+    """Même chaîne que chainer, avec la moyenne des variations logarithmiques au lieu de la médiane (base 100)."""
+    niveau, sortie = {}, {}
+    for i in range(1, len(historique)):
+        avant, apres = historique[i - 1]["prix"], historique[i]["prix"]
+        var = variations(avant, apres, groupe_de)
+        for groupe, valeurs in var.items():
+            niveau.setdefault(groupe, 100.0)
+            niveau[groupe] *= math.exp(statistics.fmean(valeurs))
+            sortie.setdefault(groupe, []).append(round(niveau[groupe], 2))
+    return {g: v[-1] for g, v in sortie.items()}
+
+
 def garder_observes(historique, observes):
     """Ne garde, chaque jour, que les prix des livres observés (une annonce actuelle pour leur état).
     Les autres livres sont extrapolés plus tard, à partir du mouvement observé : ils ne pèsent pas dans l'indice."""
@@ -118,7 +170,8 @@ def main():
     historique = json.loads(HISTO.read_text(encoding="utf-8"))
     groupe_de = groupes()
     observes = observes_depuis(ANNONCES)
-    historique = garder_observes(historique, observes)
+    historique_observes = garder_observes(historique, observes)
+    historique = historique_observes
     courbes = chainer(historique, groupe_de)
     annonces = annonces_par_groupe(ANNONCES, groupe_de)
     resultat = {"date": historique[-1]["date"], "groupes": {}, "editeurs": {}}
@@ -142,6 +195,12 @@ def main():
         nb_annonces = sum(v["annonces"] for k, v in resultat["groupes"].items() if FAMILLE.get(k.split(" · ", 1)[1], k.split(" · ", 1)[1]) == famille)
         resultat.setdefault("familles", {})[famille] = {"indice": dernier["indice"], "livres": dernier["livres"], "annonces": nb_annonces,
                                                         "historique": [[s["date"], s["indice"]] for s in serie]}
+    # Option B : la médiane reste l'indice ; la moyenne pondérée sert à la cascade et au contrôle d'écart
+    moyennes = chainer_moyenne(historique_observes, groupe_de)
+    for groupe, valeur in moyennes.items():
+        if groupe in resultat["groupes"]:
+            resultat["groupes"][groupe]["indice_moyenne"] = valeur
+    resultat["cascade"] = cascade_du_dernier_jour(historique_observes, observes, groupe_de, series_depuis())
     SORTIE.write_text(json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"Indice de marché : {len(courbes)} groupes, au {resultat['date']} -> {SORTIE}")
     return 0

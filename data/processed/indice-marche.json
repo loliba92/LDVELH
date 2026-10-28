@@ -54,7 +54,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 102.49
   },
   "V1 · Bragelonne": {
    "indice": 100.0,
@@ -85,7 +86,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 100.0
   },
   "V1 · Elder Craft": {
    "indice": 77.78,
@@ -136,7 +138,8 @@
      "2026-10-28",
      77.78
     ]
-   ]
+   ],
+   "indice_moyenne": 77.78
   },
   "V1 · Gallimard": {
    "indice": 99.51,
@@ -199,7 +202,8 @@
      "2026-10-28",
      99.51
     ]
-   ]
+   ],
+   "indice_moyenne": 99.01
   },
   "V1 · Hachette": {
    "indice": 100.22,
@@ -254,7 +258,8 @@
      "2026-10-28",
      100.22
     ]
-   ]
+   ],
+   "indice_moyenne": 86.56
   },
   "V1 · Jean-Pierre Pécau": {
    "indice": 106.0,
@@ -277,7 +282,8 @@
      "2026-10-28",
      106.0
     ]
-   ]
+   ],
+   "indice_moyenne": 106.0
   },
   "V1 · Sarbacane": {
    "indice": 96.85,
@@ -320,7 +326,8 @@
      "2026-10-28",
      96.85
     ]
-   ]
+   ],
+   "indice_moyenne": 96.85
   },
   "V2 · Alkonost": {
    "indice": 100.0,
@@ -375,7 +382,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 100.0
   },
   "V2 · Elder Craft": {
    "indice": 100.0,
@@ -426,7 +434,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 100.0
   },
   "V2 · Gallimard": {
    "indice": 100.0,
@@ -489,7 +498,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 97.51
   },
   "V3 · Gallimard": {
    "indice": 99.55,
@@ -552,7 +562,8 @@
      "2026-10-28",
      99.55
     ]
-   ]
+   ],
+   "indice_moyenne": 103.05
   },
   "V4 · Gallimard": {
    "indice": 100.0,
@@ -615,7 +626,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 101.52
   },
   "V5 · Gallimard Jeunesse": {
    "indice": 100.0,
@@ -678,7 +690,8 @@
      "2026-10-28",
      100.0
     ]
-   ]
+   ],
+   "indice_moyenne": 96.03
   }
  },
  "editeurs": {
@@ -1387,6 +1400,319 @@
      "2026-10-28",
      96.85
     ]
+   ]
+  }
+ },
+ "cascade": {
+  "V1 · Gallimard": {
+   "date": "2026-10-28",
+   "variation_pct": -0.82,
+   "prix_observes": 387,
+   "series": [
+    {
+     "serie": "Folio junior",
+     "livres": 295,
+     "contribution_pct": -0.58
+    },
+    {
+     "serie": "Loup solitaire",
+     "livres": 13,
+     "contribution_pct": -0.21
+    },
+    {
+     "serie": "L'épée de légende",
+     "livres": 8,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Sherlock Holmes",
+     "livres": 15,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Destins",
+     "livres": 4,
+     "contribution_pct": -0.01
+    },
+    {
+     "serie": "Folio Junior",
+     "livres": 4,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Défis fantastiques",
+     "livres": 23,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Folio-junior",
+     "livres": 5,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Folio junior, un livre dont vous êtes le héros. Défis fantastiques",
+     "livres": 2,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "sans série",
+     "livres": 2,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Le maître du destin",
+     "livres": 2,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Folio junior. Un livre dont vous êtes le héros. Les Messagers du temps",
+     "livres": 5,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Métamorphoses",
+     "livres": 4,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Grand Format Littérature",
+     "livres": 2,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Super Sherlock",
+     "livres": 3,
+     "contribution_pct": 0.01
+    }
+   ]
+  },
+  "V1 · Alkonost": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 4,
+   "series": [
+    {
+     "serie": "sans série",
+     "livres": 1,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Forge Divine",
+     "livres": 1,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Livre-Jeu",
+     "livres": 1,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Les Contes",
+     "livres": 1,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V2 · Alkonost": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 4,
+   "series": [
+    {
+     "serie": "Destins",
+     "livres": 4,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V2 · Gallimard": {
+   "date": "2026-10-28",
+   "variation_pct": -0.16,
+   "prix_observes": 116,
+   "series": [
+    {
+     "serie": "sans série",
+     "livres": 90,
+     "contribution_pct": -0.12
+    },
+    {
+     "serie": "Défis fantastiques",
+     "livres": 7,
+     "contribution_pct": -0.06
+    },
+    {
+     "serie": "Loup solitaire",
+     "livres": 10,
+     "contribution_pct": -0.01
+    },
+    {
+     "serie": "Défis de l'histoire",
+     "livres": 3,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Un livre dont vous êtes le héros",
+     "livres": 1,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Folio junior",
+     "livres": 5,
+     "contribution_pct": 0.03
+    }
+   ]
+  },
+  "V1 · Bragelonne": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 1,
+   "series": [
+    {
+     "serie": "Fantasy",
+     "livres": 1,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V3 · Gallimard": {
+   "date": "2026-10-28",
+   "variation_pct": 0.03,
+   "prix_observes": 36,
+   "series": [
+    {
+     "serie": "Un livre dont vous êtes le héros",
+     "livres": 20,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Défis fantastiques",
+     "livres": 16,
+     "contribution_pct": 0.05
+    }
+   ]
+  },
+  "V4 · Gallimard": {
+   "date": "2026-10-28",
+   "variation_pct": -1.84,
+   "prix_observes": 58,
+   "series": [
+    {
+     "serie": "Un livre dont vous êtes le héros",
+     "livres": 19,
+     "contribution_pct": -1.98
+    },
+    {
+     "serie": "Défis fantastiques",
+     "livres": 15,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "sans série",
+     "livres": 1,
+     "contribution_pct": -0.02
+    },
+    {
+     "serie": "Folio-junior",
+     "livres": 2,
+     "contribution_pct": 0.0
+    },
+    {
+     "serie": "Loup solitaire",
+     "livres": 3,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "Folio junior",
+     "livres": 18,
+     "contribution_pct": 0.17
+    }
+   ]
+  },
+  "V5 · Gallimard Jeunesse": {
+   "date": "2026-10-28",
+   "variation_pct": -1.41,
+   "prix_observes": 44,
+   "series": [
+    {
+     "serie": "Un livre dont vous êtes le héros",
+     "livres": 20,
+     "contribution_pct": -1.4
+    },
+    {
+     "serie": "Défis fantastiques",
+     "livres": 19,
+     "contribution_pct": -0.01
+    },
+    {
+     "serie": "Loup solitaire",
+     "livres": 3,
+     "contribution_pct": -0.0
+    },
+    {
+     "serie": "sans série",
+     "livres": 2,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V1 · Hachette": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 10,
+   "series": [
+    {
+     "serie": "Haute tension",
+     "livres": 10,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V1 · Jean-Pierre Pécau": {
+   "date": "2026-10-28",
+   "variation_pct": 1.34,
+   "prix_observes": 1,
+   "series": [
+    {
+     "serie": "Presses pocket",
+     "livres": 1,
+     "contribution_pct": 1.34
+    }
+   ]
+  },
+  "V1 · Elder Craft": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 3,
+   "series": [
+    {
+     "serie": "sans série",
+     "livres": 3,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V2 · Elder Craft": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 2,
+   "series": [
+    {
+     "serie": "sans série",
+     "livres": 2,
+     "contribution_pct": 0.0
+    }
+   ]
+  },
+  "V1 · Sarbacane": {
+   "date": "2026-10-28",
+   "variation_pct": 0.0,
+   "prix_observes": 2,
+   "series": [
+    {
+     "serie": "Exprim'",
+     "livres": 2,
+     "contribution_pct": 0.0
+    }
    ]
   }
  }

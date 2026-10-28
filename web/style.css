@@ -2077,6 +2077,18 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ind-stables-ed { margin: 8px 0 0; font-size: .85rem; color: var(--muted); }
 .ind-stables-ed b { color: var(--accent); font-weight: 600; }
 .ind-vide { color: var(--muted); }
+.ind-ligne > .ind-detail { grid-column: 1 / -1; margin-top: 4px; }
+.ind-ligne > .ind-detail > .ind-wf-total { margin-top: 6px; }
+.ind-detail summary { cursor: pointer; color: var(--accent); font-size: .85rem; }
+.ind-wf-total { margin: 8px 0; font-size: .9rem; color: var(--muted); }
+.ind-wf-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ind-wf-haut { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: .9rem; }
+.ind-wf-haut .ind-var { white-space: nowrap; font-weight: 600; }
+.ind-wf-piste { position: relative; height: 8px; margin-top: 4px; background: var(--accent-soft); border-radius: 4px; }
+.ind-wf-zero { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--muted); transform: translateX(-1px); }
+.ind-wf-barre { position: absolute; top: 0; height: 100%; border-radius: 4px; background: var(--muted); }
+.ind-wf-barre.baisse { background: var(--accent); }
+.ind-wf-barre.hausse { background: var(--text); }
 .ind-barre { position: relative; grid-column: 1 / -1; height: 8px; background: var(--accent-soft); border-radius: 4px; }
 .ind-barre .ind-axe { position: absolute; left: 50%; top: -3px; width: 2px; height: 14px; background: var(--muted); transform: translateX(-1px); }
 .ind-barre .ind-fill { position: absolute; top: 0; height: 100%; border-radius: 4px; background: var(--muted); }
