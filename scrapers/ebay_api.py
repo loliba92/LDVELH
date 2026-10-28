@@ -51,7 +51,7 @@ def etat_de(item):
         return ETAT_SUPPOSE, True
     return None, False
 LOT = re.compile(r"\b(lots?|collection|set|pack|x\s?\d+|\d+\s?x|\d+\s+livres|\d+\s+tomes|au choix|a choisir|à choisir|votre choix|au choix parmi|plusieurs titres)\b", re.I)    # « au choix » : une annonce unique pour plusieurs livres, le prix ne dit rien d'un titre précis
-CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
+CHAMPS = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes", "prix_median_nu"]
 
 
 MOTS_VIDES = {"les", "des", "dans", "avec", "pour", "livre", "dont", "vous", "etes", "heros", "poche", "folio", "junior", "gallimard", "jeunesse"}
@@ -270,8 +270,8 @@ def retenues(items, jour, titre=None, annees=None, ed=None):
         except (KeyError, ValueError):
             continue
         if valeur > 0:
-            # Prix total pour l'acheteur : le prix de l'annonce plus les frais de port (0 si l'annonce ne les indique pas)
-            sortie.append((it, etat, valeur + (frais_port(it) or 0.0), ancienne))
+            # Prix total pour l'acheteur : le prix de l'annonce plus ses frais de port (4,50 € si l'annonce ne les indique pas)
+            sortie.append((it, etat, valeur + port_retenu(it), ancienne))
     return sortie
 
 
@@ -294,19 +294,30 @@ def ecarter_aberrantes(liste):
     return [x for x in liste if x[1] not in bornes or bornes[x[1]][0] <= x[2] <= bornes[x[1]][1]]
 
 
+FRAIS_EBAY_DEFAUT = 4.50          # annonce qui n'indique pas ses frais : on compte les mêmes frais que chez une librairie
+
+
+def port_retenu(item):
+    """Frais de port retenus pour une annonce eBay : ceux qu'elle indique, sinon FRAIS_EBAY_DEFAUT."""
+    p = frais_port(item)
+    return FRAIS_EBAY_DEFAUT if p is None else p
+
+
 def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
     """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
     par_etat = {}
     for _it, etat, valeur, ancienne in ecarter_aberrantes(retenues(items, jour, titre, annees, ed)):
-        par_etat.setdefault(etat, {"frais": [], "toutes": []})
+        par_etat.setdefault(etat, {"frais": [], "toutes": [], "nus": []})
         par_etat[etat]["toutes"].append(valeur)
         if not ancienne:
             par_etat[etat]["frais"].append(valeur)
+            par_etat[etat]["nus"].append(round(valeur - port_retenu(_it), 2))     # prix sans frais de port : la cote est un prix nu
     # La cote n'utilise que les annonces récentes. Les statistiques de toutes les annonces sont gardées à côté :
     # le modèle d'auto-apprentissage en tire de combien les annonces anciennes surestiment les prix.
     return [{"isbn13": isbn13, "date": jour.isoformat(), "etat": etat, "nb_annonces": len(v["frais"]),
              "prix_min": f"{min(v['frais']):.2f}", "prix_median": f"{statistics.median(v['frais']):.2f}", "prix_max": f"{max(v['frais']):.2f}",
-             "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}"}
+             "nb_toutes": len(v["toutes"]), "prix_median_toutes": f"{statistics.median(v['toutes']):.2f}",
+             "prix_median_nu": f"{statistics.median(v['nus']):.2f}"}
             for etat, v in sorted(par_etat.items()) if v["frais"]]
 
 
