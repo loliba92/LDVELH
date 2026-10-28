@@ -1660,20 +1660,21 @@
    "le": "2026-10-15"
   },
   "9782075150620|bon": {
-   "prix": 73.98,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 41.61,
+   "decision": "corrige",
+   "le": "2026-10-28",
+   "par": "loliba (superadmin)"
   },
   "9782075150620|convenable": {
    "prix": 26.0,
    "decision": "corrige",
-   "le": "2026-10-22",
+   "le": "2026-10-28",
    "par": "loliba (superadmin)"
   },
   "9782075150620|tres_bon": {
    "prix": 74.0,
    "decision": "corrige",
-   "le": "2026-10-22",
+   "le": "2026-10-28",
    "par": "loliba (superadmin)"
   },
   "9782075179461|bon": {
