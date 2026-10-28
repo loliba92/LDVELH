@@ -26,6 +26,7 @@ Usage : python pipeline/prix_neuf.py [--isbn ISBN] [--limite N] [--occasion]
 import argparse
 import csv
 import re
+from html import unescape
 import sys
 import time
 from datetime import date
@@ -45,11 +46,29 @@ OCCASION = Path(__file__).resolve().parent.parent / "data" / "raw" / "occasion"
 URL = "https://www.leslibraires.fr/livre/{isbn}"
 CHAMPS = ["isbn13", "prix", "disponibilite", "prix_occasion", "date", "source"]
 CHAMPS_OCCASION = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
-ETAT_OCCASION = "tres_bon"   # aucun état n'est indiqué : très bon état (règle du propriétaire)
+ETAT_OCCASION = "tres_bon"   # fiche sans état lisible : très bon état (règle du propriétaire)
 PAUSE = 2.0
 ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
 AGENT = ("LDVELH-catalogue/0.1 (projet personnel de cote de livres-jeux ; lecture d'une fiche par ISBN, au plus une fois par semaine, "
          "et tous les deux jours pour la soixantaine de fiches qui proposent un exemplaire d'occasion)")
+
+
+def etat_occasion(html):
+    """État de l'exemplaire d'occasion lu sur la fiche (« État de l'exemplaire : Occasion - Etat Correct - Un peu abîmé »),
+    au format des relevés (convenable, bon, tres_bon) ; None si la fiche ne l'indique pas."""
+    m = re.search(r"tat de l.exemplaire(.{0,300})", unescape(html), re.S | re.I)
+    if not m:
+        return None
+    texte = re.sub(r"<[^>]+>", " ", m.group(1)).lower()
+    if "abîm" in texte or "correct" in texte:
+        return "convenable"
+    if "très bon" in texte:
+        return "tres_bon"
+    if "bon état" in texte or "bon etat" in texte:
+        return "bon"
+    if "comme neuf" in texte:
+        return "tres_bon"
+    return None
 
 
 def lire_fiche(html):
@@ -63,7 +82,7 @@ def lire_fiche(html):
     if en_stock and etat.group(1) == "NewCondition":
         return {"prix": prix, "disponibilite": "en_stock", "prix_occasion": None}
     if en_stock and etat.group(1) == "UsedCondition" and prix:
-        return {"prix": None, "disponibilite": "indisponible", "prix_occasion": prix}
+        return {"prix": None, "disponibilite": "indisponible", "prix_occasion": prix, "etat_occasion": etat_occasion(html)}
     return {"prix": None, "disponibilite": "indisponible", "prix_occasion": None}
 
 
@@ -153,7 +172,7 @@ def ligne_occasion(r):
     if not po:
         return None
     p = f"{po:.2f}"
-    return {"isbn13": r["isbn13"], "date": r["date"], "etat": ETAT_OCCASION, "nb_annonces": 1, "prix_min": p, "prix_median": p,
+    return {"isbn13": r["isbn13"], "date": r["date"], "etat": r.get("etat_occasion") or ETAT_OCCASION, "nb_annonces": 1, "prix_min": p, "prix_median": p,
             "prix_max": p, "nb_toutes": 1, "prix_median_toutes": p}
 
 
