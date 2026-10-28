@@ -127,6 +127,13 @@ function doPost(e) {
       return reponse({ ok: true, nombre: lignes.length });
     }
 
+    if (action === 'indice_lire') {      // indice de marché par version et éditeur : le Zagor seulement, suivi interne
+      var ind = github('/contents/data/processed/indice-marche.json?ref=main');
+      if (ind.code !== 200) return reponse({ ok: false, erreur: 'indice indisponible (' + ind.code + ')' });
+      var fic = JSON.parse(ind.texte);
+      return reponse({ ok: true, indice: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
+    }
+
     if (action === 'butin_lire' || action === 'annonces_lire') {      // Butin seul pour les sorciers ; toutes les annonces pour le Zagor
       var ann = github('/contents/data/processed/' + (action === 'annonces_lire' ? 'annonces' : 'butin') + '.json?ref=main');
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });

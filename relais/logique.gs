@@ -30,6 +30,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
   butin_lire: 'admin',            // Butin seul (bonnes affaires) : sorciers et Zagors
   annonces_lire: 'superadmin',    // toutes les annonces reçues : le Zagor seulement
+  indice_lire: 'superadmin',      // indice de marché par version et éditeur : le Zagor seulement
   pepite_offrir: 'superadmin',    // le Zagor choisit la pépite du jour offerte aux Héros
   pepite_retirer: 'superadmin',   // et peut la retirer
   pepite_vendre: 'superadmin',    // ou la marquer vendue (barrée sur le site, plus proposée)
