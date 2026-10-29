@@ -688,7 +688,8 @@
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
-      if (!zones.length || !c || !c.jours) return;
+      if (!zones.length || !BUT) return;
+      if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
       const SOURCES = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
       const lignes = [];
       for (let k = 0; k < 14; k += 1) {
@@ -701,7 +702,7 @@
       const html = `<details class="captures-acc"><summary>Annonces captées par jour</summary>
         <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par source</caption>
           <thead><tr><th scope="col">Jour</th>${SOURCES.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes.join('')}</tbody></table></div>
-        <p class="sous">Annonces nouvelles, comptées une fois le jour où elles apparaissent.${depuis ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont reconstitués au mieux.` : ''}</p></details>`;
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent.${depuis ? ` Comptage commencé le ${esc(depuis)} ; les jours d'avant sont estimés.` : ''}</p></details>`;
       zones.forEach((z) => { const ouvert = !!(z.querySelector('.captures-acc') || {}).open; z.innerHTML = html; if (ouvert) z.querySelector('.captures-acc').open = true; });
     };
     dessinerPepites = () => {

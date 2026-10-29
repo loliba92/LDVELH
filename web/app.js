@@ -1262,7 +1262,7 @@
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
         // Relevé eBay arrêté par la limite d'appels du jour (le lot s'annule alors de lui-même, voir prix-ebay.yml) : ce n'est pas une panne, rien n'est perdu
         const limite = f === 'prix-ebay.yml' && r.c === 'cancelled';
-        if (limite) return { nom, aide, cls: 'annule', quand: `limite d'appels eBay atteinte, rien n'est perdu${r.ok ? ` · dernier relevé réussi ${depuisMin(new Date(r.ok))}` : ''}`, txt: "arrêté par la limite d'appels eBay", u: r.u, detail: quand(r), discret: false, imports: false };
+        if (limite) return { nom, aide, cls: 'annule', quand: `limite eBay atteinte, rien n'est perdu${r.ok ? ` · dernier relevé ${depuisMin(new Date(r.ok))}` : ''}`, txt: "arrêté par la limite d'appels eBay", u: r.u, detail: quand(r), discret: false, imports: false };
         return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET, imports: f === IMPORTS };
       }).filter((l) => !l.discret || l.cls === 'echec');         // la publication du site n'apparaît qu'en cas d'échec : sinon le site ne se met plus à jour, sans aucun signe visible
       const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
@@ -1279,7 +1279,7 @@
       });
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
-        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou relevé eBay arrêté par la limite d\'appels du jour (rien n\'est perdu).</p><ul>'
+        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou limite d\'appels eBay atteinte (rien n\'est perdu).</p><ul>'
         + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
       majLigneImports();
