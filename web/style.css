@@ -2133,6 +2133,8 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .maj-ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 4px; color: var(--text); text-decoration: none; font-size: .9rem; }
 a.maj-ligne:hover { background: var(--surface-2); }
 .maj-nom { font-weight: 700; }
+.maj-ligne.maj-long { grid-template-columns: auto minmax(0, 1fr); row-gap: 2px; }          /* texte long (limite d'appels eBay…) : sous le nom, pas à côté */
+.maj-ligne.maj-long .maj-quand { grid-column: 2; text-align: left; }
 .maj-quand { color: var(--muted); font-size: .85rem; text-align: right; }
 .maj-echec .maj-quand { color: #f2a0a8; }
 .maj-vide { opacity: .65; }

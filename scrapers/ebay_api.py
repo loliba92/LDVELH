@@ -98,6 +98,9 @@ def jeton(client_id, secret, http=requests):
     return r.json()["access_token"]
 
 
+CODE_LIMITE = 75          # code de sortie « limite d'appels du jour atteinte » (voir .github/workflows/prix-ebay.yml)
+
+
 class QuotaEbay(RuntimeError):
     """eBay répond 429 : la limite d'appels du jour est atteinte (environ 5 000 ; un relevé complet en fait environ 2 400)."""
 
@@ -597,4 +600,5 @@ if __name__ == "__main__":
     try:
         main()
     except QuotaEbay as e:
-        sys.exit(str(e))
+        print(str(e), file=sys.stderr)
+        sys.exit(CODE_LIMITE)          # le lot le reconnaît : relevé arrêté par la limite d'appels, pas une panne

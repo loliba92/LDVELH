@@ -1243,11 +1243,11 @@
     // ne se perd pas derrière les publications). Gardé cinq minutes dans le navigateur.
     const CLE = 'cdh-rv-lots2';
     const lire = () => { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return Promise.resolve(c.runs); } catch (e) { /* pas de cache */ }
-      return Promise.all(FAMILLES.map(([f]) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${f}/runs?per_page=1`, { headers: { Accept: 'application/vnd.github+json' } })
-        .then((r) => (r.ok ? r.json() : { workflow_runs: [] })).then((d) => d.workflow_runs[0] || null).catch(() => null)))
+      return Promise.all(FAMILLES.map(([f]) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${f}/runs?per_page=5`, { headers: { Accept: 'application/vnd.github+json' } })
+        .then((r) => (r.ok ? r.json() : { workflow_runs: [] })).then((d) => { const l = d.workflow_runs || []; const x = l[0] || null; if (x) x.reussi = l.find((y) => y.status === 'completed' && y.conclusion === 'success') || null; return x; }).catch(() => null)))
         .then((l) => {
           const runs = {};
-          l.forEach((x, i) => { if (x) runs[FAMILLES[i][0]] = { st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at, u: x.html_url }; });
+          l.forEach((x, i) => { if (x) runs[FAMILLES[i][0]] = { st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at, u: x.html_url, ok: x.reussi ? x.reussi.updated_at : null }; });
           if (!Object.keys(runs).length) throw new Error('indisponible');
           try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ }
           return runs;
@@ -1260,6 +1260,9 @@
         if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET, imports: f === IMPORTS };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
+        // Relevé eBay arrêté par la limite d'appels du jour (le lot s'annule alors de lui-même, voir prix-ebay.yml) : ce n'est pas une panne, rien n'est perdu
+        const limite = f === 'prix-ebay.yml' && r.c === 'cancelled';
+        if (limite) return { nom, aide, cls: 'annule', quand: `limite d'appels eBay atteinte, rien n'est perdu${r.ok ? ` · dernier relevé réussi ${depuisMin(new Date(r.ok))}` : ''}`, txt: "arrêté par la limite d'appels eBay", u: r.u, detail: quand(r), discret: false, imports: false };
         return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET, imports: f === IMPORTS };
       }).filter((l) => !l.discret || l.cls === 'echec');         // la publication du site n'apparaît qu'en cas d'échec : sinon le site ne se met plus à jour, sans aucun signe visible
       const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
@@ -1269,14 +1272,14 @@
       const rang = { echec: 0, 'en-cours': 1 };                              // les problèmes d'abord, puis ce qui tourne
       const lignes = lots.map((l, i) => [l, i]).sort((a, b) => (rang[a[0].cls] ?? 2) - (rang[b[0].cls] ?? 2) || a[1] - b[1]).map(([l]) => {
         const corps = `<span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(l.nom)}</span><span class="maj-quand">${esc(l.quand)}</span>`;
-        if (l.imports && l.u) { urlJournalImports = l.u; return `<li><button type="button" class="maj-ligne maj-${l.cls}" data-imports title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Voir les derniers imports</span></button></li>`; }
+        if (l.imports && l.u) { urlJournalImports = l.u; return `<li><button type="button" class="maj-ligne maj-${l.cls}${l.quand.length > 34 ? ' maj-long' : ''}" data-imports title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Voir les derniers imports</span></button></li>`; }
         return l.u
-          ? `<li><a class="maj-ligne maj-${l.cls}" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Ouvrir le détail (nouvel onglet)</span></a></li>`
+          ? `<li><a class="maj-ligne maj-${l.cls}${l.quand.length > 34 ? ' maj-long' : ''}" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Ouvrir le détail (nouvel onglet)</span></a></li>`
           : `<li><div class="maj-ligne maj-vide" title="${esc(l.aide)}">${corps}</div></li>`;
       });
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
-        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente.</p><ul>'
+        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou relevé eBay arrêté par la limite d\'appels du jour (rien n\'est perdu).</p><ul>'
         + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
       majLigneImports();
