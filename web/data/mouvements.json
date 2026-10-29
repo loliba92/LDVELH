@@ -2,7 +2,7 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 551,
+ "nb_modifiees": 554,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -23,6 +23,21 @@
   }
  ],
  "baisses": [
+  {
+   "id": "9782070512706",
+   "isbn13": "9782070512706",
+   "titre": "L'Emeraude de la Rivière Noire",
+   "serie": "Sherlock Holmes",
+   "numero": "623",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 54.0,
+   "apres": 14.0,
+   "pct": -0.741,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070574940",
    "isbn13": "9782070574940",
@@ -54,7 +69,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
   "n_paires": 24,
