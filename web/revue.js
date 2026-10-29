@@ -693,7 +693,7 @@
       const brut = Math.max(10, ...totaux), echelle = brut <= 20 ? 5 : brut <= 60 ? 10 : brut <= 120 ? 20 : brut <= 300 ? 50 : 100, max = Math.ceil(brut / echelle) * echelle;
       const y = (v) => 10 + h - (v / max) * h;
       const grille = [0, max / 2, max].map((v) => `<line x1="${g}" x2="${largeur}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${g - 6}" y="${y(v) + 4}" class="cp-axe" text-anchor="end">${v}</text>`).join('');
-      const saut = largeur < 420 ? 3 : 2;
+      const saut = largeur < 420 ? 4 : 2;
       let colonnes = '', etiquettes = '';
       jours.forEach((j, k) => {
         const x = g + k * pas + (pas - ep) / 2, estime = depuis && j.cle < depuis;
@@ -719,35 +719,50 @@
       const c = BUT && BUT.captures;
       if (!zones.length || !BUT) return;
       if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
+      const nbSrc = (v) => SOURCES_CAPT.reduce((t, [src]) => t + (v[src] || 0), 0);
+      const cleJour = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+      // 15 colonnes : aujourd'hui (en cours) et les 14 jours complets avant lui ; le total, la moyenne et la tendance ne comptent que les jours complets
       const jours = [];
-      for (let k = 13; k >= 0; k -= 1) {
-        const cle = new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-        jours.push({ cle, v: c.jours[cle] || {} });
-      }
+      for (let k = 14; k >= 0; k -= 1) { const cle = cleJour(k); jours.push({ cle, v: c.jours[cle] || {} }); }
+      const complets = jours.slice(0, 14), recents = complets.slice(7), avant = complets.slice(0, 7);
+      const somme = (liste, src) => liste.reduce((t, j) => t + (src ? (j.v[src] || 0) : nbSrc(j.v)), 0);
+      const moy = (liste, src) => somme(liste, src) / liste.length;
+      const fmt1 = (x) => (x >= 10 ? String(Math.round(x)) : x.toFixed(1).replace('.', ','));
+      const evolution = (src) => { const a = moy(recents, src), b = moy(avant, src); return b > 0 ? (a - b) / b : null; };
+      const texteEvol = (p) => (p == null ? '–' : `${p > 0 ? '+' : p < 0 ? '−' : ''}${Math.abs(Math.round(p * 100))} %`);
+      const verdictEvol = (p) => (p == null ? 'pas de comparaison possible' : p >= 0.1 ? 'le marché accélère' : p <= -0.1 ? 'le marché ralentit' : 'le marché est stable');
+      const pTotal = evolution(null);
+      const nbExacts = c.depuis ? complets.filter((j) => j.cle >= c.depuis).length : 0;
+      const estimes = c.depuis && nbExacts < 14;
+      const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
       const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
       const lignes = jours.slice().reverse().map((j, k) => {
-        const total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
         const quand = k === 0 ? "Aujourd'hui" : new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
+        const total = nbSrc(j.v);
         return `<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
       }).join('');
-      const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
-      const estimes = depuis && jours.some((j) => j.cle < c.depuis && Object.keys(j.v).length);
+      const pied = `<tr><th scope="row">Total 14 jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
+        + `<tr><th scope="row">Moyenne par jour</th>${SOURCES_CAPT.map(([src]) => `<td>${fmt1(moy(complets, src))}</td>`).join('')}<td><b>${fmt1(moy(complets))}</b></td></tr>`
+        + `<tr><th scope="row">Évolution sur 7 jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
       const html = `<section class="captures" aria-label="Annonces captées par jour">
         <h3 class="captures-titre">Annonces captées par jour</h3>
-        <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom}</li>`).join('')}</ul>
+        <p class="cp-bilan"><b>${somme(complets)}</b> annonces en 14 jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
+        <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b></li>`).join('')}</ul>
+        <p class="cp-tendance"><b class="${pTotal == null ? '' : pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.
+          <span class="sous">7 derniers jours : ${fmt1(moy(recents))} par jour. 7 jours d'avant : ${fmt1(moy(avant))} par jour.</span></p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent.${estimes ? ` Avant le ${esc(depuis)}, les jours sont estimés (colonnes plus pâles).` : ''}</p>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (colonnes pâles). Tendance fiable dans ${14 - nbExacts} jour${14 - nbExacts > 1 ? 's' : ''}.` : ''}</p>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
-            <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody></table></div></details></section>`;
+            <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
       zones.forEach((z) => {
         const ouvert = !!(z.querySelector('.captures-acc') || {}).open;
         z.innerHTML = html;
         if (ouvert) z.querySelector('.captures-acc').open = true;
         const cadre = z.querySelector('.cp-cadre'), bulle = z.querySelector('.cp-bulle');
         const montrer = (col) => {
-          const k = Number(col.dataset.i), j = jours[k], total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
-          bulle.innerHTML = `<b>${esc(k === jours.length - 1 ? "Aujourd'hui" : jourCourtCapt(j.cle))} · ${total}</b>${SOURCES_CAPT.map(([src, nom]) => `<span><i class="cp-pastille cp-${src}"></i>${nom} ${j.v[src] || 0}</span>`).join('')}`;
+          const k = Number(col.dataset.i), j = jours[k];
+          bulle.innerHTML = `<b>${esc(k === jours.length - 1 ? "Aujourd'hui (en cours)" : jourCourtCapt(j.cle))} · ${nbSrc(j.v)}</b>${SOURCES_CAPT.map(([src, nom]) => `<span><i class="cp-pastille cp-${src}"></i>${nom} ${j.v[src] || 0}</span>`).join('')}`;
           bulle.hidden = false;
           const r = col.getBoundingClientRect(), rc = cadre.getBoundingClientRect();
           bulle.style.left = `${Math.min(Math.max(r.left - rc.left + r.width / 2 - bulle.offsetWidth / 2, 0), rc.width - bulle.offsetWidth)}px`;
