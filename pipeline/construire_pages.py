@@ -176,6 +176,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
       </select></label>
       <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
         <option value="tout">Tous</option>
+        <option value="super">Super pépites</option>
         <option value="pepite">Pépites</option>
         <option value="dessous">Pas cher</option>
         <option value="dans">Dans les prix</option>
