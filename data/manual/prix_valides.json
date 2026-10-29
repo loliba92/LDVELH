@@ -1158,6 +1158,24 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070574940|bon": {
+   "prix": 6.87,
+   "decision": "corrige",
+   "le": "2026-10-29",
+   "par": "loliba (superadmin)"
+  },
+  "9782070574940|convenable": {
+   "prix": 5.7,
+   "decision": "corrige",
+   "le": "2026-10-29",
+   "par": "loliba (superadmin)"
+  },
+  "9782070574940|tres_bon": {
+   "prix": 9.2,
+   "decision": "corrige",
+   "le": "2026-10-29",
+   "par": "loliba (superadmin)"
+  },
   "9782070574957|bon": {
    "prix": 6.74,
    "decision": "confirme",

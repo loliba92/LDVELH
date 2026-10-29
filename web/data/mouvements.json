@@ -2,7 +2,7 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 550,
+ "nb_modifiees": 551,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -24,6 +24,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070574940",
+   "isbn13": "9782070574940",
+   "titre": "Le Gouffre Maudit",
+   "serie": "Loup Solitaire",
+   "numero": "297",
+   "version": "V3",
+   "etat": "tres_bon",
+   "avant": 22.23,
+   "apres": 9.2,
+   "pct": -0.586,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070665839",
    "isbn13": "9782070665839",
    "titre": "La Cité des Pièges",
@@ -39,7 +54,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 2,
+ "nb_grands_mouvements": 3,
  "modele": {
   "actif": false,
   "n_paires": 24,
