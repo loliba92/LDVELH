@@ -102,13 +102,19 @@
   }
 
   // Date du dernier changement du prix : une correction de cette page, sinon le dernier changement des 10 jours publiés
-  function ajusteLe(ed, cle) {
+  // Dernier changement du prix : { date (ISO), precis } ; precis = false quand aucun changement dans les 10 jours publiés
+  function dernierChangement(ed, cle) {
     const v = validation(ed, cle);
-    if (v && v.le) return `Prix ajusté le ${jour(v.le)}`;
+    if (v && v.le) return { date: v.le, precis: true };
     const h = HISTO && HISTO.cotes[cleDe(ed, cle)];
-    if (!h) return '';
-    for (let i = h.length - 1; i > 0; i -= 1) if (h[i] != null && h[i] !== h[i - 1]) return `Prix ajusté le ${jour(HISTO.dates[i])}`;
-    return `Prix ajusté avant le ${jour(HISTO.dates[0])}`;
+    if (!h) return null;
+    for (let i = h.length - 1; i > 0; i -= 1) if (h[i] != null && h[i] !== h[i - 1]) return { date: HISTO.dates[i], precis: true };
+    return { date: HISTO.dates[0], precis: false };
+  }
+  function ajusteLe(ed, cle) {
+    const c = dernierChangement(ed, cle);
+    if (!c) return '';
+    return c.precis ? `Prix ajusté le ${jour(c.date)}` : `Prix ajusté avant le ${jour(c.date)}`;
   }
 
   function boutons(ed, cle, v, l) {
@@ -172,6 +178,8 @@
   const aVerifier = (ed) => ETATS.some(([cle]) => ed.etats[cle] && raison(ed.etats[cle], validation(ed, cle)));
   const aValide = (ed) => ETATS.some(([cle]) => validation(ed, cle));
   const aChange = (ed) => lignes(ed).some(modifie);
+  // Dernier changement de l'édition (tous états) : sert à classer « Changés » du plus récent
+  const dateEd = (ed) => Object.keys(ed.etats).map((cle) => { const c = dernierChangement(ed, cle); return c ? c.date : ''; }).sort().pop() || '';
   const force = (ed) => Math.max(0, ...lignes(ed).map((l) => { const r = ratio(l); return r ? Math.abs(Math.log(r)) : 0; }));
 
   function afficher() {
@@ -182,7 +190,7 @@
     $('#rv-n-tous').textContent = base.length;
     $('#rv-n-valide').textContent = base.filter(aValide).length;
     VUE = vue === 'verif' ? base.filter(aVerifier).sort((a, b) => force(b) - force(a))
-      : vue === 'change' ? base.filter(aChange).sort((a, b) => force(b) - force(a))
+      : vue === 'change' ? base.filter(aChange).sort((a, b) => dateEd(b).localeCompare(dateEd(a)) || force(b) - force(a))
       : vue === 'valide' ? base.filter(aValide).sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0))
       : base.slice().sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0) || a.version.localeCompare(b.version));
     $('#rv-compte').textContent = `${VUE.length} livre${VUE.length > 1 ? 's' : ''}` + (vue === 'verif' ? ' dont un prix a beaucoup bougé, du plus fort changement au plus faible.' : vue === 'change' ? ' dont au moins un prix a changé.' : vue === 'valide' ? ' dont au moins un prix est validé.' : '.');
