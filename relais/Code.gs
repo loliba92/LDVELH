@@ -164,6 +164,7 @@ function doPost(e) {
     }
 
     if (action === 'envoyer') {
+      if (String(q.lot || '') === 'communaute.yml' && moi.role !== 'superadmin') return reponse({ ok: false, erreur: 'réservé au Zagor' });
       var lot = validerEnvoi(String(q.lot || ''), q.entrees);
       if (!lot.ok) return reponse({ ok: false, erreur: lot.raison });
       lot.entrees.auteur = moi.nom;

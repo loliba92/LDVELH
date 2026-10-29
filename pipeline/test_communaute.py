@@ -1,43 +1,38 @@
-"""Liste de la page Communauté : adresses https seulement, texte échappé, état vide.   python pipeline/test_communaute.py"""
-import sys
 import unittest
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import construire_pages as cp
+from communaute import appliquer, adresse_valide
 
 
 class TestCommunaute(unittest.TestCase):
-    def test_etat_vide(self):
-        self.assertIn("La liste se construit", cp.liste_communaute({"liens": []}))
-        self.assertIn("La liste se construit", cp.liste_communaute({}))
+    def test_ajout_puis_tri(self):
+        liste = appliquer([], "ajout ; Zeta ; https://z.example ; un site | ajout ; Alpha ; https://a.example ; une chaîne")
+        self.assertEqual([x["nom"] for x in liste], ["Alpha", "Zeta"])
 
-    def test_sections_et_liens(self):
-        h = cp.liste_communaute({"liens": [
-            {"nom": "Ma chaîne", "url": "https://exemple.fr/chaine", "type": "chaine", "description": "Des parties commentées"},
-            {"nom": "Blog", "url": "https://exemple.fr/blog", "type": "site"}]})
-        self.assertIn("<h2>Chaînes vidéo</h2>", h)
-        self.assertIn("<h2>Sites et blogs</h2>", h)
-        self.assertNotIn("Podcasts", h)
-        self.assertIn('rel="noopener noreferrer"', h)
-        self.assertIn('target="_blank"', h)
-        self.assertIn("Des parties commentées", h)
+    def test_adresse_deja_presente_remplacee(self):
+        liste = appliquer([], "ajout ; Alpha ; https://a.example ; ancien")
+        liste = appliquer(liste, "ajout ; Alpha bis ; https://a.example ; nouveau")
+        self.assertEqual(len(liste), 1)
+        self.assertEqual(liste[0]["description"], "nouveau")
 
-    def test_refus_et_echappement(self):
-        h = cp.liste_communaute({"liens": [
-            {"nom": "Piégé", "url": "javascript:alert(1)", "type": "site"},
-            {"nom": "Sans https", "url": "http://exemple.fr", "type": "site"},
-            {"nom": "Type inconnu", "url": "https://exemple.fr", "type": "autre"},
-            {"nom": "", "url": "https://exemple.fr", "type": "site"},
-            {"nom": "<script>x</script>", "url": 'https://exemple.fr/"onmouseover="x', "type": "site", "description": "<b>gras</b>"}]})
-        self.assertNotIn("javascript:", h)
-        self.assertNotIn("Sans https", h)
-        self.assertNotIn("Type inconnu", h)
-        self.assertNotIn("<script>", h)
-        self.assertNotIn("<b>gras</b>", h)
-        self.assertNotIn('"onmouseover="x', h)
-        self.assertIn("&lt;script&gt;", h)
+    def test_retrait(self):
+        liste = appliquer([], "ajout ; Alpha ; https://a.example ; x | ajout ; Beta ; https://b.example ; y")
+        liste = appliquer(liste, "retrait ; https://a.example")
+        self.assertEqual([x["nom"] for x in liste], ["Beta"])
+
+    def test_refus_http_et_adresse_vide(self):
+        self.assertFalse(adresse_valide("http://a.example"))
+        self.assertFalse(adresse_valide("https://"))
+        with self.assertRaises(ValueError):
+            appliquer([], "ajout ; Alpha ; http://a.example ; x")
+
+    def test_refus_commande_inconnue_et_longueurs(self):
+        with self.assertRaises(ValueError):
+            appliquer([], "supprime ; https://a.example")
+        with self.assertRaises(ValueError):
+            appliquer([], "ajout ; " + "n" * 61 + " ; https://a.example ; x")
+        with self.assertRaises(ValueError):
+            appliquer([], "ajout ; Alpha ; https://a.example ; " + "d" * 301)
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()
