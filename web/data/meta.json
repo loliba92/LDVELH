@@ -7,14 +7,15 @@
     "Relevé d'archives (historique)",
     "eBay (interface officielle)",
     "Librairies indépendantes (leslibraires.fr)",
-    "Leboncoin"
+    "Leboncoin",
+    "Vinted"
   ],
   "types_prix": [
     "Vente probable (annonce disparue)",
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 623,
+  "nb_prix_actuels": 630,
   "calibration": {
     "actif": false,
     "n_paires": 13,
