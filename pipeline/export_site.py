@@ -179,10 +179,10 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
                 supp = (r.get("etat_suppose") or "").strip()
                 prix = float(r["prix"])
                 brut_fdp = (r.get("fdp") or "").strip()
-                if brut_fdp:
+                if brut_fdp and not (r["trouvee_par"] == "leboncoin" and float(brut_fdp) == 0):
                     fdp = float(brut_fdp)          # Leboncoin / Vinted : frais ajoutés au prix par le bot (la médiane de la cote reste calculée sur le prix nu)
-                elif r["trouvee_par"] == "vinted":
-                    fdp = prix_livre_vinted(prix) - prix      # lignes reçues avant la colonne fdp : tout se commande sur Vinted, mêmes frais par défaut que le bot
+                elif r["trouvee_par"] in ("vinted", "leboncoin"):
+                    fdp = prix_livre_vinted(prix) - prix      # lignes sans frais (avant la colonne fdp, ou Leboncoin à 0) : même prix livré que Vinted et eBay, mêmes frais par défaut que le bot
                 else:
                     fdp = 0.0
                 vues[(r["isbn13"], r["lien"])] = (r["etat"], round(prix + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
