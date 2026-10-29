@@ -135,6 +135,38 @@ class TestAnnoncesFdp(unittest.TestCase):
                                                        "https://www.vinted.fr/items/3-c": 14.2})            # Leboncoin sans fdp : même prix livré que Vinted
 
 
+class TestCaptures(unittest.TestCase):
+    def annonces(self, *lignes):
+        return {"111": {"bon": [[10.0, "t", lien, origine, "2026-10-29"] for lien, origine in lignes]}}
+
+    def test_premier_passage_range_les_annonces_a_leur_date(self):
+        from export_site import mettre_a_jour_captures
+        ann = self.annonces(("https://a/1", "isbn"), ("https://a/2", "titre"), ("https://a/3", "leboncoin"), ("https://a/4", "vinted"), ("https://a/5", "librairie"))
+        prem = {"https://a/1": "2026-10-27", "https://a/2": "2026-10-28T09:00Z", "https://a/3": "2026-10-28T10:00Z", "https://a/4": "2026-10-29T08:00Z", "https://a/5": "2026-10-29"}
+        c = mettre_a_jour_captures(None, ann, prem, "2026-10-29")
+        self.assertEqual(c["jours"], {"2026-10-27": {"ebay": 1}, "2026-10-28": {"ebay": 1, "leboncoin": 1}, "2026-10-29": {"vinted": 1, "librairie": 1}})
+
+    def test_une_annonce_n_est_comptee_qu_une_fois_meme_si_elle_disparait_puis_revient(self):
+        from export_site import mettre_a_jour_captures
+        prem = {"https://a/1": "2026-10-29T08:00Z", "https://a/2": "2026-10-30T07:00Z"}
+        c = mettre_a_jour_captures(None, self.annonces(("https://a/1", "vinted")), prem, "2026-10-29")
+        c = mettre_a_jour_captures(c, self.annonces(("https://a/1", "vinted"), ("https://a/2", "vinted")), prem, "2026-10-30")
+        self.assertEqual(c["jours"], {"2026-10-29": {"vinted": 1}, "2026-10-30": {"vinted": 1}})
+        c = mettre_a_jour_captures(c, self.annonces(("https://a/2", "vinted")), prem, "2026-10-31")        # a/1 a disparu : rien ne change
+        self.assertEqual(c["jours"], {"2026-10-29": {"vinted": 1}, "2026-10-30": {"vinted": 1}})
+        c = mettre_a_jour_captures(c, self.annonces(("https://a/1", "vinted"), ("https://a/2", "vinted")), prem, "2026-11-01")   # revenue vite : pas recomptée
+        self.assertEqual(sum(sum(j.values()) for j in c["jours"].values()), 2)
+
+    def test_les_liens_oublies_au_bout_de_quatorze_jours_et_les_jours_au_bout_de_90(self):
+        from export_site import mettre_a_jour_captures
+        c = mettre_a_jour_captures(None, self.annonces(("https://a/1", "vinted")), {"https://a/1": "2026-01-01T08:00Z"}, "2026-01-01")
+        c = mettre_a_jour_captures(c, {}, {}, "2026-02-01")
+        self.assertEqual(c["vus"], {})
+        self.assertEqual(c["jours"], {"2026-01-01": {"vinted": 1}})
+        c = mettre_a_jour_captures(c, {}, {}, "2026-06-01")
+        self.assertEqual(c["jours"], {})
+
+
 class TestButinVinted(unittest.TestCase):
     def test_prix_livre_vinted(self):
         from prix_neuf import prix_livre_vinted
