@@ -17,8 +17,8 @@
   const likeHtml = (adresse) => {
     const n = nombres[adresse] || 0, aime = mes.has(adresse);
     return connecte()
-      ? `<p class="comm-like"><button type="button" class="bouton-lien" data-aime="${esc(adresse)}" aria-pressed="${aime}">${aime ? 'Vous aimez' : "J'aime"} · ${n}</button></p>`
-      : `<p class="comm-like sous">${n ? `${n} personne${n > 1 ? 's' : ''} aime${n > 1 ? 'nt' : ''} ce lien` : 'Personne n\'a encore aimé ce lien'}</p>`;
+      ? `<p class="comm-like"><button type="button" class="bouton-lien" data-aime="${esc(adresse)}" aria-pressed="${aime}" aria-label="${aime ? 'Retirer mon cœur' : 'Mettre un cœur'} (${n})">${aime ? '♥' : '♡'} ${n}</button></p>`
+      : `<p class="comm-like sous" aria-label="${n} cœur${n > 1 ? 's' : ''}">♡ ${n}</p>`;
   };
   const dessiner = () => {
     const z = estZagor();
