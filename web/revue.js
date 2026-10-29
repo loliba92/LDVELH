@@ -684,15 +684,15 @@
       return [...l].sort((a, b) => f(a, b) || eco(b) - eco(a));
     };
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
-    // Annonces captées par jour et par plateforme : colonnes empilées, tableau en accordéon dessous
+    // Annonces captées par jour : colonnes empilées + tableau
     const SOURCES_CAPT = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
     const jourCourtCapt = (cle) => new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'numeric' });
     function svgCaptures(jours, depuis, largeur) {
-      const H = 200, g = 34, b = 26, h = H - 14 - b, n = jours.length, pas = (largeur - g - 4) / n, ep = Math.min(24, pas - 6);
+      const H = 190, g = 4, b = 26, h = H - 26 - b, n = jours.length, pas = (largeur - g - 4) / n, ep = Math.min(24, pas - 6);
       const totaux = jours.map((j) => SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0));
       const brut = Math.max(10, ...totaux), echelle = brut <= 20 ? 5 : brut <= 60 ? 10 : brut <= 120 ? 20 : brut <= 300 ? 50 : 100, max = Math.ceil(brut / echelle) * echelle;
-      const y = (v) => 10 + h - (v / max) * h;
-      const grille = [0, max / 2, max].map((v) => `<line x1="${g}" x2="${largeur}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${g - 6}" y="${y(v) + 4}" class="cp-axe" text-anchor="end">${v}</text>`).join('');
+      const y = (v) => 20 + h - (v / max) * h;
+      const grille = `<line x1="${g}" x2="${largeur}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
       const saut = largeur < 420 ? 4 : 2;
       let colonnes = '', etiquettes = '';
       jours.forEach((j, k) => {
@@ -707,10 +707,11 @@
             : `<rect x="${x}" y="${fond - hauteur}" width="${ep}" height="${hauteur}" class="${classe}"/>`;
           bas = haut;
         });
+        const nombre = totaux[k] ? `<text x="${x + ep / 2}" y="${bas - 5}" class="cp-nb" text-anchor="middle">${totaux[k]}</text>` : '';
         const lib = j.cle === jours[n - 1].cle ? 'Auj.' : jourCourtCapt(j.cle);
         if ((n - 1 - k) % saut === 0) etiquettes += `<text x="${x + ep / 2}" y="${H - 8}" class="cp-axe" text-anchor="middle">${lib}</text>`;
         const detail = SOURCES_CAPT.map(([src, nom]) => `${nom} : ${j.v[src] || 0}`).join(', ');
-        colonnes += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${totaux[k]} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/>${segs}</g>`;
+        colonnes += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${totaux[k]} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/>${segs}${nombre}</g>`;
       });
       return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${grille}${colonnes}${etiquettes}</svg>`;
     }
@@ -721,7 +722,7 @@
       if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
       const nbSrc = (v) => SOURCES_CAPT.reduce((t, [src]) => t + (v[src] || 0), 0);
       const cleJour = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-      // 15 colonnes : aujourd'hui (en cours) et les 14 jours complets avant lui ; le total, la moyenne et la tendance ne comptent que les jours complets
+      // Aujourd'hui + 14 jours complets (seuls ces derniers comptent)
       const jours = [];
       for (let k = 14; k >= 0; k -= 1) { const cle = cleJour(k); jours.push({ cle, v: c.jours[cle] || {} }); }
       const complets = jours.slice(0, 14), recents = complets.slice(7), avant = complets.slice(0, 7);

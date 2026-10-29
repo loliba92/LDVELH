@@ -141,9 +141,7 @@ def source_de_ligne(origine):
 
 
 def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gardes=90, oubli_jours=14):
-    """Nombre d'annonces captées chaque jour, par source (eBay, Leboncoin, Vinted, librairie) : {"jours": {date: {source: n}}, "vus": {empreinte du lien: dernier jour vu}}.
-    Une annonce est comptée une seule fois, le jour où elle apparaît pour la première fois (jour de `premieres`). Les annonces déjà en ligne au premier passage sont
-    rangées à leur date connue (au mieux : pour celles-ci, la date est celle de la dernière observation). `vus` oublie les liens absents depuis `oubli_jours` jours."""
+    """Annonces captées par jour et par source, chacune comptée une fois, le jour de sa première apparition."""
     captures = captures or {"jours": {}, "vus": {}}
     jours, vus = captures.setdefault("jours", {}), captures.setdefault("vus", {})
     vues_ce_passage = set()
@@ -165,7 +163,7 @@ def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gard
     captures["vus"] = {h: d for h, d in vus.items() if d >= limite_vus}
     limite_jours = (date.fromisoformat(aujourdhui) - timedelta(days=jours_gardes)).isoformat()
     captures["jours"] = {d: c for d, c in sorted(jours.items()) if d >= limite_jours}
-    captures.setdefault("depuis", aujourdhui)          # début du comptage : les jours d'avant sont reconstitués au mieux
+    captures.setdefault("depuis", aujourdhui)          # début du comptage
     return captures
 
 
