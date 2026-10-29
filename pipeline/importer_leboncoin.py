@@ -120,8 +120,8 @@ def valider(r, aujourdhui, connues):
         age = max(0, min(3650, int(float(r.get("age_jours") or 0))))
     except ValueError:
         age = 0
-    if fdp is None:                                   # relevé d'un bot plus ancien : Leboncoin sans frais (retrait possible), Vinted calculé comme le bot
-        fdp = round(prix_livre_vinted(prix) - prix, 2) if source == "vinted" else 0.0
+    if fdp is None or (source == "leboncoin" and fdp == 0):       # relevé d'un bot plus ancien, ou Leboncoin à 0 : même prix livré que Vinted et eBay (protection 0,70 € + 5 % et port 3 €)
+        fdp = round(prix_livre_vinted(prix) - prix, 2)
     return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "fdp": f"{fdp:.2f}", "titre": titre, "lien": lien, "age_jours": age,
             "trouvee_par": source, "statut": statut, "date": jour.isoformat()}, None
 
