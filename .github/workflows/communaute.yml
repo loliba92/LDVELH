@@ -53,6 +53,6 @@ jobs:
           git config user.email "communaute@users.noreply.github.com"
           AVANT="$(git rev-parse HEAD)"
           REJOUER='python pipeline/communaute.py "$COMMANDES"' \
-            .github/scripts/publier.sh "Communauté mise à jour depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" web/data/communaute.json
+            .github/scripts/publier.sh "Communauté mise à jour depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" web/data/communaute.json web/data/communaute
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
