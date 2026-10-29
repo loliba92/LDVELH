@@ -2419,9 +2419,6 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 520px) { .captures-acc { padding: 0 8px 10px; } .captures-table { font-size: .82rem; } .captures-table th, .captures-table td { padding: 6px 3px; } .captures-table thead th { font-size: .6rem; letter-spacing: 0; } }
 
 /* Lien vers le tableau, sur l'accueil */
-.captures-lien { margin: 8px 0 0; font-size: .9rem; }
-.captures-lien a { color: var(--gold); font-weight: 600; text-decoration: none; }
-.captures-lien a:hover, .captures-lien a:focus-visible { text-decoration: underline; }
 
 /* Nouveaux butins : bandeau de l'accueil et entrée « Butin » du menu du haut (sorciers et Zagor) */
 #butin-alerte-zone:empty { display: none; }
@@ -2438,3 +2435,4 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-resume b { color: var(--text); }
 @media (max-width: 899px) { .barre-bas #nb-butin-bas { position: absolute; top: 4px; left: calc(50% + 6px); right: auto; margin: 0; } }
 
+.captures-zone { scroll-margin-top: 70px; }

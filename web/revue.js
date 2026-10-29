@@ -691,7 +691,7 @@
       const H = 190, g = 8, b = 26, h = H - 20 - b, n = jours.length, pas = (largeur - 2 * g) / n;
       const max = Math.max(10, ...jours.map((j) => Math.max(...SOURCES_CAPT.map(([src]) => j.v[src] || 0))));
       const px = (k) => g + k * pas + pas / 2, y = (v) => 14 + h - (v / max) * h;
-      const saut = largeur < 420 ? 4 : 2;
+      const saut = n <= 8 ? 1 : largeur < 420 ? 4 : 2;
       let lignes = '', points = '', zones = '', etiquettes = '';
       SOURCES_CAPT.forEach(([src]) => {
         for (let k = 1; k < n; k += 1) {
@@ -716,19 +716,20 @@
       if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
       const nbSrc = (v) => SOURCES_CAPT.reduce((t, [src]) => t + (v[src] || 0), 0);
       const cleJour = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-      // Aujourd'hui + 14 jours complets (seuls ces derniers comptent)
+      // Du 25 octobre à aujourd'hui (15 jours au plus) ; seuls les jours complets comptent
+      const DEBUT_CAPT = '2026-10-25';
       const jours = [];
-      for (let k = 14; k >= 0; k -= 1) { const cle = cleJour(k); jours.push({ cle, v: c.jours[cle] || {} }); }
-      const complets = jours.slice(0, 14), recents = complets.slice(7), avant = complets.slice(0, 7);
+      for (let k = 14; k >= 0; k -= 1) { const cle = cleJour(k); if (cle >= DEBUT_CAPT) jours.push({ cle, v: c.jours[cle] || {} }); }
+      const complets = jours.slice(0, -1), m = complets.length, moitie = Math.min(7, Math.floor(m / 2)), tendanceOk = m >= 6;
+      const recents = complets.slice(m - moitie), avant = complets.slice(m - 2 * moitie, m - moitie);
       const somme = (liste, src) => liste.reduce((t, j) => t + (src ? (j.v[src] || 0) : nbSrc(j.v)), 0);
       const moy = (liste, src) => somme(liste, src) / liste.length;
       const fmt1 = (x) => (x >= 10 ? String(Math.round(x)) : x.toFixed(1).replace('.', ','));
-      const evolution = (src) => { const a = moy(recents, src), b = moy(avant, src); return b > 0 ? (a - b) / b : null; };
+      const evolution = (src) => { if (!tendanceOk) return null; const a = moy(recents, src), b = moy(avant, src); return b > 0 ? (a - b) / b : null; };
       const texteEvol = (p) => (p == null ? '–' : `${p > 0 ? '+' : p < 0 ? '−' : ''}${Math.abs(Math.round(p * 100))} %`);
-      const verdictEvol = (p) => (p == null ? 'pas de comparaison possible' : p >= 0.1 ? 'le marché accélère' : p <= -0.1 ? 'le marché ralentit' : 'le marché est stable');
-      const pTotal = evolution(null);
-      const nbExacts = c.depuis ? complets.filter((j) => j.cle >= c.depuis).length : 0;
-      const estimes = c.depuis && nbExacts < 14;
+      const verdictEvol = (p) => (p == null ? `disponible dans ${Math.max(6 - m, 1)} jour${6 - m > 1 ? 's' : ''}` : p >= 0.1 ? 'le marché accélère' : p <= -0.1 ? 'le marché ralentit' : 'le marché est stable');
+      const pTotal = tendanceOk ? evolution(null) : null;
+      const estimes = c.depuis && jours.some((j) => j.cle < c.depuis);
       const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
       const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
       const lignes = jours.slice().reverse().map((j, k) => {
@@ -736,17 +737,17 @@
         const total = nbSrc(j.v);
         return `<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
       }).join('');
-      const pied = `<tr><th scope="row">Total 14 jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
+      const pied = `<tr><th scope="row">Total ${m} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
         + `<tr><th scope="row">Moyenne par jour</th>${SOURCES_CAPT.map(([src]) => `<td>${fmt1(moy(complets, src))}</td>`).join('')}<td><b>${fmt1(moy(complets))}</b></td></tr>`
-        + `<tr><th scope="row">Évolution sur 7 jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
+        + `<tr><th scope="row">Évolution sur ${moitie} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
       const html = `<section class="captures" aria-label="Annonces captées par jour">
         <h3 class="captures-titre">Annonces captées par jour</h3>
-        <p class="cp-bilan"><b>${somme(complets)}</b> annonces en 14 jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
+        <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
         <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b></li>`).join('')}</ul>
-        <p class="cp-tendance"><b class="${pTotal == null ? '' : pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.
-          <span class="sous">7 derniers jours : ${fmt1(moy(recents))} par jour. 7 jours d'avant : ${fmt1(moy(avant))} par jour.</span></p>
+        <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
+          ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés). Tendance fiable dans ${14 - nbExacts} jour${14 - nbExacts > 1 ? 's' : ''}.` : ''}</p>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
@@ -1009,6 +1010,9 @@
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
     if (super_ && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
+    const versCaptures = (pane) => { ouvrirOnglet(pane); setTimeout(() => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }, 500); };
+    if (super_ && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
+    if (niveau2 && !super_ && (location.hash || '') === '#captures-pepites' && !pepitesOuvertes) { pepitesOuvertes = true; versCaptures('pepites'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
