@@ -2389,9 +2389,15 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .cp-svg { display: block; max-width: 100%; height: auto; overflow: visible; }
 .cp-grille { stroke: var(--line); stroke-width: 1; }
 .cp-axe { fill: var(--muted); font: 600 11px var(--f-ui); }
-.cp-seg.cp-ebay { fill: var(--c-ebay); } .cp-seg.cp-leboncoin { fill: var(--c-leboncoin); }
-.cp-seg.cp-vinted { fill: var(--c-vinted); } .cp-seg.cp-librairie { fill: var(--c-librairie); }
-.cp-seg.cp-estime { opacity: .4; }
+.cp-ligne { stroke-width: 2; stroke-linecap: round; fill: none; }
+.cp-ligne.cp-estime { opacity: .6; stroke-dasharray: 4 4; }
+.cp-ligne.cp-ebay { stroke: var(--c-ebay); } .cp-ligne.cp-leboncoin { stroke: var(--c-leboncoin); }
+.cp-ligne.cp-vinted { stroke: var(--c-vinted); } .cp-ligne.cp-librairie { stroke: var(--c-librairie); }
+.cp-pt { stroke: var(--bg, #000); stroke-width: 1.5; }
+.cp-pt.cp-ebay { fill: var(--c-ebay); } .cp-pt.cp-leboncoin { fill: var(--c-leboncoin); }
+.cp-pt.cp-vinted { fill: var(--c-vinted); } .cp-pt.cp-librairie { fill: var(--c-librairie); }
+.cp-guide { stroke: var(--line-strong); stroke-width: 1; opacity: 0; }
+.cp-col:hover .cp-guide, .cp-col:focus-visible .cp-guide { opacity: 1; }
 .cp-zone { fill: transparent; }
 .cp-col { cursor: pointer; outline: none; }
 .cp-col:hover .cp-zone, .cp-col:focus-visible .cp-zone { fill: rgba(239, 228, 207, .08); }
@@ -2432,4 +2438,3 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-resume b { color: var(--text); }
 @media (max-width: 899px) { .barre-bas #nb-butin-bas { position: absolute; top: 4px; left: calc(50% + 6px); right: auto; margin: 0; } }
 
-.cp-nb { fill: var(--muted); font: 600 9px var(--f-ui); }

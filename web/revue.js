@@ -688,32 +688,26 @@
     const SOURCES_CAPT = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
     const jourCourtCapt = (cle) => new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'numeric' });
     function svgCaptures(jours, depuis, largeur) {
-      const H = 190, g = 4, b = 26, h = H - 26 - b, n = jours.length, pas = (largeur - g - 4) / n, ep = Math.min(24, pas - 6);
-      const totaux = jours.map((j) => SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0));
-      const brut = Math.max(10, ...totaux), echelle = brut <= 20 ? 5 : brut <= 60 ? 10 : brut <= 120 ? 20 : brut <= 300 ? 50 : 100, max = Math.ceil(brut / echelle) * echelle;
-      const y = (v) => 20 + h - (v / max) * h;
-      const grille = `<line x1="${g}" x2="${largeur}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
+      const H = 190, g = 8, b = 26, h = H - 20 - b, n = jours.length, pas = (largeur - 2 * g) / n;
+      const max = Math.max(10, ...jours.map((j) => Math.max(...SOURCES_CAPT.map(([src]) => j.v[src] || 0))));
+      const px = (k) => g + k * pas + pas / 2, y = (v) => 14 + h - (v / max) * h;
       const saut = largeur < 420 ? 4 : 2;
-      let colonnes = '', etiquettes = '';
-      jours.forEach((j, k) => {
-        const x = g + k * pas + (pas - ep) / 2, estime = depuis && j.cle < depuis;
-        let bas = y(0), segs = '';
-        const actifs = SOURCES_CAPT.filter(([src]) => j.v[src]);
-        actifs.forEach(([src], m) => {
-          const haut = bas - (j.v[src] / max) * h, fond = bas - (m ? 2 : 0), hauteur = Math.max(fond - haut, 1);
-          const classe = `cp-seg cp-${src}${estime ? ' cp-estime' : ''}`;
-          segs += m === actifs.length - 1 && hauteur > 8
-            ? `<path d="M${x},${fond}V${haut + 4}a4,4 0 0 1 4,-4h${ep - 8}a4,4 0 0 1 4,4V${fond}z" class="${classe}"/>`
-            : `<rect x="${x}" y="${fond - hauteur}" width="${ep}" height="${hauteur}" class="${classe}"/>`;
-          bas = haut;
-        });
-        const nombre = totaux[k] ? `<text x="${x + ep / 2}" y="${bas - 5}" class="cp-nb" text-anchor="middle">${totaux[k]}</text>` : '';
-        const lib = j.cle === jours[n - 1].cle ? 'Auj.' : jourCourtCapt(j.cle);
-        if ((n - 1 - k) % saut === 0) etiquettes += `<text x="${x + ep / 2}" y="${H - 8}" class="cp-axe" text-anchor="middle">${lib}</text>`;
-        const detail = SOURCES_CAPT.map(([src, nom]) => `${nom} : ${j.v[src] || 0}`).join(', ');
-        colonnes += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${totaux[k]} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/>${segs}${nombre}</g>`;
+      let lignes = '', points = '', zones = '', etiquettes = '';
+      SOURCES_CAPT.forEach(([src]) => {
+        for (let k = 1; k < n; k += 1) {
+          const estime = depuis && jours[k].cle < depuis;
+          lignes += `<line x1="${px(k - 1)}" y1="${y(jours[k - 1].v[src] || 0)}" x2="${px(k)}" y2="${y(jours[k].v[src] || 0)}" class="cp-ligne cp-${src}${estime ? ' cp-estime' : ''}"/>`;
+        }
+        jours.forEach((j, k) => { if (!(depuis && j.cle < depuis)) points += `<circle cx="${px(k)}" cy="${y(j.v[src] || 0)}" r="3" class="cp-pt cp-${src}"/>`; });
       });
-      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${grille}${colonnes}${etiquettes}</svg>`;
+      jours.forEach((j, k) => {
+        const total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
+        const detail = SOURCES_CAPT.map(([src, nom]) => `${nom} : ${j.v[src] || 0}`).join(', ');
+        if ((n - 1 - k) % saut === 0) etiquettes += `<text x="${px(k)}" y="${H - 8}" class="cp-axe" text-anchor="middle">${k === n - 1 ? 'Auj.' : jourCourtCapt(j.cle)}</text>`;
+        zones += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${total} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/><line x1="${px(k)}" x2="${px(k)}" y1="6" y2="${y(0)}" class="cp-guide"/></g>`;
+      });
+      const base = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${base}${lignes}${points}${zones}${etiquettes}</svg>`;
     }
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
@@ -752,7 +746,7 @@
         <p class="cp-tendance"><b class="${pTotal == null ? '' : pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.
           <span class="sous">7 derniers jours : ${fmt1(moy(recents))} par jour. 7 jours d'avant : ${fmt1(moy(avant))} par jour.</span></p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (colonnes pâles). Tendance fiable dans ${14 - nbExacts} jour${14 - nbExacts > 1 ? 's' : ''}.` : ''}</p>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés). Tendance fiable dans ${14 - nbExacts} jour${14 - nbExacts > 1 ? 's' : ''}.` : ''}</p>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
