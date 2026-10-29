@@ -53,25 +53,27 @@
 <main id="main" class="cadre page">
 <p class="surtitre">Passionnés</p>
 <h1>Communauté</h1>
-<p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
+<p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des éditeurs, des écrivains, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
 
 <p class="comm-vide" id="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>
 <div class="comm-liste" id="comm-liste"></div>
-<form class="comm-form" id="comm-form" hidden>
-  <h2>Ajouter un lien</h2>
-  <div class="champ"><label for="cf-nom">Nom</label><input type="text" id="cf-nom" required maxlength="60" autocomplete="off"></div>
-  <div class="champ"><label for="cf-url">Adresse (https)</label><input type="url" id="cf-url" required autocomplete="off" placeholder="https://"></div>
-  <div class="champ"><label for="cf-desc">Description</label><input type="text" id="cf-desc" maxlength="300" autocomplete="off"></div>
-  <p><button type="submit" class="bouton">Ajouter à la liste</button></p>
-  <p class="corriger-msg" id="comm-msg" role="status" hidden></p>
-</form>
+<p class="comm-admin"><button type="button" class="bouton-lien" id="comm-ajout" hidden>Ajouter un lien</button></p>
+<dialog class="comm-dialog" id="comm-dialog" aria-labelledby="comm-titre">
+  <form class="comm-form" id="comm-form">
+    <h2 id="comm-titre">Ajouter un lien</h2>
+    <div class="champ"><label for="cf-nom">Nom</label><input type="text" id="cf-nom" required maxlength="60" autocomplete="off"></div>
+    <div class="champ"><label for="cf-url">Adresse (https)</label><input type="url" id="cf-url" required autocomplete="off" placeholder="https://"></div>
+    <div class="champ"><label for="cf-desc">Description</label><input type="text" id="cf-desc" maxlength="300" autocomplete="off"></div>
+    <p><button type="submit" class="bouton">Ajouter à la liste</button> <button type="button" class="bouton-lien" id="comm-fermer">Fermer</button></p>
+    <p class="corriger-msg" id="comm-msg" role="status" hidden></p>
+  </form>
+</dialog>
 
 <h2>Vous en faites partie ?</h2>
 <p>Vous tenez une chaîne, un site, un podcast, une boutique, ou vous avez une collection que vous aimez partager ? <a href="contact.html">Écrivez-moi</a> avec l'adresse et deux lignes de présentation. La sélection se fait au cas par cas, et le guide reste gratuit et sans publicité.</p>
 <p class="contact-mail"><a class="bouton" href="contact.html#formulaire">Proposer un lien</a></p>
 
-<h2>Nous soutenir</h2>
-<p>Le guide reste gratuit et sans publicité. Vous pouvez <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer">offrir un café</a> sur Buy Me a Coffee, un service extérieur. Pas d'affiliation : aucun lien de cette page n'est rémunéré.</p>
+<p class="sous comm-soutien"><strong>Nous soutenir.</strong> Le guide reste gratuit et sans publicité. Vous pouvez <a href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer">offrir un café</a> sur Buy Me a Coffee, un service extérieur. Pas d'affiliation : aucun lien de cette page n'est rémunéré.</p>
 
 </main>
 
