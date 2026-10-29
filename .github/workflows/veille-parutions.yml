@@ -51,4 +51,4 @@ jobs:
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml
           # Un livre ajouté n'a pas encore de prix : le relevé des prix suit
-          if git diff --name-only "$AVANT" HEAD | grep -q "data/processed/editions.csv"; then gh workflow run prix-ebay.yml; fi
+          if git diff --name-only "$AVANT" HEAD | grep -q "data/processed/editions.csv"; then bash .github/scripts/lancer-releve-ebay.sh; fi
