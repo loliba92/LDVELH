@@ -135,6 +135,40 @@ def premieres_vues(annonces, anciennes, maintenant, historiques=None):
     return premieres
 
 
+def source_de_ligne(origine):
+    """Source d'une annonce du relevé : Leboncoin, Vinted, librairie, sinon eBay (trouvée par l'ISBN ou par le titre)."""
+    return origine if origine in ("leboncoin", "vinted", "librairie") else "ebay"
+
+
+def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gardes=90, oubli_jours=14):
+    """Nombre d'annonces captées chaque jour, par source (eBay, Leboncoin, Vinted, librairie) : {"jours": {date: {source: n}}, "vus": {empreinte du lien: dernier jour vu}}.
+    Une annonce est comptée une seule fois, le jour où elle apparaît pour la première fois (jour de `premieres`). Les annonces déjà en ligne au premier passage sont
+    rangées à leur date connue (au mieux : pour celles-ci, la date est celle de la dernière observation). `vus` oublie les liens absents depuis `oubli_jours` jours."""
+    captures = captures or {"jours": {}, "vus": {}}
+    jours, vus = captures.setdefault("jours", {}), captures.setdefault("vus", {})
+    vues_ce_passage = set()
+    for par_etat in annonces.values():
+        for liste in par_etat.values():
+            for ligne in liste:
+                lien = ligne[2]
+                h = hashlib.sha1(lien.encode("utf-8")).hexdigest()[:10]
+                if h in vues_ce_passage:
+                    continue
+                vues_ce_passage.add(h)
+                if h not in vus:
+                    jour = (premieres.get(lien) or aujourdhui)[:10]
+                    compte = jours.setdefault(jour, {})
+                    source = source_de_ligne(ligne[3])
+                    compte[source] = compte.get(source, 0) + 1
+                vus[h] = aujourdhui
+    limite_vus = (date.fromisoformat(aujourdhui) - timedelta(days=oubli_jours)).isoformat()
+    captures["vus"] = {h: d for h, d in vus.items() if d >= limite_vus}
+    limite_jours = (date.fromisoformat(aujourdhui) - timedelta(days=jours_gardes)).isoformat()
+    captures["jours"] = {d: c for d, c in sorted(jours.items()) if d >= limite_jours}
+    captures.setdefault("depuis", aujourdhui)          # début du comptage : les jours d'avant sont reconstitués au mieux
+    return captures
+
+
 def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
     """Offre d'occasion par édition : nombre d'annonces en ligne au dernier relevé de chaque source (eBay, Leboncoin, exemplaires d'occasion en librairie)
     et âge médian des annonces eBay, en jours. Une annonce de lot n'est pas l'offre d'un livre seul : elle n'est pas comptée.
@@ -502,8 +536,14 @@ def main():
         except (OSError, ValueError):
             historiques = {}
         premieres = premieres_vues(annonces, anciennes, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), historiques)
+        try:
+            captures_avant = json.loads(chemin_ann.read_text(encoding="utf-8")).get("captures")
+        except (OSError, ValueError):
+            captures_avant = None
+        captures = mettre_a_jour_captures(captures_avant, annonces, premieres, datetime.now(timezone.utc).date().isoformat())
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "premieres": premieres},
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "premieres": premieres,
+                                          "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
         if fichiers_ann:
@@ -517,6 +557,7 @@ def main():
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := extraire_butin(annonces, revue)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
+                                                          "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis")},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
