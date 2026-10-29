@@ -1,7 +1,8 @@
 [
   {
     "nom": "Les Éditions Elvyon",
-    "adresse": "https://www.editionselvyon.com/?fbclid=IwY2xjawVQjllleHRuA2FlbQIxMABwZG9mBWJyaWQRMWZ0ZDdSVjlCOGRHWkdqYkpzcnRjBmFwcF9pZBAyMjIwMzkxNzg4MjAwODkyAAEfxZbfdubfJ2Nzue6YN08uAANBo2VKBzsqgcxVOKtwuWiElQHn3E1Y6i9drgE_aem_PIXw-tnpghp5wiYEUxDwWQ",
-    "description": "Éditeur de livres-jeux, de LDVELH et de RPG solo, qui publie aussi des jeux de société. Ses projets naissent de campagnes de financement sur La Ruche. Nous avons hâte de découvrir La Quête du Guerrier, et L’Auberge de l’Épouvante, que l’on peut même jouer directement dans le navigateur."
+    "adresse": "https://www.editionselvyon.com/",
+    "description": "Éditeur de livres-jeux, de LDVELH et de RPG solo, qui publie aussi des jeux de société. Ses projets naissent de campagnes de financement sur La Ruche. Nous avons hâte de découvrir La Quête du Guerrier, et L’Auberge de l’Épouvante, que l’on peut même jouer directement dans le navigateur.",
+    "image": "data/communaute/c1f5a31f4684.jpg"
   }
 ]
