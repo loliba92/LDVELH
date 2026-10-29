@@ -156,7 +156,7 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
   <div id="ind-liste"></div>
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
-  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date d'apparition ; l'ordre se change avec « Trier par ».</p>
+  <p class="chapeau">Toutes les annonces reçues (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date. Changez l'ordre avec « Trier par ».</p>
   <div class="captures-zone"></div>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
@@ -451,7 +451,7 @@ REVUE = '''<h1>Prix et corrections</h1>
   <button type="button" role="tab" data-pane="ajout" aria-selected="false"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter</span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel">
-<p class="chapeau">Un livre par ligne, avec ses trois prix tels qu'ils sont affichés sur le site. Quand un prix a changé, l'ancien est barré. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». Pour chaque prix, <strong>Confirmer</strong> le garde tel quel, <strong>Corriger</strong> en fixe un autre : votre prix prime ensuite sur eBay et sur les archives.</p>
+<p class="chapeau">Un livre par ligne, avec ses trois prix. L'ancien prix est barré quand il a changé. Les prix qui ont beaucoup bougé sont marqués « À vérifier ». <strong>Confirmer</strong> garde un prix. <strong>Corriger</strong> en fixe un autre, qui prime sur eBay et sur les archives.</p>
 <div class="rv-onglets" id="rv-onglets" role="group" aria-label="Quels livres voir ?">
   <button type="button" data-vue="verif" aria-pressed="true">À vérifier <span class="nb-onglet" id="rv-n-verif"></span></button>
   <button type="button" data-vue="change" aria-pressed="false">Changés <span class="nb-onglet" id="rv-n-change"></span></button>
@@ -477,7 +477,7 @@ REVUE = '''<h1>Prix et corrections</h1>
 <ul>
   <li><strong>Le gros prix</strong> est celui affiché sur le site. <strong>Le prix barré</strong> est l'ancienne cote (ancien relevé de 2024). Le pourcentage montre le changement.</li>
   <li><strong>« À vérifier »</strong> : le prix a au moins doublé ou a été divisé par près de deux. Une raison est écrite en dessous.</li>
-  <li>La ligne grise sous chaque prix dit d'où il vient : « d'après N annonces eBay » (prix actuel), « ancienne cote » (pas de relevé récent), « déduit des autres états » (état sans prix, estimé à partir des autres), « ajusté » (remonté ou ramené pour que convenable ≤ bon état ≤ très bon état).</li>
+  <li>La ligne grise sous chaque prix donne son origine. « d'après N annonces eBay » : prix actuel. « ancienne cote » : pas de relevé récent. « déduit des autres états » : estimé à partir des autres états. « ajusté » : corrigé pour que convenable ≤ bon état ≤ très bon état.</li>
   <li><strong>Confirmer / Corriger</strong> : votre prix remplace celui du site, y compris aux prochains relevés. « Retirer » annule une validation pas encore transmise.</li>
   <li>Cliquez sur le titre d'un livre pour ouvrir sa fiche sur le site.</li>
 </ul>
@@ -501,13 +501,13 @@ REVUE = '''<h1>Prix et corrections</h1>
 </section>
 </div>
 <div class="rv-pane" id="pane-annonces" role="tabpanel" hidden>
-  <p class="chapeau">Les annonces (eBay, librairies, Leboncoin et Vinted) que le dernier relevé a retenues pour calculer les cotes. Sans recherche, vous voyez les éditions dont les annonces ont été vues le plus récemment. Cherchez un livre, ouvrez une annonce et vérifiez que c'est bien le bon livre, dans le bon état.</p>
+  <p class="chapeau">Les annonces retenues pour calculer les cotes : eBay, librairies, Leboncoin, Vinted. Sans recherche, les plus récentes s'affichent. Ouvrez une annonce pour vérifier le livre et son état.</p>
   <div class="champ"><label for="an-q">Chercher un livre</label><input type="search" id="an-q" autocomplete="off" placeholder="Titre ou série"></div>
   <p class="sous" id="an-etat" role="status" aria-live="polite"></p>
   <div id="an-liste"></div>
 </div>
 <div class="rv-pane" id="pane-pepites" role="tabpanel" hidden>
-  <p class="chapeau">Les bonnes affaires : annonces encore en ligne à <strong>50 % du prix du site ou moins</strong>, pour la même édition et le même état, avec au moins 3 € d'économie. Une annonce est un prix demandé : ouvrez-la pour vérifier le livre, son état et les frais de port.</p>
+  <p class="chapeau">Les bonnes affaires : <strong>50 % du prix du site ou moins</strong>, même édition, même état, 3 € d'économie au moins. Ouvrez l'annonce pour vérifier le livre, l'état et les frais de port.</p>
   <div class="captures-zone"></div>
   <div class="pp-barre">
     <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
@@ -921,7 +921,7 @@ def corps_evolutions():
     else:
         bref = "<p>Première mise à jour : la comparaison commencera à la suivante.</p>"
     mo = mv["modele"]
-    modele = (f'<p>Le modèle apprend l\'écart entre les cotes d\'archives et les prix actuels, et se contrôle lui-même : '
+    modele = (f'<p>Le modèle apprend l\'écart entre les cotes d\'archives et les prix actuels. Il se contrôle lui-même : '
               f'il ne s\'active que s\'il prédit mieux que les archives seules. '
               f'<strong>État : {"actif" if mo["actif"] else "inactif"}</strong> ({h(mo["raison"])}).</p>')
     return f'''<p class="surtitre">Suivi des cotes</p>
