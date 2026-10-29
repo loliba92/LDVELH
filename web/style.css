@@ -2441,3 +2441,5 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .stats-resume b { color: var(--gold); }
 .stats-titre { margin: 12px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
 .cp-depuis { font-size: .8rem; color: var(--muted); }
+
+.incoh-flag { display: inline-block; margin-top: 6px; padding: 2px 8px; border: 1px solid #c4465a; border-radius: var(--r); background: rgba(122, 31, 43, .35); color: #f0a5b0; font: 600 .8rem var(--f-ui); }
