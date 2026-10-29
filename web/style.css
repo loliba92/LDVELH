@@ -2440,3 +2440,4 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .stats-resume { margin: 0 0 8px; font-size: .95rem; color: var(--text); }
 .stats-resume b { color: var(--gold); }
 .stats-titre { margin: 12px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
+.cp-depuis { font-size: .8rem; color: var(--muted); }

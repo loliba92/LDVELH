@@ -674,6 +674,11 @@
       const texteEvol = (p) => (p == null ? '–' : `${p > 0 ? '+' : p < 0 ? '−' : ''}${Math.abs(Math.round(p * 100))} %`);
       const verdictEvol = (p) => (p == null ? `disponible dans ${Math.max(6 - m, 1)} jour${6 - m > 1 ? 's' : ''}` : p >= 0.1 ? 'le marché accélère' : p <= -0.1 ? 'le marché ralentit' : 'le marché est stable');
       const pTotal = tendanceOk ? evolution(null) : null;
+      // Source comptée seulement depuis un jour : la légende l'écrit, pour qu'un 0 ne paraisse pas une erreur
+      const debutSource = (src) => {
+        const premier = Object.keys(c.jours).filter((d) => (c.jours[d] || {})[src]).sort()[0];
+        return premier && complets.length && premier > complets[0].cle ? ` <small class="cp-depuis">depuis le ${esc(jourCourtCapt(premier))}</small>` : '';
+      };
       const estimes = c.depuis && jours.some((j) => j.cle < c.depuis);
       const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
       const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
@@ -688,7 +693,7 @@
       const html = `<section class="captures" aria-label="Annonces captées par jour">
         <h3 class="captures-titre">Annonces captées par jour</h3>
         <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
-        <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b></li>`).join('')}</ul>
+        <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b>${debutSource(src)}</li>`).join('')}</ul>
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
