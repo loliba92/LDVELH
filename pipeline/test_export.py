@@ -121,6 +121,18 @@ class TestButin(unittest.TestCase):
         self.assertNotIn("222", b)                                      # pas de prix publié : pas de repère
 
 
+class TestAnnoncesFdp(unittest.TestCase):
+    def test_le_prix_affiche_ajoute_la_colonne_fdp(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "annonces-vinted-2026-10-27.csv"
+            f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp\n111,bon,10.00,A,https://www.vinted.fr/items/1-a,1,vinted,4.20\n"
+                         "111,bon,12.00,B,https://www.leboncoin.fr/ad/livres/2,1,leboncoin,\n", encoding="utf-8")
+            liste = annonces_cumulees([f])["111"]["bon"]
+        self.assertEqual({a[3]: a[0] for a in liste}, {"vinted": 14.2, "leboncoin": 12.0})       # fdp vide : prix nu
+
+
 class TestButinVinted(unittest.TestCase):
     def test_prix_livre_vinted(self):
         from prix_neuf import prix_livre_vinted

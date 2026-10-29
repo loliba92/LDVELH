@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
-from prix_neuf import FRAIS_LIBRAIRIE, prix_livre_vinted
+from prix_neuf import FRAIS_LIBRAIRIE
 import calibration
 import cote_v2
 import importer_leboncoin
@@ -177,7 +177,8 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
         with open(f, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh):
                 supp = (r.get("etat_suppose") or "").strip()
-                vues[(r["isbn13"], r["lien"])] = (r["etat"], float(r["prix"]), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
+                fdp = float(r.get("fdp") or 0)          # Leboncoin / Vinted : frais ajoutés au prix par le bot (la médiane de la cote reste calculée sur le prix nu)
+                vues[(r["isbn13"], r["lien"])] = (r["etat"], round(float(r["prix"]) + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
     sortie = {}
     for (isbn, lien), (etat, prix, titre, par, jour, supp) in vues.items():
@@ -468,7 +469,7 @@ def main():
             liens_vendus_vinted.update(r["lien"] for r in csv.DictReader(fh))
     for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED).items():
         for etat, liste in par_etat.items():
-            liste = [[prix_livre_vinted(a[0]), *a[1:]] for a in liste if a[2] not in liens_vendus_vinted]
+            liste = [a for a in liste if a[2] not in liens_vendus_vinted]          # le prix est déjà livré : la colonne fdp du relevé est ajoutée par annonces_cumulees
             if liste:
                 annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres

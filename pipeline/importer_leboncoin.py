@@ -3,7 +3,10 @@
 Le bot (hors de ce dépôt, sur l'ordinateur du propriétaire) ouvre chaque soir une issue intitulée « Relevé Leboncoin AAAA-MM-JJ » dont le texte contient
 un bloc ```csv``` : une ligne par annonce reconnue avec certitude (édition unique, état indiqué, pas de lot).
 
-    isbn13,etat,prix,titre,lien,statut,age_jours,date
+    isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date
+
+fdp (frais de port et de plateforme, facultatif) s'ajoute au prix affiché dans les annonces ; la médiane de la cote reste calculée sur le prix nu.
+Sans cette colonne : 0 pour Leboncoin (retrait possible), protection acheteurs + port pour Vinted (tout se commande).
 
 Ce script contrôle chaque ligne, puis écrit, dans data/raw/occasion/ :
   - annonces-leboncoin-AAAA-MM-JJ.csv  : annonces actives avec titre et lien (même format que annonces-*.csv d'eBay) -> onglet Butin ;
@@ -27,6 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
+from prix_neuf import prix_livre_vinted
 
 DOSSIER = editions.ROOT / "data" / "raw" / "occasion"
 LOTS = editions.ROOT / "data" / "manual" / "lots_annonces.json"
@@ -34,6 +38,7 @@ ETATS = ("convenable", "bon", "tres_bon")
 STATUTS = ("actif", "vendu")
 MAX_LIGNES = 300
 PRIX_MIN, PRIX_MAX = 0.5, 3000.0
+FDP_MAX = 30.0                                # frais de port et frais de la plateforme : au-delà, la ligne est refusée
 FENETRE_AVANT, FENETRE_APRES = 3, 1          # jours : une ligne trop ancienne ou datée du futur est refusée
 LIEN = re.compile(r"^https://www\.leboncoin\.fr/[A-Za-z0-9_\-/.]+$")
 LIEN_VINTED = re.compile(r"^https://www\.vinted\.fr/items/\d+(?:-[A-Za-z0-9_\-]*)?$")
@@ -53,7 +58,7 @@ def nom_fichier(genre, source, jour):
     """annonces-/vendus-<source>-JOUR.csv (annonces) ; <source>-JOUR.csv et <source>-vendus-JOUR.csv (agrégats pour la cote)."""
     return {"annonces": f"annonces-{source}-{jour}.csv", "vendus": f"vendus-{source}-{jour}.csv",
             "agregat": f"{source}-{jour}.csv", "agregat_vendus": f"{source}-vendus-{jour}.csv"}[genre]
-COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par"]
+COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "fdp"]       # fdp : frais ajoutés au prix (Vinted : protection acheteurs et port)
 COLONNES_AGREGAT = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
 
 
@@ -88,6 +93,16 @@ def valider(r, aujourdhui, connues):
         return None, "prix illisible"
     if not PRIX_MIN <= prix <= PRIX_MAX:
         return None, f"prix hors limites ({prix})"
+    brut_fdp = str(r.get("fdp") or "").strip()
+    if brut_fdp:
+        try:
+            fdp = round(float(brut_fdp.replace(",", ".")), 2)
+        except ValueError:
+            return None, "frais de port illisibles"
+        if not 0 <= fdp <= FDP_MAX:
+            return None, f"frais de port invraisemblables ({fdp})"
+    else:
+        fdp = None
     titre = nettoyer_titre(r.get("titre"))
     if len(titre) < 3:
         return None, "titre vide"
@@ -105,7 +120,9 @@ def valider(r, aujourdhui, connues):
         age = max(0, min(3650, int(float(r.get("age_jours") or 0))))
     except ValueError:
         age = 0
-    return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "titre": titre, "lien": lien, "age_jours": age,
+    if fdp is None:                                   # relevé d'un bot plus ancien : Leboncoin sans frais (retrait possible), Vinted calculé comme le bot
+        fdp = round(prix_livre_vinted(prix) - prix, 2) if source == "vinted" else 0.0
+    return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "fdp": f"{fdp:.2f}", "titre": titre, "lien": lien, "age_jours": age,
             "trouvee_par": source, "statut": statut, "date": jour.isoformat()}, None
 
 
