@@ -1785,9 +1785,53 @@
     const depuis = butinVuLe();
     return Object.values(OFFRE.premieres).filter((t) => typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;
   };
+  // Totaux de l'accueil (sorciers et Zagor) : annonces du Butin (niveaux 2 et 3), annonces reçues (niveau 3), chacun avec le lien vers son détail.
+  // Le Butin se compte comme sur sa page : annonces à 50 % du prix du site ou moins (3 € d'économie au moins), eBay seulement si revue au dernier relevé.
+  function nbButinTotal() {
+    if (!OFFRE || !OFFRE.annonces) return null;
+    let n = 0;
+    Object.entries(OFFRE.annonces).forEach(([isbn, parEtat]) => {
+      const b = DATA.find((x) => x.isbn13 === isbn);
+      if (!b || !b.prix) return;
+      Object.entries(parEtat).forEach(([cle, liste]) => {
+        const pub = b.prix[cle];
+        if (!pub) return;
+        (liste || []).forEach(([prix, , , origine, vue]) => {
+          if (origine === 'librairie' && cle === 'convenable') return;
+          if (origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;
+          if (prix <= 0.5 * pub && pub - prix >= 3) n += 1;
+        });
+      });
+    });
+    return n;
+  }
+  function nbAnnoncesRecues() {
+    if (!ANN || !ANN.annonces) return null;
+    let recues = 0, enLigne = 0;
+    Object.values(ANN.annonces).forEach((parEtat) => Object.values(parEtat).forEach((liste) => (liste || []).forEach(([, , , origine, vue]) => {
+      recues += 1;
+      const partie = !!(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay);
+      if (!partie) enLigne += 1;
+    })));
+    return { recues, enLigne };
+  }
+  function majCompteursAccueil() {
+    const z = $('#compteurs-accueil');
+    if (!z) return;
+    if (!niveau2Connu()) { z.innerHTML = ''; return; }
+    const nb = nbButinTotal(), niv3 = estNiveau3Brut(), ar = niv3 ? nbAnnoncesRecues() : null;
+    if (nb == null) { z.innerHTML = ''; return; }
+    const carte = (href, titre, n, detail) => `<a class="compteur-acc" href="${href}"><b>${n}</b><span><strong>${titre}</strong><small>${detail}</small></span><em>Voir le détail →</em></a>`;
+    z.innerHTML = '<div class="compteurs-acc">'
+      + carte('butin.html#pepites', 'Butin', nb, `annonce${nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
+      + (ar ? carte('butin.html#recues', 'Annonces reçues', ar.enLigne, `en ligne, sur ${ar.recues} reçues aux derniers relevés`) : '')
+      + '</div>';
+  }
   function majAlerteButin() {
     const n = nbNouveauxButin(), niv2 = niveau2Connu();
     nbButinNouveaux = n; majButin();
+    majCompteursAccueil();
+    if (estNiveau3Brut()) chargerAnnonces().then(() => majCompteursAccueil());
     const bb = $('#nb-butin-bas');          // pastille sur « Accueil » dans la barre du bas (téléphone) : nouveaux butins, sorciers et Zagor seulement
     if (bb) { bb.textContent = n ? String(n) : ''; bb.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
     document.querySelectorAll('.menu-butin').forEach((l) => {
