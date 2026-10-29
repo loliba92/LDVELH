@@ -1151,7 +1151,7 @@
   };
   // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
   async function lireImports() {
-    const CLE = 'cdh-imports-lbc-24h';
+    const CLE = 'cdh-imports-lbc-24h-v2';
     try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports; } catch (e) { /* pas de cache */ }
     const limite = Date.now() - 24 * 3600 * 1000;
     let demandes = [];
@@ -1167,7 +1167,13 @@
       const l = m ? csvLignes(m[1].trim()) : [];
       const [tete, ...corps] = l;
       const col = (nom) => (tete || []).indexOf(nom);
-      return { t: x.created_at, lignes: corps.filter((c) => c.length > 4).map((c) => ({ isbn: c[col('isbn13')], etat: c[col('etat')], prix: parseFloat(c[col('prix')]), titre: c[col('titre')], lien: c[col('lien')], statut: c[col('statut')] })) };
+      return { t: x.created_at, lignes: corps.filter((c) => c.length > 4).map((c) => {
+        // Prix payé = prix de l'annonce + frais (colonne fdp) ; relevés d'avant cette colonne : Vinted se commande toujours, mêmes frais par défaut que le site
+        const nu = parseFloat(c[col('prix')]), lien = c[col('lien')] || '', vinted = /(^|\.)vinted\./i.test(lien.split('/')[2] || '');
+        const brut = col('fdp') >= 0 ? (c[col('fdp')] || '').trim() : '';
+        const fdp = brut !== '' ? parseFloat(brut) : vinted ? Math.round((nu * 0.05 + 0.7 + 3) * 100) / 100 : 0;
+        return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')] };
+      }) };
     });
     const recents = tous.filter((im) => Date.parse(im.t) >= limite);
     const imports = recents.length ? recents : tous.slice(0, 3);
@@ -1193,17 +1199,18 @@
   const ligneImport = (a) => {
     const { ed, pub, vendu, v } = infosImport(a);
     const nom = ed ? `${ed.titre} (${ed.version})` : a.isbn;
+    const src = /(^|\.)vinted\./i.test((a.lien || '').split('/')[2] || '') ? 'Vinted' : 'Leboncoin';
     const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
-    const detail = [etatDe(a.etat).long, vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].join(' · ');
-    return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce Leboncoin (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
-      <span class="imp-ligne2">${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
+    const detail = [etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
+    return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce ${src} (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
+      <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
   async function ouvrirImports() {
     let dlg = $('#imp-dialog');
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'imp-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'imp-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Imports Leboncoin</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Imports du bot (Leboncoin et Vinted)</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'imp-fermer') dlg.close(); });
     }
