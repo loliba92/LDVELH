@@ -2443,3 +2443,11 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .cp-depuis { font-size: .8rem; color: var(--muted); }
 
 .incoh-flag { display: inline-block; margin-top: 6px; padding: 2px 8px; border: 1px solid #c4465a; border-radius: var(--r); background: rgba(122, 31, 43, .35); color: #f0a5b0; font: 600 .8rem var(--f-ui); }
+
+.comm-liste { display: grid; gap: 12px; margin: 16px 0; }
+.comm-lien { padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r); }
+.comm-lien h3 { margin: 0 0 4px; font: 700 1.05rem var(--f-ui); }
+.comm-lien h3 a { color: var(--text); overflow-wrap: anywhere; }
+.comm-lien p { margin: 0 0 8px; color: var(--muted); font-size: .95rem; }
+.comm-form { margin: 16px 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--r); }
+.comm-form h2 { margin-top: 0; }

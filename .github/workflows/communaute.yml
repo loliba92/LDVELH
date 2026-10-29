@@ -1,0 +1,58 @@
+name: Liste de la Communauté
+
+# Lancé depuis la page Communauté (Zagor seulement) : ajout ou retrait d'un lien.
+# Syntaxe : "ajout ; nom ; https://adresse ; description | retrait ; https://adresse"
+on:
+  workflow_dispatch:
+    inputs:
+      commandes:
+        description: "Commandes séparées par |, voir pipeline/communaute.py"
+        required: true
+        type: string
+      auteur:
+        description: "Nom de la personne qui envoie, transmis par le relais (ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  communaute:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      COMMANDES: ${{ inputs.commandes }}
+      IDENTITE: ${{ inputs.identite }}
+      AUTEUR_RELAIS: ${{ inputs.auteur }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
+      - name: Tests
+        run: cd pipeline && python -m unittest test_communaute.py
+      - name: Mettre à jour la liste
+        run: python pipeline/communaute.py "$COMMANDES"
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "communaute"
+          git config user.email "communaute@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/communaute.py "$COMMANDES"' \
+            .github/scripts/publier.sh "Communauté mise à jour depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" web/data/communaute.json
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml

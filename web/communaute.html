@@ -41,7 +41,8 @@
       <a class="menu-maison" href="./"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
-      <a class="menu-butin" href="butin.html" hidden>Butin <span class="nb-coll nb-butin" aria-label=""></span></a>
+      <a class="menu-butin" href="butin.html" hidden><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg> Butin <span class="nb-coll nb-butin" aria-label=""></span></a>
+      <a href="communaute.html"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.4c1.7.8 2.7 2.5 3 4.6"/></svg> Communauté</a>
       <a class="menu-cafe" href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg><span>Offrir un café</span></a>
       <div class="compte" id="compte-haut"></div>
     </nav>
@@ -54,7 +55,16 @@
 <h1>Communauté</h1>
 <p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
 
-<p class="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>
+<p class="comm-vide" id="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>
+<div class="comm-liste" id="comm-liste"></div>
+<form class="comm-form" id="comm-form" hidden>
+  <h2>Ajouter un lien</h2>
+  <div class="champ"><label for="cf-nom">Nom</label><input type="text" id="cf-nom" required maxlength="60" autocomplete="off"></div>
+  <div class="champ"><label for="cf-url">Adresse (https)</label><input type="url" id="cf-url" required autocomplete="off" placeholder="https://"></div>
+  <div class="champ"><label for="cf-desc">Description</label><input type="text" id="cf-desc" maxlength="300" autocomplete="off"></div>
+  <p><button type="submit" class="bouton">Ajouter à la liste</button></p>
+  <p class="corriger-msg" id="comm-msg" role="status" hidden></p>
+</form>
 
 <h2>Vous en faites partie ?</h2>
 <p>Vous tenez une chaîne, un site, un podcast, une boutique, ou vous avez une collection que vous aimez partager ? <a href="contact.html">Écrivez-moi</a> avec l'adresse et deux lignes de présentation. La sélection se fait au cas par cas, et le guide reste gratuit et sans publicité.</p>
@@ -100,5 +110,6 @@
 <script src="scan.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>
+<script src="communaute.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// Version du 2026-10-29 09:08 (heure de Paris) : pépite Vinted, pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-29 21:51 (heure de Paris) : liste de la Communauté éditable par le Zagor (lot communaute.yml).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -39,7 +39,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
   avis: 'heros'                   // un avis libre sur le site, envoyé par courriel à l'éditeur
 };
-var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'] };   // lots que le relais accepte de lancer, avec leurs champs
+var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'], 'communaute.yml': ['commandes'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
 
