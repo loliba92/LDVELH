@@ -62,6 +62,35 @@ class TestVinted(unittest.TestCase):
             self.assertEqual(lire(d, "vinted-2026-10-24.csv")[0]["prix_median"], "8.00")
 
 
+class TestFdp(unittest.TestCase):
+    """Colonne fdp : frais ajoutés au prix (Vinted : protection et port ; Leboncoin : 0). La médiane de la cote reste sur le prix nu."""
+    ENTETE_FDP = "isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date\n"
+    LV = "https://www.vinted.fr/items/1-x"
+
+    def corps(self, *lignes):
+        return "```csv\n" + self.ENTETE_FDP + "".join(lignes) + "```\n"
+
+    def test_fdp_gardee_dans_les_annonces_et_mediane_sur_le_prix_nu(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(self.corps(f'{ISBN_A},bon,10.00,4.20,"Titre A",{self.LV},actif,1,2026-10-24\n',
+                                    f'{ISBN_A},bon,20.00,0.00,"Titre B",https://www.leboncoin.fr/ad/livres/2,actif,1,2026-10-24\n'), JOUR, d, CONNUES)
+            self.assertEqual(lire(d, "annonces-vinted-2026-10-24.csv")[0]["fdp"], "4.20")
+            self.assertEqual(lire(d, "annonces-leboncoin-2026-10-24.csv")[0]["fdp"], "0.00")
+            self.assertEqual(lire(d, "vinted-2026-10-24.csv")[0]["prix_median"], "10.00")           # prix nu : les frais n'entrent pas dans la médiane
+
+    def test_relevé_sans_colonne_fdp(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="10", lien=self.LV), ligne(prix="12", lien="https://www.leboncoin.fr/ad/livres/3")), JOUR, d, CONNUES)
+            self.assertEqual(lire(d, "annonces-leboncoin-2026-10-24.csv")[0]["fdp"], "0.00")      # Leboncoin : retrait possible
+            self.assertEqual(lire(d, "annonces-vinted-2026-10-24.csv")[0]["fdp"], "4.20")          # Vinted : 0,70 € + 5 % + 3 €, comme le bot
+
+    def test_fdp_invraisemblable_refusee(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(self.corps(f'{ISBN_A},bon,10.00,99.00,"Titre A",{self.LV},actif,1,2026-10-24\n',
+                                        f'{ISBN_A},bon,10.00,abc,"Titre B",https://www.vinted.fr/items/2-y,actif,1,2026-10-24\n'), JOUR, d, CONNUES)
+            self.assertEqual((b["acceptees"], b["refusees"]), (0, 2))
+
+
 class TestImporter(unittest.TestCase):
     def test_import_ecrit_les_quatre_fichiers(self):
         with tempfile.TemporaryDirectory() as d:

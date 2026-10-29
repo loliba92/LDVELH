@@ -121,13 +121,30 @@ class TestButin(unittest.TestCase):
         self.assertNotIn("222", b)                                      # pas de prix publié : pas de repère
 
 
+class TestAnnoncesFdp(unittest.TestCase):
+    def test_le_prix_affiche_ajoute_la_colonne_fdp(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "annonces-vinted-2026-10-27.csv"
+            f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp\n111,bon,10.00,A,https://www.vinted.fr/items/1-a,1,vinted,4.20\n"
+                         "111,bon,12.00,B,https://www.leboncoin.fr/ad/livres/2,1,leboncoin,\n", encoding="utf-8")
+            liste = annonces_cumulees([f])["111"]["bon"]
+        self.assertEqual({a[3]: a[0] for a in liste}, {"vinted": 14.2, "leboncoin": 12.0})       # fdp vide : prix nu
+
+
 class TestButinVinted(unittest.TestCase):
-    def test_le_port_vinted_compte_dans_la_regle_du_butin(self):
-        from prix_neuf import FRAIS_VINTED
-        revue = [{"isbn": "111", "etat": "bon", "publie": 30.0}]
-        # 10 € + port et frais (3,83 €) : 13,83 € <= 50 % de 30 € (15 €) : retenue ; 12 € + 3,83 € : 15,83 € > 15 € : écartée
-        annonces = {"111": {"bon": [[round(10 + FRAIS_VINTED, 2), "a", "https://www.vinted.fr/items/1-a", "vinted", "2026-10-27", None],
-                                    [round(12 + FRAIS_VINTED, 2), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
+    def test_prix_livre_vinted(self):
+        from prix_neuf import prix_livre_vinted
+        self.assertEqual(prix_livre_vinted(10.0), 14.2)        # 10 + 0,70 + 5 % + 3 € de port
+        self.assertEqual(prix_livre_vinted(2.6), 6.43)         # frais Vinted vus au paiement : 0,83 €
+
+    def test_le_prix_livre_compte_dans_la_regle_du_butin(self):
+        from prix_neuf import prix_livre_vinted
+        revue = [{"isbn": "111", "etat": "bon", "publie": 40.0}]
+        # 50 % de 40 € = 20 € : une annonce à 12 € (livrée 16,30 €) est retenue ; à 16 € (livrée 20,50 €) elle est écartée
+        annonces = {"111": {"bon": [[prix_livre_vinted(12.0), "a", "https://www.vinted.fr/items/1-a", "vinted", "2026-10-27", None],
+                                    [prix_livre_vinted(16.0), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
         butin = extraire_butin(annonces, revue)
         self.assertEqual([a[1] for a in butin["111"]["bon"]], ["a"])
 
