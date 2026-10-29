@@ -26,9 +26,9 @@
  "nb_grands_mouvements": 1,
  "modele": {
   "actif": false,
-  "n_paires": 20,
-  "gain": 0.078,
+  "n_paires": 23,
+  "gain": 0.085,
   "raison": "le modèle ne bat pas assez les archives (gain 8%, 15% exigés)",
-  "rapport_global": 0.877
+  "rapport_global": 0.897
  }
 }
