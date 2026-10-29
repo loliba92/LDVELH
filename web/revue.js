@@ -774,10 +774,13 @@
       if (prix <= 1.5 * pub) return 'dessus';
       return 'cher';
     };
-    const comparaison = (prix, pub, v) => {
+    const comparaison = (prix, pub, v, lot) => {
       if (pub == null) return '<span class="rc-vs">pas de prix sur le site</span>';
       const ecart = Math.round((prix / pub - 1) * 100);
-      return `<span class="rc-pastille ${VERDICTS[v][1]}">${VERDICTS[v][0]}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
+      // Le moins cher / le plus cher du même livre et du même état, quand il y a plusieurs annonces (sinon le verdict habituel)
+      const extremeBas = lot && prix === lot.min && v === 'dessous', extremeHaut = lot && prix === lot.max && (v === 'dessus' || v === 'cher');
+      const libelle = extremeBas ? 'Le moins cher' : extremeHaut ? 'Le plus cher' : VERDICTS[v][0];
+      return `<span class="rc-pastille ${VERDICTS[v][1]}">${libelle}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
     // Thermomètre : où se situe l'annonce entre le moins cher et le plus cher du même livre et du même état
     const thermometre = (a) => {
@@ -786,8 +789,9 @@
       const pos = etendue > 0 ? (a.prix - a.lot.min) / etendue : 0;
       const rep = etendue > 0 ? (a.lot.med - a.lot.min) / etendue : 0.5;
       const cat = pos <= 0.1 ? 'Le moins cher' : pos >= 0.9 ? 'Le plus cher' : Math.abs(pos - rep) <= 0.1 ? 'Dans la médiane' : pos < rep ? 'Sous la médiane' : 'Au-dessus de la médiane';
+      const extreme = pos <= 0.1 || pos >= 0.9;
       const txt = `${cat} : ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}`;
-      return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste"><span class="rc-therm-rep" style="left:${(rep * 100).toFixed(1)}%"></span><span class="rc-therm-pt" style="left:${(pos * 100).toFixed(1)}%"></span></span><span class="rc-therm-txt">${cat}</span></span>`;
+      return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste"><span class="rc-therm-rep" style="left:${(rep * 100).toFixed(1)}%"></span><span class="rc-therm-pt" style="left:${(pos * 100).toFixed(1)}%"></span></span>${extreme ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
@@ -832,7 +836,7 @@
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${quandRc(a) ? ' · ' + quandRc(a) : ''}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${quandRc(a) ? ' · ' + quandRc(a) : ''}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
