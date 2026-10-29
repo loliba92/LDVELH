@@ -2368,21 +2368,46 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .compteur-acc:hover, .compteur-acc:focus-visible { background: rgba(217, 180, 95, .12); }
 .compteur-acc:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
-/* Annonces captées par jour : tableau dans les pages Butin et Annonces reçues, lien sur l'accueil */
-.captures-lien { margin: 8px 0 0; font-size: .9rem; }
-.captures-lien a { color: var(--gold); font-weight: 600; text-decoration: none; }
-.captures-lien a:hover, .captures-lien a:focus-visible { text-decoration: underline; }
+/* Annonces captées par jour : graphique empilé et tableau (pages Butin et Annonces reçues) */
+.captures-zone { --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; margin: 12px 0; }
 .captures-zone:empty { display: none; }
-/* Annonces captées par jour (accueil, sorciers et Zagor) */
-.captures-acc { margin: 10px 0 0; padding: 4px 16px 12px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r); }
-.captures-acc summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font: 700 1rem var(--f-ui); color: var(--text); }
+.captures-titre { margin: 0 0 6px; font: 700 1.05rem var(--f-ui); color: var(--text); }
+.cp-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; list-style: none; margin: 0 0 6px; padding: 0; font-size: .9rem; color: var(--muted); }
+.cp-legende li { display: flex; align-items: center; gap: 6px; }
+.cp-pastille { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.cp-pastille.cp-ebay { background: var(--c-ebay); } .cp-pastille.cp-leboncoin { background: var(--c-leboncoin); }
+.cp-pastille.cp-vinted { background: var(--c-vinted); } .cp-pastille.cp-librairie { background: var(--c-librairie); }
+.cp-cadre { position: relative; margin-bottom: 8px; }
+.cp-svg { display: block; max-width: 100%; height: auto; overflow: visible; }
+.cp-grille { stroke: var(--line); stroke-width: 1; }
+.cp-axe { fill: var(--muted); font: 600 11px var(--f-ui); }
+.cp-seg.cp-ebay { fill: var(--c-ebay); } .cp-seg.cp-leboncoin { fill: var(--c-leboncoin); }
+.cp-seg.cp-vinted { fill: var(--c-vinted); } .cp-seg.cp-librairie { fill: var(--c-librairie); }
+.cp-seg.cp-estime { opacity: .4; }
+.cp-zone { fill: transparent; }
+.cp-col { cursor: pointer; outline: none; }
+.cp-col:hover .cp-zone, .cp-col:focus-visible .cp-zone { fill: rgba(239, 228, 207, .08); }
+.cp-bulle { position: absolute; top: -4px; z-index: 2; display: grid; gap: 2px; min-width: 9.5rem; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface-2); color: var(--text); font-size: .85rem; pointer-events: none; }
+.cp-bulle[hidden] { display: none; }
+.cp-bulle b { font-weight: 700; }
+.cp-bulle span { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.cp-bulle i.cp-pastille { width: 8px; height: 8px; }
+.cp-bulle i.cp-ebay { background: var(--c-ebay); } .cp-bulle i.cp-leboncoin { background: var(--c-leboncoin); }
+.cp-bulle i.cp-vinted { background: var(--c-vinted); } .cp-bulle i.cp-librairie { background: var(--c-librairie); }
+.captures-acc { margin: 8px 0 0; padding: 0 12px 10px; border: 1px solid var(--line); border-radius: var(--r); }
+.captures-acc summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font: 600 .95rem var(--f-ui); color: var(--text); }
 .captures-defile { overflow-x: auto; }
 .captures-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
 .captures-table th, .captures-table td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .captures-table th:first-child { text-align: left; font-weight: 600; }
 .captures-table thead th { color: var(--muted); font: 700 .75rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; }
 .captures-table tr.auj th, .captures-table tr.auj td { color: var(--gold); }
-@media (max-width: 520px) { .captures-acc { padding: 4px 10px 12px; } .captures-table { font-size: .82rem; } .captures-table th, .captures-table td { padding: 6px 3px; } .captures-table thead th { font-size: .6rem; letter-spacing: 0; } }
+@media (max-width: 520px) { .captures-acc { padding: 0 8px 10px; } .captures-table { font-size: .82rem; } .captures-table th, .captures-table td { padding: 6px 3px; } .captures-table thead th { font-size: .6rem; letter-spacing: 0; } }
+
+/* Lien vers le tableau, sur l'accueil */
+.captures-lien { margin: 8px 0 0; font-size: .9rem; }
+.captures-lien a { color: var(--gold); font-weight: 600; text-decoration: none; }
+.captures-lien a:hover, .captures-lien a:focus-visible { text-decoration: underline; }
 
 /* Nouveaux butins : bandeau de l'accueil et entrée « Butin » du menu du haut (sorciers et Zagor) */
 #butin-alerte-zone:empty { display: none; }

@@ -684,27 +684,85 @@
       return [...l].sort((a, b) => f(a, b) || eco(b) - eco(a));
     };
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
-    // Annonces captées chaque jour, par source (eBay, Leboncoin, Vinted, librairies) : 14 derniers jours, pour prendre du recul sur la couverture des recherches
+    // Annonces captées par jour et par plateforme : colonnes empilées, tableau en accordéon dessous
+    const SOURCES_CAPT = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
+    const jourCourtCapt = (cle) => new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'numeric' });
+    function svgCaptures(jours, depuis, largeur) {
+      const H = 200, g = 34, b = 26, h = H - 14 - b, n = jours.length, pas = (largeur - g - 4) / n, ep = Math.min(24, pas - 6);
+      const totaux = jours.map((j) => SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0));
+      const brut = Math.max(10, ...totaux), echelle = brut <= 20 ? 5 : brut <= 60 ? 10 : brut <= 120 ? 20 : brut <= 300 ? 50 : 100, max = Math.ceil(brut / echelle) * echelle;
+      const y = (v) => 10 + h - (v / max) * h;
+      const grille = [0, max / 2, max].map((v) => `<line x1="${g}" x2="${largeur}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${g - 6}" y="${y(v) + 4}" class="cp-axe" text-anchor="end">${v}</text>`).join('');
+      const saut = largeur < 420 ? 3 : 2;
+      let colonnes = '', etiquettes = '';
+      jours.forEach((j, k) => {
+        const x = g + k * pas + (pas - ep) / 2, estime = depuis && j.cle < depuis;
+        let bas = y(0), segs = '';
+        const actifs = SOURCES_CAPT.filter(([src]) => j.v[src]);
+        actifs.forEach(([src], m) => {
+          const haut = bas - (j.v[src] / max) * h, fond = bas - (m ? 2 : 0), hauteur = Math.max(fond - haut, 1);
+          const classe = `cp-seg cp-${src}${estime ? ' cp-estime' : ''}`;
+          segs += m === actifs.length - 1 && hauteur > 8
+            ? `<path d="M${x},${fond}V${haut + 4}a4,4 0 0 1 4,-4h${ep - 8}a4,4 0 0 1 4,4V${fond}z" class="${classe}"/>`
+            : `<rect x="${x}" y="${fond - hauteur}" width="${ep}" height="${hauteur}" class="${classe}"/>`;
+          bas = haut;
+        });
+        const lib = j.cle === jours[n - 1].cle ? 'Auj.' : jourCourtCapt(j.cle);
+        if ((n - 1 - k) % saut === 0) etiquettes += `<text x="${x + ep / 2}" y="${H - 8}" class="cp-axe" text-anchor="middle">${lib}</text>`;
+        const detail = SOURCES_CAPT.map(([src, nom]) => `${nom} : ${j.v[src] || 0}`).join(', ');
+        colonnes += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${totaux[k]} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/>${segs}</g>`;
+      });
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${grille}${colonnes}${etiquettes}</svg>`;
+    }
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
       if (!zones.length || !BUT) return;
       if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
-      const SOURCES = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
-      const lignes = [];
-      for (let k = 0; k < 14; k += 1) {
-        const cle = new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }), v = c.jours[cle] || {};
-        const total = SOURCES.reduce((t, [src]) => t + (v[src] || 0), 0);
-        const quand = k === 0 ? "Aujourd'hui" : new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
-        lignes.push(`<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES.map(([src]) => `<td>${v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`);
+      const jours = [];
+      for (let k = 13; k >= 0; k -= 1) {
+        const cle = new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+        jours.push({ cle, v: c.jours[cle] || {} });
       }
+      const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
+      const lignes = jours.slice().reverse().map((j, k) => {
+        const total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
+        const quand = k === 0 ? "Aujourd'hui" : new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
+        return `<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
+      }).join('');
       const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
-      const html = `<details class="captures-acc"><summary>Annonces captées par jour</summary>
-        <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par source</caption>
-          <thead><tr><th scope="col">Jour</th>${SOURCES.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes.join('')}</tbody></table></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent.${depuis ? ` Comptage commencé le ${esc(depuis)} ; les jours d'avant sont estimés.` : ''}</p></details>`;
-      zones.forEach((z) => { const ouvert = !!(z.querySelector('.captures-acc') || {}).open; z.innerHTML = html; if (ouvert) z.querySelector('.captures-acc').open = true; });
+      const estimes = depuis && jours.some((j) => j.cle < c.depuis && Object.keys(j.v).length);
+      const html = `<section class="captures" aria-label="Annonces captées par jour">
+        <h3 class="captures-titre">Annonces captées par jour</h3>
+        <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom}</li>`).join('')}</ul>
+        <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent.${estimes ? ` Avant le ${esc(depuis)}, les jours sont estimés (colonnes plus pâles).` : ''}</p>
+        <details class="captures-acc"><summary>Tableau des chiffres</summary>
+          <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
+            <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody></table></div></details></section>`;
+      zones.forEach((z) => {
+        const ouvert = !!(z.querySelector('.captures-acc') || {}).open;
+        z.innerHTML = html;
+        if (ouvert) z.querySelector('.captures-acc').open = true;
+        const cadre = z.querySelector('.cp-cadre'), bulle = z.querySelector('.cp-bulle');
+        const montrer = (col) => {
+          const k = Number(col.dataset.i), j = jours[k], total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
+          bulle.innerHTML = `<b>${esc(k === jours.length - 1 ? "Aujourd'hui" : jourCourtCapt(j.cle))} · ${total}</b>${SOURCES_CAPT.map(([src, nom]) => `<span><i class="cp-pastille cp-${src}"></i>${nom} ${j.v[src] || 0}</span>`).join('')}`;
+          bulle.hidden = false;
+          const r = col.getBoundingClientRect(), rc = cadre.getBoundingClientRect();
+          bulle.style.left = `${Math.min(Math.max(r.left - rc.left + r.width / 2 - bulle.offsetWidth / 2, 0), rc.width - bulle.offsetWidth)}px`;
+        };
+        z.querySelectorAll('.cp-col').forEach((col) => {
+          col.addEventListener('mouseenter', () => montrer(col));
+          col.addEventListener('focus', () => montrer(col));
+          col.addEventListener('click', () => montrer(col));
+          col.addEventListener('mouseleave', () => { bulle.hidden = true; });
+          col.addEventListener('blur', () => { bulle.hidden = true; });
+        });
+      });
     };
+    let largeurCapt = 0;
+    window.addEventListener('resize', () => { const l = document.documentElement.clientWidth; if (Math.abs(l - largeurCapt) > 40) { largeurCapt = l; dessinerCaptures(); } });
     dessinerPepites = () => {
       dessinerCaptures();
       if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
