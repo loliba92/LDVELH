@@ -319,7 +319,7 @@
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.incoh || cotesMasquees() || incoherence(b)) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
+      (!S.vente || b.en_vente === 1) && (!S.incoh || !estNiveau3() || incoherence(b)) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
       ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
@@ -455,7 +455,7 @@
   function appliquerMasqueCotes() {
     const m = cotesMasquees();
     document.body.classList.toggle('cotes-masquees', m);
-    if ($('#f-incoh')) $('#f-incoh').closest('label').hidden = m;
+    if ($('#f-incoh')) $('#f-incoh').closest('label').hidden = !estNiveau3();
     if (!m) return;
     if (S.onglet === 'cote') S.onglet = 'etagere';
     S.mine = false; S.cherche = false; S.avendre = false;               // filtres de collection : réservés aux comptes
@@ -626,7 +626,7 @@
     const vus = tri.slice(0, limite);
     const cartes = vus.map((b) => {
       const p = b.prix[e.k];
-      const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id], incoh = masq ? null : incoherence(b);
+      const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id], incoh = estNiveau3() ? incoherence(b) : null;
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
         <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 5' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
