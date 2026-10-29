@@ -36,6 +36,23 @@ MAX_LIGNES = 300
 PRIX_MIN, PRIX_MAX = 0.5, 3000.0
 FENETRE_AVANT, FENETRE_APRES = 3, 1          # jours : une ligne trop ancienne ou datée du futur est refusée
 LIEN = re.compile(r"^https://www\.leboncoin\.fr/[A-Za-z0-9_\-/.]+$")
+LIEN_VINTED = re.compile(r"^https://www\.vinted\.fr/items/\d+(?:-[A-Za-z0-9_\-]*)?$")
+SOURCES = ("leboncoin", "vinted")               # le bot envoie les deux dans le même relevé ; chaque source a ses propres fichiers
+
+
+def source_du_lien(lien):
+    """« leboncoin » ou « vinted » d'après le lien (seuls ces deux sites, en https) ; None sinon."""
+    if LIEN.match(lien or ""):
+        return "leboncoin"
+    if LIEN_VINTED.match(lien or ""):
+        return "vinted"
+    return None
+
+
+def nom_fichier(genre, source, jour):
+    """annonces-/vendus-<source>-JOUR.csv (annonces) ; <source>-JOUR.csv et <source>-vendus-JOUR.csv (agrégats pour la cote)."""
+    return {"annonces": f"annonces-{source}-{jour}.csv", "vendus": f"vendus-{source}-{jour}.csv",
+            "agregat": f"{source}-{jour}.csv", "agregat_vendus": f"{source}-vendus-{jour}.csv"}[genre]
 COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par"]
 COLONNES_AGREGAT = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
 
@@ -75,7 +92,8 @@ def valider(r, aujourdhui, connues):
     if len(titre) < 3:
         return None, "titre vide"
     lien = (r.get("lien") or "").strip()
-    if not LIEN.match(lien):
+    source = source_du_lien(lien)
+    if not source:
         return None, "lien non conforme"
     try:
         jour = date.fromisoformat((r.get("date") or "").strip())
@@ -88,7 +106,7 @@ def valider(r, aujourdhui, connues):
     except ValueError:
         age = 0
     return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "titre": titre, "lien": lien, "age_jours": age,
-            "trouvee_par": "leboncoin", "statut": statut, "date": jour.isoformat()}, None
+            "trouvee_par": source, "statut": statut, "date": jour.isoformat()}, None
 
 
 def _lire(chemin):
@@ -161,16 +179,17 @@ def _agreger(lignes, jour, lots=None):
 
 
 def reagreger(dossier=None, lots=None):
-    """Recalcule les agrégats (leboncoin-*.csv, leboncoin-vendus-*.csv) à partir des annonces de chaque jour, en tenant compte des lots.
+    """Recalcule les agrégats (leboncoin-*.csv, leboncoin-vendus-*.csv, et de même pour Vinted) à partir des annonces de chaque jour, en tenant compte des lots.
     Appelé à chaque construction de la base : un lot ajouté au fichier agit sur tous les jours déjà importés."""
     dossier = Path(dossier or DOSSIER)
     lots = charger_lots() if lots is None else lots
-    for fic in sorted(dossier.glob("annonces-leboncoin-20*.csv")):
-        jour = fic.stem[-10:]
-        _ecrire(dossier / f"leboncoin-{jour}.csv", COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
-    for fic in sorted(dossier.glob("vendus-leboncoin-20*.csv")):
-        jour = fic.stem[-10:]
-        _ecrire(dossier / f"leboncoin-vendus-{jour}.csv", COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
+    for source in SOURCES:
+        for fic in sorted(dossier.glob(f"annonces-{source}-20*.csv")):
+            jour = fic.stem[-10:]
+            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
+        for fic in sorted(dossier.glob(f"vendus-{source}-20*.csv")):
+            jour = fic.stem[-10:]
+            _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
 
 
 def importer(corps, aujourdhui=None, dossier=None, connues=None):
@@ -194,10 +213,10 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
             bilan["raisons"][raison] = bilan["raisons"].get(raison, 0) + 1
         else:
             bilan["acceptees"] += 1
-            par_jour.setdefault(ok["date"], []).append(ok)
-    for jour, nouvelles in sorted(par_jour.items()):
-        actives = _lire(dossier / f"annonces-leboncoin-{jour}.csv")
-        vendues = _lire(dossier / f"vendus-leboncoin-{jour}.csv")
+            par_jour.setdefault((ok["trouvee_par"], ok["date"]), []).append(ok)
+    for (source, jour), nouvelles in sorted(par_jour.items()):
+        actives = _lire(dossier / nom_fichier("annonces", source, jour))
+        vendues = _lire(dossier / nom_fichier("vendus", source, jour))
         for r in nouvelles:                              # la ligne la plus récente d'une annonce l'emporte ; vendue, elle quitte les actives
             if r["statut"] == "vendu":
                 actives.pop(r["lien"], None)
@@ -205,12 +224,13 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
             elif r["lien"] not in vendues:
                 actives[r["lien"]] = r
         dossier.mkdir(parents=True, exist_ok=True)
-        _ecrire(dossier / f"annonces-leboncoin-{jour}.csv", COLONNES_ANNONCES, list(actives.values()))
-        _ecrire(dossier / f"vendus-leboncoin-{jour}.csv", COLONNES_ANNONCES, list(vendues.values()))
+        _ecrire(dossier / nom_fichier("annonces", source, jour), COLONNES_ANNONCES, list(actives.values()))
+        _ecrire(dossier / nom_fichier("vendus", source, jour), COLONNES_ANNONCES, list(vendues.values()))
         lots = charger_lots()
-        _ecrire(dossier / f"leboncoin-{jour}.csv", COLONNES_AGREGAT, _agreger(actives.values(), jour, lots))
-        _ecrire(dossier / f"leboncoin-vendus-{jour}.csv", COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots))
-        bilan["jours"].append(jour)
+        _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(actives.values(), jour, lots))
+        _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots))
+        if jour not in bilan["jours"]:
+            bilan["jours"].append(jour)
     return bilan
 
 

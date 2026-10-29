@@ -1,4 +1,4 @@
-// Version du 2026-10-28 21:05 (heure de Paris) : pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-29 09:08 (heure de Paris) : pépite Vinted, pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -105,7 +105,7 @@ function validerEnvoi(lot, entrees) {
 
 /* Pépite du jour : le Zagor offre une annonce aux Héros. Le fichier public data/pepite-du-jour.json est écrit par le relais ;
    on n'accepte que des champs connus, un lien https et des valeurs plausibles. */
-var ORIGINES_PEPITE = ['leboncoin', 'ebay', 'librairie', 'isbn', 'titre'];
+var ORIGINES_PEPITE = ['leboncoin', 'vinted', 'ebay', 'librairie', 'isbn', 'titre'];
 function validerPepite(q) {
   q = q || {};
   var isbn = String(q.isbn13 || ''), prix = Number(q.prix), pub = q.pub == null || q.pub === '' ? null : Number(q.pub);
