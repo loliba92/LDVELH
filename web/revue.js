@@ -540,28 +540,24 @@
   // Annonces reçues (Zagor) : toutes les annonces des derniers relevés, pour les statistiques du graphique
   let TOUTES_RC = null, redessinerCapt = () => {};
   const TRANCHES = [[0, 5, 'Moins de 5 €'], [5, 10, '5 à 10 €'], [10, 20, '10 à 20 €'], [20, 50, '20 à 50 €'], [50, Infinity, '50 € et plus']];
-  const mediane = (xs) => { if (!xs.length) return null; const t = [...xs].sort((a, b) => a - b), m = t.length >> 1; return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2; };
-  const pctSigne = (x) => (x == null ? '–' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(Math.round(x * 100))} %`);
   const estPepite = (a) => a.v === 'super' || a.v === 'pepite';
+  // Parts par verdict (seules les annonces dont le site a un prix comptent)
   function statsRecues(lignes) {
     const NOMS = { ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'Librairies' };
     const groupe = (liste, nom) => {
-      const ecarts = liste.filter((a) => a.pub).map((a) => a.prix / a.pub - 1);
-      return { nom, n: liste.length, medPrix: mediane(liste.map((a) => a.prix)), ecart: mediane(ecarts), pep: liste.filter(estPepite).length };
+      const avec = liste.filter((a) => a.v);
+      const part = (...vs) => (avec.length ? avec.filter((a) => vs.includes(a.v)).length / avec.length : null);
+      return { nom, n: liste.length, base: avec.length, pep: liste.filter(estPepite).length, pepPart: part('super', 'pepite'), pas: part('dessous'), dans: part('dans'), cher: part('dessus', 'cher') };
     };
-    const plateformes = Object.keys(NOMS).map((fam) => groupe(lignes.filter((a) => a.fam === fam), NOMS[fam])).filter((g) => g.n);
+    const plateformes = Object.keys(NOMS).map((fam) => groupe(lignes.filter((a) => a.fam === fam), NOMS[fam])).filter((g) => g.base);
     const tranches = TRANCHES.map(([min, max, nom]) => groupe(lignes.filter((a) => a.prix >= min && a.prix < max), nom)).filter((g) => g.n);
-    const part = (g) => (g.n ? g.pep / g.n : 0);
-    const avecEcart = plateformes.filter((g) => g.ecart != null);
-    const plusChere = avecEcart.reduce((m, g) => (g.ecart > m.ecart ? g : m), avecEcart[0]);
-    const moinsChere = avecEcart.reduce((m, g) => (g.ecart < m.ecart ? g : m), avecEcart[0]);
-    const plusPepites = plateformes.reduce((m, g) => (g.pep > m.pep ? g : m), plateformes[0]);
-    const pct = (x) => `${Math.round(x * 100)} %`;
+    const pct = (x) => (x == null ? '–' : `${Math.round(x * 100)} %`);
+    const haut = (cle) => plateformes.reduce((m, g) => (g[cle] > m[cle] ? g : m), plateformes[0]);
+    const resume = plateformes.length ? `<p class="stats-resume">Plus de pépites : <b>${esc(haut('pepPart').nom)}</b> (${pct(haut('pepPart').pepPart)} des annonces). Plus souvent trop cher : <b>${esc(haut('cher').nom)}</b> (${pct(haut('cher').cher)}). Plus souvent pas cher : <b>${esc(haut('pas').nom)}</b> (${pct(haut('pas').pas)}).</p>` : '';
     const ligne = (g, colonnes) => `<tr><th scope="row">${esc(g.nom)}</th>${colonnes(g)}</tr>`;
     const tete = (cols) => `<thead><tr>${cols.map((c) => `<th scope="col">${c}</th>`).join('')}</tr></thead>`;
-    const resume = (plusChere && moinsChere && plusPepites) ? `<p class="stats-resume">Plus chère : <b>${esc(plusChere.nom)}</b> (${pctSigne(plusChere.ecart)} au prix du site, médiane). Moins chère : <b>${esc(moinsChere.nom)}</b> (${pctSigne(moinsChere.ecart)}). Plus de pépites : <b>${esc(plusPepites.nom)}</b> (${plusPepites.pep} sur ${plusPepites.n} annonces).</p>` : '';
-    const tabPlat = `<table class="captures-table"><caption class="sr-only">Statistiques par plateforme</caption>${tete(['Plateforme', 'Annonces', 'Prix médian', 'Écart au site', 'Pépites'])}<tbody>${plateformes.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${eur(x.medPrix)}</td><td>${pctSigne(x.ecart)}</td><td>${x.pep} · ${pct(part(x))}</td>`)).join('')}</tbody></table>`;
-    const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(part(x))}</td>`)).join('')}</tbody></table>`;
+    const tabPlat = `<table class="captures-table"><caption class="sr-only">Parts par verdict, par plateforme</caption>${tete(['Plateforme', 'Annonces', 'Pépites', 'Pas cher', 'Dans les prix', 'Trop cher'])}<tbody>${plateformes.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${pct(x.pepPart)}</td><td>${pct(x.pas)}</td><td>${pct(x.dans)}</td><td>${pct(x.cher)}</td>`)).join('')}</tbody></table>`;
+    const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(x.n ? x.pep / x.n : null)}</td>`)).join('')}</tbody></table>`;
     return `<div class="stats-rc">${resume}<h4 class="stats-titre">Par plateforme</h4><div class="captures-defile">${tabPlat}</div><h4 class="stats-titre">Par tranche de prix</h4><div class="captures-defile">${tabTr}</div></div>`;
   }
   const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) : '');
