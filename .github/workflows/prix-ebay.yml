@@ -87,7 +87,19 @@ jobs:
         run: python scrapers/ebay_api.py --essais ${{ inputs.essais }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Relevé eBay
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
-        run: python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
+        run: |
+          # Limite d'appels eBay atteinte (code 75) : rien n'est enregistré et rien n'est perdu. Le lot est marqué « annulé » (et non « échec »),
+          # avec la raison dans son résumé ; le site l'affiche ainsi dans « Mises à jour automatiques ».
+          set +e
+          python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
+          code=$?
+          if [ "$code" = "75" ]; then
+            echo "Limite d'appels eBay atteinte pour aujourd'hui : un relevé a déjà eu lieu, rien n'est perdu. Réessayez demain." | tee -a "$GITHUB_STEP_SUMMARY"
+            gh run cancel "$GITHUB_RUN_ID" || true
+            sleep 60
+            exit 0
+          fi
+          exit $code
       - name: Prix du neuf et disponibilité des éditions en vente
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         continue-on-error: true
