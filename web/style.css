@@ -2278,6 +2278,11 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 899px) { .barre-bas .nb-pep { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; } }
 .a-trouver .l-livre { flex: 1 1 0; min-width: 0; }
 .a-trouver li > .retirer { flex: none; }
+/* Pépite du jour (Zagor) : le titre garde toute sa largeur, « Retirer » et « Marquer vendue » passent sur leur propre ligne */
+.a-trouver .pep-jour-li .l-livre { flex: 1 1 100%; }
+.pep-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+.pep-actions .retirer { flex: 1 1 8rem; white-space: nowrap; }
+@media (min-width: 700px) { .pep-actions .retirer { flex: 0 0 auto; padding: 4px 18px; } }
 
 /* Pages publiques « un livre » (livre/<isbn>.html) et « Tous les livres » */
 .livre-tete { display: grid; grid-template-columns: 200px minmax(0, 1fr); grid-template-areas: "couv chapeau" "couv faits"; grid-template-rows: auto 1fr; gap: 0 24px; align-items: start; margin: 12px 0 18px; }
