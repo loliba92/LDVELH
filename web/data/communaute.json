@@ -1,5 +1,11 @@
 [
   {
+    "nom": "Les éditions Alkonost",
+    "adresse": "https://alkonost-editions.com/",
+    "description": "Maison d’édition associative qui publie des livres-jeux de très grande qualité, du « Livre dont vous êtes le héros » aux créations francophones d’aujourd’hui, ainsi qu’un magazine en ligne. Son esprit : le rêve, le frisson et l’extraordinaire.",
+    "image": "data/communaute/36d3dc163144.jpg"
+  },
+  {
     "nom": "Les Éditions Elvyon",
     "adresse": "https://www.editionselvyon.com/",
     "description": "Éditeur de livres-jeux, de LDVELH et de RPG solo, qui publie aussi des jeux de société. Ses projets naissent de campagnes de financement sur La Ruche. Nous avons hâte de découvrir La Quête du Guerrier, et L’Auberge de l’Épouvante, que l’on peut même jouer directement dans le navigateur.",
