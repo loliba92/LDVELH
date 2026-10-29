@@ -1884,10 +1884,10 @@
     if (!b) return '';
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
     return `<h3 id="titre-pepite-jour">Pépite du jour <span class="sous">· ${esc(quand)}</span></h3>
-      <ul class="a-trouver"><li>
+      <ul class="a-trouver"><li class="pep-jour-li">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
-        ${estNiveau3() ? `<button type="button" class="retirer" data-pepite-retirer>Retirer</button>${p.vendue ? '' : ' <button type="button" class="retirer" data-pepite-vendre>Marquer vendue</button>'}` : ''}
+        ${estNiveau3() ? `<div class="pep-actions"><button type="button" class="retirer" data-pepite-retirer>Retirer</button>${p.vendue ? '' : '<button type="button" class="retirer" data-pepite-vendre>Marquer vendue</button>'}</div>` : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span><span class="pep-v${p.solide ? ' solide' : ''}">${p.solide ? 'Solide' : 'À vérifier'}</span> ↗</a></div>
       </li></ul>
       <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;
