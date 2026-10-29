@@ -1,6 +1,6 @@
 import unittest
 
-from communaute import adresse_valide, appliquer, image_de_page
+from communaute import adresse_valide, appliquer, image_de_contenu, image_de_page
 
 
 def sans_image(adresse):
@@ -46,6 +46,11 @@ class TestCommunaute(unittest.TestCase):
         self.assertEqual(image_de_page(page, "https://site.example/accueil"), "https://site.example/img/couv.jpg")
         self.assertEqual(image_de_page('<meta name="twitter:image" content="https://cdn.example/a.png">', "https://s.example"), "https://cdn.example/a.png")
         self.assertIsNone(image_de_page("<p>rien</p>", "https://s.example"))
+
+    def test_image_de_contenu_sans_balise_de_partage(self):
+        page = '<img width="200" height="83" src="/logo.png"><img width="1024" height="819" src="/gamme.jpg">'
+        self.assertEqual(image_de_contenu(page, "https://s.example/"), "https://s.example/gamme.jpg")
+        self.assertIsNone(image_de_contenu('<img width="744" height="1160" src="/portrait.jpg">', "https://s.example/"))
 
 
 if __name__ == "__main__":
