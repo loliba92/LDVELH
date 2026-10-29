@@ -779,6 +779,16 @@
       const ecart = Math.round((prix / pub - 1) * 100);
       return `<span class="rc-pastille ${VERDICTS[v][1]}">${VERDICTS[v][0]}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
+    // Thermomètre : où se situe l'annonce entre le moins cher et le plus cher du même livre et du même état
+    const thermometre = (a) => {
+      if (!a.lot) return '';
+      const etendue = a.lot.max - a.lot.min;
+      const pos = etendue > 0 ? (a.prix - a.lot.min) / etendue : 0;
+      const rep = etendue > 0 ? (a.lot.med - a.lot.min) / etendue : 0.5;
+      const cat = pos <= 0.1 ? 'Le moins cher' : pos >= 0.9 ? 'Le plus cher' : Math.abs(pos - rep) <= 0.1 ? 'Dans la médiane' : pos < rep ? 'Sous la médiane' : 'Au-dessus de la médiane';
+      const txt = `${cat} : ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}`;
+      return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste"><span class="rc-therm-rep" style="left:${(rep * 100).toFixed(1)}%"></span><span class="rc-therm-pt" style="left:${(pos * 100).toFixed(1)}%"></span></span><span class="rc-therm-txt">${cat}</span></span>`;
+    };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
     const quandRc = (a) => (heureConnue({ premiere: a.premiere }) ? new Date(a.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·') : a.vue ? jourCourt(a.vue) : '');
@@ -807,13 +817,22 @@
         }));
       });
       TOUTES_RC = toutes; redessinerCapt();
+      // Position de chaque annonce parmi les annonces du même livre et du même état : le moins cher, la médiane, le plus cher
+      const parLivre = new Map();
+      toutes.forEach((a) => { const k = a.ed.isbn + '|' + a.cle; if (!parLivre.has(k)) parLivre.set(k, []); parLivre.get(k).push(a.prix); });
+      toutes.forEach((a) => {
+        const p = parLivre.get(a.ed.isbn + '|' + a.cle).slice().sort((x, y) => x - y);
+        if (p.length < 2) return;
+        const m = p.length >> 1, med = p.length % 2 ? p[m] : (p[m - 1] + p[m]) / 2;
+        a.lot = { min: p[0], max: p[p.length - 1], med: med };
+      });
       const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${quandRc(a) ? ' · ' + quandRc(a) : ''}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${quandRc(a) ? ' · ' + quandRc(a) : ''}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
