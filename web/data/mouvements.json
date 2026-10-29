@@ -2,12 +2,28 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 540,
+ "nb_modifiees": 541,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
- "baisses": [],
- "nb_grands_mouvements": 0,
+ "baisses": [
+  {
+   "id": "9782070665839",
+   "isbn13": "9782070665839",
+   "titre": "La Cité des Pièges",
+   "serie": "Sorcellerie!",
+   "numero": "294",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 51.85,
+   "apres": 42.2,
+   "pct": -0.186,
+   "nature": "annonces",
+   "nb": 4,
+   "recalibre": false
+  }
+ ],
+ "nb_grands_mouvements": 1,
  "modele": {
   "actif": false,
   "n_paires": 14,
