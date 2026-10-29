@@ -1623,7 +1623,7 @@
   // Pépite du jour : choisie par le Zagor, offerte aux Héros (fichier public data/pepite-du-jour.json, écrit par le service technique)
   let PJ = null, pjChargee = false, pjAtterri = false;
   const jourParis = (retard = 0) => new Date(Date.now() - retard * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-  const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date >= jourParis(1) ? PJ : null);          // valable aujourd'hui et demain matin
+  const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date === jourParis() ? PJ : null);          // valable le jour où elle est offerte (jour de Paris) : elle disparaît dès le lendemain
   const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif();       // tout compte connecté (Héros, sorcier, Zagor) ; jamais un visiteur
   function chargerPepiteJour() {
     if (pjChargee) return;

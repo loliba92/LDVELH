@@ -104,8 +104,8 @@
 (function () {
   var isbn = "9782070509317", zone = document.getElementById('pepite');
   fetch('../data/pepite-du-jour.json?h=' + Math.floor(Date.now() / 600000), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (p) {
-    var hier = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-    if (!p || p.isbn13 !== isbn || !p.lien || p.date < hier || !/^https:\/\//.test(p.lien)) return;
+    var aujourdhui = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    if (!p || p.isbn13 !== isbn || !p.lien || p.date !== aujourdhui || !/^https:\/\//.test(p.lien)) return;          // valable le jour où elle est offerte seulement
     var prix = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(p.prix);
     var t = document.createElement('p'), s = document.createElement('strong'), a = document.createElement('a');
     s.textContent = 'Pépite du jour. ';
