@@ -139,10 +139,17 @@
   <div id="pp-liste"></div>
 </div>
 <div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
-  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. La plus récemment vue en premier.</p>
+  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date d'apparition ; l'ordre se change avec « Trier par ».</p>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">
+      <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
+        <option value="recent">Date et heure (récentes d'abord)</option>
+        <option value="serie">Série et numéro</option>
+        <option value="prix">Prix croissant</option>
+        <option value="ecart">Meilleures affaires d'abord</option>
+        <option value="origine">Origine</option>
+      </select></label>
       <label class="pp-tri"><span>Origine</span><select id="rc-source">
         <option value="tout">Toutes</option>
         <option value="ebay">eBay</option>
