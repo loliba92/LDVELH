@@ -8,16 +8,20 @@
   const liste = document.getElementById('comm-liste');
   if (!liste) return;
   const form = document.getElementById('comm-form'), vide = document.getElementById('comm-vide'), msg = document.getElementById('comm-msg');
+  const ajout = document.getElementById('comm-ajout'), fenetre = document.getElementById('comm-dialog');
   let donnees = [];
   const dire = (t) => { msg.textContent = t; msg.hidden = false; };
   const dessiner = () => {
     const z = estZagor();
-    form.hidden = !z;
+    ajout.hidden = !z;
     vide.hidden = donnees.length > 0;
     liste.innerHTML = donnees.map((x) => `<article class="comm-lien">
-      <h3><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}<span class="sr-only"> (nouvel onglet)</span></a></h3>
-      ${x.description ? `<p>${esc(x.description)}</p>` : ''}
-      ${z ? `<button type="button" class="bouton bouton-clair" data-retrait="${esc(x.adresse)}">Retirer ${esc(x.nom)}</button>` : ''}
+      ${x.image ? `<img src="${esc(x.image)}" alt="" width="640" height="360" loading="lazy" decoding="async">` : `<span class="comm-tuile" aria-hidden="true">${esc(x.nom.charAt(0).toUpperCase())}</span>`}
+      <div class="comm-texte">
+        <h3><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}<span class="sr-only"> (nouvel onglet)</span></a></h3>
+        ${x.description ? `<p>${esc(x.description)}</p>` : ''}
+        ${z ? `<button type="button" class="bouton-lien" data-retrait="${esc(x.adresse)}">Retirer ${esc(x.nom)}</button>` : ''}
+      </div>
     </article>`).join('');
   };
   async function envoyer(commande) {
@@ -28,6 +32,8 @@
       else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
     } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
   }
+  ajout.addEventListener('click', () => { msg.hidden = true; fenetre.showModal(); });
+  document.getElementById('comm-fermer').addEventListener('click', () => fenetre.close());
   form.addEventListener('submit', (ev) => {
     ev.preventDefault();
     const nom = net($('#cf-nom').value), adresse = $('#cf-url').value.trim(), description = net($('#cf-desc').value);

@@ -2,15 +2,25 @@
 
 Usage : python pipeline/communaute.py "ajout ; nom ; https://adresse ; description | retrait ; https://adresse"
 Écrit web/data/communaute.json, trié par nom. Une adresse déjà présente est remplacée.
+Pour un ajout, l'image du site (balise og:image) est copiée dans web/data/communaute/ ; sans image, la carte affiche une tuile.
 """
+import hashlib
 import json
+import re
 import sys
+import urllib.request
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
-FICHIER = Path(__file__).resolve().parent.parent / "web" / "data" / "communaute.json"
+RACINE = Path(__file__).resolve().parent.parent
+FICHIER = RACINE / "web" / "data" / "communaute.json"
+DOSSIER_IMAGES = RACINE / "web" / "data" / "communaute"
 MAX_NOM = 60
 MAX_DESCRIPTION = 300
+MAX_PAGE = 1_000_000
+MAX_IMAGE = 3_000_000
+EXTENSIONS = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+ENTETE = {"User-Agent": "La Cote du Heros (liste Communauté)"}
 
 
 def lire(chemin=FICHIER):
@@ -25,7 +35,48 @@ def adresse_valide(adresse):
     return p.scheme == "https" and bool(p.netloc) and " " not in adresse
 
 
-def appliquer(liste, commandes):
+def image_de_page(html, base):
+    """Adresse absolue de la balise og:image (ou twitter:image) de la page, ou None."""
+    for balise in re.findall(r"<meta\b[^>]*>", html, flags=re.I):
+        if re.search(r'(property|name)\s*=\s*["\'](og:image|twitter:image)["\']', balise, flags=re.I):
+            m = re.search(r'content\s*=\s*["\']([^"\']+)["\']', balise, flags=re.I)
+            if m and m.group(1).strip():
+                return urljoin(base, m.group(1).strip())
+    return None
+
+
+def telecharger(adresse, limite):
+    req = urllib.request.Request(adresse, headers=ENTETE)
+    with urllib.request.urlopen(req, timeout=10) as r:
+        type_ = r.headers.get_content_type()
+        return type_, r.read(limite + 1)
+
+
+def chercher_image(adresse):
+    """Copie l'image du site dans web/data/communaute/ et renvoie son chemin (relatif à web/), ou '' si rien."""
+    try:
+        _, page = telecharger(adresse, MAX_PAGE)
+        url = image_de_page(page[:MAX_PAGE].decode("utf-8", "replace"), adresse)
+        if not url or not adresse_valide(url):
+            return ""
+        type_, contenu = telecharger(url, MAX_IMAGE)
+        if type_ not in EXTENSIONS or len(contenu) > MAX_IMAGE:
+            return ""
+        nom = hashlib.sha1(adresse.encode("utf-8")).hexdigest()[:12] + "." + EXTENSIONS[type_]
+        DOSSIER_IMAGES.mkdir(parents=True, exist_ok=True)
+        (DOSSIER_IMAGES / nom).write_bytes(contenu)
+        return f"data/communaute/{nom}"
+    except Exception:  # noqa: BLE001 — un site injoignable ne doit pas bloquer l'ajout
+        return ""
+
+
+def retirer_image(entree):
+    chemin = entree.get("image") or ""
+    if chemin.startswith("data/communaute/"):
+        (RACINE / "web" / chemin).unlink(missing_ok=True)
+
+
+def appliquer(liste, commandes, image=lambda adresse: ""):
     """Applique les commandes (séparées par « | ») à la liste. Lève ValueError à la première commande invalide."""
     liste = list(liste)
     for brut in commandes.split("|"):
@@ -42,9 +93,15 @@ def appliquer(liste, commandes):
                 raise ValueError(f"adresse refusée (https attendu) : {adresse!r}")
             if len(description) > MAX_DESCRIPTION:
                 raise ValueError("description trop longue")
+            for x in liste:
+                if x["adresse"] == adresse:
+                    retirer_image(x)
             liste = [x for x in liste if x["adresse"] != adresse]
-            liste.append({"nom": nom, "adresse": adresse, "description": description})
+            liste.append({"nom": nom, "adresse": adresse, "description": description, "image": image(adresse)})
         elif action == "retrait" and len(morceaux) == 2:
+            for x in liste:
+                if x["adresse"] == morceaux[1]:
+                    retirer_image(x)
             liste = [x for x in liste if x["adresse"] != morceaux[1]]
         else:
             raise ValueError(f"commande inconnue : {brut!r}")
@@ -56,7 +113,7 @@ def main(argv):
         print("usage : python pipeline/communaute.py \"ajout ; nom ; https://… ; description\"", file=sys.stderr)
         return 2
     try:
-        liste = appliquer(lire(), argv[1])
+        liste = appliquer(lire(), argv[1], chercher_image)
     except ValueError as e:
         print(f"refusé : {e}", file=sys.stderr)
         return 1

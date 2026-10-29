@@ -1250,11 +1250,6 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .carte > header { min-height: 30px; }
 
 /* Communauté */
-.comm-liste { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 720px; }
-.comm-lien { padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--brass); border-radius: var(--r); background: var(--bg); }
-.comm-lien a { display: block; color: var(--text); text-decoration: none; }
-.comm-lien a:hover strong { color: var(--accent); text-decoration: underline; }
-.comm-lien .sous { display: block; margin-top: 2px; }
 .comm-vide { max-width: 62ch; padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: var(--r); }
 
 /* Demandes d'ajout (espace administrateur) */
@@ -2444,10 +2439,17 @@ button.maj-ligne:hover { background: var(--surface-2); }
 
 .incoh-flag { display: inline-block; margin-top: 6px; padding: 2px 8px; border: 1px solid #c4465a; border-radius: var(--r); background: rgba(122, 31, 43, .35); color: #f0a5b0; font: 600 .8rem var(--f-ui); }
 
-.comm-liste { display: grid; gap: 12px; margin: 16px 0; }
-.comm-lien { padding: 12px 14px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r); }
-.comm-lien h3 { margin: 0 0 4px; font: 700 1.05rem var(--f-ui); }
-.comm-lien h3 a { color: var(--text); overflow-wrap: anywhere; }
-.comm-lien p { margin: 0 0 8px; color: var(--muted); font-size: .95rem; }
-.comm-form { margin: 16px 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--r); }
-.comm-form h2 { margin-top: 0; }
+.comm-liste { display: grid; gap: 14px; margin: 16px 0; }
+@media (min-width: 720px) { .comm-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.comm-lien { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.comm-lien img, .comm-tuile { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--surface-2, #161616); }
+.comm-tuile { display: grid; place-items: center; font: 700 2.4rem var(--f-display); color: var(--gold); }
+.comm-texte { padding: 12px 14px 14px; }
+.comm-lien h3 { margin: 0 0 4px; font: 700 1.05rem var(--f-ui); overflow-wrap: anywhere; }
+.comm-lien h3 a { color: var(--text); }
+.comm-lien p { margin: 0 0 8px; color: var(--muted); font-size: .95rem; overflow-wrap: anywhere; }
+.comm-soutien { margin-top: 28px; font-size: .82rem; }
+.comm-admin { margin: 14px 0 0; text-align: right; }
+.comm-dialog { width: min(420px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); }
+.comm-dialog::backdrop { background: rgba(0, 0, 0, .6); }
+.comm-form h2 { margin: 0 0 10px; font: 700 1.2rem var(--f-display); }
