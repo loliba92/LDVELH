@@ -1,4 +1,4 @@
-// Version du 2026-10-29 21:51 (heure de Paris) : liste de la Communauté éditable par le Zagor (lot communaute.yml).
+// Version du 2026-10-29 22:17 (heure de Paris) : likes sur les liens de la Communauté (aimer_lien, mes_likes).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -36,6 +36,8 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   pepite_vendre: 'superadmin',    // ou la marquer vendue (barrée sur le site, plus proposée)
   noter: 'heros',                 // tout compte connecté peut noter un livre de 1 à 5
   mes_notes: 'heros',
+  aimer_lien: 'heros',            // « j'aime » sur un lien de la Communauté (un par personne)
+  mes_likes: 'heros',
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
   avis: 'heros'                   // un avis libre sur le site, envoyé par courriel à l'éditeur
 };
@@ -121,6 +123,12 @@ function validerPepite(q) {
     etat: String(q.etat), origine: String(q.origine), lien: lien, solide: q.solide === true } };
 }
 
+/* Lien de la Communauté : une adresse https, pas plus de 300 caractères. */
+function validerLien(adresse) {
+  var a = String(adresse == null ? '' : adresse).trim();
+  if (!/^https:\/\/\S+$/.test(a) || a.length > 300) return { ok: false, raison: 'adresse refusée (https attendu)' };
+  return { ok: true, adresse: a };
+}
 function copie(o) { return JSON.parse(JSON.stringify(o)); }
 function nbSuperAdmins(equipe) { return Object.keys(equipe).filter(function (k) { return equipe[k].role === 'superadmin'; }).length; }
 

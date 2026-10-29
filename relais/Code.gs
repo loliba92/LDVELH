@@ -1,4 +1,4 @@
-// Version du 2026-10-29 21:51 (heure de Paris) : lot communaute.yml réservé au Zagor (liste de la Communauté).
+// Version du 2026-10-29 22:17 (heure de Paris) : likes sur les liens de la Communauté (aimer_lien, mes_likes ; lecture publique ?likes=1).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -262,6 +262,32 @@ function doPost(e) {
       return reponse({ ok: true, moyenne: resultatNote[0], nombre: resultatNote[1], note: nt.note });
     }
 
+    if (action === 'aimer_lien') {                 // « j'aime » sur un lien de la Communauté : un par personne, on peut le retirer
+      var li = validerLien(q.adresse);
+      if (!li.ok) return reponse({ ok: false, erreur: li.raison });
+      var verrouLien = LockService.getScriptLock(), resultatLien;
+      verrouLien.waitLock(10000);
+      try {
+        var cleLien = cleLike(li.adresse), votesLien = lireLikes(cleLien), qui = votant(moi.empreinte);
+        if (q.aime === false || q.aime === 'non') delete votesLien.votes[qui]; else votesLien.votes[qui] = 1;
+        if (!votesLien.adresse) votesLien.adresse = li.adresse;
+        if (Object.keys(votesLien.votes).length) PropertiesService.getScriptProperties().setProperty(cleLien, JSON.stringify(votesLien));
+        else PropertiesService.getScriptProperties().deleteProperty(cleLien);
+        resultatLien = { ok: true, nombre: Object.keys(votesLien.votes).length, aime: !!votesLien.votes[qui] };
+      } finally { verrouLien.releaseLock(); }
+      CacheService.getScriptCache().remove('likes');
+      return reponse(resultatLien);
+    }
+
+    if (action === 'mes_likes') {                  // les liens aimés par la personne connectée : [adresse]
+      var tousLikes = PropertiesService.getScriptProperties().getProperties(), moi2 = votant(moi.empreinte), aimes = [];
+      Object.keys(tousLikes).forEach(function (k) {
+        if (k.indexOf(PREFIXE_LIKE) !== 0) return;
+        try { var vl = JSON.parse(tousLikes[k]); if (vl.votes && vl.votes[moi2]) aimes.push(vl.adresse); } catch (e) { /* propriété abîmée : ignorée */ }
+      });
+      return reponse({ ok: true, adresses: aimes });
+    }
+
     if (action === 'mes_notes') {                  // les notes données par la personne connectée : { livre: note }
       var toutes = PropertiesService.getScriptProperties().getProperties(), qui = votant(moi.empreinte), miennes = {};
       Object.keys(toutes).forEach(function (k) {
@@ -343,7 +369,27 @@ function testerCourriel() {
   Logger.log('Courriel envoyé. Quota restant aujourd\'hui : ' + MailApp.getRemainingDailyQuota());
 }
 
+var PREFIXE_LIKE = 'l:';
+function cleLike(adresse) { return PREFIXE_LIKE + empreinteDe(adresse).slice(7, 23); }
+function lireLikes(cle) {
+  var t = prop(cle);
+  try { return t ? JSON.parse(t) : { votes: {} }; } catch (e) { return { votes: {} }; }
+}
+/* Nombres de « j'aime » par lien : { adresse: nombre }, gardés dix minutes en mémoire */
+function likesPublics() {
+  var cache = CacheService.getScriptCache(), connu = cache.get('likes');
+  if (connu) return JSON.parse(connu);
+  var toutes = PropertiesService.getScriptProperties().getProperties(), resume = {};
+  Object.keys(toutes).forEach(function (k) {
+    if (k.indexOf(PREFIXE_LIKE) !== 0) return;
+    try { var vl = JSON.parse(toutes[k]); resume[vl.adresse] = Object.keys(vl.votes || {}).length; } catch (e) { /* propriété abîmée : ignorée */ }
+  });
+  cache.put('likes', JSON.stringify(resume), 600);
+  return resume;
+}
+
 function doGet(e) {
+  if (e && e.parameter && e.parameter.likes) return reponse({ ok: true, likes: likesPublics() });       // lecture publique : pas de connexion
   if (e && e.parameter && e.parameter.notes) return reponse({ ok: true, notes: notesPubliques() });      // lecture publique : pas de connexion
   return reponse({ ok: true, service: 'relais La Cote du Héros' });
 }
