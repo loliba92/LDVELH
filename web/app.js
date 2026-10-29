@@ -743,7 +743,7 @@
   const estNiveau3Brut = () => !!window.Compte && window.Compte.role() === 'superadmin';
   let ANN = null, annChargees = null;
   const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
-    .then((a) => { ANN = a && a.annonces ? a : null; return ANN; }));
+    .then((a) => { ANN = a && a.annonces ? a : null; if (!ANN) annChargees = null; return ANN; }));          // sans réponse : on réessaiera au prochain appel
   function blocAnnonces(b) {
     return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
@@ -1810,26 +1810,56 @@
     if (!OFFRE || !OFFRE.offre) return null;
     return Object.values(OFFRE.offre).reduce((t, o) => t + (o.ebay || 0) + (o.lbc || 0) + (o.vin || 0) + (o.lib || 0), 0);
   }
+  // Zagor : parmi les annonces en ligne, combien sont plus basses que notre estimation (prix du site pour le même état)
+  function nbSousEstimation() {
+    if (!ANN || !ANN.annonces) return null;
+    let n = 0;
+    Object.entries(ANN.annonces).forEach(([isbn, parEtat]) => {
+      const b = DATA.find((x) => x.isbn13 === isbn);
+      if (!b || !b.prix) return;
+      Object.entries(parEtat).forEach(([cle, liste]) => (liste || []).forEach(([prix, , , origine, vue]) => {
+        const pub = b.prix[cle];
+        const partie = !!(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay);
+        if (pub && !partie && prix < pub) n += 1;
+      }));
+    });
+    return n;
+  }
+  // Les totaux restent affichés : gardés sur l'appareil (derniers chiffres connus), « … » tant qu'on n'en a aucun, jamais une carte qui disparaît
+  const CLE_COMPTEURS = 'cdh-compteurs-accueil';
+  const compteursGardes = () => { try { return JSON.parse(localStorage.getItem(CLE_COMPTEURS) || 'null') || {}; } catch (e) { return {}; } };
+  const garderCompteurs = (d) => { try { localStorage.setItem(CLE_COMPTEURS, JSON.stringify(d)); } catch (e) { /* stockage indisponible */ } };
   function majCompteursAccueil() {
     const z = $('#compteurs-accueil');
     if (!z) return;
-    if (!niveau2Connu()) { z.innerHTML = ''; return; }
-    const nb = nbButinTotal(), na = nbAnnoncesEnLigne(), niv3 = estNiveau3Brut();
-    if (nb == null) { z.innerHTML = ''; return; }
+    const role = window.Compte && window.Compte.role && window.Compte.role();
+    if (!['admin', 'superadmin'].includes(role)) { z.innerHTML = ''; if (role) { try { localStorage.removeItem(CLE_COMPTEURS); } catch (e) { /* rien */ } } return; }
+    const niv3 = role === 'superadmin', d = compteursGardes();
+    const nb = DATA.length ? nbButinTotal() : null, na = DATA.length ? nbAnnoncesEnLigne() : null, sous = niv3 && DATA.length ? nbSousEstimation() : null;
+    if (nb != null) d.nb = nb;
+    if (na != null) d.na = na;
+    if (sous != null) d.sous = sous;
+    if (nb != null || na != null || sous != null) garderCompteurs(d);
+    const n = (v) => (v == null ? '…' : v);
     // Le détail de toutes les annonces est réservé au Zagor ; les sorciers ont le détail du Butin
-    const carte = (href, titre, n, detail) => {
-      const corps = `<b>${n}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? '<em>Voir le détail →</em>' : ''}`;
+    const carte = (href, titre, valeur, detail) => {
+      const corps = `<b>${valeur}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? '<em>Voir le détail →</em>' : ''}`;
       return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
     };
+    const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
     z.innerHTML = '<div class="compteurs-acc">'
-      + carte('butin.html#pepites', 'Butin', nb, `annonce${nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + (na != null ? carte(niv3 ? 'butin.html#recues' : '', 'Annonces reçues', na, 'en ligne au dernier relevé (eBay, Leboncoin, Vinted, librairies)') : '')
+      + carte('butin.html#pepites', 'Butin', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
+      + carte(niv3 ? 'butin.html#recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`)
       + '</div>';
   }
+  document.addEventListener('cdh-compte', majCompteursAccueil);
+  majCompteursAccueil();
+  setTimeout(() => { if (niveau2Connu() && !OFFRE) chargerOffre().then(() => majCompteursAccueil()); }, 20000);          // une seconde chance si le Butin n'est pas arrivé
   function majAlerteButin() {
     const n = nbNouveauxButin(), niv2 = niveau2Connu();
     nbButinNouveaux = n; majButin();
     majCompteursAccueil();
+    if (estNiveau3Brut()) chargerAnnonces().then(() => majCompteursAccueil());
     const bb = $('#nb-butin-bas');          // pastille sur « Accueil » dans la barre du bas (téléphone) : nouveaux butins, sorciers et Zagor seulement
     if (bb) { bb.textContent = n ? String(n) : ''; bb.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
     document.querySelectorAll('.menu-butin').forEach((l) => {
