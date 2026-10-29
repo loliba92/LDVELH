@@ -1772,7 +1772,7 @@ button.seg-ligne:hover, button.seg-ligne:focus-visible { border-color: var(--gol
 .scan-etat { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .scan-etat-lib { color: var(--muted); font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; }
 .scan-dialog .ex-etats button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.scan-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 26vh; overflow-y: auto; }
+ul.scan-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 26vh; overflow-y: auto; }
 .scan-liste li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); font-size: .95rem; }
 .scan-liste li.ok { border-color: rgba(143, 211, 168, .5); }
 .scan-liste li.ko { border-color: rgba(240, 165, 176, .5); }
