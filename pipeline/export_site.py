@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
-from prix_neuf import FRAIS_LIBRAIRIE
+from prix_neuf import FRAIS_LIBRAIRIE, prix_livre_vinted
 import calibration
 import cote_v2
 import importer_leboncoin
@@ -177,8 +177,15 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
         with open(f, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh):
                 supp = (r.get("etat_suppose") or "").strip()
-                fdp = float(r.get("fdp") or 0)          # Leboncoin / Vinted : frais ajoutés au prix par le bot (la médiane de la cote reste calculée sur le prix nu)
-                vues[(r["isbn13"], r["lien"])] = (r["etat"], round(float(r["prix"]) + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
+                prix = float(r["prix"])
+                brut_fdp = (r.get("fdp") or "").strip()
+                if brut_fdp:
+                    fdp = float(brut_fdp)          # Leboncoin / Vinted : frais ajoutés au prix par le bot (la médiane de la cote reste calculée sur le prix nu)
+                elif r["trouvee_par"] == "vinted":
+                    fdp = prix_livre_vinted(prix) - prix      # lignes reçues avant la colonne fdp : tout se commande sur Vinted, mêmes frais par défaut que le bot
+                else:
+                    fdp = 0.0
+                vues[(r["isbn13"], r["lien"])] = (r["etat"], round(prix + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
     sortie = {}
     for (isbn, lien), (etat, prix, titre, par, jour, supp) in vues.items():

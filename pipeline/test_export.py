@@ -128,9 +128,11 @@ class TestAnnoncesFdp(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = Path(d) / "annonces-vinted-2026-10-27.csv"
             f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp\n111,bon,10.00,A,https://www.vinted.fr/items/1-a,1,vinted,4.20\n"
-                         "111,bon,12.00,B,https://www.leboncoin.fr/ad/livres/2,1,leboncoin,\n", encoding="utf-8")
+                         "111,bon,12.00,B,https://www.leboncoin.fr/ad/livres/2,1,leboncoin,\n"
+                         "111,bon,10.00,C,https://www.vinted.fr/items/3-c,1,vinted,\n", encoding="utf-8")        # Vinted reçue sans fdp : frais par défaut
             liste = annonces_cumulees([f])["111"]["bon"]
-        self.assertEqual({a[3]: a[0] for a in liste}, {"vinted": 14.2, "leboncoin": 12.0})       # fdp vide : prix nu
+        self.assertEqual({a[2]: a[0] for a in liste}, {"https://www.vinted.fr/items/1-a": 14.2, "https://www.leboncoin.fr/ad/livres/2": 12.0,
+                                                       "https://www.vinted.fr/items/3-c": 14.2})            # Leboncoin sans fdp : prix nu
 
 
 class TestButinVinted(unittest.TestCase):
