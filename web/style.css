@@ -2372,6 +2372,14 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .captures-zone { --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; margin: 12px 0; }
 .captures-zone:empty { display: none; }
 .captures-titre { margin: 0 0 6px; font: 700 1.05rem var(--f-ui); color: var(--text); }
+.cp-bilan { margin: 0 0 4px; font-size: 1rem; color: var(--text); }
+.cp-bilan b { font-size: 1.15rem; color: var(--gold); }
+.cp-legende b { color: var(--text); font-variant-numeric: tabular-nums; }
+.cp-tendance { margin: 0 0 8px; font-size: .95rem; color: var(--text); }
+.cp-tendance b { font-size: 1.05rem; }
+.cp-tendance b.cp-hausse { color: #8fd3a8; } .cp-tendance b.cp-baisse { color: #f0a5b0; }
+.cp-tendance .sous { display: block; font-size: .85rem; }
+.captures-table tfoot th, .captures-table tfoot td { border-top: 2px solid var(--line-strong); }
 .cp-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; list-style: none; margin: 0 0 6px; padding: 0; font-size: .9rem; color: var(--muted); }
 .cp-legende li { display: flex; align-items: center; gap: 6px; }
 .cp-pastille { display: inline-block; width: 10px; height: 10px; border-radius: 2px; flex: none; }
