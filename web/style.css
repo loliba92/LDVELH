@@ -2342,6 +2342,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-prix { font: 700 1.1rem var(--f-ui); color: var(--gold); text-align: right; white-space: nowrap; }
 .imp-ligne2 { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: .85rem; color: var(--muted); }
 .imp-ligne2 .rc-pastille { font-size: .72rem; line-height: 1.5; white-space: nowrap; }
+.imp-src { font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
 .imp-vendu { opacity: .55; }
 
 /* Nouveaux butins : bandeau de l'accueil et entrée « Butin » du menu du haut (sorciers et Zagor) */

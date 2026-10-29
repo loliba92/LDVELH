@@ -594,7 +594,14 @@
       const mots = clair(champ.value).split(' ').filter(Boolean), q = mots.join(' ');
       if (!ANN) { etat.textContent = annChargees ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
       const nbEd = Object.keys(ANN.annonces).length;
-      if (q.length < 2) { etat.textContent = `Relevé du ${jour(ANN.date)} : annonces retenues pour ${nbEd} éditions. Tapez au moins deux lettres.`; liste.innerHTML = ''; return; }
+      // Sans recherche : les éditions dont une annonce a été vue le plus récemment
+      const derniereVue = (ed) => Object.values(ANN.annonces[ed.isbn] || {}).reduce((m, l) => l.reduce((n, x) => (x[4] && x[4] > n ? x[4] : n), m), '');
+      if (q.length < 2) {
+        const recentes = EDITIONS.filter(aDesAnnonces).map((ed) => [ed, derniereVue(ed)]).sort((x, y) => (x[1] < y[1] ? 1 : x[1] > y[1] ? -1 : 0)).slice(0, 12).map((x) => x[0]);
+        etat.textContent = `Relevé du ${jour(ANN.date)} : annonces retenues pour ${nbEd} éditions. Voici les ${recentes.length} dont les annonces ont été vues le plus récemment ; tapez au moins deux lettres pour chercher un livre.`;
+        liste.innerHTML = recentes.map((ed) => `<article class="rv-edition">${annoncesEdition(ed)}</article>`).join('');
+        return;
+      }
       const trouves = EDITIONS.filter((ed) => aDesAnnonces(ed) && (() => { const t = clair(ed.titre + ' ' + ed.serie + ' ' + (ed.numero || '')); return mots.every((m) => t.includes(m)); })()).slice(0, 12);
       etat.textContent = trouves.length ? `${trouves.length} édition${trouves.length > 1 ? 's' : ''}${trouves.length === 12 ? ' (les 12 premières : précisez la recherche)' : ''}.` : 'Aucune édition avec des annonces retenues pour cette recherche.';
       liste.innerHTML = trouves.map((ed) => `<article class="rv-edition">${annoncesEdition(ed)}</article>`).join('');
