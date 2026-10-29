@@ -2436,3 +2436,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 899px) { .barre-bas #nb-butin-bas { position: absolute; top: 4px; left: calc(50% + 6px); right: auto; margin: 0; } }
 
 .captures-zone { scroll-margin-top: 70px; }
+.stats-rc { margin: 10px 0 0; }
+.stats-resume { margin: 0 0 8px; font-size: .95rem; color: var(--text); }
+.stats-resume b { color: var(--gold); }
+.stats-titre { margin: 12px 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; color: var(--gold); }
