@@ -1,4 +1,4 @@
-// Version du 2026-10-29 09:08 (heure de Paris) : pépite Vinted, pépite « Marquer vendue », annonces reçues, indice de marché (indice_lire). Si cette ligne est ancienne dans Apps Script, le fichier n'est pas à jour.
+// Version du 2026-10-29 21:51 (heure de Paris) : lot communaute.yml réservé au Zagor (liste de la Communauté).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
