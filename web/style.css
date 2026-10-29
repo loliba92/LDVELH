@@ -2448,8 +2448,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .comm-lien h3 { margin: 0 0 4px; font: 700 1.05rem var(--f-ui); overflow-wrap: anywhere; }
 .comm-lien h3 a { color: var(--text); }
 .comm-lien p { margin: 0 0 8px; color: var(--muted); font-size: .95rem; overflow-wrap: anywhere; }
-.comm-note { margin: 28px auto 0; font-size: .8rem; }
-.comm-note p { margin: 0; color: var(--muted); }
+.comm-note { margin: 28px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: .8rem; }
 .comm-admin { margin: 14px 0 0; }
 .comm-dialog { width: min(420px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); }
 .comm-dialog::backdrop { background: rgba(0, 0, 0, .6); }
