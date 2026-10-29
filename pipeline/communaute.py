@@ -45,6 +45,19 @@ def image_de_page(html, base):
     return None
 
 
+def image_de_contenu(html, base):
+    """Sans balise de partage : première grande image en paysage de la page (largeur d'au moins 600 px), ou None."""
+    for balise in re.findall(r"<img\b[^>]*>", html, flags=re.I):
+        src = re.search(r'\ssrc\s*=\s*["\']([^"\']+)["\']', balise, flags=re.I)
+        larg = re.search(r'\swidth\s*=\s*["\']?(\d+)', balise, flags=re.I)
+        haut = re.search(r'\sheight\s*=\s*["\']?(\d+)', balise, flags=re.I)
+        if not src or not larg or not haut:
+            continue
+        if int(larg.group(1)) >= 600 and int(larg.group(1)) >= int(haut.group(1)):
+            return urljoin(base, src.group(1).strip())
+    return None
+
+
 def telecharger(adresse, limite):
     req = urllib.request.Request(adresse, headers=ENTETE)
     with urllib.request.urlopen(req, timeout=10) as r:
@@ -56,7 +69,8 @@ def chercher_image(adresse):
     """Copie l'image du site dans web/data/communaute/ et renvoie son chemin (relatif à web/), ou '' si rien."""
     try:
         _, page = telecharger(adresse, MAX_PAGE)
-        url = image_de_page(page[:MAX_PAGE].decode("utf-8", "replace"), adresse)
+        html = page[:MAX_PAGE].decode("utf-8", "replace")
+        url = image_de_page(html, adresse) or image_de_contenu(html, adresse)
         if not url or not adresse_valide(url):
             return ""
         type_, contenu = telecharger(url, MAX_IMAGE)
