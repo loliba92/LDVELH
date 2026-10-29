@@ -157,6 +157,7 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
   <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date d'apparition ; l'ordre se change avec « Trier par ».</p>
+  <div class="captures-zone"></div>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">
@@ -507,6 +508,7 @@ REVUE = '''<h1>Prix et corrections</h1>
 </div>
 <div class="rv-pane" id="pane-pepites" role="tabpanel" hidden>
   <p class="chapeau">Les bonnes affaires : annonces encore en ligne à <strong>50 % du prix du site ou moins</strong>, pour la même édition et le même état, avec au moins 3 € d'économie. Une annonce est un prix demandé : ouvrez-la pour vérifier le livre, son état et les frais de port.</p>
+  <div class="captures-zone"></div>
   <div class="pp-barre">
     <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">

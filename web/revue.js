@@ -684,7 +684,28 @@
       return [...l].sort((a, b) => f(a, b) || eco(b) - eco(a));
     };
     tri.addEventListener('change', () => { try { localStorage.setItem('cdh-butin-tri', tri.value); } catch (e) { /* tant pis */ } dessinerPepites(); });
+    // Annonces captées chaque jour, par source (eBay, Leboncoin, Vinted, librairies) : 14 derniers jours, pour prendre du recul sur la couverture des recherches
+    const dessinerCaptures = () => {
+      const zones = document.querySelectorAll('.captures-zone');
+      const c = BUT && BUT.captures;
+      if (!zones.length || !c || !c.jours) return;
+      const SOURCES = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
+      const lignes = [];
+      for (let k = 0; k < 14; k += 1) {
+        const cle = new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' }), v = c.jours[cle] || {};
+        const total = SOURCES.reduce((t, [src]) => t + (v[src] || 0), 0);
+        const quand = k === 0 ? "Aujourd'hui" : new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
+        lignes.push(`<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES.map(([src]) => `<td>${v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`);
+      }
+      const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
+      const html = `<details class="captures-acc"><summary>Annonces captées par jour</summary>
+        <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par source</caption>
+          <thead><tr><th scope="col">Jour</th>${SOURCES.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes.join('')}</tbody></table></div>
+        <p class="sous">Annonces nouvelles, comptées une fois le jour où elles apparaissent.${depuis ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont reconstitués au mieux.` : ''}</p></details>`;
+      zones.forEach((z) => { const ouvert = !!(z.querySelector('.captures-acc') || {}).open; z.innerHTML = html; if (ouvert) z.querySelector('.captures-acc').open = true; });
+    };
     dessinerPepites = () => {
+      dessinerCaptures();
       if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;

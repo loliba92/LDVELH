@@ -1829,24 +1829,6 @@
   const CLE_COMPTEURS = 'cdh-compteurs-accueil';
   const compteursGardes = () => { try { return JSON.parse(localStorage.getItem(CLE_COMPTEURS) || 'null') || {}; } catch (e) { return {}; } };
   const garderCompteurs = (d) => { try { localStorage.setItem(CLE_COMPTEURS, JSON.stringify(d)); } catch (e) { /* stockage indisponible */ } };
-  // Annonces captées chaque jour, par source (eBay, Leboncoin, Vinted, librairies) : 14 derniers jours, pour prendre du recul sur la couverture des recherches
-  function htmlCaptures(c) {
-    if (!c || !c.jours) return '';
-    const SOURCES = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies']];
-    const jourParis = (d) => d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-    const lignes = [];
-    for (let k = 0; k < 14; k += 1) {
-      const d = new Date(Date.now() - k * 86400000), cle = jourParis(d), v = c.jours[cle] || {};
-      const total = SOURCES.reduce((t, [src]) => t + (v[src] || 0), 0);
-      const quand = k === 0 ? "Aujourd'hui" : new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
-      lignes.push(`<tr${k === 0 ? ' class="auj"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES.map(([src]) => `<td>${v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`);
-    }
-    const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
-    return `<details class="captures-acc"><summary>Annonces captées par jour</summary>
-      <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par source</caption>
-        <thead><tr><th scope="col">Jour</th>${SOURCES.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes.join('')}</tbody></table></div>
-      <p class="sous">Annonces nouvelles, comptées une fois le jour où elles apparaissent.${depuis ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont reconstitués au mieux.` : ''}</p></details>`;
-  }
   function majCompteursAccueil() {
     const z = $('#compteurs-accueil');
     if (!z) return;
@@ -1865,13 +1847,10 @@
       return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
     };
     const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
-    if (OFFRE && OFFRE.captures) { d.captures = OFFRE.captures; garderCompteurs(d); }
-    const ouvert = !!(z.querySelector('.captures-acc') || {}).open;          // un rafraîchissement ne referme pas le tableau
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butin', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
       + carte(niv3 ? 'butin.html#recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`)
-      + '</div>' + htmlCaptures(d.captures);
-    if (ouvert) { const dt = z.querySelector('.captures-acc'); if (dt) dt.open = true; }
+      + '</div><p class="captures-lien"><a href="butin.html#pepites">Annonces captées par jour, par source : voir le tableau →</a></p>';
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);
   majCompteursAccueil();

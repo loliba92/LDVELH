@@ -2366,6 +2366,11 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .compteur-acc:hover, .compteur-acc:focus-visible { background: rgba(217, 180, 95, .12); }
 .compteur-acc:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
+/* Annonces captées par jour : tableau dans les pages Butin et Annonces reçues, lien sur l'accueil */
+.captures-lien { margin: 8px 0 0; font-size: .9rem; }
+.captures-lien a { color: var(--gold); font-weight: 600; text-decoration: none; }
+.captures-lien a:hover, .captures-lien a:focus-visible { text-decoration: underline; }
+.captures-zone:empty { display: none; }
 /* Annonces captées par jour (accueil, sorciers et Zagor) */
 .captures-acc { margin: 10px 0 0; padding: 4px 16px 12px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r); }
 .captures-acc summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font: 700 1rem var(--f-ui); color: var(--text); }
