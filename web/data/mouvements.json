@@ -2,10 +2,26 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 547,
+ "nb_modifiees": 549,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070333622",
+   "isbn13": "9782070333622",
+   "titre": "Les Démons des Profondeurs",
+   "serie": "Défis Fantastiques",
+   "numero": "362",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 14.18,
+   "apres": 17.55,
+   "pct": 0.238,
+   "nature": "annonces",
+   "nb": 5,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070665839",
@@ -23,12 +39,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 1,
+ "nb_grands_mouvements": 2,
  "modele": {
   "actif": false,
-  "n_paires": 23,
-  "gain": 0.085,
-  "raison": "le modèle ne bat pas assez les archives (gain 8%, 15% exigés)",
+  "n_paires": 24,
+  "gain": 0.097,
+  "raison": "le modèle ne bat pas assez les archives (gain 10%, 15% exigés)",
   "rapport_global": 0.897
  }
 }
