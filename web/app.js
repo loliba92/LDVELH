@@ -1805,33 +1805,31 @@
     });
     return n;
   }
-  function nbAnnoncesRecues() {
-    if (!ANN || !ANN.annonces) return null;
-    let recues = 0, enLigne = 0;
-    Object.values(ANN.annonces).forEach((parEtat) => Object.values(parEtat).forEach((liste) => (liste || []).forEach(([, , , origine, vue]) => {
-      recues += 1;
-      const partie = !!(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay);
-      if (!partie) enLigne += 1;
-    })));
-    return { recues, enLigne };
+  // Annonces en ligne au dernier relevé (eBay, Leboncoin, Vinted, librairies) : somme des nombres par édition que reçoivent déjà les sorciers (pas le détail des annonces)
+  function nbAnnoncesEnLigne() {
+    if (!OFFRE || !OFFRE.offre) return null;
+    return Object.values(OFFRE.offre).reduce((t, o) => t + (o.ebay || 0) + (o.lbc || 0) + (o.vin || 0) + (o.lib || 0), 0);
   }
   function majCompteursAccueil() {
     const z = $('#compteurs-accueil');
     if (!z) return;
     if (!niveau2Connu()) { z.innerHTML = ''; return; }
-    const nb = nbButinTotal(), niv3 = estNiveau3Brut(), ar = niv3 ? nbAnnoncesRecues() : null;
+    const nb = nbButinTotal(), na = nbAnnoncesEnLigne(), niv3 = estNiveau3Brut();
     if (nb == null) { z.innerHTML = ''; return; }
-    const carte = (href, titre, n, detail) => `<a class="compteur-acc" href="${href}"><b>${n}</b><span><strong>${titre}</strong><small>${detail}</small></span><em>Voir le détail →</em></a>`;
+    // Le détail de toutes les annonces est réservé au Zagor ; les sorciers ont le détail du Butin
+    const carte = (href, titre, n, detail) => {
+      const corps = `<b>${n}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? '<em>Voir le détail →</em>' : ''}`;
+      return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
+    };
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butin', nb, `annonce${nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + (ar ? carte('butin.html#recues', 'Annonces reçues', ar.enLigne, `en ligne, sur ${ar.recues} reçues aux derniers relevés`) : '')
+      + (na != null ? carte(niv3 ? 'butin.html#recues' : '', 'Annonces reçues', na, 'en ligne au dernier relevé (eBay, Leboncoin, Vinted, librairies)') : '')
       + '</div>';
   }
   function majAlerteButin() {
     const n = nbNouveauxButin(), niv2 = niveau2Connu();
     nbButinNouveaux = n; majButin();
     majCompteursAccueil();
-    if (estNiveau3Brut()) chargerAnnonces().then(() => majCompteursAccueil());
     const bb = $('#nb-butin-bas');          // pastille sur « Accueil » dans la barre du bas (téléphone) : nouveaux butins, sorciers et Zagor seulement
     if (bb) { bb.textContent = n ? String(n) : ''; bb.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
     document.querySelectorAll('.menu-butin').forEach((l) => {
