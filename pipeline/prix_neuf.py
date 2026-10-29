@@ -47,9 +47,15 @@ URL = "https://www.leslibraires.fr/livre/{isbn}"
 CHAMPS = ["isbn13", "prix", "disponibilite", "prix_occasion", "date", "source"]
 CHAMPS_OCCASION = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 FRAIS_LIBRAIRIE = 4.50          # frais de port systématiques chez les librairies de leslibraires.fr (livraison à domicile, standard ou suivie)
-FRAIS_PORT_VINTED = 3.00        # port : Vinted affiche « à partir de 2,83 € » (29/10/2026), plutôt 3 à 5 € selon le transporteur ; on prend 3 €
-FRAIS_PROTECTION_VINTED = 0.83  # « Frais Vinted » (protection acheteurs) vus au paiement ; ils grossissent avec le prix de l'article
-FRAIS_VINTED = round(FRAIS_PORT_VINTED + FRAIS_PROTECTION_VINTED, 2)   # tout se commande : prix livré = prix de l'annonce + 3,83 €
+FRAIS_PORT_VINTED = 3.00        # port : Vinted affiche « à partir de 2,83 € » au paiement (29/10/2026), plutôt 3 à 5 € selon le transporteur ; on prend 3 €
+PROTECTION_FIXE_VINTED = 0.70   # protection acheteurs : 0,70 € + 5 % du prix « habituellement » (liste des tarifs et aide de Vinted)
+PROTECTION_TAUX_VINTED = 0.05
+
+
+def prix_livre_vinted(prix):
+    """Prix payé pour une annonce Vinted : tout se commande (pas de remise en main propre), donc prix + protection acheteurs (0,70 € + 5 %) + port.
+    Exemple : 2,60 € -> 6,43 € (frais 0,83 € vus au paiement, port 3 €) ; 10 € -> 14,20 € ; 15 € -> 19,45 €."""
+    return round(prix * (1 + PROTECTION_TAUX_VINTED) + PROTECTION_FIXE_VINTED + FRAIS_PORT_VINTED, 2)
 ETAT_OCCASION = "tres_bon"   # fiche sans état lisible : très bon état (règle du propriétaire)
 PAUSE = 2.0
 ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
