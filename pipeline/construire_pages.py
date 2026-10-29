@@ -508,7 +508,6 @@ REVUE = '''<h1>Prix et corrections</h1>
 </div>
 <div class="rv-pane" id="pane-pepites" role="tabpanel" hidden>
   <p class="chapeau">Les bonnes affaires : <strong>50 % du prix du site ou moins</strong>, même édition, même état, 3 € d'économie au moins. Ouvrez l'annonce pour vérifier le livre, l'état et les frais de port.</p>
-  <div class="captures-zone" id="captures-pepites"></div>
   <div class="pp-barre">
     <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">

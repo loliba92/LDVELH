@@ -537,6 +537,34 @@
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+  // Annonces reçues (Zagor) : toutes les annonces des derniers relevés, pour les statistiques du graphique
+  let TOUTES_RC = null, redessinerCapt = () => {};
+  const TRANCHES = [[0, 5, 'Moins de 5 €'], [5, 10, '5 à 10 €'], [10, 20, '10 à 20 €'], [20, 50, '20 à 50 €'], [50, Infinity, '50 € et plus']];
+  const mediane = (xs) => { if (!xs.length) return null; const t = [...xs].sort((a, b) => a - b), m = t.length >> 1; return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2; };
+  const pctSigne = (x) => (x == null ? '–' : `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(Math.round(x * 100))} %`);
+  const estPepite = (a) => a.v === 'super' || a.v === 'pepite';
+  function statsRecues(lignes) {
+    const NOMS = { ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'Librairies' };
+    const groupe = (liste, nom) => {
+      const ecarts = liste.filter((a) => a.pub).map((a) => a.prix / a.pub - 1);
+      return { nom, n: liste.length, medPrix: mediane(liste.map((a) => a.prix)), ecart: mediane(ecarts), pep: liste.filter(estPepite).length };
+    };
+    const plateformes = Object.keys(NOMS).map((fam) => groupe(lignes.filter((a) => a.fam === fam), NOMS[fam])).filter((g) => g.n);
+    const tranches = TRANCHES.map(([min, max, nom]) => groupe(lignes.filter((a) => a.prix >= min && a.prix < max), nom)).filter((g) => g.n);
+    const part = (g) => (g.n ? g.pep / g.n : 0);
+    const avecEcart = plateformes.filter((g) => g.ecart != null);
+    const plusChere = avecEcart.reduce((m, g) => (g.ecart > m.ecart ? g : m), avecEcart[0]);
+    const moinsChere = avecEcart.reduce((m, g) => (g.ecart < m.ecart ? g : m), avecEcart[0]);
+    const plusPepites = plateformes.reduce((m, g) => (g.pep > m.pep ? g : m), plateformes[0]);
+    const pct = (x) => `${Math.round(x * 100)} %`;
+    const ligne = (g, colonnes) => `<tr><th scope="row">${esc(g.nom)}</th>${colonnes(g)}</tr>`;
+    const tete = (cols) => `<thead><tr>${cols.map((c) => `<th scope="col">${c}</th>`).join('')}</tr></thead>`;
+    const resume = (plusChere && moinsChere && plusPepites) ? `<p class="stats-resume">Plus chère : <b>${esc(plusChere.nom)}</b> (${pctSigne(plusChere.ecart)} au prix du site, médiane). Moins chère : <b>${esc(moinsChere.nom)}</b> (${pctSigne(moinsChere.ecart)}). Plus de pépites : <b>${esc(plusPepites.nom)}</b> (${plusPepites.pep} sur ${plusPepites.n} annonces).</p>` : '';
+    const tabPlat = `<table class="captures-table"><caption class="sr-only">Statistiques par plateforme</caption>${tete(['Plateforme', 'Annonces', 'Prix médian', 'Écart au site', 'Pépites'])}<tbody>${plateformes.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${eur(x.medPrix)}</td><td>${pctSigne(x.ecart)}</td><td>${x.pep} · ${pct(part(x))}</td>`)).join('')}</tbody></table>`;
+    const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(part(x))}</td>`)).join('')}</tbody></table>`;
+    return `<div class="stats-rc">${resume}<h4 class="stats-titre">Par plateforme</h4><div class="captures-defile">${tabPlat}</div><h4 class="stats-titre">Par tranche de prix</h4><div class="captures-defile">${tabTr}</div></div>`;
+  }
+  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) : '');
   let dessinerPepites = () => {};
   function pepites() {
     const lignes = [];
@@ -668,7 +696,7 @@
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. Les totaux ne comptent pas aujourd'hui.${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
@@ -693,6 +721,7 @@
         });
       });
     };
+    redessinerCapt = dessinerCaptures;
     let largeurCapt = 0;
     window.addEventListener('resize', () => { const l = document.documentElement.clientWidth; if (Math.abs(l - largeurCapt) > 40) { largeurCapt = l; dessinerCaptures(); } });
     dessinerPepites = () => {
@@ -776,6 +805,7 @@
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, premiere: (ANN.premieres && ANN.premieres[lien]) || '' });
         }));
       });
+      TOUTES_RC = toutes; redessinerCapt();
       const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
@@ -933,7 +963,6 @@
     if (super_ && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
     const versCaptures = (pane) => { ouvrirOnglet(pane); const aller = () => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }; setTimeout(aller, 500); setTimeout(aller, 2500); };
     if (super_ && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
-    if (niveau2 && !super_ && (location.hash || '') === '#captures-pepites' && !pepitesOuvertes) { pepitesOuvertes = true; versCaptures('pepites'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
