@@ -2349,6 +2349,18 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .imp-src, .rc-src { font: 700 .72rem/1.5 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
 .imp-vendu { opacity: .55; }
 
+/* Totaux de l'accueil (sorciers et Zagor) : Butin et Annonces reçues, avec le lien vers le détail */
+#compteurs-accueil:empty { display: none; }
+.compteurs-acc { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin: 14px 0 0; }
+.compteur-acc { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px 14px; padding: 12px 16px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r); background: var(--surface, transparent); color: var(--text); text-decoration: none; }
+.compteur-acc b { grid-row: 1 / 3; font: 700 1.9rem/1 var(--f-ui); color: var(--gold); min-width: 4ch; text-align: right; }
+.compteur-acc span { display: grid; gap: 1px; min-width: 0; }
+.compteur-acc strong { font: 700 1rem var(--f-ui); }
+.compteur-acc small { color: var(--muted); font-size: .85rem; }
+.compteur-acc em { grid-column: 2; font-style: normal; font-size: .85rem; font-weight: 600; color: var(--gold); }
+.compteur-acc:hover, .compteur-acc:focus-visible { background: rgba(217, 180, 95, .12); }
+.compteur-acc:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
 /* Nouveaux butins : bandeau de l'accueil et entrée « Butin » du menu du haut (sorciers et Zagor) */
 #butin-alerte-zone:empty { display: none; }
 .butin-alerte { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; padding: 12px 16px; border: 1px solid var(--gold); border-left-width: 4px; border-radius: var(--r); background: rgba(217, 180, 95, .12); color: var(--text); text-decoration: none; }

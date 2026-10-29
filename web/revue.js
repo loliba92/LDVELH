@@ -903,7 +903,7 @@
   initIndice();
   initNav();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
-  let pepitesOuvertes = false;
+  let pepitesOuvertes = false, recuesOuvertes = false;
   function majAnnonces() {
     const super_ = estNiveau3(), niveau2 = estNiveau2();
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
@@ -918,6 +918,7 @@
       pep.hidden = !niveau2;
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
+    if (super_ && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
