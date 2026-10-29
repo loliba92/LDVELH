@@ -33,6 +33,12 @@ window.Relais = (function () {
   function lireNotes() {
     return pret.then(function () { return URL_RELAIS ? fetch(URL_RELAIS + '?notes=1').then(function (r) { return r.json(); }) : null; });
   }
+  // « J'aime » sur les liens de la Communauté : nombres publics (sans connexion), puis les liens aimés par la personne connectée.
+  function lireLikes() {
+    return pret.then(function () { return URL_RELAIS ? fetch(URL_RELAIS + '?likes=1').then(function (r) { return r.json(); }) : null; });
+  }
+  function aimerLien(adresse, aime) { return appeler('aimer_lien', { adresse: adresse, aime: aime }); }
+  function mesLikes() { return appeler('mes_likes', {}); }
   // Butin (bonnes affaires seulement, niveaux 2 et 3) ou toutes les annonces (niveau 3 seul) : lus par le service technique. Résultat : les annonces, ou null.
   function lireAnnonces(toutes) {
     return pret.then(function () { return actif() ? appeler(toutes ? 'annonces_lire' : 'butin_lire', {}).then(function (r) { return r && r.ok ? r.annonces : null; }) : null; });
@@ -52,5 +58,5 @@ window.Relais = (function () {
     });
   }
 
-  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireAnnonces: lireAnnonces, lireButin: lireButin, oublierButin: oublierButin, pret: pret };
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireLikes: lireLikes, aimerLien: aimerLien, mesLikes: mesLikes, lireAnnonces: lireAnnonces, lireButin: lireButin, oublierButin: oublierButin, pret: pret };
 })();

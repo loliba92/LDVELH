@@ -10,7 +10,16 @@
   const form = document.getElementById('comm-form'), vide = document.getElementById('comm-vide'), msg = document.getElementById('comm-msg');
   const ajout = document.getElementById('comm-ajout'), fenetre = document.getElementById('comm-dialog');
   let donnees = [];
+  let nombres = {}, mes = new Set();
+  const connecte = () => !!window.Cloud && window.Cloud.actif();
   const dire = (t) => { msg.textContent = t; msg.hidden = false; };
+  // « J'aime » : le nombre est public ; le bouton n'apparaît que pour une personne connectée
+  const likeHtml = (adresse) => {
+    const n = nombres[adresse] || 0, aime = mes.has(adresse);
+    return connecte()
+      ? `<p class="comm-like"><button type="button" class="bouton-lien" data-aime="${esc(adresse)}" aria-pressed="${aime}">${aime ? 'Vous aimez' : "J'aime"} · ${n}</button></p>`
+      : `<p class="comm-like sous">${n ? `${n} personne${n > 1 ? 's' : ''} aime${n > 1 ? 'nt' : ''} ce lien` : 'Personne n\'a encore aimé ce lien'}</p>`;
+  };
   const dessiner = () => {
     const z = estZagor();
     ajout.hidden = !z;
@@ -20,6 +29,7 @@
       <div class="comm-texte">
         <h3><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}<span class="sr-only"> (nouvel onglet)</span></a></h3>
         ${x.description ? `<p>${esc(x.description)}</p>` : ''}
+        ${likeHtml(x.adresse)}
         ${z ? `<button type="button" class="bouton-lien" data-retrait="${esc(x.adresse)}">Retirer ${esc(x.nom)}</button>` : ''}
       </div>
     </article>`).join('');
@@ -41,6 +51,22 @@
     envoyer(`ajout ; ${nom} ; ${adresse} ; ${description}`);
   });
   liste.addEventListener('click', (e) => { const b = e.target.closest('[data-retrait]'); if (b) envoyer(`retrait ; ${b.dataset.retrait}`); });
-  document.addEventListener('cdh-compte', dessiner);
+  liste.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-aime]');
+    if (!b) return;
+    const adresse = b.dataset.aime, aime = !mes.has(adresse);
+    b.disabled = true;
+    window.Relais.aimerLien(adresse, aime).then((r) => {
+      if (!r || !r.ok) throw new Error((r && r.erreur) || 'refus');
+      if (r.aime) mes.add(adresse); else mes.delete(adresse);
+      nombres[adresse] = r.nombre;
+      dessiner();
+    }).catch((err) => { b.disabled = false; dire(`Votre « j'aime » n'a pas été enregistré : ${err.message || 'erreur'}.`); });
+  });
+  document.addEventListener('cdh-compte', () => {
+    if (!connecte()) { mes = new Set(); dessiner(); return; }
+    window.Relais.mesLikes().then((r) => { mes = new Set((r && r.ok && r.adresses) || []); dessiner(); }).catch(() => dessiner());
+  });
+  window.Relais.lireLikes().then((r) => { nombres = (r && r.ok && r.likes) || {}; dessiner(); }).catch(() => {});
   fetch('data/communaute.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : [])).catch(() => []).then((d) => { donnees = Array.isArray(d) ? d : []; dessiner(); });
 })();

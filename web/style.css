@@ -2453,3 +2453,4 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .comm-dialog { width: min(420px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); }
 .comm-dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .comm-form h2 { margin: 0 0 10px; font: 700 1.2rem var(--f-display); }
+.comm-like { margin: 6px 0 0; font-size: .9rem; }
