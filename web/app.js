@@ -1845,15 +1845,15 @@
     if (nb != null || na != null || sous != null) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
     // Le détail de toutes les annonces est réservé au Zagor ; les sorciers ont le détail du Butin
-    const carte = (href, titre, valeur, detail) => {
-      const corps = `<b>${valeur}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? '<em>Voir le détail →</em>' : ''}`;
+    const carte = (href, titre, valeur, detail, lien = 'Voir le détail →') => {
+      const corps = `<b>${valeur}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? `<em>${lien}</em>` : ''}`;
       return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
     };
     const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butin', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + carte(niv3 ? 'butin.html#recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`)
-      + '</div><p class="captures-lien"><a href="butin.html#pepites">Annonces captées par jour, par source : voir le tableau →</a></p>';
+      + carte(niv3 ? 'butin.html#captures-recues' : 'butin.html#captures-pepites', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
+      + '</div>';
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);
   majCompteursAccueil();
