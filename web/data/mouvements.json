@@ -2,7 +2,7 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 536,
+ "nb_modifiees": 540,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [],
@@ -10,9 +10,9 @@
  "nb_grands_mouvements": 0,
  "modele": {
   "actif": false,
-  "n_paires": 13,
+  "n_paires": 14,
   "gain": null,
-  "raison": "pas assez d'éditions comparables (13 sur 20 nécessaires)",
+  "raison": "pas assez d'éditions comparables (14 sur 20 nécessaires)",
   "rapport_global": null
  }
 }
