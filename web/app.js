@@ -38,7 +38,7 @@
 
   const defaut = () => ({
     q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'etagere', versions: new Set(VERSIONS),
-    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false, avendre: false,
+    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false, avendre: false, incoh: false,
   });
 
   /* ---------- Chargement ---------- */
@@ -190,6 +190,7 @@
     $('#f-pmin').addEventListener('input', (e) => { S.pmin = e.target.value; changer(); });
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
+    $('#f-incoh').addEventListener('change', (e) => { S.incoh = e.target.checked; changer(); });
     $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) { S.cherche = false; S.avendre = false; } synchroniser(); changer(); });
     document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; S.avendre = e.target.value === 'vendre'; synchroniser(); changer(); } }));
     brancherParcours();
@@ -222,7 +223,7 @@
     $('#f-q').value = S.q; if ($('#h-q')) $('#h-q').value = S.q; $('#f-ed').value = S.ed; remplirSeries();
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
-    $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine;
+    $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine; $('#f-incoh').checked = S.incoh;
     document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = r.value === (S.avendre ? 'vendre' : S.cherche ? 'cherche' : S.mine ? 'mine' : 'tous'); });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     $('#f-versions').value = S.versions.size === VERSIONS.length ? '' : S.versions.size === 1 ? [...S.versions][0] : 'multi';
@@ -236,7 +237,7 @@
   document.addEventListener('cdh-notes', () => { clearTimeout(minuteNotes); minuteNotes = setTimeout(() => { if (PAGE !== 'collection') afficher(); }, 200); });
 
   function nbFiltres() {
-    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.avendre, S.versions.size !== VERSIONS.length].filter(Boolean).length;
+    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.avendre, S.incoh, S.versions.size !== VERSIONS.length].filter(Boolean).length;
   }
   function resumeFiltres() {
     const t = [];
@@ -318,7 +319,7 @@
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
+      (!S.vente || b.en_vente === 1) && (!S.incoh || cotesMasquees() || incoherence(b)) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
       ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
@@ -332,6 +333,19 @@
   const nbActuels = () => META.nb_prix_actuels || 0;
   const prixAnciens = () => nbActuels() === 0;
   const infoPrix = (b, k) => (b.prix_info && b.prix_info[k]) || null;
+  // Cohérence des cotes : convenable ≤ bon état ≤ très bon état, et aucun état très loin des deux autres (proportions 40 / 60 / 100 %)
+  const PROPORTION = { convenable: 0.4, bon: 0.6, tres_bon: 1 };
+  function incoherence(b) {
+    const p = Object.fromEntries(Object.entries(b.prix || {}).filter(([, x]) => x != null));
+    const { convenable: c, bon: bo, tres_bon: t } = p;
+    if (c != null && bo != null && t != null && !(c <= bo && bo <= t)) return 'un état supérieur vaut moins qu\'un état inférieur';
+    const ks = Object.keys(p);
+    if (ks.length < 2) return null;
+    const v = ks.map((k) => p[k] / PROPORTION[k]).sort((x, y) => x - y), m = v.length >> 1;
+    const niveau = v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
+    const loin = ks.find((k) => { const r = p[k] / (niveau * PROPORTION[k]); return r < 0.5 || r > 2; });
+    return loin ? `${etatDe(loin).long.toLowerCase()} très éloigné des deux autres états` : null;
+  }
   const estActuel = (i) => !!i && i.source !== 'archives';
   const NATURES = { annonces: 'annonce', ventes: 'vente', rachats: 'rachat' };
   const dateCourte = (iso) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -441,6 +455,7 @@
   function appliquerMasqueCotes() {
     const m = cotesMasquees();
     document.body.classList.toggle('cotes-masquees', m);
+    if ($('#f-incoh')) $('#f-incoh').closest('label').hidden = m;
     if (!m) return;
     if (S.onglet === 'cote') S.onglet = 'etagere';
     S.mine = false; S.cherche = false; S.avendre = false;               // filtres de collection : réservés aux comptes
@@ -611,7 +626,7 @@
     const vus = tri.slice(0, limite);
     const cartes = vus.map((b) => {
       const p = b.prix[e.k];
-      const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id];
+      const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id], incoh = masq ? null : incoherence(b);
       return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
         <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 5' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
@@ -622,6 +637,7 @@
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!souh}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : souh ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : souh ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
+        ${incoh ? `<span class="incoh-flag" title="${esc(incoh)}">Prix à vérifier</span>` : ''}
         <span class="prix${p == null ? ' nul' : ''}">${p == null ? 'Cote indisponible' : coteTxt(p, e.k, true)}${p == null ? '' : `<small>${e.k === 'tres_bon' ? 'TBE' : esc(e.court.toLowerCase())}</small>`}</span>
       </article>`;
     }).join('');
