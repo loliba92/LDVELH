@@ -1010,7 +1010,7 @@
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
     if (super_ && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
-    const versCaptures = (pane) => { ouvrirOnglet(pane); setTimeout(() => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }, 500); };
+    const versCaptures = (pane) => { ouvrirOnglet(pane); const aller = () => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }; setTimeout(aller, 500); setTimeout(aller, 2500); };
     if (super_ && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
     if (niveau2 && !super_ && (location.hash || '') === '#captures-pepites' && !pepitesOuvertes) { pepitesOuvertes = true; versCaptures('pepites'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
