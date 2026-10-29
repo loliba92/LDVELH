@@ -2,7 +2,7 @@
  "date": "2026-10-29",
  "precedent": "2026-10-28",
  "nb_comparees": 1491,
- "nb_modifiees": 549,
+ "nb_modifiees": 550,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -43,8 +43,8 @@
  "modele": {
   "actif": false,
   "n_paires": 24,
-  "gain": 0.097,
-  "raison": "le modèle ne bat pas assez les archives (gain 10%, 15% exigés)",
+  "gain": 0.113,
+  "raison": "le modèle ne bat pas assez les archives (gain 11%, 15% exigés)",
   "rapport_global": 0.897
  }
 }
