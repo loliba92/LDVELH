@@ -125,9 +125,9 @@ class TestButinVinted(unittest.TestCase):
     def test_le_port_vinted_compte_dans_la_regle_du_butin(self):
         from prix_neuf import FRAIS_VINTED
         revue = [{"isbn": "111", "etat": "bon", "publie": 30.0}]
-        # 10 € + port : 14,50 € <= 50 % de 30 € (15 €) : retenue ; 11 € + port : 15,50 € > 15 € : écartée
+        # 10 € + port et frais (3,66 €) : 13,66 € <= 50 % de 30 € (15 €) : retenue ; 12 € + 3,66 € : 15,66 € > 15 € : écartée
         annonces = {"111": {"bon": [[round(10 + FRAIS_VINTED, 2), "a", "https://www.vinted.fr/items/1-a", "vinted", "2026-10-27", None],
-                                    [round(11 + FRAIS_VINTED, 2), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
+                                    [round(12 + FRAIS_VINTED, 2), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
         butin = extraire_butin(annonces, revue)
         self.assertEqual([a[1] for a in butin["111"]["bon"]], ["a"])
 
