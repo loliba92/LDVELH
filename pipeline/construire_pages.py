@@ -161,6 +161,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
   <div class="captures-zone" id="captures-recues"></div>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
+    <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot, plusieurs mots, une partie du titre"></div>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>

@@ -757,6 +757,8 @@
   // Onglet « Annonces reçues » (niveau 3 seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
   let dessinerRecues = () => {};
   function initRecues() {
+    const rechercheRc = $('#rc-q');
+    if (rechercheRc) rechercheRc.addEventListener('input', () => { limite = 60; dessinerRecues(); });
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
@@ -800,6 +802,15 @@
     const quandCle = (a) => a.premiere || a.vue || '';
     const parRecent = (a, b) => quandCle(b).localeCompare(quandCle(a)) || a.prix - b.prix;
     const numeroDe = (a) => parseInt(a.ed.numero, 10) || 0;
+    const distance = (a, b) => {          // distance de Levenshtein, pour les fautes de frappe
+      let ligne = Array.from({ length: b.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= a.length; i += 1) {
+        const suite = [i];
+        for (let j = 1; j <= b.length; j += 1) suite[j] = Math.min(ligne[j] + 1, suite[j - 1] + 1, ligne[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        ligne = suite;
+      }
+      return ligne[b.length];
+    };
     const comparerRc = (mode) => ({
       recent: parRecent,
       serie: (a, b) => (a.ed.serie || '').localeCompare(b.ed.serie || '', 'fr') || numeroDe(a) - numeroDe(b) || (a.ed.version || '').localeCompare(b.ed.version || '') || parRecent(a, b),
@@ -830,7 +841,11 @@
         const m = p.length >> 1, med = p.length % 2 ? p[m] : (p[m - 1] + p[m]) / 2;
         a.lot = { min: p[0], max: p[p.length - 1], med: med };
       });
-      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
+      // Recherche tolérante : chaque mot doit se trouver dans le titre, la série ou l'édition (sans accents ni majuscules),
+      // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
+      const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
+      const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
+      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
