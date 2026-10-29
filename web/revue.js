@@ -25,7 +25,6 @@
   const cleDe = (ed, cle) => `${ed.isbn}|${cle}`;
   const aujourdhui = () => new Date().toISOString().slice(0, 10);
   // Nom de la personne connectée avec Google (affichage seulement) ; le nom enregistré est celui que le lot vérifie (pipeline/identite.py)
-  const nomAdmin = () => (window.Cloud ? window.Cloud.nom() : '');
   // « aujourd'hui », « hier » ou la date : pour ne pas refaire une révision qui vient d'être faite
   function quand(iso) {
     if (!iso) return '';
@@ -68,9 +67,6 @@
     }
     return Object.fromEntries(Object.keys(libres).map((c) => [c, prix[c]]));
   }
-  // Bon état déduit d'un convenable et d'un très bon état (mêmes rapports que ci-dessus), gardé entre les deux : C ≤ BE ≤ TBE
-  const bonDeduit = (c, t) => Math.round(Math.min(t, Math.max(c, Math.sqrt((c / RAPPORT.convenable) * (t / RAPPORT.tres_bon)) * RAPPORT.bon)) * 100) / 100;
-  const prixAffiche = (ed, cle) => { const p = projection(ed)[cle], l = ed.etats[cle]; return p != null ? p : (l ? l.publie : null); };
 
   const ratio = (l) => (l && l.archive && l.publie ? l.publie / l.archive : null);
   const modifie = (l) => l && l.publie != null && l.archive != null && Math.abs(l.publie - l.archive) > 0.01;
@@ -117,35 +113,26 @@
     return c.precis ? `Prix ajusté le ${jour(c.date)}` : `Prix ajusté avant le ${jour(c.date)}`;
   }
 
-  function boutons(ed, cle, v, l) {
-    const id = `data-ed="${esc(ed.id)}" data-e="${cle}"`;
-    return `<div class="rv-actions">` +
-      `<button type="button" class="rv-b" data-act="corriger" ${id}>${l && l.publie != null || v ? 'Corriger' : 'Saisir un prix'}</button>` +
-      (v && v.enAttente ? `<button type="button" class="rv-b rv-retirer" data-act="retirer" ${id}>Retirer</button>` : '') + `</div>` +
-      `<form class="rv-form" data-ed="${esc(ed.id)}" data-e="${cle}" hidden><label>Prix en euros <input type="text" inputmode="decimal" pattern="[0-9]{1,4}([.,][0-9]{1,2})?" title="Un prix en euros, par exemple 24,50" required autocomplete="off" value="${String(v ? v.prix : (l && l.publie != null ? l.publie : '')).replace('.', ',')}"></label>` +
-      `<button type="submit" class="rv-b rv-ok">Enregistrer</button><button type="button" class="rv-b" data-act="annuler">Annuler</button></form>`;
-  }
-
   function cellule([cle, lib], ed) {
     const l = ed.etats[cle], v = validation(ed, cle);
     if (!l || l.publie == null) {
-      if (!v) return `<div class="rv-prix vide"><span class="rv-lib">${lib}</span><strong>—</strong><span class="rv-note">pas de prix</span>${boutons(ed, cle, null, l)}</div>`;
+      if (!v) return `<div class="rv-prix vide"><span class="rv-lib">${lib}</span><strong>—</strong><span class="rv-note">pas de prix</span></div>`;
     }
     if (v) {
       const calc = v.calcule != null && Math.abs(v.calcule - v.prix) > 0.005 ? `<span class="rv-avant">le site calculait <s>${eur(v.calcule)}</s></span>` : '';
       const quand = v.enAttente ? `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} ${jour(v.le)}${v.par ? ', par ' + v.par : ''} : à transmettre` : `Validé ${v.decision === 'confirme' ? '(confirmé)' : '(corrigé)'} le ${jour(v.le)}${v.par ? ', par ' + v.par : ''}`;
-      return `<div class="rv-prix valide"><span class="rv-lib">${lib}</span><strong>${eur(v.prix)}</strong>${calc}<span class="rv-note rv-quand">✓ ${esc(quand)}</span>${boutons(ed, cle, v, l)}</div>`;
+      return `<div class="rv-prix valide"><span class="rv-lib">${lib}</span><strong>${eur(v.prix)}</strong>${calc}<span class="rv-note rv-quand">✓ ${esc(quand)}</span></div>`;
     }
     const proj = projection(ed)[cle];
     if (proj != null) {                                                 // recalculé d'après les prix que vous venez de saisir
       const site = l && l.publie != null && Math.abs(l.publie - proj) > 0.005 ? `<span class="rv-avant">le site affiche <s>${eur(l.publie)}</s></span>` : '';
-      return `<div class="rv-prix"><span class="rv-lib">${lib}</span><strong>${eur(proj)}</strong>${site}<span class="rv-note">recalculé d'après vos prix saisis (à transmettre)</span>${boutons(ed, cle, null, l)}</div>`;
+      return `<div class="rv-prix"><span class="rv-lib">${lib}</span><strong>${eur(proj)}</strong>${site}<span class="rv-note">recalculé d'après vos prix saisis (à transmettre)</span></div>`;
     }
     const r = ratio(l), alerte = raison(l, null);
     const avant = modifie(l) ? `<span class="rv-avant">avant <s>${eur(l.archive)}</s> · <b>${pct(r)}</b></span>` : '';
     const notes = [origine(l), ajusteLe(ed, cle), l.lib_prix && (l.eb_nb_toutes || l.eb_nb || l.deduit || l.valide || l.neuf || l.repartition) ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
     return `<div class="rv-prix${modifie(l) ? (r > 1 ? ' hausse' : ' baisse') : ''}${alerte ? ' alerte' : ''}"><span class="rv-lib">${lib}</span>` +
-      `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span>${boutons(ed, cle, null, l)}</div>`;
+      `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span></div>`;
   }
 
   // Dernière révision d'une édition : la validation la plus récente de l'un de ses états (y compris celles pas encore transmises)
@@ -157,16 +144,10 @@
 
   function carte(ed) {
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="56" height="80" loading="lazy" decoding="async">` : '';
-    const attend = ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); });
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
-      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger la fiche (titre, série…)</a>${voirAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estNiveau3() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
+      `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger les prix dans la fiche</a>${voirAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estNiveau3() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
       `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
-      `<div class="rv-bas">${attend ? `<button type="button" class="rv-b rv-ok rv-tout" data-act="tout-ok" data-ed="${esc(ed.id)}">Confirmer ces prix</button>` : '<span class="rv-tout-ok">✓ Prix validés</span>'}` +
-      `<details class="rv-det"><summary>Saisir une fourchette</summary>` +
-      `<form class="rv-fourchette" data-ed="${esc(ed.id)}"><span>De</span><input type="text" inputmode="decimal" name="mini" aria-label="Prix le plus bas observé, en euros" placeholder="€" autocomplete="off">` +
-      `<span>à</span><input type="text" inputmode="decimal" name="maxi" aria-label="Prix le plus haut observé, en euros" placeholder="€" autocomplete="off"><button type="submit" class="rv-b rv-ok">Enregistrer</button>` +
-      `<span class="rv-aide-fourchette">bas = convenable, haut = très bon état, bon état déduit</span></form></details>` +
       `<span class="rv-liens"><span class="rv-liens-titre">Chercher en vente</span>${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
         ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
@@ -195,7 +176,7 @@
       : base.slice().sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0) || a.version.localeCompare(b.version));
     $('#rv-compte').textContent = `${VUE.length} livre${VUE.length > 1 ? 's' : ''}` + (vue === 'verif' ? ' dont un prix a beaucoup bougé, du plus fort changement au plus faible.' : vue === 'change' ? ' dont au moins un prix a changé.' : vue === 'valide' ? ' dont au moins un prix est validé.' : '.');
     const valeurs = Object.values(LOC), nbAttente = valeurs.filter((v) => !envoyee(v)).length, nbEnvoyees = valeurs.length - nbAttente;
-    $('#rv-envoi').hidden = !valeurs.length;
+    $('#rv-envoi').hidden = !nbAttente;
     $('#rv-envoi-attente').hidden = !nbAttente;                      // rien à transmettre : seules des validations déjà envoyées attendent la mise à jour du site
     $('#rv-envoyer').hidden = !nbAttente;
     $('#rv-n-attente').textContent = nbAttente;
@@ -208,14 +189,6 @@
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.vue === vue)));
   }
 
-  function toutConfirmerListe() {
-    const eds = VUE.filter((ed) => ETATS.some(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); }));
-    const nb = eds.reduce((t, ed) => t + ETATS.filter(([cle]) => { const l = ed.etats[cle]; return l && l.publie != null && !validation(ed, cle); }).length, 0);
-    if (!nb) { window.alert('Tous les prix de cette liste sont déjà validés.'); return; }
-    if (!window.confirm(`Confirmer ${nb} prix de ${eds.length} livre${eds.length > 1 ? 's' : ''} tels qu'ils sont affichés, sans les regarder un par un ?`)) return;
-    eds.forEach(confirmerEdition); sauver(); afficher();
-  }
-
   function csv() {
     const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
     const cols = ['Titre', 'Série', 'Numéro', 'Édition', 'État', 'Prix affiché', 'Ancien prix', 'Origine', 'À vérifier'];
@@ -226,77 +199,6 @@
     a.href = URL.createObjectURL(new Blob(['﻿' + [cols.join(';')].concat(lig).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
     a.download = 'verification-des-prix.csv'; document.body.appendChild(a); a.click(); a.remove();
   }
-
-  function enregistrer(edId, cle, prix, decision) {
-    const ed = EDITIONS.find((x) => x.id === edId);
-    if (!ed || !(prix > 0 && prix < 10000)) return;
-    LOC[cleDe(ed, cle)] = { prix: Math.round(prix * 100) / 100, decision, le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) };
-    sauver(); afficher();
-  }
-
-  // Confirmer d'un coup les prix affichés d'une édition (ceux qui ne sont pas déjà validés)
-  function confirmerEdition(ed) {
-    let n = 0;
-    ETATS.forEach(([cle]) => {
-      const l = ed.etats[cle], aff = prixAffiche(ed, cle);
-      if (l && aff != null && !validation(ed, cle)) { LOC[cleDe(ed, cle)] = { prix: Math.round(aff * 100) / 100, decision: 'confirme', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; n++; }
-    });
-    return n;
-  }
-
-  document.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-act]');
-    if (!b) return;
-    const edId = b.dataset.ed, cle = b.dataset.e, cell = b.closest('.rv-prix');
-    if (b.dataset.act === 'tout-ok') {
-      const ed = EDITIONS.find((x) => x.id === edId);
-      if (ed && confirmerEdition(ed)) { sauver(); afficher(); }
-      return;
-    }
-    if (b.dataset.act === 'ok') {
-      const ed = EDITIONS.find((x) => x.id === edId), l = ed && ed.etats[cle];
-      if (l && l.publie != null) enregistrer(edId, cle, l.publie, 'confirme');
-    } else if (b.dataset.act === 'corriger') {
-      const f = cell.querySelector('.rv-form'); f.hidden = false; cell.querySelector('.rv-actions').hidden = true; cell.classList.add('ouvert');
-      const champ = f.querySelector('input'); champ.focus(); champ.select();
-    } else if (b.dataset.act === 'annuler') {
-      cell.querySelector('.rv-form').hidden = true; cell.querySelector('.rv-actions').hidden = false; cell.classList.remove('ouvert');
-    } else if (b.dataset.act === 'retirer') {
-      const ed = EDITIONS.find((x) => x.id === edId);
-      if (ed) { delete LOC[cleDe(ed, cle)]; sauver(); afficher(); }
-    }
-  });
-  document.addEventListener('submit', (e) => {
-    const f = e.target.closest('.rv-form');
-    if (!f) return;
-    e.preventDefault();
-    const prix = parseFloat(String(f.querySelector('input').value).replace(',', '.'));
-    if (prix > 0 && prix < 10000) enregistrer(f.dataset.ed, f.dataset.e, prix, 'corrige');
-  });
-
-  document.addEventListener('submit', (e) => {
-    const f = e.target.closest('.rv-fourchette');
-    if (!f) return;
-    e.preventDefault();
-    const nb = (x) => parseFloat(String(x).replace(',', '.'));
-    const mini = f.elements.mini.value.trim(), maxi = f.elements.maxi.value.trim();
-    if (!mini && !maxi) return;
-    if ([mini, maxi].some((x) => x && !(nb(x) > 0 && nb(x) < 10000)) || (mini && maxi && nb(mini) > nb(maxi))) { f.classList.add('erreur'); return; }
-    const ed = EDITIONS.find((x) => x.id === f.dataset.ed);
-    if (!ed) return;
-    const nouveau = (cle, prix) => { LOC[cleDe(ed, cle)] = { prix: Math.round(prix * 100) / 100, decision: 'corrige', le: aujourdhui(), ...(nomAdmin() ? { par: nomAdmin() } : {}) }; };
-    const bonValide = validation(ed, 'bon');
-    if (mini && maxi) {
-      nouveau('convenable', nb(mini)); nouveau('tres_bon', nb(maxi));
-      nouveau('bon', bonDeduit(nb(mini), nb(maxi)));                          // une fourchette met toujours à jour les trois prix, même si le bon état venait d'annonces ou était déjà validé
-    } else {
-      const t = nb(mini || maxi);
-      nouveau('tres_bon', t);                                                    // un seul prix : très bon état
-      const c = prixAffiche(ed, 'convenable');
-      if (bonValide && bonValide.prix > t && c != null) nouveau('bon', bonDeduit(Math.min(c, t), t));   // bon état au-dessus du nouveau très bon état : recalculé
-    }
-    sauver(); afficher();
-  });
 
   // Fichier à transmettre : mêmes validations, dans le format lu par pipeline/validations.py
   async function envoyer() {
@@ -1060,7 +962,6 @@
     ['#rv-q', '#rv-serie'].forEach((s) => $(s).addEventListener('input', () => { limite = PAGE; afficher(); }));
     $('#rv-plus').addEventListener('click', () => { limite += PAGE; afficher(); });
     $('#rv-csv').addEventListener('click', csv);
-    $('#rv-tout-confirmer').addEventListener('click', toutConfirmerListe);
     $('#rv-envoyer').addEventListener('click', envoyer);
     afficher();
     dessinerPepites();                                     // les annonces peuvent arriver avant les éditions : on redessine les pépites quand elles sont là
