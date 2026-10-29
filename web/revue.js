@@ -715,7 +715,7 @@
   // Onglet « Annonces reçues » (niveau 3 seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
   let dessinerRecues = () => {};
   function initRecues() {
-    const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver');
+    const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
     const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'vinted' ? 'vinted' : o === 'librairie' ? 'librairie' : 'ebay');
@@ -737,6 +737,19 @@
       return `<span class="rc-pastille ${VERDICTS[v][1]}">${VERDICTS[v][0]}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
+    // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
+    const quandRc = (a) => (heureConnue({ premiere: a.premiere }) ? new Date(a.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·') : a.vue ? jourCourt(a.vue) : '');
+    // Ordres de tri : date et heure d'apparition (à défaut, dernier jour vu), série et numéro, prix, écart au prix du site, origine
+    const quandCle = (a) => a.premiere || a.vue || '';
+    const parRecent = (a, b) => quandCle(b).localeCompare(quandCle(a)) || a.prix - b.prix;
+    const numeroDe = (a) => parseInt(a.ed.numero, 10) || 0;
+    const comparerRc = (mode) => ({
+      recent: parRecent,
+      serie: (a, b) => (a.ed.serie || '').localeCompare(b.ed.serie || '', 'fr') || numeroDe(a) - numeroDe(b) || (a.ed.version || '').localeCompare(b.ed.version || '') || parRecent(a, b),
+      prix: (a, b) => a.prix - b.prix || parRecent(a, b),
+      ecart: (a, b) => (a.pub ? a.prix / a.pub : 99) - (b.pub ? b.prix / b.pub : 99) || parRecent(a, b),
+      origine: (a, b) => a.fam.localeCompare(b.fam) || parRecent(a, b),
+    }[mode] || parRecent);
     dessinerRecues = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
@@ -747,22 +760,23 @@
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin });
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, premiere: (ANN.premieres && ANN.premieres[lien]) || '' });
         }));
       });
       const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
-        .sort((a, b) => (b.vue || '').localeCompare(a.vue || '') || a.prix - b.prix);
+        .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}<span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${a.vue ? ' · ' + jourCourt(a.vue) : ''}${a.partie ? ' · plus vue' : ''}</span></span>
+        <span class="rc-ligne2">${a.trouver ? '<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${quandRc(a) ? ' · ' + quandRc(a) : ''}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`).join('') + '</div>' + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
+    if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
