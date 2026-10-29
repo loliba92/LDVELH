@@ -15,6 +15,7 @@
   // dans les données du site (champ « valide »). Elles priment sur eBay et les archives.
   const CLE_LOC = 'cdh-validations-v1';
   let LOC = {};
+  let HISTO = null;                                    // cotes publiées des 10 derniers jours, par livre et état
   try { LOC = JSON.parse(localStorage.getItem(CLE_LOC) || '{}') || {}; } catch (e) { LOC = {}; }
   // Une validation envoyée reste gardée jusqu'à ce que le site l'ait reprise (voir plus bas) ; pendant ce délai elle n'est plus « à transmettre ».
   // Si le site ne l'a pas reprise au bout de 20 minutes, elle est de nouveau proposée à l'envoi (l'envoi a pu échouer).
@@ -100,6 +101,16 @@
     return l.publie == null ? '' : 'ancienne cote';
   }
 
+  // Date du dernier changement du prix : une correction de cette page, sinon le dernier changement des 10 jours publiés
+  function ajusteLe(ed, cle) {
+    const v = validation(ed, cle);
+    if (v && v.le) return `Prix ajusté le ${jour(v.le)}`;
+    const h = HISTO && HISTO.cotes[cleDe(ed, cle)];
+    if (!h) return '';
+    for (let i = h.length - 1; i > 0; i -= 1) if (h[i] != null && h[i] !== h[i - 1]) return `Prix ajusté le ${jour(HISTO.dates[i])}`;
+    return `Prix ajusté avant le ${jour(HISTO.dates[0])}`;
+  }
+
   function boutons(ed, cle, v, l) {
     const id = `data-ed="${esc(ed.id)}" data-e="${cle}"`;
     return `<div class="rv-actions">` +
@@ -126,7 +137,7 @@
     }
     const r = ratio(l), alerte = raison(l, null);
     const avant = modifie(l) ? `<span class="rv-avant">avant <s>${eur(l.archive)}</s> · <b>${pct(r)}</b></span>` : '';
-    const notes = [origine(l), l.lib_prix && (l.eb_nb_toutes || l.eb_nb || l.deduit || l.valide || l.neuf || l.repartition) ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
+    const notes = [origine(l), ajusteLe(ed, cle), l.lib_prix && (l.eb_nb_toutes || l.eb_nb || l.deduit || l.valide || l.neuf || l.repartition) ? `1 exemplaire en librairie : ${eur(l.lib_prix)}` : '', l.ajuste ? 'ajusté pour garder C ≤ BE ≤ TBE' : ''].filter(Boolean).join(' · ');
     return `<div class="rv-prix${modifie(l) ? (r > 1 ? ' hausse' : ' baisse') : ''}${alerte ? ' alerte' : ''}"><span class="rv-lib">${lib}</span>` +
       `<strong>${eur(l.publie)}</strong>${avant}${alerte ? `<span class="rv-raison">À vérifier : ${alerte}</span>` : ''}<span class="rv-note">${esc(notes)}</span>${boutons(ed, cle, null, l)}</div>`;
   }
@@ -1027,6 +1038,7 @@
   calerOnglets(); addEventListener('resize', calerOnglets); addEventListener('load', calerOnglets); addEventListener('scroll', calerOnglets, { passive: true });
 
   const JAQ = {}, RAR = {};
+  fetch('data/historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((h) => { HISTO = h; const d = document.getElementById('rv-date'); if (d && h && h.dates.length) d.textContent = `Dernière publication des prix : ${jour(h.dates[h.dates.length - 1])}.`; if (EDITIONS.length) afficher(); });
   fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
