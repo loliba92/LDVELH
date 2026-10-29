@@ -1181,16 +1181,17 @@
     return imports;
   }
   // Position du prix d'une annonce par rapport au prix du site (même état) : mêmes seuils que « Annonces reçues » et le Butin
-  const VERDICTS_IMP = { pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
+  const VERDICTS_IMP = { super: ['🔥 Super pépite', 'rc-v-super'], pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
   const verdictImport = (prix, pub) => {
     if (pub == null || !(prix > 0)) return null;
+    if (prix <= 0.2 * pub && pub - prix >= 3) return 'super';          // 20 % du prix du site ou moins
     if (prix <= 0.5 * pub && pub - prix >= 3) return 'pepite';
     if (prix < 0.9 * pub) return 'dessous';
     if (prix <= 1.1 * pub) return 'dans';
     if (prix <= 1.5 * pub) return 'dessus';
     return 'cher';
   };
-  const RANG_IMPORT = { pepite: 0, dessous: 1, dans: 2, dessus: 3, cher: 4 };
+  const RANG_IMPORT = { super: -1, pepite: 0, dessous: 1, dans: 2, dessus: 3, cher: 4 };
   const infosImport = (a) => {
     const ed = DATA.find((b) => b.isbn13 === a.isbn), pub = ed && ed.prix ? ed.prix[etatDe(a.etat).k] : null, vendu = a.statut === 'vendu';
     return { ed, pub, vendu, v: vendu ? null : verdictImport(a.prix, pub) };

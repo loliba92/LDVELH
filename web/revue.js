@@ -722,9 +722,10 @@
     const NOM = { ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'Librairie' };
     // Position du prix de l'annonce par rapport au prix actuel du site (même état) : mêmes mots que le bot Leboncoin.
     // Pépite : la moitié du prix du site ou moins (règle du Butin) ; dans les prix : à 10 % près ; très cher : plus de 1,5 fois le prix du site.
-    const VERDICTS = { pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
+    const VERDICTS = { super: ['🔥 Super pépite', 'rc-v-super'], pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
     const verdictDe = (prix, pub) => {
       if (pub == null) return null;
+      if (prix <= 0.2 * pub && pub - prix >= ECONOMIE_MINI) return 'super';          // 20 % du prix du site ou moins
       if (prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI) return 'pepite';
       if (prix < 0.9 * pub) return 'dessous';
       if (prix <= 1.1 * pub) return 'dans';
@@ -763,7 +764,7 @@
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, premiere: (ANN.premieres && ANN.premieres[lien]) || '' });
         }));
       });
-      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
+      const vues = toutes.filter((a) => (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && !(enligne.checked && a.partie))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       liste.innerHTML = '<div class="rc-liste">' + vues.slice(0, limite).map((a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">

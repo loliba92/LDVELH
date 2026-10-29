@@ -2230,6 +2230,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 
 .rc-pastille { padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 .76rem var(--f-ui); letter-spacing: .04em; color: var(--muted); }
 .rc-pastille.rc-v-pepite { color: #1b1403; background: var(--gold); border-color: var(--gold); }
+.rc-pastille.rc-v-super { color: #1b1403; background: var(--gold); border-color: #fff; box-shadow: 0 0 0 2px var(--gold); font-weight: 800; }
 .rc-pastille.rc-v-dessous { color: #7fd69c; border-color: #7fd69c; }
 .rc-pastille.rc-v-dans { color: var(--text); }
 .rc-pastille.rc-v-dessus { color: #e8b86b; border-color: #e8b86b; }
