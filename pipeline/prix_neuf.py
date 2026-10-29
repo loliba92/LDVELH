@@ -47,7 +47,9 @@ URL = "https://www.leslibraires.fr/livre/{isbn}"
 CHAMPS = ["isbn13", "prix", "disponibilite", "prix_occasion", "date", "source"]
 CHAMPS_OCCASION = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max", "nb_toutes", "prix_median_toutes"]
 FRAIS_LIBRAIRIE = 4.50          # frais de port systématiques chez les librairies de leslibraires.fr (livraison à domicile, standard ou suivie)
-FRAIS_VINTED = 4.50             # Vinted : tout se commande (pas de remise en main propre), la livraison s'ajoute toujours au prix de l'annonce
+FRAIS_PORT_VINTED = 3.00        # port : Vinted affiche « à partir de 2,83 € » (29/10/2026), plutôt 3 à 5 € selon le transporteur ; on prend 3 €
+FRAIS_PROTECTION_VINTED = 0.83  # « Frais Vinted » (protection acheteurs) vus au paiement ; ils grossissent avec le prix de l'article
+FRAIS_VINTED = round(FRAIS_PORT_VINTED + FRAIS_PROTECTION_VINTED, 2)   # tout se commande : prix livré = prix de l'annonce + 3,83 €
 ETAT_OCCASION = "tres_bon"   # fiche sans état lisible : très bon état (règle du propriétaire)
 PAUSE = 2.0
 ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
