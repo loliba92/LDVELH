@@ -43,6 +43,7 @@ SOURCES = [  # code, nom, famille, accès, fiabilité
     ("achat_perso", "Mes achats", "perso", "saisie", 0.9),
     ("releve_manuel", "Relevé manuel (Vinted, Leboncoin, comparateurs)", "marketplace", "saisie", 0.6),
     ("leboncoin", "Leboncoin", "marketplace", "saisie", 0.6),
+    ("vinted", "Vinted", "marketplace", "saisie", 0.6),
     ("communaute", "Contribution d'un visiteur", "communaute", "saisie", 0.5),
 ]
 TYPES = [  # code, libellé, poids, prix réel ?
@@ -290,10 +291,12 @@ def main():
         importer_leboncoin.reagreger(a.occasion)          # lots (data/manual/lots_annonces.json) : leur prix est réparti entre les livres du lot
         n_lbc, dbl_lbc, err_lbc, nb_lbc, ecart_lbc = load_ebay(cx, a.occasion, "leboncoin-20*.csv", "leboncoin")
         n_lbv, dbl_lbv, err_lbv, nb_lbv, ecart_lbv = load_ebay(cx, a.occasion, "leboncoin-vendus-20*.csv", "leboncoin", "vente_probable")
-        n_ebay += n_lib + n_lbc + n_lbv
-        nb_fichiers += nb_lib + nb_lbc + nb_lbv
-        doublons += dbl_ebay + dbl_lib + dbl_lbc + dbl_lbv
-        erreurs += err_ebay + err_lib + err_lbc + err_lbv
+        n_vin, dbl_vin, err_vin, nb_vin, ecart_vin = load_ebay(cx, a.occasion, "vinted-20*.csv", "vinted")
+        n_vev, dbl_vev, err_vev, nb_vev, ecart_vev = load_ebay(cx, a.occasion, "vinted-vendus-20*.csv", "vinted", "vente_probable")
+        n_ebay += n_lib + n_lbc + n_lbv + n_vin + n_vev
+        nb_fichiers += nb_lib + nb_lbc + nb_lbv + nb_vin + nb_vev
+        doublons += dbl_ebay + dbl_lib + dbl_lbc + dbl_lbv + dbl_vin + dbl_vev
+        erreurs += err_ebay + err_lib + err_lbc + err_lbv + err_vin + err_vev
     cx.execute("PRAGMA foreign_keys = ON")
     problemes = cx.execute("PRAGMA foreign_key_check").fetchall()
 

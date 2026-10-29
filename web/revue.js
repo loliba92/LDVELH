@@ -556,7 +556,7 @@
       const l = par[cle];
       if (!l || !l.length) return '';
       const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
-      const dateRef = (origine) => (origine === 'leboncoin' || origine === 'librairie' ? null : ANN.date_ebay);          // Leboncoin : en ligne tant que non signalée vendue (le bot ne revoit pas les anciennes)
+      const dateRef = (origine) => (origine === 'leboncoin' || origine === 'vinted' || origine === 'librairie' ? null : ANN.date_ebay);          // Leboncoin : en ligne tant que non signalée vendue (le bot ne revoit pas les anciennes)
       const partie = ([, , , origine, vue]) => !!(vue && dateRef(origine) && vue < dateRef(origine));          // annonce non revue au dernier relevé : retirée d'eBay ou vendue
       const nbPartie = l.filter(partie).length;
       return `<h4>${lib} · ${l.length} annonce${l.length > 1 ? 's' : ''}${nbPartie ? ` (dont ${nbPartie} non revue${nbPartie > 1 ? 's' : ''} au dernier relevé)` : ''}${disp}</h4><ul>${l.map((a) => { const [prix, titre, lien, origine, vue] = a; return `<li><span class="rv-ann-prix">${eur(prix)}</span> <a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${origine === 'librairie' ? ' de la librairie' : ' sur eBay'} (nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${origine === 'titre' ? ' <span class="rv-ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? ` <span class="rv-ann-titre">non revue au dernier relevé · vue le ${jour(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
@@ -570,7 +570,7 @@
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'an-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'an-dialog-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces retenues (eBay, librairies et Leboncoin)</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="an-dialog-titre">Annonces retenues (eBay, librairies, Leboncoin et Vinted)</p><button type="button" class="bouton bouton-clair" id="an-fermer">Fermer</button></div><div id="an-dialog-corps"></div><p class="sous">Relevé du <span id="an-dialog-date"></span>. Ouvrez une annonce pour vérifier que c\'est bien le bon livre, dans le bon état.</p></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'an-fermer') dlg.close(); });
     }
@@ -618,12 +618,12 @@
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
         if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
-        if (origine !== 'leboncoin' && origine !== 'librairie' && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
+        if (origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
         if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
           if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
-          if (origine === 'leboncoin') raisons.push("annonce Leboncoin : vérifier l'édition et l'état");        // dit déjà que l'état reste à confirmer
+          if (origine === 'leboncoin' || origine === 'vinted') raisons.push(`annonce ${origine === 'vinted' ? 'Vinted' : 'Leboncoin'} : vérifier l'édition et l'état`);        // dit déjà que l'état reste à confirmer
           else if (suppose === 1) raisons.push('état non précisé : très bon état supposé');
           else if (suppose == null) raisons.push('état pas encore confirmé (prochain relevé)');
         }
@@ -644,8 +644,8 @@
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
-    const lieu = p.origine === 'librairie' ? ' de la librairie' : p.origine === 'leboncoin' ? ' sur Leboncoin' : ' sur eBay';
-    const source = p.origine === 'librairie' ? 'Librairie' : p.origine === 'leboncoin' ? 'Leboncoin' : 'eBay';          // libellé visible de la source
+    const lieu = p.origine === 'librairie' ? ' de la librairie' : p.origine === 'leboncoin' ? ' sur Leboncoin' : p.origine === 'vinted' ? ' sur Vinted' : ' sur eBay';
+    const source = p.origine === 'librairie' ? 'Librairie' : p.origine === 'leboncoin' ? 'Leboncoin' : p.origine === 'vinted' ? 'Vinted' : 'eBay';          // libellé visible de la source
     const img = JAQ[p.ed.id] ? `<img src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">`
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
@@ -694,7 +694,7 @@
       if (!window.Relais) return dire("Échec : le service technique n'est pas chargé. Rechargez la page.");
       b.disabled = true; dire('Envoi de la pépite du jour…');
       const pct = Math.round((1 - p.prix / p.pub) * 100), ABR = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
-      window.Relais.appeler('pepite_offrir', { isbn13: p.ed.isbn, prix: p.prix, pub: p.pub, pct, etat: ABR[p.cle], origine: p.origine === 'leboncoin' ? 'leboncoin' : p.origine === 'librairie' ? 'librairie' : p.origine === 'titre' ? 'titre' : p.origine === 'isbn' ? 'isbn' : 'ebay', lien: p.lien, solide: !p.raisons.length })
+      window.Relais.appeler('pepite_offrir', { isbn13: p.ed.isbn, prix: p.prix, pub: p.pub, pct, etat: ABR[p.cle], origine: p.origine === 'leboncoin' ? 'leboncoin' : p.origine === 'vinted' ? 'vinted' : p.origine === 'librairie' ? 'librairie' : p.origine === 'titre' ? 'titre' : p.origine === 'isbn' ? 'isbn' : 'ebay', lien: p.lien, solide: !p.raisons.length })
         .then((r) => { dire(r && r.ok ? `✓ Offerte aux Héros aujourd'hui (visible d'ici quelques minutes).` : `Échec : ${(r && r.erreur) || 'réponse inattendue'}.`); })
         .catch(() => { dire('Échec : service injoignable. Vérifiez la connexion, puis réessayez.'); }).then(() => { b.disabled = false; });
     });
@@ -711,8 +711,8 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver');
     if (!liste) return;
     let limite = 60;
-    const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'librairie' ? 'librairie' : 'ebay');
-    const NOM = { ebay: 'eBay', leboncoin: 'Leboncoin', librairie: 'Librairie' };
+    const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'vinted' ? 'vinted' : o === 'librairie' ? 'librairie' : 'ebay');
+    const NOM = { ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'Librairie' };
     // Position du prix de l'annonce par rapport au prix actuel du site (même état) : mêmes mots que le bot Leboncoin.
     // Pépite : la moitié du prix du site ou moins (règle du Butin) ; dans les prix : à 10 % près ; très cher : plus de 1,5 fois le prix du site.
     const VERDICTS = { pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
@@ -733,7 +733,7 @@
     dessinerRecues = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
-      const dateRef = (o) => (o === 'leboncoin' || o === 'librairie' ? null : ANN.date_ebay);
+      const dateRef = (o) => (o === 'leboncoin' || o === 'vinted' || o === 'librairie' ? null : ANN.date_ebay);
       const toutes = [], sw = souhaits();
       Object.keys(ANN.annonces).forEach((isbn) => {
         const ed = parIsbn.get(isbn); if (!ed) return;

@@ -34,6 +34,34 @@ class TestEtalerLots(unittest.TestCase):
         self.assertEqual(annonces["c"]["bon"][0][1], "Autre")
 
 
+class TestVinted(unittest.TestCase):
+    LV = "https://www.vinted.fr/items/10561472673-ldvelh-grande-menace-des-robots"
+
+    def test_vinted_a_ses_propres_fichiers_et_sa_source(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(corps(ligne(prix="10"), ligne(prix="8", lien=self.LV), ligne(prix="6", lien="https://www.vinted.fr/items/2-x", statut="vendu")), JOUR, d, CONNUES)
+            self.assertEqual((b["acceptees"], b["refusees"]), (3, 0))
+            self.assertEqual({r["trouvee_par"] for r in lire(d, "annonces-vinted-2026-10-24.csv")}, {"vinted"})
+            self.assertEqual({r["trouvee_par"] for r in lire(d, "annonces-leboncoin-2026-10-24.csv")}, {"leboncoin"})
+            self.assertEqual(lire(d, "vinted-2026-10-24.csv")[0]["prix_median"], "8.00")           # la cote lit chaque source séparément
+            self.assertEqual(lire(d, "vinted-vendus-2026-10-24.csv")[0]["prix_median"], "6.00")
+            self.assertEqual(lire(d, "leboncoin-2026-10-24.csv")[0]["prix_median"], "10.00")       # Leboncoin inchangé
+
+    def test_liens_acceptes_et_refuses(self):
+        self.assertEqual(imp.source_du_lien(self.LV), "vinted")
+        self.assertEqual(imp.source_du_lien("https://www.vinted.fr/items/42"), "vinted")
+        self.assertEqual(imp.source_du_lien("https://www.leboncoin.fr/ad/livres/1"), "leboncoin")
+        for mauvais in ("http://www.vinted.fr/items/1-x", "https://www.vinted.fr/member/1", "https://vinted.fr.evil.com/items/1-x", "https://www.vinted.fr/items/x", ""):
+            self.assertIsNone(imp.source_du_lien(mauvais), mauvais)
+
+    def test_reagreger_refait_vinted_comme_leboncoin(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="8", lien=self.LV)), JOUR, d, CONNUES)
+            (Path(d) / "vinted-2026-10-24.csv").unlink()
+            imp.reagreger(d, lots={})
+            self.assertEqual(lire(d, "vinted-2026-10-24.csv")[0]["prix_median"], "8.00")
+
+
 class TestImporter(unittest.TestCase):
     def test_import_ecrit_les_quatre_fichiers(self):
         with tempfile.TemporaryDirectory() as d:

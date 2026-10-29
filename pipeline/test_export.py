@@ -121,17 +121,29 @@ class TestButin(unittest.TestCase):
         self.assertNotIn("222", b)                                      # pas de prix publié : pas de repère
 
 
+class TestButinVinted(unittest.TestCase):
+    def test_le_port_vinted_compte_dans_la_regle_du_butin(self):
+        from prix_neuf import FRAIS_VINTED
+        revue = [{"isbn": "111", "etat": "bon", "publie": 30.0}]
+        # 10 € + port : 14,50 € <= 50 % de 30 € (15 €) : retenue ; 11 € + port : 15,50 € > 15 € : écartée
+        annonces = {"111": {"bon": [[round(10 + FRAIS_VINTED, 2), "a", "https://www.vinted.fr/items/1-a", "vinted", "2026-10-27", None],
+                                    [round(11 + FRAIS_VINTED, 2), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
+        butin = extraire_butin(annonces, revue)
+        self.assertEqual([a[1] for a in butin["111"]["bon"]], ["a"])
+
+
 class TestOffre(unittest.TestCase):
     def test_offre_compte_les_annonces_en_ligne_par_source(self):
         ann = {"111": {"bon": [[10, "a", "u1", "isbn", "2026-10-26", None], [12, "b", "u2", "titre", "2026-10-26", None],
                                [11, "c", "u3", "isbn", "2026-10-20", None],            # eBay non revue au dernier relevé : pas comptée
                                [9, "d", "u4", "leboncoin", "2026-10-27", None],
                                [8, "d2", "u8", "leboncoin", "2026-10-24", None],           # Leboncoin plus ancienne que le dernier relevé : le bot ne revoit que les plus récentes, elle reste en ligne
+                               [14, "v", "u9", "vinted", "2026-10-22", None],              # Vinted : même règle que Leboncoin, en ligne jusqu'à preuve du contraire
                                [90, "Lot de 6 livres · e", "u5", "leboncoin", "2026-10-27", None]],      # un lot n'est pas l'offre d'un livre
                        "tres_bon": [[4, "f", "u6", "librairie", None, 1]]},
                "222": {"bon": [[5, "g", "u7", "isbn", "2026-10-19", None]]}}
         o = calculer_offre(ann, {"111": [10, 30, 50]}, "2026-10-26", "2026-10-27")
-        self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "lib": 1, "age": 30})
+        self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "vin": 1, "lib": 1, "age": 30})
         self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
 
 

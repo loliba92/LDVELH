@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
 from estimation import Obs, estimer
-from prix_neuf import FRAIS_LIBRAIRIE
+from prix_neuf import FRAIS_LIBRAIRIE, FRAIS_VINTED
 import calibration
 import cote_v2
 import importer_leboncoin
@@ -83,6 +83,7 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
     return sum(1 for e in ordre if par_etat[e].get("ajuste"))
 
 
+JOURS_VINTED = 14          # même règle que Leboncoin : en ligne tant que le bot ne la signale pas vendue
 JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n'est pas signalée vendue : le bot ne revoit que les 50 plus récentes, une annonce plus ancienne n'y reparaît pas. Écartée après 14 jours sans être revue
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
@@ -140,20 +141,22 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
     Servi avec le Butin (niveaux 2 et 3) : seulement des décomptes, jamais de lien ni de titre."""
     offre = {}
     for isbn, par_etat in annonces.items():
-        ebay = lbc = lib = 0
+        ebay = lbc = vin = lib = 0
         for liste in par_etat.values():
             for prix, titre, lien, origine, vue, suppose in liste:
                 if str(titre).startswith("Lot de "):
                     continue
                 if origine == "librairie":
                     lib += 1
+                elif origine == "vinted":
+                    vin += 1                         # même règle que Leboncoin : en ligne jusqu'à preuve du contraire
                 elif origine == "leboncoin":
                     lbc += 1                         # en ligne jusqu'à preuve du contraire (voir JOURS_LEBONCOIN) : la liste a déjà retiré les vendues
                 elif not (date_ebay and vue and vue < date_ebay):
                     ebay += 1
-        if ebay or lbc or lib:
+        if ebay or lbc or vin or lib:
             ages = [a for a in ages_ebay.get(isbn, []) if a is not None]
-            offre[isbn] = {"ebay": ebay, "lbc": lbc, "lib": lib, "age": int(statistics.median(ages)) if ages else None}
+            offre[isbn] = {"ebay": ebay, "lbc": lbc, "vin": vin, "lib": lib, "age": int(statistics.median(ages)) if ages else None}
     return offre
 
 
@@ -441,7 +444,7 @@ def main():
     # Annonces retenues par le dernier relevé eBay (titre, prix, lien) : l'onglet « Annonces » de l'espace administrateur les montre pour que chaque prix puisse
     # être contrôlé à la main (bon livre ? bon état ?). Absent tant qu'aucun relevé ne les a enregistrées.
     dossier_occasion = DB.parent.parent / "raw" / "occasion"
-    fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if "leboncoin" not in f.name)         # eBay
+    fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if "leboncoin" not in f.name and "vinted" not in f.name)         # eBay
     annonces = annonces_cumulees(fichiers_ann)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
     # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
@@ -456,6 +459,18 @@ def main():
             liste = [a for a in liste if a[2] not in liens_vendus]
             if liste:
                 annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+    # Annonces Vinted envoyées par le même bot : même présentation. Tout s'y commande : le prix affiché est le prix livré (port compris, comme les librairies),
+    # comparé à la cote nue ; le prix nu reste celui de l'annonce dans le fichier d'import.
+    fichiers_vinted = sorted(dossier_occasion.glob("annonces-vinted-20*.csv"))
+    liens_vendus_vinted = set()
+    for f in dossier_occasion.glob("vendus-vinted-20*.csv"):
+        with open(f, newline="", encoding="utf-8") as fh:
+            liens_vendus_vinted.update(r["lien"] for r in csv.DictReader(fh))
+    for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED).items():
+        for etat, liste in par_etat.items():
+            liste = [[round(a[0] + FRAIS_VINTED, 2), *a[1:]] for a in liste if a[2] not in liens_vendus_vinted]
+            if liste:
+                annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
@@ -467,7 +482,7 @@ def main():
             for liste in par_etat.values():
                 liste.sort()
         fichiers_lib = sorted((DB.parent.parent / "raw" / "occasion").glob("libraires-*.csv"))
-        date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:] + fichiers_lbc[-1:]])
+        date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:] + fichiers_lbc[-1:] + fichiers_vinted[-1:]])
         # Annonces : réservées aux sorciers et aux Zagors. Elles ne sont pas publiées sur le site : le relais les lit dans data/processed/.
         chemin_ann = DB.parent.parent / "processed" / "annonces.json"
         try:

@@ -156,7 +156,7 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
   <div id="ind-liste"></div>
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
-  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, librairies), pas seulement les bonnes affaires. La plus récemment vue en premier.</p>
+  <p class="chapeau">Toutes les annonces reçues aux derniers relevés (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. La plus récemment vue en premier.</p>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">
@@ -164,6 +164,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="tout">Toutes</option>
         <option value="ebay">eBay</option>
         <option value="leboncoin">Leboncoin</option>
+        <option value="vinted">Vinted</option>
         <option value="librairie">Librairies</option>
       </select></label>
       <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
