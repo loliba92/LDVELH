@@ -233,8 +233,9 @@
   const force = (ed) => Math.max(0, ...lignes(ed).map((l) => { const r = ratio(l); return r ? Math.abs(Math.log(r)) : 0; }));
 
   function afficher() {
-    const q = norm($('#rv-q').value).trim(), serie = $('#rv-serie').value;
-    const base = EDITIONS.filter((ed) => (!q || norm(ed.titre + ' ' + ed.serie).includes(q)) && (!serie || ed.serie === serie));
+    const q = norm($('#rv-q').value).trim(), serie = $('#rv-serie').value, fiab = $('#rv-fiab').value;
+    const niveauDe = (ed) => { const f = fiabilite(ed); return f ? f.niveau : null; };
+    const base = EDITIONS.filter((ed) => (!q || norm(ed.titre + ' ' + ed.serie).includes(q)) && (!serie || ed.serie === serie) && (!fiab || niveauDe(ed) === fiab));
     $('#rv-n-verif').textContent = base.filter(aVerifier).length;
     $('#rv-n-change').textContent = base.filter(aChange).length;
     $('#rv-n-tous').textContent = base.length;
@@ -1096,7 +1097,7 @@
     sauver();
     $('#rv-serie').innerHTML = '<option value="">Toutes les séries</option>' + [...new Set(EDITIONS.map((e) => e.serie))].sort((a, b) => a.localeCompare(b, 'fr')).map((s) => `<option>${esc(s)}</option>`).join('');
     document.querySelectorAll('#rv-onglets button').forEach((b) => b.addEventListener('click', () => { vue = b.dataset.vue; limite = PAGE; afficher(); }));
-    ['#rv-q', '#rv-serie'].forEach((s) => $(s).addEventListener('input', () => { limite = PAGE; afficher(); }));
+    ['#rv-q', '#rv-serie', '#rv-fiab'].forEach((s) => $(s).addEventListener('input', () => { limite = PAGE; afficher(); }));
     $('#rv-plus').addEventListener('click', () => { limite += PAGE; afficher(); });
     $('#rv-csv').addEventListener('click', csv);
     $('#rv-envoyer').addEventListener('click', envoyer);
