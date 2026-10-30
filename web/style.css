@@ -2463,3 +2463,19 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .archive-flag { display: inline-block; margin-top: 6px; margin-left: 6px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); color: var(--muted); font: 600 .8rem var(--f-ui); }
 .rv-fiab { margin: 8px 0 0; font-size: .85rem; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
 .rv-fiab-prop strong { color: var(--gold); }
+
+.fiab-dialog { width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 24px); padding: 0; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); }
+.fiab-dialog::backdrop { background: rgba(0, 0, 0, .7); }
+.fiab-cadre { padding: 16px 18px 18px; overflow-y: auto; max-height: calc(100vh - 24px); }
+.fiab-tete { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--gold); }
+.fiab-surtitre { margin: 0 0 4px; font: 700 .8rem var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.fiab-resume { margin: 0; font-size: .95rem; color: var(--muted); }
+.fiab-resume b { color: var(--text); }
+.fiab-liste { list-style: none; margin: 0; padding: 0; }
+.fiab-ligne { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.fiab-haut { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.fiab-titre-ann { color: var(--text); font: 600 1rem var(--f-ui); overflow-wrap: anywhere; }
+.fiab-prix { color: var(--gold); font: 700 1.1rem var(--f-ui); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fiab-bas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 4px; font-size: .85rem; color: var(--muted); }
+.fiab-origine { font: 700 .72rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.fiab-meta { overflow-wrap: anywhere; }
