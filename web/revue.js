@@ -161,10 +161,12 @@
   function fiabiliteHtml(ed) {
     const f = estNiveau3() ? fiabilite(ed) : null;
     if (!f) return '';
-    if (f.niveau === 'insuffisant') return `<p class="rv-fiab"><span class="sous">Fiabilité : pas assez d'annonces (${f.n})</span></p>`;
+    // Le nombre d'annonces ouvre la liste de ces annonces (même fenêtre que « Voir les annonces »)
+    const compte = f.n ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">${f.n} annonce${f.n > 1 ? 's' : ''}</button>` : '0 annonce';
+    if (f.niveau === 'insuffisant') return `<p class="rv-fiab"><span class="sous">Fiabilité : pas assez d'annonces (${compte})</span></p>`;
     const NIV = { solide: ['Solide', 'rc-v-dessous'], confirmer: ['À confirmer', 'rc-v-dans'], faible: ['Faible', 'rc-v-dessus'] }[f.niveau];
     const pourcent = f.disp == null ? '–' : Math.round(f.disp * 100) + ' %';
-    return `<p class="rv-fiab"><span class="rc-pastille ${NIV[1]}">Fiabilité : ${NIV[0]}</span> <span class="sous">${f.n} annonce${f.n > 1 ? 's' : ''}, dispersion ${pourcent}</span> <span class="rv-fiab-prop">Proposition : <strong>${eur(f.med)}</strong> (médiane)</span></p>`;
+    return `<p class="rv-fiab"><span class="rc-pastille ${NIV[1]}">Fiabilité : ${NIV[0]}</span> <span class="sous">${compte}, dispersion ${pourcent}</span> <span class="rv-fiab-prop">Proposition : <strong>${eur(f.med)}</strong> (médiane)</span></p>`;
   }
 
   function carte(ed) {
