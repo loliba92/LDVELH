@@ -156,18 +156,39 @@
     const ecart = Math.sqrt(prix.reduce((t, x) => t + (x - moy) ** 2, 0) / n);
     const disp = med > 0 ? ecart / med : null;
     const niveau = n >= 10 && disp !== null && disp <= 0.3 ? 'solide' : (n >= 3 && (disp === null || disp <= 0.6)) ? 'confirmer' : 'faible';
-    return { n, med, disp, niveau };
+    const liste = [];
+    ETATS.forEach(([cle, lib]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => liste.push({ prix: x[0], titre: x[1], lien: x[2], origine: x[3], lib })));
+    return { n, med, disp, niveau, liste: liste.sort((a, b) => a.prix - b.prix) };
   }
   function fiabiliteHtml(ed) {
     const f = estNiveau3() ? fiabilite(ed) : null;
     if (!f) return '';
     // Le nombre d'annonces ouvre la liste de ces annonces (même fenêtre que « Voir les annonces »)
-    const compte = f.n ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">${f.n} annonce${f.n > 1 ? 's' : ''}</button>` : '0 annonce';
+    const compte = f.n ? `<button type="button" class="bouton-lien rv-voir-fiab" data-fiab="${esc(ed.id)}">${f.n} annonce${f.n > 1 ? 's' : ''}</button>` : '0 annonce';
     if (f.niveau === 'insuffisant') return `<p class="rv-fiab"><span class="sous">Fiabilité : pas assez d'annonces (${compte})</span></p>`;
     const NIV = { solide: ['Solide', 'rc-v-dessous'], confirmer: ['À confirmer', 'rc-v-dans'], faible: ['Faible', 'rc-v-dessus'] }[f.niveau];
     const pourcent = f.disp == null ? '–' : Math.round(f.disp * 100) + ' %';
     return `<p class="rv-fiab"><span class="rc-pastille ${NIV[1]}">Fiabilité : ${NIV[0]}</span> <span class="sous">${compte}, dispersion ${pourcent}</span> <span class="rv-fiab-prop">Proposition : <strong>${eur(f.med)}</strong> (médiane)</span></p>`;
   }
+
+  // Fenêtre « annonces comptées pour la fiabilité » : uniquement ces annonces, chacune avec son lien
+  function ouvrirFiabilite(ed) {
+    const f = fiabilite(ed);
+    if (!f || !f.liste.length) return;
+    let dlg = document.getElementById('fiab-dialog');
+    if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'fiab-dialog'; dlg.className = 'fiab-dialog'; document.body.appendChild(dlg); }
+    dlg.innerHTML = `<div class="fiab-cadre"><div class="fiab-tete"><p class="surtitre">Annonces comptées pour la fiabilité</p><button type="button" class="bouton-lien" data-fiab-fermer>Fermer</button></div>
+      <h3 class="fiab-titre">${esc(ed.titre)} <span class="sous">${esc(ed.version)}</span></h3>
+      <ul class="fiab-liste">${f.liste.map((a) => `<li><b>${eur(a.prix)}</b> <a href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.titre)}<span class="sr-only"> (nouvel onglet)</span></a> <span class="sous">${esc(a.lib)} · ${esc({ ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'librairie' }[a.origine] || 'eBay')}</span></li>`).join('')}</ul></div>`;
+    dlg.querySelector('[data-fiab-fermer]').addEventListener('click', () => dlg.close());
+    dlg.showModal();
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fiab]');
+    if (!b) return;
+    const ed = EDITIONS.find((x) => x.id === b.dataset.fiab);
+    if (ed) ouvrirFiabilite(ed);
+  });
 
   function carte(ed) {
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="56" height="80" loading="lazy" decoding="async">` : '';
