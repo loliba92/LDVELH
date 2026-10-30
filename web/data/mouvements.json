@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 19.41,
-   "apres": 23.58,
-   "pct": 0.215,
+   "apres": 23.3,
+   "pct": 0.2,
    "nature": "annonces",
    "nb": 10,
    "recalibre": false
@@ -45,10 +45,10 @@
    "version": "V1",
    "etat": "bon",
    "avant": 17.55,
-   "apres": 19.65,
-   "pct": 0.12,
+   "apres": 19.42,
+   "pct": 0.107,
    "nature": "annonces",
-   "nb": 6,
+   "nb": 7,
    "recalibre": false
   },
   {
@@ -142,9 +142,24 @@
    "nature": "annonces",
    "nb": 4,
    "recalibre": false
+  },
+  {
+   "id": "9782070333653",
+   "isbn13": "9782070333653",
+   "titre": "L'Odyssée d'Althéos",
+   "serie": "Chroniques Crétoises",
+   "numero": "365",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 14.65,
+   "apres": 12.97,
+   "pct": -0.115,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 24,
