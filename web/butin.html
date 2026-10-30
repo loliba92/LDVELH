@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Butin · La Cote du Héros</title>
+<title>Butins et Annonces · La Cote du Héros</title>
 <meta name="description" content="Les bonnes affaires : annonces encore en ligne à moitié prix de la cote ou moins.">
 <meta name="robots" content="noindex">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="La Cote du Héros">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Butin · La Cote du Héros">
+<meta property="og:title" content="Butins et Annonces · La Cote du Héros">
 <meta property="og:description" content="Les bonnes affaires : annonces encore en ligne à moitié prix de la cote ou moins.">
 <meta property="og:image" content="https://lacoteduheros.fr/images/partage.png">
 <meta property="og:image:width" content="1200">
@@ -42,7 +42,7 @@
       <a class="menu-maison" href="./"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>Accueil</span></a>
       <a href="./#recherche">L'étagère</a>
       <a href="collection.html">Ma collection</a>
-      <a class="menu-butin" href="butin.html" hidden><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg> Butin <span class="nb-coll nb-butin" aria-label=""></span></a>
+      <a class="menu-butin" href="butin.html" hidden><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg> Butins et Annonces <span class="nb-coll nb-butin" aria-label=""></span></a>
       <a href="communaute.html"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.4c1.7.8 2.7 2.5 3 4.6"/></svg> Communauté</a>
       <a class="menu-cafe" href="https://buymeacoffee.com/obertrand9s" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z"/><path d="M16 10.5h1.5a2 2 0 0 1 0 4H16"/><path d="M8.5 4.5c-.6.7-.6 1.3 0 2M12 4.5c-.6.7-.6 1.3 0 2"/></svg><span>Offrir un café</span></a>
       <div class="compte" id="compte-haut"></div>
@@ -58,7 +58,7 @@
   </div>
 </div>
 <main id="main" class="cadre page" hidden data-niveau="admin">
-<h1>Butin</h1>
+<h1>Butins et Annonces</h1>
 <div class="rv-identite" id="rv-identite" hidden></div>
 <div class="rv-nav" id="rv-nav" role="tablist" aria-label="Sections de la page">
   <button type="button" role="tab" data-pane="pepites" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
@@ -113,12 +113,6 @@
   <h3 class="tr-sous-titre">Évolution dans le temps</h3>
   <div id="tr-temps"></div>
 </section>
-</div>
-<div class="rv-pane" id="pane-annonces" role="tabpanel" hidden>
-  <p class="chapeau">Les annonces retenues pour calculer les cotes : eBay, librairies, Leboncoin, Vinted. Sans recherche, les plus récentes s'affichent. Ouvrez une annonce pour vérifier le livre et son état.</p>
-  <div class="champ"><label for="an-q">Chercher un livre</label><input type="search" id="an-q" autocomplete="off" placeholder="Titre ou série"></div>
-  <p class="sous" id="an-etat" role="status" aria-live="polite"></p>
-  <div id="an-liste"></div>
 </div>
 <div class="rv-pane" id="pane-pepites" role="tabpanel">
   <p class="chapeau">Les bonnes affaires : <strong>50 % du prix du site ou moins</strong>, même édition, même état, 3 € d'économie au moins. Ouvrez l'annonce pour vérifier le livre, l'état et les frais de port.</p>
