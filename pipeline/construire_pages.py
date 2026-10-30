@@ -354,49 +354,6 @@ CONTACT = '''<p class="surtitre">Nous écrire</p>
 </ul>
 '''
 
-TYPES_COMMUNAUTE = [
-    ("chaine", "Chaînes vidéo"), ("podcast", "Podcasts"), ("site", "Sites et blogs"),
-    ("collection", "Collectionneurs"), ("boutique", "Boutiques et éditeurs"),
-]
-
-
-def liste_communaute(donnees):
-    """Sections HTML des liens de la communauté (données : web/data/communaute.json). Ne garde que les adresses https et échappe tout le texte."""
-    import html as _h
-    par_type = {k: [] for k, _ in TYPES_COMMUNAUTE}
-    for l in donnees.get("liens", []):
-        url = str(l.get("url", "")).strip()
-        nom = str(l.get("nom", "")).strip()
-        if not url.startswith("https://") or not nom or l.get("type") not in par_type:
-            continue
-        desc = str(l.get("description", "")).strip()
-        par_type[l["type"]].append(
-            f'<li class="comm-lien"><a href="{_h.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer"><strong>{_h.escape(nom)}</strong> <span aria-hidden="true">↗</span>'
-            f'<span class="sr-only"> (nouvel onglet)</span></a>' + (f'<span class="sous">{_h.escape(desc)}</span>' if desc else "") + "</li>")
-    sections = [f'<h2>{_h.escape(titre)}</h2>\n<ul class="comm-liste">\n' + "\n".join(par_type[k]) + "\n</ul>" for k, titre in TYPES_COMMUNAUTE if par_type[k]]
-    return "\n\n".join(sections) if sections else '<p class="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d\'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>'
-
-
-def _donnees_communaute():
-    try:
-        return json.loads((WEB / "data" / "communaute.json").read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return {}
-
-
-def corps_communaute():
-    return f'''<p class="surtitre">Passionnés</p>
-<h1>Communauté</h1>
-<p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
-
-{liste_communaute(_donnees_communaute())}
-
-<h2>Vous en faites partie ?</h2>
-<p>Vous tenez une chaîne, un site, un podcast, une boutique, ou vous avez une collection que vous aimez partager ? <a href="contact.html">Écrivez-moi</a> avec l'adresse et deux lignes de présentation. La sélection se fait au cas par cas, et le guide reste gratuit et sans publicité.</p>
-<p class="contact-mail"><a class="bouton" href="contact.html#formulaire">Proposer un lien</a></p>
-'''
-
-
 EQUIPE = '''<h1>Équipe</h1>
 <p class="chapeau">Qui a accès à quoi, par personnage.</p>
 <p class="sous" id="eq-etat" role="status">Chargement…</p>
@@ -950,7 +907,7 @@ def main():
     (WEB / "collection.html").write_text(variante(page_collection(index_html)), encoding="utf-8")
     print("écrit : collection.html")
     for nom, corps in (("le-projet.html", LE_PROJET), ("confidentialite.html", CONFIDENTIALITE), ("mentions-legales.html", MENTIONS),
-                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", _revue_prix()), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT), ("communaute.html", corps_communaute())):
+                       ("evolutions.html", corps_evolutions()), ("revue-prix.html", _revue_prix()), ("ajouter.html", AJOUTER), ("butin.html", _butin()), ("equipe.html", EQUIPE), ("contact.html", CONTACT)):
         (WEB / nom).write_text(variante(page(nom, corps)), encoding="utf-8")
         print("écrit :", nom)
     n = pages_livres.ecrire(WEB, {"bandeau": BANDEAU, "entete": entete("livre"), "pied": PIED_LIENS, "barre": barre("livre"),
