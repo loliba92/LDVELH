@@ -2,7 +2,7 @@
  "date": "2026-10-30",
  "precedent": "2026-10-29",
  "nb_comparees": 1491,
- "nb_modifiees": 542,
+ "nb_modifiees": 545,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -39,6 +39,51 @@
  ],
  "baisses": [
   {
+   "id": "9782070509478",
+   "isbn13": "9782070509478",
+   "titre": "La Pierre de la Sagesse",
+   "serie": "Loup Solitaire",
+   "numero": "369",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 53.13,
+   "apres": 12.2,
+   "pct": -0.77,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070509478",
+   "isbn13": "9782070509478",
+   "titre": "La Pierre de la Sagesse",
+   "serie": "Loup Solitaire",
+   "numero": "369",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 31.88,
+   "apres": 7.48,
+   "pct": -0.765,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070509478",
+   "isbn13": "9782070509478",
+   "titre": "La Pierre de la Sagesse",
+   "serie": "Loup Solitaire",
+   "numero": "369",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 21.25,
+   "apres": 5.1,
+   "pct": -0.76,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070587667",
    "isbn13": "9782070587667",
    "titre": "Les Chevaliers du Destin",
@@ -69,7 +114,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 4,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
   "n_paires": 24,
