@@ -2,7 +2,7 @@
  "date": "2026-10-30",
  "precedent": "2026-10-29",
  "nb_comparees": 1491,
- "nb_modifiees": 553,
+ "nb_modifiees": 554,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -34,6 +34,21 @@
    "pct": 0.132,
    "nature": "archives",
    "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070544028",
+   "isbn13": "9782070544028",
+   "titre": "Le Tombeau du Vampire",
+   "serie": "Dragon d'Or",
+   "numero": "316",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 7.87,
+   "apres": 8.84,
+   "pct": 0.123,
+   "nature": "annonces",
+   "nb": 5,
    "recalibre": false
   },
   {
@@ -204,12 +219,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 13,
+ "nb_grands_mouvements": 14,
  "modele": {
   "actif": false,
-  "n_paires": 27,
-  "gain": 0.109,
-  "raison": "le modèle ne bat pas assez les archives (gain 11%, 15% exigés)",
+  "n_paires": 28,
+  "gain": 0.088,
+  "raison": "le modèle ne bat pas assez les archives (gain 9%, 15% exigés)",
   "rapport_global": 0.897
  }
 }
