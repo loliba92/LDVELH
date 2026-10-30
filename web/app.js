@@ -1875,7 +1875,7 @@
     };
     const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
     z.innerHTML = '<div class="compteurs-acc">'
-      + carte('butin.html#pepites', 'Butin', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
+      + carte('butin.html#pepites', 'Butins et Annonces', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
       + carte(niv3 ? 'butin.html#captures-recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
       + '</div>';
   }
