@@ -2461,3 +2461,5 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-therm-pt { position: absolute; top: -3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--text); border: 2px solid var(--surface); box-sizing: border-box; }
 .rc-therm-txt { white-space: nowrap; }
 .archive-flag { display: inline-block; margin-top: 6px; margin-left: 6px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); color: var(--muted); font: 600 .8rem var(--f-ui); }
+.rv-fiab { margin: 8px 0 0; font-size: .85rem; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.rv-fiab-prop strong { color: var(--gold); }
