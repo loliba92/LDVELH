@@ -142,12 +142,36 @@
     return best ? `<span class="rv-revision"${best.par ? ` title="Par ${esc(best.par)}"` : ''}>Révisée <strong>${esc(quand(best.le))}</strong></span>` : '<span class="rv-revision rien">Pas encore révisée</span>';
   }
 
+  // Fiabilité du prix d'un livre : toutes les annonces du livre, tous états confondus (l'état ne fait pas le prix).
+  // Solide : au moins 10 annonces et dispersion (écart-type / médiane) de 30 % au plus. À confirmer : 3 à 9 annonces, ou dispersion jusqu'à 60 %. Faible : le reste.
+  function fiabilite(ed) {
+    if (!ANN || !ANN.annonces || !ed.isbn) return null;
+    const prix = [];
+    ETATS.forEach(([cle]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => prix.push(x[0])));
+    const n = prix.length;
+    if (n < 2) return null;
+    const tries = prix.slice().sort((a, b) => a - b), m = n >> 1;
+    const med = n % 2 ? tries[m] : (tries[m - 1] + tries[m]) / 2;
+    const moy = prix.reduce((t, x) => t + x, 0) / n;
+    const ecart = Math.sqrt(prix.reduce((t, x) => t + (x - moy) ** 2, 0) / n);
+    const disp = med > 0 ? ecart / med : null;
+    const niveau = n >= 10 && disp !== null && disp <= 0.3 ? 'solide' : (n >= 3 && (disp === null || disp <= 0.6)) ? 'confirmer' : 'faible';
+    return { n, med, disp, niveau };
+  }
+  function fiabiliteHtml(ed) {
+    const f = estNiveau3() ? fiabilite(ed) : null;
+    if (!f) return '';
+    const NIV = { solide: ['Solide', 'rc-v-dessous'], confirmer: ['À confirmer', 'rc-v-dans'], faible: ['Faible', 'rc-v-dessus'] }[f.niveau];
+    const pourcent = f.disp == null ? '–' : Math.round(f.disp * 100) + ' %';
+    return `<p class="rv-fiab"><span class="rc-pastille ${NIV[1]}">Fiabilité : ${NIV[0]}</span> <span class="sous">${f.n} annonce${f.n > 1 ? 's' : ''}, dispersion ${pourcent}</span> <span class="rv-fiab-prop">Proposition : <strong>${eur(f.med)}</strong> (médiane)</span></p>`;
+  }
+
   function carte(ed) {
     const jaq = JAQ[ed.id] ? `<img class="rv-jaq" src="${esc(JAQ[ed.id])}" alt="Jaquette de ${esc(ed.titre)}" width="56" height="80" loading="lazy" decoding="async">` : '';
     return `<article class="rv-edition"><header class="rv-tete">${jaq}<div class="rv-titre"><a href="./#q=${encodeURIComponent(ed.isbn || ed.id)}">${esc(ed.titre)}</a>` +
       `<span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · <span class="badge">${esc(ed.version)}</span>${RAR[ed.id] && /rare$/.test(RAR[ed.id].niveau) ? ` · <span class="rarete rarete-${RAR[ed.id].niveau}" title="Possédé par ${RAR[ed.id].pct} % des collections">${{ tres_rare: 'très rare', rare: 'rare', peu_courant: 'peu courant', courant: 'courant' }[RAR[ed.id].niveau]}</span>` : ''}</span>${derniereRevision(ed)}` +
       `<a class="rv-fiche" href="./#fiche=${encodeURIComponent(ed.id)}&corriger=1" target="_blank" rel="noopener">Corriger les prix dans la fiche</a>${voirAnnonces(ed) ? `<button type="button" class="bouton-lien rv-voir-ann" data-annonces="${esc(ed.id)}">Voir les annonces</button>` : (estNiveau3() && ANN ? '<span class="sous rv-pas-ann">Aucune annonce retenue au dernier relevé</span>' : '')}</div></header>` +
-      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>` +
+      `<div class="rv-trois">${ETATS.map((e) => cellule(e, ed)).join('')}</div>${fiabiliteHtml(ed)}` +
       `<span class="rv-liens"><span class="rv-liens-titre">Chercher en vente</span>${[
         ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${requete(ed.titre + ' ' + (ed.isbn || ''))}`],
         ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${requete(ed.titre + ' ldvelh')}&sort=time`],
