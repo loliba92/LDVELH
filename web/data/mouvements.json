@@ -114,6 +114,51 @@
    "recalibre": false
   },
   {
+   "id": "9782070332724",
+   "isbn13": "9782070332724",
+   "titre": "Le Labyrinthe de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "272",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 28.18,
+   "apres": 14.0,
+   "pct": -0.503,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332724",
+   "isbn13": "9782070332724",
+   "titre": "Le Labyrinthe de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "272",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 13.51,
+   "apres": 9.39,
+   "pct": -0.305,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332724",
+   "isbn13": "9782070332724",
+   "titre": "Le Labyrinthe de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "272",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 9.84,
+   "apres": 7.0,
+   "pct": -0.289,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070587667",
    "isbn13": "9782070587667",
    "titre": "Les Chevaliers du Destin",
@@ -159,7 +204,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 10,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 24,
