@@ -1,23 +1,32 @@
 {
   "actif": false,
-  "n_paires": 14,
-  "calcule_le": "2026-10-29",
-  "par_etat": {},
-  "erreur_modele": null,
-  "erreur_archives": null,
-  "gain": null,
-  "raison": "pas assez d'éditions comparables (14 sur 20 nécessaires)",
+  "n_paires": 24,
+  "calcule_le": "2026-10-30",
+  "par_etat": {
+    "bon": {
+      "rapport": 0.897,
+      "ecart": 0.191,
+      "n": 24
+    }
+  },
+  "erreur_modele": 0.262,
+  "erreur_archives": 0.295,
+  "gain": 0.113,
+  "raison": "le modèle ne bat pas assez les archives (gain 11%, 15% exigés)",
+  "rapport_global": 0.897,
   "fraicheur": {
     "bon": {
       "rapport": 0.927,
-      "n": 30
+      "n": 36
     },
     "tres_bon": {
       "rapport": 0.823,
-      "n": 28
+      "n": 35
     }
   },
-  "sigma_archive": {},
+  "sigma_archive": {
+    "bon": 0.25
+  },
   "rapports_etats_mesures_archives": {
     "n": 421,
     "convenable": 0.624,
