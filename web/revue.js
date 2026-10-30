@@ -157,7 +157,7 @@
     const disp = med > 0 ? ecart / med : null;
     const niveau = n >= 10 && disp !== null && disp <= 0.3 ? 'solide' : (n >= 3 && (disp === null || disp <= 0.6)) ? 'confirmer' : 'faible';
     const liste = [];
-    ETATS.forEach(([cle, lib]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => liste.push({ prix: x[0], titre: x[1], lien: x[2], origine: x[3], lib })));
+    ETATS.forEach(([cle, lib]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => liste.push({ prix: x[0], titre: x[1], lien: x[2], origine: x[3], lib, cle })));
     return { n, med, disp, niveau, liste: liste.sort((a, b) => a.prix - b.prix) };
   }
   function fiabiliteHtml(ed) {
@@ -177,9 +177,30 @@
     if (!f || !f.liste.length) return;
     let dlg = document.getElementById('fiab-dialog');
     if (!dlg) { dlg = document.createElement('dialog'); dlg.id = 'fiab-dialog'; dlg.className = 'fiab-dialog'; document.body.appendChild(dlg); }
-    dlg.innerHTML = `<div class="fiab-cadre"><div class="fiab-tete"><p class="surtitre">Annonces comptées pour la fiabilité</p><button type="button" class="bouton-lien" data-fiab-fermer>Fermer</button></div>
-      <h3 class="fiab-titre">${esc(ed.titre)} <span class="sous">${esc(ed.version)}</span></h3>
-      <ul class="fiab-liste">${f.liste.map((a) => `<li><b>${eur(a.prix)}</b> <a href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.titre)}<span class="sr-only"> (nouvel onglet)</span></a> <span class="sous">${esc(a.lib)} · ${esc({ ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'librairie' }[a.origine] || 'eBay')}</span></li>`).join('')}</ul></div>`;
+    const ORIGINE = { ebay: 'eBay', leboncoin: 'Leboncoin', vinted: 'Vinted', librairie: 'Librairie' };
+    // Verdict comme sur la page Annonces : prix comparé au prix du site pour le même état
+    const verdict = (prix, pub) => {
+      if (pub == null) return null;
+      if (prix <= 0.2 * pub) return ['Super pépite', 'rc-v-super'];
+      if (prix <= 0.5 * pub) return ['Pépite', 'rc-v-pepite'];
+      if (prix < 0.9 * pub) return ['Pas cher', 'rc-v-dessous'];
+      if (prix <= 1.1 * pub) return ['Dans les prix', 'rc-v-dans'];
+      if (prix <= 1.5 * pub) return ['Trop cher', 'rc-v-dessus'];
+      return ['Très cher', 'rc-v-cher'];
+    };
+    const lignes = f.liste.map((x) => {
+      const pub = ed.etats[x.cle] ? ed.etats[x.cle].publie : null;
+      const v = verdict(x.prix, pub);
+      const ecart = pub ? Math.round((x.prix / pub - 1) * 100) : null;
+      const meta = `${x.lib}${x.frais ? ` · dont ${eur(x.frais)} de frais` : ''}${pub ? ` · site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : ''}`;
+      return `<li class="fiab-ligne">
+        <div class="fiab-haut"><a class="fiab-titre-ann" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer">${esc(x.titre)}<span class="sr-only"> (nouvel onglet)</span></a><b class="fiab-prix">${eur(x.prix)}</b></div>
+        <div class="fiab-bas"><span class="fiab-origine">${esc(ORIGINE[x.origine] || 'eBay')}</span>${v ? `<span class="rc-pastille ${v[1]}">${v[0]}</span>` : ''}<span class="fiab-meta">${esc(meta)}</span></div>
+      </li>`;
+    }).join('');
+    dlg.innerHTML = `<div class="fiab-cadre">
+      <div class="fiab-tete"><div><p class="fiab-surtitre">Annonces comptées pour la fiabilité</p><p class="fiab-resume"><b>${f.n} annonce${f.n > 1 ? 's' : ''}</b> · ${esc(ed.titre)} ${esc(ed.version)} · médiane ${eur(f.med)}</p></div><button type="button" class="bouton-lien" data-fiab-fermer>Fermer</button></div>
+      <ul class="fiab-liste">${lignes}</ul></div>`;
     dlg.querySelector('[data-fiab-fermer]').addEventListener('click', () => dlg.close());
     dlg.showModal();
   }
