@@ -1326,6 +1326,24 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070592265|bon": {
+   "prix": 87.21,
+   "decision": "corrige",
+   "le": "2026-10-30",
+   "par": "loliba (superadmin)"
+  },
+  "9782070592265|convenable": {
+   "prix": 65.0,
+   "decision": "corrige",
+   "le": "2026-10-30",
+   "par": "loliba (superadmin)"
+  },
+  "9782070592265|tres_bon": {
+   "prix": 130.0,
+   "decision": "corrige",
+   "le": "2026-10-30",
+   "par": "loliba (superadmin)"
+  },
   "9782070592272|bon": {
    "prix": 52.52,
    "decision": "confirme",

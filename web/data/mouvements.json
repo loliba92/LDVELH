@@ -2,7 +2,7 @@
  "date": "2026-10-30",
  "precedent": "2026-10-29",
  "nb_comparees": 1491,
- "nb_modifiees": 554,
+ "nb_modifiees": 556,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 9,
  "hausses": [
@@ -129,6 +129,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070592265",
+   "isbn13": "9782070592265",
+   "titre": "Le Chasseur de Mages",
+   "serie": "Défis Fantastiques",
+   "numero": "767",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 152.62,
+   "apres": 65.0,
+   "pct": -0.574,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070332724",
    "isbn13": "9782070332724",
    "titre": "Le Labyrinthe de la Mort",
@@ -139,6 +154,36 @@
    "avant": 28.18,
    "apres": 14.0,
    "pct": -0.503,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070592265",
+   "isbn13": "9782070592265",
+   "titre": "Le Chasseur de Mages",
+   "serie": "Défis Fantastiques",
+   "numero": "767",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 172.01,
+   "apres": 87.21,
+   "pct": -0.493,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070592265",
+   "isbn13": "9782070592265",
+   "titre": "Le Chasseur de Mages",
+   "serie": "Défis Fantastiques",
+   "numero": "767",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 194.34,
+   "apres": 130.0,
+   "pct": -0.331,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -217,39 +262,9 @@
    "nature": "annonces",
    "nb": 4,
    "recalibre": false
-  },
-  {
-   "id": "9782070546039",
-   "isbn13": "9782070546039",
-   "titre": "Le Château des Ames Damnées",
-   "serie": "Dragon d'Or",
-   "numero": "356",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 13.71,
-   "apres": 12.02,
-   "pct": -0.123,
-   "nature": "annonces",
-   "nb": 6,
-   "recalibre": false
-  },
-  {
-   "id": "9782070333653",
-   "isbn13": "9782070333653",
-   "titre": "L'Odyssée d'Althéos",
-   "serie": "Chroniques Crétoises",
-   "numero": "365",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 14.65,
-   "apres": 12.97,
-   "pct": -0.115,
-   "nature": "annonces",
-   "nb": 3,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 16,
+ "nb_grands_mouvements": 19,
  "modele": {
   "actif": false,
   "n_paires": 29,
