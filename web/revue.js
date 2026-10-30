@@ -145,11 +145,11 @@
   // Fiabilité du prix d'un livre : toutes les annonces du livre, tous états confondus (l'état ne fait pas le prix).
   // Solide : au moins 10 annonces et dispersion (écart-type / médiane) de 30 % au plus. À confirmer : 3 à 9 annonces, ou dispersion jusqu'à 60 %. Faible : le reste.
   function fiabilite(ed) {
-    if (!ANN || !ANN.annonces || !ed.isbn) return null;
+    if (!ANN || !ANN.annonces) return null;
     const prix = [];
-    ETATS.forEach(([cle]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => prix.push(x[0])));
+    if (ed.isbn) ETATS.forEach(([cle]) => (ANN.annonces[ed.isbn] && ANN.annonces[ed.isbn][cle] || []).forEach((x) => prix.push(x[0])));
     const n = prix.length;
-    if (n < 2) return null;
+    if (n < 2) return { n, niveau: 'insuffisant' };
     const tries = prix.slice().sort((a, b) => a - b), m = n >> 1;
     const med = n % 2 ? tries[m] : (tries[m - 1] + tries[m]) / 2;
     const moy = prix.reduce((t, x) => t + x, 0) / n;
@@ -161,6 +161,7 @@
   function fiabiliteHtml(ed) {
     const f = estNiveau3() ? fiabilite(ed) : null;
     if (!f) return '';
+    if (f.niveau === 'insuffisant') return `<p class="rv-fiab"><span class="sous">Fiabilité : pas assez d'annonces (${f.n})</span></p>`;
     const NIV = { solide: ['Solide', 'rc-v-dessous'], confirmer: ['À confirmer', 'rc-v-dans'], faible: ['Faible', 'rc-v-dessus'] }[f.niveau];
     const pourcent = f.disp == null ? '–' : Math.round(f.disp * 100) + ' %';
     return `<p class="rv-fiab"><span class="rc-pastille ${NIV[1]}">Fiabilité : ${NIV[0]}</span> <span class="sous">${f.n} annonce${f.n > 1 ? 's' : ''}, dispersion ${pourcent}</span> <span class="rv-fiab-prop">Proposition : <strong>${eur(f.med)}</strong> (médiane)</span></p>`;
