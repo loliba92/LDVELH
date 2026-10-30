@@ -2243,6 +2243,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-ligne2 .rc-meta { grid-column: auto; font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .rc-ligne2 .rc-pastille { font-size: .72rem; line-height: 1.5; white-space: nowrap; flex: none; }
 .rc-ligne2 .rc-vs { white-space: nowrap; flex: none; }
+.rc-ligne2 .rc-quand { flex: none; font-size: .8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 @media (min-width: 900px) {
   .rc-ligne { grid-template-columns: minmax(0, 1fr) 33rem auto; align-items: center; }
   .rc-ligne .rc-titre { grid-column: 1; grid-row: 1; }

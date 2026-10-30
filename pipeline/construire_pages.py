@@ -292,7 +292,8 @@ AJOUTER = '''<p class="surtitre">Contribuer</p>
   <label for="aj-texte">ISBN, un par ligne</label>
   <textarea id="aj-texte" rows="8" spellcheck="false" autocomplete="off" placeholder="9782070583805&#10;9791097577025"></textarea>
   <p class="sous" id="aj-compte" aria-live="polite">0 ISBN</p>
-  <div class="rv-ajout-actions"><button type="button" class="bouton" id="aj-envoyer">Ajouter au guide</button></div>
+  <div class="rv-ajout-actions"><button type="button" class="bouton-lien" id="aj-verifier">Vérifier la liste</button><button type="button" class="bouton" id="aj-envoyer">Ajouter au guide</button></div>
+  <ul class="aj-liste" id="aj-verif" aria-live="polite" hidden></ul>
   <p class="rv-ajout-bilan" id="aj-msg" role="status" hidden></p>
 </section>
 '''
