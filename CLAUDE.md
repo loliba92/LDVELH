@@ -11,6 +11,10 @@
 - Autorisation durable du propriétaire : je fusionne moi-même mes propres demandes de fusion (squash), sans attendre un « fusionne », une fois les vérifications passées. Je préviens ensuite le propriétaire, et je lui rappelle de recharger la page deux fois sur téléphone (cache).
 - Cette autorisation ne couvre que mes propres demandes de fusion sur ce dépôt.
 
+## Branche de travail
+- Autorisation durable du propriétaire : après la fusion d'une demande de fusion, je réaligne la branche de travail (`ccr-65641662-seq9a0`) sur `main` (`git checkout -B … origin/main`, puis `git push --force-with-lease`). Cette réécriture ne touche que cette branche, jamais `main`.
+- Avant de la faire, je vérifie que le contenu de la branche est identique à `main` (`git diff --stat origin/main`, vide).
+
 ## Relais (Apps Script)
 - Chaque fois que je demande au propriétaire de mettre à jour le relais (`relais/Code.gs`, `relais/logique.gs`), j'indique toujours la date et l'heure de la version à contrôler (la ligne « Version du … » en tête de fichier, heure de Paris).
 
