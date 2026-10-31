@@ -655,6 +655,24 @@
    "decision": "confirme",
    "le": "2026-10-17"
   },
+  "9782070336104|bon": {
+   "prix": 62.67,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
+  "9782070336104|convenable": {
+   "prix": 50.0,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
+  "9782070336104|tres_bon": {
+   "prix": 70.0,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
   "9782070336234|convenable": {
    "prix": 16.0,
    "decision": "corrige",

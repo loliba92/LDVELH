@@ -2,7 +2,7 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 668,
+ "nb_modifiees": 669,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
@@ -113,6 +113,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070336104",
+   "isbn13": "9782070336104",
+   "titre": "Clovis le Chevalier",
+   "serie": "Double Jeu",
+   "numero": "610",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 63.77,
+   "apres": 50.0,
+   "pct": -0.216,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070583805",
    "isbn13": "9782070583805",
    "titre": "Le Pirate des Sept Mers",
@@ -171,24 +186,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070585151",
-   "isbn13": "9782070585151",
-   "titre": "La Légende de Zagor",
-   "serie": "Défis Fantastiques",
-   "numero": "735",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 48.32,
-   "apres": 41.0,
-   "pct": -0.151,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 13,
+ "nb_grands_mouvements": 14,
  "modele": {
   "actif": false,
   "n_paires": 35,
