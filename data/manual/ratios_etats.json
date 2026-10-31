@@ -1,9 +1,14 @@
 {
   "convenable": 0.4,
-  "bon": 0.6,
+  "bon": 0.67,
   "tres_bon": 1.0,
   "ecart_etat_superieur": 1.2,
   "decote_annonces": 0.85,
-  "gains_lissage": {"0": 0.1, "1": 0.1, "2": 0.2, "3": 0.3},
-  "note": "Rapports entre états, relatifs au très bon état (règle du propriétaire : convenable 40 %, bon 60 %). Servent à déduire un état sans prix à partir des autres états de la même édition. Modifier ces valeurs puis relancer le workflow ou pipeline/export_site.py. « ecart_etat_superieur » : quand les prix d'un état supérieur sont en dessous de l'état inférieur (archives contradictoires), il est relevé à ce multiple de l'état inférieur (1,2 = +20 %). « gains_lissage » : part de l'écart entre la cible du jour (estimation sur les données) et le prix de la veille rattrapée chaque jour, selon le nombre d'annonces (0, 1, 2, 3 ou plus) : prix du jour = prix de la veille + gain × (cible − prix de la veille). Un prix validé n'est jamais lissé. « decote_annonces » : une annonce est un prix demandé, au-dessus du prix qui se conclut ; chaque prix d'annonce est multiplié par ce facteur (0,85 = -15 %, 1 = aucune correction) avant le calcul. C'est une hypothèse, à mesurer quand on aura assez de ventes probables (annonces disparues)."
+  "gains_lissage": {
+    "0": 0.1,
+    "1": 0.1,
+    "2": 0.2,
+    "3": 0.3
+  },
+  "note": "Rapports entre états, relatifs au très bon état (convenable 40 % : règle du propriétaire ; bon 67 % : médiane mesurée sur 21 livres dont les deux états sont des relevés actuels, très bon / bon = 1,50). Servent à déduire un état sans prix à partir des autres états de la même édition. Modifier ces valeurs puis relancer le workflow ou pipeline/export_site.py. « ecart_etat_superieur » : quand les prix d'un état supérieur sont en dessous de l'état inférieur (archives contradictoires), il est relevé à ce multiple de l'état inférieur (1,2 = +20 %). « gains_lissage » : part de l'écart entre la cible du jour (estimation sur les données) et le prix de la veille rattrapée chaque jour, selon le nombre d'annonces (0, 1, 2, 3 ou plus) : prix du jour = prix de la veille + gain × (cible − prix de la veille). Un prix validé n'est jamais lissé. « decote_annonces » : une annonce est un prix demandé, au-dessus du prix qui se conclut ; chaque prix d'annonce est multiplié par ce facteur (0,85 = -15 %, 1 = aucune correction) avant le calcul. C'est une hypothèse, à mesurer quand on aura assez de ventes probables (annonces disparues)."
 }
