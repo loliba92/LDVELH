@@ -88,6 +88,9 @@ JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
 
+ECONOMIE_FORTE = 30          # économie à partir de laquelle une annonce est mise en tête du Butin, même au-dessus de la moitié
+
+
 def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
     """Le Butin seul : les annonces à 50 % du prix du site ou moins (3 € d'économie au moins), même édition, même état.
     Les sorciers ne reçoivent que ce sous-ensemble ; la liste complète des annonces est réservée au Zagor."""
@@ -98,7 +101,7 @@ def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
             prix_site = publie.get((isbn, etat))
             if not prix_site:
                 continue
-            gardees = [a for a in liste if a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini and not str(a[1]).startswith("Lot de ")]
+            gardees = [a for a in liste if (a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini or prix_site - a[0] >= ECONOMIE_FORTE) and not str(a[1]).startswith("Lot de ")]
             if gardees:
                 butin.setdefault(isbn, {})[etat] = gardees
     return butin
