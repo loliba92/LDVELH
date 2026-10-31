@@ -556,7 +556,8 @@
     return `<h3 class="rv-ann-livre">${esc(ed.titre)} <span class="sous">${esc(ed.serie)}${ed.numero && !/^0+$/.test(ed.numero) ? ' n° ' + esc(ed.numero) : ''} · ${esc(ed.version)}</span></h3>${blocs || `<p class="sous">Aucune annonce retenue pour cette édition.</p>${raisons ? `<p class="sous">D'où viennent ses prix :</p><ul>${raisons}</ul>` : ''}`}`;
   }
   // Fenêtre ouverte depuis un livre de l'onglet Prix
-  function ouvrirAnnonces(ed) {
+  function ouvrirAnnonces(ed) { ouvrirFenetreAnnonces(annoncesEdition(ed)); }
+  function ouvrirFenetreAnnonces(corps) {
     let dlg = $('#an-dialog');
     if (!dlg) {
       dlg = document.createElement('dialog');
@@ -565,11 +566,26 @@
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'an-fermer') dlg.close(); });
     }
-    $('#an-dialog-corps').innerHTML = annoncesEdition(ed);
+    $('#an-dialog-corps').innerHTML = corps;
     $('#an-dialog-date').textContent = jour(ANN.date);
     dlg.showModal();
   }
+  // Annonces d'un groupe de l'indice (une version × un éditeur, ou l'une de ses séries) : une fenêtre, les livres rangés par série
+  const groupeDe = (ed) => `${ed.version} · ${EDITEUR[ed.id] || 'éditeur inconnu'}`;
+  const pl = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+  const nbAnnonces = (ed) => ETATS.reduce((t, [cle]) => t + ((ANN.annonces[ed.isbn] || {})[cle] || []).length, 0);
+  function ouvrirAnnoncesGroupe(groupe, serie) {
+    chargerAnnonces().then(() => {
+      if (!ANN) return;
+      const eds = EDITIONS.filter((ed) => ed.isbn && groupeDe(ed) === groupe && (!serie || ed.serie === serie) && nbAnnonces(ed))
+        .sort((a, b) => a.serie.localeCompare(b.serie, 'fr') || (parseInt(a.numero, 10) || 0) - (parseInt(b.numero, 10) || 0));
+      const n = eds.reduce((t, ed) => t + nbAnnonces(ed), 0);
+      ouvrirFenetreAnnonces(`<h3 class="rv-ann-groupe">${esc(serie ? `${serie} · ${groupe}` : groupe)} <span class="sous">${pl(n, 'annonce')} · ${pl(eds.length, 'livre')}</span></h3>${eds.map(annoncesEdition).join('') || '<p class="sous">Aucune annonce retenue pour ce groupe.</p>'}`);
+    });
+  }
   document.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-ind-annonces]');
+    if (g) { ouvrirAnnoncesGroupe(g.dataset.indAnnonces, g.dataset.serie || ''); return; }
     const b = e.target.closest('[data-annonces]');
     if (!b) return;
     const ed = EDITIONS.find((x) => x.id === b.dataset.annonces);
@@ -941,6 +957,8 @@
       // Indice de marché : une ligne par édition, les plus fortes baisses d'abord. Pas de liste de livres : elle n'apporte rien au groupe.
       const virgule = (x, n) => x.toFixed(n).replace('.', ',');
       const nb = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+      // « N annonces » : un lien vers leurs annonces pour le niveau 3 (les annonces ne sont lues que par lui), un simple texte sinon
+      const lienAnnonces = (n, groupe, serie) => (n > 0 && estNiveau3() ? `<button type="button" class="ind-lien" data-ind-annonces="${esc(groupe)}" data-serie="${esc(serie || '')}">${nb(n, 'annonce')}</button>` : nb(n, 'annonce'));
 
       // Mini-courbe de l'indice (historique quotidien), sans bibliothèque : une ligne SVG
       const mini = (serie) => {
@@ -958,7 +976,7 @@
           const i = cle.indexOf(' · ');
           const ecart = Math.round((g.indice - 100) * 10) / 10;
           const sens = ecart < 0 ? 'baisse' : ecart > 0 ? 'hausse' : 'stable';
-          return { edition: cle.slice(0, i), editeur: cle.slice(i + 3), ecart, sens, g };
+          return { cle, edition: cle.slice(0, i), editeur: cle.slice(i + 3), ecart, sens, g };
         }).sort((x, y) => x.ecart - y.ecart || y.g.livres - x.g.livres);
         const compte = (s) => lignes.filter((l) => l.sens === s).length;
         etat.textContent = `Au ${jour(INDICE.date)} : ${nb(compte('baisse'), 'édition')} en baisse, ${nb(compte('hausse'), 'édition')} en hausse, ${nb(compte('stable'), 'édition')} stable${compte('stable') > 1 ? 's' : ''}.`;
@@ -974,18 +992,18 @@
       // Une ligne par édition qui bouge. Les éditions stables sont repliées en bas : elles ne disent rien de plus.
       // Cascade (waterfall) : chaque série fait monter ou descendre la variation du jour, de 0 au total
       // Détail par série, façon « roll-forward » : indice de départ (100), indice d'arrivée et variation, série par série, depuis le début de la mesure
-      const cascadeHtml = (c) => {
+      const cascadeHtml = (c, groupe) => {
         if (!c || !c.series || !c.series.length) return '<p class="ind-vide">Aucun détail disponible.</p>';
         const signe = (v) => (v < 0 ? 'baisse' : v > 0 ? 'hausse' : 'stable');
         const pct = (v) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${virgule(Math.abs(v), 1)} %`;
         const ligneRf = (nom, meta, debut, fin, variation, classe) => `<li class="ind-rf-ligne ${classe || ''}"><span class="ind-rf-nom">${esc(nom)}${meta ? ` <span class="ind-meta">${meta}</span>` : ''}</span><span class="ind-rf-n">${virgule(debut, 1)}</span><span class="ind-rf-n">${virgule(fin, 1)}</span><b class="ind-var ${signe(variation)}">${pct(variation)}</b></li>`;
-        const lignes = c.series.map((x) => ligneRf(x.serie, `${nb(x.livres, 'livre')} · ${nb(x.annonces || 0, 'annonce')}`, x.debut, x.fin, x.variation_pct)).join('');
+        const lignes = c.series.map((x) => ligneRf(x.serie, `${nb(x.livres, 'livre')} · ${x.autres ? nb(x.annonces || 0, 'annonce') : lienAnnonces(x.annonces || 0, groupe, x.serie)}`, x.debut, x.fin, x.variation_pct)).join('');
         return `<p class="ind-wf-total">Depuis le ${jour(c.depuis)}, sur ${nb(c.prix_observes, 'prix observé')}</p><ul class="ind-rf"><li class="ind-rf-ligne ind-rf-tete"><span class="ind-rf-nom">Série</span><span class="ind-rf-n">Début</span><span class="ind-rf-n">Fin</span><span class="ind-rf-n">Variation</span></li>${lignes}${ligneRf('Ensemble de l\'édition', '', c.debut, c.fin, c.variation_pct, 'ind-rf-total')}</ul>`;
       };
       const ligne = (l) => {
         const variation = l.sens === 'stable' ? 'stable' : `${virgule(Math.abs(l.ecart), 1)} %`;
-        const detail = cascadeHtml((INDICE.cascade || {})[`${l.edition} · ${l.editeur}`]);
-        return `<article class="ind-ligne ${l.sens}"><div class="ind-haut"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-chiffre"><b class="ind-val">${virgule(l.g.indice, 1)}</b><span class="ind-chip ${l.sens}">${fleche[l.sens]} ${variation}</span></span></div><div class="ind-bas">${mini(l.g.historique)}<span class="ind-meta">${nb(l.g.livres, 'livre')} · ${nb(l.g.annonces, 'annonce')}</span></div>${l.sens === 'stable' ? '' : `<details class="ind-detail"><summary>Détail par série</summary>${detail}</details>`}</article>`;
+        const detail = cascadeHtml((INDICE.cascade || {})[l.cle], l.cle);
+        return `<article class="ind-ligne ${l.sens}"><div class="ind-haut"><span class="ind-titre">${esc(l.edition)}</span><span class="ind-chiffre"><b class="ind-val">${virgule(l.g.indice, 1)}</b><span class="ind-chip ${l.sens}">${fleche[l.sens]} ${variation}</span></span></div><div class="ind-bas">${mini(l.g.historique)}<span class="ind-meta">${nb(l.g.livres, 'livre')} · ${lienAnnonces(l.g.annonces, l.cle)}</span></div>${l.sens === 'stable' ? '' : `<details class="ind-detail"><summary>Détail par série</summary>${detail}</details>`}</article>`;
       };
       const bouge = lignes.filter((l) => l.sens !== 'stable');
       const stables = lignes.filter((l) => l.sens === 'stable');
@@ -1085,9 +1103,9 @@
   const calerOnglets = () => { const h = document.querySelector('.haut'); if (h) document.documentElement.style.setProperty('--haut-h', Math.max(0, Math.round(h.getBoundingClientRect().bottom)) + 'px'); };   // le bas de l'en-tête change quand le bandeau se replie au défilement
   calerOnglets(); addEventListener('resize', calerOnglets); addEventListener('load', calerOnglets); addEventListener('scroll', calerOnglets, { passive: true });
 
-  const JAQ = {}, RAR = {};
+  const JAQ = {}, RAR = {}, EDITEUR = {};
   fetch('data/historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((h) => { HISTO = h; const d = document.getElementById('rv-date'); if (d && h && h.dates.length) d.textContent = `Dernière publication des prix : ${jour(h.dates[h.dates.length - 1])}.`; if (EDITIONS.length) afficher(); });
-  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; })).catch(() => {})
+  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
     d.forEach((l) => { if (!par.has(l.id)) par.set(l.id, { id: l.id, isbn: l.isbn, titre: l.titre, serie: l.serie, numero: l.numero, version: l.version, etats: {} }); par.get(l.id).etats[l.etat] = l; });
