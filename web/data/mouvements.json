@@ -2,10 +2,26 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 680,
+ "nb_modifiees": 683,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070333103",
+   "isbn13": "9782070333103",
+   "titre": "La Couronnes des Rois",
+   "serie": "Sorcellerie!",
+   "numero": "310",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 16.97,
+   "apres": 19.42,
+   "pct": 0.144,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070583782",
@@ -188,7 +204,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 24,
+ "nb_grands_mouvements": 27,
  "modele": {
   "actif": false,
   "n_paires": 37,
