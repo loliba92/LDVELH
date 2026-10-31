@@ -733,7 +733,7 @@
     const q = requete(`${titre} ldvelh`.replace(/\s+/g, ' '));
     const ebay = requete(`${titre} ${b.isbn13 || 'livre héros'}`);
     const liens = [
-      ['Vinted', `https://www.vinted.fr/catalog?search_text=${q}`],
+      ['Vinted', `https://www.vinted.fr/catalog?search_text=${b.isbn13 ? requete(b.isbn13) : q}`],          // ISBN quand il est connu : Vinted le cherche comme un ISBN, sans le bruit du titre
       ['Leboncoin', `https://www.leboncoin.fr/recherche?text=${q}&sort=time`],
       ['eBay', `https://www.ebay.fr/sch/i.html?_nkw=${ebay}`],
       ['Facebook', `https://www.facebook.com/marketplace/search/?query=${q}`],
