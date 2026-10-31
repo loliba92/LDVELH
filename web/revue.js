@@ -679,6 +679,8 @@
     const j = p.premiere || p.vue;
     return j && /^\d{4}-\d\d-\d\d$/.test(j) ? 'Vue le ' + new Date(j + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
   };
+  // Super pépite : au moins 30 € d'économie et au moins 70 % de réduction sur le prix du site
+  const superPepite = (p) => p.pub - p.prix >= ECONOMIE_FORTE && p.prix <= (1 - 0.7) * p.pub;
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
@@ -688,6 +690,7 @@
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
       `<span class="pp-badge ${solide ? 'solide' : 'verifier'}">${solide ? 'Solide' : 'À vérifier'}</span>` +
+      (superPepite(p) ? `<span class="pp-super">Super pépite</span>` : '') +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
       `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></span>` +
@@ -817,9 +820,7 @@
       const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       try { localStorage.setItem('cdh-butin-vu', String(Date.now())); } catch (e) { /* tant pis */ }          // les nouveautés comptées sur l'accueil repartent de zéro
-      const fortes = vues.filter((p) => p.pub - p.prix >= ECONOMIE_FORTE), reste = vues.filter((p) => p.pub - p.prix < ECONOMIE_FORTE);
-      const bloc = fortes.length ? `<section class="pp-forte"><h3 class="pp-forte-titre">Plus de ${ECONOMIE_FORTE} € d'économie <span class="sous">${fortes.length}</span></h3><div class="rayon pp-rayon">${fortes.map(cartePepite).join('')}</div></section>` : '';
-      liste.innerHTML = vues.length ? bloc + (reste.length ? '<div class="rayon pp-rayon">' + reste.map(cartePepite).join('') + '</div>' : '') : '<p>Aucune bonne affaire pour ce filtre.</p>';
+      liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
     liste.addEventListener('click', (e) => {
