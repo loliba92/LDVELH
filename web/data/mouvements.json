@@ -2,10 +2,26 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 665,
+ "nb_modifiees": 668,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070509430",
+   "isbn13": "9782070509430",
+   "titre": "Le Voyage de la Pierre de Lune",
+   "serie": "Loup Solitaire",
+   "numero": "763",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 34.17,
+   "apres": 42.31,
+   "pct": 0.238,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070585151",
@@ -113,7 +129,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 7,
+ "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
   "n_paires": 35,
