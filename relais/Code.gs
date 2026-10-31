@@ -1,4 +1,4 @@
-// Version du 2026-10-31 16:55 (heure de Paris) : rattachement des comptes arrivés avant les signes d'empreinte, par prénom unique (promotion depuis la liste des comptes).
+// Version du 2026-10-31 16:58 (heure de Paris) : retrait du rattachement par prénom ; promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -13,8 +13,9 @@ function empreinteDe(adresse) {
   return 'sha256:' + octets.map(function (b) { return ('0' + (b < 0 ? b + 256 : b).toString(16)).slice(-2); }).join('');
 }
 
-/* Compte arrivé avant la version qui garde l'empreinte : rattaché à sa ligne seulement si une seule ligne sans empreinte porte son prénom. */
+/* Compte arrivé avant la version qui garde l'empreinte : rattaché à sa ligne seulement s'il n'y en a qu'une (prénom et signes). */
 function rattacherEmpreinte(props, nom, empreinte) {
+  if (!/#[0-9a-f]{4}$/.test(nettoyerNom(nom))) return;
   var tout = props.getProperties(), vals = [];
   Object.keys(tout).forEach(function (k) { if (/^un:\d+$/.test(k) && !tout['ue:' + k.slice(3)]) vals.push({ rang: Number(k.slice(3)), valeur: tout[k] }); });
   var rangs = rangsSansEmpreinte(vals, nom);
