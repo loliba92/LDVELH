@@ -121,20 +121,24 @@ window.Compte = (function () {
     b.hidden = false;
   }
 
-  // Message à l'arrivée sur le niveau sorcier, une fois par période : la période et ce que le sorcier a en plus
+  // Fenêtre à l'arrivée sur le niveau sorcier, une fois par période : la date et ce que le sorcier a en plus
   var CLE_SORCIER_VU = 'cdh-sorcier-vu';
   function bienvenueSorcier() {
-    var b = $('#compte-bienvenue'), cle = role === 'admin' ? (finAcces || 'sans-fin') : '', vu = '';
-    try { vu = localStorage.getItem(CLE_SORCIER_VU) || ''; } catch (e) { /* sans stockage : le message reviendra */ }
-    if (role !== 'admin' || vu === cle) { if (b) b.hidden = true; return; }
-    if (!b) {
-      b = document.createElement('div'); b.id = 'compte-bienvenue'; b.className = 'compte-bandeau'; b.setAttribute('role', 'status');
-      var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
-    }
+    var cle = role === 'admin' ? (finAcces || 'sans-fin') : '', vu = '';
+    try { vu = localStorage.getItem(CLE_SORCIER_VU) || ''; } catch (e) { /* sans stockage : la fenêtre reviendra */ }
+    if (role !== 'admin' || vu === cle || $('.dlg-sorcier')) return;
     var jusqua = finAcces ? 'jusqu\'au ' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'sans date de fin';
-    b.innerHTML = '<span>Vous êtes passé sorcier ' + jusqua + '. Profitez-en bien : un sorcier, c\'est un héros avec en plus le Butin (les bonnes affaires) et l\'ajout de livres en série.</span> <button type="button" class="bouton bouton-clair" data-sorcier-vu>Compris</button>';
-    b.hidden = false;
-    b.querySelector('[data-sorcier-vu]').onclick = function () { try { localStorage.setItem(CLE_SORCIER_VU, cle); } catch (e) { /* tant pis */ } b.hidden = true; };
+    var d = dialogue('<img class="bienvenue-img" src="images/accueil-3.webp" alt="" width="460" height="120" decoding="async">' +
+      '<h2>Vous êtes sorcier</h2>' +
+      '<p>Vous êtes passé sorcier <strong>' + jusqua + '</strong>. Profitez-en bien.</p>' +
+      '<p class="sous">Un sorcier, c\'est un héros avec en plus :</p>' +
+      '<ul class="avantages">' +
+      '<li><strong>Le Butin</strong> : les bonnes affaires, repérées pour vous.</li>' +
+      '<li><strong>L\'ajout de livres en série</strong> : une liste d\'ISBN d\'un coup.</li>' +
+      '</ul>' +
+      '<div class="dlg-actions"><button type="button" class="bouton" data-fermer autofocus>Compris</button></div>', 'dlg-bienvenue dlg-sorcier');
+    d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
+    d.addEventListener('close', function () { try { localStorage.setItem(CLE_SORCIER_VU, cle); } catch (e) { /* tant pis */ } });
   }
 
   function bandeau() {

@@ -112,7 +112,7 @@
       // Seuls les comptes dont le relais garde l'empreinte peuvent être promus (promouvable)
       var passer = c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
         '<form class="eq-passer" hidden data-rang="' + esc(c.rang) + '" data-nom="' + esc(c.nom) + '">' +
-        '<label>Début <input type="date" name="debut" value="' + esc(EQUIPE_JOUR || new Date().toISOString().slice(0, 10)) + '"></label><label>Fin (obligatoire) <input type="date" name="fin" required></label>' +
+        '<label>Jusqu\'au <input type="date" name="fin" required></label>' +
         '<button type="submit" class="bouton bouton-clair">Enregistrer</button>' +
         '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '';
       return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span>' + passer + '</li>';
@@ -200,11 +200,10 @@
     ev.preventDefault();
     var m = f.querySelector('.eq-msg-ligne');
     var montre = function (t, err) { m.textContent = t; m.hidden = false; m.classList.toggle('erreur', !!err); };
-    var debut = f.elements.debut.value, fin = f.elements.fin.value, nom = f.dataset.nom.replace(/\s*#[0-9a-f]{4}$/, '');
+    var fin = f.elements.fin.value, nom = f.dataset.nom.replace(/\s*#[0-9a-f]{4}$/, '');
     if (!fin) return montre('Indiquez la date de fin : le sorcier redevient héros après.', true);
-    if (debut && fin < debut) return montre('La date de fin est avant le début.', true);
     montre('Enregistrement…');
-    window.Relais.appeler('equipe_promouvoir', { rang: Number(f.dataset.rang), debut: debut, fin: fin }).then(function (r) {
+    window.Relais.appeler('equipe_promouvoir', { rang: Number(f.dataset.rang), fin: fin }).then(function (r) {
       if (!r || !r.ok) return montre(erreurLisible(r), true);
       dire(nom + ' est maintenant sorcier, jusqu\'au ' + jour(fin) + '.');
       setTimeout(charger, 2500);                           // laisse à GitHub le temps de servir la nouvelle liste
