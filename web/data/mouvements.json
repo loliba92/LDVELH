@@ -2,11 +2,41 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 661,
+ "nb_modifiees": 662,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
  "baisses": [
+  {
+   "id": "9782070585151",
+   "isbn13": "9782070585151",
+   "titre": "La Légende de Zagor",
+   "serie": "Défis Fantastiques",
+   "numero": "735",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 98.24,
+   "apres": 59.0,
+   "pct": -0.399,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585151",
+   "isbn13": "9782070585151",
+   "titre": "La Légende de Zagor",
+   "serie": "Défis Fantastiques",
+   "numero": "735",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 48.32,
+   "apres": 41.0,
+   "pct": -0.151,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070665839",
    "isbn13": "9782070665839",
@@ -23,7 +53,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 1,
+ "nb_grands_mouvements": 3,
  "modele": {
   "actif": false,
   "n_paires": 35,

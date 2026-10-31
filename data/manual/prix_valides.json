@@ -1301,6 +1301,24 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070585151|bon": {
+   "prix": 52.1,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
+  "9782070585151|convenable": {
+   "prix": 41.0,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
+  "9782070585151|tres_bon": {
+   "prix": 59.0,
+   "decision": "corrige",
+   "le": "2026-10-31",
+   "par": "loliba (superadmin)"
+  },
   "9782070585168|bon": {
    "prix": 36.74,
    "decision": "confirme",
