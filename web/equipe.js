@@ -109,7 +109,15 @@
     var sans = Math.max(0, r.total - r.connus);
     etatC.textContent = TOTAL + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers héros arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
     ul.innerHTML = liste.length ? liste.map(function (c) {
-      return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span></li>';
+      var signes = /#([0-9a-f]{4})$/.exec(c.nom), prenom = c.nom.replace(/\s*#[0-9a-f]{4}$/, '');
+      // Sans signes d'empreinte, impossible de vérifier l'adresse : pas de bouton
+      var passer = signes ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
+        '<form class="eq-passer" hidden data-nom="' + esc(prenom) + '" data-signes="' + signes[1] + '">' +
+        '<label>Adresse du héros <input type="email" name="adresse" required autocomplete="off"></label>' +
+        '<label>Début <input type="date" name="debut"></label><label>Fin <input type="date" name="fin"></label>' +
+        '<button type="submit" class="bouton bouton-clair">Enregistrer</button>' +
+        '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '';
+      return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span>' + passer + '</li>';
     }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant.</li>';
   }
 
@@ -186,6 +194,39 @@
     }).catch(function () { direMembre(e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
   }
   ['#eq-zagors', '#eq-sorciers'].forEach(function (s) { $(s).addEventListener('click', actions); $(s).addEventListener('submit', nouvelleFin); });
+
+  // Héros → sorcier : l'adresse saisie doit donner les mêmes signes d'empreinte que le héros affiché (« #ab12 »)
+  function signesDe(adresse) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(adresse.trim().toLowerCase())).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('').slice(0, 4);
+    });
+  }
+  function passerSorcier(ev) {
+    var f = ev.target.closest('.eq-passer');
+    if (!f) return;
+    ev.preventDefault();
+    var m = f.querySelector('.eq-msg-ligne');
+    var montre = function (t, err) { m.textContent = t; m.hidden = false; m.classList.toggle('erreur', !!err); };
+    var adresse = f.elements.adresse.value.trim(), debut = f.elements.debut.value, fin = f.elements.fin.value;
+    if (!adresse) return montre('Saisissez l\'adresse du héros.', true);
+    if (!window.crypto || !window.crypto.subtle) return montre('Vérification impossible sur cet appareil.', true);
+    montre('Enregistrement…');
+    signesDe(adresse).then(function (signes) {
+      if (signes !== f.dataset.signes) return montre('Cette adresse ne correspond pas à ce héros : vérifiez-la auprès de la personne.', true);
+      return window.Relais.appeler('equipe_ajouter', { adresse: adresse, nom: f.dataset.nom, role: 'admin', debut: debut, fin: fin }).then(function (r) {
+        if (!r || !r.ok) return montre(erreurLisible(r), true);
+        dire(f.dataset.nom + ' est maintenant sorcier' + (fin ? ', jusqu\'au ' + jour(fin) : '') + '.');
+        setTimeout(charger, 2500);                           // laisse à GitHub le temps de servir la nouvelle liste
+      });
+    }).catch(function () { montre('Le relais ne répond pas : vérifiez votre connexion.', true); });
+  }
+  $('#eq-comptes').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-passer]');
+    if (!b) return;
+    var f = b.parentNode.querySelector('.eq-passer'), ouvre = f.hidden;
+    f.hidden = !ouvre; b.setAttribute('aria-expanded', ouvre ? 'true' : 'false');
+  });
+  $('#eq-comptes').addEventListener('submit', passerSorcier);
 
   // La porte ouvre la page une fois le niveau niveau 3 confirmé par le service technique
   document.addEventListener('cdh-porte-ouverte', charger);
