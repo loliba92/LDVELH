@@ -32,7 +32,7 @@ class TestCorrections(unittest.TestCase):
         v = validations.lire(chemin)
         self.assertEqual(v[("9782070585168", "convenable")]["prix"], 25.0)
         self.assertEqual(v[("9782070585168", "tres_bon")]["prix"], 60.0)
-        self.assertEqual(v[("9782070585168", "bon")]["prix"], 36.74)      # fourchette complète : le bon état vide est calculé entre les deux
+        self.assertEqual(v[("9782070585168", "bon")]["prix"], 41.03)      # fourchette complète : le bon état vide est calculé entre les deux (bon = 0,67 du très bon)
 
     def test_le_nom_d_admin_est_garde_et_nettoye(self):
         base, chemin = self.base()
@@ -63,7 +63,7 @@ class TestCorrections(unittest.TestCase):
         self._valides(chemin, convenable=16.38, bon=24.58, tres_bon=40.96)
         bilan = c.appliquer("9782070585168 ; 2,5 ; ; 13", chemin, base)
         v = validations.lire(chemin)
-        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 5.41, 13.0])
+        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 6.04, 13.0])
         self.assertEqual(v[("9782070585168", "bon")]["decision"], "corrige")
         self.assertIn("bon état recalculé", bilan[0][2])
 
@@ -73,7 +73,7 @@ class TestCorrections(unittest.TestCase):
         c.appliquer("9782070585168 ; ; ; 13", chemin, base)
         v = validations.lire(chemin)
         self.assertEqual(v[("9782070585168", "tres_bon")]["prix"], 13.0)
-        self.assertEqual(v[("9782070585168", "bon")]["prix"], 4.84)
+        self.assertEqual(v[("9782070585168", "bon")]["prix"], 5.4)
 
     def test_un_bon_etat_coherent_n_est_pas_touche(self):
         base, chemin = self.base()
@@ -87,7 +87,7 @@ class TestCorrections(unittest.TestCase):
         base, chemin = self.base()                                            # aucun bon état validé (il pouvait venir d'annonces)
         c.appliquer("9782070585168 ; 2,5 ; ; 13", chemin, base)
         v = validations.lire(chemin)
-        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 5.41, 13.0])
+        self.assertEqual([v[("9782070585168", e)]["prix"] for e in ("convenable", "bon", "tres_bon")], [2.5, 6.04, 13.0])
 
     def test_un_seul_prix_sans_bon_etat_valide_ne_cree_pas_de_bon_etat(self):
         base, chemin = self.base()
