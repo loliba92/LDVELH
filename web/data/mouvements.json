@@ -23,6 +23,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070527090",
+   "isbn13": "9782070527090",
+   "titre": "La Cité de l'Empereur",
+   "serie": "Loup Solitaire",
+   "numero": "986",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 79.44,
+   "apres": 45.0,
+   "pct": -0.434,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070527090",
+   "isbn13": "9782070527090",
+   "titre": "La Cité de l'Empereur",
+   "serie": "Loup Solitaire",
+   "numero": "986",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 128.19,
+   "apres": 75.0,
+   "pct": -0.415,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070585151",
    "isbn13": "9782070585151",
    "titre": "La Légende de Zagor",
@@ -63,6 +93,21 @@
    "avant": 32.1,
    "apres": 22.0,
    "pct": -0.315,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070527090",
+   "isbn13": "9782070527090",
+   "titre": "La Cité de l'Empereur",
+   "serie": "Loup Solitaire",
+   "numero": "986",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 86.03,
+   "apres": 61.54,
+   "pct": -0.285,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -141,24 +186,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070665839",
-   "isbn13": "9782070665839",
-   "titre": "La Cité des Pièges",
-   "serie": "Sorcellerie!",
-   "numero": "294",
-   "version": "V4",
-   "etat": "bon",
-   "avant": 35.44,
-   "apres": 30.71,
-   "pct": -0.133,
-   "nature": "annonces",
-   "nb": 4,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 10,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 35,
