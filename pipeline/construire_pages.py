@@ -162,7 +162,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
   <div class="captures-zone" id="captures-recues"></div>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
-    <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot, plusieurs mots, une partie du titre"></div>
+    <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>
@@ -188,6 +188,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="cher">Très chers</option>
       </select></label>
       <label class="case"><input type="checkbox" id="rc-trouver"><span>Mes « à trouver » seulement</span></label>
+      <label class="case"><input type="checkbox" id="rc-sans"><span>Sans point à vérifier</span></label>
       <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
     </div>
   </div>
@@ -467,7 +468,7 @@ REVUE = '''<h1>Prix et corrections</h1>
     <p class="sous" id="pp-etat" role="status" aria-live="polite"></p>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="pp-tri">
-        <option value="solides">Solides d'abord</option>
+        <option value="solides">Sans point à vérifier d'abord</option>
         <option value="eco">Plus grosse économie</option>
         <option value="pct">Plus forte réduction</option>
         <option value="prix">Prix de l'annonce, croissant</option>
@@ -475,7 +476,7 @@ REVUE = '''<h1>Prix et corrections</h1>
         <option value="titre">Titre, de A à Z</option>
       </select></label>
       <label class="case"><input type="checkbox" id="pp-trouver"><span>Mes « à trouver » seulement</span></label>
-      <label class="case"><input type="checkbox" id="pp-solides"><span>Seulement les solides</span></label>
+      <label class="case"><input type="checkbox" id="pp-solides"><span>Sans point à vérifier</span></label>
     </div>
   </div>
   <div id="pp-liste"></div>
