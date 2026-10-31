@@ -1946,9 +1946,7 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 /* Onglet « Butin » (SuperAdmin) : annonces à 50 % du prix du site ou moins */
 .pp-barre { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 16px; margin: 6px 0 12px; }
 .pp-barre .sous { margin: 0; }
-.pp-forte { scroll-margin-top: calc(var(--haut-h, 0px) + 12px); margin: 0 0 18px; padding: 12px 14px; border: 1px solid var(--gold); border-radius: var(--r); }
-.pp-forte-titre { margin: 0 0 10px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
-.pp-forte-titre .sous { margin-left: 6px; letter-spacing: 0; text-transform: none; }
+.pp-super { position: absolute; left: 6px; bottom: 6px; padding: 2px 8px; border-radius: 999px; background: var(--gold); color: var(--on-accent, #111); font: 700 .68rem var(--f-ui); letter-spacing: .04em; }
 /* Butin : mêmes jaquettes que l'étagère (.rayon / .livre-carte), infos posées sur et sous la jaquette */
 .pp-carte .couv { display: block; }
 .pp-carte .infos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
