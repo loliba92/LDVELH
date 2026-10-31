@@ -2212,9 +2212,13 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .eq-corps .bouton { min-height: 38px; }
 .eq-corps .eq-empreinte { display: block; margin: 0; }
 .eq-comptes { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0 18px; max-width: 700px; }
-.eq-heros { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: .95rem; }
+.eq-heros { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 8px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: .95rem; }
 .eq-heros .sous { white-space: nowrap; }
-.eq-ajouter > summary { cursor: pointer; list-style: none; }
+.eq-heros .eq-passer-ouvrir { font-size: .85rem; white-space: nowrap; }
+.eq-passer { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 12px; margin: 4px 0 6px; }
+.eq-passer[hidden] { display: none; }
+.eq-passer label { display: flex; flex-direction: column; gap: 2px; font-size: .85rem; }
+.eq-passer .eq-msg-ligne { flex-basis: 100%; margin: 0; }.eq-ajouter > summary { cursor: pointer; list-style: none; }
 .eq-ajouter > summary::-webkit-details-marker { display: none; }
 .eq-ajouter > summary h2 { display: inline; }
 .eq-ajouter > summary::after { content: ' +'; color: var(--gold); font-weight: 700; }

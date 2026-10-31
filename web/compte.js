@@ -97,6 +97,7 @@ window.Compte = (function () {
     var ban = $('#compte-bandeau');
     if (ban) ban.hidden = !(e.cle === 'reprendre' && enCours());
     bandeauFin();
+    bienvenueSorcier();
     document.dispatchEvent(new CustomEvent('cdh-compte', { detail: { etat: e.cle, role: role } }));
   }
   // Le bandeau « connexion expirée » n'apparaît que s'il y a des changements pas encore envoyés au Drive
@@ -118,6 +119,22 @@ window.Compte = (function () {
     var quand = reste === 0 ? 'aujourd\'hui' : reste === 1 ? 'demain' : 'dans ' + reste + ' jours';
     b.innerHTML = '<span>Votre accès sorcier va bientôt se terminer : <strong>' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '</strong> (' + quand + '). Ensuite, vous redevenez Héros : votre collection est conservée.</span>';
     b.hidden = false;
+  }
+
+  // Message à l'arrivée sur le niveau sorcier, une fois par période : la période et ce que le sorcier a en plus
+  var CLE_SORCIER_VU = 'cdh-sorcier-vu';
+  function bienvenueSorcier() {
+    var b = $('#compte-bienvenue'), cle = role === 'admin' ? (finAcces || 'sans-fin') : '', vu = '';
+    try { vu = localStorage.getItem(CLE_SORCIER_VU) || ''; } catch (e) { /* sans stockage : le message reviendra */ }
+    if (role !== 'admin' || vu === cle) { if (b) b.hidden = true; return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'compte-bienvenue'; b.className = 'compte-bandeau'; b.setAttribute('role', 'status');
+      var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
+    }
+    var jusqua = finAcces ? 'jusqu\'au ' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'sans date de fin';
+    b.innerHTML = '<span>Vous êtes passé sorcier ' + jusqua + '. Profitez-en bien : un sorcier, c\'est un héros avec en plus le Butin (les bonnes affaires) et l\'ajout de livres en série.</span> <button type="button" class="bouton bouton-clair" data-sorcier-vu>Compris</button>';
+    b.hidden = false;
+    b.querySelector('[data-sorcier-vu]').onclick = function () { try { localStorage.setItem(CLE_SORCIER_VU, cle); } catch (e) { /* tant pis */ } b.hidden = true; };
   }
 
   function bandeau() {
