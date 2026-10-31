@@ -2041,6 +2041,12 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .rc-prix { color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rc-meta { grid-column: 1 / -1; }
 .ind-meta { grid-column: 1 / -1; font-size: .8rem; color: var(--muted); }
+.ind-lien { all: unset; cursor: pointer; color: inherit; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.ind-lien:hover { color: var(--text); }
+.ind-lien:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rv-ann-groupe { margin: 0 0 4px; font-size: 1rem; }
+.an-dialog .rv-ann-livre { margin-top: 20px; }
+.an-dialog .rv-ann-groupe + .rv-ann-livre { margin-top: 8px; }
 .ind-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
 .ind-carte { display: grid; justify-items: center; gap: 2px; padding: 10px 6px; border: 1px solid var(--line); border-radius: var(--r); text-align: center; }
 .ind-carte b { font-size: 1.5rem; line-height: 1; }
