@@ -1,4 +1,4 @@
-// Version du 2026-10-31 16:58 (heure de Paris) : retrait du rattachement par prénom ; promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
+// Version du 2026-10-31 17:20 (heure de Paris) : annonces reçues ouvertes aux sorciers (annonces_lire, niveau sorcier).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -30,7 +30,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
   butin_lire: 'admin',            // Butin seul (bonnes affaires) : sorciers et Zagors
-  annonces_lire: 'superadmin',    // toutes les annonces reçues : le Zagor seulement
+  annonces_lire: 'admin',         // toutes les annonces reçues : sorciers et Zagor
   indice_lire: 'superadmin',      // indice de marché par version et éditeur : le Zagor seulement
   pepite_offrir: 'superadmin',    // le Zagor choisit la pépite du jour offerte aux Héros
   pepite_retirer: 'superadmin',   // et peut la retirer

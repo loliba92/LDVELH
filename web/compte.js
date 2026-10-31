@@ -136,6 +136,7 @@ window.Compte = (function () {
       '<li><strong>Le Butin</strong> : les bonnes affaires</li>' +
       '<li><strong>Évolutions des prix</strong> : ce qui a bougé</li>' +
       '<li><strong>Ajout en série</strong> : 20 ISBN par envoi</li>' +
+      '<li><strong>Annonces</strong> : toutes les annonces reçues</li>' +
       '<li><strong>Fiches</strong> : évolution et offre d\'occasion</li>' +
       '<li><strong>Collection</strong> : mouvements, analyse complète</li>' +
       '</ul>' +
