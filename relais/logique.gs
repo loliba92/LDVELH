@@ -1,4 +1,4 @@
-// Version du 2026-10-29 22:17 (heure de Paris) : likes sur les liens de la Communauté (aimer_lien, mes_likes).
+// Version du 2026-10-31 15:18 (heure de Paris) : promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -25,6 +25,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   equipe_retirer: 'superadmin',
   equipe_bloquer: 'superadmin',
   equipe_periode: 'superadmin',   // dates de début et de fin d'un sorcier (facultatives)
+  equipe_promouvoir: 'superadmin', // un héros de la liste devient sorcier (fin obligatoire, début facultatif)
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
@@ -251,6 +252,11 @@ function resumerNotes(votes) {
 
 /* ---------- Nouveaux comptes et avis ----------
    Les deux envoient un courriel à l'éditeur. Jamais d'adresse : le prénom et quatre signes de l'empreinte du compte. */
+/* Rangs des comptes sans empreinte gardée (valeurs : [{ rang, valeur }]) dont la ligne porte ce prénom et ces signes. */
+function rangsSansEmpreinte(valeurs, nom) {
+  var n = nettoyerNom(nom);
+  return (valeurs || []).filter(function (v) { return String(v.valeur || '').split('|')[0] === n; }).map(function (v) { return Number(v.rang); });
+}
 var LIMITE_AVIS = 3;                   // par personne et par fenêtre de six heures
 function texteLibre(brut, max) {          // texte multi-lignes : sans caractères de commande, retours à la ligne normalisés
   return String(brut == null ? '' : brut).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]+/g, ' ').replace(/\r\n?/g, '\n').trim().slice(0, max);

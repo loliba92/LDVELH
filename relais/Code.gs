@@ -1,4 +1,4 @@
-// Version du 2026-10-29 22:17 (heure de Paris) : likes sur les liens de la Communauté (aimer_lien, mes_likes ; lecture publique ?likes=1).
+// Version du 2026-10-31 15:18 (heure de Paris) : promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -11,6 +11,15 @@ function reponse(objet) { return ContentService.createTextOutput(JSON.stringify(
 function empreinteDe(adresse) {
   var octets = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, adresse, Utilities.Charset.UTF_8);
   return 'sha256:' + octets.map(function (b) { return ('0' + (b < 0 ? b + 256 : b).toString(16)).slice(-2); }).join('');
+}
+
+/* Compte arrivé avant la version qui garde l'empreinte : rattaché à sa ligne seulement s'il n'y en a qu'une (prénom et signes). */
+function rattacherEmpreinte(props, nom, empreinte) {
+  if (!/#[0-9a-f]{4}$/.test(nettoyerNom(nom))) return;
+  var tout = props.getProperties(), vals = [];
+  Object.keys(tout).forEach(function (k) { if (/^un:\d+$/.test(k) && !tout['ue:' + k.slice(3)]) vals.push({ rang: Number(k.slice(3)), valeur: tout[k] }); });
+  var rangs = rangsSansEmpreinte(vals, nom);
+  if (rangs.length === 1) props.setProperty('ue:' + rangs[0], empreinte);
 }
 
 function github(chemin, options) {
@@ -226,7 +235,9 @@ function doPost(e) {
           rang = (Number(props.getProperty('u:total')) || 0) + 1;
           props.setProperty(cleU, '1'); props.setProperty('u:total', String(rang));
           props.setProperty('un:' + rang, ligneCompte(moi.nom, Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd')));      // prénom et date d'arrivée, pour la page Équipe
+          props.setProperty('ue:' + rang, moi.empreinte);                                                                              // empreinte, gardée côté relais seulement (jamais envoyée au site)
         }
+        rattacherEmpreinte(props, moi.nom, moi.empreinte);                                                                             // comptes arrivés avant cette version : rattachés à leur ligne
       } finally { verrouB.releaseLock(); }
       if (rang) {
         var nc = formaterNouveauCompte(moi.nom, rang);
@@ -306,7 +317,19 @@ function doPost(e) {
       var tout = PropertiesService.getScriptProperties().getProperties(), vals = [];
       Object.keys(tout).forEach(function (k) { if (/^un:\d+$/.test(k)) vals.push({ rang: Number(k.slice(3)), valeur: tout[k] }); });
       var lc = listerComptes(vals, Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd'), 300);
+      lc.liste.forEach(function (c) { c.promouvable = !!tout['ue:' + c.rang]; });       // le bouton « Passer sorcier » n'apparaît que pour ces comptes
       return reponse({ ok: true, total: Number(tout['u:total']) || 0, aujourdhui: lc.aujourdhui, connus: lc.connus, liste: lc.liste });
+    }
+
+    if (action === 'equipe_promouvoir') {          // SuperAdmin : un héros de la liste devient sorcier, sur une période (fin obligatoire)
+      var propsP = PropertiesService.getScriptProperties(), rangP = Number(q.rang) || 0;
+      var empP = propsP.getProperty('ue:' + rangP), ligneP = propsP.getProperty('un:' + rangP);
+      if (!empP || !ligneP) return reponse({ ok: false, erreur: 'compte introuvable ou trop ancien pour être promu ici' });
+      if (!String(q.fin || '').trim()) return reponse({ ok: false, erreur: 'indiquez la date de fin' });
+      var resP = ajouterMembre(v.admins.contenu, empP, ligneP.split('|')[0], 'admin', moi.empreinte, q.fin, jourDe(Math.floor(Date.now() / 1000)), q.debut);
+      if (!resP.ok) return reponse({ ok: false, erreur: resP.raison });
+      ecrireAdmins(resP.fichier, v.admins.sha, 'Équipe : promotion en sorcier par ' + moi.nom);
+      return reponse({ ok: true });
     }
 
     if (action === 'equipe_ajouter' || action === 'equipe_retirer' || action === 'equipe_bloquer' || action === 'equipe_periode') {
