@@ -1,4 +1,4 @@
-// Version du 2026-10-31 16:55 (heure de Paris) : rattachement des comptes arrivés avant les signes d'empreinte, par prénom unique (promotion depuis la liste des comptes).
+// Version du 2026-10-31 15:18 (heure de Paris) : promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -252,13 +252,10 @@ function resumerNotes(votes) {
 
 /* ---------- Nouveaux comptes et avis ----------
    Les deux envoient un courriel à l'éditeur. Jamais d'adresse : le prénom et quatre signes de l'empreinte du compte. */
-/* Prénom seul (sans les signes « #ab12 ») : sert à rattacher un compte arrivé avant les signes. */
-function prenomSeul(nom) { return nettoyerNom(nom).replace(/\s*#[0-9a-f]{4}$/, ''); }
-/* Rangs des comptes sans empreinte gardée (valeurs : [{ rang, valeur }]) dont le prénom est celui-ci. Le contrôle d'unicité est fait à l'appel. */
+/* Rangs des comptes sans empreinte gardée (valeurs : [{ rang, valeur }]) dont la ligne porte ce prénom et ces signes. */
 function rangsSansEmpreinte(valeurs, nom) {
-  var n = prenomSeul(nom);
-  if (!n || n === '(sans prénom)') return [];
-  return (valeurs || []).filter(function (v) { return prenomSeul(String(v.valeur || '').split('|')[0]) === n; }).map(function (v) { return Number(v.rang); });
+  var n = nettoyerNom(nom);
+  return (valeurs || []).filter(function (v) { return String(v.valeur || '').split('|')[0] === n; }).map(function (v) { return Number(v.rang); });
 }
 var LIMITE_AVIS = 3;                   // par personne et par fenêtre de six heures
 function texteLibre(brut, max) {          // texte multi-lignes : sans caractères de commande, retours à la ligne normalisés
