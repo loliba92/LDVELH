@@ -129,17 +129,17 @@ window.Compte = (function () {
     if (role !== 'admin' || vu === cle || $('.dlg-sorcier')) return;
     var jusqua = finAcces ? 'jusqu\'au ' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'sans date de fin';
     var d = dialogue('<img class="bienvenue-img" src="images/accueil-3.webp" alt="" width="460" height="120" decoding="async">' +
-      '<h2>Vous êtes sorcier</h2>' +
-      '<p>Vous êtes passé sorcier <strong>' + jusqua + '</strong>. Profitez-en bien.</p>' +
-      '<p class="sous">Un sorcier, c\'est un héros avec en plus :</p>' +
+      '<h2>Vous êtes devenu sorcier</h2>' +
+      '<p>Pour <strong>' + jusqua + '</strong>, de nouveaux outils s\'ouvrent à vous.</p>' +
+      '<p class="sous">Un héros, avec plus de pouvoirs :</p>' +
       '<ul class="avantages">' +
-      '<li><strong>Le Butin</strong> : les bonnes affaires.</li>' +
-      '<li><strong>Évolutions des prix</strong> : ce que la cote a changé.</li>' +
+      '<li><strong>Le Butin</strong> : les meilleures affaires, repérées pour vous.</li>' +
+      '<li><strong>Évolutions des prix</strong> : tout ce qui a bougé dans la cote.</li>' +
       '<li><strong>Ajout en série</strong> : 20 ISBN par envoi, 3 envois par jour.</li>' +
       '<li><strong>Sur les fiches</strong> : l\'évolution du prix et l\'offre d\'occasion.</li>' +
       '<li><strong>Dans votre collection</strong> : les mouvements et l\'analyse complète.</li>' +
       '</ul>' +
-      '<div class="dlg-actions"><button type="button" class="bouton" data-fermer autofocus>Compris</button></div>', 'dlg-bienvenue dlg-sorcier');
+      '<div class="dlg-actions"><button type="button" class="bouton" data-fermer autofocus>C\'est parti !</button></div>', 'dlg-bienvenue dlg-sorcier');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
     d.addEventListener('close', function () { try { localStorage.setItem(CLE_SORCIER_VU, cle); } catch (e) { /* tant pis */ } });
   }
