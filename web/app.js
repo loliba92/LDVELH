@@ -334,18 +334,14 @@
   const nbActuels = () => META.nb_prix_actuels || 0;
   const prixAnciens = () => nbActuels() === 0;
   const infoPrix = (b, k) => (b.prix_info && b.prix_info[k]) || null;
-  // Cohérence des cotes : convenable ≤ bon état ≤ très bon état, et aucun état très loin des deux autres (proportions 40 / 60 / 100 %)
-  const PROPORTION = { convenable: 0.4, bon: 0.6, tres_bon: 1 };
+  // Cohérence des cotes : un état supérieur ne vaut jamais moins qu'un inférieur ; convenable proche du bon état, ou très bon état plus de 2 fois le bon état
   function incoherence(b) {
     const p = Object.fromEntries(Object.entries(b.prix || {}).filter(([, x]) => x != null));
     const { convenable: c, bon: bo, tres_bon: t } = p;
     if (c != null && bo != null && t != null && !(c <= bo && bo <= t)) return 'un état supérieur vaut moins qu\'un état inférieur';
-    const ks = Object.keys(p);
-    if (ks.length < 2) return null;
-    const v = ks.map((k) => p[k] / PROPORTION[k]).sort((x, y) => x - y), m = v.length >> 1;
-    const niveau = v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2;
-    const loin = ks.find((k) => { const r = p[k] / (niveau * PROPORTION[k]); return r < 0.5 || r > 2; });
-    return loin ? `${etatDe(loin).long.toLowerCase()} très éloigné des deux autres états` : null;
+    if (c != null && bo != null && c > 0.9 * bo) return 'convenable presque aussi cher que le bon état';
+    if (bo != null && t != null && t > 2 * bo) return 'très bon état plus de deux fois le bon état';
+    return null;
   }
   // Aucun prix révisé : tous les états connus viennent des archives (ancienne cote), aucun relevé ni validation
   const estSansRevision = (b) => {
