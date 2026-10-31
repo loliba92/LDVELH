@@ -3375,9 +3375,10 @@
 
   // Accueil : les deux dernières entrées de la communauté (fichier data/communaute.json, dans l'ordre du fichier)
   fetch('data/communaute.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : [])).catch(() => []).then((d) => {
+    const court = (t) => { const s = String(t || '').replace(/\s+/g, ' ').trim(); return s.length > 90 ? s.slice(0, 90).replace(/\s+\S*$/, '') + '…' : s; };
     const deux = (Array.isArray(d) ? d : []).slice(-2).reverse();
     if (!deux.length || !$('#hero-communaute')) return;
-    $('#hc-liste').innerHTML = deux.map((x) => `<li><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}</a><span>${esc(x.description)}</span></li>`).join('');
+    $('#hc-liste').innerHTML = deux.map((x) => `<li><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}</a><span>${esc(court(x.description))}</span></li>`).join('');
     $('#hero-communaute').hidden = false;
   });
 

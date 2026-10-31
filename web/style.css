@@ -2498,7 +2498,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .carte-communaute header h2 { margin: 0; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
 .carte-communaute .hc-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; }
 .carte-communaute .hc-liste li { padding-left: 14px; border-left: 1px solid var(--line); }
-.carte-communaute .hc-liste span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.carte-communaute .hc-liste span { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 @media (max-width: 700px) {
   .carte-communaute { grid-template-columns: minmax(0, 1fr); padding: 12px 14px; }
   .carte-communaute .hc-liste { grid-template-columns: minmax(0, 1fr); gap: 12px; }
