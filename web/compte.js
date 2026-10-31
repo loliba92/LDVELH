@@ -133,11 +133,11 @@ window.Compte = (function () {
       '<p>Pour <strong>' + jusqua + '</strong>, de nouveaux outils s\'ouvrent à vous.</p>' +
       '<p class="sous">Un héros, avec plus de pouvoirs :</p>' +
       '<ul class="avantages">' +
-      '<li><strong>Le Butin</strong> : les meilleures affaires, repérées pour vous.</li>' +
-      '<li><strong>Évolutions des prix</strong> : tout ce qui a bougé dans la cote.</li>' +
-      '<li><strong>Ajout en série</strong> : 20 ISBN par envoi, 3 envois par jour.</li>' +
-      '<li><strong>Sur les fiches</strong> : l\'évolution du prix et l\'offre d\'occasion.</li>' +
-      '<li><strong>Dans votre collection</strong> : les mouvements et l\'analyse complète.</li>' +
+      '<li><strong>Le Butin</strong> : les bonnes affaires</li>' +
+      '<li><strong>Évolutions des prix</strong> : ce qui a bougé</li>' +
+      '<li><strong>Ajout en série</strong> : 20 ISBN par envoi</li>' +
+      '<li><strong>Fiches</strong> : évolution et offre d\'occasion</li>' +
+      '<li><strong>Collection</strong> : mouvements, analyse complète</li>' +
       '</ul>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-fermer autofocus>C\'est parti !</button></div>', 'dlg-bienvenue dlg-sorcier');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });
