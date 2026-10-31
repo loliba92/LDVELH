@@ -2,7 +2,7 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 663,
+ "nb_modifiees": 665,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
@@ -23,6 +23,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070583805",
+   "isbn13": "9782070583805",
+   "titre": "Le Pirate des Sept Mers",
+   "serie": "Destins",
+   "numero": "731",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 72.99,
+   "apres": 45.0,
+   "pct": -0.383,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070583805",
+   "isbn13": "9782070583805",
+   "titre": "Le Pirate des Sept Mers",
+   "serie": "Destins",
+   "numero": "731",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 77.86,
+   "apres": 61.54,
+   "pct": -0.21,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070584635",
    "isbn13": "9782070584635",
    "titre": "Le Dragon de la Nuit",
@@ -33,6 +63,21 @@
    "avant": 120.0,
    "apres": 99.0,
    "pct": -0.175,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070583805",
+   "isbn13": "9782070583805",
+   "titre": "Le Pirate des Sept Mers",
+   "serie": "Destins",
+   "numero": "731",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 90.07,
+   "apres": 75.0,
+   "pct": -0.167,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -68,7 +113,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 4,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
   "n_paires": 35,
