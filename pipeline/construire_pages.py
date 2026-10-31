@@ -110,6 +110,7 @@ def barre(courante):
   <a href="./#recherche">{ico('<path d="M4 20h16M6 20V9l3-1v12M11 20V5h3.5v15M16.5 20V10l2.5 1v9"/>')}<span>L'étagère</span></a>
   <a class="barre-centre" href="collection.html">{ico('<path d="M5 4.5h10a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3zM8 4.5V17"/>')}<span>Ma collection</span></a>
   <a class="barre-trouver" href="collection.html#trouver">{ico('<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>')}<span>À trouver</span><b class="nb-pep" id="nb-pep-bas"></b></a>
+  <a href="communaute.html">{ico('<path d="M3.5 19c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.4c1.7.8 2.7 2.5 3 4.6"/><circle cx="9" cy="8.5" r="3"/>')}<span>Communauté</span></a>
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false"{plus_actif}>{ico('<circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/>')}<span>Compte</span></button>
 </nav>'''
 
