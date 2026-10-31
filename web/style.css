@@ -2489,3 +2489,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fiab-bas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 4px; font-size: .85rem; color: var(--muted); }
 .fiab-origine { font: 700 .72rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
 .fiab-meta { overflow-wrap: anywhere; }
+.carte-communaute .hc-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.carte-communaute .hc-liste li { display: grid; gap: 2px; overflow-wrap: anywhere; }
+.carte-communaute .hc-liste a { font-weight: 600; color: var(--text); text-underline-offset: 3px; }
+.carte-communaute .hc-liste span { font-size: .9rem; color: var(--muted); line-height: 1.4; }
