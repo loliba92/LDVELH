@@ -63,6 +63,8 @@ test('changer ou effacer la date de fin ; Zagor refusé ; le « depuis » est ga
   assert.strictEqual(L('changerPeriode')(f, h('inconnu'), '', '2027-03-01', '2026-10-27').ok, false);
   assert.strictEqual(J(L('ajouterMembre')(f, ADM, 'Marie', 'admin', SUPER, '2027-01-01', '2026-10-27')).fichier.equipe[ADM].depuis, '2026-09-01');
   assert.strictEqual(L('peut')('superadmin', 'equipe_periode'), true); assert.strictEqual(L('peut')('admin', 'equipe_periode'), false);
+  assert.strictEqual(L('peut')('superadmin', 'equipe_promouvoir'), true); assert.strictEqual(L('peut')('admin', 'equipe_promouvoir'), false);
+  assert.deepStrictEqual(J(L('rangsSansEmpreinte')([{ rang: 3, valeur: 'Léa #ab12|2026-10-30' }, { rang: 4, valeur: 'Léa|2026-10-01' }], 'Léa #ab12')), [3]);
 });
 test('sorcier : la période commence à sa date de début et finit à sa date de fin', () => {
   const f = (debut, fin) => ({ equipe: { [ADM]: { nom: 'Marie', role: 'admin', debut, fin } }, bloques: [] });
