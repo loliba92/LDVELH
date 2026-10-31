@@ -134,6 +134,7 @@ window.Compte = (function () {
       '<p class="sous">Un sorcier, c\'est un héros avec en plus :</p>' +
       '<ul class="avantages">' +
       '<li><strong>Le Butin</strong> : les bonnes affaires.</li>' +
+      '<li><strong>Évolutions des prix</strong> : ce que la cote a changé.</li>' +
       '<li><strong>Ajout en série</strong> : 20 ISBN par envoi, 3 envois par jour.</li>' +
       '<li><strong>Sur les fiches</strong> : l\'évolution du prix et l\'offre d\'occasion.</li>' +
       '<li><strong>Dans votre collection</strong> : les mouvements et l\'analyse complète.</li>' +
