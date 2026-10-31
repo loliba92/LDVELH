@@ -2,7 +2,7 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 662,
+ "nb_modifiees": 663,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
@@ -18,6 +18,21 @@
    "avant": 98.24,
    "apres": 59.0,
    "pct": -0.399,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070584635",
+   "isbn13": "9782070584635",
+   "titre": "Le Dragon de la Nuit",
+   "serie": "Défis Fantastiques",
+   "numero": "787",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 120.0,
+   "apres": 99.0,
+   "pct": -0.175,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -53,7 +68,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
   "n_paires": 35,
