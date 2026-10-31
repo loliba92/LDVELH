@@ -1865,7 +1865,7 @@
     if (sous != null) d.sous = sous;
     if (nb != null || na != null || sous != null) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
-    // Le détail de toutes les annonces est réservé au Zagor ; les sorciers ont le détail du Butin
+    // Le détail de toutes les annonces est ouvert aux sorciers et au Zagor
     const carte = (href, titre, valeur, detail, lien = 'Voir le détail →') => {
       const corps = `<b>${valeur}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? `<em>${lien}</em>` : ''}`;
       return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
@@ -1873,7 +1873,7 @@
     const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butins et Annonces', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + carte(niv3 ? 'butin.html#captures-recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
+      + carte(niveau2Connu() ? 'butin.html#captures-recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
       + '</div>';
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);

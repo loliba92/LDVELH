@@ -953,7 +953,7 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau3()) chargerAnnonces().then(dessinerRecues); });
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau2()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
   }
   // Indice de marché : sur toutes les pages qui ont l'onglet Indice (pas seulement celles qui ont Annonces reçues)
@@ -1088,18 +1088,18 @@
     const indice = document.querySelector('#rv-nav [data-pane="indice"]');
     if (indice) { indice.hidden = !super_; if (!super_) replier(indice); }
     const recues = document.querySelector('#rv-nav [data-pane="recues"]');
-    if (recues) { recues.hidden = !super_; if (!super_) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
+    if (recues) { recues.hidden = !niveau2; if (!niveau2) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
     const pep = document.querySelector('#rv-nav [data-pane="pepites"]');
     if (pep) {
       pep.hidden = !niveau2;
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
-    if (super_ && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
+    if (niveau2 && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
     const versCaptures = (pane) => { ouvrirOnglet(pane); const aller = () => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }; setTimeout(aller, 500); setTimeout(aller, 2500); };
-    if (super_ && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
+    if (niveau2 && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (niveau2) chargerButin().then(() => dessinerPepites());
-    if (super_) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
+    if (niveau2) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
   }
   document.addEventListener('cdh-compte', majAnnonces);
