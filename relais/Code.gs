@@ -1,4 +1,4 @@
-// Version du 2026-10-31 15:18 (heure de Paris) : promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
+// Version du 2026-10-31 16:58 (heure de Paris) : retrait du rattachement par prénom ; promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.

@@ -1,4 +1,4 @@
-// Version du 2026-10-31 15:18 (heure de Paris) : promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
+// Version du 2026-10-31 16:58 (heure de Paris) : retrait du rattachement par prénom ; promotion d'un héros en sorcier depuis la liste des comptes (equipe_promouvoir, sans adresse).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
