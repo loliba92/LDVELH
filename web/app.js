@@ -958,8 +958,8 @@
       if (ficheOuverte !== b.id || !zone) return;
       if (!OFFRE) { zone.innerHTML = '<p class="sous">Pas encore de relevé d\'annonces.</p>'; return; }
       if (!b.isbn13) { zone.innerHTML = '<p class="sous">Pas de relevé pour une édition sans ISBN.</p>'; return; }
-      const o = OFFRE.offre[b.isbn13] || { ebay: 0, lbc: 0, lib: 0, age: null };
-      const n = o.ebay + o.lbc + o.lib, niv = n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : 3;
+      const o = OFFRE.offre[b.isbn13] || { ebay: 0, lbc: 0, vin: 0, lib: 0, age: null };
+      const n = o.ebay + o.lbc + o.vin + o.lib, niv = n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : 3;
       const neuf = b.en_vente === 1;
       const nom = neuf && n === 0 ? 'Disponible neuf' : ['Introuvable', 'Rare', 'Courante', 'Abondante'][niv];
       const barres = neuf && n === 0 ? 3 : niv;
