@@ -2,7 +2,7 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 672,
+ "nb_modifiees": 674,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [],
@@ -98,6 +98,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070335947",
+   "isbn13": "9782070335947",
+   "titre": "La Vengeance des Démons",
+   "serie": "Défis Fantastiques",
+   "numero": "594",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 40.78,
+   "apres": 24.0,
+   "pct": -0.411,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070585151",
    "isbn13": "9782070585151",
    "titre": "La Légende de Zagor",
@@ -143,6 +158,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070335947",
+   "isbn13": "9782070335947",
+   "titre": "La Vengeance des Démons",
+   "serie": "Défis Fantastiques",
+   "numero": "594",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 58.61,
+   "apres": 40.53,
+   "pct": -0.308,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070527090",
    "isbn13": "9782070527090",
    "titre": "La Cité de l'Empereur",
@@ -156,39 +186,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070336104",
-   "isbn13": "9782070336104",
-   "titre": "Clovis le Chevalier",
-   "serie": "Double Jeu",
-   "numero": "610",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 63.77,
-   "apres": 50.0,
-   "pct": -0.216,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070583805",
-   "isbn13": "9782070583805",
-   "titre": "Le Pirate des Sept Mers",
-   "serie": "Destins",
-   "numero": "731",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 77.86,
-   "apres": 61.54,
-   "pct": -0.21,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 17,
+ "nb_grands_mouvements": 20,
  "modele": {
   "actif": false,
   "n_paires": 36,
