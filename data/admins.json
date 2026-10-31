@@ -5,6 +5,13 @@
     "sha256:a368231a67eff380f08953cff1eb3e41813f86ceed64ebcd9911422ef8d533e6": {
       "nom": "loliba (superadmin)",
       "role": "superadmin"
+    },
+    "sha256:6bda02e6fa235ef2c07c7aca289c48cf2fe4987db4517b54ccb51ed06c1b0538": {
+      "nom": "scenariocontact75 #6bda",
+      "role": "admin",
+      "depuis": "2026-10-31",
+      "debut": "2026-10-31",
+      "fin": "2026-10-31"
     }
   },
   "bloques": []
