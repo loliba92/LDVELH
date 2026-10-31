@@ -5,7 +5,8 @@
  "nb_modifiees": 668,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [
+ "hausses": [],
+ "baisses": [
   {
    "id": "9782070509430",
    "isbn13": "9782070509430",
@@ -13,16 +14,14 @@
    "serie": "Loup Solitaire",
    "numero": "763",
    "version": "V2",
-   "etat": "bon",
-   "avant": 34.17,
-   "apres": 42.31,
-   "pct": 0.238,
+   "etat": "tres_bon",
+   "avant": 59.0,
+   "apres": 32.0,
+   "pct": -0.458,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  }
- ],
- "baisses": [
+  },
   {
    "id": "9782070585151",
    "isbn13": "9782070585151",
@@ -54,6 +53,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070509430",
+   "isbn13": "9782070509430",
+   "titre": "Le Voyage de la Pierre de Lune",
+   "serie": "Loup Solitaire",
+   "numero": "763",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 32.1,
+   "apres": 22.0,
+   "pct": -0.315,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070583805",
    "isbn13": "9782070583805",
    "titre": "Le Pirate des Sept Mers",
@@ -64,6 +78,21 @@
    "avant": 77.86,
    "apres": 61.54,
    "pct": -0.21,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070509430",
+   "isbn13": "9782070509430",
+   "titre": "Le Voyage de la Pierre de Lune",
+   "serie": "Loup Solitaire",
+   "numero": "763",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 34.17,
+   "apres": 28.11,
+   "pct": -0.177,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -129,7 +158,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 35,
