@@ -108,6 +108,9 @@
     var liste = r.liste.filter(function (c) { var k = /#([0-9a-f]{4})$/.exec(c.nom); return !(k && actifs[k[1]]); });
     var sans = Math.max(0, r.total - r.connus);
     etatC.textContent = TOTAL + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers héros arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
+    // Diagnostic : le relais renvoie-t-il la version qui sait promouvoir ?
+    if (r.liste.length && r.liste[0].promouvable === undefined) etatC.textContent += ' Le relais n\'est pas à jour : collez relais/Code.gs et relais/logique.gs, puis déployez une nouvelle version.';
+    else if (r.liste.length && !r.liste.some(function (c) { return c.promouvable; })) etatC.textContent += ' Aucun héros promouvable pour l\'instant : il faut qu\'il se reconnecte depuis la mise à jour.';
     ul.innerHTML = liste.length ? liste.map(function (c) {
       // Seuls les comptes dont le relais garde l'empreinte peuvent être promus (promouvable)
       var passer = c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
