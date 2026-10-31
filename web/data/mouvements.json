@@ -2,10 +2,26 @@
  "date": "2026-10-31",
  "precedent": "2026-10-30",
  "nb_comparees": 1497,
- "nb_modifiees": 688,
+ "nb_modifiees": 690,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070334087",
+   "isbn13": "9782070334087",
+   "titre": "L'Ombre de la Guillotine",
+   "serie": "Histoire",
+   "numero": "408",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 9.76,
+   "apres": 11.23,
+   "pct": 0.151,
+   "nature": "annonces",
+   "nb": 8,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070584413",
@@ -188,11 +204,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 33,
+ "nb_grands_mouvements": 35,
  "modele": {
   "actif": false,
-  "n_paires": 42,
-  "gain": 0.071,
+  "n_paires": 46,
+  "gain": 0.068,
   "raison": "le modèle ne bat pas assez les archives (gain 7%, 15% exigés)",
   "rapport_global": 0.897
  }
