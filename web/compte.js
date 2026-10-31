@@ -133,8 +133,10 @@ window.Compte = (function () {
       '<p>Vous êtes passé sorcier <strong>' + jusqua + '</strong>. Profitez-en bien.</p>' +
       '<p class="sous">Un sorcier, c\'est un héros avec en plus :</p>' +
       '<ul class="avantages">' +
-      '<li><strong>Le Butin</strong> : les bonnes affaires, repérées pour vous.</li>' +
-      '<li><strong>L\'ajout de livres en série</strong> : une liste d\'ISBN d\'un coup.</li>' +
+      '<li><strong>Le Butin</strong> : les bonnes affaires.</li>' +
+      '<li><strong>Ajout en série</strong> : 20 ISBN par envoi, 3 envois par jour.</li>' +
+      '<li><strong>Sur les fiches</strong> : l\'évolution du prix et l\'offre d\'occasion.</li>' +
+      '<li><strong>Dans votre collection</strong> : les mouvements et l\'analyse complète.</li>' +
       '</ul>' +
       '<div class="dlg-actions"><button type="button" class="bouton" data-fermer autofocus>Compris</button></div>', 'dlg-bienvenue dlg-sorcier');
     d.addEventListener('click', function (e) { if (e.target.closest('[data-fermer]')) d.close(); });

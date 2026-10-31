@@ -203,7 +203,7 @@
     var fin = f.elements.fin.value, nom = f.dataset.nom.replace(/\s*#[0-9a-f]{4}$/, '');
     if (!fin) return montre('Indiquez la date de fin : le sorcier redevient héros après.', true);
     montre('Enregistrement…');
-    window.Relais.appeler('equipe_promouvoir', { rang: Number(f.dataset.rang), fin: fin }).then(function (r) {
+    window.Relais.appeler('equipe_promouvoir', { rang: Number(f.dataset.rang), debut: EQUIPE_JOUR || new Date().toISOString().slice(0, 10), fin: fin }).then(function (r) {
       if (!r || !r.ok) return montre(erreurLisible(r), true);
       dire(nom + ' est maintenant sorcier, jusqu\'au ' + jour(fin) + '.');
       setTimeout(charger, 2500);                           // laisse à GitHub le temps de servir la nouvelle liste
