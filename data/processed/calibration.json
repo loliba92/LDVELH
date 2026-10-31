@@ -1,27 +1,27 @@
 {
   "actif": false,
-  "n_paires": 24,
-  "calcule_le": "2026-10-30",
+  "n_paires": 31,
+  "calcule_le": "2026-10-31",
   "par_etat": {
     "bon": {
       "rapport": 0.897,
-      "ecart": 0.191,
-      "n": 24
+      "ecart": 0.214,
+      "n": 31
     }
   },
-  "erreur_modele": 0.262,
-  "erreur_archives": 0.295,
-  "gain": 0.113,
-  "raison": "le modèle ne bat pas assez les archives (gain 11%, 15% exigés)",
+  "erreur_modele": 0.275,
+  "erreur_archives": 0.303,
+  "gain": 0.093,
+  "raison": "le modèle ne bat pas assez les archives (gain 9%, 15% exigés)",
   "rapport_global": 0.897,
   "fraicheur": {
     "bon": {
       "rapport": 0.927,
-      "n": 36
+      "n": 44
     },
     "tres_bon": {
       "rapport": 0.823,
-      "n": 35
+      "n": 42
     }
   },
   "sigma_archive": {
@@ -34,7 +34,7 @@
   },
   "rapports_etats_retenus": {
     "convenable": 0.4,
-    "bon": 0.6,
+    "bon": 0.67,
     "tres_bon": 1.0
   },
   "toutes_annonces": {

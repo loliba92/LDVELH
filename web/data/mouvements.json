@@ -1,10 +1,10 @@
 {
  "date": "2026-10-31",
  "precedent": "2026-10-30",
- "nb_comparees": 1500,
+ "nb_comparees": 1497,
  "nb_modifiees": 657,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 6,
+ "nouvelles_cotes": 3,
  "hausses": [
   {
    "id": "9782070332977",
@@ -57,9 +57,9 @@
  "nb_grands_mouvements": 3,
  "modele": {
   "actif": false,
-  "n_paires": 32,
-  "gain": 0.081,
-  "raison": "le modèle ne bat pas assez les archives (gain 8%, 15% exigés)",
+  "n_paires": 31,
+  "gain": 0.093,
+  "raison": "le modèle ne bat pas assez les archives (gain 9%, 15% exigés)",
   "rapport_global": 0.897
  }
 }
