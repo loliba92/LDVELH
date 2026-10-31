@@ -622,7 +622,7 @@
   // « Solide » : exemplaire de librairie, ou trouvée par l'ISBN avec l'état indiqué dans l'annonce ; sinon « à vérifier », avec la raison (état supposé, trouvée par le titre, librairie).
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
-  const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+  const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Annonces reçues (Zagor) : toutes les annonces des derniers relevés, pour les statistiques du graphique
   let TOUTES_RC = null, redessinerCapt = () => {};
   const TRANCHES = [[0, 5, 'Moins de 5 €'], [5, 10, '5 à 10 €'], [10, 20, '10 à 20 €'], [20, 50, '20 à 50 €'], [50, Infinity, '50 € et plus']];
@@ -657,7 +657,7 @@
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
         if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
         if (origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
-        if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
+        if ((prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) && pub - prix < ECONOMIE_FORTE) return;
         const raisons = [];
         if (origine !== 'librairie') {                          // un exemplaire de librairie est compté « solide » : état non indiqué, très bon état par règle, et très au-dessous du prix du site
           if (origine === 'titre') raisons.push("trouvée par le titre : vérifier que c'est la bonne édition");
@@ -817,7 +817,9 @@
       const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} solide${sures.length > 1 ? 's' : ''}. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       try { localStorage.setItem('cdh-butin-vu', String(Date.now())); } catch (e) { /* tant pis */ }          // les nouveautés comptées sur l'accueil repartent de zéro
-      liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
+      const fortes = vues.filter((p) => p.pub - p.prix >= ECONOMIE_FORTE), reste = vues.filter((p) => p.pub - p.prix < ECONOMIE_FORTE);
+      const bloc = fortes.length ? `<section class="pp-forte"><h3 class="pp-forte-titre">Plus de ${ECONOMIE_FORTE} € d'économie <span class="sous">${fortes.length}</span></h3><div class="rayon pp-rayon">${fortes.map(cartePepite).join('')}</div></section>` : '';
+      liste.innerHTML = vues.length ? bloc + (reste.length ? '<div class="rayon pp-rayon">' + reste.map(cartePepite).join('') + '</div>' : '') : '<p>Aucune bonne affaire pour ce filtre.</p>';
     };
     // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
     liste.addEventListener('click', (e) => {
