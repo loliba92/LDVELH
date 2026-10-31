@@ -114,7 +114,7 @@
       var passer = signes ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
         '<form class="eq-passer" hidden data-nom="' + esc(prenom) + '" data-signes="' + signes[1] + '">' +
         '<label>Adresse du héros <input type="email" name="adresse" required autocomplete="off"></label>' +
-        '<label>Début <input type="date" name="debut"></label><label>Fin <input type="date" name="fin"></label>' +
+        '<label>Début <input type="date" name="debut" value="' + esc(EQUIPE_JOUR || new Date().toISOString().slice(0, 10)) + '"></label><label>Fin (obligatoire) <input type="date" name="fin" required></label>' +
         '<button type="submit" class="bouton bouton-clair">Enregistrer</button>' +
         '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '';
       return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span>' + passer + '</li>';
@@ -209,6 +209,8 @@
     var montre = function (t, err) { m.textContent = t; m.hidden = false; m.classList.toggle('erreur', !!err); };
     var adresse = f.elements.adresse.value.trim(), debut = f.elements.debut.value, fin = f.elements.fin.value;
     if (!adresse) return montre('Saisissez l\'adresse du héros.', true);
+    if (!fin) return montre('Indiquez la date de fin : le sorcier redevient héros après.', true);
+    if (debut && fin < debut) return montre('La date de fin est avant le début.', true);
     if (!window.crypto || !window.crypto.subtle) return montre('Vérification impossible sur cet appareil.', true);
     montre('Enregistrement…');
     signesDe(adresse).then(function (signes) {
