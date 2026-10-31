@@ -513,10 +513,10 @@ dialog.parcours[open] { display: flex; }
 /* Barre de menu du bas (téléphones) : l'en-tête n'est pas collant et ses liens disparaissent, donc la navigation reste à portée de pouce */
 .barre-bas { display: none; }
 @media (max-width: 700px) {
-  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch;
+  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch;
     padding: 0 4px env(safe-area-inset-bottom); background: var(--walnut); border-top: 3px double var(--brass); box-shadow: 0 -6px 18px rgba(0, 0, 0, .28); }
   .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 2px;
-    background: none; border: 0; color: var(--walnut-text); font: 600 .72rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
+    background: none; border: 0; color: var(--walnut-text); font: 600 .68rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
   .barre-bas svg { flex: none; }
   .barre-bas a[aria-current], .barre-bas button[aria-current="page"] { color: var(--gold); }
   .barre-bas a[aria-current]::before, .barre-bas button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; background: var(--gold); border-radius: 0 0 3px 3px; }
@@ -2493,3 +2493,16 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .carte-communaute .hc-liste li { display: grid; gap: 2px; overflow-wrap: anywhere; }
 .carte-communaute .hc-liste a { font-weight: 600; color: var(--text); text-underline-offset: 3px; }
 .carte-communaute .hc-liste span { font-size: .9rem; color: var(--muted); line-height: 1.4; }
+.carte-communaute { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px 22px; padding: 12px 18px; border-left: 3px solid var(--gold); background: linear-gradient(90deg, rgba(201, 162, 39, .08), transparent 60%); }
+.carte-communaute header { display: grid; gap: 4px; }
+.carte-communaute header h2 { margin: 0; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.carte-communaute .hc-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; }
+.carte-communaute .hc-liste li { padding-left: 14px; border-left: 1px solid var(--line); }
+.carte-communaute .hc-liste span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 700px) {
+  .carte-communaute { grid-template-columns: minmax(0, 1fr); padding: 12px 14px; }
+  .carte-communaute .hc-liste { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
+@media (min-width: 701px) {
+  .carte-communaute { grid-column: 1 / -1; }
+}
