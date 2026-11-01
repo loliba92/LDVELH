@@ -2,7 +2,7 @@
  "date": "2026-11-01",
  "precedent": "2026-10-31",
  "nb_comparees": 1500,
- "nb_modifiees": 674,
+ "nb_modifiees": 676,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -17,6 +17,21 @@
    "avant": 7.44,
    "apres": 9.17,
    "pct": 0.233,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070651351",
+   "isbn13": "9782070651351",
+   "titre": "Le Sang des Zombies (Grand format)",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 10.0,
+   "apres": 12.22,
+   "pct": 0.222,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -99,6 +114,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070651351",
+   "isbn13": "9782070651351",
+   "titre": "Le Sang des Zombies (Grand format)",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 10.0,
+   "apres": 7.0,
+   "pct": -0.3,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070573226",
    "isbn13": "9782070573226",
    "titre": "L'Œil d'émeraude",
@@ -174,7 +204,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 52,

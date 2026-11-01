@@ -1788,19 +1788,22 @@
    "par": "loliba (superadmin)"
   },
   "9782070651351|bon": {
-   "prix": 10.0,
+   "prix": 12.22,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
   },
   "9782070651351|convenable": {
-   "prix": 10.0,
+   "prix": 7.0,
    "decision": "corrige",
-   "le": "2026-10-15"
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
   },
   "9782070651351|tres_bon": {
    "prix": 19.0,
    "decision": "corrige",
-   "le": "2026-10-15"
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
   },
   "9782070651412|convenable": {
    "prix": 20.0,
