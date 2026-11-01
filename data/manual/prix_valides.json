@@ -2128,6 +2128,24 @@
    "le": "2026-10-20",
    "par": "loliba (superadmin)"
   },
+  "9782380240269|bon": {
+   "prix": 5.19,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782380240269|convenable": {
+   "prix": 3.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782380240269|tres_bon": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
   "9782380240276|convenable": {
    "prix": 20.0,
    "decision": "corrige",
