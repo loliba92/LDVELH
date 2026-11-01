@@ -335,6 +335,24 @@
    "decision": "corrige",
    "le": "2026-10-17"
   },
+  "9782070333653|bon": {
+   "prix": 7.86,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333653|convenable": {
+   "prix": 5.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782070333653|tres_bon": {
+   "prix": 11.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
   "9782070333684|convenable": {
    "prix": 7.0,
    "decision": "corrige",
