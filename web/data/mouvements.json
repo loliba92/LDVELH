@@ -2,7 +2,7 @@
  "date": "2026-11-01",
  "precedent": "2026-10-31",
  "nb_comparees": 1500,
- "nb_modifiees": 671,
+ "nb_modifiees": 674,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -23,6 +23,36 @@
   }
  ],
  "baisses": [
+  {
+   "id": "9782070332670",
+   "isbn13": "9782070332670",
+   "titre": "L'Île du Roi Lézard",
+   "serie": "Défis Fantastiques",
+   "numero": "267",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 12.08,
+   "apres": 5.8,
+   "pct": -0.52,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332670",
+   "isbn13": "9782070332670",
+   "titre": "L'Île du Roi Lézard",
+   "serie": "Défis Fantastiques",
+   "numero": "267",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 4.0,
+   "apres": 2.0,
+   "pct": -0.5,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9791097577445",
    "isbn13": "9791097577445",
@@ -144,7 +174,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
   "n_paires": 52,
