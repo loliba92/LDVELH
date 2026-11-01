@@ -61,6 +61,24 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782012000735|bon": {
+   "prix": 9.17,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782012000735|convenable": {
+   "prix": 5.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
+  "9782012000735|tres_bon": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-11-01",
+   "par": "loliba (superadmin)"
+  },
   "9782070332670|bon": {
    "prix": 12.08,
    "decision": "confirme",
