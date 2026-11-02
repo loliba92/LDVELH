@@ -1805,7 +1805,7 @@ body.cotes-masquees #onglet-cote, body.cotes-masquees #cote, body.cotes-masquees
 body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: none !important; }
 @media (max-width: 560px) { .hero-coll .avantages { columns: 2; column-gap: 10px; font-size: .92rem; } .hero-coll .avantages li::before { margin-right: 5px; } }
 
-.lien-reserve { opacity: .5; }
+.lien-reserve { color: var(--muted); border-style: dashed; border-color: var(--line-strong); }
 @media (min-width: 701px) { .coll-avantages { grid-template-columns: repeat(2, minmax(0, 1fr)); } .coll-invite { max-width: 80ch; } }
 .ajout-coll[hidden] { display: none !important; }
 
