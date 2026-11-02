@@ -876,16 +876,18 @@
       const libelle = extremeBas ? 'Le moins cher' : extremeHaut ? 'Le plus cher' : VERDICTS[v][0];
       return `<span class="rc-pastille ${VERDICTS[v][1]}">${libelle}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
-    // Thermomètre : où se situe l'annonce entre le moins cher et le plus cher du même livre et du même état
+    // Thermomètre : le rond est l'annonce, entre le moins cher et le plus cher du même livre et du même état ; le trait est le prix du site (même état).
+    // L'échelle s'élargit au prix du site, pour que le trait reste dans la barre. Mêmes seuils que « Dans les prix » (10 % autour du prix du site).
     const thermometre = (a) => {
       if (!a.lot) return '';
-      const etendue = a.lot.max - a.lot.min;
-      const pos = etendue > 0 ? (a.prix - a.lot.min) / etendue : 0;
-      const rep = etendue > 0 ? (a.lot.med - a.lot.min) / etendue : 0.5;
-      const cat = pos <= 0.1 ? 'Le moins cher' : pos >= 0.9 ? 'Le plus cher' : Math.abs(pos - rep) <= 0.1 ? 'Dans la médiane' : pos < rep ? 'Sous la médiane' : 'Au-dessus de la médiane';
-      const extreme = pos <= 0.1 || pos >= 0.9;
-      const txt = `${cat} : ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}`;
-      return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste"><span class="rc-therm-rep" style="left:${(rep * 100).toFixed(1)}%"></span><span class="rc-therm-pt" style="left:${(pos * 100).toFixed(1)}%"></span></span>${extreme ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
+      const site = a.pub != null;
+      const bas = site ? Math.min(a.lot.min, a.pub) : a.lot.min, haut = site ? Math.max(a.lot.max, a.pub) : a.lot.max;
+      const place = (x) => (haut > bas ? (x - bas) / (haut - bas) : 0);
+      const rang = a.lot.max > a.lot.min ? (a.prix - a.lot.min) / (a.lot.max - a.lot.min) : 0;
+      const extreme = rang <= 0.1 || rang >= 0.9;
+      const cat = rang <= 0.1 ? 'Le moins cher' : rang >= 0.9 ? 'Le plus cher' : !site ? '' : a.prix < 0.9 * a.pub ? 'Sous le prix du site' : a.prix <= 1.1 * a.pub ? 'Au prix du site' : 'Au-dessus du prix du site';
+      const txt = `${cat ? cat + ' : ' : ''}annonces de ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}${site ? `. Le trait marque le prix du site, ${eur(a.pub)}` : ''}`;
+      return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste">${site ? `<span class="rc-therm-rep" style="left:${(place(a.pub) * 100).toFixed(1)}%"></span>` : ''}<span class="rc-therm-pt" style="left:${(place(a.prix) * 100).toFixed(1)}%"></span></span>${extreme || !cat ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
