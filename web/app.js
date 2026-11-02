@@ -647,7 +647,7 @@
     const lignes = [];
     if (!ANN) lignes.push('Annonces : chargement…');
     else {
-      lignes.push(avec ? `${SVG_ACHAT}<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bons coups : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : SVG_ACHAT + 'Acheter : aucune annonce pour cette sélection');
+      lignes.push(avec ? `${SVG_ACHAT}<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bonnes affaires : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : SVG_ACHAT + 'Acheter : aucune annonce pour cette sélection');
       lignes.push(vavec ? `${SVG_VENTE}<b>Revendre pour</b> environ ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide : ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `${SVG_VENTE}Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
     }
     if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
@@ -2008,7 +2008,7 @@
     return livrees.filter(([, , , origine, vue]) => !(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay));
   };
   const eurosArr = (n) => fmtE(Math.round(n));
-  // Prix repères d'une liste d'annonces : médiane (prix conseillé) et premier quart (prix rapide ou bon coup)
+  // Prix repères d'une liste d'annonces : médiane (prix conseillé) et premier quart (prix rapide ou bonne affaire)
   const quantile = (t, q) => { const i = (t.length - 1) * q, k = Math.floor(i); return t[k] + (t[Math.min(k + 1, t.length - 1)] - t[k]) * (i - k); };
   const reperes = (liste, retrait) => {
     const t = liste.map((a) => Math.max(0, a[0] - retrait)).sort((x, y) => x - y);
@@ -2049,14 +2049,14 @@
     if (voit) lignes.forEach((b) => { const r = fl(b); if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; chiffres += 1; } });
     const sans = lignes.length - chiffres;
     const budget = !voitAnnonces() ? '' : !ANN ? '<p class="sous budget">Budget estimé : chargement…</p>'
-      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `environ ${eurosArr(med)}` : 'pas de repère'}</b>${chiffres && bon < med ? `<span class="sous"> · en visant les bons coups : ${eurosArr(bon)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-      <p class="sous">Pour chaque livre : le prix médian des annonces en ligne, frais de port compris. Un « bon coup » est un prix plus bas que trois annonces sur quatre. Prix demandés, sans garantie de disponibilité.</p>`;
+      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `environ ${eurosArr(med)}` : 'pas de repère'}</b>${chiffres && bon < med ? `<span class="sous"> · en visant les bonnes affaires : ${eurosArr(bon)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      <p class="sous">Pour chaque livre : le prix médian des annonces en ligne, frais de port compris. Une « bonne affaire » est un prix plus bas que trois annonces sur quatre. Prix demandés, sans garantie de disponibilité.</p>`;
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const r = fl(b); return voit ? `<p class="sous fourchette-ligne">${r ? `Prix à prévoir : ${eurosArr(r.med)}${r.bas != null ? ` · bon coup : ${eurosArr(r.bas)}` : ''} · ${r.n} annonce${r.n > 1 ? 's' : ''}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
+        ${(() => { const r = fl(b); return voit ? `<p class="sous fourchette-ligne">${r ? `Prix à prévoir : ${eurosArr(r.med)}${r.bas != null ? ` · bonne affaire : ${eurosArr(r.bas)}` : ''} · ${r.n} annonce${r.n > 1 ? 's' : ''}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
