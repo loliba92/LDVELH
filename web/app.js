@@ -651,10 +651,8 @@
     const lignes = [];
     if (!cotes) lignes.push('Pas de cote pour cette sélection');
     else {
-      lignes.push(`${SVG_ACHAT}<b>Acheter</b> : offrez ${eurosArr(achat)} <span class="nowrap">(+ ${eurosArr(cotes * FRAIS_PORT)} de port)</span>${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
-      if (nA) lignes.push(`<span class="sel-sous">${pastille(ptsA / nA)}</span>`);
-      lignes.push(`${SVG_VENTE}<b>Revendre</b> : affichez ${eurosArr(vente)}`);
-      lignes.push(`<span class="sel-sous">Descendez jusqu'à ${eurosArr(achat)} ${nV ? pastille(ptsV / nV) : ''}</span>`);
+      lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(achat)} + port ${eurosArr(cotes * FRAIS_PORT)}${nA ? ` ${pastille(ptsA / nA)}` : ''}${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
+      lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}`);
     }
     z.title = `Achat : la cote du guide arrondie à l'euro inférieur, port en plus (environ ${FRAIS_PORT} € par livre). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
