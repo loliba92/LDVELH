@@ -603,25 +603,13 @@ dialog.parcours[open] { display: flex; }
 
 /* Haut de page : fondu noir (icône, nom, textes) puis l'illustration, sur un fond toujours sombre */
 .hero { --img: url("images/accueil-2.webp"); --text: #f3e9d2; --muted: #d6c8a8; --accent: #cf9a2e; --on-accent: #0a0a0a; --brass-text: #d9b45f; --surface: rgba(10, 10, 10, .85); --line: rgba(243, 233, 210, .24);
-  position: relative; overflow: clip; min-height: 760px; padding: 34px 0 56px; color: var(--text); border-bottom: 3px double var(--brass);
-  background:
-    linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
-    linear-gradient(90deg, rgba(0, 0, 0, .92) 0, rgba(0, 0, 0, .82) 36%, rgba(0, 0, 0, .3) 62%, rgba(0, 0, 0, 0) 82%),
-    var(--img) var(--pos, 80% 26%) / var(--taille, cover) no-repeat,
-    #000000; }
+  position: relative; overflow: clip; min-height: 0; padding: 40px 0 44px; color: var(--text); border-bottom: 3px double var(--brass);
+  background: radial-gradient(900px 380px at 78% -10%, rgba(207, 154, 46, .16), transparent 62%), #120d08; }
 .hero-in { grid-template-columns: 1fr; }
 .hero-texte { max-width: 620px; }
 .hero .chapeau { color: var(--text); }
 .hero .chiffres-hero { border-top-color: var(--line); }
 .hero .avis { background: var(--surface); }
-@media (max-width: 900px) {
-  /* téléphone et tablette : texte dans le noir en haut, illustration entière dans la partie basse */
-  .hero { min-height: 0; padding: 26px 0 clamp(340px, 94vw, 640px);
-    background:
-      linear-gradient(180deg, #000000 0, #000000 50%, rgba(0, 0, 0, .8) 58%, rgba(0, 0, 0, 0) 68%),
-      var(--img) center bottom / 100% auto no-repeat,
-      #000000; }
-}
 
 /* Inventaire : « Tout » par colonne, onglets d'éditions, états rapides C / BE / TBE */
 .col-tout { display: block; margin: 6px auto 0; min-width: 44px; min-height: 28px; padding: 2px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--accent);
@@ -639,16 +627,12 @@ dialog.parcours[open] { display: flex; }
 .etats-rapides button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .etats-rapides button:focus-visible, .onglets-ed button:focus-visible, .col-tout:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
-/* Cinq illustrations, tirées au hasard à chaque visite (choix dans l'en-tête de la page) ; cadrage propre à chacune */
-html[data-accueil="1"] .hero { --img: url("images/accueil-1.webp"); --pos: 72% 22%; }
-html[data-accueil="2"] .hero { --img: url("images/accueil-2.webp"); --pos: 80% 26%; }
-html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 82% 30%; }
-html[data-accueil="4"] .hero { --img: url("images/accueil-4.webp"); --pos: 50% 45%; }
-html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 28%; }
-@media (min-width: 901px) { html[data-accueil="4"] .hero, html[data-accueil="5"] .hero { background:
-  linear-gradient(180deg, #000000 0, rgba(0, 0, 0, .9) 110px, rgba(0, 0, 0, 0) 330px),
-  linear-gradient(90deg, rgba(0, 0, 0, .86) 0, rgba(0, 0, 0, .72) 34%, rgba(0, 0, 0, .28) 60%, rgba(0, 0, 0, 0) 80%),
-  var(--img) var(--pos) / cover no-repeat, #000000; } }
+/* Cinq illustrations, une par jour (choix dans l'en-tête de la page) ; cadrage propre à chacune */
+html[data-accueil="1"] .hero { --img: url("images/accueil-1.webp"); --pos: 50% 28%; }
+html[data-accueil="2"] .hero { --img: url("images/accueil-2.webp"); --pos: 50% 50%; }
+html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 50% 50%; }
+html[data-accueil="4"] .hero { --img: url("images/accueil-4.webp"); --pos: 50% 50%; }
+html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 50%; }
 
 /* Bandeau illustré de la page « Ma collection » */
 .banniere { position: relative; display: flex; align-items: flex-end; min-height: clamp(210px, 26vw, 300px); padding: 28px 0 30px; border-bottom: 3px double var(--brass);
@@ -929,9 +913,8 @@ table.mouv .num { white-space: nowrap; }
   .banniere .mur { inset: -10px -10px -10px 40%; grid-template-columns: repeat(3, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .mur { transform: none; } }
-.hero.avec-mur, .banniere.avec-mur { background: #000000; }
+.banniere.avec-mur { background: #000000; }
 .banniere { overflow: clip; }
-html[data-accueil="6"] .hero { background: #000000; }   /* tirage « mur de jaquettes » : pas d'illustration le temps que le mur se construise */
 
 /* Analyses du portefeuille (bloc « Ma collection » de l'accueil) */
 .hc-analyses summary { cursor: pointer; display: flex; align-items: center; min-height: 44px; margin-top: 4px; font-weight: 700; color: var(--brass-text, var(--accent)); }
@@ -1196,7 +1179,7 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 .contact-mail a.bouton { color: #1a1205; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; text-decoration: none; }
 
 /* ---------- Accueil, refonte de l'intro : un bandeau (titre, recherche, compteurs) puis deux cartes alignées ---------- */
-.hero { min-height: 0; padding: 30px 0 30px; }
+.hero { min-height: 0; padding: 40px 0 44px; }
 .hero .hero-in { display: block; max-width: 1180px; }
 .hero .hero-in > * { max-width: 720px; }
 .hero h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); line-height: 1.05; }
@@ -2492,4 +2475,16 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (min-width: 901px) {
   .rang:not(:has(> .carte-ajouts:not([hidden]))) > .carte-coll { grid-column: 1 / -1; }
   .carte-ajouts .ap-det { margin-top: auto; padding-top: 12px; }
+}
+
+/* Accueil : texte à gauche, illustration entière dans un cadre à droite (au-dessus du texte sur téléphone et tablette) */
+.hero-visuel { border: 1px solid var(--gold); border-radius: 12px; background: var(--img) var(--pos, 50% 50%) / cover no-repeat; box-shadow: 0 18px 40px rgba(0, 0, 0, .55), 0 0 0 6px rgba(207, 154, 46, .10); }
+@media (min-width: 901px) {
+  .hero .hero-in { display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 56px; align-items: center; max-width: 1180px; }
+  .hero .hero-in > .hero-texte { max-width: none; }
+  .hero .hero-in > .hero-visuel { max-width: none; aspect-ratio: 1214 / 1295; }
+}
+@media (max-width: 900px) {
+  .hero .hero-in { display: flex; flex-direction: column; align-items: stretch; }
+  .hero .hero-in > .hero-visuel { order: -1; flex: none; max-width: none; height: 170px; margin-bottom: 18px; }
 }

@@ -71,8 +71,7 @@
         'Ouvrez le guide depuis un serveur (par exemple <code>python -m http.server</code> dans le dossier <code>web</code>).</p>';
       return;
     }
-    // Une fois sur six en haut de l'accueil, une fois sur deux sur « Ma collection » : le mur de jaquettes ; sinon l'illustration
-    if (document.documentElement.dataset.accueil === '6') murJaquettes('.hero', matchMedia('(max-width: 900px)').matches ? 12 : 30);
+    // Une fois sur deux sur « Ma collection » : le mur de jaquettes
     if (Math.random() < 0.5) murJaquettes('.banniere', matchMedia('(max-width: 700px)').matches ? 8 : 18);
     DATA.forEach((b) => { b._txt = norm([b.titre, b.livre, b.auteurs, b.isbn13, b.serie, b.editeur].join(' ')); });
     VERSIONS = [...new Set(DATA.map((b) => b.version))].sort();
