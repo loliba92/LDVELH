@@ -622,6 +622,48 @@
     return [...liste].sort(cmp);
   }
 
+  /* ---------- Lot d'achat (sorciers et plus) : livres cochés un par un sur l'étagère, prix du lot ---------- */
+  const SEL_LOT = new Set();
+  function medianeNb(p) {
+    const t = p.slice().sort((x, y) => x - y);
+    return t.length % 2 ? t[(t.length - 1) / 2] : (t[t.length / 2 - 1] + t[t.length / 2]) / 2;
+  }
+  function majBarreLot() {
+    let z = $('#barre-sel');
+    if (!SEL_LOT.size || !voitAnnonces() || !$('#resultats')) { if (z) z.hidden = true; return; }
+    if (!z) {
+      z = document.createElement('div');
+      z.id = 'barre-sel'; z.className = 'barre-sel'; z.setAttribute('role', 'status');
+      document.body.appendChild(z);
+    }
+    z.hidden = false;
+    const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
+    const n = livres.length, e = etatDe(S.h);
+    const cote = livres.reduce((t, b) => (b.prix[e.k] != null ? { s: t.s + b.prix[e.k], k: t.k + 1 } : t), { s: 0, k: 0 });
+    let bas = 0, haut = 0, med = 0, avec = 0;
+    if (ANN) livres.forEach((b) => {
+      const l = annoncesEnLigne(b), f = fourchette(l, 0);
+      if (f) { bas += f.bas; haut += f.haut; med += medianeNb(l.map((a) => a[0])); avec += 1; }
+    });
+    const sans = n - avec;
+    const lignes = [];
+    lignes.push(!ANN ? 'Annonces : chargement…' : avec ? `Annonces : entre ${eurosArr(bas)} et ${eurosArr(haut)} · médiane ${eurosArr(med)}${sans ? ` · ${sans} sans annonce` : ''}` : 'Annonces : aucune pour cette sélection');
+    if (cote.k) lignes.push(`Cote du site (${e.court}) : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
+    z.innerHTML = `<div class="sel-texte"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b>${lignes.map((l) => `<span>${esc(l)}</span>`).join('')}</div><button type="button" class="retirer" data-sel-vider>Vider</button>`;
+    if (!ANN) chargerAnnonces().then(() => majBarreLot());
+  }
+  document.addEventListener('click', (ev) => {
+    const vider = ev.target.closest('[data-sel-vider]');
+    if (vider) { SEL_LOT.clear(); document.querySelectorAll('.sel-case[aria-pressed="true"]').forEach((c) => { c.setAttribute('aria-pressed', 'false'); c.closest('.livre-carte').classList.remove('sel-oui'); }); majBarreLot(); return; }
+    const c = ev.target.closest('button[data-sel-lot]');
+    if (!c || !voitAnnonces()) return;
+    const id = c.dataset.selLot, oui = !SEL_LOT.has(id);
+    if (oui) SEL_LOT.add(id); else SEL_LOT.delete(id);
+    c.setAttribute('aria-pressed', String(oui));
+    c.closest('.livre-carte').classList.toggle('sel-oui', oui);
+    majBarreLot();
+  });
+
   function afficherEtagere(liste) {
     const e = etatDe(S.h);
     const tri = trier(liste);
@@ -629,7 +671,7 @@
     const cartes = vus.map((b) => {
       const p = b.prix[e.k];
       const masq = cotesMasquees(), poss = masq ? null : COLL[b.id], souh = masq ? null : SOUH[b.id], incoh = estNiveau3() ? incoherence(b) : null;
-      return `<article class="livre-carte${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
+      return `<article class="livre-carte${SEL_LOT.has(b.id) && voitAnnonces() ? ' sel-oui' : ''}${poss ? ' possede-oui' : ''}${poss && poss.vendre ? ' vendre-oui' : ''}${!poss && souh ? ' trouver-oui' : ''}">
         <button type="button" class="ouvrir" data-id="${esc(b.id)}" aria-label="${esc(b.titre)}, édition ${esc(b.version)}${p != null ? ', ' + (cotesMasquees() ? 'niveau de prix ' + niveauCote(p, e.k) + ' sur 5' : fmt(p)) + ' en ' + e.long.toLowerCase() : ''}${poss ? ', dans ma collection en ' + etatDe(poss.etat).long.toLowerCase() : ''}">
           <span class="couv">${b.couverture
             ? `<img src="${esc(racine(b.couverture))}" alt="" width="88" height="124" loading="lazy" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
@@ -637,6 +679,7 @@
           <span class="infos"><span class="titre">${esc(b.titre)}</span><span class="meta" style="display:block">${esc(b.serie)}${esc(numero(b))}<span class="ed"><b class="bv">${esc(b.version)}</b>${b.annee ? esc(String(b.annee)) : ''}</span></span></span>
         </button>
         ${window.Notes ? window.Notes.pastille(b.livre_id) : ''}
+        ${voitAnnonces() ? `<button type="button" class="sel-case" data-sel-lot="${esc(b.id)}" aria-pressed="${SEL_LOT.has(b.id)}" aria-label="Ajouter au lot : ${esc(b.titre)}, édition ${esc(b.version)}" title="Ajouter au lot pour estimer un achat groupé"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>` : ''}
         <div class="etats-carte" role="group" aria-label="Ajouter à ma collection : ${esc(b.titre)}, édition ${esc(b.version)}">${ETATS.map((x) =>
           `<button type="button" data-etat-possede="${esc(b.id)}" data-e="${x.k}" aria-pressed="${!!poss && poss.etat === x.k}" title="${poss && poss.etat === x.k ? 'Dans ma collection en ' + x.long.toLowerCase() + ' : retirer' : 'Ajouter en ' + x.long.toLowerCase()}" aria-label="${poss && poss.etat === x.k ? 'Retirer de ma collection' : 'Ajouter en ' + x.long.toLowerCase()} : ${esc(b.titre)}, édition ${esc(b.version)}">${ABREGE[x.k]}</button>`).join('')}</div>${poss ? `<button type="button" class="souhait-carte" data-vendre-carte="${esc(b.id)}" aria-pressed="${!!poss.vendre}" title="${poss.vendre ? 'Dans ma liste à vendre : retirer' : 'Mettre à vendre'}" aria-label="${poss.vendre ? 'Retirer de ma liste à vendre' : 'Mettre à vendre'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><span class="souhait-txt">À vendre</span></button>` : `<button type="button" class="souhait-carte" data-souhait-carte="${esc(b.id)}" aria-pressed="${!poss && !!souh}"${poss ? ' disabled' : ''} title="${poss ? 'Déjà dans ma collection' : souh ? 'Dans ma liste à trouver : retirer' : 'Ajouter à ma liste à trouver'}" aria-label="${poss ? 'Déjà dans ma collection' : souh ? 'Retirer de ma liste à trouver' : 'Ajouter à ma liste à trouver'} : ${esc(b.titre)}, édition ${esc(b.version)}"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><span class="souhait-txt">À trouver</span></button>`}
         ${incoh ? `<span class="incoh-flag" title="${esc(incoh)}">Prix à vérifier</span>` : ''}
@@ -649,6 +692,7 @@
       (reste > 0 ? `<button type="button" class="plus" id="plus">Voir ${Math.min(reste, PAR_PAGE)} livres de plus (${reste} restants)</button>` : '');
     const plus = $('#plus');
     if (plus) plus.addEventListener('click', () => { limite += PAR_PAGE; afficherEtagere(liste); });
+    majBarreLot();
   }
 
   /* ---------- Liste ---------- */
