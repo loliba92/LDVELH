@@ -658,9 +658,9 @@
       lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(offreLot)}${remise ? ` <span class="nowrap">(−${Math.round(remise * 100)} % lot)</span>` : ''} ${nA ? ` ${pastille(ptsA / nA)}` : ''}`);
       lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}`);
       if (cotes < n) lignes.push(`<span class="sel-sous">${n - cotes} livre${n - cotes > 1 ? 's' : ''} sans cote, non chiffré${n - cotes > 1 ? 's' : ''}</span>`);
-      { const pl = portLot(cotes); lignes.push(`<span class="sel-sous">Port Mondial Relay : ${eurosArr(pl.prix)} (≈ ${(Math.round(pl.kg * 10) / 10).toLocaleString('fr-FR')} kg${pl.colis > 1 ? `, ${pl.colis} colis` : ''})</span>`); }
+      { const pl = portLot(cotes); lignes.push(`<span class="sel-sous">Port Mondial Relay : ${eurosArr(pl.prix)} + ${eurosArr(FRAIS_PLATEFORME)} de frais (≈ ${(Math.round(pl.kg * 10) / 10).toLocaleString('fr-FR')} kg${pl.colis > 1 ? `, ${pl.colis} colis` : ''})</span>`); }
     }
-    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, moins une remise de lot (nombre de livres ou montant : 5 % dès 3 livres ou 50 €, jusqu'à 20 % dès 21 livres ou 400 €), port en plus : un seul colis, tarif Mondial Relay en point relais selon le poids estimé (environ ${POIDS_LIVRE * 1000} g par livre plus ${POIDS_EMBALLAGE * 1000} g d'emballage). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
+    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, moins une remise de lot (nombre de livres ou montant : 5 % dès 3 livres ou 50 €, jusqu'à 20 % dès 21 livres ou 400 €), frais de plateforme (Vinted ou Leboncoin) : 1 € par achat ; port en plus : un seul colis, tarif Mondial Relay en point relais selon le poids estimé (environ ${POIDS_LIVRE * 1000} g par livre plus ${POIDS_EMBALLAGE * 1000} g d'emballage). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
@@ -2019,6 +2019,7 @@
 
   // Budget et vente estimés d'après les annonces en ligne (niveaux 2 et 3) : prix demandés, annonces « plus vues » écartées
   const FRAIS_PORT = 4;
+  const FRAIS_PLATEFORME = 1;          // frais de plateforme (Vinted ou Leboncoin) par achat, en euros
   // Port d'un lot expédié en un seul colis : grille Mondial Relay (particulier, point relais, France, TTC, 15 juin 2026), d'après le poids estimé
   const POIDS_LIVRE = 0.2, POIDS_EMBALLAGE = 0.3;          // kg : un livre de poche, et le carton
   const GRILLE_MONDIAL_RELAY = [[0.5, 4.15], [1, 5.99], [3, 7.99], [4, 9.99], [10, 15.99], [25, 25.99]];
@@ -2117,7 +2118,7 @@
     const resume = voit && sCote ? `<p class="budget-resume">Les vendeurs demandent environ ${Math.max(0, Math.round((sAff / sCote - 1) * 100))} % de plus : négociez ${nPts ? pastille(pts / nPts) : ''}</p>` : '';
     const sans = lignes.length - cotes;
     const budget = !voit ? ''
-      : `<p class="budget"><b>À offrir : ${cotes ? eurosArr(somme) : 'pas de cote'}</b>${cotes ? `<span class="sous"> (budget estimé pour tout trouver) + frais de port estimés à ${eurosArr(cotes * FRAIS_PORT)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      : `<p class="budget"><b>À offrir : ${cotes ? eurosArr(somme) : 'pas de cote'}</b>${cotes ? `<span class="sous"> (budget estimé pour tout trouver) + port estimé à ${eurosArr(cotes * FRAIS_PORT)} + ${eurosArr(cotes * FRAIS_PLATEFORME)} de frais de plateforme</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
       ${resume}
       <p class="sous">Pour chaque livre : l'offre à faire, soit la cote du guide (médiane des états) arrondie à l'euro inférieur, port non compris. Le port s'ajoute à l'achat (environ ${FRAIS_PORT} € par livre). Le marché indique les annonces en ligne : leur nombre et la moins chère.</p>`;
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
@@ -2129,7 +2130,7 @@
           if (!voit) return '';
           const p = prixCote(b), l = ANN ? annoncesEnLigne(b) : [], m = moinsCher(l), v = prixAffiche(b);
           if (p == null) return '<p class="sous fourchette-ligne">Pas de cote</p>';
-          return `<div class="prix-bloc"><p class="prix-ligne"><b>Offrez ${eurosArr(offre(p))}</b> <span class="sous">+ ${eurosArr(FRAIS_PORT)} de port</span> ${pastille(pointsAchat(b))}</p>
+          return `<div class="prix-bloc"><p class="prix-ligne"><b>Offrez ${eurosArr(offre(p))}</b> <span class="sous">+ ${eurosArr(FRAIS_PORT)} de port + ${eurosArr(FRAIS_PLATEFORME)} de frais</span> ${pastille(pointsAchat(b))}</p>
             <p class="sous prix-detail">Négociable : les vendeurs demandent environ ${eurosArr(v.prix)}${!ANN ? '' : l.length ? ` · ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'}</p></div>`;
         })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
