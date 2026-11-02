@@ -651,10 +651,14 @@
     const lignes = [];
     if (!cotes) lignes.push('Pas de cote pour cette sélection');
     else {
-      lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(achat)} + port ${eurosArr(cotes * FRAIS_PORT)}${nA ? ` ${pastille(ptsA / nA)}` : ''}${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
+      // Remise de lot : la plus forte entre le nombre de livres et le montant (un gros lot se négocie plus fort) ; le port d'un lot est un seul colis
+      const parNombre = n >= 21 ? 0.20 : n >= 11 ? 0.15 : n >= 6 ? 0.10 : n >= 3 ? 0.05 : 0;
+      const parMontant = achat >= 400 ? 0.20 : achat >= 200 ? 0.15 : achat >= 100 ? 0.10 : achat >= 50 ? 0.05 : 0;
+      const remise = Math.max(parNombre, parMontant), offreLot = Math.floor(achat * (1 - remise));
+      lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(offreLot)}${remise ? ` <span class="nowrap">(−${Math.round(remise * 100)} % lot)</span>` : ''} <span class="nowrap">+ port ${eurosArr(Math.min(cotes * FRAIS_PORT, PORT_COLIS_MAX))}</span>${nA ? ` ${pastille(ptsA / nA)}` : ''}${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
       lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}`);
     }
-    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, port en plus (environ ${FRAIS_PORT} € par livre). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
+    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, moins une remise de lot (nombre de livres ou montant : 5 % dès 3 livres ou 50 €, jusqu'à 20 % dès 21 livres ou 400 €), port en plus (environ ${FRAIS_PORT} € par livre, un seul colis au plus ${PORT_COLIS_MAX} €). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
@@ -2012,7 +2016,8 @@
   });
 
   // Budget et vente estimés d'après les annonces en ligne (niveaux 2 et 3) : prix demandés, annonces « plus vues » écartées
-  const FRAIS_PORT = 4;                                  // frais de port à retirer d'un prix livré pour estimer ce que touche le vendeur
+  const FRAIS_PORT = 4;
+  const PORT_COLIS_MAX = 15;          // port estimé d'un lot expédié en un seul colis                                  // frais de port à retirer d'un prix livré pour estimer ce que touche le vendeur
   const annoncesEnLigne = (b, etat) => {
     const par = ANN && ANN.annonces && b.isbn13 ? ANN.annonces[b.isbn13] : null;
     if (!par) return [];
