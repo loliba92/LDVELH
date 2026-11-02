@@ -84,6 +84,36 @@
  ],
  "baisses": [
   {
+   "id": "9782070336203",
+   "isbn13": "9782070336203",
+   "titre": "Les Treize Mages",
+   "serie": "L'Epée de Légende",
+   "numero": "620",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 35.4,
+   "apres": 16.0,
+   "pct": -0.548,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070336203",
+   "isbn13": "9782070336203",
+   "titre": "Les Treize Mages",
+   "serie": "L'Epée de Légende",
+   "numero": "620",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 71.71,
+   "apres": 38.0,
+   "pct": -0.47,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070509614",
    "isbn13": "9782070509614",
    "titre": "Le Temps de la Malédiction",
@@ -109,6 +139,21 @@
    "avant": 59.0,
    "apres": 38.0,
    "pct": -0.356,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070336203",
+   "isbn13": "9782070336203",
+   "titre": "Les Treize Mages",
+   "serie": "L'Epée de Légende",
+   "numero": "620",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 39.78,
+   "apres": 26.12,
+   "pct": -0.343,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -217,24 +262,9 @@
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
-  },
-  {
-   "id": "9782070336203",
-   "isbn13": "9782070336203",
-   "titre": "Les Treize Mages",
-   "serie": "L'Epée de Légende",
-   "numero": "620",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 71.71,
-   "apres": 63.79,
-   "pct": -0.11,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 15,
+ "nb_grands_mouvements": 17,
  "modele": {
   "actif": false,
   "n_paires": 92,
