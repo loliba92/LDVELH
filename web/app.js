@@ -624,6 +624,8 @@
 
   /* ---------- Lot d'achat (sorciers et plus) : livres cochés un par un sur l'étagère, prix du lot ---------- */
   const SEL_LOT = new Set();
+  const SVG_ACHAT = '<svg class="sel-ico sel-achat" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg>';
+  const SVG_VENTE = '<svg class="sel-ico sel-vente" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg>';
   function majBarreLot() {
     let z = $('#barre-sel');
     if (!SEL_LOT.size || !voitAnnonces() || !$('#resultats')) { if (z) z.hidden = true; return; }
@@ -645,8 +647,8 @@
     const lignes = [];
     if (!ANN) lignes.push('Annonces : chargement…');
     else {
-      lignes.push(avec ? `<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bons coups : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : 'Acheter : aucune annonce pour cette sélection');
-      lignes.push(vavec ? `<b>Revendre pour</b> environ ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide : ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
+      lignes.push(avec ? `${SVG_ACHAT}<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bons coups : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : SVG_ACHAT + 'Acheter : aucune annonce pour cette sélection');
+      lignes.push(vavec ? `${SVG_VENTE}<b>Revendre pour</b> environ ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide : ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `${SVG_VENTE}Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
     }
     if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
     z.title = `Achat : annonces en ligne, port compris. Revente : annonces à l'état ${e.court.toLowerCase()}, environ ${FRAIS_PORT_VENTE} € de port retiré par livre. Prix demandés, pas des prix payés.`;
