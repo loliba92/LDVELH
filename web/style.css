@@ -2559,3 +2559,5 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-texte b { color: var(--accent); font-size: var(--t-base); }
 .barre-sel .retirer { flex: none; min-height: 40px; padding: 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--accent); font: 600 var(--t-base) var(--f-ui); cursor: pointer; }
 @media (max-width: 700px) { .barre-sel { bottom: calc(66px + env(safe-area-inset-bottom)); } }
+
+.sel-texte span b { color: var(--text); }
