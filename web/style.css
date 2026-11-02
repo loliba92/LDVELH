@@ -2564,3 +2564,8 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-ico { display: inline-block; vertical-align: -3px; margin-right: 6px; }
 .sel-achat { color: #8fd3a8; }
 .sel-vente { color: #f0a5b0; }
+.barre-sel { flex-direction: column; align-items: stretch; gap: 4px; padding: 8px 14px 10px; }
+.sel-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sel-tete b { color: var(--accent); font-size: var(--t-base); }
+.sel-tete .retirer { min-height: 32px; padding: 2px 12px; }
+.sel-texte b { color: var(--text); font-size: inherit; }
