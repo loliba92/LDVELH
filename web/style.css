@@ -2506,3 +2506,11 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (min-width: 701px) {
   .carte-communaute { grid-column: 1 / -1; }
 }
+.carte-communaute .hc-liste li { border-bottom: 0; align-content: start; }
+@media (min-width: 901px) {
+  .rang > .carte-ajouts { order: 1; }
+  .rang > .carte-coll { order: 2; }
+  .rang > .carte-communaute { order: 3; }
+  .rang:not(:has(> .carte-ajouts:not([hidden]))) > .carte-coll { grid-column: 1 / -1; }
+  .carte-ajouts .ap-det { margin-top: auto; padding-top: 12px; }
+}
