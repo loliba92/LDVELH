@@ -1952,7 +1952,7 @@
     window.Relais.appeler('pepite_retirer').then((r) => { if (r && r.ok) { PJ = null; majBadgePepites(); afficherCollection(); } });
   });
 
-  // Budget et gain estimés d'après les annonces en ligne (niveaux 2 et 3) : prix demandés, annonces « plus vues » écartées
+  // Budget et vente estimés d'après les annonces en ligne (niveaux 2 et 3) : prix demandés, annonces « plus vues » écartées
   const FRAIS_PORT_VENTE = 4;                                  // frais de port à retirer d'un prix livré pour estimer ce que touche le vendeur
   const annoncesEnLigne = (b, etat) => {
     const par = ANN && ANN.annonces && b.isbn13 ? ANN.annonces[b.isbn13] : null;
@@ -2008,11 +2008,11 @@
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
       ${(() => {
         if (!voitAnnonces()) return '';
-        if (!ANN) return '<p class="sous budget">Gain estimé : chargement…</p>';
+        if (!ANN) return '<p class="sous budget">Vente estimée : chargement…</p>';
         let b0 = 0, h0 = 0, n0 = 0;
         lignes.forEach(({ b, c }) => { const f = fourchette(annoncesEnLigne(b, c.etat), FRAIS_PORT_VENTE); if (f) { b0 += f.bas * c.qte; h0 += f.haut * c.qte; n0 += 1; } });
         const sans = lignes.length - n0;
-        return `<p class="budget"><b>Gain estimé : ${n0 ? `de ${eurosArr(b0)} à ${eurosArr(h0)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+        return `<p class="budget"><b>Vente estimée : ${n0 ? `de ${eurosArr(b0)} à ${eurosArr(h0)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
         <p class="sous">D'après les annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). La facilité dépend du nombre d'annonces concurrentes. Prix demandés, pas des prix payés.</p>`;
       })()}
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
