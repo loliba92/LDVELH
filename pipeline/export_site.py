@@ -85,6 +85,7 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
 
 JOURS_VINTED = 14          # même règle que Leboncoin : en ligne tant que le bot ne la signale pas vendue
 JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n'est pas signalée vendue : le bot ne revoit que les 50 plus récentes, une annonce plus ancienne n'y reparaît pas. Écartée après 14 jours sans être revue
+JOURS_INCERTAINES = 14      # annonce « à vérifier » : écartée après 14 jours sans être revue, comme Leboncoin et Vinted
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
 
@@ -226,6 +227,27 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
     for (isbn, lien), (etat, prix, titre, par, jour, supp) in vues.items():
         if jour >= limite:
             sortie.setdefault(isbn, {}).setdefault(etat, []).append([prix, titre, lien, par, jour, supp])
+    return sortie
+
+
+def annonces_incertaines(fichiers, deja, jours=JOURS_INCERTAINES):
+    """Annonces d'édition incertaine (titre seul, plusieurs éditions possibles) : {isbn13: [[prix, titre, lien, origine, jour, nb d'éditions possibles]]}.
+    Une annonce est rattachée à chacune de ses éditions possibles. Celles déjà retenues avec certitude ou vendues (`deja` : liens) sont écartées.
+    Jamais dans la cote ni dans le Butin : la fiche les montre à part, « à vérifier »."""
+    brut = annonces_cumulees(fichiers, jours=jours)
+    possibles = {}
+    for isbn, par_etat in brut.items():
+        for liste in par_etat.values():
+            for ligne in liste:
+                possibles.setdefault(ligne[2], set()).add(isbn)
+    sortie = {}
+    for isbn, par_etat in brut.items():
+        for liste in par_etat.values():
+            for prix, titre, lien, origine, jour, _ in liste:
+                if lien not in deja:
+                    sortie.setdefault(isbn, []).append([prix, titre, lien, origine, jour, len(possibles[lien])])
+    for liste in sortie.values():
+        liste.sort()
     return sortie
 
 
@@ -514,6 +536,11 @@ def main():
             liste = [a for a in liste if a[2] not in liens_vendus_vinted]          # le prix est déjà livré : la colonne fdp du relevé est ajoutée par annonces_cumulees
             if liste:
                 annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+    liens_certains = liens_vendus | liens_vendus_vinted | {a[2] for par in annonces.values() for liste in par.values() for a in liste}
+    incertaines = {}          # annonces « à vérifier » : à part, elles n'entrent ni dans la cote, ni dans le Butin, ni dans les totaux
+    for source in importer_leboncoin.SOURCES:
+        for isbn, liste in annonces_incertaines(sorted(dossier_occasion.glob(f"incertaines-{source}-20*.csv")), liens_certains).items():
+            incertaines.setdefault(isbn, []).extend(liste)
     importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
@@ -543,8 +570,8 @@ def main():
             captures_avant = None
         captures = mettre_a_jour_captures(captures_avant, annonces, premieres, datetime.now(timezone.utc).date().isoformat())
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "premieres": premieres,
-                                          "captures": captures},
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines,
+                                          "premieres": premieres, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
         if fichiers_ann:

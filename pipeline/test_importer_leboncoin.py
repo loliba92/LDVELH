@@ -175,5 +175,41 @@ class TestImporter(unittest.TestCase):
             self.assertTrue(set(lot["isbns"]) <= set(lot["poids"]) and all(float(v) > 0 for v in lot["poids"].values()))
 
 
+
+class TestAVerifier(unittest.TestCase):
+    """Colonne verif : annonce d'édition incertaine. Fichier à part, jamais dans la cote."""
+    ENTETE_VERIF = "isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date,verif\n"
+    LV = "https://www.vinted.fr/items/1-x"
+
+    def corps(self, *lignes):
+        return "```csv\n" + self.ENTETE_VERIF + "".join(lignes) + "```\n"
+
+    def test_ligne_a_verifier_va_dans_son_fichier_et_pas_dans_la_cote(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(self.corps(f'{ISBN_A},bon,10.00,4.20,"Titre A",{self.LV},actif,1,2026-10-24,1\n',
+                                        f'{ISBN_B},bon,10.00,4.20,"Titre A",{self.LV},actif,1,2026-10-24,1\n',
+                                        f'{ISBN_A},bon,12.00,4.60,"Titre C",https://www.vinted.fr/items/2-y,actif,1,2026-10-24,\n'), JOUR, d, CONNUES)
+            self.assertEqual((b["acceptees"], b["a_verifier"], b["refusees"]), (3, 2, 0))
+            self.assertEqual(sorted((r["isbn13"], r["lien"]) for r in lire(d, "incertaines-vinted-2026-10-24.csv")), [(ISBN_A, self.LV), (ISBN_B, self.LV)])
+            self.assertEqual([r["lien"] for r in lire(d, "annonces-vinted-2026-10-24.csv")], ["https://www.vinted.fr/items/2-y"])
+            self.assertEqual(lire(d, "vinted-2026-10-24.csv")[0]["nb_annonces"], "1")          # la médiane de la cote ne voit que l'annonce sûre
+            self.assertIn("dont 2 à vérifier", imp.compte_rendu(b))
+
+    def test_rejouer_ne_double_rien_et_une_vendue_a_verifier_est_refusee(self):
+        with tempfile.TemporaryDirectory() as d:
+            relevé = self.corps(f'{ISBN_A},bon,10.00,4.20,"Titre A",{self.LV},actif,1,2026-10-24,1\n')
+            imp.importer(relevé, JOUR, d, CONNUES)
+            imp.importer(relevé, JOUR, d, CONNUES)
+            self.assertEqual(len(lire(d, "incertaines-vinted-2026-10-24.csv")), 1)
+            b = imp.importer(self.corps(f'{ISBN_A},bon,10.00,4.20,"Titre A",{self.LV},vendu,1,2026-10-24,1\n'), JOUR, d, CONNUES)
+            self.assertEqual(b["raisons"], {"annonce à vérifier déjà vendue": 1})
+
+    def test_fenetre_d_une_semaine(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(self.corps(f'{ISBN_A},bon,10.00,4.20,"Titre A",{self.LV},actif,1,2026-10-17,\n',
+                                        f'{ISBN_A},bon,10.00,4.20,"Titre A",https://www.vinted.fr/items/3-z,actif,1,2026-10-15,\n'), JOUR, d, CONNUES)
+            self.assertEqual((b["acceptees"], b["raisons"]), (1, {"date hors fenêtre": 1}))
+
+
 if __name__ == "__main__":
     unittest.main()

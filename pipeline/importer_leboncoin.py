@@ -3,8 +3,9 @@
 Le bot (hors de ce dépôt, sur l'ordinateur du propriétaire) ouvre chaque soir une issue intitulée « Relevé Leboncoin AAAA-MM-JJ » dont le texte contient
 un bloc ```csv``` : une ligne par annonce reconnue avec certitude (édition unique, état indiqué, pas de lot).
 
-    isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date
+    isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date,verif
 
+verif (facultatif) : « 1 » pour une annonce dont l'édition n'est pas sûre (titre seul, plusieurs éditions possibles) ; une ligne par édition possible, même lien.
 fdp (frais de port et de plateforme, facultatif) s'ajoute au prix affiché dans les annonces ; la médiane de la cote reste calculée sur le prix nu.
 Sans cette colonne : 0 pour Leboncoin (retrait possible), protection acheteurs + port pour Vinted (tout se commande).
 
@@ -12,7 +13,8 @@ Ce script contrôle chaque ligne, puis écrit, dans data/raw/occasion/ :
   - annonces-leboncoin-AAAA-MM-JJ.csv  : annonces actives avec titre et lien (même format que annonces-*.csv d'eBay) -> onglet Butin ;
   - vendus-leboncoin-AAAA-MM-JJ.csv    : annonces vendues, gardées pour contrôle (jamais dans le Butin) ;
   - leboncoin-AAAA-MM-JJ.csv           : agrégat des actives (nb, min, médiane, max par livre et état) -> cote, comme eBay ;
-  - leboncoin-vendus-AAAA-MM-JJ.csv    : agrégat des vendues -> cote, comme « vente probable ».
+  - leboncoin-vendus-AAAA-MM-JJ.csv    : agrégat des vendues -> cote, comme « vente probable » ;
+  - incertaines-leboncoin-AAAA-MM-JJ.csv : annonces « à vérifier » (verif = 1), montrées dans la fiche, jamais dans la cote ni dans le Butin.
 Rien n'est lu comme une instruction : seules des valeurs contrôlées sont écrites. Rejouer le même relevé donne le même résultat.
 
 Usage : CORPS="$texte" python pipeline/importer_leboncoin.py [--aujourdhui AAAA-MM-JJ]
@@ -39,7 +41,7 @@ STATUTS = ("actif", "vendu")
 MAX_LIGNES = 300
 PRIX_MIN, PRIX_MAX = 0.5, 3000.0
 FDP_MAX = 30.0                                # frais de port et frais de la plateforme : au-delà, la ligne est refusée
-FENETRE_AVANT, FENETRE_APRES = 3, 1          # jours : une ligne trop ancienne ou datée du futur est refusée
+FENETRE_AVANT, FENETRE_APRES = 8, 1          # jours : une ligne trop ancienne ou datée du futur est refusée (le bot envoie les annonces vues depuis moins de 7 jours)
 LIEN = re.compile(r"^https://www\.leboncoin\.fr/[A-Za-z0-9_\-/.]+$")
 LIEN_VINTED = re.compile(r"^https://www\.vinted\.fr/items/\d+(?:-[A-Za-z0-9_\-]*)?$")
 SOURCES = ("leboncoin", "vinted")               # le bot envoie les deux dans le même relevé ; chaque source a ses propres fichiers
@@ -55,8 +57,8 @@ def source_du_lien(lien):
 
 
 def nom_fichier(genre, source, jour):
-    """annonces-/vendus-<source>-JOUR.csv (annonces) ; <source>-JOUR.csv et <source>-vendus-JOUR.csv (agrégats pour la cote)."""
-    return {"annonces": f"annonces-{source}-{jour}.csv", "vendus": f"vendus-{source}-{jour}.csv",
+    """annonces-/vendus-/incertaines-<source>-JOUR.csv (annonces) ; <source>-JOUR.csv et <source>-vendus-JOUR.csv (agrégats pour la cote)."""
+    return {"annonces": f"annonces-{source}-{jour}.csv", "vendus": f"vendus-{source}-{jour}.csv", "incertaines": f"incertaines-{source}-{jour}.csv",
             "agregat": f"{source}-{jour}.csv", "agregat_vendus": f"{source}-vendus-{jour}.csv"}[genre]
 COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "fdp"]       # fdp : frais ajoutés au prix (Vinted : protection acheteurs et port)
 COLONNES_AGREGAT = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
@@ -87,6 +89,9 @@ def valider(r, aujourdhui, connues):
     statut = (r.get("statut") or "actif").strip()
     if statut not in STATUTS:
         return None, f"statut inconnu ({statut})"
+    verif = (r.get("verif") or "").strip() == "1"
+    if verif and statut != "actif":
+        return None, "annonce à vérifier déjà vendue"
     try:
         prix = round(float(str(r.get("prix", "")).replace(",", ".")), 2)
     except ValueError:
@@ -123,7 +128,7 @@ def valider(r, aujourdhui, connues):
     if fdp is None or (source == "leboncoin" and fdp == 0):       # relevé d'un bot plus ancien, ou Leboncoin à 0 : même prix livré que Vinted et eBay (protection 0,70 € + 5 % et port 3 €)
         fdp = round(prix_livre_vinted(prix) - prix, 2)
     return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "fdp": f"{fdp:.2f}", "titre": titre, "lien": lien, "age_jours": age,
-            "trouvee_par": source, "statut": statut, "date": jour.isoformat()}, None
+            "trouvee_par": source, "statut": statut, "date": jour.isoformat(), "verif": verif}, None
 
 
 def _lire(chemin):
@@ -131,6 +136,14 @@ def _lire(chemin):
         return {}
     with open(chemin, newline="", encoding="utf-8") as f:
         return {r["lien"]: r for r in csv.DictReader(f)}
+
+
+def _lire_incertaines(chemin):
+    """Annonces « à vérifier » : une ligne par annonce et par édition possible, donc clé (lien, isbn13)."""
+    if not chemin.exists():
+        return {}
+    with open(chemin, newline="", encoding="utf-8") as f:
+        return {(r["lien"], r["isbn13"]): r for r in csv.DictReader(f)}
 
 
 def _ecrire(chemin, colonnes, lignes):
@@ -217,20 +230,33 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
         with open(editions.BASE, newline="", encoding="utf-8") as f:
             connues = {r["isbn13"] for r in csv.DictReader(f)}
     lignes = list(csv.DictReader(io.StringIO(extraire_csv(corps))))
-    bilan = {"acceptees": 0, "refusees": 0, "jours": [], "raisons": {}}
+    bilan = {"acceptees": 0, "refusees": 0, "a_verifier": 0, "jours": [], "raisons": {}}
     if len(lignes) > MAX_LIGNES:
         bilan["refusees"] = len(lignes)
         bilan["raisons"]["trop de lignes"] = len(lignes)
         return bilan
-    par_jour = {}
+    par_jour, a_verifier = {}, {}
     for r in lignes:
         ok, raison = valider(r, aujourdhui, connues)
         if ok is None:
             bilan["refusees"] += 1
             bilan["raisons"][raison] = bilan["raisons"].get(raison, 0) + 1
+        elif ok["verif"]:
+            bilan["acceptees"] += 1
+            bilan["a_verifier"] += 1
+            a_verifier.setdefault((ok["trouvee_par"], ok["date"]), []).append(ok)
         else:
             bilan["acceptees"] += 1
             par_jour.setdefault((ok["trouvee_par"], ok["date"]), []).append(ok)
+    for (source, jour), nouvelles in sorted(a_verifier.items()):          # hors cote : seulement un fichier d'annonces, lu par la fiche
+        fichier = dossier / nom_fichier("incertaines", source, jour)
+        gardees = _lire_incertaines(fichier)
+        for r in nouvelles:
+            gardees[(r["lien"], r["isbn13"])] = r
+        dossier.mkdir(parents=True, exist_ok=True)
+        _ecrire(fichier, COLONNES_ANNONCES, list(gardees.values()))
+        if jour not in bilan["jours"]:
+            bilan["jours"].append(jour)
     for (source, jour), nouvelles in sorted(par_jour.items()):
         actives = _lire(dossier / nom_fichier("annonces", source, jour))
         vendues = _lire(dossier / nom_fichier("vendus", source, jour))
@@ -254,7 +280,7 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
 def compte_rendu(b):
     if not b["acceptees"] and not b["refusees"]:
         return "Aucune ligne reconnue dans ce relevé."
-    texte = f"**{b['acceptees']}** annonce(s) importée(s), **{b['refusees']}** refusée(s)."
+    texte = f"**{b['acceptees']}** annonce(s) importée(s)" + (f" (dont {b['a_verifier']} à vérifier)" if b.get("a_verifier") else "") + f", **{b['refusees']}** refusée(s)."
     if b["raisons"]:
         texte += " Raisons : " + ", ".join(f"{k} ({v})" for k, v in sorted(b["raisons"].items(), key=lambda kv: -kv[1])) + "."
     if b["jours"]:

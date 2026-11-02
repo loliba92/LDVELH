@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis
+from export_site import aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis
 
 
 def e(prix):
@@ -62,6 +62,33 @@ class TestAligner(unittest.TestCase):
         p = {"bon": e(15), "tres_bon": e(12)}
         aligner(p, 1.1)
         self.assertEqual(p["tres_bon"]["prix"], 16.5)
+
+
+class TestAnnoncesIncertaines(unittest.TestCase):
+    def fichiers(self, **jours):
+        d = Path(tempfile.mkdtemp())
+        for jour, lignes in jours.items():
+            f = d / f"incertaines-vinted-{jour}.csv"
+            f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp\n" + "".join(f"{l}\n" for l in lignes), encoding="utf-8")
+        return sorted(d.glob("incertaines-*.csv"))
+
+    def test_rattachee_a_chaque_edition_possible_avec_leur_nombre(self):
+        f = self.fichiers(**{"2026-10-28": ["111,bon,10.00,Livre A,http://a,1,vinted,4.00", "222,bon,10.00,Livre A,http://a,1,vinted,4.00", "111,bon,8.00,Livre B,http://b,1,vinted,3.50"]})
+        r = annonces_incertaines(f, set())
+        self.assertEqual(r["111"], [[11.5, "Livre B", "http://b", "vinted", "2026-10-28", 1], [14.0, "Livre A", "http://a", "vinted", "2026-10-28", 2]])
+        self.assertEqual(r["222"], [[14.0, "Livre A", "http://a", "vinted", "2026-10-28", 2]])
+
+    def test_une_annonce_deja_retenue_avec_certitude_ou_vendue_est_ecartee(self):
+        f = self.fichiers(**{"2026-10-28": ["111,bon,10.00,Livre A,http://a,1,vinted,4.00", "111,bon,8.00,Livre B,http://b,1,vinted,3.50"]})
+        self.assertEqual([l[2] for l in annonces_incertaines(f, {"http://a"})["111"]], ["http://b"])
+        self.assertEqual(annonces_incertaines(f, {"http://a", "http://b"}), {})
+
+    def test_la_version_la_plus_recente_l_emporte_et_les_vieilles_sont_oubliees(self):
+        f = self.fichiers(**{"2026-10-01": ["111,bon,10.00,Vieille,http://v,1,vinted,4.00", "111,bon,9.00,Ancien prix,http://a,1,vinted,4.00"],
+                             "2026-10-28": ["111,bon,7.00,Nouveau prix,http://a,1,vinted,4.00"]})
+        r = annonces_incertaines(f, set())["111"]
+        self.assertEqual([(l[1], l[0]) for l in r], [("Nouveau prix", 11.0)])
+        self.assertEqual(annonces_incertaines([], set()), {})
 
 
 class TestAnnoncesCumulees(unittest.TestCase):
