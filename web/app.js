@@ -758,9 +758,10 @@
         <p class="sous">Recherches sur des sites extérieurs, dans un nouvel onglet. Le guide n'y est affilié à aucun titre.</p>`;
   }
 
-  /* ---------- Annonces retenues (niveau 3) ---------- */
-  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé au niveau 3.
+  /* ---------- Annonces retenues (niveaux 2 et 3) ---------- */
+  // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé aux sorciers et au Zagor.
   const estNiveau3Brut = () => !!window.Compte && window.Compte.role() === 'superadmin';
+  const voitAnnonces = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());
   let ANN = null, annChargees = null;
   const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
     .then((a) => { ANN = a && a.annonces ? a : null; if (!ANN) annChargees = null; return ANN; }));          // sans réponse : on réessaiera au prochain appel
@@ -1012,7 +1013,7 @@
         </div>
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${estNiveau2() ? blocOffre() : ''}
-        ${estNiveau3Brut() ? blocAnnonces(b) : ''}
+        ${voitAnnonces() ? blocAnnonces(b) : ''}
         <h3>Détails du livre</h3>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
@@ -1033,7 +1034,7 @@
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
     brancherFicheCollection(b);
     brancherCorriger();
-    if (estNiveau3Brut()) remplirAnnonces(b);
+    if (voitAnnonces()) remplirAnnonces(b);
     if (estNiveau2()) remplirOffre(b);
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
@@ -1331,7 +1332,7 @@
     afficher();
     if (etaitSansCompte !== null && etaitSansCompte !== sans && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSansCompte = sans;
-    const super_ = estNiveau3Brut();           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
+    const super_ = (window.Compte && window.Compte.role()) || '';           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
     if (etaitSuper !== null && etaitSuper !== super_ && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSuper = super_;
     if (window.Compte) window.Compte.accueillir();
