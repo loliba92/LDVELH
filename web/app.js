@@ -652,7 +652,7 @@
     if (!cotes) lignes.push('Pas de cote pour cette sélection');
     else {
       lignes.push(`${SVG_ACHAT}<b>Acheter</b> : offrez ${eurosArr(achat)} <span class="nowrap">(+ ${eurosArr(cotes * FRAIS_PORT)} de port)</span>${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
-      lignes.push(`<span class="sel-sous">Vendeurs : environ ${eurosArr(vente)} ${nA ? pastille(ptsA / nA) : ''}</span>`);
+      if (nA) lignes.push(`<span class="sel-sous">${pastille(ptsA / nA)}</span>`);
       lignes.push(`${SVG_VENTE}<b>Revendre</b> : affichez ${eurosArr(vente)}`);
       lignes.push(`<span class="sel-sous">Descendez jusqu'à ${eurosArr(achat)} ${nV ? pastille(ptsV / nV) : ''}</span>`);
     }
