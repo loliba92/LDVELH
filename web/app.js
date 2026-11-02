@@ -2009,7 +2009,14 @@
     return p.length ? { bas: Math.min(...p), haut: Math.max(...p) } : null;
   };
   const eurosArr = (n) => fmtE(Math.round(n));
-  const plage = (f, q) => (f.bas === f.haut ? eurosArr(f.bas * q) : `entre ${eurosArr(f.bas * q)} et ${eurosArr(f.haut * q)}`);
+  // Prix repères d'une liste d'annonces : médiane (prix conseillé) et premier quart (prix rapide ou bon coup)
+  const quantile = (t, q) => { const i = (t.length - 1) * q, k = Math.floor(i); return t[k] + (t[Math.min(k + 1, t.length - 1)] - t[k]) * (i - k); };
+  const reperes = (liste, retrait) => {
+    const t = liste.map((a) => Math.max(0, a[0] - retrait)).sort((x, y) => x - y);
+    if (!t.length) return null;
+    const med = quantile(t, 0.5), bas = Math.min(med, quantile(t, 0.25));
+    return { med, bas: Math.round(bas) < Math.round(med) ? bas : null, n: t.length };
+  };
   // Ancienneté d'une annonce : jours depuis sa première vue par le bot (null si inconnue)
   const joursEnLigne = (a) => {
     const t = ANN && ANN.premieres ? ANN.premieres[a[2]] : null;
@@ -2038,19 +2045,19 @@
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
     const voit = voitAnnonces() && !!ANN;
-    const fl = (b) => (voit ? fourchette(annoncesEnLigne(b), 0) : null);
-    let bas = 0, haut = 0, chiffres = 0;
-    if (voit) lignes.forEach((b) => { const f = fl(b); if (f) { bas += f.bas; haut += f.haut; chiffres += 1; } });
+    const fl = (b) => (voit ? reperes(annoncesEnLigne(b), 0) : null);
+    let med = 0, bon = 0, chiffres = 0;
+    if (voit) lignes.forEach((b) => { const r = fl(b); if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; chiffres += 1; } });
     const sans = lignes.length - chiffres;
     const budget = !voitAnnonces() ? '' : !ANN ? '<p class="sous budget">Budget estimé : chargement…</p>'
-      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `de ${eurosArr(bas)} à ${eurosArr(haut)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-      <p class="sous">De l'annonce la moins chère à la plus chère en ligne pour chaque livre, frais de port compris. Prix demandés, sans garantie de disponibilité.</p>`;
+      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `environ ${eurosArr(med)}` : 'pas de repère'}</b>${chiffres && bon < med ? `<span class="sous"> · en visant les bons coups : ${eurosArr(bon)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      <p class="sous">Pour chaque livre : le prix médian des annonces en ligne, frais de port compris. Un « bon coup » est un prix plus bas que trois annonces sur quatre. Prix demandés, sans garantie de disponibilité.</p>`;
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const f = fl(b); return voit ? `<p class="sous fourchette-ligne">${f ? `Achat ${f.bas === f.haut ? ': ' : ''}${plage(f, 1)} · ${(() => { const l = annoncesEnLigne(b), p = l.map((a) => a[0]).sort((x, y) => x - y), m = p.length % 2 ? p[(p.length - 1) / 2] : (p[p.length / 2 - 1] + p[p.length / 2]) / 2; return `${p.length > 1 ? `médiane ${fmtE(Math.round(m))} · ` : ''}${p.length} annonce${p.length > 1 ? 's' : ''}`; })()}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
+        ${(() => { const r = fl(b); return voit ? `<p class="sous fourchette-ligne">${r ? `Prix à prévoir : ${eurosArr(r.med)}${r.bas != null ? ` · bon coup : ${eurosArr(r.bas)}` : ''} · ${r.n} annonce${r.n > 1 ? 's' : ''}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
@@ -2063,18 +2070,18 @@
       ${(() => {
         if (!voitAnnonces()) return '';
         if (!ANN) return '<p class="sous budget">Vente estimée : chargement…</p>';
-        let b0 = 0, h0 = 0, n0 = 0;
-        lignes.forEach(({ b, c }) => { const f = fourchette(annoncesEnLigne(b, c.etat), FRAIS_PORT_VENTE); if (f) { b0 += f.bas * c.qte; h0 += f.haut * c.qte; n0 += 1; } });
+        let m0 = 0, r0 = 0, n0 = 0;
+        lignes.forEach(({ b, c }) => { const r = reperes(annoncesEnLigne(b, c.etat), FRAIS_PORT_VENTE); if (r) { m0 += r.med * c.qte; r0 += (r.bas != null ? r.bas : r.med) * c.qte; n0 += 1; } });
         const sans = lignes.length - n0;
-        return `<p class="budget"><b>Vente estimée : ${n0 ? `de ${eurosArr(b0)} à ${eurosArr(h0)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-        <p class="sous">D'après les annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). La facilité dépend du nombre d'annonces concurrentes et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide). Prix demandés, pas des prix payés.</p>`;
+        return `<p class="budget"><b>Vente estimée : ${n0 ? `environ ${eurosArr(m0)}` : 'pas de repère'}</b>${n0 && r0 < m0 ? `<span class="sous"> · en vendant vite : ${eurosArr(r0)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+        <p class="sous">Pour chaque livre : le prix médian des annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). « Vente rapide » est un prix plus bas que trois annonces sur quatre. La facilité dépend du nombre d'annonces concurrentes et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide). Prix demandés, pas des prix payés.</p>`;
       })()}
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span>${(() => {
           if (!voitAnnonces() || !ANN) return '';
-          const l = annoncesEnLigne(b, c.etat), f = fourchette(l, FRAIS_PORT_VENTE), jl = medianeJours(l), fa = facilite(l.length, jl);
-          return `<span class="sous fourchette-ligne">${f ? `Vente ${f.bas === f.haut ? ': ' : ''}${plage(f, c.qte)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
+          const l = annoncesEnLigne(b, c.etat), r = reperes(l, FRAIS_PORT_VENTE), jl = medianeJours(l), fa = facilite(l.length, jl);
+          return `<span class="sous fourchette-ligne">${r ? `Prix conseillé : ${eurosArr(r.med * c.qte)}${r.bas != null ? ` · vente rapide : ${eurosArr(r.bas * c.qte)}` : ''} · ${l.length} annonce${l.length > 1 ? 's' : ''}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
         })()}</div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
