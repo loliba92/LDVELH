@@ -2096,10 +2096,10 @@
       const v = voit ? prixAffiche(b) : null; if (v) { sCote += v.p; sAff += v.prix; }
       const q = voit ? pointsAchat(b) : null; if (q != null) { pts += q; nPts += 1; }
     });
-    const resume = voit && sCote ? `<p class="budget-resume">Négociation : environ ${Math.max(0, Math.round((sAff / sCote - 1) * 100))} % ${nPts ? pastille(pts / nPts) : ''}</p>` : '';
+    const resume = voit && sCote ? `<p class="budget-resume">Les vendeurs demandent environ ${Math.max(0, Math.round((sAff / sCote - 1) * 100))} % de plus : négociez ${nPts ? pastille(pts / nPts) : ''}</p>` : '';
     const sans = lignes.length - cotes;
     const budget = !voit ? ''
-      : `<p class="budget"><b>Budget estimé pour tout trouver : ${cotes ? `environ ${eurosArr(somme)}` : 'pas de cote'}</b>${cotes ? `<span class="sous"> + port (environ ${eurosArr(cotes * FRAIS_PORT)})</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      : `<p class="budget"><b>À offrir : ${cotes ? eurosArr(somme) : 'pas de cote'}</b>${cotes ? `<span class="sous"> (budget estimé pour tout trouver) + frais de port estimés à ${eurosArr(cotes * FRAIS_PORT)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
       ${resume}
       <p class="sous">Pour chaque livre : l'offre à faire, soit la cote du guide (médiane des états) arrondie à l'euro inférieur, port non compris. Le port s'ajoute à l'achat (environ ${FRAIS_PORT} € par livre). Le marché indique les annonces en ligne : leur nombre et la moins chère.</p>`;
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
@@ -2132,7 +2132,8 @@
           const v = prixAffiche(b, c.etat); if (v) { sCote += v.p * c.qte; sAff += v.prix * c.qte; }
           const q = pointsVente(b, c.etat); if (q != null) { pts += q; nPts += 1; }
         });
-        const resume = sCote ? `<p class="budget-resume">À afficher : ${eurosArr(sAff)} · négociation : environ ${Math.max(0, Math.round((sAff / sCote - 1) * 100))} % ${nPts ? pastille(pts / nPts) : ''}</p>` : '';
+        const exemplaires = lignes.reduce((t, { c }) => t + c.qte, 0);
+        const resume = sCote ? `<p class="budget-resume"><b>À afficher : ${eurosArr(sAff)}</b> (incluant une marge de négo de ${Math.max(0, Math.round((sAff / sCote - 1) * 100))} %) + frais de port estimés à ${eurosArr(exemplaires * FRAIS_PORT)} ${nPts ? pastille(pts / nPts) : ''}</p>` : '';
         return `<p class="budget"><b>Vente estimée : ${tot.k ? `environ ${eurosArr(tot.s)}` : 'pas de cote'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
         ${resume}
         <p class="sous">La cote est ce que vous devriez obtenir. « Affichez » ajoute une marge de négociation (« négo ») qui dépend de la rareté et de la liquidité du marché. Le marché indique les annonces concurrentes au même état. La facilité dépend de leur nombre et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide).</p>`;
