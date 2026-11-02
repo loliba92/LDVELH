@@ -2,10 +2,25 @@
  "date": "2026-11-02",
  "precedent": "2026-11-01",
  "nb_comparees": 1503,
- "nb_modifiees": 685,
+ "nb_modifiees": 687,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782070575176",
+   "isbn13": "9782070575176",
+   "titre": "Les Druides de Cener",
+   "serie": "Loup Solitaire",
+   "numero": "608",
+   "version": "V3",
+   "etat": "tres_bon",
+   "avant": 7.7,
+   "apres": 9.36,
+   "pct": 0.216,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
   {
    "id": "9782070333622",
    "isbn13": "9782070333622",
@@ -63,7 +78,7 @@
    "apres": 10.82,
    "pct": 0.128,
    "nature": "annonces",
-   "nb": 4,
+   "nb": 5,
    "recalibre": false
   }
  ],
@@ -174,12 +189,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
-  "n_paires": 65,
-  "gain": 0.008,
+  "n_paires": 66,
+  "gain": 0.012,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.935
+  "rapport_global": 0.938
  }
 }
