@@ -1839,6 +1839,20 @@
     if (!OFFRE || !OFFRE.offre) return null;
     return Object.values(OFFRE.offre).reduce((t, o) => t + (o.ebay || 0) + (o.lbc || 0) + (o.vin || 0) + (o.lib || 0), 0);
   }
+  // Annonces ajoutées sur les 24 heures avant la dernière mise à jour du site, et sur les 24 heures d'avant : [récentes, précédentes] ; null tant que le relevé n'a pas les heures
+  function ajoutsSur24h() {
+    const c = OFFRE && OFFRE.captures;
+    if (!c || !c.heures || !c.maj) return null;
+    const fin = Math.floor(Date.parse(c.maj) / 3600000) * 3600000, H = 3600000;
+    if (isNaN(fin)) return null;
+    let recents = 0, avant = 0;
+    Object.entries(c.heures).forEach(([h, n]) => {
+      const t = Date.parse(h + ':00:00Z');
+      if (t > fin - 24 * H && t <= fin) recents += n;
+      else if (t > fin - 48 * H && t <= fin - 24 * H) avant += n;
+    });
+    return [recents, avant];
+  }
   // Zagor : parmi les annonces en ligne, combien sont plus basses que notre estimation (prix du site pour le même état)
   function nbSousEstimation() {
     if (!ANN || !ANN.annonces) return null;
@@ -1868,7 +1882,9 @@
     if (nb != null) d.nb = nb;
     if (na != null) d.na = na;
     if (sous != null) d.sous = sous;
-    if (nb != null || na != null || sous != null) garderCompteurs(d);
+    const aj = ajoutsSur24h();
+    if (aj) d.aj = aj;
+    if (nb != null || na != null || sous != null || aj) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
     // Le détail de toutes les annonces est ouvert aux sorciers et au Zagor
     const carte = (href, titre, valeur, detail, lien = 'Voir le détail →') => {
@@ -1879,6 +1895,7 @@
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butins et Annonces', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
       + carte(niveau2Connu() ? 'butin.html#captures-recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
+      + carte('', 'Annonces ajoutées', n(d.aj ? d.aj[0] : null), d.aj ? `sur 24 h · 24 h avant : ${d.aj[1]}${d.aj[1] ? ` (${d.aj[0] >= d.aj[1] ? '+' : '−'}${Math.round(100 * Math.abs(d.aj[0] - d.aj[1]) / d.aj[1])}\u00a0%)` : ''}` : 'sur 24 h')
       + '</div>';
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);
