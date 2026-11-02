@@ -2172,15 +2172,23 @@
    "le": "2026-11-01",
    "par": "loliba (superadmin)"
   },
+  "9782380240276|bon": {
+   "prix": 29.2,
+   "decision": "corrige",
+   "le": "2026-11-02",
+   "par": "loliba (superadmin)"
+  },
   "9782380240276|convenable": {
    "prix": 20.0,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-11-02",
+   "par": "loliba (superadmin)"
   },
   "9782380240276|tres_bon": {
-   "prix": 59.0,
+   "prix": 38.0,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-11-02",
+   "par": "loliba (superadmin)"
   },
   "9791040805618|bon": {
    "prix": 4.85,
