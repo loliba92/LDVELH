@@ -13,12 +13,12 @@
 
 :root {
   color-scheme: dark;
-  --bg: #000000;
-  --surface: #0e0e0e;
-  --surface-2: #181818;
-  --text: #efe4cf;
-  --muted: #b4aea2;
-  --line: #2a2a2a;
+  --bg: #0c0a08;
+  --surface: #15120e;
+  --surface-2: #1d1914;
+  --text: #f2e9d8;
+  --muted: #b8ad99;
+  --line: #2c261e;
   --line-strong: #6f6a60;
   --accent: #cf9a2e;
   --accent-soft: #2a2412;
@@ -28,7 +28,7 @@
   --brass-fill: #b08a37;
   --bar: #b08a37;
   --forest: #2f4a3a;
-  --walnut: #000000;
+  --walnut: #0c0a08;
   --walnut-text: #efe4cf;
   --walnut-muted: #bdb7aa;
   --gold: #d9b45f;
@@ -37,6 +37,7 @@
   --f-display: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --f-ui: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --r: 6px;
+  --r-carte: 14px;
   --t: 250ms cubic-bezier(0, 0, .2, 1);
 }
 
@@ -2504,3 +2505,11 @@ button.maj-ligne:hover { background: var(--surface-2); }
   .menu:has(.menu-butin:not([hidden])) a.menu-cafe { padding: 7px 10px; margin-left: 2px; }
   .menu:has(.menu-butin:not([hidden])) a.menu-cafe span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* Cartes calmes : un filet fin, pas de barre dorée ; l'or reste pour les actions, les prix et l'état actif */
+.carte, .carte-coll, .hero-coll, .compteur-acc, .reprise, .coll-fiche, .dm-demande { border: 1px solid var(--line); border-radius: var(--r-carte); }
+.selecteur { border-top: 1px solid var(--line); border-radius: var(--r-carte); }
+dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte); }
+.cotes div, .coll-avantages li, .coll-cles li { border-top: 1px solid var(--line); }
+.hero, .banniere { border-bottom: 1px solid var(--line); }
+.carte > header h2, .carte .hc-titre, .hero-coll .hc-titre { margin: 0; color: var(--text); font: 600 1.4rem/1.2 var(--f-display); letter-spacing: 0; text-transform: none; }
