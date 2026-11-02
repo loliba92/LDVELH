@@ -29,8 +29,8 @@
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
 <link rel="stylesheet" href="style.css?v=394">
 <script>
-  // Haut de page : une des cinq illustrations ou le mur de jaquettes (6), au hasard
-  document.documentElement.dataset.accueil = 1 + Math.floor(Math.random() * 6);
+  // Haut de page : une des cinq illustrations, la même toute la journée
+  document.documentElement.dataset.accueil = 1 + Math.floor(Date.now() / 86400000) % 5;
 </script>
 </head>
 <body data-page="accueil">
@@ -61,15 +61,18 @@
 
 <section class="hero" id="haut" aria-label="Présentation du guide">
   <div class="cadre hero-in">
-    <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
-    <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
-    <p class="chapeau" id="hero-chapeau">Retrouvez la cote de chaque édition des livres-jeux.</p>
-    <form class="hero-recherche" id="hero-recherche" role="search">
-      <label class="sr-only" for="h-q">Titre, auteur ou ISBN</label>
-      <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN" autocomplete="off" enterkeyhint="search">
-      <button type="submit" class="bouton">Chercher</button>
-    </form>
-    <p class="hero-compte"><span id="chiffres-hero"></span></p>
+    <div class="hero-texte">
+      <p class="surtitre">Guide de cote · livres dont vous êtes le héros</p>
+      <h1><img class="titre-icone" src="icons/icon-192.png" alt="" width="96" height="96"><span>La Cote du Héros</span></h1>
+      <p class="chapeau" id="hero-chapeau">Retrouvez la cote de chaque édition des livres-jeux.</p>
+      <form class="hero-recherche" id="hero-recherche" role="search">
+        <label class="sr-only" for="h-q">Titre, auteur ou ISBN</label>
+        <input type="search" id="h-q" placeholder="Titre, auteur ou ISBN" autocomplete="off" enterkeyhint="search">
+        <button type="submit" class="bouton">Chercher</button>
+      </form>
+      <p class="hero-compte"><span id="chiffres-hero"></span></p>
+    </div>
+    <div class="hero-visuel" aria-hidden="true"></div>
   </div>
 </section>
 
