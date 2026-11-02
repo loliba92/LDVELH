@@ -2574,3 +2574,4 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .facilite svg { vertical-align: -2px; margin-right: 4px; }
 .sel-sous { color: var(--muted); font-size: var(--t-sm); padding-left: 22px; }
 .sel-texte span { white-space: nowrap; }
+.budget-resume { margin: 2px 0 6px; font-size: var(--t-base); color: var(--text); }
