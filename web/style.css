@@ -2522,3 +2522,7 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
   .livre-carte .etats-carte { opacity: 0; transition: opacity var(--t); }
   .livre-carte:hover .etats-carte, .livre-carte:focus-within .etats-carte, .livre-carte .etats-carte:has([aria-pressed="true"]) { opacity: 1; }
 }
+
+/* Butin et Annonces : tableau de bord sur toute la largeur du cadre ; les paragraphes gardent une mesure de lecture */
+.page-large > * { max-width: none; }
+.page-large p { max-width: 72ch; }
