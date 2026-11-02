@@ -2489,28 +2489,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fiab-bas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 4px; font-size: .85rem; color: var(--muted); }
 .fiab-origine { font: 700 .72rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
 .fiab-meta { overflow-wrap: anywhere; }
-.carte-communaute .hc-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.carte-communaute .hc-liste li { display: grid; gap: 2px; overflow-wrap: anywhere; }
-.carte-communaute .hc-liste a { font-weight: 600; color: var(--text); text-underline-offset: 3px; }
-.carte-communaute .hc-liste span { font-size: .9rem; color: var(--muted); line-height: 1.4; }
-.carte-communaute { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px 22px; padding: 12px 18px; border-left: 3px solid var(--gold); background: linear-gradient(90deg, rgba(201, 162, 39, .08), transparent 60%); }
-.carte-communaute header { display: grid; gap: 4px; }
-.carte-communaute header h2 { margin: 0; font-size: 1rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
-.carte-communaute .hc-liste { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; }
-.carte-communaute .hc-liste li { padding-left: 14px; border-left: 1px solid var(--line); }
-.carte-communaute .hc-liste span { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-@media (max-width: 700px) {
-  .carte-communaute { grid-template-columns: minmax(0, 1fr); padding: 12px 14px; }
-  .carte-communaute .hc-liste { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-}
-@media (min-width: 701px) {
-  .carte-communaute { grid-column: 1 / -1; }
-}
-.carte-communaute .hc-liste li { border-bottom: 0; align-content: start; }
 @media (min-width: 901px) {
-  .rang > .carte-ajouts { order: 1; }
-  .rang > .carte-coll { order: 2; }
-  .rang > .carte-communaute { order: 3; }
   .rang:not(:has(> .carte-ajouts:not([hidden]))) > .carte-coll { grid-column: 1 / -1; }
   .carte-ajouts .ap-det { margin-top: auto; padding-top: 12px; }
 }
