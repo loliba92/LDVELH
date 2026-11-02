@@ -636,16 +636,21 @@
     const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
     const n = livres.length, e = etatDe(S.h);
     const cote = livres.reduce((t, b) => (b.prix[e.k] != null ? { s: t.s + b.prix[e.k], k: t.k + 1 } : t), { s: 0, k: 0 });
-    let med = 0, bon = 0, avec = 0;
+    let med = 0, bon = 0, avec = 0, vmed = 0, vrap = 0, vavec = 0;
     if (ANN) livres.forEach((b) => {
-      const r = reperes(annoncesEnLigne(b), 0);
+      const r = reperes(annoncesEnLigne(b), 0), v = reperes(annoncesEnLigne(b, e.k), FRAIS_PORT_VENTE);
       if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; avec += 1; }
+      if (v) { vmed += v.med; vrap += v.bas != null ? v.bas : v.med; vavec += 1; }
     });
-    const sans = n - avec;
     const lignes = [];
-    lignes.push(!ANN ? 'Annonces : chargement…' : avec ? `Prix à prévoir : ${eurosArr(med)}${bon < med ? ` · bons coups : ${eurosArr(bon)}` : ''}${sans ? ` · ${sans} sans annonce` : ''}` : 'Annonces : aucune pour cette sélection');
-    if (cote.k) lignes.push(`Cote du site (${e.court}) : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
-    z.innerHTML = `<div class="sel-texte"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b>${lignes.map((l) => `<span>${esc(l)}</span>`).join('')}</div><button type="button" class="retirer" data-sel-vider>Vider</button>`;
+    if (!ANN) lignes.push('Annonces : chargement…');
+    else {
+      lignes.push(avec ? `<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bons coups : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : 'Acheter : aucune annonce pour cette sélection');
+      lignes.push(vavec ? `<b>Revendre pour</b> environ ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide : ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
+    }
+    if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
+    z.title = `Achat : annonces en ligne, port compris. Revente : annonces à l'état ${e.court.toLowerCase()}, environ ${FRAIS_PORT_VENTE} € de port retiré par livre. Prix demandés, pas des prix payés.`;
+    z.innerHTML = `<div class="sel-texte"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b>${lignes.map((l) => `<span>${l}</span>`).join('')}</div><button type="button" class="retirer" data-sel-vider>Vider</button>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
   document.addEventListener('click', (ev) => {
