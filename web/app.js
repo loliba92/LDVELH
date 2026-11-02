@@ -2107,7 +2107,13 @@
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { if (!voit) return ''; const p = prixCote(b), l = ANN ? annoncesEnLigne(b) : [], m = moinsCher(l); return `<p class="sous fourchette-ligne">${p != null ? `Offrez ${eurosArr(offre(p))} + port ${eurosArr(FRAIS_PORT)}${(() => { const v = prixAffiche(b); return v ? ` · négo ${Math.round(v.m * 100)} %` : ''; })()}` : 'Pas de cote'}${!ANN ? '' : l.length ? ` · marché : ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'} ${pastille(pointsAchat(b))}</p>`; })()}
+        ${(() => {
+          if (!voit) return '';
+          const p = prixCote(b), l = ANN ? annoncesEnLigne(b) : [], m = moinsCher(l), v = prixAffiche(b);
+          if (p == null) return '<p class="sous fourchette-ligne">Pas de cote</p>';
+          return `<div class="prix-bloc"><p class="prix-ligne"><b>Offrez ${eurosArr(offre(p))}</b> <span class="sous">+ ${eurosArr(FRAIS_PORT)} de port</span> ${pastille(pointsAchat(b))}</p>
+            <p class="sous prix-detail">Négociable : les vendeurs demandent environ ${eurosArr(v.prix)}${!ANN ? '' : l.length ? ` · ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'}</p></div>`;
+        })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
@@ -2136,7 +2142,10 @@
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span>${(() => {
           if (!voitAnnonces() || !ANN) return '';
           const l = annoncesEnLigne(b, c.etat), m = moinsCher(l), jl = medianeJours(l), v = prixAffiche(b, c.etat);
-          return `<span class="sous fourchette-ligne">${v ? `Affichez ${eurosArr(v.prix)} · min. ${eurosArr(offre(v.p))} · négo ${Math.round(v.m * 100)} % · ` : ''}${l.length ? `marché : ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'aucune annonce au même état'} ${pastille(pointsVente(b, c.etat))}</span>`;
+          if (!v) return '';
+          const mini = offre(v.p), baisse = Math.max(0, Math.round((1 - mini / v.prix) * 100));
+          return `<div class="prix-bloc"><p class="prix-ligne"><b>Affichez ${eurosArr(v.prix)}</b> ${pastille(pointsVente(b, c.etat))}</p>
+            <p class="sous prix-detail">Négociable jusqu'à ${eurosArr(mini)} (−${baisse} %) · ${l.length ? `${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'aucune annonce au même état'}</p></div>`;
         })()}</div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;

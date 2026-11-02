@@ -2575,3 +2575,8 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-sous { color: var(--muted); font-size: var(--t-sm); padding-left: 22px; }
 .sel-texte span { white-space: nowrap; }
 .budget-resume { margin: 2px 0 6px; font-size: var(--t-base); color: var(--text); }
+.prix-bloc { flex: 1 1 100%; margin-top: 4px; }
+.prix-ligne { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: var(--t-md); color: var(--text); }
+.prix-ligne b { color: var(--accent); }
+.prix-ligne .facilite { margin-left: 0; }
+.prix-detail { margin: 2px 0 0; font-size: var(--t-sm); }
