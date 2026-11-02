@@ -1199,7 +1199,7 @@
   // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, niveau 3 seul)
   const FAMILLES = [
     ['prix-ebay.yml', 'Relevé des prix', 'Met à jour les cotes à partir des annonces eBay et des prix en librairie. Un jour sur deux, vers 6 h, ou à la demande ; environ 1 h 30.'],
-    ['releve-leboncoin.yml', 'Import Leboncoin', 'Met la cote à jour avec les annonces Leboncoin reçues chaque soir. La date est celle de la dernière réception.'],
+    ['releve-leboncoin.yml', 'Import bot', 'Met la cote à jour avec les annonces reçues du bot (Leboncoin et Vinted). La date est celle de la dernière réception ; orange au-delà de 2 h sans import.'],
     ['ajout-isbn.yml', 'Ajout de livres', 'Ajoute au site les livres envoyés depuis la page « Ajouter des livres ».'],
     ['corriger-fiche.yml', 'Correction de fiches', 'Applique une correction de titre, de série ou de numéro faite depuis une fiche.'],
     ['corriger-prix.yml', 'Correction de cotes', 'Applique une cote corrigée ou confirmée depuis le site (« Confirmer ces prix »).'],
@@ -1357,13 +1357,13 @@
       });
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
-        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou limite d\'appels eBay atteinte (rien n\'est perdu).</p><ul>'
+        + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Orange : dernier import il y a plus de 2 h. Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou limite d\'appels eBay atteinte (rien n\'est perdu).</p><ul>'
         + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
       bloc.hidden = false;
       majLigneImports();
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
-  // Ligne « Import Leboncoin » de l'accueil : dernier import et livres ajoutés sur 24 h (même source que la liste des imports)
+  // Ligne « Import bot » de l'accueil : dernier import et livres ajoutés sur 24 h (même source que la liste des imports)
   async function majLigneImports() {
     const cible = document.querySelector('[data-imports] .maj-quand');
     if (!cible) return;
@@ -1375,6 +1375,8 @@
       const n = lignes.length, p = lignes.filter((a) => infosImport(a).v === 'pepite').length;
       const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
       const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
+      const ligne = document.querySelector('[data-imports]');
+      if (ligne) ligne.classList.toggle('maj-retard', !!dernier && Date.now() - dernier > 2 * 3600 * 1000 && ligne.classList.contains('maj-ok'));          // plus de 2 h sans import : point orange
       cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
     } catch (e) { /* historique indisponible : la ligne garde son libellé d'origine */ }
   }
