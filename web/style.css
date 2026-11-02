@@ -2569,3 +2569,5 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-tete b { color: var(--accent); font-size: var(--t-base); }
 .sel-tete .retirer { min-height: 32px; padding: 2px 12px; }
 .sel-texte b { color: var(--text); font-size: inherit; }
+.maj-retard .maj-point { background: #e8a13a; }
+.maj-retard .maj-quand { color: #f0c27a; }
