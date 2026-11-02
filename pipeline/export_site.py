@@ -144,9 +144,14 @@ def source_de_ligne(origine):
     return origine if origine in ("leboncoin", "vinted", "librairie") else "ebay"
 
 
-def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gardes=90, oubli_jours=14):
-    """Annonces captées par jour et par source, chacune comptée une fois, le jour de sa première apparition."""
+def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gardes=90, oubli_jours=14, maintenant=None):
+    """Annonces captées par jour et par source, chacune comptée une fois, le jour de sa première apparition.
+    `heures` : les mêmes captures par heure (72 dernières heures), pour les ajouts sur 24 h de l'accueil. À la première fois,
+    les annonces déjà connues et encore en ligne remplissent les heures d'après leur première apparition."""
+    maintenant = maintenant or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
     captures = captures or {"jours": {}, "vus": {}}
+    amorce = "heures" not in captures
+    heures = captures.setdefault("heures", {})
     jours, vus = captures.setdefault("jours", {}), captures.setdefault("vus", {})
     vues_ce_passage = set()
     for par_etat in annonces.values():
@@ -157,16 +162,23 @@ def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gard
                 if h in vues_ce_passage:
                     continue
                 vues_ce_passage.add(h)
+                heure = (premieres.get(lien) or maintenant)[:13]
                 if h not in vus:
                     jour = (premieres.get(lien) or aujourdhui)[:10]
                     compte = jours.setdefault(jour, {})
                     source = source_de_ligne(ligne[3])
                     compte[source] = compte.get(source, 0) + 1
+                    if len(heure) == 13:
+                        heures[heure] = heures.get(heure, 0) + 1
+                elif amorce and len(heure) == 13 and premieres.get(lien):
+                    heures[heure] = heures.get(heure, 0) + 1
                 vus[h] = aujourdhui
     limite_vus = (date.fromisoformat(aujourdhui) - timedelta(days=oubli_jours)).isoformat()
     captures["vus"] = {h: d for h, d in vus.items() if d >= limite_vus}
     limite_jours = (date.fromisoformat(aujourdhui) - timedelta(days=jours_gardes)).isoformat()
     captures["jours"] = {d: c for d, c in sorted(jours.items()) if d >= limite_jours}
+    limite_heures = (datetime.strptime(maintenant[:13], "%Y-%m-%dT%H") - timedelta(hours=72)).strftime("%Y-%m-%dT%H")
+    captures["heures"] = {k: v for k, v in sorted(heures.items()) if k >= limite_heures}
     captures.setdefault("depuis", aujourdhui)          # début du comptage
     return captures
 
@@ -563,12 +575,13 @@ def main():
             historiques = json.loads((DB.parent.parent / "manual" / "premieres_historiques.json").read_text(encoding="utf-8"))      # heures retrouvées dans l'historique git
         except (OSError, ValueError):
             historiques = {}
-        premieres = premieres_vues(annonces, anciennes, datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), historiques)
+        maintenant = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+        premieres = premieres_vues(annonces, anciennes, maintenant, historiques)
         try:
             captures_avant = json.loads(chemin_ann.read_text(encoding="utf-8")).get("captures")
         except (OSError, ValueError):
             captures_avant = None
-        captures = mettre_a_jour_captures(captures_avant, annonces, premieres, datetime.now(timezone.utc).date().isoformat())
+        captures = mettre_a_jour_captures(captures_avant, annonces, premieres, maintenant[:10], maintenant=maintenant)
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines,
                                           "premieres": premieres, "captures": captures},
@@ -585,7 +598,7 @@ def main():
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := extraire_butin(annonces, revue)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
-                                                          "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis")},
+                                                          "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

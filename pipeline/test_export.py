@@ -184,6 +184,24 @@ class TestCaptures(unittest.TestCase):
         c = mettre_a_jour_captures(c, self.annonces(("https://a/1", "vinted"), ("https://a/2", "vinted")), prem, "2026-11-01")   # revenue vite : pas recomptée
         self.assertEqual(sum(sum(j.values()) for j in c["jours"].values()), 2)
 
+    def test_les_heures_comptent_les_captures_et_gardent_72_heures(self):
+        from export_site import mettre_a_jour_captures
+        prem = {"https://a/1": "2026-10-29T08:10Z", "https://a/2": "2026-10-29T08:50Z", "https://a/3": "2026-10-29T10:00Z", "https://a/4": "2026-10-29"}
+        ann = self.annonces(("https://a/1", "vinted"), ("https://a/2", "vinted"), ("https://a/3", "leboncoin"), ("https://a/4", "librairie"))
+        c = mettre_a_jour_captures(None, ann, prem, "2026-10-29", maintenant="2026-10-29T11:00Z")
+        self.assertEqual(c["heures"], {"2026-10-29T08": 2, "2026-10-29T10": 1})          # une date sans heure ne compte pas dans les heures
+        c = mettre_a_jour_captures(c, ann, prem, "2026-10-29", maintenant="2026-10-29T12:00Z")          # déjà vues : rien de plus
+        self.assertEqual(c["heures"], {"2026-10-29T08": 2, "2026-10-29T10": 1})
+        c = mettre_a_jour_captures(c, ann, prem, "2026-11-01", maintenant="2026-11-01T09:30Z")          # 72 h plus tard : l'heure de 8 h est oubliée, celle de 10 h reste
+        self.assertEqual(c["heures"], {"2026-10-29T10": 1})
+
+    def test_premiere_fois_les_annonces_deja_connues_remplissent_les_heures_sans_double_compte(self):
+        from export_site import mettre_a_jour_captures
+        prem = {"https://a/1": "2026-10-29T08:10Z", "https://a/2": "2026-10-29T09:00Z"}
+        ancien = {"jours": {"2026-10-29": {"vinted": 1}}, "vus": {__import__("hashlib").sha1(b"https://a/1").hexdigest()[:10]: "2026-10-29"}}
+        c = mettre_a_jour_captures(ancien, self.annonces(("https://a/1", "vinted"), ("https://a/2", "vinted")), prem, "2026-10-29", maintenant="2026-10-29T10:00Z")
+        self.assertEqual(c["heures"], {"2026-10-29T08": 1, "2026-10-29T09": 1})          # a/1 vient de l'amorce, a/2 est une nouvelle capture
+
     def test_les_liens_oublies_au_bout_de_quatorze_jours_et_les_jours_au_bout_de_90(self):
         from export_site import mettre_a_jour_captures
         c = mettre_a_jour_captures(None, self.annonces(("https://a/1", "vinted")), {"https://a/1": "2026-01-01T08:00Z"}, "2026-01-01")
