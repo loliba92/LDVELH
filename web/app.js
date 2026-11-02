@@ -1952,14 +1952,51 @@
     window.Relais.appeler('pepite_retirer').then((r) => { if (r && r.ok) { PJ = null; majBadgePepites(); afficherCollection(); } });
   });
 
+  // Budget et gain estimés d'après les annonces en ligne (niveaux 2 et 3) : prix demandés, annonces « plus vues » écartées
+  const FRAIS_PORT_VENTE = 4;                                  // frais de port à retirer d'un prix livré pour estimer ce que touche le vendeur
+  const annoncesEnLigne = (b, etat) => {
+    const par = ANN && ANN.annonces && b.isbn13 ? ANN.annonces[b.isbn13] : null;
+    if (!par) return [];
+    const livrees = etat ? (par[etat] || []) : ETATS.reduce((l, e) => l.concat(par[e.k] || []), []);
+    return livrees.filter(([, , , origine, vue]) => !(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay));
+  };
+  const fourchette = (liste, retrait) => {
+    const p = liste.map((a) => Math.max(0, a[0] - retrait));
+    return p.length ? { bas: Math.min(...p), haut: Math.max(...p) } : null;
+  };
+  const eurosArr = (n) => fmtE(Math.round(n));
+  const plage = (f, q) => (f.bas === f.haut ? eurosArr(f.bas * q) : `${eurosArr(f.bas * q)} à ${eurosArr(f.haut * q)}`);
+  // Facilité de vente d'après le nombre d'annonces concurrentes au même état
+  function facilite(nb) {
+    if (!nb) return { cle: 'inconnu', txt: 'Pas de repère' };
+    if (nb <= 3) return { cle: 'facile', txt: 'Facile' };
+    if (nb <= 8) return { cle: 'moyen', txt: 'Moyen' };
+    return { cle: 'difficile', txt: 'Difficile' };
+  }
+  let annTentee = false;
+  function chargerAnnoncesCollection() {
+    if (!voitAnnonces() || ANN || annTentee || !window.Relais) return;
+    annTentee = true;
+    chargerAnnonces().then(() => { if (ANN && $('#coll-corps')) afficherCollection(); });
+  }
+
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
-    return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>
+    const voit = voitAnnonces() && !!ANN;
+    const fl = (b) => (voit ? fourchette(annoncesEnLigne(b), 0) : null);
+    let bas = 0, haut = 0, chiffres = 0;
+    if (voit) lignes.forEach((b) => { const f = fl(b); if (f) { bas += f.bas; haut += f.haut; chiffres += 1; } });
+    const sans = lignes.length - chiffres;
+    const budget = !voitAnnonces() ? '' : !ANN ? '<p class="sous budget">Budget estimé : chargement…</p>'
+      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `de ${eurosArr(bas)} à ${eurosArr(haut)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      <p class="sous">De l'annonce la moins chère à la plus chère en ligne pour chaque livre, frais de port compris. Prix demandés, sans garantie de disponibilité.</p>`;
+    return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
+        ${(() => { const f = fl(b); return voit ? `<p class="sous fourchette-ligne">${f ? `${plage(f, 1)} · ${annoncesEnLigne(b).length} annonce${annoncesEnLigne(b).length > 1 ? 's' : ''}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
@@ -1969,9 +2006,22 @@
     if (!lignes.length) return '';
     return `<h3 id="titre-a-vendre">À vendre <span class="sous">(${lignes.length})</span></h3>
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
+      ${(() => {
+        if (!voitAnnonces()) return '';
+        if (!ANN) return '<p class="sous budget">Gain estimé : chargement…</p>';
+        let b0 = 0, h0 = 0, n0 = 0;
+        lignes.forEach(({ b, c }) => { const f = fourchette(annoncesEnLigne(b, c.etat), FRAIS_PORT_VENTE); if (f) { b0 += f.bas * c.qte; h0 += f.haut * c.qte; n0 += 1; } });
+        const sans = lignes.length - n0;
+        return `<p class="budget"><b>Gain estimé : ${n0 ? `de ${eurosArr(b0)} à ${eurosArr(h0)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+        <p class="sous">D'après les annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). La facilité dépend du nombre d'annonces concurrentes. Prix demandés, pas des prix payés.</p>`;
+      })()}
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
-          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span></div></div>
+          <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span>${(() => {
+          if (!voitAnnonces() || !ANN) return '';
+          const l = annoncesEnLigne(b, c.etat), f = fourchette(l, FRAIS_PORT_VENTE), fa = facilite(l.length);
+          return `<span class="sous fourchette-ligne">${f ? `Vente : ${plage(f, c.qte)} · ${l.length} annonce${l.length > 1 ? 's' : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
+        })()}</div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
   }
@@ -2362,6 +2412,7 @@
     setTimeout(atterrirATrouver, 0);
     dessinerPepiteAccueil();
     rendreAjoutColl();
+    chargerAnnoncesCollection();
     const bl = bilan();
     const n = bl.exemplaires, nPastille = cotesMasquees() ? 0 : n;          // sans compte, la copie gardée sur l'appareil n'est pas affichée
     ['#nb-coll', '#nb-coll-bas'].forEach((sel) => {

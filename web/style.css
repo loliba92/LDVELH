@@ -2530,3 +2530,14 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 /* Butin et Annonces : tableau de bord sur toute la largeur du cadre ; les paragraphes gardent une mesure de lecture */
 .page-large > * { max-width: none; }
 .page-large p { max-width: 72ch; }
+
+/* Budget et gain estimés (À trouver, À vendre) */
+.budget { margin: 6px 0 2px; font-size: var(--t-md); color: var(--text); }
+.budget b { color: var(--accent); }
+.fourchette-ligne { display: block; flex: 1 1 100%; margin: 0; font-size: var(--t-sm); }
+.a-trouver .l-livre .fourchette-ligne { margin-top: 2px; }
+.facilite { display: inline-block; margin-left: 6px; padding: 1px 8px; border: 1px solid var(--line-strong); border-radius: 999px; font-size: var(--t-xs); font-weight: 600; white-space: nowrap; }
+.facilite-facile { color: #8fcf9a; border-color: #4d7f58; }
+.facilite-moyen { color: #e0c27a; border-color: #8a7236; }
+.facilite-difficile { color: #e59a8c; border-color: #8a4a40; }
+.facilite-inconnu { color: var(--muted); }
