@@ -762,9 +762,15 @@
   // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé aux sorciers et au Zagor.
   const estNiveau3Brut = () => !!window.Compte && window.Compte.role() === 'superadmin';
   const voitAnnonces = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());
-  let ANN = null, annChargees = null;
-  const chargerAnnonces = () => annChargees || (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
-    .then((a) => { ANN = a && a.annonces ? a : null; if (!ANN) annChargees = null; return ANN; }));          // sans réponse : on réessaiera au prochain appel
+  let ANN = null, annChargees = null, annLueA = 0;
+  // Relues au plus toutes les 2 minutes : une page restée ouverte ne garde pas des annonces périmées
+  const chargerAnnonces = () => {
+    if (annChargees && Date.now() - annLueA < 120000) return annChargees;
+    annLueA = Date.now();
+    const precedentes = ANN;
+    return (annChargees = window.Relais.lireAnnonces(true).catch(() => null)
+      .then((a) => { ANN = a && a.annonces ? a : precedentes; if (!(a && a.annonces)) annChargees = null; return ANN; }));          // sans réponse : on garde les dernières et on réessaiera au prochain appel
+  };
   function blocAnnonces(b) {
     return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
