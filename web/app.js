@@ -636,25 +636,22 @@
     }
     z.hidden = false;
     const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
-    const n = livres.length, e = etatDe(S.h);
-    const cote = livres.reduce((t, b) => (b.prix[e.k] != null ? { s: t.s + b.prix[e.k], k: t.k + 1 } : t), { s: 0, k: 0 });
-    let med = 0, bon = 0, avec = 0;
-    if (ANN) livres.forEach((b) => {
-      const poss = COLL[b.id];          // livre de la collection : annonces à son état ; sinon, tous les états
-      const r = reperes(annoncesEnLigne(b, poss ? poss.etat : undefined), FRAIS_PORT);
-      if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; avec += 1; }
+    const n = livres.length;
+    let somme = 0, cotes = 0, annN = 0, annMin = 0, avecAnn = 0;
+    livres.forEach((b) => {
+      const poss = COLL[b.id], etat = poss ? poss.etat : undefined;          // livre de la collection : son état ; sinon, médiane des états
+      const p = prixCote(b, etat);
+      if (p != null) { somme += p; cotes += 1; }
+      if (ANN) { const l = annoncesEnLigne(b, etat), m = moinsCher(l); if (m != null) { annN += l.length; annMin += m; avecAnn += 1; } }
     });
     const lignes = [];
-    if (!ANN) lignes.push('Annonces : chargement…');
-    else if (!avec) lignes.push('Aucune annonce pour cette sélection');
+    if (!cotes) lignes.push('Pas de cote pour cette sélection');
     else {
-      const sans = n - avec, bas = bon < med;
-      lignes.push(`${SVG_ACHAT}<b>Acheter pour</b> ${eurosArr(med)}${bas ? ` · <span class="nowrap">proposez ${eurosArr(bon)}</span>` : ''}`);
-      lignes.push(`${SVG_VENTE}<b>Revendre pour</b> ${eurosArr(med)}${bas ? ` · <span class="nowrap">vendez vite à ${eurosArr(bon)}</span>` : ''}`);
-      lignes.push(`Port à ajouter à l'achat : environ ${eurosArr(avec * FRAIS_PORT)}${sans ? ` · ${sans} sans annonce` : ''}`);
+      lignes.push(`${SVG_ACHAT}<b>Acheter pour</b> ${eurosArr(somme)} · <span class="nowrap">+ port ${eurosArr(cotes * FRAIS_PORT)}</span>${cotes < n ? ` · ${n - cotes} sans cote` : ''}`);
+      lignes.push(`${SVG_VENTE}<b>Revendre pour</b> ${eurosArr(somme)}`);
+      lignes.push(!ANN ? 'Annonces : chargement…' : avecAnn ? `Marché : ${annN} annonce${annN > 1 ? 's' : ''}, dès ${eurosArr(annMin)}${avecAnn < n ? ` · ${n - avecAnn} sans annonce` : ''}` : 'Marché : aucune annonce en ligne');
     }
-    if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
-    z.title = `Prix des annonces en ligne, hors port : à l'état de votre exemplaire pour un livre de votre collection, tous états mélangés sinon. Cote du site à l'état ${e.court.toLowerCase()}. Port : environ ${FRAIS_PORT} € retirés par livre (payés en plus par l'acheteur). Prix demandés, pas des prix payés.`;
+    z.title = `Prix de la cote du guide, hors port : à l'état de votre exemplaire pour un livre de votre collection, médiane des états sinon. Le port (environ ${FRAIS_PORT} € par livre) s'ajoute à l'achat. Marché : annonces en ligne, port retiré, prix demandés.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
@@ -2020,14 +2017,15 @@
     return livrees.filter(([, , , origine, vue]) => !(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay));
   };
   const eurosArr = (n) => fmtE(Math.round(n));
-  // Prix repères d'une liste d'annonces : médiane (prix conseillé) et premier quart (prix à proposer ou vente rapide)
-  const quantile = (t, q) => { const i = (t.length - 1) * q, k = Math.floor(i); return t[k] + (t[Math.min(k + 1, t.length - 1)] - t[k]) * (i - k); };
-  const reperes = (liste, retrait) => {
-    const t = liste.map((a) => Math.max(0, a[0] - retrait)).sort((x, y) => x - y);
-    if (!t.length) return null;
-    const med = quantile(t, 0.5), bas = Math.min(med, quantile(t, 0.25));
-    return { med, bas: Math.round(bas) < Math.round(med) ? bas : null, n: t.length };
+  // Prix du guide (cote) d'un livre : à l'état donné ; sans état, médiane des états cotés. Les annonces ne servent que de témoin du marché.
+  const prixCote = (b, etat) => {
+    const p = b.prix || {};
+    if (etat) return p[etat] != null ? p[etat] : null;
+    const v = Object.values(p).filter((x) => x != null).sort((x, y) => x - y);
+    if (!v.length) return null;
+    return v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
   };
+  const moinsCher = (liste) => (liste.length ? Math.max(0, Math.min(...liste.map((a) => a[0])) - FRAIS_PORT) : null);
   // Ancienneté d'une annonce : jours depuis sa première vue par le bot (null si inconnue)
   const joursEnLigne = (a) => {
     const t = ANN && ANN.premieres ? ANN.premieres[a[2]] : null;
@@ -2055,20 +2053,19 @@
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
-    const voit = voitAnnonces() && !!ANN;
-    const fl = (b) => (voit ? reperes(annoncesEnLigne(b), FRAIS_PORT) : null);
-    let med = 0, bon = 0, chiffres = 0;
-    if (voit) lignes.forEach((b) => { const r = fl(b); if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; chiffres += 1; } });
-    const sans = lignes.length - chiffres;
-    const budget = !voitAnnonces() ? '' : !ANN ? '<p class="sous budget">Budget estimé : chargement…</p>'
-      : `<p class="budget"><b>Budget estimé pour tout trouver : ${chiffres ? `environ ${eurosArr(med)}` : 'pas de repère'}</b>${chiffres ? `<span class="sous"> + port (environ ${eurosArr(chiffres * FRAIS_PORT)})</span>` : ''}${chiffres && bon < med ? `<span class="sous"> · en proposant le prix bas : ${eurosArr(bon)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-      <p class="sous">Pour chaque livre : le prix médian des annonces en ligne, port non compris : il s'ajoute (environ ${FRAIS_PORT} € par livre). « Proposez » est un prix plus bas que trois annonces sur quatre : une offre raisonnable. Prix demandés, sans garantie de disponibilité.</p>`;
+    const voit = voitAnnonces();
+    let somme = 0, cotes = 0;
+    lignes.forEach((b) => { const p = prixCote(b); if (p != null) { somme += p; cotes += 1; } });
+    const sans = lignes.length - cotes;
+    const budget = !voit ? ''
+      : `<p class="budget"><b>Budget estimé pour tout trouver : ${cotes ? `environ ${eurosArr(somme)}` : 'pas de cote'}</b>${cotes ? `<span class="sous"> + port (environ ${eurosArr(cotes * FRAIS_PORT)})</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+      <p class="sous">Pour chaque livre : la cote du guide (médiane des états, port non compris). Le port s'ajoute à l'achat (environ ${FRAIS_PORT} € par livre). Le marché indique les annonces en ligne : leur nombre et la moins chère.</p>`;
     return `<h3 id="titre-a-trouver">À trouver <span class="sous">(${lignes.length})</span></h3>${budget}
       <ul class="a-trouver">${lignes.map((b) => `<li data-souhait="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
         <button type="button" class="retirer" data-souhait-retirer="${esc(b.id)}" aria-label="Retirer ${esc(b.titre)}, édition ${esc(b.version)}, de la liste à trouver">Retirer</button>
-        ${(() => { const r = fl(b); return voit ? `<p class="sous fourchette-ligne">${r ? `Comptez ${eurosArr(r.med)}${r.bas != null ? ` · proposez ${eurosArr(r.bas)}` : ''} · ${r.n} annonce${r.n > 1 ? 's' : ''}` : 'Aucune annonce en ligne'}</p>` : ''; })()}
+        ${(() => { if (!voit) return ''; const p = prixCote(b), l = ANN ? annoncesEnLigne(b) : [], m = moinsCher(l); return `<p class="sous fourchette-ligne">${p != null ? `Cote ${eurosArr(p)}` : 'Pas de cote'}${!ANN ? '' : l.length ? ` · marché : ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'}</p>`; })()}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
@@ -2080,19 +2077,17 @@
       <p class="sous">Livres à sortir de votre collection, comptés dans le total jusqu'à la vente.</p>
       ${(() => {
         if (!voitAnnonces()) return '';
-        if (!ANN) return '<p class="sous budget">Vente estimée : chargement…</p>';
-        let m0 = 0, r0 = 0, n0 = 0;
-        lignes.forEach(({ b, c }) => { const r = reperes(annoncesEnLigne(b, c.etat), FRAIS_PORT); if (r) { m0 += r.med * c.qte; r0 += (r.bas != null ? r.bas : r.med) * c.qte; n0 += 1; } });
-        const sans = lignes.length - n0;
-        return `<p class="budget"><b>Vente estimée : ${n0 ? `environ ${eurosArr(m0)}` : 'pas de repère'}</b>${n0 && r0 < m0 ? `<span class="sous"> · en vendant vite : ${eurosArr(r0)}</span>` : ''}${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-        <p class="sous">Pour chaque livre : le prix médian des annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT} €). « Vendez vite à » est un prix plus bas que trois annonces sur quatre : il part plus vite. La facilité dépend du nombre d'annonces concurrentes et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide). Prix demandés, pas des prix payés.</p>`;
+        const tot = lignes.reduce((t, { b, c }) => { const v = valeurLigne(b, c); return v != null ? { s: t.s + v, k: t.k + 1 } : t; }, { s: 0, k: 0 });
+        const sans = lignes.length - tot.k;
+        return `<p class="budget"><b>Vente estimée : ${tot.k ? `environ ${eurosArr(tot.s)}` : 'pas de cote'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans cote, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
+        <p class="sous">Cote du guide à l'état de chaque exemplaire. Le marché indique les annonces concurrentes au même état. La facilité dépend de leur nombre et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide).</p>`;
       })()}
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span>${(() => {
           if (!voitAnnonces() || !ANN) return '';
-          const l = annoncesEnLigne(b, c.etat), r = reperes(l, FRAIS_PORT), jl = medianeJours(l), fa = facilite(l.length, jl);
-          return `<span class="sous fourchette-ligne">${r ? `Demandez ${eurosArr(r.med * c.qte)}${r.bas != null ? ` · vendez vite à ${eurosArr(r.bas * c.qte)}` : ''} · ${l.length} annonce${l.length > 1 ? 's' : ''}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
+          const l = annoncesEnLigne(b, c.etat), m = moinsCher(l), jl = medianeJours(l), fa = facilite(l.length, jl);
+          return `<span class="sous fourchette-ligne">${l.length ? `Marché : ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
         })()}</div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
