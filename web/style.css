@@ -2513,3 +2513,12 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .cotes div, .coll-avantages li, .coll-cles li { border-top: 1px solid var(--line); }
 .hero, .banniere { border-bottom: 1px solid var(--line); }
 .carte > header h2, .carte .hc-titre, .hero-coll .hc-titre { margin: 0; color: var(--text); font: 600 1.4rem/1.2 var(--f-display); letter-spacing: 0; text-transform: none; }
+
+/* Étagère : à la souris, C, BE et TBE n'apparaissent qu'au survol d'une jaquette (ou au clavier, ou quand le livre est déjà possédé) ; au doigt, ils restent toujours visibles */
+.aide-souris { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .aide-tactile { display: none; }
+  .aide-souris { display: inline; }
+  .livre-carte .etats-carte { opacity: 0; transition: opacity var(--t); }
+  .livre-carte:hover .etats-carte, .livre-carte:focus-within .etats-carte, .livre-carte .etats-carte:has([aria-pressed="true"]) { opacity: 1; }
+}
