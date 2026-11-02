@@ -640,12 +640,13 @@
     const cote = livres.reduce((t, b) => (b.prix[e.k] != null ? { s: t.s + b.prix[e.k], k: t.k + 1 } : t), { s: 0, k: 0 });
     let med = 0, bon = 0, avec = 0;
     if (ANN) livres.forEach((b) => {
-      const r = reperes(annoncesEnLigne(b, e.k), FRAIS_PORT);
+      const poss = COLL[b.id];          // livre de la collection : annonces à son état ; sinon, tous les états
+      const r = reperes(annoncesEnLigne(b, poss ? poss.etat : undefined), FRAIS_PORT);
       if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; avec += 1; }
     });
     const lignes = [];
     if (!ANN) lignes.push('Annonces : chargement…');
-    else if (!avec) lignes.push(`Aucune annonce à l'état ${esc(e.court.toLowerCase())} pour cette sélection`);
+    else if (!avec) lignes.push('Aucune annonce pour cette sélection');
     else {
       const sans = n - avec, bas = bon < med;
       lignes.push(`${SVG_ACHAT}<b>Acheter pour</b> ${eurosArr(med)}${bas ? ` · <span class="nowrap">proposez ${eurosArr(bon)}</span>` : ''}`);
@@ -653,7 +654,7 @@
       lignes.push(`Port à ajouter à l'achat : environ ${eurosArr(avec * FRAIS_PORT)}${sans ? ` · ${sans} sans annonce` : ''}`);
     }
     if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
-    z.title = `Prix des annonces en ligne à l'état ${e.court.toLowerCase()}, hors port (environ ${FRAIS_PORT} € de port retiré par livre, payé en plus par l'acheteur). Prix demandés, pas des prix payés.`;
+    z.title = `Prix des annonces en ligne, hors port : à l'état de votre exemplaire pour un livre de votre collection, tous états mélangés sinon. Cote du site à l'état ${e.court.toLowerCase()}. Port : environ ${FRAIS_PORT} € retirés par livre (payés en plus par l'acheteur). Prix demandés, pas des prix payés.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
