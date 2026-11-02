@@ -2571,3 +2571,5 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-texte b { color: var(--text); font-size: inherit; }
 .maj-retard .maj-point { background: #e8a13a; }
 .maj-retard .maj-quand { color: #f0c27a; }
+.facilite svg { vertical-align: -2px; margin-right: 4px; }
+.sel-sous { color: var(--muted); font-size: var(--t-sm); padding-left: 22px; }
