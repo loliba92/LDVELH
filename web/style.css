@@ -2561,3 +2561,6 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 @media (max-width: 700px) { .barre-sel { bottom: calc(66px + env(safe-area-inset-bottom)); } }
 
 .sel-texte span b { color: var(--text); }
+.sel-ico { display: inline-block; vertical-align: -3px; margin-right: 6px; }
+.sel-achat { color: #8fd3a8; }
+.sel-vente { color: #f0a5b0; }
