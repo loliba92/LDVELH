@@ -1,4 +1,4 @@
-// Version du 2026-10-31 17:20 (heure de Paris) : annonces reçues ouvertes aux sorciers (annonces_lire, niveau sorcier).
+// Version du 2026-11-02 14:42 (heure de Paris) : annonces et Butin lus en contenu brut, sans la limite de 1 Mo de l'interface de GitHub.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -26,7 +26,7 @@ function github(chemin, options) {
   options = options || {};
   var r = UrlFetchApp.fetch('https://api.github.com/repos/' + prop('DEPOT') + chemin, {
     method: options.method || 'get', muteHttpExceptions: true, contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + prop('GITHUB_TOKEN'), Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+    headers: { Authorization: 'Bearer ' + prop('GITHUB_TOKEN'), Accept: options.accept || 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
     payload: options.payload ? JSON.stringify(options.payload) : undefined
   });
   return { code: r.getResponseCode(), texte: r.getContentText() };
@@ -144,10 +144,9 @@ function doPost(e) {
     }
 
     if (action === 'butin_lire' || action === 'annonces_lire') {      // Butin seul pour les sorciers ; toutes les annonces pour le Zagor
-      var ann = github('/contents/data/processed/' + (action === 'annonces_lire' ? 'annonces' : 'butin') + '.json?ref=main');
+      var ann = github('/contents/data/processed/' + (action === 'annonces_lire' ? 'annonces' : 'butin') + '.json?ref=main', { accept: 'application/vnd.github.raw+json' });      // contenu brut : le contenu en base 64 est vide au-delà de 1 Mo
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
-      var fic = JSON.parse(ann.texte);
-      return reponse({ ok: true, annonces: JSON.parse(Utilities.newBlob(Utilities.base64Decode(fic.content.replace(/\n/g, ''))).getDataAsString('UTF-8')) });
+      return reponse({ ok: true, annonces: JSON.parse(ann.texte) });
     }
 
     if (action === 'pepite_offrir' || action === 'pepite_retirer' || action === 'pepite_vendre') {      // pépite du jour : fichier public lu par tous les Héros
