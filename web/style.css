@@ -2488,3 +2488,19 @@ button.maj-ligne:hover { background: var(--surface-2); }
   .hero .hero-in { display: flex; flex-direction: column; align-items: stretch; }
   .hero .hero-in > .hero-visuel { order: -1; flex: none; max-width: none; height: 170px; margin-bottom: 18px; }
 }
+
+/* En-tête : le nom du site reste sur une ligne ; « Offrir un café » devient une icône quand la place manque (écrans moyens, comptes avec le Butin) ; le menu passe sur une seconde ligne plutôt que de déborder */
+.marque { flex: none; }
+.marque-nom { white-space: nowrap; }
+@media (min-width: 701px) {
+  .bandeau-in { flex-wrap: wrap; row-gap: 6px; }
+  .menu { flex-wrap: wrap; justify-content: flex-end; row-gap: 4px; margin-left: auto; }
+}
+@media (min-width: 701px) and (max-width: 1279px) {
+  .menu a.menu-cafe { padding: 7px 10px; margin-left: 2px; }
+  .menu a.menu-cafe span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (min-width: 701px) {
+  .menu:has(.menu-butin:not([hidden])) a.menu-cafe { padding: 7px 10px; margin-left: 2px; }
+  .menu:has(.menu-butin:not([hidden])) a.menu-cafe span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
