@@ -2,7 +2,7 @@
  "date": "2026-11-02",
  "precedent": "2026-11-01",
  "nb_comparees": 1503,
- "nb_modifiees": 698,
+ "nb_modifiees": 699,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -182,19 +182,34 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 33.57,
-   "apres": 29.74,
+   "apres": 29.73,
    "pct": -0.114,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
+  },
+  {
+   "id": "9782070336203",
+   "isbn13": "9782070336203",
+   "titre": "Les Treize Mages",
+   "serie": "L'Epée de Légende",
+   "numero": "620",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 71.71,
+   "apres": 63.79,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 5,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 12,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
-  "n_paires": 90,
-  "gain": 0.013,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.946
+  "n_paires": 92,
+  "gain": 0.0,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 0.941
  }
 }
