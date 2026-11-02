@@ -778,12 +778,24 @@
       const nb = par ? ETATS.reduce((n, e) => n + ((par[e.k] || []).length), 0) : 0;
       const resume = $('#annonces-fiche summary');
       const inc = ANN && ANN.incertaines && b.isbn13 ? (ANN.incertaines[b.isbn13] || []) : [];          // édition incertaine : à vérifier, hors prix
+      const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'vinted' ? 'Vinted' : o === 'librairie' ? 'Librairie' : 'eBay');
+      const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</li>`;
+      // Les autres éditions du même livre : leurs annonces sont rangées sous leur propre ISBN, mais ce sont des annonces de ce livre
+      const autres = (b.livre_id ? DATA.filter((x) => x.livre_id === b.livre_id && x.id !== b.id && x.isbn13) : []).map((x) => {
+        const p = ANN && ANN.annonces ? ANN.annonces[x.isbn13] : null;
+        const sures = p ? ETATS.flatMap((e) => (p[e.k] || []).map((a) => ({ a, e }))).sort((u, v) => u.a[0] - v.a[0]) : [];
+        return { x, sures, incs: (ANN && ANN.incertaines && ANN.incertaines[x.isbn13]) || [] };
+      }).filter((o) => o.sures.length || o.incs.length);
+      const nbAutres = autres.reduce((n, o) => n + o.sures.length + o.incs.length, 0);
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
-      if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
-      if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? 'Aucune annonce retenue pour cette édition.' : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
-      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map(([prix, titre, lien, origine, , n]) => {
-        const site = origine === 'leboncoin' ? 'Leboncoin' : origine === 'vinted' ? 'Vinted' : 'eBay';
-        return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${site}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${site}</span><span class="ann-titre">${n > 1 ? `1 édition sur ${n} possibles` : 'édition à confirmer'}</span></li>`; }).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
+      if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''}${nbAutres ? `, ${nbAutres} sur d'autres éditions` : ''} `;
+      if (resume && !nb && !inc.length && nbAutres) resume.firstChild.textContent = `Annonces retenues (0), ${nbAutres} sur d'autres éditions `;
+      if (!nb && !inc.length && !nbAutres) { zone.innerHTML = `<p class="sous">${ANN ? 'Aucune annonce retenue pour cette édition.' : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
+      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, a[5] > 1 ? `1 édition sur ${a[5]} possibles` : 'édition à confirmer')).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
+      const autresEditions = autres.map((o) => {
+        const n = o.sures.length + o.incs.length;
+        return `<h4>Autre édition · ${esc(o.x.version)} · ${n} annonce${n > 1 ? 's' : ''}</h4><ul>${o.sures.map(({ a, e }) => ligneAnn(a, esc(e.long))).join('')}${o.incs.map((a) => ligneAnn(a, 'à vérifier')).join('')}</ul>`;
+      }).join('');
       zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '') + ETATS.map((e) => {
         const l = par ? par[e.k] : null;
         if (!l || !l.length) return '';
@@ -793,7 +805,7 @@
         return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => {
           const [prix, titre, lien, origine, vue] = a;
           return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${origine === 'leboncoin' ? 'Leboncoin' : origine === 'vinted' ? 'Vinted' : origine === 'librairie' ? 'librairie' : 'eBay'}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${origine === 'leboncoin' ? 'Leboncoin' : origine === 'vinted' ? 'Vinted' : origine === 'librairie' ? 'Librairie' : 'eBay'}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
-      }).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
+      }).join('') + aVerifier + autresEditions + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
     });
   }
 
