@@ -624,10 +624,6 @@
 
   /* ---------- Lot d'achat (sorciers et plus) : livres cochés un par un sur l'étagère, prix du lot ---------- */
   const SEL_LOT = new Set();
-  function medianeNb(p) {
-    const t = p.slice().sort((x, y) => x - y);
-    return t.length % 2 ? t[(t.length - 1) / 2] : (t[t.length / 2 - 1] + t[t.length / 2]) / 2;
-  }
   function majBarreLot() {
     let z = $('#barre-sel');
     if (!SEL_LOT.size || !voitAnnonces() || !$('#resultats')) { if (z) z.hidden = true; return; }
@@ -640,14 +636,14 @@
     const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
     const n = livres.length, e = etatDe(S.h);
     const cote = livres.reduce((t, b) => (b.prix[e.k] != null ? { s: t.s + b.prix[e.k], k: t.k + 1 } : t), { s: 0, k: 0 });
-    let bas = 0, haut = 0, med = 0, avec = 0;
+    let med = 0, bon = 0, avec = 0;
     if (ANN) livres.forEach((b) => {
-      const l = annoncesEnLigne(b), f = fourchette(l, 0);
-      if (f) { bas += f.bas; haut += f.haut; med += medianeNb(l.map((a) => a[0])); avec += 1; }
+      const r = reperes(annoncesEnLigne(b), 0);
+      if (r) { med += r.med; bon += r.bas != null ? r.bas : r.med; avec += 1; }
     });
     const sans = n - avec;
     const lignes = [];
-    lignes.push(!ANN ? 'Annonces : chargement…' : avec ? `Annonces : entre ${eurosArr(bas)} et ${eurosArr(haut)} · médiane ${eurosArr(med)}${sans ? ` · ${sans} sans annonce` : ''}` : 'Annonces : aucune pour cette sélection');
+    lignes.push(!ANN ? 'Annonces : chargement…' : avec ? `Prix à prévoir : ${eurosArr(med)}${bon < med ? ` · bons coups : ${eurosArr(bon)}` : ''}${sans ? ` · ${sans} sans annonce` : ''}` : 'Annonces : aucune pour cette sélection');
     if (cote.k) lignes.push(`Cote du site (${e.court}) : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
     z.innerHTML = `<div class="sel-texte"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b>${lignes.map((l) => `<span>${esc(l)}</span>`).join('')}</div><button type="button" class="retirer" data-sel-vider>Vider</button>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
@@ -2003,10 +1999,6 @@
     if (!par) return [];
     const livrees = etat ? (par[etat] || []) : ETATS.reduce((l, e) => l.concat(par[e.k] || []), []);
     return livrees.filter(([, , , origine, vue]) => !(vue && origine !== 'leboncoin' && origine !== 'vinted' && origine !== 'librairie' && ANN.date_ebay && vue < ANN.date_ebay));
-  };
-  const fourchette = (liste, retrait) => {
-    const p = liste.map((a) => Math.max(0, a[0] - retrait));
-    return p.length ? { bas: Math.min(...p), haut: Math.max(...p) } : null;
   };
   const eurosArr = (n) => fmtE(Math.round(n));
   // Prix repères d'une liste d'annonces : médiane (prix conseillé) et premier quart (prix rapide ou bon coup)
