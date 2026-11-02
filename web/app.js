@@ -1966,12 +1966,22 @@
   };
   const eurosArr = (n) => fmtE(Math.round(n));
   const plage = (f, q) => (f.bas === f.haut ? eurosArr(f.bas * q) : `${eurosArr(f.bas * q)} à ${eurosArr(f.haut * q)}`);
-  // Facilité de vente d'après le nombre d'annonces concurrentes au même état
-  function facilite(nb) {
+  // Ancienneté d'une annonce : jours depuis sa première vue par le bot (null si inconnue)
+  const joursEnLigne = (a) => {
+    const t = ANN && ANN.premieres ? ANN.premieres[a[2]] : null;
+    const ms = t ? Date.parse(t.length > 10 ? t : t + 'T12:00:00Z') : NaN;
+    return Number.isNaN(ms) ? null : Math.max(0, Math.floor((Date.now() - ms) / 86400000));
+  };
+  const medianeJours = (liste) => {
+    const j = liste.map(joursEnLigne).filter((x) => x != null).sort((x, y) => x - y);
+    return j.length ? j[Math.floor(j.length / 2)] : null;
+  };
+  // Facilité de vente : nombre d'annonces concurrentes au même état, d'un cran plus difficile si elles restent en ligne (médiane de 3 semaines ou plus)
+  function facilite(nb, jours) {
     if (!nb) return { cle: 'inconnu', txt: 'Pas de repère' };
-    if (nb <= 3) return { cle: 'facile', txt: 'Facile' };
-    if (nb <= 8) return { cle: 'moyen', txt: 'Moyen' };
-    return { cle: 'difficile', txt: 'Difficile' };
+    let n = nb <= 3 ? 0 : nb <= 8 ? 1 : 2;
+    if (jours != null && jours >= 21) n = Math.min(2, n + 1);
+    return [{ cle: 'facile', txt: 'Facile' }, { cle: 'moyen', txt: 'Moyen' }, { cle: 'difficile', txt: 'Difficile' }][n];
   }
   let annTentee = false;
   function chargerAnnoncesCollection() {
@@ -2013,14 +2023,14 @@
         lignes.forEach(({ b, c }) => { const f = fourchette(annoncesEnLigne(b, c.etat), FRAIS_PORT_VENTE); if (f) { b0 += f.bas * c.qte; h0 += f.haut * c.qte; n0 += 1; } });
         const sans = lignes.length - n0;
         return `<p class="budget"><b>Vente estimée : ${n0 ? `de ${eurosArr(b0)} à ${eurosArr(h0)}` : 'pas de repère'}</b>${sans ? `<span class="sous"> · ${sans} livre${sans > 1 ? 's' : ''} sans annonce comparable, non chiffré${sans > 1 ? 's' : ''}</span>` : ''}</p>
-        <p class="sous">D'après les annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). La facilité dépend du nombre d'annonces concurrentes. Prix demandés, pas des prix payés.</p>`;
+        <p class="sous">D'après les annonces en ligne au même état, frais de port retirés (environ ${FRAIS_PORT_VENTE} €). La facilité dépend du nombre d'annonces concurrentes et du temps qu'elles restent en ligne (durée médiane depuis leur première vue par le guide). Prix demandés, pas des prix payés.</p>`;
       })()}
       <ul class="a-trouver a-vendre">${lignes.map(({ b, c }) => `<li data-vendre="${esc(b.id)}">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span> <span class="nb">· ${ABREGE[c.etat]}${c.qte > 1 ? ' · ' + c.qte + ' ex.' : ''}${valeurLigne(b, c) != null ? ' · ' + fmt(valeurLigne(b, c)) : ''}</span></span>${(() => {
           if (!voitAnnonces() || !ANN) return '';
-          const l = annoncesEnLigne(b, c.etat), f = fourchette(l, FRAIS_PORT_VENTE), fa = facilite(l.length);
-          return `<span class="sous fourchette-ligne">${f ? `Vente : ${plage(f, c.qte)} · ${l.length} annonce${l.length > 1 ? 's' : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
+          const l = annoncesEnLigne(b, c.etat), f = fourchette(l, FRAIS_PORT_VENTE), jl = medianeJours(l), fa = facilite(l.length, jl);
+          return `<span class="sous fourchette-ligne">${f ? `Vente : ${plage(f, c.qte)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${jl != null ? ` · en ligne depuis ${jl} j` : ''}` : 'Aucune annonce au même état'} <span class="facilite facilite-${fa.cle}">${fa.txt}</span></span>`;
         })()}</div></div>
         <span class="vendre-actions"><button type="button" class="retirer" data-vendre-garder="${esc(b.id)}" title="Remettre dans ma collection" aria-label="Garder ${esc(b.titre)}, édition ${esc(b.version)}, dans ma collection">Je le garde</button>
         <button type="button" class="retirer" data-vendu="${esc(b.id)}" aria-label="Vendu : retirer ${esc(b.titre)}, édition ${esc(b.version)}, de ma collection">Vendu</button></span></li>`).join('')}</ul>`;
