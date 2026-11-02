@@ -647,12 +647,12 @@
     const lignes = [];
     if (!ANN) lignes.push('Annonces : chargement…');
     else {
-      lignes.push(avec ? `${SVG_ACHAT}<b>Acheter pour</b> environ ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bonnes affaires : ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : SVG_ACHAT + 'Acheter : aucune annonce pour cette sélection');
-      lignes.push(vavec ? `${SVG_VENTE}<b>Revendre pour</b> environ ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide : ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `${SVG_VENTE}Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
+      lignes.push(avec ? `${SVG_ACHAT}<b>Acheter pour</b> ${eurosArr(med)}${bon < med ? ` · <span class="nowrap">bonnes affaires ${eurosArr(bon)}</span>` : ''}${avec < n ? ` · ${n - avec} sans annonce` : ''}` : SVG_ACHAT + 'Acheter : aucune annonce pour cette sélection');
+      lignes.push(vavec ? `${SVG_VENTE}<b>Revendre pour</b> ${eurosArr(vmed)}${vrap < vmed ? ` · <span class="nowrap">vente rapide ${eurosArr(vrap)}</span>` : ''}${vavec < n ? ` · ${n - vavec} sans repère` : ''}` : `${SVG_VENTE}Revendre : aucune annonce à l'état ${esc(e.court.toLowerCase())}`);
     }
     if (cote.k) lignes.push(`Cote du site, ${esc(e.court.toLowerCase())} : ${eurosArr(cote.s)}${cote.k < n ? ` · ${n - cote.k} sans cote` : ''}`);
     z.title = `Achat : annonces en ligne, port compris. Revente : annonces à l'état ${e.court.toLowerCase()}, environ ${FRAIS_PORT_VENTE} € de port retiré par livre. Prix demandés, pas des prix payés.`;
-    z.innerHTML = `<div class="sel-texte"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b>${lignes.map((l) => `<span>${l}</span>`).join('')}</div><button type="button" class="retirer" data-sel-vider>Vider</button>`;
+    z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
   document.addEventListener('click', (ev) => {
