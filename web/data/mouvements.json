@@ -2,10 +2,25 @@
  "date": "2026-11-03",
  "precedent": "2026-11-02",
  "nb_comparees": 1503,
- "nb_modifiees": 696,
+ "nb_modifiees": 698,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782070333202",
+   "isbn13": "9782070333202",
+   "titre": "La Source de Mort",
+   "serie": "L'Œil Noir",
+   "numero": "320",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.19,
+   "apres": 7.02,
+   "pct": 0.134,
+   "nature": "annonces",
+   "nb": 7,
+   "recalibre": false
+  },
   {
    "id": "9782070333783",
    "isbn13": "9782070333783",
@@ -54,7 +69,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
   "n_paires": 109,
