@@ -1,11 +1,11 @@
 {
-  "isbn13": "9782070333424",
-  "prix": 14.2,
-  "pub": 29.74,
+  "isbn13": "9782075097314",
+  "prix": 7.02,
+  "pub": 14.5,
   "pct": 52,
   "etat": "TBE",
-  "origine": "vinted",
-  "lien": "https://www.vinted.fr/items/8496598294-livre-dont-vous-etre-le-heros-le-navire-des-ames-perdues",
-  "solide": false,
+  "origine": "isbn",
+  "lien": "https://www.ebay.fr/itm/128172270285",
+  "solide": true,
   "date": "2026-11-03"
 }
