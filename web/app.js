@@ -1417,7 +1417,7 @@
       const r = await fetch(`https://api.github.com/repos/loliba92/LDVELH/issues/${dernier.number}/comments`, { headers: { Accept: 'application/vnd.github+json' } });
       if (!r.ok) throw new Error(r.status);
       const commentaires = await r.json();
-      const hasError = commentaires.some((c) => /DatadomeError|DataDome|403|Datadome/.test(c.body || ''));
+      const hasError = commentaires.some((c) => /datadome/i.test(c.body || ''));
       try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), hasError })); } catch (e) { /* idem */ }
       return hasError;
     } catch (e) { return false; }
@@ -1464,13 +1464,17 @@
         const severe = lignes.some((l) => l.classList.contains('maj-severe'));
         const retard = lignes.some((l) => l.classList.contains('maj-retard'));
         const resume = conteneur.querySelector('.maj-resume');
+        const etat = conteneur.querySelector('.maj-etat');
+        const noms = (cls) => lignes.filter((l) => l.classList.contains(cls)).map((l) => l.querySelector('.maj-nom').textContent);
         if (severe) {
           conteneur.classList.add('maj-imports-severe');
           if (resume) resume.classList.add('maj-severe');
+          if (etat && !conteneur.classList.contains('maj-echec-global')) etat.textContent = `${noms('maj-severe').length} problème${noms('maj-severe').length > 1 ? 's' : ''} : ${noms('maj-severe').join(', ')}`;
         }
         if (retard && !severe) {
           conteneur.classList.add('maj-imports-retard');
           if (resume) resume.classList.add('maj-retard');
+          if (etat && !conteneur.classList.contains('maj-echec-global')) etat.textContent = `En retard : ${noms('maj-retard').join(', ')}`;
         }
       }
     } catch (e) { /* historique indisponible : les lignes gardent leur libellé d'origine */ }
