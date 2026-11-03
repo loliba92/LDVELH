@@ -21,13 +21,28 @@
    "nature": "archives",
    "nb": 1,
    "recalibre": false
+  },
+  {
+   "id": "9782070333257",
+   "isbn13": "9782070333257",
+   "titre": "Les Sept Coupes Magiques",
+   "serie": "L'Œil Noir",
+   "numero": "325",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 12.21,
+   "apres": 10.86,
+   "pct": -0.111,
+   "nature": "annonces",
+   "nb": 7,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 1,
+ "nb_grands_mouvements": 2,
  "modele": {
   "actif": false,
-  "n_paires": 94,
-  "gain": 0.004,
+  "n_paires": 98,
+  "gain": 0.003,
   "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
   "rapport_global": 0.941
  }
