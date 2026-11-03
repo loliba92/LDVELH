@@ -1208,7 +1208,8 @@
   // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, niveau 3 seul)
   const FAMILLES = [
     ['prix-ebay.yml', 'Relevé des prix', 'Met à jour les cotes à partir des annonces eBay et des prix en librairie. Un jour sur deux, vers 6 h, ou à la demande ; environ 1 h 30.'],
-    ['releve-leboncoin.yml', 'Import bot', 'Met la cote à jour avec les annonces reçues du bot (Leboncoin et Vinted). La date est celle de la dernière réception ; orange après 2 h sans import, de 6 h à 23 h.'],
+    ['releve-leboncoin.yml', 'Import Leboncoin', 'Met la cote à jour avec les annonces reçues du bot sur Leboncoin. La date est celle de la dernière réception ; orange après 2 h sans import, de 6 h à 23 h.'],
+    ['releve-leboncoin.yml', 'Import Vinted', 'Met la cote à jour avec les annonces reçues du bot sur Vinted. La date est celle de la dernière réception ; orange après 2 h sans import, de 6 h à 23 h.'],
     ['ajout-isbn.yml', 'Ajout de livres', 'Ajoute au site les livres envoyés depuis la page « Ajouter des livres ».'],
     ['corriger-fiche.yml', 'Correction de fiches', 'Applique une correction de titre, de série ou de numéro faite depuis une fiche.'],
     ['corriger-prix.yml', 'Correction de cotes', 'Applique une cote corrigée ou confirmée depuis le site (« Confirmer ces prix »).'],
@@ -1216,7 +1217,8 @@
     ['veille-parutions.yml', 'Veille des parutions', 'Cherche chaque jour les livres annoncés et pas encore parus.'],
   ];
   const DISCRET = 'pages.yml';          // lot affiché seulement quand il échoue
-  const IMPORTS = 'releve-leboncoin.yml';          // lot dont la ligne ouvre la liste des derniers imports (au lieu du journal)
+  const IMPORTS_LBC = 'releve-leboncoin.yml:lbc';          // lot dont la ligne ouvre la liste des derniers imports Leboncoin
+  const IMPORTS_VINTED = 'releve-leboncoin.yml:vinted';    // lot dont la ligne ouvre la liste des derniers imports Vinted
   let urlJournalImports = '';
   const depuisMin = (d) => {
     const m = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
@@ -1237,9 +1239,9 @@
     return lignes;
   };
   // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
-  async function lireImports() {
+  async function lireImports(filtre_source = null) {
     const CLE = 'cdh-imports-lbc-24h-v2';
-    try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports; } catch (e) { /* pas de cache */ }
+    try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports.filter((im) => !filtre_source || im.source === filtre_source); } catch (e) { /* pas de cache */ }
     const limite = Date.now() - 24 * 3600 * 1000;
     let demandes = [];
     for (let page = 1; page <= 2; page += 1) {
@@ -1254,17 +1256,19 @@
       const l = m ? csvLignes(m[1].trim()) : [];
       const [tete, ...corps] = l;
       const col = (nom) => (tete || []).indexOf(nom);
-      return { t: x.created_at, lignes: corps.filter((c) => c.length > 4).map((c) => {
+      const lignes = corps.filter((c) => c.length > 4).map((c) => {
         // Prix payé = prix de l'annonce + frais (colonne fdp) ; relevés d'avant cette colonne : Vinted se commande toujours, mêmes frais par défaut que le site
         const nu = parseFloat(c[col('prix')]), lien = c[col('lien')] || '', vinted = /(^|\.)vinted\./i.test(lien.split('/')[2] || '');
         const brut = col('fdp') >= 0 ? (c[col('fdp')] || '').trim() : '';
         const fdp = brut !== '' ? parseFloat(brut) : vinted ? Math.round((nu * 0.05 + 0.7 + 3) * 100) / 100 : 0;
-        return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')] };
-      }) };
+        return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')], source: vinted ? 'vinted' : 'leboncoin' };
+      });
+      // Séparer les lignes par source
+      return { t: x.created_at, lignes: lignes.filter((a) => !filtre_source || a.source === filtre_source), source: filtre_source };
     });
-    const recents = tous.filter((im) => Date.parse(im.t) >= limite);
-    const imports = recents.length ? recents : tous.slice(0, 3);
-    try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports })); } catch (e) { /* idem */ }
+    const recents = tous.filter((im) => Date.parse(im.t) >= limite && im.lignes.length > 0);
+    const imports = recents.length ? recents : tous.slice(0, 3).filter((im) => im.lignes.length > 0);
+    try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports: tous })); } catch (e) { /* idem */ }
     return imports;
   }
   // Position du prix d'une annonce par rapport au prix du site (même état) : mêmes seuils que « Annonces reçues » et le Butin
@@ -1293,20 +1297,22 @@
     return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce ${src} (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
       <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
-  async function ouvrirImports() {
+  async function ouvrirImports(filtre_source = null) {
     let dlg = $('#imp-dialog');
     if (!dlg) {
       dlg = document.createElement('dialog');
       dlg.id = 'imp-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'imp-titre');
-      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Imports du bot (Leboncoin et Vinted)</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
+      dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="imp-titre">Imports du bot</p><button type="button" class="bouton bouton-clair" id="imp-fermer">Fermer</button></div><div id="imp-corps" class="imp-corps"></div></div>';
       document.body.appendChild(dlg);
       dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'imp-fermer') dlg.close(); });
     }
+    const titre = filtre_source === 'leboncoin' ? 'Imports Leboncoin' : filtre_source === 'vinted' ? 'Imports Vinted' : 'Imports du bot (Leboncoin et Vinted)';
+    $('#imp-titre').textContent = titre;
     const corps = $('#imp-corps');
     corps.innerHTML = '<p class="sous">Chargement…</p>';
     dlg.showModal();
     try {
-      const imports = await lireImports();
+      const imports = await lireImports(filtre_source);
       const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
       const rang = (a) => { const { v, vendu } = infosImport(a); return vendu ? 9 : v ? RANG_IMPORT[v] : 8; };          // les pépites d'abord, les annonces vendues à la fin
       const avecAnnonces = imports.filter((im) => im.lignes.length), sans = imports.length - avecAnnonces.length;
@@ -1320,7 +1326,13 @@
         + (urlJournalImports ? `<p class="sous"><a href="${esc(urlJournalImports)}" target="_blank" rel="noopener noreferrer">Journal de la dernière exécution ↗</a></p>` : '');
     } catch (e) { corps.innerHTML = '<p class="sous">Impossible de lire l\'historique pour le moment (limite de l\'interface publique de GitHub). Réessayez dans quelques minutes.</p>'; }
   }
-  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-imports]')) ouvrirImports(); });
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-imports]');
+    if (btn) {
+      const source = btn.dataset.source || null;
+      ouvrirImports(source);
+    }
+  });
   let majFaite = false;
   function initMaj() {
     const bloc = $('#rv-maj');
@@ -1342,15 +1354,16 @@
     lire().then((runs) => {
       const etat = (r) => (r.st !== 'completed' ? ['en cours', 'en-cours'] : r.c === 'success' ? ['réussi', 'ok'] : r.c === 'cancelled' ? ['annulé', 'annule'] : ['échec', 'echec']);
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
-      const lots = FAMILLES.map(([f, nom, aide]) => {
+      const lots = FAMILLES.map(([f, nom, aide], i) => {
         const r = runs[f];
-        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET, imports: f === IMPORTS };
+        const source = f === 'releve-leboncoin.yml' && nom === 'Import Leboncoin' ? 'leboncoin' : f === 'releve-leboncoin.yml' && nom === 'Import Vinted' ? 'vinted' : null;
+        if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET, imports: source || (f === IMPORTS_LBC || f === IMPORTS_VINTED), source };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
         const retard = f === 'veille-parutions.yml' && jours > 2;          // GitHub peut sauter un passage programmé : on le voit ici plutôt que de le deviner
         // Relevé eBay arrêté par la limite d'appels du jour (le lot s'annule alors de lui-même, voir prix-ebay.yml) : ce n'est pas une panne, rien n'est perdu
         const limite = f === 'prix-ebay.yml' && r.c === 'cancelled';
-        if (limite) return { nom, aide, cls: 'annule', quand: `limite eBay atteinte, rien n'est perdu${r.ok ? ` · dernier relevé ${depuisMin(new Date(r.ok))}` : ''}`, txt: "arrêté par la limite d'appels eBay", u: r.u, detail: quand(r), discret: false, imports: false };
-        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET, imports: f === IMPORTS };
+        if (limite) return { nom, aide, cls: 'annule', quand: `limite eBay atteinte, rien n'est perdu${r.ok ? ` · dernier relevé ${depuisMin(new Date(r.ok))}` : ''}`, txt: "arrêté par la limite d'appels eBay", u: r.u, detail: quand(r), discret: false, imports: false, source };
+        return { nom, aide, cls: retard ? 'echec' : cls, quand: retard ? `en retard : ${Math.floor(jours)} jours` : depuisMin(d), txt: retard ? 'en retard' : txt, u: r.u, detail: quand(r), discret: f === DISCRET, imports: source || (f === IMPORTS_LBC || f === IMPORTS_VINTED), source };
       }).filter((l) => !l.discret || l.cls === 'echec');         // la publication du site n'apparaît qu'en cas d'échec : sinon le site ne se met plus à jour, sans aucun signe visible
       const mal = lots.filter((l) => l.cls === 'echec'), enCours = lots.filter((l) => l.cls === 'en-cours');
       const global = mal.length ? 'echec' : enCours.length ? 'en-cours' : 'ok';
@@ -1359,7 +1372,8 @@
       const rang = { echec: 0, 'en-cours': 1 };                              // les problèmes d'abord, puis ce qui tourne
       const lignes = lots.map((l, i) => [l, i]).sort((a, b) => (rang[a[0].cls] ?? 2) - (rang[b[0].cls] ?? 2) || a[1] - b[1]).map(([l]) => {
         const corps = `<span class="maj-point" aria-hidden="true"></span><span class="maj-nom">${esc(l.nom)}</span><span class="maj-quand">${esc(l.quand)}</span>`;
-        if (l.imports && l.u) { urlJournalImports = l.u; return `<li><button type="button" class="maj-ligne maj-${l.cls}${l.quand.length > 34 ? ' maj-long' : ''}" data-imports title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Voir les derniers imports</span></button></li>`; }
+        const sourceAttr = l.source ? ` data-source="${esc(l.source)}"` : '';
+        if (l.imports && l.u) { urlJournalImports = l.u; return `<li><button type="button" class="maj-ligne maj-${l.cls}${l.quand.length > 34 ? ' maj-long' : ''}" data-imports${sourceAttr} title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Voir les derniers imports</span></button></li>`; }
         return l.u
           ? `<li><a class="maj-ligne maj-${l.cls}${l.quand.length > 34 ? ' maj-long' : ''}" href="${esc(l.u)}" target="_blank" rel="noopener noreferrer" title="${esc(l.aide)}">${corps}<span class="sr-only"> : ${esc(l.txt)}, ${esc(l.detail)}. Ouvrir le détail (nouvel onglet)</span></a></li>`
           : `<li><div class="maj-ligne maj-vide" title="${esc(l.aide)}">${corps}</div></li>`;
@@ -1367,34 +1381,45 @@
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
         + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Orange : plus de 2 h sans import (de 6 h à 23 h). Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou limite d\'appels eBay atteinte (rien n\'est perdu).</p><ul>'
-        + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`).join('') + '</ul></details></details>';
+        + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => {
+            // Pour les imports, afficher les deux lignes LBC et Vinted au lieu de les regrouper
+            if (nom === 'Import Leboncoin' && lots.some((l) => l.nom === 'Import Vinted')) return '';
+            return `<li><strong>${esc(nom)}</strong> : ${esc(aide)}</li>`;
+          }).join('') + '</ul></details></details>';
       bloc.hidden = false;
       majLigneImports();
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
-  // Ligne « Import bot » de l'accueil : dernier import et livres ajoutés sur 24 h (même source que la liste des imports)
+  // Lignes « Import Leboncoin » et « Import Vinted » de l'accueil : dernier import par source et livres ajoutés sur 24 h
   async function majLigneImports() {
-    const cible = document.querySelector('[data-imports] .maj-quand');
-    if (!cible) return;
+    const cibles = document.querySelectorAll('[data-imports][data-source] .maj-quand');
+    if (!cibles.length) return;
     try {
       const limite = Date.now() - 24 * 3600 * 1000;
-      const imports = await lireImports();
-      const recents = imports.filter((im) => Date.parse(im.t) >= limite);
-      const lignes = recents.flatMap((im) => im.lignes);
-      const n = lignes.length, p = lignes.filter((a) => infosImport(a).v === 'pepite').length;
-      const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
-      const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
-      const ligne = document.querySelector('[data-imports]');
-      if (ligne) {
-        // Orange : plus de 2 h sans import, seulement de 6 h à 23 h (heure de Paris) ; le décompte repart à 6 h le matin
-        const p = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
-        const h = +p.find((x) => x.type === 'hour').value, mn = +p.find((x) => x.type === 'minute').value;
-        const depuis6h = Date.now() - ((h - 6) * 60 + mn) * 60000;
-        const actif = h >= 6 && h < 23;
-        ligne.classList.toggle('maj-retard', !!dernier && actif && Date.now() - Math.max(dernier, depuis6h) > 2 * 3600 * 1000 && ligne.classList.contains('maj-ok'));
-      }
-      cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
-    } catch (e) { /* historique indisponible : la ligne garde son libellé d'origine */ }
+      const importsLbc = await lireImports('leboncoin');
+      const importsVinted = await lireImports('vinted');
+      const maj = (imports, source) => {
+        const cible = document.querySelector(`[data-imports][data-source="${source}"] .maj-quand`);
+        if (!cible) return;
+        const recents = imports.filter((im) => Date.parse(im.t) >= limite);
+        const lignes = recents.flatMap((im) => im.lignes);
+        const n = lignes.length, p = lignes.filter((a) => infosImport(a).v === 'pepite').length;
+        const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
+        const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
+        const ligne = document.querySelector(`[data-imports][data-source="${source}"]`);
+        if (ligne) {
+          // Orange : plus de 2 h sans import, seulement de 6 h à 23 h (heure de Paris) ; le décompte repart à 6 h le matin
+          const t = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
+          const h = +t.find((x) => x.type === 'hour').value, mn = +t.find((x) => x.type === 'minute').value;
+          const depuis6h = Date.now() - ((h - 6) * 60 + mn) * 60000;
+          const actif = h >= 6 && h < 23;
+          ligne.classList.toggle('maj-retard', !!dernier && actif && Date.now() - Math.max(dernier, depuis6h) > 2 * 3600 * 1000 && ligne.classList.contains('maj-ok'));
+        }
+        cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
+      };
+      maj(importsLbc, 'leboncoin');
+      maj(importsVinted, 'vinted');
+    } catch (e) { /* historique indisponible : les lignes gardent leur libellé d'origine */ }
   }
   document.addEventListener('cdh-compte', initMaj);
   initMaj();
