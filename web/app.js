@@ -1413,7 +1413,7 @@
         if (lot.length < 100 || (lot.length && Date.parse(lot[lot.length - 1].created_at) < limite)) break;
       }
       const dernier = demandes.find((x) => !x.pull_request && /^Relevé Leboncoin/.test(x.title || ''));
-      if (!dernier || !dernier.comments) { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), hasError: false })); return false; }
+      if (!dernier || !dernier.comments) { try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), hasError: false })); } catch (e) { /* idem */ } return false; }
       const r = await fetch(`https://api.github.com/repos/loliba92/LDVELH/issues/${dernier.number}/comments`, { headers: { Accept: 'application/vnd.github+json' } });
       if (!r.ok) throw new Error(r.status);
       const commentaires = await r.json();
