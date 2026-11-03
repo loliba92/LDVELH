@@ -1413,12 +1413,14 @@
         const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
         const ligne = document.querySelector(`[data-imports][data-source="${source}"]`);
         if (ligne) {
-          // Orange : plus de 2 h sans import, seulement de 6 h à 23 h (heure de Paris) ; le décompte repart à 6 h le matin
+          // Orange : plus de 2 h sans import, seulement de 6 h à 23 h ; Rouge : plus de 6 h
           const t = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
           const h = +t.find((x) => x.type === 'hour').value, mn = +t.find((x) => x.type === 'minute').value;
           const depuis6h = Date.now() - ((h - 6) * 60 + mn) * 60000;
           const actif = h >= 6 && h < 23;
-          ligne.classList.toggle('maj-retard', !!dernier && actif && Date.now() - Math.max(dernier, depuis6h) > 2 * 3600 * 1000 && ligne.classList.contains('maj-ok'));
+          const delai = !!dernier ? Date.now() - Math.max(dernier, depuis6h) : null;
+          ligne.classList.toggle('maj-severe', !!delai && delai > 6 * 3600 * 1000);
+          ligne.classList.toggle('maj-retard', !!delai && actif && delai > 2 * 3600 * 1000 && delai <= 6 * 3600 * 1000);
         }
         cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
       };
