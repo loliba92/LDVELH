@@ -1426,6 +1426,22 @@
       };
       maj(importsLbc, 'leboncoin');
       maj(importsVinted, 'vinted');
+      // Propager l'état au parent si l'un des imports est en retard/sévère
+      const conteneur = document.querySelector('.maj.maj-ok-global, .maj.maj-en-cours-global, .maj.maj-echec-global');
+      if (conteneur) {
+        const lignes = [...document.querySelectorAll('[data-imports][data-source]')];
+        const severe = lignes.some((l) => l.classList.contains('maj-severe'));
+        const retard = lignes.some((l) => l.classList.contains('maj-retard'));
+        const resume = conteneur.querySelector('.maj-resume');
+        if (severe) {
+          conteneur.classList.add('maj-imports-severe');
+          if (resume) resume.classList.add('maj-severe');
+        }
+        if (retard && !severe) {
+          conteneur.classList.add('maj-imports-retard');
+          if (resume) resume.classList.add('maj-retard');
+        }
+      }
     } catch (e) { /* historique indisponible : les lignes gardent leur libellé d'origine */ }
   }
   document.addEventListener('cdh-compte', initMaj);
