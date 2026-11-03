@@ -1241,7 +1241,12 @@
   // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
   async function lireImports(filtre_source = null) {
     const CLE = 'cdh-imports-lbc-24h-v2';
-    try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return c.imports.filter((im) => !filtre_source || im.source === filtre_source); } catch (e) { /* pas de cache */ }
+    try {
+      const c = JSON.parse(sessionStorage.getItem(CLE) || 'null');
+      if (c && Date.now() - c.t < 300000) {
+        return c.imports.map((im) => ({ ...im, lignes: im.lignes.filter((a) => !filtre_source || a.source === filtre_source) })).filter((im) => im.lignes.length > 0);
+      }
+    } catch (e) { /* pas de cache */ }
     const limite = Date.now() - 24 * 3600 * 1000;
     let demandes = [];
     for (let page = 1; page <= 2; page += 1) {
@@ -1263,13 +1268,13 @@
         const fdp = brut !== '' ? parseFloat(brut) : vinted ? Math.round((nu * 0.05 + 0.7 + 3) * 100) / 100 : 0;
         return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')], source: vinted ? 'vinted' : 'leboncoin' };
       });
-      // Séparer les lignes par source
-      return { t: x.created_at, lignes: lignes.filter((a) => !filtre_source || a.source === filtre_source), source: filtre_source };
+      const sources = new Set(lignes.map((a) => a.source));
+      return { t: x.created_at, lignes, sources: [...sources] };
     });
     const recents = tous.filter((im) => Date.parse(im.t) >= limite && im.lignes.length > 0);
     const imports = recents.length ? recents : tous.slice(0, 3).filter((im) => im.lignes.length > 0);
     try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports: tous })); } catch (e) { /* idem */ }
-    return imports;
+    return imports.map((im) => ({ ...im, lignes: im.lignes.filter((a) => !filtre_source || a.source === filtre_source) })).filter((im) => im.lignes.length > 0);
   }
   // Position du prix d'une annonce par rapport au prix du site (même état) : mêmes seuils que « Annonces reçues » et le Butin
   const VERDICTS_IMP = { super: ['🔥 Super pépite', 'rc-v-super'], pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
