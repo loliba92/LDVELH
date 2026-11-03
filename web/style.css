@@ -2118,6 +2118,8 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .maj-ok .maj-point, .maj-resume .maj-point { background: #4cc16f; }
 .maj-echec-global .maj-resume .maj-point, .maj-echec .maj-point { background: #e0604f; }
 .maj-en-cours-global .maj-resume .maj-point, .maj-en-cours .maj-point { background: var(--gold); animation: compte-pouls 1.2s ease-in-out infinite; }
+.maj-imports-severe .maj-resume .maj-point, .maj-severe .maj-point { background: #c1272d; }
+.maj-imports-retard .maj-resume .maj-point, .maj-retard .maj-point { background: #e8a13a; }
 .maj-liste { margin: 0; padding: 0 6px 4px; list-style: none; border-top: 1px solid var(--line); }
 .maj-liste li { margin: 0; break-inside: avoid; }
 .maj-ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 4px; color: var(--text); text-decoration: none; font-size:var(--t-base); }
