@@ -1395,6 +1395,33 @@
       majLigneImports();
     }).catch(() => { /* historique indisponible (limite de l'interface publique) : rien n'est affiché */ });
   }
+  // Détecte les erreurs DataDome récentes dans les commentaires de l'issue
+  async function verifierErrorDatadome() {
+    const CLE = 'cdh-imports-erreur-dd-24h';
+    try {
+      const c = JSON.parse(sessionStorage.getItem(CLE) || 'null');
+      if (c && Date.now() - c.t < 300000) return c.hasError;
+    } catch (e) { /* pas de cache */ }
+    try {
+      const limite = Date.now() - 24 * 3600 * 1000;
+      let demandes = [];
+      for (let page = 1; page <= 2; page += 1) {
+        const r = await fetch(`https://api.github.com/repos/loliba92/LDVELH/issues?state=all&per_page=100&page=${page}&sort=created&direction=desc`, { headers: { Accept: 'application/vnd.github+json' } });
+        if (!r.ok) { if (page === 1) throw new Error(r.status); break; }
+        const lot = await r.json();
+        demandes = demandes.concat(lot);
+        if (lot.length < 100 || (lot.length && Date.parse(lot[lot.length - 1].created_at) < limite)) break;
+      }
+      const dernier = demandes.find((x) => !x.pull_request && /^Relevé Leboncoin/.test(x.title || ''));
+      if (!dernier || !dernier.comments) { try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), hasError: false })); } catch (e) { /* idem */ } return false; }
+      const r = await fetch(`https://api.github.com/repos/loliba92/LDVELH/issues/${dernier.number}/comments`, { headers: { Accept: 'application/vnd.github+json' } });
+      if (!r.ok) throw new Error(r.status);
+      const commentaires = await r.json();
+      const hasError = commentaires.some((c) => /datadome/i.test(c.body || ''));
+      try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), hasError })); } catch (e) { /* idem */ }
+      return hasError;
+    } catch (e) { return false; }
+  }
   // Lignes « Import Leboncoin » et « Import Vinted » de l'accueil : dernier import par source et livres ajoutés sur 24 h
   async function majLigneImports() {
     const cibles = document.querySelectorAll('[data-imports][data-source] .maj-quand');
@@ -1403,6 +1430,7 @@
       const limite = Date.now() - 24 * 3600 * 1000;
       const importsLbc = await lireImports('leboncoin');
       const importsVinted = await lireImports('vinted');
+      const aUnErreur = await verifierErrorDatadome();
       const maj = (imports, source) => {
         const cible = document.querySelector(`[data-imports][data-source="${source}"] .maj-quand`);
         if (!cible) return;
@@ -1413,14 +1441,17 @@
         const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
         const ligne = document.querySelector(`[data-imports][data-source="${source}"]`);
         if (ligne) {
-          // Orange : plus de 2 h sans import, seulement de 6 h à 23 h ; Rouge : plus de 6 h
+          // Orange : pause (2 h à 6 h sans import) ; Rouge : erreur DataDome ou pause > 6 h
           const t = new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date());
           const h = +t.find((x) => x.type === 'hour').value, mn = +t.find((x) => x.type === 'minute').value;
           const depuis6h = Date.now() - ((h - 6) * 60 + mn) * 60000;
           const actif = h >= 6 && h < 23;
           const delai = !!dernier ? Date.now() - Math.max(dernier, depuis6h) : null;
-          ligne.classList.toggle('maj-severe', !!delai && delai > 6 * 3600 * 1000);
-          ligne.classList.toggle('maj-retard', !!delai && actif && delai > 2 * 3600 * 1000 && delai <= 6 * 3600 * 1000);
+          // Rouge si erreur DataDome OU pause > 6 h
+          const estSevere = !!delai && (aUnErreur || delai > 6 * 3600 * 1000);
+          ligne.classList.toggle('maj-severe', estSevere);
+          // Orange si pause 2-6 h ET pas erreur DataDome
+          ligne.classList.toggle('maj-retard', !!delai && actif && delai > 2 * 3600 * 1000 && delai <= 6 * 3600 * 1000 && !aUnErreur);
         }
         cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
       };
@@ -1433,13 +1464,17 @@
         const severe = lignes.some((l) => l.classList.contains('maj-severe'));
         const retard = lignes.some((l) => l.classList.contains('maj-retard'));
         const resume = conteneur.querySelector('.maj-resume');
+        const etat = conteneur.querySelector('.maj-etat');
+        const noms = (cls) => lignes.filter((l) => l.classList.contains(cls)).map((l) => l.querySelector('.maj-nom').textContent);
         if (severe) {
           conteneur.classList.add('maj-imports-severe');
           if (resume) resume.classList.add('maj-severe');
+          if (etat && !conteneur.classList.contains('maj-echec-global')) etat.textContent = `${noms('maj-severe').length} problème${noms('maj-severe').length > 1 ? 's' : ''} : ${noms('maj-severe').join(', ')}`;
         }
         if (retard && !severe) {
           conteneur.classList.add('maj-imports-retard');
           if (resume) resume.classList.add('maj-retard');
+          if (etat && !conteneur.classList.contains('maj-echec-global')) etat.textContent = `En retard : ${noms('maj-retard').join(', ')}`;
         }
       }
     } catch (e) { /* historique indisponible : les lignes gardent leur libellé d'origine */ }
