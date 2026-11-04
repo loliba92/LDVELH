@@ -102,6 +102,7 @@ jobs:
           exit $code
       - name: Prix du neuf et disponibilité des éditions en vente
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
+        id: neuf
         continue-on-error: true
         run: |
           # Relevé complet des fiches de leslibraires.fr (prix du neuf + exemplaires d'occasion) : au plus une fois par semaine (7 jours minimum) sur l'horaire,
@@ -120,6 +121,12 @@ jobs:
             fi
           fi
           python pipeline/prix_neuf.py
+      - name: Signaler l'échec du relevé du neuf
+        if: ${{ steps.neuf.outcome == 'failure' }}
+        run: |
+          # Le relevé eBay est déjà fait et la suite continue : on garde seulement une trace visible de l'échec (refus 403 ou 429, ou erreurs réseau).
+          echo "::error title=Prix du neuf::Relevé arrêté (voir le journal de l'étape) ; le fichier précédent est conservé. Le relevé eBay et la suite du lot continuent."
+          echo "Relevé du prix du neuf arrêté ce jour (refus de la librairie ou erreurs réseau) : le fichier précédent est conservé." >> "$GITHUB_STEP_SUMMARY"
       - name: Base et données du site
         if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
