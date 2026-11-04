@@ -632,12 +632,13 @@ dialog.parcours[open] { display: flex; }
 .etats-rapides button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .etats-rapides button:focus-visible, .onglets-ed button:focus-visible, .col-tout:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 
-/* Cinq illustrations, une par jour (choix dans l'en-tête de la page) ; cadrage propre à chacune */
+/* Six illustrations, une par jour (choix dans l'en-tête de la page) ; cadrage propre à chacune */
 html[data-accueil="1"] .hero { --img: url("images/accueil-1.webp"); --pos: 50% 28%; }
 html[data-accueil="2"] .hero { --img: url("images/accueil-2.webp"); --pos: 50% 50%; }
 html[data-accueil="3"] .hero { --img: url("images/accueil-3.webp"); --pos: 50% 50%; }
 html[data-accueil="4"] .hero { --img: url("images/accueil-4.webp"); --pos: 50% 50%; }
 html[data-accueil="5"] .hero { --img: url("images/accueil-5.webp"); --pos: 50% 50%; }
+html[data-accueil="6"] .hero { --img: url("images/accueil-6.webp"); --pos: 35% 50%; }
 
 /* Bandeau illustré de la page « Ma collection » */
 .banniere { position: relative; display: flex; align-items: flex-end; min-height: clamp(210px, 26vw, 300px); padding: 28px 0 30px; border-bottom: 3px double var(--brass);
