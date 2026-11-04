@@ -58,9 +58,14 @@ def prix_livre_vinted(prix):
     return round(prix * (1 + PROTECTION_TAUX_VINTED) + PROTECTION_FIXE_VINTED + FRAIS_PORT_VINTED, 2)
 ETAT_OCCASION = "tres_bon"   # fiche sans état lisible : très bon état (règle du propriétaire)
 PAUSE = 2.0
-ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (429, 5xx, réseau)
+ESSAIS = (3, 8, 20)        # attentes (secondes) avant de réessayer après une erreur passagère (5xx, réseau)
+REFUS = (403, 429)         # le site refuse : on s'arrête, sans réessayer
 AGENT = ("LDVELH-catalogue/0.1 (projet personnel de cote de livres-jeux ; lecture d'une fiche par ISBN, au plus une fois par semaine, "
          "et tous les deux jours pour la soixantaine de fiches qui proposent un exemplaire d'occasion)")
+
+
+class Refus(Exception):
+    """Le site a répondu 403 ou 429 : le relevé s'arrête."""
 
 
 def etat_occasion(html):
@@ -116,7 +121,7 @@ def fiche_coherente(isbn, html, http=requests):
 
 
 def source_leslibraires(isbn, http=requests, attentes=ESSAIS):
-    """Dictionnaire de lire_fiche ; 404 = fiche absente = indisponible ; erreur passagère : on réessaie, puis on lève l'erreur."""
+    """Dictionnaire de lire_fiche ; 404 = fiche absente = indisponible ; 403 ou 429 : Refus, sans réessai ; autre erreur passagère : on réessaie, puis on lève l'erreur."""
     dernier = None
     for attente in (0,) + tuple(attentes):
         time.sleep(attente)
@@ -124,7 +129,10 @@ def source_leslibraires(isbn, http=requests, attentes=ESSAIS):
             r = http.get(URL.format(isbn=isbn), headers={"User-Agent": AGENT}, timeout=30, allow_redirects=True)
             if r.status_code == 404:
                 return {"prix": None, "disponibilite": "indisponible", "prix_occasion": None}
-            if r.status_code == 429 or r.status_code >= 500:
+            if r.status_code in REFUS:
+                print(f"  Refus HTTP {r.status_code} sur la fiche {isbn} : arrêt du relevé, aucun nouvel essai.")
+                raise Refus(f"HTTP {r.status_code}")
+            if r.status_code >= 500:
                 dernier = requests.HTTPError(f"HTTP {r.status_code}")
                 continue
             r.raise_for_status()
@@ -201,7 +209,10 @@ def main():
         return
     lignes, occasion, erreurs = [], [], 0
     for n, isbn in enumerate(isbns, 1):
-        r = prix_neuf(isbn)
+        try:
+            r = prix_neuf(isbn)
+        except Refus as e:
+            sys.exit(f"Refus du site ({e}) : relevé arrêté, le fichier précédent est conservé. Prochain passage à l'heure habituelle.")
         if r is None:
             erreurs += 1
             print(f"  {isbn} : aucune source n'a répondu, ignoré")
