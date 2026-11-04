@@ -49,9 +49,20 @@ class TestPrixNeuf(unittest.TestCase):
         self.assertEqual(p.source_leslibraires("9782075123150", Faux(Rep(404)), attentes=())["disponibilite"], "indisponible")
 
     def test_erreur_passagere_puis_succes(self):
-        h = Faux(Rep(429), Rep(503), Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
+        h = Faux(Rep(503), Rep(502), Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
         self.assertEqual(p.source_leslibraires("x", h, attentes=(0, 0))["prix"], 13.5)
         self.assertEqual(h.n, 3)
+
+    def test_403_et_429_arretent_sans_reessai(self):
+        for code in (403, 429):
+            h = Faux(Rep(code), Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
+            with self.assertRaises(p.Refus):
+                p.source_leslibraires("x", h, attentes=(0, 0))
+            self.assertEqual(h.n, 1)
+
+    def test_refus_traverse_prix_neuf(self):
+        with self.assertRaises(p.Refus):
+            p.prix_neuf("9782075148641", Faux(Rep(429)), attentes=(0,))
 
     def test_fonction_prix_neuf_par_isbn(self):
         h = Faux(Rep(200, FICHE.format(dispo="InStock", etat="NewCondition")))
