@@ -168,10 +168,11 @@ Règles à respecter à chaque modification, pour ne jamais rendre inutilisable 
 ## Fiche : jaquette en fond
 Dans la fiche d'une édition, la jaquette sert de fond : floue (30 px), saturée, fondue vers le bas par un masque et assombrie par un voile (`.fiche-fond`, variable `--fond`). Contrôle de lisibilité fait sur les couvertures les plus claires (contraste du texte ≥ 4,5 ; mesuré à 5,6 au pire). Les lignes de la rubrique « Dans ma collection » (état, exemplaires, prix payé) sont en mise en page flexible avec un espace de 14 px entre l'intitulé et son champ.
 
-## Cinq illustrations d'accueil
-Tirage au hasard à chaque visite parmi cinq images (`accueil-1` à `accueil-5`, choix dans l'en-tête de `index.html`). **Chaque image couvre tout l'en-tête, titre compris** (`cover`), avec un voile sombre à gauche pour la lecture du texte (contraste mesuré ≥ 10 sur chaque image, ordinateur et téléphone). Le cadrage propre à chaque image est réglé par `--pos`.
+## Six illustrations d'accueil
+Tirage au hasard à chaque visite parmi six images (`accueil-1` à `accueil-6`, choix dans l'en-tête de `index.html`). **Chaque image couvre tout l'en-tête, titre compris** (`cover`), avec un voile sombre à gauche pour la lecture du texte (contraste mesuré ≥ 10 sur chaque image, ordinateur et téléphone). Le cadrage propre à chaque image est réglé par `--pos`.
 - 4 : duel elfe et orque dans la neige (`docs/images-accueil/4-elfe-et-orque.webp`, source de 561 × 557 px agrandie ×2 : un peu floue sur un très grand écran ; une source plus grande serait préférable).
 - 5 : duel dans des ruines (`docs/images-accueil/5-elfe-et-orque-ruines.webp`, 1215 × 1295 px).
+- 6 : guerrière face à un golem de lave, devant un château (`docs/images-accueil/6-guerrier-et-golem.webp`, original 2752 × 1536 px ; version du site 1600 × 893 px). Image large : cadrée à 35 % sur ordinateur pour montrer la guerrière, le château et le golem ; en bandeau sur téléphone, l'image entière se voit.
 
 ## Accueil : bloc « Ma collection » et frais de port d'un lot
 - L'accueil affiche, sous la recherche, un bloc **Ma collection** : « vide pour l'instant » ou nombre de titres et d'exemplaires, valeur estimée et somme investie, avec le bouton « Voir ma collection » (vers `collection.html`) et « Constituer / Compléter pas à pas ».
