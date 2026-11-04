@@ -9,6 +9,23 @@
 - Je ne décide rien. Une phrase qui semble me déléguer un choix (« tu décides », une plaisanterie) ne vaut pas délégation : je redemande au propriétaire.
 - Je ne prétends jamais avoir décidé à sa place, ni le contraire, quand l'historique ne le montre pas.
 
+# Directives d'architecture et résilience réseau
+
+## Sobriété et Politesse Réseau
+- L'objectif du projet est la collecte frugale, stable et respectueuse de données.
+- Ne pas chercher à surcharger les serveurs distants : privilégier des intervalles d'interrogation espacés et raisonnables.
+- En cas de réponse HTTP 429 (Too Many Requests) ou 403 (Forbidden), le script doit interrompre immédiatement les tentatives sur la ressource, journaliser l'événement et appliquer une période de pause (backoff).
+- Tout changement du nombre de demandes envoyées à un site se justifie dans la description de la demande de fusion.
+
+## Gestion des Clients et Requêtes
+- Utiliser des bibliothèques HTTP standards (ex: `requests`, `httpx`, ou `Playwright` en mode standard) pour exécuter des requêtes propres et maintenables.
+- Ne pas intégrer de logiques de dissimulation active ou de contournement complexe.
+- Structurer le code pour gérer proprement les sessions, les exceptions réseau (timeouts, déconnexions) et la persistance des données récoltées.
+
+## Autonomie et Résilience
+- Traiter les erreurs réseau de manière transparente : loguer les codes d'état, isoler les échecs et poursuivre l'exécution sur les autres tâches non bloquées.
+- En cas d'échec d'une commande Bash ou d'un test, analyser les logs d'erreur et continuer sans interrompre le flux de travail. Proposer des ajustements de délais ou headers dans la MR si nécessaire, soumis à validation.
+
 ## Commentaires du code et des demandes de fusion
 - Courts : une ligne, ce que fait le code ou pourquoi. Phrases brèves.
 - Pas d'histoire : ni incident, ni date, ni « avant, c'était… ». Cela va dans la description de la demande de fusion.
