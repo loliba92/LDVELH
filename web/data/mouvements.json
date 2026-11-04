@@ -2,9 +2,9 @@
  "date": "2026-11-04",
  "precedent": "2026-11-03",
  "nb_comparees": 1503,
- "nb_modifiees": 705,
+ "nb_modifiees": 707,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 6,
+ "nouvelles_cotes": 9,
  "hausses": [
   {
    "id": "9782070333783",
@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 55.03,
-   "apres": 62.72,
-   "pct": 0.14,
+   "apres": 62.65,
+   "pct": 0.138,
    "nature": "annonces",
    "nb": 6,
    "recalibre": false
@@ -34,6 +34,21 @@
    "pct": 0.113,
    "nature": "annonces",
    "nb": 9,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333202",
+   "isbn13": "9782070333202",
+   "titre": "La Source de Mort",
+   "serie": "L'Œil Noir",
+   "numero": "320",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 7.02,
+   "apres": 7.77,
+   "pct": 0.107,
+   "nature": "annonces",
+   "nb": 8,
    "recalibre": false
   }
  ],
@@ -67,29 +82,14 @@
    "nature": "annonces",
    "nb": 7,
    "recalibre": false
-  },
-  {
-   "id": "9782070334742",
-   "isbn13": "9782070334742",
-   "titre": "La Crypte du Sorcier",
-   "serie": "Défis Fantastiques",
-   "numero": "474",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 20.88,
-   "apres": 18.78,
-   "pct": -0.101,
-   "nature": "annonces",
-   "nb": 7,
-   "recalibre": false
   }
  ],
  "nb_grands_mouvements": 5,
  "modele": {
   "actif": false,
-  "n_paires": 120,
-  "gain": 0.04,
-  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
-  "rapport_global": 0.923
+  "n_paires": 118,
+  "gain": 0.03,
+  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
+  "rapport_global": 0.928
  }
 }
