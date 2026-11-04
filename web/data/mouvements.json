@@ -2,9 +2,9 @@
  "date": "2026-11-04",
  "precedent": "2026-11-03",
  "nb_comparees": 1503,
- "nb_modifiees": 696,
+ "nb_modifiees": 701,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 3,
  "hausses": [
   {
    "id": "9782070333783",
@@ -27,8 +27,8 @@
  "modele": {
   "actif": false,
   "n_paires": 109,
-  "gain": 0.021,
+  "gain": 0.02,
   "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.94
+  "rapport_global": 0.935
  }
 }
