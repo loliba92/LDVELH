@@ -2585,6 +2585,8 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .sel-texte { display: grid; gap: 2px; min-width: 0; font-size: var(--t-sm); color: var(--text); }
 .sel-texte b { color: var(--accent); font-size: var(--t-base); }
 .barre-sel .retirer { flex: none; min-height: 40px; padding: 4px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: transparent; color: var(--accent); font: 600 var(--t-base) var(--f-ui); cursor: pointer; }
+.sel-lien { display: inline; min-height: 0; padding: 0; margin-left: 6px; border: 0; background: none; color: var(--accent); font: 600 var(--t-sm) var(--f-ui); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap; }
+.annonce-lot-champ { width: 100%; box-sizing: border-box; font: inherit; font-size: var(--t-sm); padding: 8px 10px; color: var(--text); background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r); }
 @media (max-width: 700px) { .barre-sel { bottom: calc(66px + env(safe-area-inset-bottom)); } }
 
 .sel-texte span b { color: var(--text); }

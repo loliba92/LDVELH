@@ -656,7 +656,7 @@
       const parMontant = achat >= 400 ? 0.20 : achat >= 200 ? 0.15 : achat >= 100 ? 0.10 : achat >= 50 ? 0.05 : 0;
       const remise = Math.max(parNombre, parMontant), offreLot = Math.floor(achat * (1 - remise));
       lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(offreLot)}${remise ? ` <span class="nowrap">(−${Math.round(remise * 100)} % lot)</span>` : ''} ${nA ? ` ${pastille(ptsA / nA)}` : ''}`);
-      lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}`);
+      lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''} <button type="button" class="sel-lien" data-sel-annonce>Créer l'annonce</button>`);
       if (cotes < n) lignes.push(`<span class="sel-sous">${n - cotes} livre${n - cotes > 1 ? 's' : ''} sans cote, non chiffré${n - cotes > 1 ? 's' : ''}</span>`);
       { const pl = portLot(cotes); lignes.push(`<span class="sel-sous">Port Mondial Relay : ${eurosArr(pl.prix)} + ${eurosArr(FRAIS_PLATEFORME)} de frais (≈ ${(Math.round(pl.kg * 10) / 10).toLocaleString('fr-FR')} kg${pl.colis > 1 ? `, ${pl.colis} colis` : ''})</span>`); }
     }
@@ -675,6 +675,54 @@
     c.closest('.livre-carte').classList.toggle('sel-oui', oui);
     majBarreLot();
   });
+
+  // Annonce de vente du lot coché : titre et description à copier (Leboncoin, Vinted)
+  function annonceLot() {
+    const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
+    let total = 0, chiffres = 0;
+    const lignes = livres.map((b) => {
+      const poss = COLL[b.id], v = prixAffiche(b, poss ? poss.etat : undefined);
+      if (v) { total += v.prix; chiffres += 1; }
+      const edition = [b.editeur, b.annee].filter(Boolean).join(', ');
+      return `• ${b.titre} — ${b.serie}${b.numero ? ` n° ${b.numero}` : ''}${edition ? ` (${edition})` : ''}`;
+    });
+    const series = [...new Set(livres.map((b) => b.serie).filter(Boolean))];
+    const titre = `Lot de ${livres.length} livre${livres.length > 1 ? 's' : ''} dont vous êtes le héros${series.length === 1 ? ` — ${series[0]}` : ''}`;
+    const texte = [`${titre}.`, ...(chiffres ? ['', `Prix du lot : ${eurosArr(total)}.`] : []), '', 'Contenu du lot :', ...lignes].join('\n');
+    return { titre, texte, sansCote: livres.length - chiffres };
+  }
+  function ouvrirAnnonceLot() {
+    let d = $('#annonce-lot');
+    if (!d) {
+      d = document.createElement('dialog');
+      d.id = 'annonce-lot'; d.className = 'carte-dialog'; d.setAttribute('aria-labelledby', 'annonce-lot-titre');
+      d.innerHTML = `<div class="carte-cadre"><div class="scan-tete"><p class="surtitre" id="annonce-lot-titre">Annonce de vente</p><button type="button" class="bouton bouton-clair" data-annonce-fermer>Fermer</button></div>
+        <label class="sous" for="annonce-lot-t">Titre (modifiable)</label>
+        <input type="text" id="annonce-lot-t" class="annonce-lot-champ" spellcheck="true">
+        <label class="sous" for="annonce-lot-d">Texte de l'annonce (modifiable)</label>
+        <textarea id="annonce-lot-d" rows="10" spellcheck="true"></textarea>
+        <p class="sous" id="annonce-lot-msg" role="status" aria-live="polite"></p>
+        <div class="carte-actions"><button type="button" class="bouton" data-annonce-copier="t">Copier le titre</button><button type="button" class="bouton" data-annonce-copier="d">Copier le texte</button></div></div>`;
+      document.body.appendChild(d);
+      d.addEventListener('click', (e) => {
+        if (e.target === d || e.target.closest('[data-annonce-fermer]')) { d.close(); return; }
+        const c = e.target.closest('[data-annonce-copier]');
+        if (!c) return;
+        const champ = $(`#annonce-lot-${c.dataset.annonceCopier}`), msg = $('#annonce-lot-msg'), nom = c.dataset.annonceCopier === 't' ? 'Titre' : 'Texte';
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(champ.value).then(() => { msg.textContent = `${nom} copié.`; }).catch(() => { champ.select(); msg.textContent = 'Copie impossible : sélectionnez le texte et copiez-le.'; });
+        else { champ.select(); msg.textContent = 'Texte sélectionné : copiez-le.'; }
+      });
+    }
+    const a = annonceLot();
+    $('#annonce-lot-t').value = a.titre;
+    $('#annonce-lot-d').value = a.texte;
+    $('#annonce-lot-msg').textContent = a.sansCote ? `${a.sansCote} livre${a.sansCote > 1 ? 's' : ''} sans cote : ${a.sansCote > 1 ? 'ils ne sont' : 'il n\'est'} pas dans le prix.` : '';
+    d.showModal();
+    const ta = $('#annonce-lot-d');
+    ta.style.height = 'auto';
+    ta.style.height = `${Math.min(ta.scrollHeight + 4, Math.round(innerHeight * 0.45))}px`;          // tout le texte visible, dans la limite de l'écran
+  }
+  document.addEventListener('click', (ev) => { if (ev.target.closest('[data-sel-annonce]') && voitAnnonces() && SEL_LOT.size) ouvrirAnnonceLot(); });
 
   function afficherEtagere(liste) {
     const e = etatDe(S.h);
