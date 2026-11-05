@@ -97,7 +97,7 @@ window.Compte = (function () {
     var ban = $('#compte-bandeau');
     if (ban) ban.hidden = !(e.cle === 'reprendre' && enCours());
     bandeauFin();
-    annonceSorcier();
+    if (!nouvelleDemandee) { nouvelleDemandee = true; chargerNouvelle(); } else annonceNouvelle();
     bienvenueSorcier();
     document.dispatchEvent(new CustomEvent('cdh-compte', { detail: { etat: e.cle, role: role } }));
   }
@@ -122,21 +122,43 @@ window.Compte = (function () {
     b.hidden = false;
   }
 
-  // Annonce du profil Sorcier : un bloc discret tant qu'il n'est pas fermé (ou lu), jamais pour un sorcier ni sur la page qui l'explique
-  var CLE_ANNONCE = 'cdh-sorcier-annonce';
-  function annonceSorcier() {
-    var b = $('#annonce-sorcier'), vu = false;
-    try { vu = !!localStorage.getItem(CLE_ANNONCE); } catch (e) { /* sans stockage : le bloc reviendra */ }
-    var visible = !vu && role !== 'admin' && role !== 'superadmin' && !$('#sorcier');
+  // Dernière nouvelle de la page Communauté : un bloc sous l'en-tête pendant `data-index-jours` jours après `data-index-date`, jusqu'à ce qu'on le ferme ou le lise
+  var CLE_ANNONCE = 'cdh-nouvelle-vue', CLE_NOUVELLE = 'cdh-nouvelle-cache';
+  var nouvelle = null, nouvelleLue = false, nouvelleDemandee = false;
+  function lireNouvelle(html) {                     // première nouvelle de la page encore dans sa période, ou null
+    var doc = new DOMParser().parseFromString(html, 'text/html'), auj = Date.now(), r = null;
+    Array.prototype.some.call(doc.querySelectorAll('.comm-article[data-index-date]'), function (a) {
+      var fin = Date.parse(a.dataset.indexDate + 'T23:59:59') + (parseInt(a.dataset.indexJours, 10) || 0) * 86400000, img = a.querySelector('img');
+      if (!a.id || !(auj <= fin)) return false;
+      r = { id: a.id, titre: a.dataset.indexTitre || '', texte: a.dataset.indexTexte || '', image: img ? img.getAttribute('src') : '', sansSorcier: a.hasAttribute('data-index-sans-sorcier'), fin: fin };
+      return true;
+    });
+    return r;
+  }
+  function chargerNouvelle() {                     // une lecture de la page Communauté par session, gardée sur l'appareil le temps de la visite
+    var c = lireSession(CLE_NOUVELLE);
+    if (c) { try { nouvelle = JSON.parse(c); } catch (e) { nouvelle = null; } nouvelleLue = true; annonceNouvelle(); return; }
+    fetch('communaute.html').then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; }).then(function (h) {
+      nouvelle = h ? lireNouvelle(h) : null; nouvelleLue = true;
+      ecrireSession(CLE_NOUVELLE, JSON.stringify(nouvelle));
+      annonceNouvelle();
+    });
+  }
+  function annonceNouvelle() {
+    var b = $('#annonce-nouvelle'), vu = '';
+    if (!nouvelleLue) return;
+    try { vu = localStorage.getItem(CLE_ANNONCE) || ''; } catch (e) { /* sans stockage : le bloc reviendra */ }
+    var n = nouvelle;
+    var visible = !!n && Date.now() <= n.fin && vu !== n.id && !(n.sansSorcier && (role === 'admin' || role === 'superadmin')) && !document.getElementById(n.id);
     if (!visible) { if (b) b.hidden = true; return; }
     if (!b) {
-      b = document.createElement('div'); b.id = 'annonce-sorcier'; b.className = 'annonce-sorcier'; b.setAttribute('role', 'region'); b.setAttribute('aria-label', 'Nouveauté');
-      b.innerHTML = '<img src="images/accueil-3.webp" alt="" width="40" height="40" decoding="async">' +
-        '<p><strong>Les sorciers arrivent.</strong> Un nouveau profil, avec des outils pour repérer les bonnes affaires. <a href="communaute.html#sorcier" data-annonce="lu">En savoir plus</a></p>' +
+      b = document.createElement('div'); b.id = 'annonce-nouvelle'; b.className = 'annonce-sorcier'; b.setAttribute('role', 'region'); b.setAttribute('aria-label', 'Nouveauté');
+      b.innerHTML = (n.image ? '<img src="' + esc(n.image) + '" alt="" width="40" height="40" decoding="async">' : '') +
+        '<p><strong>' + esc(n.titre) + '</strong> ' + esc(n.texte) + ' <a href="communaute.html#' + esc(n.id) + '" data-annonce="lu">En savoir plus</a></p>' +
         '<button type="button" class="annonce-fermer" data-annonce="fermer" aria-label="Fermer l\'annonce">×</button>';
       b.addEventListener('click', function (e) {
         if (!e.target.closest('[data-annonce]')) return;
-        try { localStorage.setItem(CLE_ANNONCE, '1'); } catch (err) { /* tant pis */ }
+        try { localStorage.setItem(CLE_ANNONCE, n.id); } catch (err) { /* tant pis */ }
         if (e.target.closest('[data-annonce="fermer"]')) b.hidden = true;
       });
       var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
