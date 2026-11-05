@@ -44,6 +44,9 @@ SOURCES = [  # code, nom, famille, accès, fiabilité
     ("releve_manuel", "Relevé manuel (Vinted, Leboncoin, comparateurs)", "marketplace", "saisie", 0.6),
     ("leboncoin", "Leboncoin", "marketplace", "saisie", 0.6),
     ("vinted", "Vinted", "marketplace", "saisie", 0.6),
+    ("amazon", "Amazon (occasion)", "marketplace", "saisie", 0.6),
+    ("fnac", "Fnac (occasion)", "marketplace", "saisie", 0.6),
+    ("abebooks", "AbeBooks (occasion)", "marketplace", "saisie", 0.6),
     ("communaute", "Contribution d'un visiteur", "communaute", "saisie", 0.5),
 ]
 TYPES = [  # code, libellé, poids, prix réel ?
@@ -297,6 +300,9 @@ def main():
         nb_fichiers += nb_lib + nb_lbc + nb_lbv + nb_vin + nb_vev
         doublons += dbl_ebay + dbl_lib + dbl_lbc + dbl_lbv + dbl_vin + dbl_vev
         erreurs += err_ebay + err_lib + err_lbc + err_lbv + err_vin + err_vev
+        for revendeur in importer_leboncoin.REVENDEURS:          # offres d'occasion Amazon, Fnac, AbeBooks : annonces actives seulement
+            n_r, dbl_r, err_r, nb_r, _ = load_ebay(cx, a.occasion, f"{revendeur}-20*.csv", revendeur)
+            n_ebay, nb_fichiers, doublons, erreurs = n_ebay + n_r, nb_fichiers + nb_r, doublons + dbl_r, erreurs + err_r
     cx.execute("PRAGMA foreign_keys = ON")
     problemes = cx.execute("PRAGMA foreign_key_check").fetchall()
 

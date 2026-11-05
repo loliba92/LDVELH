@@ -44,16 +44,36 @@ FDP_MAX = 30.0                                # frais de port et frais de la pla
 FENETRE_AVANT, FENETRE_APRES = 8, 1          # jours : une ligne trop ancienne ou datée du futur est refusée (le bot envoie les annonces vues depuis moins de 7 jours)
 LIEN = re.compile(r"^https://www\.leboncoin\.fr/[A-Za-z0-9_\-/.]+$")
 LIEN_VINTED = re.compile(r"^https://www\.vinted\.fr/items/\d+(?:-[A-Za-z0-9_\-]*)?$")
-SOURCES = ("leboncoin", "vinted")               # le bot envoie les deux dans le même relevé ; chaque source a ses propres fichiers
+LIENS_REVENDEURS = {          # offres d'occasion des revendeurs (page chasse-aux-livres) : lien direct vers le livre, construit par le bot avec l'ISBN
+    "amazon": re.compile(r"^https://www\.amazon\.fr/dp/[0-9X]{10}$"),
+    "fnac": re.compile(r"^https://www\.fnac\.com/SearchResult/ResultList\.aspx\?Search=\d{13}$"),
+    "abebooks": re.compile(r"^https://www\.abebooks\.fr/servlet/SearchResults\?isbn=\d{13}$"),
+}
+REVENDEURS = tuple(LIENS_REVENDEURS)
+SOURCES = ("leboncoin", "vinted") + REVENDEURS          # le bot envoie tout dans le même relevé ; chaque source a ses propres fichiers
 
 
 def source_du_lien(lien):
-    """« leboncoin » ou « vinted » d'après le lien (seuls ces deux sites, en https) ; None sinon."""
+    """« leboncoin », « vinted » ou un revendeur d'après le lien (seuls ces sites, en https) ; None sinon."""
     if LIEN.match(lien or ""):
         return "leboncoin"
     if LIEN_VINTED.match(lien or ""):
         return "vinted"
-    return None
+    return next((s for s, motif in LIENS_REVENDEURS.items() if motif.match(lien or "")), None)
+
+
+def isbn10(isbn13):
+    """ISBN à 10 chiffres d'un ISBN 978… ; None sinon."""
+    if not (isbn13.startswith("978") and len(isbn13) == 13):
+        return None
+    corps = isbn13[3:12]
+    cle = (11 - sum((10 - i) * int(c) for i, c in enumerate(corps)) % 11) % 11
+    return corps + ("X" if cle == 10 else str(cle))
+
+
+def lien_conforme(source, lien, isbn):
+    """Le lien d'un revendeur désigne bien l'ISBN de la ligne (le lien est construit avec l'ISBN)."""
+    return isbn10(isbn) == lien.rsplit("/", 1)[-1] if source == "amazon" else lien.endswith(isbn)
 
 
 def nom_fichier(genre, source, jour):
@@ -125,7 +145,12 @@ def valider(r, aujourdhui, connues):
         age = max(0, min(3650, int(float(r.get("age_jours") or 0))))
     except ValueError:
         age = 0
-    if fdp is None or (source == "leboncoin" and fdp == 0):       # relevé d'un bot plus ancien, ou Leboncoin à 0 : même prix livré que Vinted et eBay (protection 0,70 € + 5 % et port 3 €)
+    if source in REVENDEURS:
+        if not lien_conforme(source, lien, isbn):
+            return None, "lien sans rapport avec l'ISBN"
+        fdp = fdp or 0.0                                          # port réel de l'offre, 0 si gratuit
+        lien = f"{lien}#{etat}-{round(prix * 100)}"               # plusieurs offres d'un même revendeur partagent le lien du livre : l'état et le prix les distinguent
+    elif fdp is None or (source == "leboncoin" and fdp == 0):       # relevé d'un bot plus ancien, ou Leboncoin à 0 : même prix livré que Vinted et eBay (protection 0,70 € + 5 % et port 3 €)
         fdp = round(prix_livre_vinted(prix) - prix, 2)
     return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "fdp": f"{fdp:.2f}", "titre": titre, "lien": lien, "age_jours": age,
             "trouvee_par": source, "statut": statut, "date": jour.isoformat(), "verif": verif}, None

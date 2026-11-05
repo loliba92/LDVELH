@@ -158,7 +158,7 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
   <div id="ind-liste"></div>
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
-  <p class="chapeau">Toutes les annonces (eBay, Leboncoin, Vinted, librairies), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date. Changez l'ordre avec « Trier par ».</p>
+  <p class="chapeau">Toutes les annonces (eBay, Leboncoin, Vinted, librairies, revendeurs), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date. Changez l'ordre avec « Trier par ».</p>
   <div class="captures-zone" id="captures-recues"></div>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
@@ -177,6 +177,9 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="leboncoin">Leboncoin</option>
         <option value="vinted">Vinted</option>
         <option value="librairie">Librairies</option>
+        <option value="amazon">Amazon</option>
+        <option value="fnac">Fnac</option>
+        <option value="abebooks">AbeBooks</option>
       </select></label>
       <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
         <option value="tout">Tous</option>
