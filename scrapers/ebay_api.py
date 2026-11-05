@@ -561,6 +561,7 @@ def essayer_modalites(a, token):
     modalites = ("FIXED_PRICE", "AUCTION", "CLASSIFIED_AD")
     valables = {m: collections.defaultdict(set) for m in modalites}          # modalité -> {isbn: {itemId}}
     sans_offre, fin_proche = collections.Counter(), collections.Counter()
+    renvoyees, concordantes = collections.Counter(), collections.Counter()          # avant tout filtre ; puis titre qui concorde avec l'édition
     for isbn, titre, nb_ed, livre, annees in echantillon:
         ed = rows.get(isbn, {})
         for m in modalites:
@@ -570,17 +571,19 @@ def essayer_modalites(a, token):
                 raise
             except requests.RequestException:
                 continue
+            renvoyees[m] += len(items)
+            concordantes[m] += sum(1 for it in items if concorde(it.get("title", ""), titre, 1.0 if it.get("_titre_seul") else 0.6))
             gardees = {it.get("itemId"): it for it, _e, _p, ancienne in retenues(items, jour, titre, annees, ed) if not ancienne}
             valables[m][isbn] = set(gardees)
             if m == "AUCTION":
                 for it in gardees.values():
                     sans_offre[m] += 1 if int(it.get("bidCount") or 0) == 0 else 0
     print(f"Essai sur {len(echantillon)} éditions réparties sur le catalogue (comptages seulement)\n")
-    print("| Modalité de vente | annonces valables | éditions avec ≥ 1 | éditions avec ≥ 3 |")
-    print("|---|---|---|---|")
+    print("| Modalité de vente | annonces renvoyées par eBay | dont titre concordant | annonces valables | éditions avec ≥ 1 | éditions avec ≥ 3 |")
+    print("|---|---|---|---|---|---|")
     for m in modalites:
         v = valables[m]
-        print(f"| {m} | {sum(len(x) for x in v.values())} | {sum(1 for x in v.values() if x)} | {sum(1 for x in v.values() if len(x) >= 3)} |")
+        print(f"| {m} | {renvoyees[m]} | {concordantes[m]} | {sum(len(x) for x in v.values())} | {sum(1 for x in v.values() if x)} | {sum(1 for x in v.values() if len(x) >= 3)} |")
     base = valables["FIXED_PRICE"]
     tout = {i: set().union(*(valables[m].get(i, set()) for m in modalites)) for i in base}
     print(f"\nAnnonces valables au total (toutes modalités) : {sum(len(x) for x in tout.values())} contre {sum(len(x) for x in base.values())} à prix fixe ; "
