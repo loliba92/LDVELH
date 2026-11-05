@@ -1,5 +1,18 @@
 [
   {
+    "nom": "Le profil Sorcier arrive",
+    "adresse": "https://lacoteduheros.fr/sorcier.html",
+    "description": "Un nouveau profil arrive : le Sorcier, sur invitation jusqu'à la fin de l'année. Ce qu'il apporte par rapport au Héros et au Visiteur, expliqué simplement.",
+    "image": "data/communaute/sorcier.webp",
+    "annonce": {
+      "date": "2026-11-05",
+      "jours": 14,
+      "titre": "Les sorciers arrivent.",
+      "texte": "Un nouveau profil, sur invitation jusqu'à la fin de l'année.",
+      "sans_sorcier": true
+    }
+  },
+  {
     "nom": "Les éditions Alkonost",
     "adresse": "https://alkonost-editions.com/",
     "description": "Maison d’édition associative qui publie des livres-jeux de très grande qualité, du « Livre dont vous êtes le héros » aux créations francophones d’aujourd’hui, ainsi qu’un magazine en ligne. Son esprit : le rêve, le frisson et l’extraordinaire.",
