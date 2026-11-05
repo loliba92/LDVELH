@@ -54,6 +54,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070595457",
+   "isbn13": "9782070595457",
+   "titre": "La Guerre des Runes",
+   "serie": "Loup Solitaire",
+   "numero": "779",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 21.6,
+   "apres": 8.0,
+   "pct": -0.63,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070335046",
    "isbn13": "9782070335046",
    "titre": "Péreim le Chevalier",
@@ -64,6 +79,36 @@
    "avant": 28.79,
    "apres": 13.2,
    "pct": -0.542,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070595457",
+   "isbn13": "9782070595457",
+   "titre": "La Guerre des Runes",
+   "serie": "Loup Solitaire",
+   "numero": "779",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 32.35,
+   "apres": 15.86,
+   "pct": -0.51,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070595457",
+   "isbn13": "9782070595457",
+   "titre": "La Guerre des Runes",
+   "serie": "Loup Solitaire",
+   "numero": "779",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 57.2,
+   "apres": 28.0,
+   "pct": -0.51,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -159,7 +204,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 10,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 130,

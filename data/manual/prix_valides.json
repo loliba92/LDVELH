@@ -1696,6 +1696,24 @@
    "le": "2026-10-20",
    "par": "loliba (superadmin)"
   },
+  "9782070595457|bon": {
+   "prix": 15.86,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070595457|convenable": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070595457|tres_bon": {
+   "prix": 28.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
   "9782070610327|bon": {
    "prix": 4.19,
    "decision": "confirme",
