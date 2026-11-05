@@ -97,6 +97,7 @@ window.Compte = (function () {
     var ban = $('#compte-bandeau');
     if (ban) ban.hidden = !(e.cle === 'reprendre' && enCours());
     bandeauFin();
+    annonceSorcier();
     bienvenueSorcier();
     document.dispatchEvent(new CustomEvent('cdh-compte', { detail: { etat: e.cle, role: role } }));
   }
@@ -118,6 +119,28 @@ window.Compte = (function () {
     }
     var quand = reste === 0 ? 'aujourd\'hui' : reste === 1 ? 'demain' : 'dans ' + reste + ' jours';
     b.innerHTML = '<span>Votre accès sorcier va bientôt se terminer : <strong>' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '</strong> (' + quand + '). Ensuite, vous redevenez Héros : votre collection est conservée.</span>';
+    b.hidden = false;
+  }
+
+  // Annonce du profil Sorcier : un bloc discret tant qu'il n'est pas fermé (ou lu), jamais pour un sorcier ni sur la page qui l'explique
+  var CLE_ANNONCE = 'cdh-sorcier-annonce';
+  function annonceSorcier() {
+    var b = $('#annonce-sorcier'), vu = false;
+    try { vu = !!localStorage.getItem(CLE_ANNONCE); } catch (e) { /* sans stockage : le bloc reviendra */ }
+    var visible = !vu && role !== 'admin' && role !== 'superadmin' && !$('#sorcier');
+    if (!visible) { if (b) b.hidden = true; return; }
+    if (!b) {
+      b = document.createElement('div'); b.id = 'annonce-sorcier'; b.className = 'annonce-sorcier'; b.setAttribute('role', 'region'); b.setAttribute('aria-label', 'Nouveauté');
+      b.innerHTML = '<img src="images/accueil-3.webp" alt="" width="40" height="40" decoding="async">' +
+        '<p><strong>Les sorciers arrivent.</strong> Un nouveau profil, avec des outils pour repérer les bonnes affaires. <a href="communaute.html#sorcier" data-annonce="lu">En savoir plus</a></p>' +
+        '<button type="button" class="annonce-fermer" data-annonce="fermer" aria-label="Fermer l\'annonce">×</button>';
+      b.addEventListener('click', function (e) {
+        if (!e.target.closest('[data-annonce]')) return;
+        try { localStorage.setItem(CLE_ANNONCE, '1'); } catch (err) { /* tant pis */ }
+        if (e.target.closest('[data-annonce="fermer"]')) b.hidden = true;
+      });
+      var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
+    }
     b.hidden = false;
   }
 
