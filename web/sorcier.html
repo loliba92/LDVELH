@@ -75,13 +75,34 @@
     <tr><th scope="row" data-label="Fonction">Voir le détail des annonces en ligne derrière chaque prix</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Suivre les évolutions des prix</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Savoir quels livres de sa liste « À trouver » ont une pépite</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
-    <tr><th scope="row" data-label="Fonction">Composer un lot d'achat et en voir le prix</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
+    <tr><th scope="row" data-label="Fonction">Composer un lot d'achat et de vente, avec son prix et son port</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Suivre les mouvements de sa collection</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
     <tr><th scope="row" data-label="Fonction">Ajouter des livres au guide par ISBN (20 par envoi)</th><td data-label="Visiteur"><span aria-label="non">—</span></td><td data-label="Héros"><span aria-label="non">—</span></td><td data-label="Sorcier"><span aria-label="oui">✓</span></td></tr>
   </tbody>
 </table>
 </div>
 <p class="sous">Une <strong>pépite</strong> est une annonce nettement sous la cote du livre. Le site en offre une par jour à tous les comptes ; le Sorcier les voit toutes.</p>
+<h2>Un petit outil d'achat et de vente : le lot</h2>
+<p>Sur l'étagère, cochez la case sur la jaquette de plusieurs livres. Une barre apparaît en bas de l'écran et chiffre le lot : ce qu'il faut offrir pour l'acheter, ce qu'il faut afficher pour le vendre, et le port. Voici un exemple avec deux livres :</p>
+<figure class="exemple-lot">
+  <div class="barre-sel barre-exemple" role="img" aria-label="Exemple : 2 livres dans le lot. Offrez 22 euros, facile. Affichez 26 euros, minimum 22 euros, facile. Port Mondial Relay : 6 euros plus 1 euro de frais, environ 0,7 kg.">
+    <div class="sel-tete"><b>2 livres dans le lot</b><span class="retirer" aria-hidden="true">Vider</span></div>
+    <div class="sel-texte" aria-hidden="true">
+      <span><svg class="sel-ico sel-achat" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg><b>Offrez</b> 22 € <span class="facilite facilite-facile"><svg viewBox="0 0 16 16" width="14" height="14"><rect x="1" y="10" width="4" height="6" rx="1" fill="currentColor"/><rect x="6" y="6" width="4" height="10" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor"/></svg>Facile</span></span>
+      <span><svg class="sel-ico sel-vente" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg><b>Affichez</b> 26 € · min. 22 € <span class="facilite facilite-facile"><svg viewBox="0 0 16 16" width="14" height="14"><rect x="1" y="10" width="4" height="6" rx="1" fill="currentColor"/><rect x="6" y="6" width="4" height="10" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="14" rx="1" fill="currentColor"/></svg>Facile</span></span>
+      <span><span class="sel-sous">Port Mondial Relay : 6 € + 1 € de frais (≈ 0,7 kg)</span></span>
+    </div>
+  </div>
+</figure>
+<ul class="comm-profils">
+  <li><strong>Vider</strong> retire tous les livres du lot d'un seul geste.</li>
+  <li><strong>Offrez</strong> : le prix conseillé pour acheter le lot. C'est la cote du guide, arrondie à l'euro inférieur, avec une remise de lot : 5 % dès 3 livres ou 50 €, jusqu'à 20 % dès 21 livres ou 400 €.</li>
+  <li><strong>Affichez</strong> : le prix à afficher pour vendre le lot. Il ajoute à la cote une marge de négociation. « min. » est le prix en dessous duquel il vaut mieux ne pas descendre.</li>
+  <li><strong>Facile, Moyen, Difficile</strong> : la facilité d'acheter ou de vendre, d'après la rareté des livres, le nombre d'annonces et leur durée en ligne.</li>
+  <li><strong>Le port</strong> : le lot part en un seul colis, au tarif Mondial Relay en point relais selon le poids estimé, plus 1 € de frais de plateforme (Vinted ou Leboncoin).</li>
+</ul>
+<p class="sous">Les livres sans cote ne sont pas chiffrés : la barre le précise. Ces montants sont des repères, la négociation reste à votre main.</p>
+
 <h2>Ce qui ne change pas</h2>
 <ul>
   <li>Rien n'est retiré aux Visiteurs ni aux Héros.</li>
