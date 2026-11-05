@@ -626,6 +626,8 @@
   const SEL_LOT = new Set();
   const SVG_ACHAT = '<svg class="sel-ico sel-achat" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="7"/><path d="M2 12h9M8 9l3 3-3 3"/></svg>';
   const SVG_VENTE = '<svg class="sel-ico sel-vente" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg>';
+  // Une annonce de vente ne parle que des livres que l'on possède (jamais ceux de la liste « À trouver »)
+  const dansMaCollection = (b) => !COLL_PRET || !!COLL[b.id];
   function majBarreLot() {
     let z = $('#barre-sel');
     if (!SEL_LOT.size || !voitAnnonces() || !$('#resultats')) { if (z) z.hidden = true; return; }
@@ -636,7 +638,7 @@
     }
     z.hidden = false;
     const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
-    const n = livres.length;
+    const n = livres.length, possedes = livres.filter(dansMaCollection).length;
     let achat = 0, vente = 0, cotes = 0, annN = 0, annMin = 0, avecAnn = 0, ptsA = 0, nA = 0, ptsV = 0, nV = 0;
     livres.forEach((b) => {
       const poss = COLL[b.id], etat = poss ? poss.etat : undefined;          // livre de la collection : son état ; sinon, médiane des états
@@ -656,7 +658,8 @@
       const parMontant = achat >= 400 ? 0.20 : achat >= 200 ? 0.15 : achat >= 100 ? 0.10 : achat >= 50 ? 0.05 : 0;
       const remise = Math.max(parNombre, parMontant), offreLot = Math.floor(achat * (1 - remise));
       lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(offreLot)}${remise ? ` <span class="nowrap">(−${Math.round(remise * 100)} % lot)</span>` : ''} ${nA ? ` ${pastille(ptsA / nA)}` : ''}`);
-      lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''} <button type="button" class="sel-lien" data-sel-annonce>Créer l'annonce</button>`);
+      lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}${possedes ? ' <button type="button" class="sel-lien" data-sel-annonce>Créer l\'annonce</button>' : ''}`);
+      if (!possedes) lignes.push('<span class="sel-sous">Aucun livre de la sélection n\'est dans votre collection : pas d\'annonce de vente</span>');
       if (cotes < n) lignes.push(`<span class="sel-sous">${n - cotes} livre${n - cotes > 1 ? 's' : ''} sans cote, non chiffré${n - cotes > 1 ? 's' : ''}</span>`);
       { const pl = portLot(cotes); lignes.push(`<span class="sel-sous">Port Mondial Relay : ${eurosArr(pl.prix)} + ${eurosArr(FRAIS_PLATEFORME)} de frais (≈ ${(Math.round(pl.kg * 10) / 10).toLocaleString('fr-FR')} kg${pl.colis > 1 ? `, ${pl.colis} colis` : ''})</span>`); }
     }
@@ -678,14 +681,15 @@
 
   // Annonce de vente du lot coché : titre et description à copier (Leboncoin, Vinted)
   function annonceLot() {
-    const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
+    const choisis = [...SEL_LOT].map(livreDe).filter(Boolean);
+    const livres = choisis.filter(dansMaCollection);
     const lignes = livres.map((b) => {
       const edition = [b.editeur, b.annee].filter(Boolean).join(', ');
       return `• ${b.titre} — ${b.serie}${b.numero ? ` n° ${b.numero}` : ''}${edition ? ` (${edition})` : ''}`;
     });
     const series = [...new Set(livres.map((b) => b.serie).filter(Boolean))];
     const titre = `Lot de ${livres.length} livre${livres.length > 1 ? 's' : ''} dont vous êtes le héros${series.length === 1 ? ` — ${series[0]}` : ''}`;
-    return { titre, texte: [`${titre}.`, '', 'Contenu du lot :', ...lignes].join('\n') };
+    return { titre, texte: [`${titre}.`, '', 'Contenu du lot :', ...lignes].join('\n'), ecartes: choisis.length - livres.length };
   }
   function ouvrirAnnonceLot() {
     let d = $('#annonce-lot');
@@ -712,7 +716,7 @@
     const a = annonceLot();
     $('#annonce-lot-t').value = a.titre;
     $('#annonce-lot-d').value = a.texte;
-    $('#annonce-lot-msg').textContent = '';
+    $('#annonce-lot-msg').textContent = a.ecartes ? (a.ecartes > 1 ? `${a.ecartes} livres de la sélection ne sont pas dans votre collection : ils ne figurent pas dans l'annonce.` : '1 livre de la sélection n\'est pas dans votre collection : il ne figure pas dans l\'annonce.') : '';
     d.showModal();
     const ta = $('#annonce-lot-d');
     ta.style.height = 'auto';
