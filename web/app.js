@@ -977,6 +977,7 @@
     const retenter = () => { if (!estNiveau3()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de niveau 2 arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
   }
+  let ficheMasquee = null;      // les cotes étaient masquées quand la fiche a été dessinée : elle est redessinée dès que le compte est prêt
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
   // Évolution du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3)
   function blocEvolution(b, etat) {
@@ -1040,7 +1041,7 @@
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
-    ficheOuverte = id;
+    ficheOuverte = id; ficheMasquee = cotesMasquees();
     if (sansCompte()) {                       // fiches distinctes consultées pendant la visite : sert à proposer la connexion (voir inviterApresFiches)
       try { const vus = new Set(JSON.parse(sessionStorage.getItem('cdh-fiches-vues') || '[]')); vus.add(b.livre_id); sessionStorage.setItem('cdh-fiches-vues', JSON.stringify([...vus])); } catch (e) { /* stockage indisponible */ }
     }
@@ -1488,6 +1489,7 @@
     const sans = sansCompte();
     afficher();
     if (etaitSansCompte !== null && etaitSansCompte !== sans && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
+    else if (ficheMasquee !== null && ficheMasquee !== cotesMasquees() && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
     etaitSansCompte = sans;
     const super_ = (window.Compte && window.Compte.role()) || '';           // le rôle arrive après l'ouverture de la fiche : le bloc des annonces apparaît (ou disparaît) sans la rouvrir
     if (etaitSuper !== null && etaitSuper !== super_ && ficheOuverte && $('#fiche') && $('#fiche').open) ouvrirFiche(ficheOuverte);
