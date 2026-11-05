@@ -589,7 +589,17 @@ def essayer_modalites(a, token):
 
 
 REQUETES_LARGES = ("ldvelh", "livre dont vous êtes le héros", "ldvelh lot", "ldvelh graal", "ldvelh livre dont vous êtes le héros",
-                   "ldvelh loup solitaire", "dungeons", "ldvelh sorcellerie", "défis fantastiques", "livre jeu")
+                   "ldvelh loup solitaire", "dungeons", "ldvelh sorcellerie", "défis fantastiques", "livre jeu",
+                   "alkonost", "elder craft", "scriptarium")          # éditeurs de livres-jeux modernes : 53, 3 et 13 éditions du catalogue
+SERIES_TROP_LARGES = {"non classée", "livre-jeu", "histoire", "reine", "duel", "tempus", "les contes", "recto verso", "métamorphose", "destins"}
+
+
+def requetes_series(fiches, minimum=3):
+    """Noms des séries du catalogue (au moins `minimum` éditions), comme requêtes larges ; les noms trop courants sont laissés de côté."""
+    import collections
+    import re
+    n = collections.Counter(re.sub(r"\s*\(.*?\)", "", (r.get("serie") or "")).strip() for r in fiches.values())
+    return sorted(s for s, k in n.items() if s and k >= minimum and s.lower() not in SERIES_TROP_LARGES)
 
 
 def numero_annonce(item_id):
@@ -622,7 +632,7 @@ def essayer_large(a, token):
     print("|---|---|---|---|---|")
     for modalite in ("FIXED_PRICE", "AUCTION"):
         par_requete, pool = {}, {}
-        for q in REQUETES_LARGES:
+        for q in REQUETES_LARGES + tuple(requetes_series(fiches)):
             try:
                 items = annonces_pages(q, token, modalites=modalite, pages=a.essai_large, pause=PAUSE)
             except requests.RequestException:
