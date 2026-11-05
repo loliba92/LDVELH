@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const REVENDEURS = { amazon: 'Amazon', fnac: 'Fnac', abebooks: 'AbeBooks' };          // offres d'occasion des revendeurs (relevé du bot)
+  const REVENDEURS = { amazon: 'Amazon', fnac: 'Fnac', abebooks: 'AbeBooks', recyclivre: 'Recyclivre' };          // offres d'occasion des revendeurs (relevé du bot)
   const enLigne = (o) => o === 'leboncoin' || o === 'vinted' || o === 'librairie' || Object.hasOwn(REVENDEURS, o);          // en ligne tant que non signalée vendue : pas de date de relevé eBay
 
   const DONNEES = 'data/';

@@ -48,6 +48,7 @@ LIENS_REVENDEURS = {          # offres d'occasion des revendeurs (page chasse-au
     "amazon": re.compile(r"^https://www\.amazon\.fr/dp/[0-9X]{10}$"),
     "fnac": re.compile(r"^https://www\.fnac\.com/SearchResult/ResultList\.aspx\?Search=\d{13}$"),
     "abebooks": re.compile(r"^https://www\.abebooks\.fr/servlet/SearchResults\?isbn=\d{13}$"),
+    "recyclivre": re.compile(r"^https://www\.recyclivre\.com/boutique/produits/recherche\?q=\d{13}$"),
 }
 REVENDEURS = tuple(LIENS_REVENDEURS)
 SOURCES = ("leboncoin", "vinted") + REVENDEURS          # le bot envoie tout dans le même relevé ; chaque source a ses propres fichiers

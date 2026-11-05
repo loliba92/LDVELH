@@ -38,13 +38,14 @@ class TestRevendeurs(unittest.TestCase):
     AMAZON = "https://www.amazon.fr/dp/2070333701"          # ISBN-10 de 9782070333707
     FNAC = "https://www.fnac.com/SearchResult/ResultList.aspx?Search=9782070333707"
     ABE = "https://www.abebooks.fr/servlet/SearchResults?isbn=9782070333707"
+    RECYCLIVRE = "https://www.recyclivre.com/boutique/produits/recherche?q=9782070333707"
 
     def test_isbn10(self):
         self.assertEqual(imp.isbn10("9782070333707"), "2070333701")
         self.assertIsNone(imp.isbn10("9791234567896"))
 
     def test_sources_des_liens(self):
-        self.assertEqual([imp.source_du_lien(x) for x in (self.AMAZON, self.FNAC, self.ABE)], ["amazon", "fnac", "abebooks"])
+        self.assertEqual([imp.source_du_lien(x) for x in (self.AMAZON, self.FNAC, self.ABE, self.RECYCLIVRE)], ["amazon", "fnac", "abebooks", "recyclivre"])
         for non in ("https://www.amazon.fr/dp/2070333701?tag=x", "https://evil.example/https://www.fnac.com/SearchResult/ResultList.aspx?Search=9782070333707",
                     "https://www.fnac.com/SearchResult/ResultList.aspx?Search=abc"):
             self.assertIsNone(imp.source_du_lien(non))
@@ -59,6 +60,11 @@ class TestRevendeurs(unittest.TestCase):
         self.assertEqual(ok["lien"], self.FNAC + "#bon-5844")
         autre, _ = self.valide(self.FNAC, prix="70.51", fdp="3.49")
         self.assertNotEqual(ok["lien"], autre["lien"])          # deux offres du même revendeur ne s'écrasent pas
+
+    def test_recyclivre_lien_conforme_a_lisbn(self):
+        ok, _ = self.valide(self.RECYCLIVRE, prix="32.83")
+        self.assertEqual((ok["trouvee_par"], ok["lien"]), ("recyclivre", self.RECYCLIVRE + "#bon-3283"))
+        self.assertEqual(self.valide(self.RECYCLIVRE, isbn=ISBN_B)[1], "lien sans rapport avec l'ISBN")
 
     def test_port_absent_vaut_zero_et_non_les_frais_vinted(self):
         ok, _ = self.valide(self.AMAZON)
