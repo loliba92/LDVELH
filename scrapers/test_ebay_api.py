@@ -24,6 +24,27 @@ class Faux:
         return R()
 
 
+class TestModalites(unittest.TestCase):
+    class Http:
+        def __init__(self): self.appels = []
+        def get(self, url, params=None, headers=None, timeout=None):
+            self.appels.append(params)
+            class R:
+                status_code = 200
+                def raise_for_status(self): pass
+                def json(self): return {"itemSummaries": []}
+            return R()
+
+    def test_prix_fixe_par_defaut_et_modalite_au_choix(self):
+        h = self.Http()
+        ebay_api.annonces("9782070333707", "jeton", h)
+        ebay_api.annonces("9782070333707", "jeton", h, "AUCTION")
+        ebay_api.chercher_elargi("9782070333707", "Titre", "jeton", {"livre": "Un titre", "isbn13": "9782070333707"}, h, modalites="CLASSIFIED_AD")
+        self.assertEqual(h.appels[0]["filter"], "buyingOptions:{FIXED_PRICE}")
+        self.assertEqual(h.appels[1]["filter"], "buyingOptions:{AUCTION}")
+        self.assertTrue(all(p["filter"] == "buyingOptions:{CLASSIFIED_AD}" for p in h.appels[2:]))
+
+
 class TestConcordance(unittest.TestCase):
     def test_concorde(self):
         self.assertTrue(ebay_api.concorde("LE SORCIER de la montagne de feu - Défis Fantastiques - Folio Junior", "Le Sorcier de la montagne de feu"))

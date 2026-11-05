@@ -30,6 +30,9 @@ on:
       essais:
         description: "Compare plusieurs façons de chercher (ISBN-13, ISBN-10, titre…) sur N éditions, comptages seulement (60 conseillé)"
         required: false
+      essai_modalites:
+        description: "Mesure ce qu'apportent les enchères et les petites annonces en plus des annonces à prix fixe, sur N éditions, comptages seulement (40 conseillé)"
+        required: false
 
 permissions:
   contents: write
@@ -85,8 +88,11 @@ jobs:
       - name: Essai de requêtes (sans enregistrement)
         if: ${{ inputs.essais != '' }}
         run: python scrapers/ebay_api.py --essais ${{ inputs.essais }} | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Essai des modalités de vente (sans enregistrement)
+        if: ${{ inputs.essai_modalites != '' }}
+        run: python scrapers/ebay_api.py --essai-modalites ${{ inputs.essai_modalites }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Relevé eBay
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_modalites == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
           # Limite d'appels eBay atteinte (code 75) : rien n'est enregistré et rien n'est perdu. Le lot est marqué « annulé » (et non « échec »),
           # avec la raison dans son résumé ; le site l'affiche ainsi dans « Mises à jour automatiques ».
@@ -101,7 +107,7 @@ jobs:
           fi
           exit $code
       - name: Prix du neuf et disponibilité des éditions en vente
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_modalites == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         id: neuf
         continue-on-error: true
         run: |
@@ -128,14 +134,14 @@ jobs:
           echo "::error title=Prix du neuf::Relevé arrêté (voir le journal de l'étape) ; le fichier précédent est conservé. Le relevé eBay et la suite du lot continuent."
           echo "Relevé du prix du neuf arrêté ce jour (refus de la librairie ou erreurs réseau) : le fichier précédent est conservé." >> "$GITHUB_STEP_SUMMARY"
       - name: Base et données du site
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_modalites == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
           python pipeline/build_db.py
           python pipeline/export_site.py
           python pipeline/construire_pages.py
           python pipeline/indice_marche.py
       - name: Enregistrer et republier
-        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
+        if: ${{ inputs.controle == '' && inputs.diagnostic == '' && inputs.essais == '' && inputs.essai_modalites == '' && inputs.essai_photos == '' && inputs.essai_version == '' }}
         run: |
           git config user.name "releve-prix"
           git config user.email "releve-prix@users.noreply.github.com"
