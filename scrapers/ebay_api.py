@@ -116,6 +116,24 @@ def annonces(isbn, token, http=requests, modalites="FIXED_PRICE"):
     return r.json().get("itemSummaries", [])
 
 
+def annonces_pages(q, token, http=requests, modalites="FIXED_PRICE", pages=3, tri="newlyListed", pause=0):
+    """Balayage large : les `pages` premières pages (200 annonces chacune) d'une requête, des plus récentes aux plus anciennes."""
+    toutes = []
+    for page in range(pages):
+        r = http.get(URL_RECHERCHE, params={"q": q, "limit": 200, "offset": page * 200, "sort": tri, "filter": "buyingOptions:{" + modalites + "}"},
+                     headers={"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_FR"}, timeout=30)
+        if getattr(r, "status_code", 200) == 429:
+            raise QuotaEbay("Limite d'appels eBay atteinte pour aujourd'hui (erreur 429). Aucun enregistrement.")
+        r.raise_for_status()
+        items = r.json().get("itemSummaries", [])
+        toutes += items
+        if pause:
+            time.sleep(pause)
+        if len(items) < 200:
+            break
+    return toutes
+
+
 def chercher(isbn, titre, token, http=requests, pause=0, modalites="FIXED_PRICE"):
     """Annonces d'une édition : recherche par ISBN seul, comme un acheteur qui colle l'ISBN dans eBay (vérifié par le
     propriétaire sur « La Forêt du Dragon » : 3 annonces, les mêmes qu'avec le titre). Pas de recherche de repli par le
@@ -570,6 +588,60 @@ def essayer_modalites(a, token):
     print(f"Enchères valables sans aucune offre encore : {sans_offre['AUCTION']} sur {sum(len(x) for x in valables['AUCTION'].values())}.")
 
 
+REQUETES_LARGES = ("ldvelh", "livre dont vous êtes le héros", "ldvelh lot", "ldvelh graal", "ldvelh livre dont vous êtes le héros",
+                   "ldvelh loup solitaire", "dungeons", "ldvelh sorcellerie", "défis fantastiques", "livre jeu")
+
+
+def numero_annonce(item_id):
+    """Numéro d'une annonce eBay : « v1|123456789012|0 » -> « 123456789012 »."""
+    morceaux = str(item_id or "").split("|")
+    return morceaux[1] if len(morceaux) > 1 else morceaux[0]
+
+
+def annonces_connues(dossier):
+    """Numéros des annonces du dernier relevé enregistré (annonces-AAAA-MM-JJ.csv)."""
+    import re
+    fichiers = sorted(Path(dossier).glob("annonces-20??-??-??.csv"))
+    if not fichiers:
+        return set()
+    with open(fichiers[-1], newline="", encoding="utf-8") as f:
+        return {m.group(1) for r in csv.DictReader(f) for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m}
+
+
+def essayer_large(a, token):
+    """Mesure un balayage large (« ldvelh », « livre dont vous êtes le héros »…) : annonces renvoyées, rattachées à une édition du catalogue
+    (mêmes filtres que le relevé, concordance stricte du titre) et NOUVELLES (absentes du dernier relevé enregistré). Rien n'est enregistré,
+    le journal (public) ne montre que des comptages."""
+    import editions
+    jour = date.today()
+    fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
+    cat = catalogue()
+    connues = annonces_connues(a.sortie)
+    print(f"Balayage large : {a.essai_large} page(s) de 200 annonces au plus par requête, des plus récentes aux plus anciennes ; {len(connues)} annonces déjà connues du dernier relevé\n")
+    print("| Modalité | Requête | annonces renvoyées | rattachées au catalogue | dont nouvelles |")
+    print("|---|---|---|---|---|")
+    for modalite in ("FIXED_PRICE", "AUCTION"):
+        par_requete, pool = {}, {}
+        for q in REQUETES_LARGES:
+            try:
+                items = annonces_pages(q, token, modalites=modalite, pages=a.essai_large, pause=PAUSE)
+            except requests.RequestException:
+                continue
+            par_requete[q] = {numero_annonce(it.get("itemId")) for it in items}
+            for it in items:
+                pool.setdefault(numero_annonce(it.get("itemId")), {**it, "_titre_seul": True})
+        rattachees = {}                                          # numéro d'annonce -> {isbn}
+        for isbn, titre, nb_ed, livre, annees in cat:
+            for it, _etat, _prix, ancienne in retenues(list(pool.values()), jour, titre, annees, fiches.get(isbn)):
+                if not ancienne:
+                    rattachees.setdefault(numero_annonce(it.get("itemId")), set()).add(isbn)
+        for q, ids in par_requete.items():
+            valides = ids & set(rattachees)
+            print(f"| {modalite} | {q} | {len(ids)} | {len(valides)} | {len(valides - connues)} |")
+        valides = set(rattachees)
+        print(f"| {modalite} | **toutes les requêtes** | {len(pool)} | {len(valides)} | {len(valides - connues)} |")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
@@ -577,6 +649,7 @@ def main():
     p.add_argument("--diagnostic", help="ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
     p.add_argument("--essai-modalites", dest="essai_modalites", type=int, help="compare les annonces à prix fixe, aux enchères et en petites annonces sur N éditions (comptages seulement)")
+    p.add_argument("--essai-large", dest="essai_large", type=int, help="balayage large (« ldvelh »…) : N pages de 200 annonces par requête, comptages seulement (3 conseillé)")
     p.add_argument("--essai-version", dest="essai_version", type=int, help="essai en deux étapes (titre, description, image) sur N éditions « archive seule » (aucun enregistrement)")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
@@ -602,6 +675,9 @@ def main():
         return
     if a.essai_modalites:
         essayer_modalites(a, token)
+        return
+    if a.essai_large:
+        essayer_large(a, token)
         return
     if a.essai_version:
         import essai_version
