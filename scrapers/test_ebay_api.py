@@ -45,6 +45,39 @@ class TestModalites(unittest.TestCase):
         self.assertTrue(all(p["filter"] == "buyingOptions:{CLASSIFIED_AD}" for p in h.appels[2:]))
 
 
+class TestBalayageLarge(unittest.TestCase):
+    class Http:
+        def __init__(self, pages): self.pages, self.appels = pages, []
+        def get(self, url, params=None, headers=None, timeout=None):
+            self.appels.append(params)
+            page = self.pages[min(len(self.appels) - 1, len(self.pages) - 1)]
+            class R:
+                status_code = 200
+                def raise_for_status(self): pass
+                def json(self): return {"itemSummaries": page}
+            return R()
+
+    def test_pages_successives_et_arret_quand_la_page_nest_pas_pleine(self):
+        pleine = [{"itemId": f"v1|{i}|0"} for i in range(200)]
+        h = self.Http([pleine, pleine, [{"itemId": "v1|999|0"}]])
+        items = ebay_api.annonces_pages("ldvelh", "jeton", h, pages=5)
+        self.assertEqual(len(items), 401)
+        self.assertEqual([p["offset"] for p in h.appels], [0, 200, 400])
+        self.assertEqual((h.appels[0]["limit"], h.appels[0]["sort"], h.appels[0]["filter"]), (200, "newlyListed", "buyingOptions:{FIXED_PRICE}"))
+
+    def test_numero_annonce(self):
+        self.assertEqual(ebay_api.numero_annonce("v1|123456789012|0"), "123456789012")
+        self.assertEqual(ebay_api.numero_annonce("123"), "123")
+
+    def test_annonces_connues_lues_dans_le_dernier_releve(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        (d / "annonces-2026-11-04.csv").write_text("isbn13,lien\n1,https://www.ebay.fr/itm/111?x=1\n", encoding="utf-8")
+        (d / "annonces-2026-11-05.csv").write_text("isbn13,lien\n1,https://www.ebay.fr/itm/222?x=1\n2,https://www.ebay.fr/itm/333\n", encoding="utf-8")
+        self.assertEqual(ebay_api.annonces_connues(d), {"222", "333"})
+        self.assertEqual(ebay_api.annonces_connues(d / "absent"), set())
+
+
 class TestConcordance(unittest.TestCase):
     def test_concorde(self):
         self.assertTrue(ebay_api.concorde("LE SORCIER de la montagne de feu - Défis Fantastiques - Folio Junior", "Le Sorcier de la montagne de feu"))
