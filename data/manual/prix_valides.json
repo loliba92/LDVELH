@@ -1385,6 +1385,24 @@
    "decision": "corrige",
    "le": "2026-10-15"
   },
+  "9782070569403|bon": {
+   "prix": 24.27,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070569403|convenable": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070569403|tres_bon": {
+   "prix": 35.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
   "9782070569410|bon": {
    "prix": 31.78,
    "decision": "corrige",
