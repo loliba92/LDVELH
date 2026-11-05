@@ -1423,7 +1423,7 @@
       return hasError;
     } catch (e) { return false; }
   }
-  // Lignes « Import Leboncoin » et « Import Vinted » de l'accueil : dernier import par source et livres ajoutés sur 24 h
+  // Lignes « Import Leboncoin » et « Import Vinted » de l'accueil : dernier import par source, ses livres et le total sur 24 h
   async function majLigneImports() {
     const cibles = document.querySelectorAll('[data-imports][data-source] .maj-quand');
     if (!cibles.length) return;
@@ -1454,7 +1454,9 @@
           // Orange si pause 2-6 h ET pas erreur DataDome
           ligne.classList.toggle('maj-retard', !!delai && actif && delai > 2 * 3600 * 1000 && delai <= 6 * 3600 * 1000 && !aUnErreur);
         }
-        cible.textContent = `${quand} · ${n ? `+${n} livre${n > 1 ? 's' : ''}${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre'} sur 24 h`;
+        const dern = imports.reduce((m, im) => (!m || Date.parse(im.t) > Date.parse(m.t) ? im : m), null), nd = dern ? dern.lignes.length : 0;   // livres du dernier import
+        const dernierTxt = dern ? `+${nd} livre${nd > 1 ? 's' : ''} · ` : '';
+        cible.textContent = `${quand} · ${dernierTxt}${n ? `${n} sur 24 h${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre sur 24 h'}`;
       };
       maj(importsLbc, 'leboncoin');
       maj(importsVinted, 'vinted');
