@@ -24,6 +24,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070506866",
+   "isbn13": "9782070506866",
+   "titre": "Le Tyran du Désert",
+   "serie": "Loup Solitaire",
+   "numero": "330",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 29.64,
+   "apres": 9.0,
+   "pct": -0.696,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782075123150",
    "isbn13": "9782075123150",
    "titre": "Les Maîtres des ténèbres",
@@ -51,21 +66,6 @@
    "pct": -0.134,
    "nature": "annonces",
    "nb": 12,
-   "recalibre": false
-  },
-  {
-   "id": "9782070506866",
-   "isbn13": "9782070506866",
-   "titre": "Le Tyran du Désert",
-   "serie": "Loup Solitaire",
-   "numero": "330",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 8.28,
-   "apres": 7.24,
-   "pct": -0.126,
-   "nature": "annonces",
-   "nb": 4,
    "recalibre": false
   }
  ],
