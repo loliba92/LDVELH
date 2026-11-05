@@ -132,8 +132,8 @@
  "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
-  "n_paires": 128,
-  "gain": 0.045,
+  "n_paires": 130,
+  "gain": 0.047,
   "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
   "rapport_global": 0.916
  }
