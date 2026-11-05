@@ -105,9 +105,9 @@ class QuotaEbay(RuntimeError):
     """eBay répond 429 : la limite d'appels du jour est atteinte (environ 5 000 ; un relevé complet en fait environ 2 400)."""
 
 
-def annonces(isbn, token, http=requests):
-    """Annonces à prix fixe pour une requête (un ISBN, ou un titre suivi de l'ISBN)."""
-    r = http.get(URL_RECHERCHE, params={"q": isbn, "limit": 50, "filter": "buyingOptions:{FIXED_PRICE}"},
+def annonces(isbn, token, http=requests, modalites="FIXED_PRICE"):
+    """Annonces pour une requête (un ISBN, ou un titre suivi de l'ISBN). Par défaut à prix fixe ; `modalites` : « AUCTION », « CLASSIFIED_AD »…"""
+    r = http.get(URL_RECHERCHE, params={"q": isbn, "limit": 50, "filter": "buyingOptions:{" + modalites + "}"},
                  headers={"Authorization": f"Bearer {token}", "X-EBAY-C-MARKETPLACE-ID": "EBAY_FR"}, timeout=30)
     if getattr(r, "status_code", 200) == 429:
         raise QuotaEbay("Limite d'appels eBay atteinte pour aujourd'hui (erreur 429). Aucun enregistrement. "
@@ -116,11 +116,11 @@ def annonces(isbn, token, http=requests):
     return r.json().get("itemSummaries", [])
 
 
-def chercher(isbn, titre, token, http=requests, pause=0):
+def chercher(isbn, titre, token, http=requests, pause=0, modalites="FIXED_PRICE"):
     """Annonces d'une édition : recherche par ISBN seul, comme un acheteur qui colle l'ISBN dans eBay (vérifié par le
     propriétaire sur « La Forêt du Dragon » : 3 annonces, les mêmes qu'avec le titre). Pas de recherche de repli par le
     titre : elle remplaçait ces 3 annonces (27 à 50 €) par 14 annonces à 6 € d'autres objets au titre voisin."""
-    items = annonces(isbn, token, http)
+    items = annonces(isbn, token, http, modalites)
     if pause:
         time.sleep(pause)
     return items
@@ -147,14 +147,14 @@ def requetes_complementaires(ed):
     return sortie
 
 
-def chercher_elargi(isbn, titre, token, ed=None, http=requests, pause=0):
+def chercher_elargi(isbn, titre, token, ed=None, http=requests, pause=0, modalites="FIXED_PRICE"):
     """Annonces d'une édition : recherche par ISBN, puis par le titre (voir requetes_complementaires). Les annonces apportées
     seulement par le titre sont marquées « _titre_seul » : agreger leur applique une concordance stricte."""
-    items = list(chercher(isbn, titre, token, http, pause))
+    items = list(chercher(isbn, titre, token, http, pause, modalites))
     vus = {it.get("itemId") for it in items}
     for q in requetes_complementaires(ed):
         try:
-            extra = annonces(q, token, http)
+            extra = annonces(q, token, http, modalites)
         except requests.RequestException:
             continue
         if pause:
@@ -529,12 +529,54 @@ def essayer(a, token):
     print(f"| + toutes, concordance stricte sur le titre (méthode retenue) | {sum(len(strict[i] - base[i]) for i in base)} | {avant3} → {sum(1 for x in strict.values() if len(x) >= 3)} |")
 
 
+def essayer_modalites(a, token):
+    """Mesure ce que d'autres modalités de vente (enchères, petites annonces) apportent en plus des annonces à prix fixe, sur N éditions réparties
+    sur le catalogue. Mêmes requêtes et mêmes filtres que le relevé (`chercher_elargi`, `retenues`). Rien n'est enregistré, le journal (public)
+    ne montre que des comptages. Une annonce aux enchères affiche son offre actuelle : ce n'est pas un prix final."""
+    import collections
+    import editions
+    jour = date.today()
+    rows = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
+    cat = catalogue()
+    pas = max(1, len(cat) // a.essai_modalites)
+    echantillon = cat[::pas][: a.essai_modalites]
+    modalites = ("FIXED_PRICE", "AUCTION", "CLASSIFIED_AD")
+    valables = {m: collections.defaultdict(set) for m in modalites}          # modalité -> {isbn: {itemId}}
+    sans_offre, fin_proche = collections.Counter(), collections.Counter()
+    for isbn, titre, nb_ed, livre, annees in echantillon:
+        ed = rows.get(isbn, {})
+        for m in modalites:
+            try:
+                items = chercher_elargi(isbn, titre, token, ed, pause=PAUSE, modalites=m)
+            except QuotaEbay:
+                raise
+            except requests.RequestException:
+                continue
+            gardees = {it.get("itemId"): it for it, _e, _p, ancienne in retenues(items, jour, titre, annees, ed) if not ancienne}
+            valables[m][isbn] = set(gardees)
+            if m == "AUCTION":
+                for it in gardees.values():
+                    sans_offre[m] += 1 if int(it.get("bidCount") or 0) == 0 else 0
+    print(f"Essai sur {len(echantillon)} éditions réparties sur le catalogue (comptages seulement)\n")
+    print("| Modalité de vente | annonces valables | éditions avec ≥ 1 | éditions avec ≥ 3 |")
+    print("|---|---|---|---|")
+    for m in modalites:
+        v = valables[m]
+        print(f"| {m} | {sum(len(x) for x in v.values())} | {sum(1 for x in v.values() if x)} | {sum(1 for x in v.values() if len(x) >= 3)} |")
+    base = valables["FIXED_PRICE"]
+    tout = {i: set().union(*(valables[m].get(i, set()) for m in modalites)) for i in base}
+    print(f"\nAnnonces valables au total (toutes modalités) : {sum(len(x) for x in tout.values())} contre {sum(len(x) for x in base.values())} à prix fixe ; "
+          f"éditions avec ≥ 1 annonce : {sum(1 for x in tout.values() if x)} contre {sum(1 for x in base.values() if x)}.")
+    print(f"Enchères valables sans aucune offre encore : {sans_offre['AUCTION']} sur {sum(len(x) for x in valables['AUCTION'].values())}.")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--limite", type=int, help="nombre maximal d'éditions interrogées")
     p.add_argument("--controle", type=int, help="contrôle sans enregistrement sur N éditions (comptages seulement)")
     p.add_argument("--diagnostic", help="ISBN (un ou plusieurs, séparés par des espaces) : liste les annonces trouvées, avec leur lien (aucun enregistrement)")
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
+    p.add_argument("--essai-modalites", dest="essai_modalites", type=int, help="compare les annonces à prix fixe, aux enchères et en petites annonces sur N éditions (comptages seulement)")
     p.add_argument("--essai-version", dest="essai_version", type=int, help="essai en deux étapes (titre, description, image) sur N éditions « archive seule » (aucun enregistrement)")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
@@ -557,6 +599,9 @@ def main():
         return
     if a.essais:
         essayer(a, token)
+        return
+    if a.essai_modalites:
+        essayer_modalites(a, token)
         return
     if a.essai_version:
         import essai_version
