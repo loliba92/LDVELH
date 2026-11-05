@@ -1386,19 +1386,22 @@
    "le": "2026-10-15"
   },
   "9782070569410|bon": {
-   "prix": 57.81,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 31.78,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
   },
   "9782070569410|convenable": {
-   "prix": 50.27,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 20.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
   },
   "9782070569410|tres_bon": {
-   "prix": 69.37,
-   "decision": "confirme",
-   "le": "2026-10-15"
+   "prix": 45.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
   },
   "9782070573226|bon": {
    "prix": 9.17,
