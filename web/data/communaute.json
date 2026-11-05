@@ -3,20 +3,22 @@
     "nom": "Le lot d'achat et de vente",
     "adresse": "https://lacoteduheros.fr/lot.html",
     "description": "Un outil réservé aux Sorciers : cochez plusieurs livres et voyez le prix à offrir, le prix à afficher et le port du lot, avec un exemple pas à pas.",
-    "image": "data/communaute/lot.webp"
+    "image": "data/communaute/lot.jpg",
+    "date": "2026-11-05"
   },
   {
     "nom": "Le profil Sorcier arrive",
     "adresse": "https://lacoteduheros.fr/sorcier.html",
     "description": "Un nouveau profil arrive : le Sorcier, sur invitation jusqu'à la fin de l'année. Ce qu'il apporte par rapport au Héros et au Visiteur, expliqué simplement.",
-    "image": "data/communaute/sorcier.webp",
+    "image": "data/communaute/sorcier.jpg",
     "annonce": {
       "date": "2026-11-05",
       "jours": 14,
       "titre": "Les sorciers arrivent.",
       "texte": "Un nouveau profil, sur invitation jusqu'à la fin de l'année.",
       "sans_sorcier": true
-    }
+    },
+    "date": "2026-11-05"
   },
   {
     "nom": "Les éditions Alkonost",
