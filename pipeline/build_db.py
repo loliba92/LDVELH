@@ -47,6 +47,7 @@ SOURCES = [  # code, nom, famille, accès, fiabilité
     ("amazon", "Amazon (occasion)", "marketplace", "saisie", 0.6),
     ("fnac", "Fnac (occasion)", "marketplace", "saisie", 0.6),
     ("abebooks", "AbeBooks (occasion)", "marketplace", "saisie", 0.6),
+    ("recyclivre", "Recyclivre (occasion)", "marketplace", "saisie", 0.6),
     ("communaute", "Contribution d'un visiteur", "communaute", "saisie", 0.5),
 ]
 TYPES = [  # code, libellé, poids, prix réel ?

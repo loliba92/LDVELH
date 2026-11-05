@@ -180,6 +180,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="amazon">Amazon</option>
         <option value="fnac">Fnac</option>
         <option value="abebooks">AbeBooks</option>
+        <option value="recyclivre">Recyclivre</option>
       </select></label>
       <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
         <option value="tout">Tous</option>
