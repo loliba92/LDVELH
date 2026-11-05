@@ -65,6 +65,14 @@ class TestBalayageLarge(unittest.TestCase):
         self.assertEqual([p["offset"] for p in h.appels], [0, 200, 400])
         self.assertEqual((h.appels[0]["limit"], h.appels[0]["sort"], h.appels[0]["filter"]), (200, "newlyListed", "buyingOptions:{FIXED_PRICE}"))
 
+    def test_requetes_de_series_du_catalogue(self):
+        fiches = {str(i): {"serie": s} for i, s in enumerate(["Loup Solitaire"] * 4 + ["Défis et Sortilèges (Scriptarium)"] * 3 + ["Destins"] * 9 + ["Rare"] * 2 + [""] * 5)}
+        self.assertEqual(ebay_api.requetes_series(fiches), ["Défis et Sortilèges", "Loup Solitaire"])          # « Destins » trop courant, « Rare » trop peu fourni
+
+    def test_requetes_larges_du_proprietaire(self):
+        for q in ("ldvelh", "livre dont vous êtes le héros", "alkonost", "elder craft"):
+            self.assertIn(q, ebay_api.REQUETES_LARGES)
+
     def test_numero_annonce(self):
         self.assertEqual(ebay_api.numero_annonce("v1|123456789012|0"), "123456789012")
         self.assertEqual(ebay_api.numero_annonce("123"), "123")
