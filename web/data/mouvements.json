@@ -39,6 +39,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070335046",
+   "isbn13": "9782070335046",
+   "titre": "Péreim le Chevalier",
+   "serie": "Défis et Sortilèges",
+   "numero": "504",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 28.79,
+   "apres": 13.2,
+   "pct": -0.542,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782075123150",
    "isbn13": "9782075123150",
    "titre": "Les Maîtres des ténèbres",
@@ -50,6 +65,36 @@
    "apres": 6.8,
    "pct": -0.235,
    "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070335046",
+   "isbn13": "9782070335046",
+   "titre": "Péreim le Chevalier",
+   "serie": "Défis et Sortilèges",
+   "numero": "504",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 10.06,
+   "apres": 8.0,
+   "pct": -0.205,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070335046",
+   "isbn13": "9782070335046",
+   "titre": "Péreim le Chevalier",
+   "serie": "Défis et Sortilèges",
+   "numero": "504",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 13.24,
+   "apres": 10.89,
+   "pct": -0.177,
+   "nature": "validé",
    "nb": 0,
    "recalibre": false
   },
@@ -69,7 +114,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 4,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
   "n_paires": 122,
