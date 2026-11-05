@@ -679,17 +679,13 @@
   // Annonce de vente du lot coché : titre et description à copier (Leboncoin, Vinted)
   function annonceLot() {
     const livres = [...SEL_LOT].map(livreDe).filter(Boolean);
-    let total = 0, chiffres = 0;
     const lignes = livres.map((b) => {
-      const poss = COLL[b.id], v = prixAffiche(b, poss ? poss.etat : undefined);
-      if (v) { total += v.prix; chiffres += 1; }
       const edition = [b.editeur, b.annee].filter(Boolean).join(', ');
       return `• ${b.titre} — ${b.serie}${b.numero ? ` n° ${b.numero}` : ''}${edition ? ` (${edition})` : ''}`;
     });
     const series = [...new Set(livres.map((b) => b.serie).filter(Boolean))];
     const titre = `Lot de ${livres.length} livre${livres.length > 1 ? 's' : ''} dont vous êtes le héros${series.length === 1 ? ` — ${series[0]}` : ''}`;
-    const texte = [`${titre}.`, ...(chiffres ? ['', `Prix du lot : ${eurosArr(total)}.`] : []), '', 'Contenu du lot :', ...lignes].join('\n');
-    return { titre, texte, sansCote: livres.length - chiffres };
+    return { titre, texte: [`${titre}.`, '', 'Contenu du lot :', ...lignes].join('\n') };
   }
   function ouvrirAnnonceLot() {
     let d = $('#annonce-lot');
@@ -716,7 +712,7 @@
     const a = annonceLot();
     $('#annonce-lot-t').value = a.titre;
     $('#annonce-lot-d').value = a.texte;
-    $('#annonce-lot-msg').textContent = a.sansCote ? `${a.sansCote} livre${a.sansCote > 1 ? 's' : ''} sans cote : ${a.sansCote > 1 ? 'ils ne sont' : 'il n\'est'} pas dans le prix.` : '';
+    $('#annonce-lot-msg').textContent = '';
     d.showModal();
     const ta = $('#annonce-lot-d');
     ta.style.height = 'auto';
