@@ -2,7 +2,7 @@
  "date": "2026-11-05",
  "precedent": "2026-11-04",
  "nb_comparees": 1512,
- "nb_modifiees": 714,
+ "nb_modifiees": 717,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -84,6 +84,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070575213",
+   "isbn13": "9782070575213",
+   "titre": "La Tour de Cristal",
+   "serie": "Loup Solitaire",
+   "numero": "696",
+   "version": "V3",
+   "etat": "convenable",
+   "avant": 5.98,
+   "apres": 4.82,
+   "pct": -0.194,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
    "id": "9782070335046",
    "isbn13": "9782070335046",
    "titre": "Péreim le Chevalier",
@@ -129,7 +144,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 9,
  "modele": {
   "actif": false,
   "n_paires": 130,
