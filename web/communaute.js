@@ -3,6 +3,7 @@
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const estZagor = () => !!window.Cloud && window.Cloud.actif() && !!window.Compte && window.Compte.role() === 'superadmin';
+  const interne = (a) => { try { const u = new URL(a); return u.hostname === 'lacoteduheros.fr' || u.origin === location.origin ? u.pathname.replace(/^\//, '') + u.hash : ''; } catch (e) { return ''; } };   // page du site : même onglet
   const net = (t) => t.replace(/[;|]/g, ' ').replace(/\s+/g, ' ').trim();
 
   const liste = document.getElementById('comm-liste');
@@ -27,7 +28,7 @@
     liste.innerHTML = donnees.map((x) => `<article class="comm-lien">
       ${x.image ? `<img src="${esc(x.image)}" alt="" width="640" height="360" loading="lazy" decoding="async">` : `<span class="comm-tuile" aria-hidden="true">${esc(x.nom.charAt(0).toUpperCase())}</span>`}
       <div class="comm-texte">
-        <h3><a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}<span class="sr-only"> (nouvel onglet)</span></a></h3>
+        <h3>${interne(x.adresse) ? `<a href="${esc(interne(x.adresse))}">${esc(x.nom)}</a>` : `<a href="${esc(x.adresse)}" target="_blank" rel="noopener noreferrer">${esc(x.nom)}<span class="sr-only"> (nouvel onglet)</span></a>`}</h3>
         ${x.description ? `<p>${esc(x.description)}</p>` : ''}
         ${likeHtml(x.adresse)}
         ${z ? `<button type="button" class="bouton-lien" data-retrait="${esc(x.adresse)}">Retirer ${esc(x.nom)}</button>` : ''}
