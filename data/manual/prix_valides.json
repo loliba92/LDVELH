@@ -1106,6 +1106,24 @@
    "le": "2026-10-21",
    "par": "loliba (superadmin)"
   },
+  "9782070512683|bon": {
+   "prix": 12.97,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070512683|convenable": {
+   "prix": 10.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070512683|tres_bon": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
   "9782070512706|bon": {
    "prix": 10.59,
    "decision": "corrige",

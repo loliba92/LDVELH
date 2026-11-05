@@ -2,7 +2,7 @@
  "date": "2026-11-05",
  "precedent": "2026-11-04",
  "nb_comparees": 1512,
- "nb_modifiees": 721,
+ "nb_modifiees": 722,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -23,6 +23,21 @@
   }
  ],
  "baisses": [
+  {
+   "id": "9782070512683",
+   "isbn13": "9782070512683",
+   "titre": "La Porte d'Ombre",
+   "serie": "Loup Solitaire",
+   "numero": "707",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 52.88,
+   "apres": 15.0,
+   "pct": -0.716,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070506866",
    "isbn13": "9782070506866",
@@ -144,7 +159,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 130,
