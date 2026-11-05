@@ -2,7 +2,7 @@
  "date": "2026-11-05",
  "precedent": "2026-11-04",
  "nb_comparees": 1512,
- "nb_modifiees": 706,
+ "nb_modifiees": 707,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -99,6 +99,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070665808",
+   "isbn13": "9782070665808",
+   "titre": "L'Œil d'Émeraude",
+   "serie": "Défis Fantastiques",
+   "numero": "000",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 5.96,
+   "apres": 5.0,
+   "pct": -0.161,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070332977",
    "isbn13": "9782070332977",
    "titre": "Le Gouffre Maudit",
@@ -114,7 +129,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 7,
+ "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
   "n_paires": 122,

@@ -1960,6 +1960,24 @@
    "le": "2026-10-17",
    "par": "loliba (superadmin)"
   },
+  "9782070665808|bon": {
+   "prix": 6.49,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070665808|convenable": {
+   "prix": 5.0,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
+  "9782070665808|tres_bon": {
+   "prix": 7.5,
+   "decision": "corrige",
+   "le": "2026-11-05",
+   "par": "loliba (superadmin)"
+  },
   "9782070665815|convenable": {
    "prix": 39.0,
    "decision": "corrige",
