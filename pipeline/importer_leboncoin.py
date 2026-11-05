@@ -12,7 +12,7 @@ Sans cette colonne : 0 pour Leboncoin (retrait possible), protection acheteurs +
 Ce script contrôle chaque ligne, puis écrit, dans data/raw/occasion/ :
   - annonces-leboncoin-AAAA-MM-JJ.csv  : annonces actives avec titre et lien (même format que annonces-*.csv d'eBay) -> onglet Butin ;
   - vendus-leboncoin-AAAA-MM-JJ.csv    : annonces vendues, gardées pour contrôle (jamais dans le Butin) ;
-  - leboncoin-AAAA-MM-JJ.csv           : agrégat des actives (nb, min, médiane, max par livre et état) -> cote, comme eBay ;
+  - leboncoin-AAAA-MM-JJ.csv           : agrégat des actives (nb, min, médiane, max par livre, état et jour de publication) -> cote, comme eBay ;
   - leboncoin-vendus-AAAA-MM-JJ.csv    : agrégat des vendues -> cote, comme « vente probable » ;
   - incertaines-leboncoin-AAAA-MM-JJ.csv : annonces « à vérifier » (verif = 1), montrées dans la fiche, jamais dans la cote ni dans le Butin.
 Rien n'est lu comme une instruction : seules des valeurs contrôlées sont écrites. Rejouer le même relevé donne le même résultat.
@@ -192,20 +192,31 @@ def etaler_lots(annonces, lots):
                 ligne[0], ligne[1] = round(part_de[i], 2), titre
 
 
-def _agreger(lignes, jour, lots=None):
-    """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier."""
+def _agreger(lignes, jour, lots=None, datees=False):
+    """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier.
+    `datees` : chaque annonce est datée de sa publication (jour du relevé moins son âge), pas du jour où elle a été vue ; son poids dans la cote baisse avec son ancienneté."""
     lots = lots or {}
     groupes = {}
+    fin = date.fromisoformat(jour)
+
+    def quand(r):
+        if not datees:
+            return jour
+        try:
+            return (fin - timedelta(days=max(0, int(float(r.get("age_jours") or 0))))).isoformat()
+        except ValueError:
+            return jour
+
     for r in lignes:
         lot = lots.get(r["lien"])
         if lot:
             for isbn, part in repartir_lot(float(r["prix"]), lot):
-                groupes.setdefault((isbn, r["etat"]), []).append(round(part, 2))
+                groupes.setdefault((isbn, r["etat"], quand(r)), []).append(round(part, 2))
             continue
-        groupes.setdefault((r["isbn13"], r["etat"]), []).append(float(r["prix"]))
-    return [{"isbn13": i, "date": jour, "etat": e, "nb_annonces": len(p), "prix_min": f"{min(p):.2f}",
+        groupes.setdefault((r["isbn13"], r["etat"], quand(r)), []).append(float(r["prix"]))
+    return [{"isbn13": i, "date": d, "etat": e, "nb_annonces": len(p), "prix_min": f"{min(p):.2f}",
              "prix_median": f"{statistics.median(p):.2f}", "prix_max": f"{max(p):.2f}"}
-            for (i, e), p in sorted(groupes.items())]
+            for (i, e, d), p in sorted(groupes.items())]
 
 
 def reagreger(dossier=None, lots=None):
@@ -216,7 +227,7 @@ def reagreger(dossier=None, lots=None):
     for source in SOURCES:
         for fic in sorted(dossier.glob(f"annonces-{source}-20*.csv")):
             jour = fic.stem[-10:]
-            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
+            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, datees=True))
         for fic in sorted(dossier.glob(f"vendus-{source}-20*.csv")):
             jour = fic.stem[-10:]
             _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
@@ -270,7 +281,7 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
         _ecrire(dossier / nom_fichier("annonces", source, jour), COLONNES_ANNONCES, list(actives.values()))
         _ecrire(dossier / nom_fichier("vendus", source, jour), COLONNES_ANNONCES, list(vendues.values()))
         lots = charger_lots()
-        _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(actives.values(), jour, lots))
+        _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(actives.values(), jour, lots, datees=True))
         _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots))
         if jour not in bilan["jours"]:
             bilan["jours"].append(jour)

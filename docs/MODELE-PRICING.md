@@ -12,6 +12,7 @@ But : pour un livre (ISBN) et un état, donner une fourchette de prix de revente
 | Historique collection-ldvelh | 0,2 | Base de départ, vieillit (voir plus bas). |
 
 Le poids diminue avec l'ancienneté : demi-vie de 90 jours pour les relevés récents, 12 mois pour l'historique.
+Les annonces Leboncoin et Vinted sont datées de leur **publication** (jour du relevé moins l'âge de l'annonce), pas du jour où le bot les a vues ; sans date connue, du jour du relevé. Leboncoin donne la date exacte ; Vinted seulement « il y a N semaines », comptée à la valeur basse.
 
 ## 2. Nettoyage avant calcul
 

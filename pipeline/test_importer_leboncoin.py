@@ -211,5 +211,39 @@ class TestAVerifier(unittest.TestCase):
             self.assertEqual((b["acceptees"], b["raisons"]), (1, {"date hors fenêtre": 1}))
 
 
+class TestDatePublication(unittest.TestCase):
+    def test_chaque_annonce_est_datee_de_sa_publication(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="10", age="0"), ligne(prix="14", age="21", lien="https://www.leboncoin.fr/ad/livres/2"),
+                               ligne(prix="16", age="21", lien="https://www.leboncoin.fr/ad/livres/3")), JOUR, d, CONNUES)
+            ag = {r["date"]: r for r in lire(d, "leboncoin-2026-10-24.csv")}
+            self.assertEqual(sorted(ag), ["2026-10-03", "2026-10-24"])                 # 24 octobre moins 21 jours = 3 octobre
+            self.assertEqual((ag["2026-10-24"]["nb_annonces"], ag["2026-10-24"]["prix_median"]), ("1", "10.00"))
+            self.assertEqual((ag["2026-10-03"]["nb_annonces"], ag["2026-10-03"]["prix_median"]), ("2", "15.00"))
+
+    def test_age_inconnu_ou_illisible_compte_comme_vue_ce_jour(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="10", age="0"), ligne(prix="12", age="", lien="https://www.leboncoin.fr/ad/livres/2")), JOUR, d, CONNUES)
+            self.assertEqual({r["date"] for r in lire(d, "leboncoin-2026-10-24.csv")}, {"2026-10-24"})
+
+    def test_les_ventes_gardent_le_jour_du_relevé(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="9", age="21", statut="vendu")), JOUR, d, CONNUES)
+            self.assertEqual([r["date"] for r in lire(d, "leboncoin-vendus-2026-10-24.csv")], ["2026-10-24"])
+
+    def test_vinted_aussi_et_reagreger_refait_les_dates(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps(ligne(prix="9", age="150", lien="https://www.vinted.fr/items/1-x")), JOUR, d, CONNUES)
+            (Path(d) / "vinted-2026-10-24.csv").unlink()
+            imp.reagreger(d, {})
+            self.assertEqual([r["date"] for r in lire(d, "vinted-2026-10-24.csv")], ["2026-05-27"])      # 150 jours avant le 24 octobre
+
+    def test_une_annonce_de_lot_garde_la_date_de_son_annonce(self):
+        lots = {"https://www.leboncoin.fr/ad/livres/9": {"isbns": [ISBN_A, ISBN_B], "poids": {ISBN_A: 10.0, ISBN_B: 10.0}}}
+        lignes = [{"isbn13": ISBN_A, "etat": "bon", "prix": "20.00", "lien": "https://www.leboncoin.fr/ad/livres/9", "age_jours": "10"}]
+        r = imp._agreger(lignes, "2026-10-24", lots, datees=True)
+        self.assertEqual({(x["isbn13"], x["date"], x["prix_median"]) for x in r}, {(ISBN_A, "2026-10-14", "10.00"), (ISBN_B, "2026-10-14", "10.00")})
+
+
 if __name__ == "__main__":
     unittest.main()
