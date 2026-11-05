@@ -34,6 +34,49 @@ class TestEtalerLots(unittest.TestCase):
         self.assertEqual(annonces["c"]["bon"][0][1], "Autre")
 
 
+class TestRevendeurs(unittest.TestCase):
+    AMAZON = "https://www.amazon.fr/dp/2070333701"          # ISBN-10 de 9782070333707
+    FNAC = "https://www.fnac.com/SearchResult/ResultList.aspx?Search=9782070333707"
+    ABE = "https://www.abebooks.fr/servlet/SearchResults?isbn=9782070333707"
+
+    def test_isbn10(self):
+        self.assertEqual(imp.isbn10("9782070333707"), "2070333701")
+        self.assertIsNone(imp.isbn10("9791234567896"))
+
+    def test_sources_des_liens(self):
+        self.assertEqual([imp.source_du_lien(x) for x in (self.AMAZON, self.FNAC, self.ABE)], ["amazon", "fnac", "abebooks"])
+        for non in ("https://www.amazon.fr/dp/2070333701?tag=x", "https://evil.example/https://www.fnac.com/SearchResult/ResultList.aspx?Search=9782070333707",
+                    "https://www.fnac.com/SearchResult/ResultList.aspx?Search=abc"):
+            self.assertIsNone(imp.source_du_lien(non))
+
+    def valide(self, lien, isbn=ISBN_A, prix="30.00", fdp=""):
+        r = {"isbn13": isbn, "etat": "bon", "prix": prix, "titre": "Défis", "lien": lien, "date": "2026-10-24", "fdp": fdp, "statut": "actif"}
+        return imp.valider(r, JOUR, CONNUES)
+
+    def test_lien_distinct_par_offre_et_port_reel(self):
+        ok, _ = self.valide(self.FNAC, prix="58.44", fdp="3.49")
+        self.assertEqual((ok["trouvee_par"], ok["fdp"]), ("fnac", "3.49"))
+        self.assertEqual(ok["lien"], self.FNAC + "#bon-5844")
+        autre, _ = self.valide(self.FNAC, prix="70.51", fdp="3.49")
+        self.assertNotEqual(ok["lien"], autre["lien"])          # deux offres du même revendeur ne s'écrasent pas
+
+    def test_port_absent_vaut_zero_et_non_les_frais_vinted(self):
+        ok, _ = self.valide(self.AMAZON)
+        self.assertEqual(ok["fdp"], "0.00")
+
+    def test_lien_sans_rapport_avec_lisbn_refuse(self):
+        self.assertEqual(self.valide(self.FNAC, isbn=ISBN_B)[1], "lien sans rapport avec l'ISBN")
+        self.assertEqual(self.valide(self.AMAZON, isbn=ISBN_B)[1], "lien sans rapport avec l'ISBN")
+
+    def test_import_dans_les_fichiers_du_revendeur(self):
+        with tempfile.TemporaryDirectory() as d:
+            c = "```csv\n" + ENTETE.strip() + ",fdp\n" + f'{ISBN_A},bon,58.44,"Défis",{self.FNAC},actif,0,2026-10-24,3.49\n' + f'{ISBN_A},bon,70.51,"Défis",{self.FNAC},actif,0,2026-10-24,3.49\n' + "```\n"
+            b = imp.importer(c, JOUR, d, CONNUES)
+            self.assertEqual(b["acceptees"], 2)
+            self.assertEqual(len(lire(d, "annonces-fnac-2026-10-24.csv")), 2)
+            self.assertEqual(len(lire(d, "fnac-2026-10-24.csv")), 1)
+
+
 class TestVinted(unittest.TestCase):
     LV = "https://www.vinted.fr/items/10561472673-ldvelh-grande-menace-des-robots"
 

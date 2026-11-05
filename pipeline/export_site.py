@@ -141,7 +141,7 @@ def premieres_vues(annonces, anciennes, maintenant, historiques=None):
 
 def source_de_ligne(origine):
     """Source d'une annonce du relevé : Leboncoin, Vinted, librairie, sinon eBay (trouvée par l'ISBN ou par le titre)."""
-    return origine if origine in ("leboncoin", "vinted", "librairie") else "ebay"
+    return origine if origine in ("leboncoin", "vinted", "librairie") + importer_leboncoin.REVENDEURS else "ebay"
 
 
 def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gardes=90, oubli_jours=14, maintenant=None):
@@ -189,7 +189,7 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
     Servi avec le Butin (niveaux 2 et 3) : seulement des décomptes, jamais de lien ni de titre."""
     offre = {}
     for isbn, par_etat in annonces.items():
-        ebay = lbc = vin = lib = 0
+        ebay = lbc = vin = lib = rev = 0
         for liste in par_etat.values():
             for prix, titre, lien, origine, vue, suppose in liste:
                 if str(titre).startswith("Lot de "):
@@ -198,13 +198,17 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
                     lib += 1
                 elif origine == "vinted":
                     vin += 1                         # même règle que Leboncoin : en ligne jusqu'à preuve du contraire
+                elif origine in importer_leboncoin.REVENDEURS:
+                    rev += 1                         # offre d'un revendeur : en ligne jusqu'à preuve du contraire
                 elif origine == "leboncoin":
                     lbc += 1                         # en ligne jusqu'à preuve du contraire (voir JOURS_LEBONCOIN) : la liste a déjà retiré les vendues
                 elif not (date_ebay and vue and vue < date_ebay):
                     ebay += 1
-        if ebay or lbc or vin or lib:
+        if ebay or lbc or vin or lib or rev:
             ages = [a for a in ages_ebay.get(isbn, []) if a is not None]
             offre[isbn] = {"ebay": ebay, "lbc": lbc, "vin": vin, "lib": lib, "age": int(statistics.median(ages)) if ages else None}
+            if rev:
+                offre[isbn]["rev"] = rev          # offres d'occasion des revendeurs (Amazon, Fnac, AbeBooks)
     return offre
 
 
@@ -521,7 +525,7 @@ def main():
     # Annonces retenues par le dernier relevé eBay (titre, prix, lien) : l'onglet « Annonces » de l'espace administrateur les montre pour que chaque prix puisse
     # être contrôlé à la main (bon livre ? bon état ?). Absent tant qu'aucun relevé ne les a enregistrées.
     dossier_occasion = DB.parent.parent / "raw" / "occasion"
-    fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if "leboncoin" not in f.name and "vinted" not in f.name)         # eBay
+    fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if not any(s in f.name for s in importer_leboncoin.SOURCES))         # eBay
     annonces = annonces_cumulees(fichiers_ann)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
     # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
@@ -547,6 +551,10 @@ def main():
         for etat, liste in par_etat.items():
             liste = [a for a in liste if a[2] not in liens_vendus_vinted]          # le prix est déjà livré : la colonne fdp du relevé est ajoutée par annonces_cumulees
             if liste:
+                annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+    for revendeur in importer_leboncoin.REVENDEURS:          # offres d'occasion Amazon, Fnac, AbeBooks : même présentation, le lien porte l'état et le prix
+        for isbn, par_etat in annonces_cumulees(sorted(dossier_occasion.glob(f"annonces-{revendeur}-20*.csv")), jours=JOURS_VINTED).items():
+            for etat, liste in par_etat.items():
                 annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
     liens_certains = liens_vendus | liens_vendus_vinted | {a[2] for par in annonces.values() for liste in par.values() for a in liste}
     incertaines = {}          # annonces « à vérifier » : à part, elles n'entrent ni dans la cote, ni dans le Butin, ni dans les totaux

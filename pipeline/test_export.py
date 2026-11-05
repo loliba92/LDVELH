@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis
+from export_site import aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
 
 
 def e(prix):
@@ -241,6 +241,12 @@ class TestOffre(unittest.TestCase):
         o = calculer_offre(ann, {"111": [10, 30, 50]}, "2026-10-26", "2026-10-27")
         self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "vin": 1, "lib": 1, "age": 30})
         self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
+
+    def test_offres_des_revendeurs_comptees_a_part(self):
+        ann = {"111": {"bon": [[58.44, "a", "https://www.fnac.com/x#bon-5844", "fnac", "2026-10-20", None], [55.7, "b", "https://www.amazon.fr/dp/1#bon-5570", "amazon", "2026-10-20", None]]}}
+        self.assertEqual(calculer_offre(ann, {}, "2026-10-26", "2026-10-27")["111"], {"ebay": 0, "lbc": 0, "vin": 0, "lib": 0, "age": None, "rev": 2})
+        self.assertEqual(source_de_ligne("fnac"), "fnac")
+        self.assertEqual(source_de_ligne("titre"), "ebay")
 
 
 
