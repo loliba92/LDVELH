@@ -2108,13 +2108,20 @@
     if (aj) d.aj = aj;
     if (nb != null || na != null || sous != null || aj) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
-    // Une seule carte « Butins et Annonces » : pépites du Butin, annonces en ligne, ajouts des dernières 24 h ; liens vers le Butin et les annonces, et vers l'analyse pour le Zagor
-    const ajout = d.aj ? `+${d.aj[0]} ajoutée${d.aj[0] > 1 ? 's' : ''} sur 24 h · 24 h avant : ${d.aj[1]}${d.aj[1] ? ` (${d.aj[0] >= d.aj[1] ? '+' : '−'}${Math.round(100 * Math.abs(d.aj[0] - d.aj[1]) / d.aj[1])}\u00a0%)` : ''}` : 'ajoutées sur 24 h : …';
-    const enLigneTxt = `${n(d.na)} annonce${d.na > 1 ? 's' : ''} en ligne${niv3 && d.sous != null ? ` (dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation)` : ''}`;
-    z.innerHTML = '<div class="compteurs-acc"><div class="compteur-acc compteur-fusion">'
-      + `<b>${n(d.nb)}</b><span><strong>Butins et Annonces</strong><small>${d.nb > 1 ? 'annonces à 50 %' : 'annonce à 50 %'} du prix du site ou moins</small><small>${enLigneTxt}</small><small>${ajout}</small>`
-      + `<span class="compteur-liens"><a href="butin.html#pepites">Voir le Butin →</a><a href="butin.html#recues">Voir les annonces →</a>${niv3 ? '<a href="butin.html#analyse">Voir l\'analyse →</a>' : ''}</span></span>`
-      + '</div></div>';
+    // Tableau de bord « Butins et Annonces » : trois chiffres (pépites du Butin, annonces en ligne, ajouts sur 24 h), puis les accès ; l'analyse est pour le Zagor
+    const f = (v) => (v == null ? '…' : Number(v).toLocaleString('fr-FR'));
+    const evol = d.aj && d.aj[1] ? Math.round(100 * (d.aj[0] - d.aj[1]) / d.aj[1]) : null;
+    const evolTxt = evol == null ? (d.aj ? '' : 'en cours de calcul') : `<span class="tb-evol ${evol >= 0 ? 'tb-hausse' : 'tb-baisse'}">${evol >= 0 ? '▲' : '▼'} ${Math.abs(evol)}\u00a0%</span> · 24 h avant : ${d.aj[1]}`;
+    const sousTxt = niv3 && d.sous != null ? `dont ${f(d.sous)} sous notre estimation` : 'au dernier relevé';
+    z.innerHTML = `<section class="tb-carte" aria-label="Butins et Annonces">
+      <p class="tb-titre">Butins et Annonces</p>
+      <div class="tb-chiffres">
+        <div class="tb-chiffre"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
+        <div class="tb-chiffre"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>
+        <div class="tb-chiffre"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
+      </div>
+      <div class="tb-liens"><a class="bouton" href="butin.html#pepites">Voir le Butin</a><a class="bouton bouton-clair" href="butin.html#recues">Voir les annonces</a>${niv3 ? '<a class="bouton bouton-clair" href="butin.html#analyse">Analyse</a>' : ''}</div>
+    </section>`;
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);
   majCompteursAccueil();

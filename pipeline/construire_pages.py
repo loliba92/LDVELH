@@ -235,6 +235,18 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
     </div>
     </details>
   </div>
+  <details class="rc-legende">
+    <summary>C'est quoi la température ?</summary>
+    <p>Un mot qui dit si l'annonce vaut le coup. Il compare son prix au prix du site (pour 60 %) et aux autres annonces du même livre dans le même état (pour 40 %).</p>
+    <ul>
+      <li><strong>Brûlant</strong> : très en dessous du prix du site, parmi les moins chères.</li>
+      <li><strong>Chaud</strong> : bonne affaire.</li>
+      <li><strong>Tiède</strong> : prix correct.</li>
+      <li><strong>Frais</strong> : un peu cher.</li>
+      <li><strong>Glacé</strong> : cher, au-dessus du marché.</li>
+    </ul>
+    <p>Un mot en pointillé pâle veut dire que l'édition ou l'état reste à confirmer.</p>
+  </details>
   <div id="rc-liste"></div>
 </div>'''
 
