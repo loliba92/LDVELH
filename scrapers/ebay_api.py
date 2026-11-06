@@ -625,13 +625,11 @@ def annonces_connues(dossier):
         return {m.group(1) for r in csv.DictReader(f) for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m}
 
 
-# Relevé quotidien par balayage : plus aucune recherche édition par édition (décision du propriétaire). Les recherches larges ci-dessous ramènent toutes les
-# annonces récentes du domaine, puis chacune est rattachée à son édition par le titre (concordance stricte), comme dans l'essai du 6 novembre : 715 annonces
-# rattachées dont 259 nouvelles, pour environ 200 appels. Retirées après l'essai : « ldvelh lot », « dungeons », « elder craft », « scriptarium » et les
-# séries qui ne ramenaient rien (Fabled Lands, Les Chroniques d'Hamalron, Littéraction).
-REQUETES_RELEVE = ("ldvelh", "livre dont vous êtes le héros", "ldvelh livre dont vous êtes le héros", "ldvelh graal", "ldvelh loup solitaire",
-                   "ldvelh sorcellerie", "défis fantastiques", "livre jeu", "alkonost")
-SERIES_SANS_RESULTAT = {"fabled lands", "les chroniques d'hamalron", "littéraction"}
+# Relevé quotidien par balayage : plus aucune recherche par ISBN ni édition par édition (décision du propriétaire). Les recherches larges ramènent toutes
+# les annonces récentes du domaine (« ldvelh », « livre dont vous êtes le héros », les éditeurs Alkonost, Elder Craft, Scriptarium, les séries du
+# catalogue…), puis chacune est rattachée à son édition par le titre (concordance stricte). Même liste que l'essai du 6 novembre : 715 annonces
+# rattachées dont 259 nouvelles, pour environ 200 appels. Aucune requête n'est retirée sans l'accord du propriétaire.
+REQUETES_RELEVE = REQUETES_LARGES
 PAGES_RELEVE = 10          # 10 pages de 200 annonces au plus par requête, des plus récentes aux plus anciennes
 
 
@@ -640,7 +638,7 @@ def balayer(token, fiches, pages=PAGES_RELEVE, http=requests, pause=0):
     Chaque annonce est marquée « _titre_seul » : elle n'est rattachée à une édition que si tous les mots du titre concordent.
     Une requête qui échoue (hors limite d'appels) est notée dans le journal et les autres continuent ; la limite d'appels arrête tout."""
     pool = {}
-    requetes = list(REQUETES_RELEVE) + [q for q in requetes_series(fiches) if q.lower() not in SERIES_SANS_RESULTAT]
+    requetes = list(REQUETES_RELEVE) + list(requetes_series(fiches))
     for q in requetes:
         try:
             items = annonces_pages(q, token, http, "FIXED_PRICE", pages, pause=pause)
