@@ -6,6 +6,7 @@ observations hors lots : natures, fraîcheur, nombre d'annonces). Sans relevé a
     python pipeline/build_db.py && python pipeline/export_site.py
 """
 import argparse
+import copy
 import csv
 import hashlib
 import json
@@ -449,6 +450,7 @@ def main():
             prix.setdefault(r["version_key"], {})["tres_bon"] = {
                 "prix": prix_tbe_en_vente(e_ed["prix"]), "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
                 "confiance": "élevée", "incertitude": 0.05, "neuf": True}
+    sans_valide = copy.deepcopy(prix)          # même calcul sans les prix validés, sans lissage : la cible d'une remise au calcul
     # Prix validés par le propriétaire : ils servent aussi de base pour déduire les états qu'il n'a pas chiffrés (60 % / 40 %)
     for r in cx.execute(REQUETE):
         for e in validations.ETATS:
@@ -459,6 +461,9 @@ def main():
     # Déduction des états sans prix à partir des autres états de la même édition (rapports du propriétaire)
     nb_repartis = sum(etats.repartir(par_etat, ratios) for par_etat in prix.values())       # éditions avec un prix actuel
     nb_deduits = sum(etats.completer(par_etat, ratios) for par_etat in prix.values())       # éditions sans prix actuel, état manquant
+    for par_etat in sans_valide.values():
+        etats.repartir(par_etat, ratios)
+        etats.completer(par_etat, ratios)
     # Lissage quotidien : le prix du jour dépend de celui de la veille (voir etats.lisser). Appliqué à partir du 22 octobre 2026, après la
     # remise à zéro du relevé du 21 (annonces d'autres objets retirées), pour ne pas bloquer cette correction.
     nb_lisses = 0
@@ -473,6 +478,8 @@ def main():
                 if isbn_v:
                     nb_lisses += etats.lisser(par_etat, {e: veille.get(f"{isbn_v}|{e}") for e in ETATS}, gains)
     nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
+    for par_etat in sans_valide.values():
+        aligner(par_etat, ecart)
 
     dates_maj = {x["id"]: x["date_maj"] for x in editions.load(None)}      # date d'ajout (ou de dernière mise à jour) de la fiche
 
@@ -502,7 +509,8 @@ def main():
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "par", "neuf") if k in p[e]}
+            "prix_info": {e: {**{k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "par", "neuf") if k in p[e]},
+                              **({"sans_validation": [round(sv["prix"], 2), sv.get("source")]} if p[e].get("valide") and (sv := (sans_valide.get(r["version_key"], {}).get(e) or {})).get("prix") else {})}
                           for e in ETATS if p.get(e)},
         })
     # Ce qui a bougé depuis la publication précédente (à défaut : cote d'archives seule)
