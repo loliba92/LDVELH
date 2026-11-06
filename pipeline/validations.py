@@ -70,6 +70,17 @@ def importer(source, chemin=CHEMIN):
     return ajoutees, refusees
 
 
+def retirer(cles, chemin=CHEMIN):
+    """Supprime les validations demandées (clés « isbn13|etat »). Renvoie le nombre retiré ; la cote repart alors des annonces."""
+    actuel = {"|".join(k): v for k, v in lire(chemin).items()}
+    retirees = [c for c in cles if c in actuel]
+    for c in retirees:
+        del actuel[c]
+    if retirees:
+        Path(chemin).write_text(json.dumps({"valides": dict(sorted(actuel.items()))}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    return len(retirees)
+
+
 def appliquer(par_etat, isbn, valides):
     """Remplace dans `par_etat` ({etat: estimation}) les prix validés ; garde le prix calculé dans « calcule ». Renvoie le nombre."""
     n = 0
