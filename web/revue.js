@@ -976,6 +976,65 @@
     };
     const ageClasse = (a) => (a.ageJ == null || a.ageEstime ? 'an-age-x' : a.ageJ <= 2 ? 'an-age-vert' : a.ageJ <= 14 ? 'an-age-neutre' : a.ageJ <= 30 ? 'an-age-moyen' : 'an-age-ancien');
     const ageHtml = (a) => `<span class="an-age ${ageClasse(a)}"${a.publiee ? ` title="Publiée le ${esc(new Date(a.publiee + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }))}"` : ''}>${esc(ageTexte(a))}</span>`;
+    // Opportunités d'achat (Zagor, onglet Analyse) : annonces assez sous le prix du site pour être revendues avec une marge, frais déduits.
+    // Marge nette = revente (part du prix du site) − frais de vente − prix d'achat livré. Revente sur Leboncoin : pas de frais de vente par défaut.
+    const PARAMS_OPP_DEFAUT = { vente: 90, frais: 0 };
+    let paramsOpp = { ...PARAMS_OPP_DEFAUT }, dernieresToutes = null, nbOppAffichees = 25, defilementOpp = null;
+    try { const o = JSON.parse(localStorage.getItem('cdh-opp-params') || 'null'); if (o && o.vente > 0 && o.vente <= 150 && o.frais >= 0 && o.frais <= 50) paramsOpp = { vente: Number(o.vente), frais: Number(o.frais) }; } catch (e) { /* valeurs par défaut */ }
+    try { const o = JSON.parse(sessionStorage.getItem('cdh-opp-etat') || 'null'); if (o && Date.now() - o.t < 2 * 3600 * 1000) { defilementOpp = o.y; nbOppAffichees = o.n || 25; } sessionStorage.removeItem('cdh-opp-etat'); } catch (e) { /* retour au début */ }
+    const fiabiliteOpp = (a) => {
+      const cote = (a.ed.etats[a.cle] || {}).confiance;
+      if (a.points.length || !['élevée', 'validée', 'moyenne'].includes(cote)) return 'faible';
+      return ['élevée', 'validée'].includes(cote) && a.ageJ != null && !a.ageEstime && a.ageJ <= 30 ? 'haute' : 'moyenne';
+    };
+    const LIB_FIAB = { haute: 'Fiabilité haute', moyenne: 'Fiabilité moyenne', faible: 'À vérifier' };
+    const POIDS_FIAB = { haute: 1, moyenne: 0.6, faible: 0.25 };
+    function dessinerOpp(toutes) {
+      const zone = document.getElementById('opp-zone');
+      if (!zone || !estNiveau3()) return;
+      if (toutes) dernieresToutes = toutes;
+      if (!dernieresToutes) return;
+      const vente = paramsOpp.vente / 100, frais = paramsOpp.frais;
+      const liste = dernieresToutes.filter((a) => a.pub && !a.aberrant && !a.partie && a.fam !== 'librairie' && !/^Lot de /.test(a.titre || ''))
+        .map((a) => { const marge = vente * a.pub - frais - a.prix, fiab = fiabiliteOpp(a); return { a, marge, roi: marge / a.prix, fiab, score: marge * POIDS_FIAB[fiab] }; })
+        .filter((o) => o.marge >= 5 && o.roi >= 0.25).sort((x, y) => y.score - x.score);
+      const hautes = liste.filter((o) => o.fiab === 'haute').length;
+      const cartes = liste.slice(0, nbOppAffichees).map((o) => {
+        const a = o.a, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`, n = (a.tous || []).length;
+        const num = a.ed.numero && !/^0+$/.test(a.ed.numero) ? ' n° ' + esc(a.ed.numero) : '';
+        return `<article class="opp-carte opp-${o.fiab}">
+          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(a.points.join(', ') || 'Cote peu fiable pour cette édition') : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote fiable, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
+          <p class="opp-meta">${esc(a.ed.serie)}${num} · ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${n} annonce${n > 1 ? 's' : ''} de ce livre dans cet état</p>
+          <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
+          <p class="opp-bas">${ageHtml(a)} · <a class="opp-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a></p>
+        </article>`;
+      }).join('');
+      zone.innerHTML = `<section class="opp" aria-label="Opportunités d'achat">
+        <h3 class="captures-titre">Opportunités d'achat</h3>
+        <p class="sous">Annonces assez sous le prix du site pour être revendues avec au moins 5 € de marge nette et 25 % de rendement. Triées par marge, la fiabilité compte : une marge énorme est souvent une erreur d'édition ou d'état.</p>
+        <div class="opp-params"><label>Revente à <input type="number" id="opp-vente" min="10" max="150" step="1" value="${paramsOpp.vente}" inputmode="numeric"> % du prix du site</label><label>Frais de vente <input type="number" id="opp-frais" min="0" max="50" step="0.5" value="${paramsOpp.frais}" inputmode="decimal"> €</label></div>
+        <p class="sous opp-bilan"><b>${liste.length}</b> opportunité${liste.length > 1 ? 's' : ''}, dont <b>${hautes}</b> de fiabilité haute${liste.length > nbOppAffichees ? ` · ${nbOppAffichees} affichées` : ''}. Prix demandés (pas des ventes) : la cote a ses marges d'erreur.</p>
+        <div class="opp-liste">${cartes || '<p class="sous">Aucune opportunité avec ces hypothèses.</p>'}</div>
+        ${liste.length > nbOppAffichees ? '<p><button type="button" class="bouton bouton-clair" id="opp-plus">Afficher plus</button></p>' : ''}
+      </section>`;
+      const pane = document.getElementById('pane-analyse');
+      if (defilementOpp != null && pane && !pane.hidden) { const y = defilementOpp; defilementOpp = null; requestAnimationFrame(() => window.scrollTo(0, y)); setTimeout(() => window.scrollTo(0, y), 400); }
+    }
+    document.addEventListener('input', (e) => {
+      if (e.target.id !== 'opp-vente' && e.target.id !== 'opp-frais') return;
+      const v = Number(document.getElementById('opp-vente').value), f = Number(document.getElementById('opp-frais').value);
+      if (!(v > 0 && v <= 150 && f >= 0 && f <= 50)) return;
+      paramsOpp = { vente: v, frais: f };
+      try { localStorage.setItem('cdh-opp-params', JSON.stringify(paramsOpp)); } catch (er) { /* tant pis */ }
+      const actif = document.activeElement && document.activeElement.id; nbOppAffichees = 25; dessinerOpp();
+      const el = actif && document.getElementById(actif); if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (er) { /* type nombre */ } }
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'opp-plus') { nbOppAffichees += 25; dessinerOpp(); return; }
+      if (e.target.closest('a.opp-titre')) {
+        try { sessionStorage.setItem('cdh-opp-etat', JSON.stringify({ t: Date.now(), y: window.scrollY, n: nbOppAffichees })); sessionStorage.setItem('cdh-retour-fiche', 'butin.html#analyse'); } catch (er) { /* tant pis */ }
+      }
+    });
     const dansPeriode = (a) => {
       if (periode === 'tout') return true;
       if (a.ageJ == null) return false;
@@ -1029,6 +1088,7 @@
         a.lot = { min: p[0], max: p[p.length - 1], med: med, n: p.length };
       });
       toutes.forEach((a) => { a.tous = parLivre.get(a.ed.isbn + '|' + a.cle).slice().sort((x, y) => x - y); });
+      dessinerOpp(toutes);
       // Listes de filtres (série, édition, éditeur) : les valeurs présentes dans les annonces, remplies une fois
       const remplir = (el, valeurs, tous) => { if (!el || el.options.length > 1) return; el.innerHTML = `<option value="">${tous}</option>` + valeurs.map((v) => `<option>${esc(v)}</option>`).join(''); };
       const uniques = (f) => [...new Set(toutes.map(f).filter(Boolean))].sort((x, y) => String(x).localeCompare(String(y), 'fr', { numeric: true }));
