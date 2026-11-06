@@ -861,7 +861,7 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
-    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), tempRc = $('#rc-temp'), verifRc = $('#rc-verif'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
+    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), verifRc = $('#rc-verif'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
     // Retour de la fiche : filtres, tri, longueur de liste et position sont gardés au clic, puis remis à la réouverture de la page
     const CTRL_RC = ['rc-q', 'rc-tri', 'rc-source', 'rc-verdict', 'rc-serie', 'rc-edition', 'rc-editeur', 'rc-etatf', 'rc-temp', 'rc-pmin', 'rc-pmax'], CASES_RC = ['rc-trouver', 'rc-pep', 'rc-bon', 'rc-sans', 'rc-verif', 'rc-enligne'];
     let etatARestaurer = null, defilementEnAttente = null;
@@ -922,17 +922,18 @@
       const txt = `${cat ? cat + ' : ' : ''}annonces de ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}${site ? `. Le trait marque le prix du site, ${eur(a.pub)}` : ''}`;
       return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste">${site ? `<span class="rc-therm-rep" style="left:${(place(a.pub) * 100).toFixed(1)}%"></span>` : ''}<span class="rc-therm-pt" style="left:${(place(a.prix) * 100).toFixed(1)}%"></span></span>${extreme || !cat ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
-    const DEGRES = { brulant: 'Brûlant', chaud: 'Chaud', tiede: 'Tiède', frais: 'Frais', glace: 'Glacé' };
-    const puceTemp = (a) => {
-      if (!a.degre) return '<span class="an-temp an-t-vide" title="Pas de prix du site ni d\'autres annonces pour comparer">Température : …</span>';
-      const base = a.pub != null ? `écart au prix du site (${eur(a.pub)})` : 'les autres annonces du même livre';
-      const autres = a.lot ? ` et place parmi ${a.lot.n} annonces du même livre et du même état` : '';
-      return `<span class="an-temp an-t-${a.degre}${a.points.length ? ' an-t-pale' : ''}" title="${esc(`Température : ${base}${autres}.${a.points.length ? ' À confirmer : ' + a.points.join(', ') + '.' : ''}`)}">${DEGRES[a.degre]}</span>`;
+    // Écart au prix du site : rouge au-dessus, vert en dessous
+    const ecartHtml = (a) => {
+      const e = Math.round((a.prix / a.pub - 1) * 100);
+      return `<b class="an-ecart ${e > 0 ? 'an-ecart-plus' : e < 0 ? 'an-ecart-moins' : ''}">${e > 0 ? '+' : e < 0 ? '−' : ''}${Math.abs(e)}\u00a0%</b>`;
     };
-    const liquidite = (a) => {
-      const n = a.lot ? `${a.lot.n} annonces en ligne` : 'Seule annonce';
-      const r = (INFO_ED[a.ed.id] || {}).rarete;
-      return `${n} · même état${r && r !== 'courant' ? ' · ' + ({ peu_courant: 'peu courant', rare: 'rare', tres_rare: 'très rare' }[r] || '') : ''}`;
+    // Barre des prix : un trait par annonce du même livre et du même état, le point doré est celle-ci, le trait clair est le prix du site
+    const barrePrix = (a) => {
+      const p = a.tous || [a.prix], site = a.pub != null ? a.pub : null;
+      const bas = Math.min(...p, site == null ? Infinity : site), haut = Math.max(...p, site == null ? -Infinity : site);
+      const pos = (x) => (haut > bas ? ((x - bas) / (haut - bas)) * 100 : 50).toFixed(1);
+      const txt = `${p.length} annonce${p.length > 1 ? 's' : ''} de ce livre dans le même état, de ${eur(Math.min(...p))} à ${eur(Math.max(...p))}. Cette annonce : ${eur(a.prix)}.${site != null ? ` Prix du site : ${eur(site)}.` : ''}`;
+      return `<div class="an-barre" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><div class="an-barre-piste">${p.map((x) => `<i class="an-tick" style="left:${pos(x)}%"></i>`).join('')}${site != null ? `<i class="an-reperesite" style="left:${pos(site)}%"></i>` : ''}<i class="an-moi" style="left:${pos(a.prix)}%"></i></div><div class="an-barre-bornes"><span>${eur(bas)}</span><span>${eur(haut)}</span></div></div>`;
     };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
@@ -960,7 +961,6 @@
     };
     const comparerRc = (mode) => ({
       recent: parRecent,
-      temp: (a, b) => (b.t == null ? -1 : b.t) - (a.t == null ? -1 : a.t) || parRecent(a, b),
       ancien: (a, b) => quandCle(a).localeCompare(quandCle(b)) || a.prix - b.prix,
       prixdesc: (a, b) => b.prix - a.prix || parRecent(a, b),
       eco: (a, b) => (b.pub ? b.pub - b.prix : -9999) - (a.pub ? a.pub - a.prix : -9999) || parRecent(a, b),
@@ -994,13 +994,7 @@
         const m = p.length >> 1, med = p.length % 2 ? p[m] : (p[m - 1] + p[m]) / 2;
         a.lot = { min: p[0], max: p[p.length - 1], med: med, n: p.length };
       });
-      // Température : 60 % l'écart au prix du site, 40 % la place parmi les annonces du même livre et du même état (la moins chère = la plus chaude)
-      toutes.forEach((a) => {
-        const r = a.pub ? a.prix / a.pub : null, parCote = r == null ? null : 1 - Math.min(r, 1.5) / 1.5;
-        const rang = a.lot ? (a.lot.max > a.lot.min ? (a.prix - a.lot.min) / (a.lot.max - a.lot.min) : 0.5) : null;
-        const t = parCote == null ? (rang == null ? null : 1 - rang) : rang == null ? parCote : 0.6 * parCote + 0.4 * (1 - rang);
-        a.t = t; a.degre = t == null ? null : t >= 0.75 ? 'brulant' : t >= 0.55 ? 'chaud' : t >= 0.4 ? 'tiede' : t >= 0.25 ? 'frais' : 'glace';
-      });
+      toutes.forEach((a) => { a.tous = parLivre.get(a.ed.isbn + '|' + a.cle).slice().sort((x, y) => x - y); });
       // Listes de filtres (série, édition, éditeur) : les valeurs présentes dans les annonces, remplies une fois
       const remplir = (el, valeurs, tous) => { if (!el || el.options.length > 1) return; el.innerHTML = `<option value="">${tous}</option>` + valeurs.map((v) => `<option>${esc(v)}</option>`).join(''); };
       const uniques = (f) => [...new Set(toutes.map(f).filter(Boolean))].sort((x, y) => String(x).localeCompare(String(y), 'fr', { numeric: true }));
@@ -1018,13 +1012,12 @@
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
       const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie)
         && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
-        && (!tempRc || !tempRc.value || (tempRc.value === 'brulant' && a.degre === 'brulant') || (tempRc.value === 'chaud' && (a.degre === 'brulant' || a.degre === 'chaud')) || (tempRc.value === 'glace' && a.degre === 'glace'))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
         && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       const nbTr = $('#rc-nb-trouver'); if (nbTr) { const nt = toutes.filter((a) => a.trouver && !a.partie).length; nbTr.textContent = nt ? `(${nt})` : ''; }
-      const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, tempRc && tempRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
+      const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
       const actifs = dansPlus + [verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
       if (effacerRc) effacerRc.hidden = !(dansPlus || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
@@ -1032,26 +1025,21 @@
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${puceTemp(a)}${thermometre(a)}${a.points.map((t) => `<span class="rc-point">${esc(t)}</span>`).join('')}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`;
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
         const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
-        const precis = [a.ed.version, info.editeur, info.annee].filter(Boolean).map((x) => esc(String(x))).join(' · ');
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
           <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
           <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
-          <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}</span>
-          ${a.pub != null ? `<span class="rc-vs">site ${eur(a.pub)} · ${Math.round((a.prix / a.pub - 1) * 100) > 0 ? '+' : Math.round((a.prix / a.pub - 1) * 100) < 0 ? '−' : ''}${Math.abs(Math.round((a.prix / a.pub - 1) * 100))} %</span>` : ''}
-          <div class="an-temprow">${puceTemp(a)}</div>
-          ${thermometre(a)}
-          <span class="an-meta">${precis ? precis + ' · ' : ''}${ABR_ETAT[a.cle]}</span>
-          <span class="an-meta">${NOM[a.fam]}${quandRc(a) ? ' · ' + esc(quandRc(a)) : ''}${a.partie ? ' · plus vue' : ''}</span>
-          <span class="an-meta an-liq">${esc(liquidite(a))}</span>
-          ${a.points.length ? `<span class="an-points">${a.points.map((t) => esc(t)).join(' · ')}</span>` : ''}
+          <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
+          ${a.pub != null ? `<span class="an-site">site ${eur(a.pub)} · ${ecartHtml(a)}</span>` : ''}
+          ${barrePrix(a)}
+          <span class="an-meta">${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${quandRc(a) ? ' · ' + esc(quandRc(a)) : ''}${a.partie ? ' · plus vue' : ''}</span>
         </article>`;
       };
       const page = vues.slice(0, limite);
@@ -1065,12 +1053,12 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc, tempRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
+    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
     [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
     const razFiltres = () => {
       [trouverRc, pepRc, bonRc, sansRc, verifRc].forEach((el) => { if (el) el.checked = false; });
       source.value = 'tout'; verdict.value = 'tout';
-      [serieRc, editionRc, editeurRc, etatfRc, tempRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
+      [serieRc, editionRc, editeurRc, etatfRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
       if (rechercheRc) rechercheRc.value = '';
       periode = 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'tout')));
       triRc.value = 'recent';
@@ -1082,7 +1070,7 @@
       chasse: ['pépites sans réserve, les meilleures affaires d\'abord.', () => { pepRc.checked = true; sansRc.checked = true; triRc.value = 'ecart'; }],
       veille: ['annonces arrivées aujourd\'hui, les plus récentes d\'abord.', () => { periode = 'auj'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'auj'))); triRc.value = 'recent'; }],
       comparaison: ['classées par prix croissant. Tapez un titre pour comparer les annonces d\'un même livre.', () => { triRc.value = 'prix'; }],
-      verification: ['annonces dont l\'édition ou l\'état reste à confirmer, les plus chaudes d\'abord.', () => { verifRc.checked = true; triRc.value = 'temp'; }],
+      verification: ['annonces dont l\'édition ou l\'état reste à confirmer, les meilleures affaires d\'abord.', () => { verifRc.checked = true; triRc.value = 'ecart'; }],
     };
     const txtPreset = $('#rc-preset-txt');
     document.querySelectorAll('#rc-presets [data-preset]').forEach((b) => b.addEventListener('click', () => {
