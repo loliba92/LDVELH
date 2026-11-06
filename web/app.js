@@ -901,12 +901,22 @@
   // Nouveaux prix d'un livre : les états au-dessus des annonces passent à la médiane des annonces ; un état inférieur qui dépasserait le supérieur est ramené à son rapport (bon 60 %, convenable 40 %)
   function baisseMediane(b, h) {
     const nv = { convenable: b.prix.convenable, bon: b.prix.bon, tres_bon: b.prix.tres_bon }, change = new Set(h.map((x) => x.k)), r2 = (v) => Math.round(v * 100) / 100;
-    h.forEach((x) => { nv[x.k] = x.med; });
-    if (nv.bon != null && nv.tres_bon != null && nv.bon > nv.tres_bon) { nv.bon = r2(nv.tres_bon * 0.6); change.add('bon'); }
-    if (nv.convenable != null && nv.bon != null && nv.convenable > nv.bon) { nv.convenable = r2(nv.bon * 2 / 3); change.add('convenable'); }
-    else if (nv.convenable != null && nv.bon == null && nv.tres_bon != null && nv.convenable > nv.tres_bon) { nv.convenable = r2(nv.tres_bon * 0.4); change.add('convenable'); }
+    const raison = {}, plage = Object.fromEntries(h.map((x) => [x.k, x]));
+    h.forEach((x) => { nv[x.k] = x.med; raison[x.k] = 'mediane'; });
+    // Un état supérieur ne vaut jamais moins que l'état inférieur. Deux médianes qui se contredisent (annonces mal classées) : le supérieur est relevé à 1,2 fois l'inférieur, sans passer sous une annonce ; un inférieur non baissé qui dépasse le supérieur est ramené à son rapport (bon 67 %, convenable 40 %).
+    const ordre = ['convenable', 'bon', 'tres_bon'].filter((k) => nv[k] != null), rapport = { convenable: 0.4, bon: 0.67, tres_bon: 1 };
+    for (let i = 1; i < ordre.length; i += 1) {
+      const bas = ordre[i - 1], haut = ordre[i];
+      if (nv[haut] >= nv[bas]) continue;
+      if (plage[haut] && plage[bas]) { nv[haut] = r2(nv[bas] * 1.2); change.add(haut); raison[haut] = 'releve'; }
+      else { nv[bas] = r2(nv[haut] * rapport[bas] / rapport[haut]); change.add(bas); raison[bas] = 'plafond'; }
+    }
+    for (let i = ordre.length - 2; i >= 0; i -= 1) {          // un plafond posé sur un état peut faire dépasser celui qui est dessous
+      const bas = ordre[i], haut = ordre[i + 1];
+      if (nv[bas] > nv[haut]) { nv[bas] = r2(nv[haut] * rapport[bas] / rapport[haut]); change.add(bas); raison[bas] = 'plafond'; }
+    }
     const lot = ETATS.map((e) => (change.has(e.k) ? String(nv[e.k]) : ''));
-    return { nv, change, ligne: `${b.isbn13} ; ${lot.join(' ; ')}`, texte: ETATS.filter((e) => change.has(e.k)).map((e) => `${e.nom || e.court} ${fmt(b.prix[e.k])} → ${fmt(nv[e.k])}`).join(' · ') + (h.some((x) => x.n === 1) ? ' (1 seule annonce)' : '') };
+    return { nv, change, raison, ligne: `${b.isbn13} ; ${lot.join(' ; ')}`, texte: ETATS.filter((e) => change.has(e.k)).map((e) => `${e.nom || e.court} ${fmt(b.prix[e.k])} → ${fmt(nv[e.k])}`).join(' · ') + (h.some((x) => x.n === 1) ? ' (1 seule annonce)' : '') };
   }
   async function envoyerCorrections(lignes, dire) {
     if (!(window.Relais && window.Relais.actif())) { dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.'); return false; }
@@ -948,7 +958,9 @@
     const bm = baisseMediane(b, h);
     zone.hidden = false;
     zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span></p>
-      <ul class="hors-apres">${h.map((x) => `<li>${esc(x.nom)} : cote ${x.valide ? 'validée' : 'd\'archives'} ${fmt(x.cote)} → <strong>${fmt(x.med)}</strong> (médiane de ${x.n} annonce${x.n > 1 ? 's' : ''} en ligne ; la plus chère ${fmt(x.max)})</li>`).join('')}${ETATS.filter((e) => bm.change.has(e.k) && !h.some((x) => x.k === e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(bm.nv[e.k])}</strong> (pour rester sous l'état supérieur)</li>`).join('')}</ul>
+      <ul class="hors-apres">${ETATS.filter((e) => bm.change.has(e.k)).map((e) => { const x = h.find((y) => y.k === e.k), r = bm.raison[e.k], av = x ? `cote ${x.valide ? 'validée' : 'd\'archives'} ${fmt(x.cote)}` : fmt(b.prix[e.k]);
+        const why = r === 'mediane' ? `médiane de ${x.n} annonce${x.n > 1 ? 's' : ''} en ligne ; la plus chère ${fmt(x.max)}` : r === 'releve' ? `médiane ${fmt(x.med)}, relevée : les annonces se contredisent avec l'état inférieur` : 'pour rester sous l\'état supérieur';
+        return `<li>${esc(e.nom || e.court)} : ${av} → <strong>${fmt(bm.nv[e.k])}</strong> (${why})</li>`; }).join('')}</ul>
       <div class="corriger-actions"><button type="button" class="bouton" id="hors-baisse">Baisser à la médiane</button>${h.some((x) => x.valide) ? ' <button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button>' : ''}</div>
       ${h.some((x) => x.valide) ? `<p class="sous">« Remettre au calcul » retire votre validation : ${h.filter((x) => x.valide).map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return sv ? `${esc(x.nom)} ${fmt(sv[0])} (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : ''; }).filter(Boolean).join(' · ') || 'prix calculé pas encore disponible'}, atteint progressivement par le lissage quotidien.</p>` : ''}
       <p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
