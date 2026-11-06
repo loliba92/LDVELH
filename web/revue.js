@@ -626,6 +626,7 @@
   // Point à vérifier : voir pointsAVerifier ; sans point, l'annonce est retenue sans réserve.
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
+  const SEUIL_ABERRANT = 2;          // une annonce à 2 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse (décision du propriétaire)
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Points à vérifier d'une annonce (liste vide si rien à vérifier : exemplaire de librairie, ou état indiqué par l'ISBN)
   const pointsAVerifier = (origine, suppose) => {
@@ -660,7 +661,7 @@
     const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(x.n ? x.pep / x.n : null)}</td>`)).join('')}</tbody></table>`;
     return `<div class="stats-rc">${resume}<h4 class="stats-titre">Par plateforme</h4><div class="captures-defile">${tabPlat}</div><h4 class="stats-titre">Par tranche de prix</h4><div class="captures-defile">${tabTr}</div></div>`;
   }
-  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) : '');
+  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) + (TOUTES_RC.nbAberrantes ? `<p class="sous">${TOUTES_RC.nbAberrantes} annonces à 2 fois le prix du très bon état ou plus sont exclues de ces chiffres.</p>` : '') : '');
   let dessinerPepites = () => {};
   function pepites() {
     const lignes = [];
@@ -861,9 +862,9 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
-    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), verifRc = $('#rc-verif'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
+    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), verifRc = $('#rc-verif'), aberrRc = $('#rc-aberr'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
     // Retour de la fiche : filtres, tri, longueur de liste et position sont gardés au clic, puis remis à la réouverture de la page
-    const CTRL_RC = ['rc-q', 'rc-tri', 'rc-source', 'rc-verdict', 'rc-serie', 'rc-edition', 'rc-editeur', 'rc-etatf', 'rc-temp', 'rc-pmin', 'rc-pmax'], CASES_RC = ['rc-trouver', 'rc-pep', 'rc-bon', 'rc-sans', 'rc-verif', 'rc-enligne'];
+    const CTRL_RC = ['rc-q', 'rc-tri', 'rc-source', 'rc-verdict', 'rc-serie', 'rc-edition', 'rc-editeur', 'rc-etatf', 'rc-temp', 'rc-pmin', 'rc-pmax'], CASES_RC = ['rc-trouver', 'rc-pep', 'rc-bon', 'rc-sans', 'rc-verif', 'rc-enligne', 'rc-aberr'];
     let etatARestaurer = null, defilementEnAttente = null;
     try { const o = JSON.parse(sessionStorage.getItem('cdh-annonces-etat') || 'null'); if (o && Date.now() - o.t < 2 * 3600 * 1000) etatARestaurer = o; sessionStorage.removeItem('cdh-annonces-etat'); } catch (e) { /* sans stockage : retour à la liste de départ */ }
     const sauverEtatRc = () => {
@@ -995,10 +996,10 @@
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
-          { const z = toutes[toutes.length - 1]; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
+          { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
       });
-      TOUTES_RC = toutes; redessinerCapt();
+      TOUTES_RC = toutes.filter((a) => !a.aberrant); TOUTES_RC.nbAberrantes = toutes.length - TOUTES_RC.length; redessinerCapt();
       // Position de chaque annonce parmi les annonces du même livre et du même état : le moins cher, la médiane, le plus cher
       const parLivre = new Map();
       toutes.forEach((a) => { const k = a.ed.isbn + '|' + a.cle; if (!parLivre.has(k)) parLivre.set(k, []); parLivre.get(k).push(a.prix); });
@@ -1024,7 +1025,7 @@
       // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
-      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie)
+      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie) && !(aberrRc && aberrRc.checked && a.aberrant)
         && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
@@ -1032,10 +1033,12 @@
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       const nbTr = $('#rc-nb-trouver'); if (nbTr) { const nt = toutes.filter((a) => a.trouver && !a.partie).length; nbTr.textContent = nt ? `(${nt})` : ''; }
       const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
-      const actifs = dansPlus + [verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
+      const actifs = dansPlus + [aberrRc && !aberrRc.checked, verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
-      if (effacerRc) effacerRc.hidden = !(dansPlus || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
-      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      if (effacerRc) effacerRc.hidden = !(dansPlus || (aberrRc && !aberrRc.checked) || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
+      const nbAbs = toutes.filter((a) => a.aberrant).length;
+      const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
+      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${aberrRc && aberrRc.checked && nbAbs ? ` (${nbAbs} masquées : prix à 2 fois le très bon état ou plus)` : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
@@ -1067,10 +1070,11 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
+    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc, aberrRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
     [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
     const razFiltres = () => {
       [trouverRc, pepRc, bonRc, sansRc, verifRc].forEach((el) => { if (el) el.checked = false; });
+      if (aberrRc) aberrRc.checked = true;
       source.value = 'tout'; verdict.value = 'tout';
       [serieRc, editionRc, editeurRc, etatfRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
       if (rechercheRc) rechercheRc.value = '';
