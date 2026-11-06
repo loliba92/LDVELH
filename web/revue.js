@@ -697,12 +697,12 @@
     const source = p.origine === 'librairie' ? 'Librairie' : p.origine === 'leboncoin' ? 'Leboncoin' : p.origine === 'vinted' ? 'Vinted' : REVENDEURS[p.origine] || 'eBay';          // libellé visible de la source
     const img = JAQ[p.ed.id] ? `<img src="${esc(JAQ[p.ed.id])}" alt="Jaquette de ${esc(p.ed.titre)}" width="88" height="124" loading="lazy" decoding="async">`
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
-    return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><span class="couv">${img}` +
+    return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><a class="couv" href="./#fiche=${encodeURIComponent(p.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(p.ed.titre)}">${img}` +
       (superPepite(p) ? `<span class="pp-super">Super pépite</span>` : '') +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
-      `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></span>` +
-      `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}" target="_blank" rel="noopener">${esc(p.ed.titre)}</a>` +
+      `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></a>` +
+      `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
       `<span class="meta pp-source">Source : ${source}</span>` +
@@ -714,6 +714,16 @@
   function initPepites() {
     const liste = $('#pp-liste'), etat = $('#pp-etat'), solides = $('#pp-solides'), tri = $('#pp-tri'), trouver = $('#pp-trouver');
     if (!liste) return;
+    // Retour de la fiche : tri, filtres et position sont gardés au clic, puis remis à la réouverture de la page
+    let etatARestaurer = null, defilementEnAttente = null;
+    try { const o = JSON.parse(sessionStorage.getItem('cdh-butin-etat') || 'null'); if (o && Date.now() - o.t < 2 * 3600 * 1000) etatARestaurer = o; sessionStorage.removeItem('cdh-butin-etat'); } catch (e) { /* sans stockage : retour à la liste de départ */ }
+    liste.addEventListener('click', (e) => {
+      if (!e.target.closest('a.couv, a.titre')) return;
+      try {
+        sessionStorage.setItem('cdh-butin-etat', JSON.stringify({ t: Date.now(), y: window.scrollY, tri: tri.value, sol: solides.checked, tr: trouver.checked }));
+        sessionStorage.setItem('cdh-retour-fiche', 'butin.html#pepites');
+      } catch (er) { /* tant pis */ }
+    });
     try { const m = localStorage.getItem('cdh-butin-tri'); if (m && [...tri.options].some((o) => o.value === m)) tri.value = m; } catch (e) { /* sans stockage : tri par défaut */ }
     const triUrl = new URLSearchParams(location.search).get('tri');
     if (triUrl && [...tri.options].some((o) => o.value === triUrl)) tri.value = triUrl;          // arrivée par « nouvelles annonces au Butin »
@@ -828,10 +838,17 @@
     dessinerPepites = () => {
       dessinerCaptures();
       if (!BUT) { etat.textContent = butChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      if (etatARestaurer) {
+        const o = etatARestaurer; etatARestaurer = null;
+        if ([...tri.options].some((x) => x.value === o.tri)) tri.value = o.tri;
+        solides.checked = !!o.sol; trouver.checked = !!o.tr; defilementEnAttente = o.y;
+      }
       const sw = souhaits(), toutes = pepites().map((p) => Object.assign(p, { trouver: !!sw[p.ed.id] })).filter((p) => !trouver.checked || p.trouver), sures = toutes.filter((p) => !p.raisons.length), vues = ordonner(solides.checked ? sures : sures.concat(toutes.filter((p) => p.raisons.length)), tri.value);   // solides d'abord, puis à vérifier (chacun trié par économie)
       etat.textContent = `${toutes.length} bonne${toutes.length > 1 ? 's' : ''} affaire${toutes.length > 1 ? 's' : ''}, dont ${sures.length} sans point à vérifier. Dernier relevé eBay : ${jour(BUT.date_ebay || BUT.date)}.`;
       try { localStorage.setItem('cdh-butin-vu', String(Date.now())); } catch (e) { /* tant pis */ }          // les nouveautés comptées sur l'accueil repartent de zéro
       liste.innerHTML = vues.length ? '<div class="rayon pp-rayon">' + vues.map(cartePepite).join('') + '</div>' : '<p>Aucune bonne affaire pour ce filtre.</p>';
+      const pane = document.getElementById('pane-pepites');
+      if (defilementEnAttente != null && pane && !pane.hidden) { const y = defilementEnAttente; defilementEnAttente = null; requestAnimationFrame(() => window.scrollTo(0, y)); setTimeout(() => window.scrollTo(0, y), 400); }
     };
     // Pépite du jour : le Zagor choisit l'annonce offerte aux Héros (fichier public écrit par le service technique)
     liste.addEventListener('click', (e) => {
