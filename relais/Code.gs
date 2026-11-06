@@ -1,4 +1,4 @@
-// Version du 2026-11-02 14:42 (heure de Paris) : annonces et Butin lus en contenu brut, sans la limite de 1 Mo de l'interface de GitHub.
+// Version du 2026-11-06 07:16 (heure de Paris) : les comptes par jour du Butin ne sont plus envoyés aux sorciers (onglet Analyse réservé au Zagor).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -146,7 +146,9 @@ function doPost(e) {
     if (action === 'butin_lire' || action === 'annonces_lire') {      // Butin seul pour les sorciers ; toutes les annonces pour le Zagor
       var ann = github('/contents/data/processed/' + (action === 'annonces_lire' ? 'annonces' : 'butin') + '.json?ref=main', { accept: 'application/vnd.github.raw+json' });      // contenu brut : le contenu en base 64 est vide au-delà de 1 Mo
       if (ann.code !== 200) return reponse({ ok: false, erreur: 'annonces indisponibles (' + ann.code + ')' });
-      return reponse({ ok: true, annonces: JSON.parse(ann.texte) });
+      var contenuAnn = JSON.parse(ann.texte);
+      if (moi.role !== 'superadmin' && contenuAnn && contenuAnn.captures) delete contenuAnn.captures.jours;      // comptes par jour : Zagor seul (les heures restent pour l'accueil)
+      return reponse({ ok: true, annonces: contenuAnn });
     }
 
     if (action === 'pepite_offrir' || action === 'pepite_retirer' || action === 'pepite_vendre') {      // pépite du jour : fichier public lu par tous les Héros
