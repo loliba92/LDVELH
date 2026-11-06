@@ -886,15 +886,15 @@
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
   const fratrieIsbn = (b) => DATA.filter((x) => x.livre_id === b.livre_id && x.isbn13);
-  // Cotes validées à la main plus chères (de plus de 5 %) que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %) que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
   function horsMarche(b) {
     if (!ANN || !ANN.annonces || !b.isbn13) return null;
     const par = ANN.annonces[b.isbn13] || {}, tbe = b.prix.tres_bon, sortie = [];
     ETATS.forEach((e) => {
       const i = infoPrix(b, e.k), cote = b.prix[e.k];
-      if (!i || !i.valide || cote == null) return;
+      if (!i || !(i.valide || i.source === 'archives') || cote == null) return;
       const prix = (par[e.k] || []).filter(([p, , , origine, vue]) => !(tbe && p >= 3 * tbe) && (enLigne(origine) || !(vue && ANN.date_ebay && vue < ANN.date_ebay))).map((a) => a[0]);
-      if (prix.length && cote > 1.05 * Math.max(...prix)) { const tri = [...prix].sort((u, v) => u - v), m = tri.length >> 1; sortie.push({ k: e.k, nom: e.nom || e.court, cote, max: tri[tri.length - 1], n: tri.length, med: Math.round((tri.length % 2 ? tri[m] : (tri[m - 1] + tri[m]) / 2) * 100) / 100 }); }
+      if (prix.length && cote > 1.05 * Math.max(...prix)) { const tri = [...prix].sort((u, v) => u - v), m = tri.length >> 1; sortie.push({ k: e.k, nom: e.nom || e.court, cote, valide: !!i.valide, max: tri[tri.length - 1], n: tri.length, med: Math.round((tri.length % 2 ? tri[m] : (tri[m - 1] + tri[m]) / 2) * 100) / 100 }); }
     });
     return sortie.length ? sortie : null;
   }
@@ -946,14 +946,14 @@
     const bm = baisseMediane(b, h);
     zone.hidden = false;
     zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span></p>
-      <ul class="hors-apres">${h.map((x) => `<li>${esc(x.nom)} : cote validée ${fmt(x.cote)} → <strong>${fmt(x.med)}</strong> (médiane de ${x.n} annonce${x.n > 1 ? 's' : ''} en ligne ; la plus chère ${fmt(x.max)})</li>`).join('')}${ETATS.filter((e) => bm.change.has(e.k) && !h.some((x) => x.k === e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(bm.nv[e.k])}</strong> (pour rester sous l'état supérieur)</li>`).join('')}</ul>
-      <div class="corriger-actions"><button type="button" class="bouton" id="hors-baisse">Baisser à la médiane</button> <button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button></div>
-      <p class="sous">« Remettre au calcul » retire votre validation : ${h.map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return sv ? `${esc(x.nom)} ${fmt(sv[0])} (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : ''; }).filter(Boolean).join(' · ') || 'prix calculé pas encore disponible'}, atteint progressivement par le lissage quotidien.</p>
+      <ul class="hors-apres">${h.map((x) => `<li>${esc(x.nom)} : cote ${x.valide ? 'validée' : 'd\'archives'} ${fmt(x.cote)} → <strong>${fmt(x.med)}</strong> (médiane de ${x.n} annonce${x.n > 1 ? 's' : ''} en ligne ; la plus chère ${fmt(x.max)})</li>`).join('')}${ETATS.filter((e) => bm.change.has(e.k) && !h.some((x) => x.k === e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(bm.nv[e.k])}</strong> (pour rester sous l'état supérieur)</li>`).join('')}</ul>
+      <div class="corriger-actions"><button type="button" class="bouton" id="hors-baisse">Baisser à la médiane</button>${h.some((x) => x.valide) ? ' <button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button>' : ''}</div>
+      ${h.some((x) => x.valide) ? `<p class="sous">« Remettre au calcul » retire votre validation : ${h.filter((x) => x.valide).map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return sv ? `${esc(x.nom)} ${fmt(sv[0])} (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : ''; }).filter(Boolean).join(' · ') || 'prix calculé pas encore disponible'}, atteint progressivement par le lissage quotidien.</p>` : ''}
       <p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
     const msg = $('#hors-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
     $('#hors-baisse').addEventListener('click', async () => { $('#hors-baisse').disabled = true; await envoyerCorrections([bm.ligne], dire); $('#hors-baisse').disabled = false; });
-    $('#hors-reset').addEventListener('click', async () => {
-      const cases = ['convenable', 'bon', 'tres_bon'].map((k) => (h.some((x) => x.k === k) ? 'reset' : ''));
+    if ($('#hors-reset')) $('#hors-reset').addEventListener('click', async () => {
+      const cases = ['convenable', 'bon', 'tres_bon'].map((k) => (h.some((x) => x.k === k && x.valide) ? 'reset' : ''));
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
