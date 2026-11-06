@@ -99,6 +99,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070506736",
+   "isbn13": "9782070506736",
+   "titre": "Le Sorcier Majdar",
+   "serie": "Astre d'Or",
+   "numero": "370",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 10.18,
+   "apres": 6.0,
+   "pct": -0.411,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070519040",
    "isbn13": "9782070519040",
    "titre": "Le Démon des Profondeurs",
@@ -111,6 +126,21 @@
    "pct": -0.18,
    "nature": "archives",
    "nb": 1,
+   "recalibre": false
+  },
+  {
+   "id": "9782070506736",
+   "isbn13": "9782070506736",
+   "titre": "Le Sorcier Majdar",
+   "serie": "Astre d'Or",
+   "numero": "370",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 15.69,
+   "apres": 13.0,
+   "pct": -0.171,
+   "nature": "validé",
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -127,9 +157,24 @@
    "nature": "archives",
    "nb": 1,
    "recalibre": false
+  },
+  {
+   "id": "9782070506736",
+   "isbn13": "9782070506736",
+   "titre": "Le Sorcier Majdar",
+   "serie": "Astre d'Or",
+   "numero": "370",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 11.2,
+   "apres": 9.36,
+   "pct": -0.164,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
   "n_paires": 128,
