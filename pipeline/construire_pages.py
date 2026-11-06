@@ -240,7 +240,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
   <details class="rc-legende">
     <summary>Comment lire une carte ?</summary>
     <p>Sous chaque annonce, la barre montre où se situe son prix parmi les annonces du même livre dans le même état. Chaque trait est une annonce, le point doré est celle-ci, le trait clair plus haut est le prix du site. Le vert est le bas de la fourchette, le rouge le haut.</p>
-    <p>La date est celle de la publication de l'annonce, pas celle où le site l'a trouvée. Vert : publiée il y a 2 jours ou moins (badge « Nouveau »). Blanc : 3 à 14 jours. Gris : 15 à 30 jours. Rouge pâle : plus de 30 jours, souvent un prix trop haut. « vue » : date de publication inconnue, on indique le jour où le site l'a vue.</p>
+    <p>La date est celle de la publication de l'annonce, pas celle où le site l'a trouvée. Vert : publiée il y a 2 jours ou moins (badge « Nouveau »). Blanc : 3 à 14 jours. Gris : 15 à 30 jours. Rouge pâle : plus de 30 jours, souvent un prix trop haut. « trouvée par le site » (gris, en italique) : la date de publication est inconnue, on indique le jour où le site a trouvé l'annonce, ce qui ne dit pas si elle est fraîche.</p>
   </details>
   <div id="rc-liste"></div>
 </div>'''

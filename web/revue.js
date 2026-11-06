@@ -949,7 +949,7 @@
     const quandCle = (a) => (a.publiee || (a.premiere || a.vue || '').slice(0, 10)) + '|' + (a.premiere || '');
     const ageTexte = (a) => {
       if (a.ageJ == null) return 'date inconnue';
-      const n = a.ageJ, base = a.ageEstime ? 'vue' : 'publiée';
+      const n = a.ageJ, base = a.ageEstime ? 'trouvée par le site' : 'publiée';
       if (n === 0) return `${base} aujourd'hui`;
       if (n === 1) return `${base} hier`;
       if (n < 60) return `${base} il y a ${n}\u00a0j`;
