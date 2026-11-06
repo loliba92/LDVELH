@@ -516,6 +516,18 @@
    "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
+  "9782070334049|tres_bon": {
+   "prix": 24.17,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070334209|convenable": {
+   "prix": 10.0,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
   "9782070334230|bon": {
    "prix": 8.46,
    "decision": "confirme",
@@ -538,6 +550,12 @@
    "prix": 17.0,
    "decision": "corrige",
    "le": "2026-10-21",
+   "par": "loliba (superadmin)"
+  },
+  "9782070334247|tres_bon": {
+   "prix": 19.11,
+   "decision": "corrige",
+   "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
   "9782070334254|bon": {
@@ -574,6 +592,18 @@
    "prix": 13.9,
    "decision": "confirme",
    "le": "2026-10-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070334742|tres_bon": {
+   "prix": 21.03,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335022|tres_bon": {
+   "prix": 14.94,
+   "decision": "corrige",
+   "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
   "9782070335046|bon": {
@@ -682,6 +712,12 @@
    "prix": 42.0,
    "decision": "corrige",
    "le": "2026-10-27",
+   "par": "loliba (superadmin)"
+  },
+  "9782070335848|tres_bon": {
+   "prix": 28.38,
+   "decision": "corrige",
+   "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
   "9782070335855|bon": {
@@ -990,6 +1026,12 @@
    "prix": 15.0,
    "decision": "corrige",
    "le": "2026-10-17"
+  },
+  "9782070509355|tres_bon": {
+   "prix": 35.2,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
   },
   "9782070509362|bon": {
    "prix": 4.65,
@@ -1393,6 +1435,12 @@
    "le": "2026-10-28",
    "par": "loliba (superadmin)"
   },
+  "9782070567881|tres_bon": {
+   "prix": 44.65,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
   "9782070567898|bon": {
    "prix": 23.41,
    "decision": "confirme",
@@ -1407,6 +1455,12 @@
    "prix": 28.09,
    "decision": "confirme",
    "le": "2026-10-15"
+  },
+  "9782070568154|tres_bon": {
+   "prix": 45.18,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
   },
   "9782070568734|convenable": {
    "prix": 40.0,
@@ -2012,10 +2066,23 @@
    "le": "2026-11-01",
    "par": "loliba (superadmin)"
   },
-  "9782070651412|convenable": {
-   "prix": 20.0,
+  "9782070651412|bon": {
+   "prix": 19.95,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070651412|convenable": {
+   "prix": 11.91,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070651412|tres_bon": {
+   "prix": 29.77,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
   },
   "9782070656530|bon": {
    "prix": 35.0,
@@ -2147,6 +2214,12 @@
    "prix": 3.13,
    "decision": "confirme",
    "le": "2026-10-17"
+  },
+  "9782075097284|bon": {
+   "prix": 6.85,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
   },
   "9782075097314|bon": {
    "prix": 6.67,
