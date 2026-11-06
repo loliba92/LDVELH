@@ -861,6 +861,7 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
+    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
     const boutonsQuand = [...document.querySelectorAll('#rc-quand [data-quand]')], boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
     let modeVue = 'grille', periode = 'tout';
     boutonsQuand.forEach((b) => b.addEventListener('click', () => { periode = b.dataset.quand; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); limite = 60; dessinerRecues(); }));
@@ -927,6 +928,10 @@
     };
     const comparerRc = (mode) => ({
       recent: parRecent,
+      ancien: (a, b) => quandCle(a).localeCompare(quandCle(b)) || a.prix - b.prix,
+      prixdesc: (a, b) => b.prix - a.prix || parRecent(a, b),
+      eco: (a, b) => (b.pub ? b.pub - b.prix : -9999) - (a.pub ? a.pub - a.prix : -9999) || parRecent(a, b),
+      editeur: (a, b) => ((INFO_ED[a.ed.id] || {}).editeur || '').localeCompare((INFO_ED[b.ed.id] || {}).editeur || '', 'fr') || parRecent(a, b),
       serie: (a, b) => (a.ed.serie || '').localeCompare(b.ed.serie || '', 'fr') || numeroDe(a) - numeroDe(b) || (a.ed.version || '').localeCompare(b.ed.version || '') || parRecent(a, b),
       prix: (a, b) => a.prix - b.prix || parRecent(a, b),
       ecart: (a, b) => (a.pub ? a.prix / a.pub : 99) - (b.pub ? b.prix / b.pub : 99) || parRecent(a, b),
@@ -956,12 +961,23 @@
         const m = p.length >> 1, med = p.length % 2 ? p[m] : (p[m - 1] + p[m]) / 2;
         a.lot = { min: p[0], max: p[p.length - 1], med: med };
       });
+      // Listes de filtres (série, édition, éditeur) : les valeurs présentes dans les annonces, remplies une fois
+      const remplir = (el, valeurs, tous) => { if (!el || el.options.length > 1) return; el.innerHTML = `<option value="">${tous}</option>` + valeurs.map((v) => `<option>${esc(v)}</option>`).join(''); };
+      const uniques = (f) => [...new Set(toutes.map(f).filter(Boolean))].sort((x, y) => String(x).localeCompare(String(y), 'fr', { numeric: true }));
+      remplir(serieRc, uniques((a) => a.ed.serie), 'Toutes'); remplir(editionRc, uniques((a) => a.ed.version), 'Toutes'); remplir(editeurRc, uniques((a) => (INFO_ED[a.ed.id] || {}).editeur), 'Tous');
       // Recherche tolérante : chaque mot doit se trouver dans le titre, la série ou l'édition (sans accents ni majuscules),
       // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
-      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && dansPeriode(a) && !(enligne.checked && a.partie))
+      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && dansPeriode(a) && !(enligne.checked && a.partie)
+        && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
+        && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
+        && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
+        && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
+      const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
+      if (nbPlus) nbPlus.textContent = dansPlus ? `(${dansPlus})` : '';
+      if (effacerRc) effacerRc.hidden = !(dansPlus || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
@@ -997,6 +1013,15 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
+    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
+    [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
+    if (effacerRc) effacerRc.addEventListener('click', () => {
+      [trouverRc, pepRc, bonRc, sansRc].forEach((el) => { if (el) el.checked = false; });
+      source.value = 'tout'; verdict.value = 'tout';
+      [serieRc, editionRc, editeurRc, etatfRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
+      periode = 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'tout')));
+      limite = 60; dessinerRecues();
+    });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau2()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
   }
