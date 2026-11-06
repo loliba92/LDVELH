@@ -2644,3 +2644,14 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-carte .rc-therm-txt { white-space: normal; }
 .an-carte a.an-titre { color: var(--text); }
 .an-carte a.an-titre:hover { color: var(--accent); }
+/* Annonces : lecture facile */
+.an-grille { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.an-jaq { aspect-ratio: 320 / 523; background: #000; }
+.an-jaq img { object-fit: contain; }
+.an-verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.an-verdict .an-new { font-size: var(--t-xs); }
+.an-carte a.an-titre { font-size: 1.05rem; line-height: 1.25; -webkit-line-clamp: 3; margin-top: 4px; }
+.an-serie { font-size: var(--t-base); color: var(--text); line-height: 1.3; }
+.an-meta { font-size: var(--t-sm); }
+.rc-periode button { min-height: 40px; padding: 4px 14px; font-size: var(--t-base); }
+@media (max-width: 600px) { .an-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); } .an-carte a.an-titre { font-size: 1rem; } }

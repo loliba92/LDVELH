@@ -861,8 +861,9 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
-    const nouvRc = $('#rc-new'), boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
-    let modeVue = 'grille';
+    const boutonsQuand = [...document.querySelectorAll('#rc-quand [data-quand]')], boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
+    let modeVue = 'grille', periode = 'tout';
+    boutonsQuand.forEach((b) => b.addEventListener('click', () => { periode = b.dataset.quand; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); limite = 60; dessinerRecues(); }));
     try { const m = localStorage.getItem('cdh-annonces-vue'); if (m === 'liste' || m === 'grille') modeVue = m; } catch (e) { /* sans stockage : jaquettes */ }
     boutonsVue.forEach((b) => { b.setAttribute('aria-pressed', String(b.dataset.vue === modeVue)); b.addEventListener('click', () => { modeVue = b.dataset.vue; boutonsVue.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); try { localStorage.setItem('cdh-annonces-vue', modeVue); } catch (e) { /* tant pis */ } limite = 60; dessinerRecues(); }); });
     const famille = (o) => (o === 'leboncoin' ? 'leboncoin' : o === 'vinted' ? 'vinted' : o === 'librairie' ? 'librairie' : REVENDEURS[o] ? o : 'ebay');
@@ -905,6 +906,14 @@
     const quandRc = (a) => (heureConnue({ premiere: a.premiere }) ? new Date(a.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·') : a.vue ? jourCourt(a.vue) : '');
     // Ordres de tri : date et heure d'apparition (à défaut, dernier jour vu), série et numéro, prix, écart au prix du site, origine
     const quandCle = (a) => a.premiere || a.vue || '';
+    // Jour d'arrivée (heure de Paris) : « Aujourd'hui » = le jour même, « Cette semaine » = les 7 derniers jours
+    const jourParis = (d) => d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    const jourArrivee = (a) => { const c = quandCle(a); return c.length > 10 && !Number.isNaN(Date.parse(c)) ? jourParis(new Date(c)) : c.slice(0, 10); };
+    const dansPeriode = (a) => {
+      if (periode === 'tout') return true;
+      const j = jourArrivee(a);
+      return periode === 'auj' ? j === jourParis(new Date()) : j >= jourParis(new Date(Date.now() - 6 * 86400000));
+    };
     const parRecent = (a, b) => quandCle(b).localeCompare(quandCle(a)) || a.prix - b.prix;
     const numeroDe = (a) => parseInt(a.ed.numero, 10) || 0;
     const distance = (a, b) => {          // distance de Levenshtein, pour les fautes de frappe
@@ -951,7 +960,7 @@
       // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
-      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!nouvRc || !nouvRc.checked || a.nouveau) && !(enligne.checked && a.partie))
+      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && dansPeriode(a) && !(enligne.checked && a.partie))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
@@ -962,16 +971,17 @@
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
         const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
-        const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="150" height="210" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
+        const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         const precis = [a.ed.version, info.editeur, info.annee].filter(Boolean).map((x) => esc(String(x))).join(' · ');
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">${image}${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <a class="an-jaq" href="${fiche}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
+          <a class="an-titre" href="${fiche}" target="_blank" rel="noopener">${esc(a.ed.titre)}</a>
+          <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}</span>
           ${a.pub != null ? `<span class="rc-vs">site ${eur(a.pub)} · ${Math.round((a.prix / a.pub - 1) * 100) > 0 ? '+' : Math.round((a.prix / a.pub - 1) * 100) < 0 ? '−' : ''}${Math.abs(Math.round((a.prix / a.pub - 1) * 100))} %</span>` : ''}
           ${thermometre(a)}
-          <a class="an-titre" href="${fiche}" target="_blank" rel="noopener">${esc(a.ed.titre)}</a>
-          <span class="an-meta">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}</span>
+
           <span class="an-meta">${precis ? precis + ' · ' : ''}${ABR_ETAT[a.cle]}</span>
           <span class="an-meta">${NOM[a.fam]}${quandRc(a) ? ' · ' + esc(quandRc(a)) : ''}${a.partie ? ' · plus vue' : ''}</span>
           ${a.points.length ? `<span class="an-points">${a.points.map((t) => esc(t)).join(' · ')}</span>` : ''}
@@ -987,7 +997,6 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    if (nouvRc) nouvRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau2()) chargerAnnonces().then(dessinerRecues); });
     dessinerRecues();
   }
@@ -1150,7 +1159,7 @@
 
   const JAQ = {}, RAR = {}, EDITEUR = {};
   fetch('data/historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((h) => { HISTO = h; const d = document.getElementById('rv-date'); if (d && h && h.dates.length) d.textContent = `Dernière publication des prix : ${jour(h.dates[h.dates.length - 1])}.`; if (EDITIONS.length) afficher(); });
-  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { mini: b.couverture_mini || b.couverture || '', editeur: (b.editeur || '').trim(), annee: b.annee || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
+  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { mini: b.couverture || b.couverture_mini || '', editeur: (b.editeur || '').trim(), annee: b.annee || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
     d.forEach((l) => { if (!par.has(l.id)) par.set(l.id, { id: l.id, isbn: l.isbn, titre: l.titre, serie: l.serie, numero: l.numero, version: l.version, etats: {} }); par.get(l.id).etats[l.etat] = l; });
