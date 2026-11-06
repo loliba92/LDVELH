@@ -982,10 +982,21 @@
     let paramsOpp = { ...PARAMS_OPP_DEFAUT }, dernieresToutes = null, nbOppAffichees = 25, defilementOpp = null;
     try { const o = JSON.parse(localStorage.getItem('cdh-opp-params') || 'null'); if (o && o.vente > 0 && o.vente <= 150 && o.frais >= 0 && o.frais <= 50) paramsOpp = { vente: Number(o.vente), frais: Number(o.frais) }; } catch (e) { /* valeurs par défaut */ }
     try { const o = JSON.parse(sessionStorage.getItem('cdh-opp-etat') || 'null'); if (o && Date.now() - o.t < 2 * 3600 * 1000) { defilementOpp = o.y; nbOppAffichees = o.n || 25; } sessionStorage.removeItem('cdh-opp-etat'); } catch (e) { /* retour au début */ }
-    const fiabiliteOpp = (a) => {
+    // Fiabilité d'une opportunité : qualité de la donnée ET appui du marché. Une cote bien au-dessus de toutes les annonces, ou des annonces disparues (vendues ?) bien
+    // moins chères, rendent la marge douteuse : ce n'est alors pas une affaire, c'est peut-être la cote qui est trop haute.
+    const marcheOpp = (a, groupes) => {
+      const memes = groupes.get(a.ed.isbn + '|' + a.cle) || [], mediane = (l) => { const t = l.slice().sort((x, y) => x - y), m = t.length >> 1; return t.length ? (t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2) : null; };
+      const enLigne = memes.filter((x) => !x.partie && !x.aberrant), disparues = memes.filter((x) => x.partie && !x.aberrant);
+      return { n: enLigne.length, bas: Math.min(...enLigne.map((x) => x.prix)), haut: Math.max(...enLigne.map((x) => x.prix)),
+        proches: enLigne.filter((x) => x.lien !== a.lien && x.prix >= 0.7 * a.pub).length, disparues: disparues.map((x) => x.prix), medDisparues: mediane(disparues.map((x) => x.prix)) };
+    };
+    const fiabiliteOpp = (a, m) => {
       const cote = (a.ed.etats[a.cle] || {}).confiance;
-      if (a.points.length || !['élevée', 'validée', 'moyenne'].includes(cote)) return 'faible';
-      return ['élevée', 'validée'].includes(cote) && a.ageJ != null && !a.ageEstime && a.ageJ <= 30 ? 'haute' : 'moyenne';
+      if (a.points.length) return { niveau: 'faible', raison: a.points.join(', ') };
+      if (m.proches === 0) return { niveau: 'faible', raison: `Aucune autre annonce près du prix du site (${eur(a.pub)}) : la cote n'est pas confirmée par le marché.` };
+      if (m.medDisparues != null && m.medDisparues < 0.6 * a.pub) return { niveau: 'faible', raison: `Les annonces disparues (vendues ?) étaient à ${eur(m.medDisparues)}, bien sous le prix du site.` };
+      if (!['élevée', 'validée', 'moyenne'].includes(cote)) return { niveau: 'faible', raison: 'Cote peu fiable pour cette édition.' };
+      return { niveau: ['élevée', 'validée'].includes(cote) && a.ageJ != null && !a.ageEstime && a.ageJ <= 30 ? 'haute' : 'moyenne', raison: '' };
     };
     const LIB_FIAB = { haute: 'Fiabilité haute', moyenne: 'Fiabilité moyenne', faible: 'À vérifier' };
     const POIDS_FIAB = { haute: 1, moyenne: 0.6, faible: 0.25 };
@@ -995,17 +1006,20 @@
       if (toutes) dernieresToutes = toutes;
       if (!dernieresToutes) return;
       const vente = paramsOpp.vente / 100, frais = paramsOpp.frais;
+      const groupes = new Map(); dernieresToutes.forEach((x) => { const k = x.ed.isbn + '|' + x.cle; if (!groupes.has(k)) groupes.set(k, []); groupes.get(k).push(x); });
       const liste = dernieresToutes.filter((a) => a.pub && !a.aberrant && !a.partie && a.fam !== 'librairie' && !/^Lot de /.test(a.titre || ''))
-        .map((a) => { const marge = vente * a.pub - frais - a.prix, fiab = fiabiliteOpp(a); return { a, marge, roi: marge / a.prix, fiab, score: marge * POIDS_FIAB[fiab] }; })
+        .map((a) => { const marge = vente * a.pub - frais - a.prix, m = marcheOpp(a, groupes), f = fiabiliteOpp(a, m), fiab = f.niveau; return { a, marge, roi: marge / a.prix, fiab, raison: f.raison, m, score: marge * POIDS_FIAB[fiab] }; })
         .filter((o) => o.marge >= 5 && o.roi >= 0.25).sort((x, y) => y.score - x.score);
       const hautes = liste.filter((o) => o.fiab === 'haute').length;
       const cartes = liste.slice(0, nbOppAffichees).map((o) => {
         const a = o.a, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`, n = (a.tous || []).length;
         const num = a.ed.numero && !/^0+$/.test(a.ed.numero) ? ' n° ' + esc(a.ed.numero) : '';
         return `<article class="opp-carte opp-${o.fiab}">
-          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(a.points.join(', ') || 'Cote peu fiable pour cette édition') : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote fiable, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
+          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
           <p class="opp-meta">${esc(a.ed.serie)}${num} · ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${n} annonce${n > 1 ? 's' : ''} de ce livre dans cet état</p>
           <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
+          <p class="opp-marche">En ligne : ${o.m.n} annonce${o.m.n > 1 ? 's' : ''}${o.m.n > 1 ? ` de ${eur(o.m.bas)} à ${eur(o.m.haut)}` : ''}${o.m.disparues.length ? ` · disparues (vendues ?) : ${o.m.disparues.slice(0, 4).map((x) => eur(x)).join(', ')}` : ''}</p>
+          ${o.raison ? `<p class="opp-raison">${esc(o.raison)}</p>` : ''}
           <p class="opp-bas">${ageHtml(a)} · <a class="opp-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a></p>
         </article>`;
       }).join('');
