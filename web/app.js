@@ -2492,7 +2492,8 @@
     ['version', 'Édition (V1 à V5)', (b) => b.version, 'version'],
     ['decennie', 'Décennie', (b) => (b.annee ? `${Math.floor(b.annee / 10) * 10}–${Math.floor(b.annee / 10) * 10 + 9}` : 'Année inconnue'), null],
     ['etat', 'État', (b, c) => etatDe(c.etat).long, 'etat'],
-    ['rarete', 'Rareté', (b) => (b.rarete ? RARETE[b.rarete.niveau] : 'Sans information'), null]];
+    ['rarete', 'Rareté', (b) => (b.rarete ? RARETE[b.rarete.niveau] : 'Sans information'), null],
+    ['livre', 'Livre', (b) => `${b.livre || b.titre} (${b.version})`, null]];
   function barresSegment(bl) {
     const [, , clef, filtre] = SEGMENTS.find((x) => x[0] === CSEG) || SEGMENTS[0];
     const m = new Map();
@@ -2554,8 +2555,7 @@
     return { n, tot, mouv, suivis, i0 };
   }
   // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
-  // Segments du roll-forward : ceux de l'Analyse, plus le livre (les 5 qui bougent le plus)
-  const SEG_RF = [...SEGMENTS, ['livre', 'Livre (les 5 qui bougent le plus)', (b) => `${b.livre || b.titre} (${b.version})`, null]];
+  const SEG_RF = SEGMENTS;          // même liste que l'Analyse ; « Livre » : les cinq qui bougent le plus
   let RFSEG = 'decennie', RF_BL = null;
   // Cascade interactive : valeur de départ, puis la contribution de chaque segment, puis valeur d'aujourd'hui.
   // Toucher une barre (ou la sélectionner au clavier) affiche son détail ; le tableau reste dessous.
