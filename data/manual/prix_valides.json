@@ -994,6 +994,24 @@
    "le": "2026-10-17",
    "par": "Propriétaire"
   },
+  "9782070509249|bon": {
+   "prix": 13.48,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070509249|convenable": {
+   "prix": 9.0,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070509249|tres_bon": {
+   "prix": 18.0,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
   "9782070509287|bon": {
    "prix": 24.27,
    "decision": "corrige",

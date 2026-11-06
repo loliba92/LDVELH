@@ -2,8 +2,8 @@
  "date": "2026-11-06",
  "precedent": "2026-11-05",
  "nb_comparees": 1512,
- "nb_modifiees": 937,
- "mediane_variation": 0.0,
+ "nb_modifiees": 940,
+ "mediane_variation": -0.0,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -234,7 +234,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 75,
+ "nb_grands_mouvements": 78,
  "modele": {
   "actif": false,
   "n_paires": 128,
