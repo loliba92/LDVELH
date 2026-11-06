@@ -147,6 +147,26 @@ def premieres_vues(annonces, anciennes, maintenant, historiques=None):
     return premieres
 
 
+def mettre_a_jour_disparues(disparues, annonces, premieres, dates_releves, aujourdhui, jours_gardes=365):
+    """Archive des annonces qui ne sont plus en ligne : {lien: {i: isbn, e: état, p: prix, s: source, d: première apparition, v: dernière observation}}.
+    Une annonce est « disparue » quand sa dernière observation est antérieure au dernier relevé de sa source (`dates_releves` : {source: date}). Elle sort de l'archive
+    si elle réapparaît. Sert à mesurer la durée de vie des annonces (vitesse de vente), sur plus longtemps que la liste des annonces. Seules eBay, Leboncoin et Vinted comptent."""
+    disparues = dict(disparues or {})
+    limite = (date.fromisoformat(aujourdhui) - timedelta(days=jours_gardes)).isoformat()
+    for isbn, par_etat in annonces.items():
+        for etat, liste in par_etat.items():
+            for prix, titre, lien, origine, vue, *_ in liste:
+                source = "ebay" if origine in ("isbn", "titre") else origine
+                ref = dates_releves.get(source)
+                if not ref or not vue:
+                    continue
+                if vue >= ref:
+                    disparues.pop(lien, None)                      # revue au dernier relevé : de nouveau en ligne
+                elif lien not in disparues:
+                    disparues[lien] = {"i": isbn, "e": etat, "p": prix, "s": source, "d": premieres.get(lien), "v": vue}
+    return {k: v for k, v in disparues.items() if (v.get("v") or "") >= limite}
+
+
 def source_de_ligne(origine):
     """Source d'une annonce du relevé : Leboncoin, Vinted, librairie, sinon eBay (trouvée par l'ISBN ou par le titre)."""
     return origine if origine in ("leboncoin", "vinted", "librairie") + importer_leboncoin.REVENDEURS else "ebay"
@@ -603,6 +623,7 @@ def main():
         date_ann = max([f.stem[-10:] for f in fichiers_ann[-1:] + fichiers_lib[-1:] + fichiers_lbc[-1:] + fichiers_vinted[-1:]])
         # Annonces : réservées aux sorciers et aux Zagors. Elles ne sont pas publiées sur le site : le relais les lit dans data/processed/.
         chemin_ann = DB.parent.parent / "processed" / "annonces.json"
+        chemin_disp = DB.parent.parent / "processed" / "disparues.json"
         try:
             anciennes = json.loads(chemin_ann.read_text(encoding="utf-8")).get("premieres")        # None : fichier d'avant cette information
         except (OSError, ValueError):
@@ -618,6 +639,13 @@ def main():
         except (OSError, ValueError):
             captures_avant = None
         captures = mettre_a_jour_captures(captures_avant, annonces, premieres, maintenant[:10], maintenant=maintenant)
+        try:
+            disparues_avant = json.loads(chemin_disp.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            disparues_avant = {}
+        dates_releves = {"ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None, "leboncoin": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None,
+                         "vinted": fichiers_vinted[-1].stem[-10:] if fichiers_vinted else None}
+        chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines,
                                           "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},

@@ -1,7 +1,7 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
+from export_site import mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
 
 
 def e(prix):
@@ -338,3 +338,21 @@ class TestPubliees(unittest.TestCase):
         pub = {}
         annonces_cumulees(sorted(d.glob("annonces-*.csv")), publiees=pub)
         self.assertEqual(pub, {"http://c": "2026-10-21"})
+
+
+class TestDisparues(unittest.TestCase):
+    def test_archive_les_annonces_non_revues_et_retire_celles_qui_reviennent(self):
+        annonces = {"111": {"bon": [[10.0, "A", "http://a", "isbn", "2026-11-05", 0], [12.0, "B", "http://b", "isbn", "2026-11-03", 0], [9.0, "C", "http://c", "vinted", "2026-11-06", None]]}}
+        premieres = {"http://b": "2026-10-30T08:00Z"}
+        r = mettre_a_jour_disparues({"http://a": {"i": "111", "e": "bon", "p": 10, "s": "ebay", "d": None, "v": "2026-11-01"}}, annonces, premieres,
+                                    {"ebay": "2026-11-05", "vinted": "2026-11-06"}, "2026-11-06")
+        self.assertEqual(sorted(r), ["http://b"])                        # a revue au dernier relevé (retirée), b disparue, c encore en ligne
+        self.assertEqual((r["http://b"]["v"], r["http://b"]["d"], r["http://b"]["s"]), ("2026-11-03", "2026-10-30T08:00Z", "ebay"))
+
+    def test_les_tres_anciennes_sortent_de_l_archive(self):
+        r = mettre_a_jour_disparues({"http://x": {"i": "1", "e": "bon", "p": 1, "s": "ebay", "d": None, "v": "2025-01-01"}}, {}, {}, {"ebay": "2026-11-05"}, "2026-11-06")
+        self.assertEqual(r, {})
+
+    def test_une_source_sans_releve_est_ignoree(self):
+        annonces = {"111": {"bon": [[10.0, "A", "http://a", "amazon", "2026-11-01", 0]]}}
+        self.assertEqual(mettre_a_jour_disparues({}, annonces, {}, {"ebay": "2026-11-05"}, "2026-11-06"), {})
