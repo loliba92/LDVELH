@@ -2773,3 +2773,5 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .hors-marche .corriger-actions { margin-top: 6px; }
 .hors-apres { margin: 6px 0; padding-left: 18px; font-size: .92rem; }
 .hors-apres strong { color: var(--or, #d4a437); }
+.hors-lot { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--bord, #3a3326); border-radius: var(--r); }
+.hors-lot p { margin: 0 0 6px; }

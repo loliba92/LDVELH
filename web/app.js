@@ -434,6 +434,7 @@
     majResume();
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     $('#nb-onglet').textContent = String(liste.length);
+    majHorsLot(liste);
     afficherCote(liste);
     afficherHisto();
     afficherCollection();
@@ -885,7 +886,7 @@
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
   const fratrieIsbn = (b) => DATA.filter((x) => x.livre_id === b.livre_id && x.isbn13);
-  // Cotes validées à la main plus chères que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  // Cotes validées à la main plus chères (de plus de 5 %) que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
   function horsMarche(b) {
     if (!ANN || !ANN.annonces || !b.isbn13) return null;
     const par = ANN.annonces[b.isbn13] || {}, tbe = b.prix.tres_bon, sortie = [];
@@ -893,9 +894,48 @@
       const i = infoPrix(b, e.k), cote = b.prix[e.k];
       if (!i || !i.valide || cote == null) return;
       const prix = (par[e.k] || []).filter(([p, , , origine, vue]) => !(tbe && p >= 3 * tbe) && (enLigne(origine) || !(vue && ANN.date_ebay && vue < ANN.date_ebay))).map((a) => a[0]);
-      if (prix.length && cote > Math.max(...prix)) sortie.push({ k: e.k, nom: e.nom || e.court, cote, max: Math.max(...prix), n: prix.length });
+      if (prix.length && cote > 1.05 * Math.max(...prix)) { const tri = [...prix].sort((u, v) => u - v), m = tri.length >> 1; sortie.push({ k: e.k, nom: e.nom || e.court, cote, max: tri[tri.length - 1], n: tri.length, med: Math.round((tri.length % 2 ? tri[m] : (tri[m - 1] + tri[m]) / 2) * 100) / 100 }); }
     });
     return sortie.length ? sortie : null;
+  }
+  // Nouveaux prix d'un livre : les états au-dessus des annonces passent à la médiane des annonces ; un état inférieur qui dépasserait le supérieur est ramené à son rapport (bon 60 %, convenable 40 %)
+  function baisseMediane(b, h) {
+    const nv = { convenable: b.prix.convenable, bon: b.prix.bon, tres_bon: b.prix.tres_bon }, change = new Set(h.map((x) => x.k)), r2 = (v) => Math.round(v * 100) / 100;
+    h.forEach((x) => { nv[x.k] = x.med; });
+    if (nv.bon != null && nv.tres_bon != null && nv.bon > nv.tres_bon) { nv.bon = r2(nv.tres_bon * 0.6); change.add('bon'); }
+    if (nv.convenable != null && nv.bon != null && nv.convenable > nv.bon) { nv.convenable = r2(nv.bon * 2 / 3); change.add('convenable'); }
+    else if (nv.convenable != null && nv.bon == null && nv.tres_bon != null && nv.convenable > nv.tres_bon) { nv.convenable = r2(nv.tres_bon * 0.4); change.add('convenable'); }
+    const lot = ETATS.map((e) => (change.has(e.k) ? String(nv[e.k]) : ''));
+    return { nv, change, ligne: `${b.isbn13} ; ${lot.join(' ; ')}`, texte: ETATS.filter((e) => change.has(e.k)).map((e) => `${e.nom || e.court} ${fmt(b.prix[e.k])} → ${fmt(nv[e.k])}`).join(' · ') + (h.some((x) => x.n === 1) ? ' (1 seule annonce)' : '') };
+  }
+  async function envoyerCorrections(lignes, dire) {
+    if (!(window.Relais && window.Relais.actif())) { dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.'); return false; }
+    dire('Envoi en cours…');
+    try {
+      const r = await window.Relais.envoyerLot('corriger-prix.yml', { corrections: lignes.join(' | ') });
+      if (r.status === 204) { dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.'); return true; }
+      if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
+      else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+    } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
+    return false;
+  }
+  // Barre au-dessus de l'étagère quand le filtre « cote au-dessus des annonces » est actif : baisse de tous les livres affichés, après confirmation
+  function majHorsLot(liste) {
+    const z = $('#hors-lot');
+    if (!z) return;
+    const h = S.hors && estNiveau3() && ANN ? liste.map((b) => [b, horsMarche(b)]).filter(([, x]) => x) : [];
+    z.hidden = !h.length;
+    if (!h.length) { z.innerHTML = ''; return; }
+    z.innerHTML = `<p><strong>${h.length} livre${h.length > 1 ? 's' : ''}</strong> au-dessus des annonces.</p><button type="button" class="bouton" id="hors-lot-go">Baisser les ${h.length} à la médiane des annonces</button><p class="corriger-msg" id="hors-lot-msg" role="status" hidden></p>`;
+    $('#hors-lot-go').addEventListener('click', async () => {
+      const msg = $('#hors-lot-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const plan = h.map(([b, x]) => [b, baisseMediane(b, x)]);
+      const apercu = plan.slice(0, 12).map(([b, p]) => `• ${b.titre} (${b.version}) : ${p.texte}`).join('\n') + (plan.length > 12 ? `\n… et ${plan.length - 12} autre${plan.length - 12 > 1 ? 's' : ''}` : '');
+      if (!window.confirm(`Baisser ${plan.length} livre${plan.length > 1 ? 's' : ''} à la médiane des annonces en ligne ?\n\n${apercu}`)) return;
+      $('#hors-lot-go').disabled = true;
+      await envoyerCorrections(plan.map(([, p]) => p.ligne), dire);
+      $('#hors-lot-go').disabled = false;
+    });
   }
   const SOURCE_CALCUL = { actuel: 'd\'après les annonces actuelles', mixte: 'annonces et archives', archives: 'cote d\'archives, pas les annonces', neuf: 'prix du neuf' };
   function remplirHorsMarche(b) {
@@ -903,23 +943,18 @@
     if (!zone) return;
     const h = horsMarche(b);
     if (!h) { zone.hidden = true; zone.innerHTML = ''; return; }
+    const bm = baisseMediane(b, h);
     zone.hidden = false;
-    zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span> ${h.map((x) => `${esc(x.nom)} : cote validée ${fmt(x.cote)}, annonce en ligne la plus chère ${fmt(x.max)} (${x.n} annonce${x.n > 1 ? 's' : ''})`).join(' · ')}.</p>
-      <ul class="hors-apres">${h.map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return `<li>${esc(x.nom)} : ${fmt(x.cote)} → ${sv ? `<strong>${fmt(sv[0])}</strong> après remise au calcul (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : 'pas de calcul disponible pour l\'instant'}</li>`; }).join('')}</ul>
-      <p class="sous">« Remettre au calcul » retire votre validation. La cote rejoint ensuite le prix calculé progressivement, par le lissage quotidien.</p>
-      <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button></div><p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
+    zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span></p>
+      <ul class="hors-apres">${h.map((x) => `<li>${esc(x.nom)} : cote validée ${fmt(x.cote)} → <strong>${fmt(x.med)}</strong> (médiane de ${x.n} annonce${x.n > 1 ? 's' : ''} en ligne ; la plus chère ${fmt(x.max)})</li>`).join('')}${ETATS.filter((e) => bm.change.has(e.k) && !h.some((x) => x.k === e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(bm.nv[e.k])}</strong> (pour rester sous l'état supérieur)</li>`).join('')}</ul>
+      <div class="corriger-actions"><button type="button" class="bouton" id="hors-baisse">Baisser à la médiane</button> <button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button></div>
+      <p class="sous">« Remettre au calcul » retire votre validation : ${h.map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return sv ? `${esc(x.nom)} ${fmt(sv[0])} (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : ''; }).filter(Boolean).join(' · ') || 'prix calculé pas encore disponible'}, atteint progressivement par le lissage quotidien.</p>
+      <p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
+    const msg = $('#hors-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+    $('#hors-baisse').addEventListener('click', async () => { $('#hors-baisse').disabled = true; await envoyerCorrections([bm.ligne], dire); $('#hors-baisse').disabled = false; });
     $('#hors-reset').addEventListener('click', async () => {
-      const msg = $('#hors-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
-      if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
       const cases = ['convenable', 'bon', 'tres_bon'].map((k) => (h.some((x) => x.k === k) ? 'reset' : ''));
-      $('#hors-reset').disabled = true; dire('Envoi en cours…');
-      try {
-        const r = await window.Relais.envoyerLot('corriger-prix.yml', { corrections: `${b.isbn13} ; ${cases.join(' ; ')}` });
-        if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
-        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
-        else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
-      } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
-      $('#hors-reset').disabled = false;
+      $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
   function blocAnnonces(b) {
