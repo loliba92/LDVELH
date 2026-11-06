@@ -427,3 +427,37 @@ class TestReleveParBalayage(unittest.TestCase):
         cat = [("9782070583805", "Le Sorcier de la montagne de feu", 1, "Le Sorcier de la montagne de feu", None)]
         r = ebay_api.rattacher(pool, cat, {}, date(2026, 10, 11))
         self.assertEqual([it["itemId"] for it in r["9782070583805"]], ["v1|1|0"])
+
+
+class TestDeuxRythmes(unittest.TestCase):
+    def dossier(self, **fichiers):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        for nom, contenu in fichiers.items():
+            (d / nom.replace("_", "-").replace("-csv", ".csv")).write_text(contenu, encoding="utf-8")
+        return d
+
+    def test_complet_si_le_dernier_complet_a_deux_jours_ou_plus(self):
+        d = self.dossier(**{"ebay_2026_11_05-csv": "isbn13\n"})
+        self.assertFalse(ebay_api.est_complet(d, date(2026, 11, 6)))
+        self.assertTrue(ebay_api.est_complet(d, date(2026, 11, 7)))
+        self.assertTrue(ebay_api.est_complet(self.dossier(), date(2026, 11, 7)))          # jamais fait
+
+    def test_choix_impose(self):
+        d = self.dossier(**{"ebay_2026_11_05-csv": "isbn13\n"})
+        self.assertTrue(ebay_api.est_complet(d, date(2026, 11, 6), True))
+        self.assertFalse(ebay_api.est_complet(d, date(2026, 11, 7), False))
+
+    def test_fusion_sans_doublon_la_premiere_version_est_gardee(self):
+        par_isbn = {"111": [{"itemId": "1", "n": "isbn"}]}
+        balayage = {"111": [{"itemId": "1", "n": "titre", "_titre_seul": True}, {"itemId": "2", "n": "titre"}], "222": [{"itemId": "3"}]}
+        r = ebay_api.fusionner_recherches(par_isbn, balayage)
+        self.assertEqual([it["n"] for it in r["111"]], ["isbn", "titre"])
+        self.assertEqual(list(r), ["111", "222"])
+
+    def test_report_des_annonces_non_retrouvees(self):
+        entete = "isbn13,etat,prix,titre,lien,age_jours,trouvee_par,etat_suppose,port\n"
+        d = self.dossier(**{"annonces_2026_11_05-csv": entete + "111,bon,10,A,https://www.ebay.fr/itm/1001,3,isbn,0,\n111,bon,12,B,https://www.ebay.fr/itm/1002,4,isbn,0,\n"})
+        r = ebay_api.lignes_reportees(d, date(2026, 11, 6), ["https://www.ebay.fr/itm/1001?hash=x"])
+        self.assertEqual([x["lien"] for x in r], ["https://www.ebay.fr/itm/1002"])
+        self.assertEqual(ebay_api.lignes_reportees(d, date(2026, 11, 8), []), [])          # fichier trop ancien : rien n'est reporté

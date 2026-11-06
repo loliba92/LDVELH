@@ -1,10 +1,13 @@
 name: Relevé des prix (eBay et librairies)
 
-# UN SEUL lot pour tous les prix, chaque jour ou à la demande : (1) interroge l'interface officielle d'eBay par recherches larges (« ldvelh », « livre dont
-# vous êtes le héros », éditeurs, séries : environ 200 appels par relevé, pour une limite habituelle de 5 000 par jour), (2) relève le prix du neuf chez
-# les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé complet date d'au moins 7 jours (jamais plus d'une fois par semaine), et à la demande ;
-# entre deux, relevé léger des seuls exemplaires d'occasion des librairies, UN JOUR SUR DEUX (jours impairs du mois) : réseau de petites librairies, on ne le
-# sollicite pas plus malgré le relevé eBay quotidien. Puis ajoute un relevé agrégé, reconstruit la base, regénère les données du site et redéclenche sa publication.
+# UN SEUL lot pour tous les prix, chaque jour ou à la demande, à deux rythmes : (1) chaque jour, un BALAYAGE de l'interface officielle d'eBay (recherches larges :
+# « ldvelh », « livre dont vous êtes le héros », éditeurs, séries ; environ 200 appels) qui rattrape vite les nouvelles annonces et les écrit dans les annonces ;
+# (2) tous les deux jours, un RELEVÉ COMPLET (balayage + recherche édition par édition, environ 3 700 appels pour une limite habituelle de 5 000 par jour : ne
+# pas lancer d'essai eBay le même jour) qui seul alimente la cote. Le script choisit : complet si le dernier relevé complet (ebay-AAAA-MM-JJ.csv) a au moins
+# deux jours. Puis le lot relève le prix du neuf chez les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé complet date d'au moins 7 jours
+# (jamais plus d'une fois par semaine), et à la demande ; entre deux, relevé léger des seuls exemplaires d'occasion des librairies, UN JOUR SUR DEUX (jours
+# impairs du mois) : réseau de petites librairies, on ne le sollicite pas plus. Enfin ajoute un relevé agrégé, reconstruit la base, regénère les données du
+# site et redéclenche sa publication.
 # Prérequis : secrets EBAY_CLIENT_ID et EBAY_CLIENT_SECRET (voir docs/PRIX-ACTUELS.md).
 on:
   schedule:
@@ -29,8 +32,11 @@ on:
       essais:
         description: "Compare plusieurs façons de chercher (ISBN-13, ISBN-10, titre…) sur N éditions, comptages seulement (60 conseillé)"
         required: false
+      releve_complet:
+        description: "Force un relevé COMPLET (balayage + recherche édition par édition, environ 3 700 appels) même si le dernier date de moins de deux jours : tapez oui"
+        required: false
       essai_releve:
-        description: "Relevé complet par balayage SANS enregistrement : tapez oui (comptages et comparaison avec le dernier relevé, vérification des photos comprise)"
+        description: "Relevé de balayage SANS enregistrement (environ 200 appels) : tapez oui (comptages et comparaison avec le dernier relevé, vérification des photos comprise)"
         required: false
       essai_large:
         description: "Balayage large (« ldvelh », « livre dont vous êtes le héros »…) : nombre de pages de 200 annonces par requête, comptages seulement (3 conseillé)"
@@ -98,7 +104,7 @@ jobs:
         run: python scrapers/ebay_api.py --essai-modalites ${{ inputs.essai_modalites }} | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Essai du relevé par balayage (sans enregistrement)
         if: ${{ inputs.essai_releve != '' }}
-        run: python scrapers/ebay_api.py --essai-releve | tee -a "$GITHUB_STEP_SUMMARY"
+        run: python scrapers/ebay_api.py --essai-releve --balayage-seul | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Essai du balayage large (sans enregistrement)
         if: ${{ inputs.essai_large != '' }}
         run: python scrapers/ebay_api.py --essai-large ${{ inputs.essai_large }} | tee -a "$GITHUB_STEP_SUMMARY"
@@ -108,7 +114,7 @@ jobs:
           # Limite d'appels eBay atteinte (code 75) : rien n'est enregistré et rien n'est perdu. Le lot est marqué « annulé » (et non « échec »),
           # avec la raison dans son résumé ; le site l'affiche ainsi dans « Mises à jour automatiques ».
           set +e
-          python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }}
+          python scrapers/ebay_api.py ${{ inputs.limite && format('--limite {0}', inputs.limite) || '' }} ${{ inputs.releve_complet != '' && '--complet' || '' }}
           code=$?
           if [ "$code" = "75" ]; then
             echo "Limite d'appels eBay atteinte pour aujourd'hui : un relevé a déjà eu lieu, rien n'est perdu. Réessayez demain." | tee -a "$GITHUB_STEP_SUMMARY"

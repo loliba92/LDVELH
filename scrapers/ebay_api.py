@@ -659,6 +659,49 @@ def rattacher(pool, cat, fiches, jour):
             for isbn, titre, nb_ed, livre, annees in cat}
 
 
+# Deux rythmes (décision du propriétaire) : le BALAYAGE (recherches larges, environ 200 appels) tourne chaque jour et rattrape vite les nouvelles annonces ;
+# le RELEVÉ COMPLET (balayage + recherche édition par édition, environ 3 700 appels) tourne tous les deux jours et seul alimente la cote. Un jour de balayage
+# seul, les annonces du dernier relevé complet non retrouvées sont reportées (un jour au plus), pour qu'elles ne paraissent pas « plus en ligne ».
+INTERVALLE_COMPLET_JOURS = 2
+
+
+def dernier_complet(dossier):
+    """Date du dernier relevé complet (ebay-AAAA-MM-JJ.csv, écrit seulement par un relevé complet), ou None."""
+    fichiers = sorted(Path(dossier).glob("ebay-20??-??-??.csv"))
+    return date.fromisoformat(fichiers[-1].stem[-10:]) if fichiers else None
+
+
+def est_complet(dossier, jour, force=None):
+    """Vrai si le relevé du jour doit être complet : jamais fait, ou dernier complet vieux d'au moins INTERVALLE_COMPLET_JOURS jours. `force` : True/False impose le choix."""
+    if force is not None:
+        return force
+    d = dernier_complet(dossier)
+    return d is None or (jour - d).days >= INTERVALLE_COMPLET_JOURS
+
+
+def fusionner_recherches(*recherches):
+    """Réunit plusieurs {isbn: annonces} sans doublon (même annonce = même itemId) ; la première version rencontrée est gardée (mettre les annonces trouvées par ISBN en premier)."""
+    sortie = {}
+    for r in recherches:
+        for isbn, items in r.items():
+            vus = {it.get("itemId") for it in sortie.setdefault(isbn, [])}
+            for it in items:
+                if it.get("itemId") not in vus:
+                    vus.add(it.get("itemId"))
+                    sortie[isbn].append(it)
+    return sortie
+
+
+def lignes_reportees(dossier, jour, liens_actuels, max_jours=1):
+    """Lignes du dernier fichier d'annonces (datant d'au plus `max_jours` jours avant `jour`) dont l'annonce n'est pas retrouvée aujourd'hui : reportées telles quelles."""
+    fichiers = sorted(f for f in Path(dossier).glob("annonces-20??-??-??.csv") if f.stem[-10:] < jour.isoformat())
+    if not fichiers or (jour - date.fromisoformat(fichiers[-1].stem[-10:])).days > max_jours:
+        return []
+    actuels = {m.group(1) for l in liens_actuels for m in [re.search(r"/itm/(\d+)", l or "")] if m}
+    with open(fichiers[-1], newline="", encoding="utf-8") as f:
+        return [r for r in csv.DictReader(f) for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m and m.group(1) not in actuels]
+
+
 def essayer_large(a, token):
     """Mesure un balayage large (« ldvelh », « livre dont vous êtes le héros »…) : annonces renvoyées, rattachées à une édition du catalogue
     (mêmes filtres que le relevé, concordance stricte du titre) et NOUVELLES (absentes du dernier relevé enregistré). Rien n'est enregistré,
@@ -701,6 +744,8 @@ def main():
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
     p.add_argument("--essai-modalites", dest="essai_modalites", type=int, help="compare les annonces à prix fixe, aux enchères et en petites annonces sur N éditions (comptages seulement)")
     p.add_argument("--essai-large", dest="essai_large", type=int, help="balayage large (« ldvelh »…) : N pages de 200 annonces par requête, comptages seulement (3 conseillé)")
+    p.add_argument("--complet", dest="complet", action="store_true", help="force un relevé complet (balayage et recherche édition par édition), même si le dernier date de moins de deux jours")
+    p.add_argument("--balayage-seul", dest="balayage_seul", action="store_true", help="force un relevé de balayage seul (environ 200 appels), sans écrire de ligne de cote")
     p.add_argument("--essai-releve", dest="essai_releve", action="store_true", help="relevé complet par balayage SANS enregistrement : comptages et comparaison avec le dernier relevé")
     p.add_argument("--essai-version", dest="essai_version", type=int, help="essai en deux étapes (titre, description, image) sur N éditions « archive seule » (aucun enregistrement)")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
@@ -745,11 +790,21 @@ def main():
     lignes, par_isbn = [], {}
     import editions
     fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
+    sortie = Path(a.sortie)
+    complet = est_complet(sortie, jour, True if a.complet else False if a.balayage_seul else None)
     pool = balayer(token, fiches, pause=PAUSE)
     if not pool:
         sys.exit("Le balayage n'a renvoyé aucune annonce : relevé abandonné, rien n'est enregistré.")
     print(f"Balayage : {len(pool)} annonces renvoyées par les recherches larges.")
     par_isbn = rattacher(pool, cat, fiches, jour)
+    if complet:
+        print("Relevé complet : recherche édition par édition en plus du balayage.")
+        par_edition = {}
+        for isbn, titre, nb_ed, livre, annees in cat:
+            par_edition[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
+        par_isbn = fusionner_recherches(par_edition, par_isbn)          # les annonces trouvées par ISBN d'abord : elles n'ont pas à passer la concordance stricte du titre
+    else:
+        print("Relevé de balayage seul : pas de ligne de cote, les annonces du dernier relevé non retrouvées sont reportées.")
     import reconciliation_image                                  # réconciliation par image : une annonce vue sous plusieurs éditions va à celle dont la jaquette lui ressemble
     par_isbn = reconciliation_image.reconcilier(par_isbn, {c[0]: c[3] for c in cat}, RACINE / "web" / "covers")
     par_isbn = reconciliation_image.verifier_photos(par_isbn, RACINE / "web" / "covers")      # toute annonce retenue : la photo doit montrer l'édition à laquelle elle est rattachée
@@ -759,7 +814,6 @@ def main():
     for isbn, titre, nb_ed, livre, annees in cat:
         lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn), prix_tbe=tbe.get(isbn))
         annonces_gardees += lignes_annonces(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
-    sortie = Path(a.sortie)
     if a.essai_releve:
         connues = annonces_connues(sortie)
         gardees = {m.group(1) for r in annonces_gardees for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m}
@@ -767,16 +821,21 @@ def main():
               f"{len(lignes)} lignes de cote ; dernier relevé : {len(connues)} annonces ; nouvelles : {len(gardees - connues)} ; connues non retrouvées : {len(connues - gardees)}.")
         return
     sortie.mkdir(parents=True, exist_ok=True)
+    if not complet:
+        reportees = lignes_reportees(sortie, jour, [r.get("lien") for r in annonces_gardees])
+        annonces_gardees = annonces_gardees + reportees
+        print(f"{len(reportees)} annonces du dernier relevé reportées.")
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
-    with open(fichier, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=CHAMPS)
-        w.writeheader()
-        w.writerows(lignes)
+    if complet:                                                  # la cote ne lit que les relevés complets
+        with open(fichier, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=CHAMPS)
+            w.writeheader()
+            w.writerows(lignes)
     with open(sortie / f"annonces-{jour.isoformat()}.csv", "w", newline="", encoding="utf-8") as f:       # non lu par build_db : sert à vérifier
         w = csv.DictWriter(f, fieldnames=CHAMPS_ANNONCES)
         w.writeheader()
         w.writerows(annonces_gardees)
-    print(f"{len(isbns)} éditions rattachées, {len(lignes)} lignes écrites dans {fichier}")
+    print(f"{len(annonces_gardees)} annonces écrites" + (f", {len(lignes)} lignes de cote dans {fichier}" if complet else " (balayage seul : pas de ligne de cote)"))
 
 
 if __name__ == "__main__":
