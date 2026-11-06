@@ -861,7 +861,26 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
-    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), tempRc = $('#rc-temp'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
+    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), tempRc = $('#rc-temp'), verifRc = $('#rc-verif'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
+    // Retour de la fiche : filtres, tri, longueur de liste et position sont gardés au clic, puis remis à la réouverture de la page
+    const CTRL_RC = ['rc-q', 'rc-tri', 'rc-source', 'rc-verdict', 'rc-serie', 'rc-edition', 'rc-editeur', 'rc-etatf', 'rc-temp', 'rc-pmin', 'rc-pmax'], CASES_RC = ['rc-trouver', 'rc-pep', 'rc-bon', 'rc-sans', 'rc-verif', 'rc-enligne'];
+    let etatARestaurer = null, defilementEnAttente = null;
+    try { const o = JSON.parse(sessionStorage.getItem('cdh-annonces-etat') || 'null'); if (o && Date.now() - o.t < 2 * 3600 * 1000) etatARestaurer = o; sessionStorage.removeItem('cdh-annonces-etat'); } catch (e) { /* sans stockage : retour à la liste de départ */ }
+    const sauverEtatRc = () => {
+      try {
+        const o = { t: Date.now(), y: window.scrollY, lim: limite, per: periode, v: {}, c: {} };
+        CTRL_RC.forEach((i) => { const e = document.getElementById(i); if (e) o.v[i] = e.value; });
+        CASES_RC.forEach((i) => { const e = document.getElementById(i); if (e) o.c[i] = e.checked; });
+        sessionStorage.setItem('cdh-annonces-etat', JSON.stringify(o)); sessionStorage.setItem('cdh-retour-fiche', 'butin.html#recues');
+      } catch (e) { /* tant pis */ }
+    };
+    liste.addEventListener('click', (e) => { if (e.target.closest('a.an-jaq, a.an-titre, a.rc-fiche')) sauverEtatRc(); });
+    const appliquerDefilement = () => {
+      const pane = document.getElementById('pane-recues');
+      if (defilementEnAttente == null || !pane || pane.hidden) return;
+      const y = defilementEnAttente; defilementEnAttente = null;
+      requestAnimationFrame(() => window.scrollTo(0, y)); setTimeout(() => window.scrollTo(0, y), 400);
+    };
     const boutonsQuand = [...document.querySelectorAll('#rc-quand [data-quand]')], boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
     let modeVue = 'grille', periode = 'tout';
     const accRc = $('#rc-acc'); if (accRc && window.matchMedia('(max-width: 600px)').matches) accRc.open = false;          // replié sur téléphone, ouvert sur ordinateur
@@ -986,26 +1005,34 @@
       const remplir = (el, valeurs, tous) => { if (!el || el.options.length > 1) return; el.innerHTML = `<option value="">${tous}</option>` + valeurs.map((v) => `<option>${esc(v)}</option>`).join(''); };
       const uniques = (f) => [...new Set(toutes.map(f).filter(Boolean))].sort((x, y) => String(x).localeCompare(String(y), 'fr', { numeric: true }));
       remplir(serieRc, uniques((a) => a.ed.serie), 'Toutes'); remplir(editionRc, uniques((a) => a.ed.version), 'Toutes'); remplir(editeurRc, uniques((a) => (INFO_ED[a.ed.id] || {}).editeur), 'Tous');
+      if (etatARestaurer) {
+        const o = etatARestaurer; etatARestaurer = null;
+        CTRL_RC.forEach((i) => { const e = document.getElementById(i); if (e && o.v[i] != null) e.value = o.v[i]; });
+        CASES_RC.forEach((i) => { const e = document.getElementById(i); if (e && o.c[i] != null) e.checked = o.c[i]; });
+        periode = o.per || 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === periode)));
+        limite = o.lim || 60; defilementEnAttente = o.y;
+      }
       // Recherche tolérante : chaque mot doit se trouver dans le titre, la série ou l'édition (sans accents ni majuscules),
       // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
-      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && dansPeriode(a) && !(enligne.checked && a.partie)
+      const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie)
         && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
         && (!tempRc || !tempRc.value || (tempRc.value === 'brulant' && a.degre === 'brulant') || (tempRc.value === 'chaud' && (a.degre === 'brulant' || a.degre === 'chaud')) || (tempRc.value === 'glace' && a.degre === 'glace'))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
         && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
+      const nbTr = $('#rc-nb-trouver'); if (nbTr) { const nt = toutes.filter((a) => a.trouver && !a.partie).length; nbTr.textContent = nt ? `(${nt})` : ''; }
       const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, tempRc && tempRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
-      const actifs = dansPlus + [periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
+      const actifs = dansPlus + [verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
-      if (effacerRc) effacerRc.hidden = !(dansPlus || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
+      if (effacerRc) effacerRc.hidden = !(dansPlus || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${puceTemp(a)}${thermometre(a)}${a.points.map((t) => `<span class="rc-point">${esc(t)}</span>`).join('')}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${puceTemp(a)}${thermometre(a)}${a.points.map((t) => `<span class="rc-point">${esc(t)}</span>`).join('')}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`;
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
@@ -1013,10 +1040,10 @@
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         const precis = [a.ed.version, info.editeur, info.annee].filter(Boolean).map((x) => esc(String(x))).join(' · ');
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
           <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
-          <a class="an-titre" href="${fiche}" target="_blank" rel="noopener">${esc(a.ed.titre)}</a>
+          <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}</span>
           ${a.pub != null ? `<span class="rc-vs">site ${eur(a.pub)} · ${Math.round((a.prix / a.pub - 1) * 100) > 0 ? '+' : Math.round((a.prix / a.pub - 1) * 100) < 0 ? '−' : ''}${Math.abs(Math.round((a.prix / a.pub - 1) * 100))} %</span>` : ''}
           <div class="an-temprow">${puceTemp(a)}</div>
@@ -1029,6 +1056,7 @@
       };
       const page = vues.slice(0, limite);
       liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carteGrille).join('') + '</div>' : '<div class="rc-liste">' + page.map(carteListe).join('') + '</div>') + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
+      appliquerDefilement();
     };
     liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
@@ -1039,14 +1067,35 @@
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc, tempRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
     [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
-    if (effacerRc) effacerRc.addEventListener('click', () => {
-      [trouverRc, pepRc, bonRc, sansRc].forEach((el) => { if (el) el.checked = false; });
+    const razFiltres = () => {
+      [trouverRc, pepRc, bonRc, sansRc, verifRc].forEach((el) => { if (el) el.checked = false; });
       source.value = 'tout'; verdict.value = 'tout';
       [serieRc, editionRc, editeurRc, etatfRc, tempRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
+      if (rechercheRc) rechercheRc.value = '';
       periode = 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'tout')));
-      limite = 60; dessinerRecues();
-    });
-    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau2()) chargerAnnonces().then(dessinerRecues); });
+      triRc.value = 'recent';
+      limite = 60;
+    };
+    if (effacerRc) effacerRc.addEventListener('click', () => { razFiltres(); dessinerRecues(); });
+    // Préréglages : chaque bouton remet tout à zéro puis règle les filtres d'un usage
+    const PRESETS = {
+      chasse: ['pépites sans réserve, les meilleures affaires d\'abord.', () => { pepRc.checked = true; sansRc.checked = true; triRc.value = 'ecart'; }],
+      veille: ['annonces arrivées aujourd\'hui, les plus récentes d\'abord.', () => { periode = 'auj'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'auj'))); triRc.value = 'recent'; }],
+      comparaison: ['classées par prix croissant. Tapez un titre pour comparer les annonces d\'un même livre.', () => { triRc.value = 'prix'; }],
+      verification: ['annonces dont l\'édition ou l\'état reste à confirmer, les plus chaudes d\'abord.', () => { verifRc.checked = true; triRc.value = 'temp'; }],
+    };
+    const txtPreset = $('#rc-preset-txt');
+    document.querySelectorAll('#rc-presets [data-preset]').forEach((b) => b.addEventListener('click', () => {
+      const p = PRESETS[b.dataset.preset]; if (!p) return;
+      razFiltres(); p[1]();
+      if (b.dataset.preset === 'comparaison') { modeVue = 'grille'; boutonsVue.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.vue === 'grille'))); }
+      if (txtPreset) { txtPreset.textContent = `${b.textContent} : ${p[0]}`; txtPreset.hidden = false; }
+      dessinerRecues();
+      if (b.dataset.preset === 'comparaison' && rechercheRc) rechercheRc.focus();
+    }));
+    // « Sans réserve » et « À vérifier » s'excluent
+    if (sansRc && verifRc) { sansRc.addEventListener('change', () => { if (sansRc.checked) verifRc.checked = false; }); verifRc.addEventListener('change', () => { if (verifRc.checked) sansRc.checked = false; limite = 60; dessinerRecues(); }); }
+    document.addEventListener('cdh-pane', (e) => { if (e.detail === 'recues' && estNiveau2()) chargerAnnonces().then(() => { dessinerRecues(); appliquerDefilement(); }); });
     dessinerRecues();
   }
   // Indice de marché : sur toutes les pages qui ont l'onglet Indice (pas seulement celles qui ont Annonces reçues)
