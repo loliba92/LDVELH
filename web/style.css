@@ -2668,3 +2668,13 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .rc-plus .pp-outils { margin-top: 8px; }
 .rc-nb { color: var(--text); }
 .rc-prix-champ { width: 5.5em; min-height: 40px; }
+/* Annonces : température */
+.an-temp { display: inline-block; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 4px; font: 700 var(--t-xs)/1.6 var(--f-ui); letter-spacing: .03em; white-space: nowrap; color: var(--muted); flex: none; }
+.an-t-brulant { color: #ffb08a; border-color: #ff7a45; background: rgba(255, 122, 69, .14); }
+.an-t-chaud { color: #f4c470; border-color: #e8b86b; background: rgba(232, 184, 107, .12); }
+.an-t-tiede { color: var(--text); }
+.an-t-frais { color: #9fc8f0; border-color: #6aa5e0; }
+.an-t-glace { color: #8fb3ff; border-color: #5b7fd1; background: rgba(91, 127, 209, .14); }
+.an-t-pale { opacity: .6; border-style: dashed; }
+.an-temprow { display: flex; align-items: center; min-height: 1.6em; }
+.an-liq { color: var(--muted); }

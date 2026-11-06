@@ -861,7 +861,7 @@
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
-    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
+    const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), tempRc = $('#rc-temp'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
     const boutonsQuand = [...document.querySelectorAll('#rc-quand [data-quand]')], boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
     let modeVue = 'grille', periode = 'tout';
     boutonsQuand.forEach((b) => b.addEventListener('click', () => { periode = b.dataset.quand; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); limite = 60; dessinerRecues(); }));
@@ -902,6 +902,18 @@
       const txt = `${cat ? cat + ' : ' : ''}annonces de ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}${site ? `. Le trait marque le prix du site, ${eur(a.pub)}` : ''}`;
       return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste">${site ? `<span class="rc-therm-rep" style="left:${(place(a.pub) * 100).toFixed(1)}%"></span>` : ''}<span class="rc-therm-pt" style="left:${(place(a.prix) * 100).toFixed(1)}%"></span></span>${extreme || !cat ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
+    const DEGRES = { brulant: 'Brûlant', chaud: 'Chaud', tiede: 'Tiède', frais: 'Frais', glace: 'Glacé' };
+    const puceTemp = (a) => {
+      if (!a.degre) return '<span class="an-temp an-t-vide" title="Pas de prix du site ni d\'autres annonces pour comparer">Température : …</span>';
+      const base = a.pub != null ? `écart au prix du site (${eur(a.pub)})` : 'les autres annonces du même livre';
+      const autres = a.lot ? ` et place parmi ${a.lot.n} annonces du même livre et du même état` : '';
+      return `<span class="an-temp an-t-${a.degre}${a.points.length ? ' an-t-pale' : ''}" title="${esc(`Température : ${base}${autres}.${a.points.length ? ' À confirmer : ' + a.points.join(', ') + '.' : ''}`)}">${DEGRES[a.degre]}</span>`;
+    };
+    const liquidite = (a) => {
+      const n = a.lot ? `${a.lot.n} annonces en ligne` : 'Seule annonce';
+      const r = (INFO_ED[a.ed.id] || {}).rarete;
+      return `${n} · même état${r && r !== 'courant' ? ' · ' + ({ peu_courant: 'peu courant', rare: 'rare', tres_rare: 'très rare' }[r] || '') : ''}`;
+    };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
     const quandRc = (a) => (heureConnue({ premiere: a.premiere }) ? new Date(a.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·') : a.vue ? jourCourt(a.vue) : '');
@@ -928,6 +940,7 @@
     };
     const comparerRc = (mode) => ({
       recent: parRecent,
+      temp: (a, b) => (b.t == null ? -1 : b.t) - (a.t == null ? -1 : a.t) || parRecent(a, b),
       ancien: (a, b) => quandCle(a).localeCompare(quandCle(b)) || a.prix - b.prix,
       prixdesc: (a, b) => b.prix - a.prix || parRecent(a, b),
       eco: (a, b) => (b.pub ? b.pub - b.prix : -9999) - (a.pub ? a.pub - a.prix : -9999) || parRecent(a, b),
@@ -959,7 +972,14 @@
         const p = parLivre.get(a.ed.isbn + '|' + a.cle).slice().sort((x, y) => x - y);
         if (p.length < 2) return;
         const m = p.length >> 1, med = p.length % 2 ? p[m] : (p[m - 1] + p[m]) / 2;
-        a.lot = { min: p[0], max: p[p.length - 1], med: med };
+        a.lot = { min: p[0], max: p[p.length - 1], med: med, n: p.length };
+      });
+      // Température : 60 % l'écart au prix du site, 40 % la place parmi les annonces du même livre et du même état (la moins chère = la plus chaude)
+      toutes.forEach((a) => {
+        const r = a.pub ? a.prix / a.pub : null, parCote = r == null ? null : 1 - Math.min(r, 1.5) / 1.5;
+        const rang = a.lot ? (a.lot.max > a.lot.min ? (a.prix - a.lot.min) / (a.lot.max - a.lot.min) : 0.5) : null;
+        const t = parCote == null ? (rang == null ? null : 1 - rang) : rang == null ? parCote : 0.6 * parCote + 0.4 * (1 - rang);
+        a.t = t; a.degre = t == null ? null : t >= 0.75 ? 'brulant' : t >= 0.55 ? 'chaud' : t >= 0.4 ? 'tiede' : t >= 0.25 ? 'frais' : 'glace';
       });
       // Listes de filtres (série, édition, éditeur) : les valeurs présentes dans les annonces, remplies une fois
       const remplir = (el, valeurs, tous) => { if (!el || el.options.length > 1) return; el.innerHTML = `<option value="">${tous}</option>` + valeurs.map((v) => `<option>${esc(v)}</option>`).join(''); };
@@ -971,18 +991,19 @@
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
       const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && dansPeriode(a) && !(enligne.checked && a.partie)
         && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
+        && (!tempRc || !tempRc.value || (tempRc.value === 'brulant' && a.degre === 'brulant') || (tempRc.value === 'chaud' && (a.degre === 'brulant' || a.degre === 'chaud')) || (tempRc.value === 'glace' && a.degre === 'glace'))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
         && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
-      const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
+      const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, tempRc && tempRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = dansPlus ? `(${dansPlus})` : '';
       if (effacerRc) effacerRc.hidden = !(dansPlus || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}${a.points.map((t) => `<span class="rc-point">${esc(t)}</span>`).join('')}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${puceTemp(a)}${thermometre(a)}${a.points.map((t) => `<span class="rc-point">${esc(t)}</span>`).join('')}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" target="_blank" rel="noopener" aria-label="Ouvrir la fiche du livre (nouvel onglet) : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`;
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
@@ -996,10 +1017,11 @@
           <a class="an-titre" href="${fiche}" target="_blank" rel="noopener">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}</span>
           ${a.pub != null ? `<span class="rc-vs">site ${eur(a.pub)} · ${Math.round((a.prix / a.pub - 1) * 100) > 0 ? '+' : Math.round((a.prix / a.pub - 1) * 100) < 0 ? '−' : ''}${Math.abs(Math.round((a.prix / a.pub - 1) * 100))} %</span>` : ''}
+          <div class="an-temprow">${puceTemp(a)}</div>
           ${thermometre(a)}
-
           <span class="an-meta">${precis ? precis + ' · ' : ''}${ABR_ETAT[a.cle]}</span>
           <span class="an-meta">${NOM[a.fam]}${quandRc(a) ? ' · ' + esc(quandRc(a)) : ''}${a.partie ? ' · plus vue' : ''}</span>
+          <span class="an-meta an-liq">${esc(liquidite(a))}</span>
           ${a.points.length ? `<span class="an-points">${a.points.map((t) => esc(t)).join(' · ')}</span>` : ''}
         </article>`;
       };
@@ -1013,12 +1035,12 @@
     if (triRc) triRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
-    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
+    [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc, tempRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
     [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
     if (effacerRc) effacerRc.addEventListener('click', () => {
       [trouverRc, pepRc, bonRc, sansRc].forEach((el) => { if (el) el.checked = false; });
       source.value = 'tout'; verdict.value = 'tout';
-      [serieRc, editionRc, editeurRc, etatfRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
+      [serieRc, editionRc, editeurRc, etatfRc, tempRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
       periode = 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'tout')));
       limite = 60; dessinerRecues();
     });
@@ -1184,7 +1206,7 @@
 
   const JAQ = {}, RAR = {}, EDITEUR = {};
   fetch('data/historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((h) => { HISTO = h; const d = document.getElementById('rv-date'); if (d && h && h.dates.length) d.textContent = `Dernière publication des prix : ${jour(h.dates[h.dates.length - 1])}.`; if (EDITIONS.length) afficher(); });
-  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { mini: b.couverture || b.couverture_mini || '', editeur: (b.editeur || '').trim(), annee: b.annee || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
+  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { mini: b.couverture || b.couverture_mini || '', editeur: (b.editeur || '').trim(), annee: b.annee || '', rarete: (b.rarete || {}).niveau || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
     d.forEach((l) => { if (!par.has(l.id)) par.set(l.id, { id: l.id, isbn: l.isbn, titre: l.titre, serie: l.serie, numero: l.numero, version: l.version, etats: {} }); par.get(l.id).etats[l.etat] = l; });
