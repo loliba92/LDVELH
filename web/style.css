@@ -2684,8 +2684,26 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .rc-acc .pp-outils:first-of-type { margin-top: 4px; }
 .rc-acc .rc-plus { margin: 4px 0 12px; }
 @media (max-width: 600px) { .rc-periode { display: flex; width: 100%; gap: 6px; flex-wrap: nowrap; margin: 4px 0 8px; } .rc-vue { margin: 4px 0 8px; } .rc-periode button { flex: 1 1 auto; padding: 4px 6px; font-size: .9rem; white-space: nowrap; } }
-.compteur-fusion .compteur-liens { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 2px; }
-.compteur-fusion .compteur-liens a { font-size: var(--t-sm); font-weight: 600; color: var(--gold); text-decoration: none; white-space: nowrap; }
-.compteur-fusion .compteur-liens a:hover { text-decoration: underline; }
-.compteur-fusion:hover { background: transparent; }
-.compteur-fusion { max-width: 640px; }
+/* Accueil : tableau de bord Butins et Annonces */
+.tb-carte { max-width: 640px; padding: 16px 18px 18px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: var(--r-carte, var(--r)); background: var(--surface, transparent); }
+.tb-titre { margin: 0 0 12px; font: 700 .78rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.tb-chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.tb-chiffre { display: grid; align-content: start; gap: 2px; min-width: 0; padding-right: 8px; }
+.tb-chiffre + .tb-chiffre { padding-left: 14px; border-left: 1px solid var(--line); }
+.tb-chiffre b { font: 700 2rem/1.05 var(--f-ui); color: var(--gold); font-variant-numeric: tabular-nums; }
+.tb-chiffre span { font: 600 1rem/1.3 var(--f-ui); color: var(--text); }
+.tb-chiffre small { color: var(--muted); font-size: var(--t-sm); line-height: 1.35; }
+.tb-chiffre small .tb-evol { font: 700 var(--t-sm) var(--f-ui); }
+.tb-chiffre small .tb-hausse { color: #8fd3a8; } .tb-chiffre small .tb-baisse { color: #f0a5b0; }
+.tb-liens { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.tb-liens .bouton { min-height: 40px; padding: 6px 16px; font-size: var(--t-base); }
+@media (max-width: 600px) {
+  .tb-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+  .tb-chiffre:nth-child(3) { grid-column: 1 / -1; padding-left: 0; border-left: 0; padding-top: 12px; border-top: 1px solid var(--line); }
+  .tb-chiffre:nth-child(2) { padding-left: 14px; }
+  .tb-liens .bouton { flex: 1 1 auto; }
+}
+.rc-legende { margin: 4px 0 12px; font-size: var(--t-base); color: var(--muted); }
+.rc-legende summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; color: var(--gold); font: 600 var(--t-base) var(--f-ui); }
+.rc-legende ul { margin: 6px 0; padding-left: 20px; }
+.rc-legende p { margin: 6px 0; }
