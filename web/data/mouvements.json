@@ -45,8 +45,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 56.99,
-   "apres": 68.45,
-   "pct": 0.201,
+   "apres": 68.57,
+   "pct": 0.203,
    "nature": "annonces",
    "nb": 6,
    "recalibre": false
