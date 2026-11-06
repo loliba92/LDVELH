@@ -153,9 +153,9 @@ def _revue_prix():
 RECUES_ONGLET = '''  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>'''
 ANALYSE_ONGLET = '''  <button type="button" role="tab" data-pane="analyse" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analyse</span></button>'''
 ANALYSE_PANNEAU = '''<div class="rv-pane" id="pane-analyse" role="tabpanel" hidden>
-  <p class="chapeau">Les opportunités d'achat et le rythme des annonces captées chaque jour. Réservé à Zagor.</p>
-  <div class="opp-zone" id="opp-zone"></div>
+  <p class="chapeau">Le rythme des annonces captées chaque jour, puis les opportunités d'achat. Réservé à Zagor.</p>
   <div class="captures-zone" id="captures-analyse"></div>
+  <div class="opp-zone" id="opp-zone"></div>
 </div>'''
 INDICE_ONGLET = '''  <button type="button" role="tab" data-pane="indice" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Indice</span></button>'''
 INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden>
