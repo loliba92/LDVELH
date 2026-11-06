@@ -169,6 +169,8 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
     <div class="rv-onglets rc-vue rc-periode" id="rc-quand" role="group" aria-label="Annonces reçues"><button type="button" data-quand="auj" aria-pressed="false">Aujourd'hui</button><button type="button" data-quand="sem" aria-pressed="false">Cette semaine</button><button type="button" data-quand="tout" aria-pressed="true">Toutes</button></div>
     <div class="rv-onglets rc-vue" id="rc-vue" role="group" aria-label="Affichage des annonces"><button type="button" data-vue="grille" aria-pressed="true">Jaquettes</button><button type="button" data-vue="liste" aria-pressed="false">Liste</button></div>
     <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
+    <details class="rc-acc" id="rc-acc" open>
+    <summary>Filtres et tri <span class="rc-nb" id="rc-nb-filtres"></span></summary>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>
@@ -190,8 +192,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
       <label class="rc-filtre"><input type="checkbox" id="rc-sans"><span>Sans réserve</span></label>
       <button type="button" class="rc-effacer" id="rc-effacer" hidden>Tout effacer</button>
     </div>
-    <details class="rc-plus" id="rc-plus-filtres">
-      <summary>Plus de filtres <span class="rc-nb" id="rc-nb-filtres"></span></summary>
+    <div class="rc-plus" id="rc-plus-filtres">
       <div class="pp-outils">
         <label class="pp-tri"><span>Origine</span><select id="rc-source">
           <option value="tout">Toutes</option>
@@ -231,6 +232,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <label class="pp-tri"><span>Prix de</span><input type="number" id="rc-pmin" inputmode="decimal" min="0" step="1" placeholder="0" class="rc-prix-champ"> <span>à</span> <input type="number" id="rc-pmax" inputmode="decimal" min="0" step="1" placeholder="999" class="rc-prix-champ"> <span>€</span></label>
         <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
       </div>
+    </div>
     </details>
   </div>
   <div id="rc-liste"></div>
