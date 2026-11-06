@@ -897,6 +897,7 @@
     });
     return sortie.length ? sortie : null;
   }
+  const SOURCE_CALCUL = { actuel: 'd\'après les annonces actuelles', mixte: 'annonces et archives', archives: 'cote d\'archives, pas les annonces', neuf: 'prix du neuf' };
   function remplirHorsMarche(b) {
     const zone = $('#hors-marche');
     if (!zone) return;
@@ -904,7 +905,8 @@
     if (!h) { zone.hidden = true; zone.innerHTML = ''; return; }
     zone.hidden = false;
     zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span> ${h.map((x) => `${esc(x.nom)} : cote validée ${fmt(x.cote)}, annonce en ligne la plus chère ${fmt(x.max)} (${x.n} annonce${x.n > 1 ? 's' : ''})`).join(' · ')}.</p>
-      <p class="sous">« Remettre au calcul » retire votre validation : la cote repart des annonces.</p>
+      <ul class="hors-apres">${h.map((x) => { const sv = (infoPrix(b, x.k) || {}).sans_validation; return `<li>${esc(x.nom)} : ${fmt(x.cote)} → ${sv ? `<strong>${fmt(sv[0])}</strong> après remise au calcul (${SOURCE_CALCUL[sv[1]] || 'calcul du site'})` : 'pas de calcul disponible pour l\'instant'}</li>`; }).join('')}</ul>
+      <p class="sous">« Remettre au calcul » retire votre validation. La cote rejoint ensuite le prix calculé progressivement, par le lissage quotidien.</p>
       <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button></div><p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
     $('#hors-reset').addEventListener('click', async () => {
       const msg = $('#hors-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
