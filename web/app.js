@@ -41,7 +41,7 @@
 
   const defaut = () => ({
     q: '', serie: '', ed: '', amin: '', amax: '', pmin: '', pmax: '', vente: false, onglet: 'etagere', versions: new Set(VERSIONS),
-    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false, avendre: false, incoh: false, archive: false,
+    h: 'bon', vue: 'etagere', tri: 'serie', g: 'serie', mine: false, cherche: false, avendre: false, incoh: false, hors: false, archive: false,
   });
 
   /* ---------- Chargement ---------- */
@@ -193,6 +193,7 @@
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
     $('#f-incoh').addEventListener('change', (e) => { S.incoh = e.target.checked; changer(); });
+    $('#f-hors').addEventListener('change', (e) => { S.hors = e.target.checked; changer(); if (S.hors) chargerAnnonces().then(() => changer()); });
     $('#f-archive').addEventListener('change', (e) => { S.archive = e.target.checked; changer(); });
     $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) { S.cherche = false; S.avendre = false; } synchroniser(); changer(); });
     document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; S.avendre = e.target.value === 'vendre'; synchroniser(); changer(); } }));
@@ -226,7 +227,7 @@
     $('#f-q').value = S.q; if ($('#h-q')) $('#h-q').value = S.q; $('#f-ed').value = S.ed; remplirSeries();
     $('#f-amin').value = S.amin; $('#f-amax').value = S.amax; $('#f-pmin').value = S.pmin; $('#f-pmax').value = S.pmax;
     $('#prix-etat').textContent = `en ${etatDe(S.h).long.toLowerCase()}`;
-    $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine; $('#f-incoh').checked = S.incoh; $('#f-archive').checked = S.archive;
+    $('#f-vente').checked = S.vente; $('#f-mine').checked = S.mine; $('#f-incoh').checked = S.incoh; $('#f-hors').checked = S.hors; $('#f-archive').checked = S.archive;
     document.querySelectorAll('#f-coll input').forEach((r) => { r.checked = r.value === (S.avendre ? 'vendre' : S.cherche ? 'cherche' : S.mine ? 'mine' : 'tous'); });
     $('#f-tri').value = S.tri; $('#f-groupe').value = S.g;
     $('#f-versions').value = S.versions.size === VERSIONS.length ? '' : S.versions.size === 1 ? [...S.versions][0] : 'multi';
@@ -240,7 +241,7 @@
   document.addEventListener('cdh-notes', () => { clearTimeout(minuteNotes); minuteNotes = setTimeout(() => { if (PAGE !== 'collection') afficher(); }, 200); });
 
   function nbFiltres() {
-    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.avendre, S.incoh, S.archive, S.versions.size !== VERSIONS.length].filter(Boolean).length;
+    return [S.q.trim(), S.serie, S.ed, S.amin || S.amax, S.pmin !== '' || S.pmax !== '', S.vente, S.mine, S.cherche, S.avendre, S.incoh, S.hors, S.archive, S.versions.size !== VERSIONS.length].filter(Boolean).length;
   }
   function resumeFiltres() {
     const t = [];
@@ -254,6 +255,7 @@
     if (S.mine) t.push('ma collection');
     if (S.cherche) t.push('à trouver');
     if (S.avendre) t.push('à vendre');
+    if (S.hors) t.push('cote au-dessus des annonces');
     return t.join(' · ');
   }
   function basculerSelecteur(ouvert) {
@@ -325,7 +327,7 @@
       (!q || b._txt.includes(q)) && (!S.serie || b.serie === S.serie) && S.versions.has(b.version) &&
       (!S.ed || (b.editeur || 'Non renseigné') === S.ed) &&
       (amin === null || (b.annee && b.annee >= amin)) && (amax === null || (b.annee && b.annee <= amax)) &&
-      (!S.vente || b.en_vente === 1) && (!S.incoh || !estNiveau3() || incoherence(b)) && (!S.archive || !estNiveau3() || estSansRevision(b)) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
+      (!S.vente || b.en_vente === 1) && (!S.incoh || !estNiveau3() || incoherence(b)) && (!S.hors || !estNiveau3() || horsMarche(b)) && (!S.archive || !estNiveau3() || estSansRevision(b)) && (!S.mine || COLL[b.id]) && (!S.cherche || (SOUH[b.id] && !COLL[b.id])) && (!S.avendre || (COLL[b.id] && COLL[b.id].vendre)) &&
       ((pmin === null && pmax === null) || (b.prix[k] != null && (pmin === null || b.prix[k] >= pmin) && (pmax === null || b.prix[k] < pmax))));
   }
   function stat(liste, k) {
@@ -463,6 +465,7 @@
     const m = cotesMasquees();
     document.body.classList.toggle('cotes-masquees', m);
     if ($('#f-incoh')) $('#f-incoh').closest('label').hidden = !estNiveau3();
+    if ($('#f-hors')) $('#f-hors').closest('label').hidden = !estNiveau3();
     if ($('#f-archive')) $('#f-archive').closest('label').hidden = !estNiveau3();
     if (!m) return;
     if (S.onglet === 'cote') S.onglet = 'etagere';
@@ -882,6 +885,41 @@
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
   const fratrieIsbn = (b) => DATA.filter((x) => x.livre_id === b.livre_id && x.isbn13);
+  // Cotes validées à la main plus chères que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  function horsMarche(b) {
+    if (!ANN || !ANN.annonces || !b.isbn13) return null;
+    const par = ANN.annonces[b.isbn13] || {}, tbe = b.prix.tres_bon, sortie = [];
+    ETATS.forEach((e) => {
+      const i = infoPrix(b, e.k), cote = b.prix[e.k];
+      if (!i || !i.valide || cote == null) return;
+      const prix = (par[e.k] || []).filter(([p, , , origine, vue]) => !(tbe && p >= 3 * tbe) && (enLigne(origine) || !(vue && ANN.date_ebay && vue < ANN.date_ebay))).map((a) => a[0]);
+      if (prix.length && cote > Math.max(...prix)) sortie.push({ k: e.k, nom: e.nom || e.court, cote, max: Math.max(...prix), n: prix.length });
+    });
+    return sortie.length ? sortie : null;
+  }
+  function remplirHorsMarche(b) {
+    const zone = $('#hors-marche');
+    if (!zone) return;
+    const h = horsMarche(b);
+    if (!h) { zone.hidden = true; zone.innerHTML = ''; return; }
+    zone.hidden = false;
+    zone.innerHTML = `<p class="sous"><span class="incoh-flag">Cote au-dessus des annonces</span> ${h.map((x) => `${esc(x.nom)} : cote validée ${fmt(x.cote)}, annonce en ligne la plus chère ${fmt(x.max)} (${x.n} annonce${x.n > 1 ? 's' : ''})`).join(' · ')}.</p>
+      <p class="sous">« Remettre au calcul » retire votre validation : la cote repart des annonces.</p>
+      <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="hors-reset">Remettre au calcul</button></div><p class="corriger-msg" id="hors-msg" role="status" hidden></p>`;
+    $('#hors-reset').addEventListener('click', async () => {
+      const msg = $('#hors-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
+      const cases = ['convenable', 'bon', 'tres_bon'].map((k) => (h.some((x) => x.k === k) ? 'reset' : ''));
+      $('#hors-reset').disabled = true; dire('Envoi en cours…');
+      try {
+        const r = await window.Relais.envoyerLot('corriger-prix.yml', { corrections: `${b.isbn13} ; ${cases.join(' ; ')}` });
+        if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
+        else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
+        else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+      } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
+      $('#hors-reset').disabled = false;
+    });
+  }
   function blocAnnonces(b) {
     return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
@@ -890,7 +928,9 @@
     const zone = $('#annonces-corps');
     if (!zone) return;
     chargerAnnonces().then(() => {
-      if (ficheOuverte !== b.id || !$('#annonces-corps')) return;
+      if (ficheOuverte !== b.id) return;
+      remplirHorsMarche(b);
+      if (!$('#annonces-corps')) return;
       const fratrie = fratrieIsbn(b), plusieurs = fratrie.length > 1;
       let par = null;          // {état: [[prix, titre, lien, origine, vue, supposé, version]]} : toutes les éditions du livre, la moins chère d'abord
       if (ANN && ANN.annonces) {
@@ -1141,6 +1181,7 @@
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
         ${estNiveau3() && incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>` : ''}
+        ${estNiveau3() ? '<div class="hors-marche" id="hors-marche" hidden></div>' : ''}
         ${blocCorriger(b)}
 
           </div>

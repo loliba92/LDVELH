@@ -9,6 +9,8 @@ les états non saisis en sont déduits (voir pipeline/export_site.py).
 Exception : une fourchette (convenable ET très bon état, bon état non saisi) met toujours à jour les trois prix : le bon état est calculé
 entre les deux, avec les mêmes rapports que le site, et remplace un ancien bon état validé ou issu d'annonces. Avec un seul des deux prix,
 un bon état déjà validé n'est recalculé que s'il sort de l'intervalle [convenable, très bon état] après la correction.
+Un mot « reset » (ou « calcul ») à la place d'un prix retire la validation de cet état : la cote repart des annonces.
+    9782070585168 ; ; reset ; reset
 Usage : python pipeline/corriger_prix.py "9782070585168 ; 25 ; ; 60"
 """
 import json
@@ -24,6 +26,7 @@ import etats
 import validations
 
 ORDRE = ("convenable", "bon", "tres_bon")
+RESET = "reset"
 RATIOS = Path(__file__).resolve().parent.parent / "data" / "manual" / "ratios_etats.json"
 
 
@@ -58,7 +61,9 @@ def lire(texte):
         champs = [c.strip() for c in ligne.split(";")] + ["", "", "", "", ""]
         prix = {}
         for etat, brut in zip(ORDRE, champs[1:4]):
-            if brut:
+            if brut.lower().startswith(("reset", "calcul")):
+                prix[etat] = RESET
+            elif brut:
                 try:
                     prix[etat] = float(brut.replace(",", ".").replace("€", "").replace(" ", ""))
                 except ValueError:
@@ -84,8 +89,15 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur=""):
         if isbn not in connus:
             bilan.append(("refuse", isbn, "ISBN absent de la base"))
             continue
+        remises = [k for k, v in e["prix"].items() if v == RESET]
+        e["prix"] = {k: v for k, v in e["prix"].items() if v != RESET}
+        if remises:
+            if validations.retirer([f"{isbn}|{k}" for k in remises], chemin):
+                valides = validations.lire(chemin)
+            bilan.append(("ok", isbn, f"{connus[isbn]['titre']} ({connus[isbn]['version']}) : remis au calcul ({', '.join(remises)})"))
         if not e["prix"]:
-            bilan.append(("refuse", isbn, "aucun prix indiqué"))
+            if not remises:
+                bilan.append(("refuse", isbn, "aucun prix indiqué"))
             continue
         mauvais = [k for k, v in e["prix"].items() if v is None or not 0 < v < 10000]
         if mauvais:

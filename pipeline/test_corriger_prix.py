@@ -52,6 +52,15 @@ class TestCorrections(unittest.TestCase):
         c.appliquer("9782070585168 ; 30", chemin, base)
         self.assertEqual(validations.lire(chemin)[("9782070585168", "convenable")]["prix"], 30.0)
 
+    def test_remise_au_calcul(self):
+        base, chemin = self.base()
+        c.appliquer("9782070585168 ; 25 ; 40 ; 60", chemin, base)
+        bilan = c.appliquer("9782070585168 ; ; reset ; calcul", chemin, base)
+        self.assertEqual([b[0] for b in bilan], ["ok"])
+        self.assertEqual(sorted(e for _, e in validations.lire(chemin)), ["convenable"])
+        self.assertEqual(c.appliquer("9782070585168 ; ; ; reset", chemin, base)[0][0], "ok")      # état sans validation : sans effet, sans erreur
+        self.assertEqual(c.appliquer("9782070585168 ; ; ;", chemin, base)[0][0], "refuse")
+
     def _valides(self, chemin, **prix):
         envoi = {f"9782070585168|{e}": {"prix": p, "decision": "confirme", "le": "2026-10-21"} for e, p in prix.items()}
         f = chemin.parent / "envoi.json"
