@@ -2739,3 +2739,4 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-carte.rc-butin .an-jaq { outline: 2px solid var(--gold); outline-offset: -2px; }
 .an-carte a.an-titre { font-size: 1rem; }
 @media (max-width: 600px) { .an-grille { grid-template-columns: repeat(2, 158px); justify-content: center; gap: 22px 12px; } }          /* 158 px : largeur d'une jaquette de l'étagère sur téléphone */
+.pp-carte a.couv { color: inherit; text-decoration: none; }
