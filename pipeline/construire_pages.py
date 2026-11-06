@@ -231,6 +231,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
           <option value="tres_bon">Très bon</option>
         </select></label>
         <label class="pp-tri"><span>Prix de</span><input type="number" id="rc-pmin" inputmode="decimal" min="0" step="1" placeholder="0" class="rc-prix-champ"> <span>à</span> <input type="number" id="rc-pmax" inputmode="decimal" min="0" step="1" placeholder="999" class="rc-prix-champ"> <span>€</span></label>
+        <label class="case"><input type="checkbox" id="rc-aberr" checked><span>Masquer les prix aberrants (2 fois le très bon état ou plus) <b id="rc-aberr-nb"></b></span></label>
         <label class="case"><input type="checkbox" id="rc-verif"><span>À vérifier seulement</span></label>
         <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
       </div>
