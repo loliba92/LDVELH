@@ -193,7 +193,7 @@
     $('#f-pmax').addEventListener('input', (e) => { S.pmax = e.target.value; changer(); });
     $('#f-vente').addEventListener('change', (e) => { S.vente = e.target.checked; changer(); });
     $('#f-incoh').addEventListener('change', (e) => { S.incoh = e.target.checked; changer(); });
-    $('#f-hors').addEventListener('change', (e) => { S.hors = e.target.checked; changer(); if (S.hors) chargerAnnonces().then(() => changer()); });
+    $('#f-hors').addEventListener('change', (e) => { S.hors = e.target.checked; changer(); if (S.hors) chargerAnnonces().then((a) => { annIndispo = !a; changer(); }); });
     $('#f-archive').addEventListener('change', (e) => { S.archive = e.target.checked; changer(); });
     $('#f-mine').addEventListener('change', (e) => { S.mine = e.target.checked; if (S.mine) { S.cherche = false; S.avendre = false; } synchroniser(); changer(); });
     document.querySelectorAll('#f-coll input').forEach((r) => r.addEventListener('change', (e) => { if (e.target.checked) { S.mine = e.target.value === 'mine'; S.cherche = e.target.value === 'cherche'; S.avendre = e.target.value === 'vendre'; synchroniser(); changer(); } }));
@@ -875,7 +875,7 @@
   // Les annonces eBay du dernier relevé (data/annonces.json) derrière la cote, par état : pour vérifier d'où vient un prix. Réservé aux sorciers et au Zagor.
   const estNiveau3Brut = () => !!window.Compte && window.Compte.role() === 'superadmin';
   const voitAnnonces = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());
-  let ANN = null, annChargees = null, annLueA = 0;
+  let ANN = null, annChargees = null, annLueA = 0, annIndispo = false;
   // Relues au plus toutes les 2 minutes : une page restée ouverte ne garde pas des annonces périmées
   const chargerAnnonces = () => {
     if (annChargees && Date.now() - annLueA < 120000) return annChargees;
@@ -923,9 +923,11 @@
   function majHorsLot(liste) {
     const z = $('#hors-lot');
     if (!z) return;
-    const h = S.hors && estNiveau3() && ANN ? liste.map((b) => [b, horsMarche(b)]).filter(([, x]) => x) : [];
-    z.hidden = !h.length;
-    if (!h.length) { z.innerHTML = ''; return; }
+    if (!(S.hors && estNiveau3())) { z.hidden = true; z.innerHTML = ''; return; }
+    if (!ANN) { z.hidden = false; z.innerHTML = `<p>${annIndispo ? 'Annonces non chargées : le filtre ne peut pas comparer les cotes. Vérifiez votre connexion (bouton du compte), puis décochez et recochez la case.' : 'Chargement des annonces…'}</p>`; return; }
+    const h = liste.map((b) => [b, horsMarche(b)]).filter(([, x]) => x);
+    if (!h.length) { z.hidden = false; z.innerHTML = '<p>Aucun livre dont la cote dépasse les annonces en ligne.</p>'; return; }
+    z.hidden = false;
     z.innerHTML = `<p><strong>${h.length} livre${h.length > 1 ? 's' : ''}</strong> au-dessus des annonces.</p><button type="button" class="bouton" id="hors-lot-go">Baisser les ${h.length} à la médiane des annonces</button><p class="corriger-msg" id="hors-lot-msg" role="status" hidden></p>`;
     $('#hors-lot-go').addEventListener('click', async () => {
       const msg = $('#hors-lot-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
