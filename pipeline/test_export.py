@@ -312,3 +312,11 @@ class TestMinis(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPrixTbeEnVente(unittest.TestCase):
+    def test_soixante_dix_pour_cent_du_neuf(self):
+        import export_site
+        self.assertEqual(export_site.prix_tbe_en_vente(15.5), 10.85)
+        self.assertEqual(export_site.prix_tbe_en_vente(13.9), 9.73)
+        self.assertEqual(export_site.prix_tbe_en_vente(10), 7.0)

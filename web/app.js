@@ -357,7 +357,7 @@
     const i = infoPrix(b, k);
     if (b.prix[k] == null) return '';
     const aligne = i && i.ajuste ? ' Alignée sur l\'état inférieur : un état supérieur ne vaut jamais moins qu\'un état inférieur.' : '';
-    if (i && i.neuf) return `Édition encore en vente neuve : un exemplaire en très bon état est coté au prix du neuf, le prix éditeur. Les autres états en sont déduits (bon état ≈ 60 %, convenable ≈ 40 %).`;
+    if (i && i.neuf) return `Édition encore en vente neuve : un exemplaire en très bon état est coté à 70 % du prix du neuf (le prix éditeur), car l'acheteur garde l'option du neuf. Les autres états en sont déduits (bon état ≈ 60 %, convenable ≈ 40 %).`;
     if (i && i.valide) return `Prix validé par le guide le ${dateCourte(i.date)}${i.decision === 'corrige' ? ' (corrigé à la main)' : ' (confirmé)'} : il prime sur les annonces et les archives.`;
     if (i && i.repartition) return `Prix réparti entre les trois états d'après les annonces actuelles de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état), ${i.nb} annonce${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)} · confiance ${i.confiance}. Prix demandés, souvent supérieurs aux prix réellement payés.${aligne}`;
     if (i && i.deduit) return `Prix estimé d'après les autres états de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état) : une estimation, pas un relevé.${aligne}`;

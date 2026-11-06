@@ -29,6 +29,14 @@ import tendances
 import etats
 import validations
 
+PART_DU_NEUF_TBE = 0.70          # édition encore en vente neuve : un exemplaire en très bon état vaut 70 % du prix du neuf (décision du propriétaire)
+
+
+def prix_tbe_en_vente(prix_neuf):
+    """Prix du très bon état d'une édition encore en vente neuve : 70 % du prix éditeur, arrondi au centime."""
+    return round(prix_neuf * PART_DU_NEUF_TBE, 2)
+
+
 DB = editions.ROOT / "data" / "warehouse" / "ldvelh.sqlite"
 SORTIE = editions.ROOT / "web" / "data"
 COVERS = editions.ROOT / "web" / "covers"
@@ -393,14 +401,14 @@ def main():
             continue
         if isbn_e in bnf and bnf[isbn_e].get("devise") == "EUR" and float(bnf[isbn_e]["prix"]) != editeur[isbn_e]["prix"]:
             editeur[isbn_e]["parution"] = float(bnf[isbn_e]["prix"])
-    # Édition encore en vente neuve : un exemplaire en très bon état vaut le prix du neuf, donc le prix éditeur (décision du
-    # propriétaire). Ce prix compte comme un prix actuel : les autres états en sont déduits (60 % / 40 %), un état d'archive
+    # Édition encore en vente neuve : un exemplaire en très bon état vaut 70 % du prix du neuf, le prix éditeur (décision du
+    # propriétaire ; l'acheteur garde l'option du neuf, souvent port compris). Ce prix compte comme un prix actuel : les autres états en sont déduits (60 % / 40 %), un état d'archive
     # au-dessus est ramené sous lui par `aligner`.
     for r in cx.execute(REQUETE):
         e_ed = editeur.get(r["isbn13"]) if r["isbn13"] else None
         if e_ed and e_ed["source"] == "editeur":            # prix actuel relevé chez l'éditeur ; la notice BnF (prix à la parution) ne suffit pas
             prix.setdefault(r["version_key"], {})["tres_bon"] = {
-                "prix": e_ed["prix"], "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
+                "prix": prix_tbe_en_vente(e_ed["prix"]), "source": "neuf", "nature": "prix éditeur", "nb": 0, "date": e_ed.get("date") or args.aujourdhui.isoformat(),
                 "confiance": "élevée", "incertitude": 0.05, "neuf": True}
     # Prix validés par le propriétaire : ils servent aussi de base pour déduire les états qu'il n'a pas chiffrés (60 % / 40 %)
     for r in cx.execute(REQUETE):
