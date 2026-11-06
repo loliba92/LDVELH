@@ -368,3 +368,12 @@ class TestFraisPort(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPrixAberrantsCote(unittest.TestCase):
+    def test_une_annonce_a_trois_fois_le_tbe_n_entre_pas_dans_la_cote(self):
+        items = [{"itemId": str(i), **item(p, "5000")} for i, p in enumerate((10, 12, 14, 16, 35))]
+        sans = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11), "Le Sorcier de la montagne de feu")
+        avec = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11), "Le Sorcier de la montagne de feu", prix_tbe=10)
+        self.assertEqual(sans[0]["nb_annonces"], 5)          # 35 reste sous 3 × la médiane des annonces
+        self.assertEqual(avec[0]["nb_annonces"], 4)          # mais atteint 3 × le très bon état

@@ -24,6 +24,7 @@ import requests
 
 RACINE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RACINE / "pipeline"))
+import prix_aberrants as prix_aberrant
 
 URL_TOKEN = "https://api.ebay.com/identity/v1/oauth2/token"
 URL_RECHERCHE = "https://api.ebay.com/buy/browse/v1/item_summary/search"
@@ -324,10 +325,13 @@ def port_retenu(item):
     return FRAIS_EBAY_DEFAUT if p is None else p
 
 
-def agreger(items, isbn13, jour, titre=None, annees=None, ed=None):
-    """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés)."""
+def agreger(items, isbn13, jour, titre=None, annees=None, ed=None, prix_tbe=None):
+    """Regroupe les annonces par état et renvoie une ligne par état (lots, devises étrangères et annonces d'un autre livre écartés).
+    `prix_tbe` : prix du très bon état de l'édition ; une annonce à 3 fois ce prix ou plus est écartée de la cote."""
     par_etat = {}
     for _it, etat, valeur, ancienne in ecarter_aberrantes(retenues(items, jour, titre, annees, ed)):
+        if prix_aberrant.est_aberrant(valeur, prix_tbe):
+            continue
         par_etat.setdefault(etat, {"frais": [], "toutes": [], "nus": []})
         par_etat[etat]["toutes"].append(valeur)
         if not ancienne:
@@ -713,8 +717,9 @@ def main():
     par_isbn = reconciliation_image.verifier_photos(par_isbn, RACINE / "web" / "covers")      # toute annonce retenue : la photo doit montrer l'édition à laquelle elle est rattachée
     par_isbn = ecarter_ambigues(par_isbn, {c[0]: c[3] for c in cat})
     annonces_gardees = []
+    tbe = prix_aberrant.charger_tbe()          # prix du très bon état publié : une annonce à 3 fois ce prix ou plus reste affichée mais n'entre pas dans la cote
     for isbn, titre, nb_ed, livre, annees in cat:
-        lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
+        lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn), prix_tbe=tbe.get(isbn))
         annonces_gardees += lignes_annonces(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
     sortie = Path(a.sortie)
     sortie.mkdir(parents=True, exist_ok=True)

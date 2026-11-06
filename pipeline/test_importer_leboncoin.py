@@ -4,6 +4,17 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import importer_leboncoin as imp
+from unittest import mock
+
+_sans_reference = mock.patch.object(imp.prix_aberrants, "charger_tbe", lambda chemin=None: {})      # les essais ne dépendent pas des prix réels du dépôt
+
+
+def setUpModule():
+    _sans_reference.start()
+
+
+def tearDownModule():
+    _sans_reference.stop()
 
 ISBN_A, ISBN_B = "9782070333707", "9782070506736"
 CONNUES = {ISBN_A, ISBN_B}
@@ -296,3 +307,16 @@ class TestDatePublication(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPrixAberrants(unittest.TestCase):
+    def test_une_annonce_a_trois_fois_le_tbe_est_ecartee_de_la_cote(self):
+        lignes = [{"isbn13": "111", "etat": "bon", "prix": "10", "fdp": "0", "lien": "http://a", "age_jours": "0"},
+                  {"isbn13": "111", "etat": "bon", "prix": "29", "fdp": "2", "lien": "http://b", "age_jours": "0"},
+                  {"isbn13": "111", "etat": "bon", "prix": "12", "fdp": "0", "lien": "http://c", "age_jours": "0"}]
+        r = imp._agreger(lignes, "2026-10-24", {}, tbe={"111": 10.0})
+        self.assertEqual((r[0]["nb_annonces"], r[0]["prix_max"]), (2, "12.00"))          # 29 + 2 de port = 31, soit plus de 3 × 10
+
+    def test_sans_prix_de_reference_rien_n_est_ecarte(self):
+        lignes = [{"isbn13": "111", "etat": "bon", "prix": "500", "fdp": "0", "lien": "http://a", "age_jours": "0"}]
+        self.assertEqual(imp._agreger(lignes, "2026-10-24", {}, tbe={})[0]["nb_annonces"], 1)
