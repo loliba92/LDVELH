@@ -2732,3 +2732,10 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-age-ancien { color: #f0a5b0; }
 .an-age-x { color: var(--muted); font-style: italic; }
 .an-exclu { padding: 0 8px; border: 1px dashed var(--line-strong); border-radius: 4px; font: 700 var(--t-xs)/1.6 var(--f-ui); color: var(--muted); white-space: nowrap; }
+/* Annonces : jaquettes à la taille de l'étagère (mêmes colonnes, même format 5 / 7, même ombre) */
+.an-grille { grid-template-columns: repeat(auto-fill, 161px); justify-content: start; gap: 26px 18px; }          /* 161 px : largeur d'une jaquette de l'étagère sur ordinateur */
+.an-jaq { aspect-ratio: 5 / 7; border: 0; border-radius: 3px; background: var(--line); box-shadow: var(--shadow-cover); }
+.an-jaq img { border-radius: 3px; object-fit: cover; }
+.an-carte.rc-butin .an-jaq { outline: 2px solid var(--gold); outline-offset: -2px; }
+.an-carte a.an-titre { font-size: 1rem; }
+@media (max-width: 600px) { .an-grille { grid-template-columns: repeat(2, 158px); justify-content: center; gap: 22px 12px; } }          /* 158 px : largeur d'une jaquette de l'étagère sur téléphone */
