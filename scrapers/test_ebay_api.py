@@ -377,3 +377,87 @@ class TestPrixAberrantsCote(unittest.TestCase):
         avec = ebay_api.agreger(items, "9782070583805", date(2026, 10, 11), "Le Sorcier de la montagne de feu", prix_tbe=10)
         self.assertEqual(sans[0]["nb_annonces"], 5)          # 35 reste sous 3 × la médiane des annonces
         self.assertEqual(avec[0]["nb_annonces"], 4)          # mais atteint 3 × le très bon état
+
+
+class TestReleveParBalayage(unittest.TestCase):
+    class Http:
+        """Renvoie pour chaque requête (paramètre q) la liste d'annonces prévue ; 500 pour une requête marquée en échec."""
+        def __init__(self, par_requete, echecs=()):
+            self.par_requete, self.echecs, self.appels = par_requete, set(echecs), []
+
+        def get(self, url, params=None, headers=None, timeout=None):
+            self.appels.append(params["q"])
+            q, echecs, items = params["q"], self.echecs, self.par_requete.get(params["q"], [])
+
+            class R:
+                status_code = 500 if q in echecs else 200
+                def raise_for_status(s):
+                    if s.status_code >= 400:
+                        raise ebay_api.requests.HTTPError("erreur")
+                def json(s): return {"itemSummaries": items}
+            return R()
+
+    def annonce(self, numero, titre, prix=10):
+        return {"itemId": f"v1|{numero}|0", **item(prix, "3000", titre)}
+
+    def test_les_annonces_sont_dedoublonnees_et_marquees_titre_seul(self):
+        a = self.annonce(1, "Le Sorcier de la montagne de feu")
+        http = self.Http({"ldvelh": [a], "livre jeu": [a, self.annonce(2, "Autre livre")]})
+        pool = ebay_api.balayer("T", {}, pages=1, http=http)
+        self.assertEqual(sorted(pool), ["1", "2"])
+        self.assertTrue(all(it["_titre_seul"] for it in pool.values()))
+
+    def test_une_requete_en_echec_n_arrete_pas_les_autres(self):
+        http = self.Http({"ldvelh": [self.annonce(1, "Le Sorcier de la montagne de feu")]}, echecs={"livre jeu"})
+        pool = ebay_api.balayer("T", {}, pages=1, http=http)
+        self.assertEqual(sorted(pool), ["1"])
+
+    def test_la_limite_d_appels_arrete_tout(self):
+        class Http429:
+            def get(self, url, **kw):
+                class R:
+                    status_code = 429
+                return R()
+        with self.assertRaises(ebay_api.QuotaEbay):
+            ebay_api.balayer("T", {}, pages=1, http=Http429())
+
+    def test_rattachement_par_le_titre(self):
+        pool = {"1": {**self.annonce(1, "Le Sorcier de la montagne de feu"), "_titre_seul": True},
+                "2": {**self.annonce(2, "Sorcier de la nuit - jeu de cartes"), "_titre_seul": True}}
+        cat = [("9782070583805", "Le Sorcier de la montagne de feu", 1, "Le Sorcier de la montagne de feu", None)]
+        r = ebay_api.rattacher(pool, cat, {}, date(2026, 10, 11))
+        self.assertEqual([it["itemId"] for it in r["9782070583805"]], ["v1|1|0"])
+
+
+class TestDeuxRythmes(unittest.TestCase):
+    def dossier(self, **fichiers):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        for nom, contenu in fichiers.items():
+            (d / nom.replace("_", "-").replace("-csv", ".csv")).write_text(contenu, encoding="utf-8")
+        return d
+
+    def test_complet_si_le_dernier_complet_a_deux_jours_ou_plus(self):
+        d = self.dossier(**{"ebay_2026_11_05-csv": "isbn13\n"})
+        self.assertFalse(ebay_api.est_complet(d, date(2026, 11, 6)))
+        self.assertTrue(ebay_api.est_complet(d, date(2026, 11, 7)))
+        self.assertTrue(ebay_api.est_complet(self.dossier(), date(2026, 11, 7)))          # jamais fait
+
+    def test_choix_impose(self):
+        d = self.dossier(**{"ebay_2026_11_05-csv": "isbn13\n"})
+        self.assertTrue(ebay_api.est_complet(d, date(2026, 11, 6), True))
+        self.assertFalse(ebay_api.est_complet(d, date(2026, 11, 7), False))
+
+    def test_fusion_sans_doublon_la_premiere_version_est_gardee(self):
+        par_isbn = {"111": [{"itemId": "1", "n": "isbn"}]}
+        balayage = {"111": [{"itemId": "1", "n": "titre", "_titre_seul": True}, {"itemId": "2", "n": "titre"}], "222": [{"itemId": "3"}]}
+        r = ebay_api.fusionner_recherches(par_isbn, balayage)
+        self.assertEqual([it["n"] for it in r["111"]], ["isbn", "titre"])
+        self.assertEqual(list(r), ["111", "222"])
+
+    def test_report_des_annonces_non_retrouvees(self):
+        entete = "isbn13,etat,prix,titre,lien,age_jours,trouvee_par,etat_suppose,port\n"
+        d = self.dossier(**{"annonces_2026_11_05-csv": entete + "111,bon,10,A,https://www.ebay.fr/itm/1001,3,isbn,0,\n111,bon,12,B,https://www.ebay.fr/itm/1002,4,isbn,0,\n"})
+        r = ebay_api.lignes_reportees(d, date(2026, 11, 6), ["https://www.ebay.fr/itm/1001?hash=x"])
+        self.assertEqual([x["lien"] for x in r], ["https://www.ebay.fr/itm/1002"])
+        self.assertEqual(ebay_api.lignes_reportees(d, date(2026, 11, 8), []), [])          # fichier trop ancien : rien n'est reporté
