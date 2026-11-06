@@ -886,7 +886,8 @@
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
   const fratrieIsbn = (b) => DATA.filter((x) => x.livre_id === b.livre_id && x.isbn13);
-  // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %) que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %), avec au moins MIN_ANNONCES annonces en ligne pour l'état que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  const MIN_ANNONCES = 2;          // en dessous, on laisse le lissage quotidien rapprocher la cote du marché
   function horsMarche(b) {
     if (!ANN || !ANN.annonces || !b.isbn13) return null;
     const par = ANN.annonces[b.isbn13] || {}, tbe = b.prix.tres_bon, sortie = [];
@@ -894,7 +895,7 @@
       const i = infoPrix(b, e.k), cote = b.prix[e.k];
       if (!i || !(i.valide || i.source === 'archives') || cote == null) return;
       const prix = (par[e.k] || []).filter(([p, , , origine, vue]) => !(tbe && p >= 3 * tbe) && (enLigne(origine) || !(vue && ANN.date_ebay && vue < ANN.date_ebay))).map((a) => a[0]);
-      if (prix.length && cote > 1.05 * Math.max(...prix)) { const tri = [...prix].sort((u, v) => u - v), m = tri.length >> 1; sortie.push({ k: e.k, nom: e.nom || e.court, cote, valide: !!i.valide, max: tri[tri.length - 1], n: tri.length, med: Math.round((tri.length % 2 ? tri[m] : (tri[m - 1] + tri[m]) / 2) * 100) / 100 }); }
+      if (prix.length >= MIN_ANNONCES && cote > 1.05 * Math.max(...prix)) { const tri = [...prix].sort((u, v) => u - v), m = tri.length >> 1; sortie.push({ k: e.k, nom: e.nom || e.court, cote, valide: !!i.valide, max: tri[tri.length - 1], n: tri.length, med: Math.round((tri.length % 2 ? tri[m] : (tri[m - 1] + tri[m]) / 2) * 100) / 100 }); }
     });
     return sortie.length ? sortie : null;
   }
@@ -936,9 +937,9 @@
     if (!(S.hors && estNiveau3())) { z.hidden = true; z.innerHTML = ''; return; }
     if (!ANN) { z.hidden = false; z.innerHTML = `<p>${annIndispo ? 'Annonces non chargées : le filtre ne peut pas comparer les cotes. Vérifiez votre connexion (bouton du compte), puis décochez et recochez la case.' : 'Chargement des annonces…'}</p>`; return; }
     const h = liste.map((b) => [b, horsMarche(b)]).filter(([, x]) => x);
-    if (!h.length) { z.hidden = false; z.innerHTML = '<p>Aucun livre dont la cote dépasse les annonces en ligne.</p>'; return; }
+    if (!h.length) { z.hidden = false; z.innerHTML = '<p>Aucun livre dont la cote dépasse les annonces en ligne (au moins ' + MIN_ANNONCES + ' annonces par état).</p>'; return; }
     z.hidden = false;
-    z.innerHTML = `<p><strong>${h.length} livre${h.length > 1 ? 's' : ''}</strong> au-dessus des annonces.</p><button type="button" class="bouton" id="hors-lot-go">Baisser les ${h.length} à la médiane des annonces</button><p class="corriger-msg" id="hors-lot-msg" role="status" hidden></p>`;
+    z.innerHTML = `<p><strong>${h.length} livre${h.length > 1 ? 's' : ''}</strong> au-dessus des annonces (au moins ${MIN_ANNONCES} annonces par état).</p><button type="button" class="bouton" id="hors-lot-go">Baisser les ${h.length} à la médiane des annonces</button><p class="corriger-msg" id="hors-lot-msg" role="status" hidden></p>`;
     $('#hors-lot-go').addEventListener('click', async () => {
       const msg = $('#hors-lot-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
       const plan = h.map(([b, x]) => [b, baisseMediane(b, x)]);
