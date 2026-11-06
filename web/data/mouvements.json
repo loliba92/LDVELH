@@ -2,25 +2,10 @@
  "date": "2026-11-06",
  "precedent": "2026-11-05",
  "nb_comparees": 1512,
- "nb_modifiees": 876,
+ "nb_modifiees": 877,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
-  {
-   "id": "9782070332977",
-   "isbn13": "9782070332977",
-   "titre": "Le Gouffre Maudit",
-   "serie": "Loup Solitaire",
-   "numero": "297",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 8.64,
-   "apres": 10.44,
-   "pct": 0.208,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
   {
    "id": "9782070333202",
    "isbn13": "9782070333202",
@@ -49,6 +34,21 @@
    "pct": 0.203,
    "nature": "annonces",
    "nb": 6,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332977",
+   "isbn13": "9782070332977",
+   "titre": "Le Gouffre Maudit",
+   "serie": "Loup Solitaire",
+   "numero": "297",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 8.64,
+   "apres": 10.34,
+   "pct": 0.197,
+   "nature": "annonces",
+   "nb": 12,
    "recalibre": false
   }
  ],
