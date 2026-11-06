@@ -885,7 +885,7 @@
       .then((a) => { ANN = a && a.annonces ? a : precedentes; if (!(a && a.annonces)) annChargees = null; return ANN; }));          // sans réponse : on garde les dernières et on réessaiera au prochain appel
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
-  const fratrieIsbn = (b) => DATA.filter((x) => x.livre_id === b.livre_id && x.isbn13);
+  const editionIsbn = (b) => (b.isbn13 ? [b] : []);          // annonces et offre de l'édition de la fiche seulement : une V1 ne se compare pas aux V2 ou V3
   // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %), avec au moins MIN_ANNONCES annonces en ligne pour l'état que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
   const MIN_ANNONCES = 2;          // en dessous, on laisse le lissage quotidien rapprocher la cote du marché
   function horsMarche(b) {
@@ -983,8 +983,8 @@
       if (ficheOuverte !== b.id) return;
       remplirHorsMarche(b);
       if (!$('#annonces-corps')) return;
-      const fratrie = fratrieIsbn(b), plusieurs = fratrie.length > 1;
-      let par = null;          // {état: [[prix, titre, lien, origine, vue, supposé, version]]} : toutes les éditions du livre, la moins chère d'abord
+      const fratrie = editionIsbn(b);
+      let par = null;          // {état: [[prix, titre, lien, origine, vue, supposé, version]]} : cette édition, la moins chère d'abord
       if (ANN && ANN.annonces) {
         const vues = new Set(), m = {};
         fratrie.forEach((x) => { const p = ANN.annonces[x.isbn13]; if (p) ETATS.forEach((e) => (p[e.k] || []).forEach((a) => { if (vues.has(a[2])) return; vues.add(a[2]); (m[e.k] = m[e.k] || []).push([a[0], a[1], a[2], a[3], a[4], a[5], x.version]); })); });
@@ -999,7 +999,7 @@
       const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</li>`;
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
-      if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour ${plusieurs ? 'ce livre' : 'cette édition'}.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
+      if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, a[5] > 1 ? `1 édition sur ${a[5]} possibles` : 'édition à confirmer')).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
       zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '') + ETATS.map((e) => {
         const l = par ? par[e.k] : null;
@@ -1009,8 +1009,8 @@
         const nbPartie = l.filter(partie).length;
         return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => {
           const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${plusieurs && a[6] ? `<span class="ann-titre">${esc(a[6])}</span>` : ''}<span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
-      }).join('') + aVerifier + (plusieurs ? `<p class="sous">Toutes les éditions du livre (${esc(fratrie.map((x) => x.version).join(', '))}) : l'édition est indiquée sur chaque annonce.</p>` : '') + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
+          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+      }).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
     });
   }
 
@@ -1180,9 +1180,9 @@
       const zone = $('#fo-corps');
       if (ficheOuverte !== b.id || !zone) return;
       if (!OFFRE) { zone.innerHTML = '<p class="sous">Pas encore de relevé d\'annonces.</p>'; return; }
-      const fratrie = fratrieIsbn(b), plusieurs = fratrie.length > 1;
+      const fratrie = editionIsbn(b);
       if (!fratrie.length) { zone.innerHTML = '<p class="sous">Pas de relevé pour une édition sans ISBN.</p>'; return; }
-      const o = { ebay: 0, lbc: 0, vin: 0, lib: 0, rev: 0, age: null };          // toutes les éditions du livre : on additionne
+      const o = { ebay: 0, lbc: 0, vin: 0, lib: 0, rev: 0, age: null };          // cette édition
       const ages = [];
       fratrie.forEach((x) => { const p = OFFRE.offre[x.isbn13]; if (!p) return; ['ebay', 'lbc', 'vin', 'lib', 'rev'].forEach((k) => { o[k] += p[k] || 0; }); if (p.age != null) ages.push(p.age); });
       if (ages.length) o.age = ages.sort((u, v) => u - v)[Math.floor(ages.length / 2)];
@@ -1194,7 +1194,7 @@
       const age = o.age == null ? '' : o.age >= 14 ? ` Annonces eBay en ligne depuis environ ${Math.round(o.age / 7)} semaines.` : ` Annonces eBay en ligne depuis ${o.age} jour${o.age > 1 ? 's' : ''}.`;
       zone.innerHTML = `<p class="fo-ligne"><span class="fo-jauge" aria-hidden="true">${[1, 2, 3].map((i) => `<i${i <= barres ? ' class="on"' : ''}></i>`).join('')}</span><strong class="fo-niveau">${nom}</strong><span class="sous">${n ? `${n} annonce${n > 1 ? 's' : ''} : ${esc(parties.join(' · '))}` : 'aucune annonce trouvée au relevé'}</span></p>`
         + (neuf && n > 0 ? '<p class="sous">Encore en vente neuve.</p>' : '')
-        + `<p class="sous fo-note">${plusieurs ? 'Toutes les éditions du livre. ' : ''}${esc(age.trim())} Relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}.</p>`;
+        + `<p class="sous fo-note">${esc(age.trim())} Relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}.</p>`;
     });
   }
 
