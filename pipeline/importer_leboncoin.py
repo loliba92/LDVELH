@@ -32,6 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import editions
+import prix_aberrants
 from prix_neuf import prix_livre_vinted
 
 DOSSIER = editions.ROOT / "data" / "raw" / "occasion"
@@ -218,9 +219,10 @@ def etaler_lots(annonces, lots):
                 ligne[0], ligne[1] = round(part_de[i], 2), titre
 
 
-def _agreger(lignes, jour, lots=None, datees=False):
+def _agreger(lignes, jour, lots=None, datees=False, tbe=None):
     """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier.
-    `datees` : chaque annonce est datée de sa publication (jour du relevé moins son âge), pas du jour où elle a été vue ; son poids dans la cote baisse avec son ancienneté."""
+    `datees` : chaque annonce est datée de sa publication (jour du relevé moins son âge), pas du jour où elle a été vue ; son poids dans la cote baisse avec son ancienneté.
+    `tbe` : {isbn13: prix du très bon état} ; une annonce dont le prix livré atteint 3 fois ce prix est écartée de la cote (elle reste dans les fichiers d'annonces)."""
     lots = lots or {}
     groupes = {}
     fin = date.fromisoformat(jour)
@@ -233,7 +235,10 @@ def _agreger(lignes, jour, lots=None, datees=False):
         except ValueError:
             return jour
 
+    tbe = tbe or {}
     for r in lignes:
+        if not lots.get(r["lien"]) and prix_aberrants.est_aberrant(float(r["prix"]) + float(r.get("fdp") or 0), tbe.get(r["isbn13"])):
+            continue
         lot = lots.get(r["lien"])
         if lot:
             for isbn, part in repartir_lot(float(r["prix"]), lot):
@@ -250,13 +255,14 @@ def reagreger(dossier=None, lots=None):
     Appelé à chaque construction de la base : un lot ajouté au fichier agit sur tous les jours déjà importés."""
     dossier = Path(dossier or DOSSIER)
     lots = charger_lots() if lots is None else lots
+    tbe = prix_aberrants.charger_tbe()
     for source in SOURCES:
         for fic in sorted(dossier.glob(f"annonces-{source}-20*.csv")):
             jour = fic.stem[-10:]
-            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, datees=True))
+            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, datees=True, tbe=tbe))
         for fic in sorted(dossier.glob(f"vendus-{source}-20*.csv")):
             jour = fic.stem[-10:]
-            _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots))
+            _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, tbe=tbe))
 
 
 def importer(corps, aujourdhui=None, dossier=None, connues=None):
@@ -307,8 +313,9 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
         _ecrire(dossier / nom_fichier("annonces", source, jour), COLONNES_ANNONCES, list(actives.values()))
         _ecrire(dossier / nom_fichier("vendus", source, jour), COLONNES_ANNONCES, list(vendues.values()))
         lots = charger_lots()
-        _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(actives.values(), jour, lots, datees=True))
-        _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots))
+        tbe = prix_aberrants.charger_tbe()
+        _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(actives.values(), jour, lots, datees=True, tbe=tbe))
+        _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(vendues.values(), jour, lots, tbe=tbe))
         if jour not in bilan["jours"]:
             bilan["jours"].append(jour)
     return bilan

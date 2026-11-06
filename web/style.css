@@ -2731,3 +2731,4 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-age-moyen { color: var(--muted); }
 .an-age-ancien { color: #f0a5b0; }
 .an-age-x { color: var(--muted); font-style: italic; }
+.an-exclu { padding: 0 8px; border: 1px dashed var(--line-strong); border-radius: 4px; font: 700 var(--t-xs)/1.6 var(--f-ui); color: var(--muted); white-space: nowrap; }

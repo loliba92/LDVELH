@@ -626,7 +626,7 @@
   // Point à vérifier : voir pointsAVerifier ; sans point, l'annonce est retenue sans réserve.
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
-  const SEUIL_ABERRANT = 2;          // une annonce à 2 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse (décision du propriétaire)
+  const SEUIL_ABERRANT = 3;          // une annonce à 3 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Points à vérifier d'une annonce (liste vide si rien à vérifier : exemplaire de librairie, ou état indiqué par l'ISBN)
   const pointsAVerifier = (origine, suppose) => {
@@ -661,7 +661,7 @@
     const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(x.n ? x.pep / x.n : null)}</td>`)).join('')}</tbody></table>`;
     return `<div class="stats-rc">${resume}<h4 class="stats-titre">Par plateforme</h4><div class="captures-defile">${tabPlat}</div><h4 class="stats-titre">Par tranche de prix</h4><div class="captures-defile">${tabTr}</div></div>`;
   }
-  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) + (TOUTES_RC.nbAberrantes ? `<p class="sous">${TOUTES_RC.nbAberrantes} annonces à 2 fois le prix du très bon état ou plus sont exclues de ces chiffres.</p>` : '') : '');
+  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) + (TOUTES_RC.nbAberrantes ? `<p class="sous">${TOUTES_RC.nbAberrantes} annonces à 3 fois le prix du très bon état ou plus sont exclues de ces chiffres.</p>` : '') : '');
   let dessinerPepites = () => {};
   function pepites() {
     const lignes = [];
@@ -923,6 +923,7 @@
       const txt = `${cat ? cat + ' : ' : ''}annonces de ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}${site ? `. Le trait marque le prix du site, ${eur(a.pub)}` : ''}`;
       return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste">${site ? `<span class="rc-therm-rep" style="left:${(place(a.pub) * 100).toFixed(1)}%"></span>` : ''}<span class="rc-therm-pt" style="left:${(place(a.prix) * 100).toFixed(1)}%"></span></span>${extreme || !cat ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
+    const exclueHtml = '<span class="an-exclu" title="Prix à 3 fois le très bon état ou plus : annonce affichée, mais écartée du calcul de la cote.">Exclue du pricing</span>';
     // Écart au prix du site : rouge au-dessus, vert en dessous
     const ecartHtml = (a) => {
       const e = Math.round((a.prix / a.pub - 1) * 100);
@@ -996,7 +997,8 @@
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
-          { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
+          // une librairie n'est pas une annonce de particulier : sa cote suit sa propre règle
+          { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
       });
       TOUTES_RC = toutes.filter((a) => !a.aberrant); TOUTES_RC.nbAberrantes = toutes.length - TOUTES_RC.length; redessinerCapt();
@@ -1033,16 +1035,16 @@
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       const nbTr = $('#rc-nb-trouver'); if (nbTr) { const nt = toutes.filter((a) => a.trouver && !a.partie).length; nbTr.textContent = nt ? `(${nt})` : ''; }
       const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
-      const actifs = dansPlus + [aberrRc && !aberrRc.checked, verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
+      const actifs = dansPlus + [aberrRc && aberrRc.checked, verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
-      if (effacerRc) effacerRc.hidden = !(dansPlus || (aberrRc && !aberrRc.checked) || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
+      if (effacerRc) effacerRc.hidden = !(dansPlus || (aberrRc && aberrRc.checked) || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
-      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${aberrRc && aberrRc.checked && nbAbs ? ` (${nbAbs} masquées : prix à 2 fois le très bon état ou plus)` : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : `, dont ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`;
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
@@ -1050,7 +1052,7 @@
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
           <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
@@ -1074,7 +1076,7 @@
     [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
     const razFiltres = () => {
       [trouverRc, pepRc, bonRc, sansRc, verifRc].forEach((el) => { if (el) el.checked = false; });
-      if (aberrRc) aberrRc.checked = true;
+      if (aberrRc) aberrRc.checked = false;
       source.value = 'tout'; verdict.value = 'tout';
       [serieRc, editionRc, editeurRc, etatfRc, pminRc, pmaxRc].forEach((el) => { if (el) el.value = ''; });
       if (rechercheRc) rechercheRc.value = '';
