@@ -2668,8 +2668,7 @@
   };
   document.addEventListener('click', (e) => {
     const l = e.target.closest('a[href$="collection.html#trouver"]');
-    const t = l && $('#collection') && ($('#titre-pepite-jour') || $('#titre-a-trouver'));
-    if (t) { e.preventDefault(); ancreTrouver = false; t.scrollIntoView({ behavior: 'instant', block: 'start' }); }
+    if (l && $('#collection') && $('#onglet-coll-trouver')) { e.preventDefault(); ancreTrouver = false; ouvrirOnglet('trouver', { aller: true }); }          // déjà sur la collection : on ouvre l'onglet « À trouver » (son contenu est caché tant qu'un autre onglet est ouvert)
   });
   document.addEventListener('click', (e) => { const b = e.target.closest('[data-onglet]'); if (b && $('#collection')) ouvrirOnglet(b.dataset.onglet, { aller: true }); });
   document.addEventListener('keydown', (e) => {
