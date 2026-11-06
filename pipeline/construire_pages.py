@@ -166,6 +166,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
   <p class="chapeau">Voici les annonces captées par le site, toutes origines confondues. <strong>La Cote du Héros n'est affiliée à aucun site de vente</strong> : nous restons neutres.</p>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
+    <div class="rv-onglets rc-vue rc-periode" id="rc-quand" role="group" aria-label="Annonces reçues"><button type="button" data-quand="auj" aria-pressed="false">Aujourd'hui</button><button type="button" data-quand="sem" aria-pressed="false">Cette semaine</button><button type="button" data-quand="tout" aria-pressed="true">Toutes</button></div>
     <div class="rv-onglets rc-vue" id="rc-vue" role="group" aria-label="Affichage des annonces"><button type="button" data-vue="grille" aria-pressed="true">Jaquettes</button><button type="button" data-vue="liste" aria-pressed="false">Liste</button></div>
     <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
     <div class="pp-outils">
@@ -197,7 +198,6 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="cher">Très chers</option>
       </select></label>
       <label class="case"><input type="checkbox" id="rc-trouver"><span>Mes « à trouver » seulement</span></label>
-      <label class="case"><input type="checkbox" id="rc-new"><span>Nouvelles (24 h)</span></label>
       <label class="case"><input type="checkbox" id="rc-sans"><span>Sans point à vérifier</span></label>
       <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
     </div>
