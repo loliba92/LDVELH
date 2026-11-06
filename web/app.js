@@ -2116,7 +2116,7 @@
     const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
     z.innerHTML = '<div class="compteurs-acc">'
       + carte('butin.html#pepites', 'Butins et Annonces', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + carte(niveau2Connu() ? 'butin.html#captures-recues' : '', 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, 'Voir les annonces captées par jour →')
+      + carte(niv3 ? 'butin.html#analyse' : (niveau2Connu() ? 'butin.html#recues' : ''), 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, niv3 ? "Voir l'analyse →" : 'Voir les annonces →')
       + carte('', 'Annonces ajoutées', n(d.aj ? d.aj[0] : null), d.aj ? `sur 24 h · 24 h avant : ${d.aj[1]}${d.aj[1] ? ` (${d.aj[0] >= d.aj[1] ? '+' : '−'}${Math.round(100 * Math.abs(d.aj[0] - d.aj[1]) / d.aj[1])}\u00a0%)` : ''}` : 'sur 24 h')
       + '</div>';
   }

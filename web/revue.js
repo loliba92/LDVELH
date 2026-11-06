@@ -736,15 +736,15 @@
       SOURCES_CAPT.forEach(([src]) => {
         for (let k = 1; k < n; k += 1) {
           const estime = depuis && jours[k].cle < depuis;
-          lignes += `<line x1="${px(k - 1)}" y1="${y(jours[k - 1].v[src] || 0)}" x2="${px(k)}" y2="${y(jours[k].v[src] || 0)}" class="cp-ligne cp-${src}${estime ? ' cp-estime' : ''}"/>`;
+          lignes += `<line x1="${px(k - 1)}" y1="${y(jours[k - 1].v[src] || 0)}" x2="${px(k)}" y2="${y(jours[k].v[src] || 0)}" class="cp-ligne cp-${src}${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
         }
-        jours.forEach((j, k) => { if (!(depuis && j.cle < depuis)) points += `<circle cx="${px(k)}" cy="${y(j.v[src] || 0)}" r="3" class="cp-pt cp-${src}"/>`; });
+        jours.forEach((j, k) => { if (!(depuis && j.cle < depuis)) points += `<circle cx="${px(k)}" cy="${y(j.v[src] || 0)}" r="3" class="cp-pt cp-${src}${j.enCours ? ' cp-encours' : ''}"/>`; });
       });
       jours.forEach((j, k) => {
         const total = SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0);
         const detail = SOURCES_CAPT.map(([src, nom]) => `${nom} : ${j.v[src] || 0}`).join(', ');
         if ((n - 1 - k) % saut === 0) etiquettes += `<text x="${px(k)}" y="${H - 8}" class="cp-axe" text-anchor="middle">${jourCourtCapt(j.cle)}</text>`;
-        zones += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))} : ${total} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/><line x1="${px(k)}" x2="${px(k)}" y1="6" y2="${y(0)}" class="cp-guide"/></g>`;
+        zones += `<g class="cp-col" tabindex="0" data-i="${k}" role="img" aria-label="${esc(jourCourtCapt(j.cle))}${j.enCours ? ' (en cours)' : ''} : ${total} annonces (${esc(detail)})"><rect x="${g + k * pas}" y="0" width="${pas}" height="${H - b}" class="cp-zone"/><line x1="${px(k)}" x2="${px(k)}" y1="6" y2="${y(0)}" class="cp-guide"/></g>`;
       });
       const base = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
       return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${base}${lignes}${points}${zones}${etiquettes}</svg>`;
@@ -753,14 +753,16 @@
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
       if (!zones.length || !BUT) return;
+      if (!estNiveau3()) { zones.forEach((z) => { z.innerHTML = ''; }); return; }
       if (!c || !c.jours) { zones.forEach((z) => { z.innerHTML = '<p class="sous">Annonces captées par jour : le premier comptage arrive au prochain relevé (dans l\'heure).</p>'; }); return; }
       const nbSrc = (v) => SOURCES_CAPT.reduce((t, [src]) => t + (v[src] || 0), 0);
       const cleJour = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-      // Du 25 octobre à hier (15 jours au plus) : aujourd'hui n'est pas compté
+      // Du 25 octobre à hier (15 jours au plus) pour les moyennes ; le jour en cours s'ajoute au graphique et au tableau, sans entrer dans les moyennes
       const DEBUT_CAPT = '2026-10-25';
-      const jours = [];
-      for (let k = 15; k >= 1; k -= 1) { const cle = cleJour(k); if (cle >= DEBUT_CAPT) jours.push({ cle, v: c.jours[cle] || {} }); }
-      const complets = jours, m = complets.length, moitie = Math.min(7, Math.floor(m / 2)), tendanceOk = m >= 6;
+      const complets = [];
+      for (let k = 15; k >= 1; k -= 1) { const cle = cleJour(k); if (cle >= DEBUT_CAPT) complets.push({ cle, v: c.jours[cle] || {} }); }
+      const aujourdhui = c.jours[cleJour(0)] ? { cle: cleJour(0), v: c.jours[cleJour(0)], enCours: true } : null;          // sans comptage du jour : pas de point inventé
+      const jours = aujourdhui ? complets.concat(aujourdhui) : complets, m = complets.length, moitie = Math.min(7, Math.floor(m / 2)), tendanceOk = m >= 6;
       const recents = complets.slice(m - moitie), avant = complets.slice(m - 2 * moitie, m - moitie);
       const somme = (liste, src) => liste.reduce((t, j) => t + (src ? (j.v[src] || 0) : nbSrc(j.v)), 0);
       const moy = (liste, src) => somme(liste, src) / liste.length;
@@ -778,7 +780,7 @@
       const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
       const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
       const lignes = jours.slice().reverse().map((j, k) => {
-        const quand = new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '');
+        const quand = new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '') + (j.enCours ? ' (en cours)' : '');
         const total = nbSrc(j.v);
         return `<tr><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
       }).join('');
@@ -788,11 +790,12 @@
       const html = `<section class="captures" aria-label="Annonces captées par jour">
         <h3 class="captures-titre">Annonces captées par jour</h3>
         <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
+        <p class="cp-bilan cp-jour">${aujourdhui ? `Aujourd'hui, à cette heure : <b>${nbSrc(aujourdhui.v)}</b> annonce${nbSrc(aujourdhui.v) > 1 ? 's' : ''} <span class="sous">(jour en cours, non compté dans les moyennes)</span>` : `Aujourd'hui : <span class="sous">pas encore compté, le premier comptage arrive au prochain relevé.</span>`}</p>
         <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b>${debutSource(src)}</li>`).join('')}</ul>
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
@@ -803,7 +806,7 @@
         const cadre = z.querySelector('.cp-cadre'), bulle = z.querySelector('.cp-bulle');
         const montrer = (col) => {
           const k = Number(col.dataset.i), j = jours[k];
-          bulle.innerHTML = `<b>${esc(k === jours.length - 1 ? "Aujourd'hui (en cours)" : jourCourtCapt(j.cle))} · ${nbSrc(j.v)}</b>${SOURCES_CAPT.map(([src, nom]) => `<span><i class="cp-pastille cp-${src}"></i>${nom} ${j.v[src] || 0}</span>`).join('')}`;
+          bulle.innerHTML = `<b>${esc(j.enCours ? "Aujourd'hui (en cours)" : jourCourtCapt(j.cle))} · ${nbSrc(j.v)}</b>${SOURCES_CAPT.map(([src, nom]) => `<span><i class="cp-pastille cp-${src}"></i>${nom} ${j.v[src] || 0}</span>`).join('')}`;
           bulle.hidden = false;
           const r = col.getBoundingClientRect(), rc = cadre.getBoundingClientRect();
           bulle.style.left = `${Math.min(Math.max(r.left - rc.left + r.width / 2 - bulle.offsetWidth / 2, 0), rc.width - bulle.offsetWidth)}px`;
@@ -1084,7 +1087,7 @@
   initIndice();
   initNav();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
-  let pepitesOuvertes = false, recuesOuvertes = false;
+  let pepitesOuvertes = false, recuesOuvertes = false, analyseOuverte = false;
   function majAnnonces() {
     const super_ = estNiveau3(), niveau2 = estNiveau2();
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
@@ -1092,6 +1095,8 @@
     if (onglet) { onglet.hidden = !super_; if (!super_) replier(onglet); }
     const indice = document.querySelector('#rv-nav [data-pane="indice"]');
     if (indice) { indice.hidden = !super_; if (!super_) replier(indice); }
+    const analyse = document.querySelector('#rv-nav [data-pane="analyse"]');
+    if (analyse) { analyse.hidden = !super_; if (!super_) replier(analyse); }
     const recues = document.querySelector('#rv-nav [data-pane="recues"]');
     if (recues) { recues.hidden = !niveau2; if (!niveau2) { const pep = document.querySelector('#rv-nav [data-pane="pepites"]'); if (recues.getAttribute('aria-selected') === 'true' && pep) pep.click(); } }
     const pep = document.querySelector('#rv-nav [data-pane="pepites"]');
@@ -1100,8 +1105,9 @@
       if (!niveau2 && pep.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]'); if (prix) prix.click(); }
     }
     if (niveau2 && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
-    const versCaptures = (pane) => { ouvrirOnglet(pane); const aller = () => { const z = document.getElementById(`captures-${pane}`); if (z) z.scrollIntoView({ block: 'start' }); }; setTimeout(aller, 500); setTimeout(aller, 2500); };
-    if (niveau2 && (location.hash || '') === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; versCaptures('recues'); }
+    const ancre = location.hash || '';
+    if (super_ && (ancre === '#analyse' || ancre === '#captures-recues') && !analyseOuverte) { analyseOuverte = true; ouvrirOnglet('analyse'); }          // ancien lien « annonces captées par jour »
+    else if (niveau2 && ancre === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (niveau2) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
