@@ -2554,13 +2554,15 @@
     return { n, tot, mouv, suivis, i0 };
   }
   // Roll-forward par segment (édition, série, décennie…) : début, hausses, baisses, aujourd'hui. Choix du segment : Mouvements.
+  // Segments du roll-forward : ceux de l'Analyse, plus le livre (les 5 qui bougent le plus)
+  const SEG_RF = [...SEGMENTS, ['livre', 'Livre (les 5 qui bougent le plus)', (b) => `${b.livre || b.titre} (${b.version})`, null]];
   let RFSEG = 'decennie', RF_BL = null;
   // Cascade interactive : valeur de départ, puis la contribution de chaque segment, puis valeur d'aujourd'hui.
   // Toucher une barre (ou la sélectionner au clavier) affiche son détail ; le tableau reste dessous.
   let RF_PAS = [];
   function rollforwardGraphique(bl) {
     const { mouv, i0 } = serieValeur(bl);
-    const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
+    const [, nomSeg, clef] = SEG_RF.find((x) => x[0] === RFSEG) || SEG_RF[0];
     const groupes = new Map();
     mouv.forEach((x) => {
       const k = clef(x.b, x.c), g = groupes.get(k) || { nom: k, d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 };
@@ -2572,8 +2574,8 @@
     const debut = tous.reduce((t, g) => t + g.d, 0), fin = tous.reduce((t, g) => t + g.f, 0);
     const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     const detailDe = (g, titre) => `${titre} : ${fmtE(g.d)} → ${fmtE(g.f)}. Hausses + ${fmtE(g.hausse)} (${g.nh} livre${g.nh > 1 ? 's' : ''}), baisses − ${fmtE(Math.abs(g.baisse))} (${g.nb} livre${g.nb > 1 ? 's' : ''}).`;
-    // Les trois segments qui bougent le plus ; le reste est regroupé en « Autres »
-    const liste = tous.slice(0, 3), reste = tous.slice(3);
+    // Les segments qui bougent le plus (cinq pour les titres, trois sinon) ; le reste est regroupé en « Autres »
+    const nbMax = RFSEG === 'livre' ? 5 : 3, liste = tous.slice(0, nbMax), reste = tous.slice(nbMax);
     if (reste.length) {
       const g = reste.reduce((t, x) => ({ d: t.d + x.d, f: t.f + x.f, hausse: t.hausse + x.hausse, nh: t.nh + x.nh, baisse: t.baisse + x.baisse, nb: t.nb + x.nb }), { d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 });
       liste.push({ ...g, nom: 'Autres', detail: detailDe(g, `Les ${reste.length} autres (${nomSeg.toLowerCase()})`) });
@@ -2596,20 +2598,23 @@
       const x = marge + i * slot + (slot - bw) / 2, y1 = Y(Math.max(p.de, p.a)), y2 = Y(Math.min(p.de, p.a));
       const cls = p.total ? 'rf-total' : p.delta >= 0 ? 'rf-hausse' : 'rf-baisse';
       const valeur = p.total ? fmtE(p.valeur) : `${p.delta >= 0 ? '+' : '−'} ${fmtE(Math.abs(p.delta))}`;
-      const nom = p.nom.length > 11 ? p.nom.slice(0, 10) + '…' : p.nom;
+      // Nom sur deux lignes au plus (mots entiers) ; la seconde est abrégée si elle reste trop longue. Avec 8 colonnes, lignes plus courtes, sans article ni numéro d'édition
+      const lim = pas.length > 6 ? 9 : 11, court = pas.length > 6 ? String(p.nom).replace(/ \(V\d\)$/, '').replace(/^(Le |La |Les |L')/, '') : String(p.nom);
+      const lignes = []; court.split(' ').forEach((m) => { const d = lignes[lignes.length - 1]; if (d !== undefined && (d + ' ' + m).length <= lim && lignes.length <= 2) lignes[lignes.length - 1] = d + ' ' + m; else lignes.push(m); });
+      const deux = lignes.length > 2 ? [lignes[0], lignes.slice(1).join(' ')] : lignes, cut = (t) => (t.length > lim ? t.slice(0, lim - 1) + '…' : t);
       return `<g class="rf-barre" tabindex="0" role="button" data-i="${i}" aria-label="${esc(p.nom)} : ${esc(valeur)}">
         <rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(p.total ? 4 : 2, y2 - y1).toFixed(1)}" rx="2" class="${cls}"/>
         <text x="${(x + bw / 2).toFixed(1)}" y="${(y1 - 6).toFixed(1)}" text-anchor="middle" class="rf-valeur">${esc(valeur)}</text>
-        <text x="${(x + bw / 2).toFixed(1)}" y="${H - 22}" text-anchor="middle" class="rf-nom"><title>${esc(p.nom)}</title>${esc(nom)}</text></g>`;
+        <text x="${(x + bw / 2).toFixed(1)}" y="${H - (deux.length > 1 ? 33 : 22)}" text-anchor="middle" class="rf-nom"${pas.length > 6 ? ' style="font-size:14px"' : ''}><title>${esc(p.nom)}</title>${deux.map((t, k) => `<tspan x="${(x + bw / 2).toFixed(1)}" dy="${k ? (pas.length > 6 ? 15 : 20) : 0}">${esc(cut(t))}</tspan>`).join('')}</text></g>`;
     }).join('');
     return `<figure class="rf-graph"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cascade de la valeur de la collection, du ${jour(HIST.dates[i0])} à aujourd'hui, par ${nomSeg.toLowerCase()}">${barres}</svg></figure>
-      <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. Les trois segments qui bougent le plus ; départ et arrivée en valeur, hors échelle.</p>
+      <p class="sous rf-detail" id="rf-detail" aria-live="polite">Touchez une barre pour voir son détail. Les ${nbMax === 5 ? 'cinq livres' : 'trois segments'} qui bougent le plus ; départ et arrivée en valeur, hors échelle.</p>
       <details class="rf-chiffres"><summary>Voir les chiffres</summary>${rollforwardTable(bl)}</details>`;
   }
 
   function rollforwardTable(bl) {
     const { mouv } = serieValeur(bl);
-    const [, nomSeg, clef] = SEGMENTS.find((x) => x[0] === RFSEG) || SEGMENTS[0];
+    const [, nomSeg, clef] = SEG_RF.find((x) => x[0] === RFSEG) || SEG_RF[0];
     const groupes = new Map();
     mouv.forEach((x) => {
       const k = clef(x.b, x.c), g = groupes.get(k) || { nom: k, d: 0, f: 0, hausse: 0, nh: 0, baisse: 0, nb: 0 };
@@ -2617,7 +2622,7 @@
       if (x.delta > 0.004) { g.hausse += x.delta; g.nh += 1; } else if (x.delta < -0.004) { g.baisse += x.delta; g.nb += 1; }
       groupes.set(k, g);
     });
-    const lignes = [...groupes.values()].sort((a, b) => a.nom.localeCompare(b.nom, 'fr', { numeric: true }));
+    const lignes = [...groupes.values()].sort(RFSEG === 'livre' ? (a, b) => Math.abs(b.f - b.d) - Math.abs(a.f - a.d) : (a, b) => a.nom.localeCompare(b.nom, 'fr', { numeric: true }));
     return `<table class="rf-table"><caption class="sr-only">Roll-forward par ${nomSeg.toLowerCase()}</caption><thead><tr><th scope="col">${nomSeg}</th><th scope="col" class="num">Début</th><th scope="col" class="num">Hausses</th><th scope="col" class="num">Baisses</th><th scope="col" class="num">Aujourd'hui</th></tr></thead><tbody>${lignes.map((g) => `<tr><th scope="row">${esc(g.nom)}</th><td class="num">${fmtE(g.d)}</td><td class="num">+ ${fmtE(g.hausse)} <small>(${g.nh})</small></td><td class="num">− ${fmtE(Math.abs(g.baisse))} <small>(${g.nb})</small></td><td class="num">${fmtE(g.f)}</td></tr>`).join('')}</tbody></table>`;
   }
 
@@ -2635,7 +2640,7 @@
     const pluriel = (liste) => `${liste.length} livre${liste.length > 1 ? 's' : ''}`;
     const cles = `<ul class="coll-cles hc-cles hc-cles-4" aria-label="Du ${depuis} à aujourd'hui">${cle('Valeur au ' + depuis, fmtE(v0))}${cle('Hausses (' + pluriel(hausses) + ')', '+ ' + fmtE(somme(hausses)))}${cle('Baisses (' + pluriel(baisses) + ')', '− ' + fmtE(Math.abs(somme(baisses))))}${cle('Valeur aujourd\'hui', fmtE(v1))}</ul>`;
     return `<p class="sous hc-bilan">${bilan}</p>${cles}
-      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEGMENTS.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
+      <div class="seg-choix"><label for="rf-segment">Détailler par</label><select id="rf-segment">${SEG_RF.map(([k, nom]) => `<option value="${k}"${k === RFSEG ? ' selected' : ''}>${nom}</option>`).join('')}</select></div>
       <div id="rf-tableau">${rollforwardGraphique(bl)}</div>
       <div class="hc-mouv">${listeMouv('Ont le plus progressé', hausses.slice().sort((x, y) => y.delta - x.delta).slice(0, 5), 'hausse')}${listeMouv('Ont le plus reculé', baisses.slice().sort((x, y) => x.delta - y.delta).slice(0, 5), 'baisse')}</div>`;
   }
