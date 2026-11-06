@@ -164,7 +164,7 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
   <p class="chapeau">Voici les annonces captées par le site, toutes origines confondues. <strong>La Cote du Héros n'est affiliée à aucun site de vente</strong> : nous restons neutres.</p>
-  <div class="pp-barre">
+  <div class="pp-barre rc-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
     <div class="rv-onglets rc-vue rc-periode" id="rc-quand" role="group" aria-label="Annonces reçues"><button type="button" data-quand="auj" aria-pressed="false">Aujourd'hui</button><button type="button" data-quand="sem" aria-pressed="false">Cette semaine</button><button type="button" data-quand="tout" aria-pressed="true">Toutes</button></div>
     <div class="rv-onglets rc-vue" id="rc-vue" role="group" aria-label="Affichage des annonces"><button type="button" data-vue="grille" aria-pressed="true">Jaquettes</button><button type="button" data-vue="liste" aria-pressed="false">Liste</button></div>
@@ -172,35 +172,59 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>
-        <option value="serie">Série et numéro</option>
+        <option value="ancien">Plus anciennes d'abord</option>
         <option value="prix">Prix croissant</option>
+        <option value="prixdesc">Prix décroissant</option>
         <option value="ecart">Meilleures affaires d'abord</option>
+        <option value="eco">Plus grosse économie (€)</option>
+        <option value="serie">Série et numéro</option>
+        <option value="editeur">Éditeur</option>
         <option value="origine">Origine</option>
       </select></label>
-      <label class="pp-tri"><span>Origine</span><select id="rc-source">
-        <option value="tout">Toutes</option>
-        <option value="ebay">eBay</option>
-        <option value="leboncoin">Leboncoin</option>
-        <option value="vinted">Vinted</option>
-        <option value="librairie">Librairies</option>
-        <option value="amazon">Amazon</option>
-        <option value="fnac">Fnac</option>
-        <option value="abebooks">AbeBooks</option>
-        <option value="recyclivre">Recyclivre</option>
-      </select></label>
-      <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
-        <option value="tout">Tous</option>
-        <option value="super">Super pépites</option>
-        <option value="pepite">Pépites</option>
-        <option value="dessous">Pas cher</option>
-        <option value="dans">Dans les prix</option>
-        <option value="dessus">Trop cher</option>
-        <option value="cher">Très chers</option>
-      </select></label>
-      <label class="case"><input type="checkbox" id="rc-trouver"><span>Mes « à trouver » seulement</span></label>
-      <label class="case"><input type="checkbox" id="rc-sans"><span>Sans point à vérifier</span></label>
-      <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
     </div>
+    <div class="rc-rapides" role="group" aria-label="Filtres rapides">
+      <label class="rc-filtre"><input type="checkbox" id="rc-trouver"><span>★ À trouver</span></label>
+      <label class="rc-filtre"><input type="checkbox" id="rc-pep"><span>Pépites</span></label>
+      <label class="rc-filtre"><input type="checkbox" id="rc-bon"><span>Pas cher et mieux</span></label>
+      <label class="rc-filtre"><input type="checkbox" id="rc-sans"><span>Sans réserve</span></label>
+      <button type="button" class="rc-effacer" id="rc-effacer" hidden>Tout effacer</button>
+    </div>
+    <details class="rc-plus" id="rc-plus-filtres">
+      <summary>Plus de filtres <span class="rc-nb" id="rc-nb-filtres"></span></summary>
+      <div class="pp-outils">
+        <label class="pp-tri"><span>Origine</span><select id="rc-source">
+          <option value="tout">Toutes</option>
+          <option value="ebay">eBay</option>
+          <option value="leboncoin">Leboncoin</option>
+          <option value="vinted">Vinted</option>
+          <option value="librairie">Librairies</option>
+          <option value="amazon">Amazon</option>
+          <option value="fnac">Fnac</option>
+          <option value="abebooks">AbeBooks</option>
+          <option value="recyclivre">Recyclivre</option>
+        </select></label>
+        <label class="pp-tri"><span>Prix</span><select id="rc-verdict">
+          <option value="tout">Tous</option>
+          <option value="super">Super pépites</option>
+          <option value="pepite">Pépites</option>
+          <option value="dessous">Pas cher</option>
+          <option value="dans">Dans les prix</option>
+          <option value="dessus">Trop cher</option>
+          <option value="cher">Très chers</option>
+        </select></label>
+        <label class="pp-tri"><span>Série</span><select id="rc-serie"><option value="">Toutes</option></select></label>
+        <label class="pp-tri"><span>Édition</span><select id="rc-edition"><option value="">Toutes</option></select></label>
+        <label class="pp-tri"><span>Éditeur</span><select id="rc-editeur"><option value="">Tous</option></select></label>
+        <label class="pp-tri"><span>État</span><select id="rc-etatf">
+          <option value="">Tous</option>
+          <option value="convenable">Convenable</option>
+          <option value="bon">Bon</option>
+          <option value="tres_bon">Très bon</option>
+        </select></label>
+        <label class="pp-tri"><span>Prix de</span><input type="number" id="rc-pmin" inputmode="decimal" min="0" step="1" placeholder="0" class="rc-prix-champ"> <span>à</span> <input type="number" id="rc-pmax" inputmode="decimal" min="0" step="1" placeholder="999" class="rc-prix-champ"> <span>€</span></label>
+        <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
+      </div>
+    </details>
   </div>
   <div id="rc-liste"></div>
 </div>'''
