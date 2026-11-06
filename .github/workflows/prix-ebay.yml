@@ -1,15 +1,14 @@
 name: Relevé des prix (eBay et librairies)
 
-# UN SEUL lot pour tous les prix, tous les deux jours ou à la demande : (1) interroge l'interface officielle d'eBay (annonces d'occasion), (2) relève le prix du
-# neuf chez les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé complet date d'au moins 7 jours (jamais plus d'une fois par semaine ; environ tous les 8 jours avec un relevé eBay tous les deux jours), et à la demande ; entre deux, relevé léger des seuls exemplaires d'occasion des librairies (programme présenté comme une
-# lecture hebdomadaire, réseau de petites librairies : on ne le sollicite pas plus), puis ajoute un relevé agrégé, reconstruit la base, regénère les
-# données du site et redéclenche sa publication. Le relevé eBay a lieu tous les deux jours : le prix évolue par petites étapes (lissage, voir
-# docs/MODELE-PRICING.md) au lieu de grands sauts après une semaine de données (environ 2 400 appels par relevé, pour une limite habituelle de
-# 5 000 par jour : éviter deux relevés complets le même jour). « */2 » = les jours impairs du mois : en fin de mois, le 31 puis le 1er sont consécutifs.
+# UN SEUL lot pour tous les prix, chaque jour ou à la demande : (1) interroge l'interface officielle d'eBay par recherches larges (« ldvelh », « livre dont
+# vous êtes le héros », éditeurs, séries : environ 200 appels par relevé, pour une limite habituelle de 5 000 par jour), (2) relève le prix du neuf chez
+# les libraires (pipeline/prix_neuf.py) seulement si le dernier relevé complet date d'au moins 7 jours (jamais plus d'une fois par semaine), et à la demande ;
+# entre deux, relevé léger des seuls exemplaires d'occasion des librairies, UN JOUR SUR DEUX (jours impairs du mois) : réseau de petites librairies, on ne le
+# sollicite pas plus malgré le relevé eBay quotidien. Puis ajoute un relevé agrégé, reconstruit la base, regénère les données du site et redéclenche sa publication.
 # Prérequis : secrets EBAY_CLIENT_ID et EBAY_CLIENT_SECRET (voir docs/PRIX-ACTUELS.md).
 on:
   schedule:
-    - cron: "17 5 */2 * *"      # tous les deux jours, à 5 h 17 (Greenwich)
+    - cron: "17 5 * * *"        # chaque jour, à 5 h 17 (Greenwich)
   workflow_dispatch:
     inputs:
       limite:
@@ -125,13 +124,17 @@ jobs:
         run: |
           # Relevé complet des fiches de leslibraires.fr (prix du neuf + exemplaires d'occasion) : au plus une fois par semaine (7 jours minimum) sur l'horaire,
           # toujours à la demande. Les autres jours de l'horaire : relevé LÉGER, qui ne relit que les éditions ayant un exemplaire d'occasion en librairie
-          # (une soixantaine de fiches, environ 2 minutes), pour que ces cotes d'occasion suivent le rythme d'eBay (tous les deux jours).
+          # (une soixantaine de fiches, environ 2 minutes), un jour sur deux (jours impairs), comme avant le relevé eBay quotidien.
           if [ "${{ github.event_name }}" = "schedule" ] && [ -f data/processed/prix_neuf.csv ]; then
             # date la plus ANCIENNE du fichier = dernier relevé complet : le relevé léger ne rafraîchit que les lignes des exemplaires d'occasion
             derniere="$(python -c "import csv; print(min((r['date'] for r in csv.DictReader(open('data/processed/prix_neuf.csv', encoding='utf-8')) if r.get('date')), default=''))")"
             if [ -n "$derniere" ]; then
               age=$(( ( $(date +%s) - $(date -d "$derniere" +%s) ) / 86400 ))
               if [ "$age" -lt 7 ]; then
+                if [ $(( 10#$(date +%d) % 2 )) -eq 0 ]; then
+                  echo "Relevé complet fait le $derniere (il y a $age jour(s)) ; jour pair : les librairies ne sont pas relues (un jour sur deux)."
+                  exit 0
+                fi
                 echo "Relevé complet fait le $derniere (il y a $age jour(s)) : relevé léger des exemplaires d'occasion seulement."
                 python pipeline/prix_neuf.py --occasion
                 exit 0
