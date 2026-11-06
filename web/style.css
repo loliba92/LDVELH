@@ -2714,3 +2714,13 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .rc-presets button:hover { background: rgba(217, 180, 95, .14); }
 .rc-preset-txt { margin: 0 0 6px; }
 .rc-filtre span b { font-weight: 700; margin-left: 4px; }
+/* Annonces : barre des prix, écart coloré */
+.an-site { font-size: var(--t-base); color: var(--text); }
+.an-ecart { font-weight: 700; }
+.an-ecart-plus { color: #f0a5b0; } .an-ecart-moins { color: #8fd3a8; }
+.an-barre { margin: 6px 0 2px; }
+.an-barre-piste { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #8fd3a8, #d9b45f 50%, #f0a5b0); opacity: .9; }
+.an-tick { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: rgba(0, 0, 0, .55); }
+.an-reperesite { position: absolute; top: -5px; width: 2px; height: 18px; margin-left: -1px; background: var(--text); }
+.an-moi { position: absolute; top: -4px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--gold); border: 2px solid #fff; box-sizing: border-box; box-shadow: 0 0 0 1px rgba(0, 0, 0, .6); }
+.an-barre-bornes { display: flex; justify-content: space-between; margin-top: 6px; color: var(--muted); font-size: var(--t-xs); font-variant-numeric: tabular-nums; }

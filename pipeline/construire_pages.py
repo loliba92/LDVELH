@@ -186,7 +186,6 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="prix">Prix croissant</option>
         <option value="prixdesc">Prix décroissant</option>
         <option value="ecart">Meilleures affaires d'abord</option>
-        <option value="temp">Température (plus chaudes d'abord)</option>
         <option value="eco">Plus grosse économie (€)</option>
         <option value="serie">Série et numéro</option>
         <option value="editeur">Éditeur</option>
@@ -222,12 +221,6 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
           <option value="dessus">Trop cher</option>
           <option value="cher">Très chers</option>
         </select></label>
-        <label class="pp-tri"><span>Température</span><select id="rc-temp">
-          <option value="">Toutes</option>
-          <option value="brulant">Brûlant</option>
-          <option value="chaud">Chaud ou brûlant</option>
-          <option value="glace">Glacé</option>
-        </select></label>
         <label class="pp-tri"><span>Série</span><select id="rc-serie"><option value="">Toutes</option></select></label>
         <label class="pp-tri"><span>Édition</span><select id="rc-edition"><option value="">Toutes</option></select></label>
         <label class="pp-tri"><span>Éditeur</span><select id="rc-editeur"><option value="">Tous</option></select></label>
@@ -245,16 +238,8 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
     </details>
   </div>
   <details class="rc-legende">
-    <summary>C'est quoi la température ?</summary>
-    <p>Un mot qui dit si l'annonce vaut le coup. Il compare son prix au prix du site (pour 60 %) et aux autres annonces du même livre dans le même état (pour 40 %).</p>
-    <ul>
-      <li><strong>Brûlant</strong> : très en dessous du prix du site, parmi les moins chères.</li>
-      <li><strong>Chaud</strong> : bonne affaire.</li>
-      <li><strong>Tiède</strong> : prix correct.</li>
-      <li><strong>Frais</strong> : un peu cher.</li>
-      <li><strong>Glacé</strong> : cher, au-dessus du marché.</li>
-    </ul>
-    <p>Un mot en pointillé pâle veut dire que l'édition ou l'état reste à confirmer.</p>
+    <summary>Comment lire la barre des prix ?</summary>
+    <p>Sous chaque annonce, la barre montre où se situe son prix parmi les annonces du même livre dans le même état. Chaque trait est une annonce, le point doré est celle-ci, le trait clair plus haut est le prix du site. Le vert est le bas de la fourchette, le rouge le haut.</p>
   </details>
   <div id="rc-liste"></div>
 </div>'''
