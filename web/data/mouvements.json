@@ -60,25 +60,10 @@
    "serie": "Défis Fantastiques",
    "numero": "740",
    "version": "V1",
-   "etat": "convenable",
-   "avant": 46.61,
-   "apres": 24.0,
-   "pct": -0.485,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070586134",
-   "isbn13": "9782070586134",
-   "titre": "Le Sépulcre des Ombres",
-   "serie": "Défis Fantastiques",
-   "numero": "740",
-   "version": "V1",
    "etat": "bon",
    "avant": 78.21,
-   "apres": 45.84,
-   "pct": -0.414,
+   "apres": 35.96,
+   "pct": -0.54,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -92,8 +77,23 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 103.71,
-   "apres": 78.0,
-   "pct": -0.248,
+   "apres": 48.0,
+   "pct": -0.537,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070586134",
+   "isbn13": "9782070586134",
+   "titre": "Le Sépulcre des Ombres",
+   "serie": "Défis Fantastiques",
+   "numero": "740",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 46.61,
+   "apres": 24.0,
+   "pct": -0.485,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -132,9 +132,9 @@
  "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
-  "n_paires": 132,
-  "gain": 0.046,
-  "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
-  "rapport_global": 0.916
+  "n_paires": 128,
+  "gain": 0.044,
+  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+  "rapport_global": 0.913
  }
 }
