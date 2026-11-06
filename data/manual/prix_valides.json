@@ -1302,16 +1302,22 @@
    "le": "2026-10-23",
    "par": "loliba (superadmin)"
   },
-  "9782070566440|convenable": {
-   "prix": 20.0,
+  "9782070566440|bon": {
+   "prix": 20.6,
    "decision": "corrige",
-   "le": "2026-10-21",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9782070566440|convenable": {
+   "prix": 10.8,
+   "decision": "corrige",
+   "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
   "9782070566440|tres_bon": {
-   "prix": 61.0,
+   "prix": 35.0,
    "decision": "corrige",
-   "le": "2026-10-21",
+   "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
   "9782070566495|bon": {

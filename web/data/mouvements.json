@@ -2,7 +2,7 @@
  "date": "2026-11-06",
  "precedent": "2026-11-05",
  "nb_comparees": 1512,
- "nb_modifiees": 886,
+ "nb_modifiees": 888,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -99,6 +99,51 @@
    "recalibre": false
   },
   {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 20.0,
+   "apres": 10.8,
+   "pct": -0.46,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 36.01,
+   "apres": 20.6,
+   "pct": -0.428,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 61.0,
+   "apres": 35.0,
+   "pct": -0.426,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070506736",
    "isbn13": "9782070506736",
    "titre": "Le Sorcier Majdar",
@@ -187,24 +232,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9791040809630",
-   "isbn13": "9791040809630",
-   "titre": "Reine des dragons",
-   "serie": "Reine",
-   "numero": "2",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 12.59,
-   "apres": 11.19,
-   "pct": -0.111,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 13,
+ "nb_grands_mouvements": 16,
  "modele": {
   "actif": false,
   "n_paires": 128,
