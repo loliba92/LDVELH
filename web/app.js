@@ -2108,17 +2108,13 @@
     if (aj) d.aj = aj;
     if (nb != null || na != null || sous != null || aj) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
-    // Le détail de toutes les annonces est ouvert aux sorciers et au Zagor
-    const carte = (href, titre, valeur, detail, lien = 'Voir le détail →') => {
-      const corps = `<b>${valeur}</b><span><strong>${titre}</strong><small>${detail}</small></span>${href ? `<em>${lien}</em>` : ''}`;
-      return href ? `<a class="compteur-acc" href="${href}">${corps}</a>` : `<div class="compteur-acc">${corps}</div>`;
-    };
-    const dontRecues = niv3 ? (d.sous != null ? `dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation` : '') : (d.nb != null ? `dont ${d.nb} au Butin` : '');
-    z.innerHTML = '<div class="compteurs-acc">'
-      + carte('butin.html#pepites', 'Butins et Annonces', n(d.nb), `annonce${d.nb > 1 ? 's' : ''} à 50 % du prix du site ou moins`)
-      + carte(niv3 ? 'butin.html#analyse' : (niveau2Connu() ? 'butin.html#recues' : ''), 'Annonces reçues', n(d.na), `en ligne${dontRecues ? ` (${dontRecues})` : ' au dernier relevé'}`, niv3 ? "Voir l'analyse →" : 'Voir les annonces →')
-      + carte('', 'Annonces ajoutées', n(d.aj ? d.aj[0] : null), d.aj ? `sur 24 h · 24 h avant : ${d.aj[1]}${d.aj[1] ? ` (${d.aj[0] >= d.aj[1] ? '+' : '−'}${Math.round(100 * Math.abs(d.aj[0] - d.aj[1]) / d.aj[1])}\u00a0%)` : ''}` : 'sur 24 h')
-      + '</div>';
+    // Une seule carte « Butins et Annonces » : pépites du Butin, annonces en ligne, ajouts des dernières 24 h ; liens vers le Butin et les annonces, et vers l'analyse pour le Zagor
+    const ajout = d.aj ? `+${d.aj[0]} ajoutée${d.aj[0] > 1 ? 's' : ''} sur 24 h · 24 h avant : ${d.aj[1]}${d.aj[1] ? ` (${d.aj[0] >= d.aj[1] ? '+' : '−'}${Math.round(100 * Math.abs(d.aj[0] - d.aj[1]) / d.aj[1])}\u00a0%)` : ''}` : 'ajoutées sur 24 h : …';
+    const enLigneTxt = `${n(d.na)} annonce${d.na > 1 ? 's' : ''} en ligne${niv3 && d.sous != null ? ` (dont ${d.sous} plus basse${d.sous > 1 ? 's' : ''} que notre estimation)` : ''}`;
+    z.innerHTML = '<div class="compteurs-acc"><div class="compteur-acc compteur-fusion">'
+      + `<b>${n(d.nb)}</b><span><strong>Butins et Annonces</strong><small>${d.nb > 1 ? 'annonces à 50 %' : 'annonce à 50 %'} du prix du site ou moins</small><small>${enLigneTxt}</small><small>${ajout}</small>`
+      + `<span class="compteur-liens"><a href="butin.html#pepites">Voir le Butin →</a><a href="butin.html#recues">Voir les annonces →</a>${niv3 ? '<a href="butin.html#analyse">Voir l\'analyse →</a>' : ''}</span></span>`
+      + '</div></div>';
   }
   document.addEventListener('cdh-compte', majCompteursAccueil);
   majCompteursAccueil();
