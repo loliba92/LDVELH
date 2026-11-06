@@ -220,14 +220,32 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc):
     return offre
 
 
-def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
+def publiee_le(ligne, jour, publiees):
+    """Enregistre dans `publiees` la date de publication d'une ligne de relevé (jour du relevé moins `age_jours`), si elle est connue et pas déjà enregistrée."""
+    if publiees is None or ligne["lien"] in publiees:
+        return
+    brut = (ligne.get("age_jours") or "").strip()
+    if brut == "":
+        return
+    try:
+        age = int(float(brut))
+        if age < 0 or (age == 0 and ligne.get("trouvee_par") == "vinted"):
+            return
+        publiees[ligne["lien"]] = (date.fromisoformat(jour) - timedelta(days=age)).isoformat()
+    except ValueError:
+        return
+
+
+def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
     Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation, état supposé]. Depuis le relevé à colonne « port »,
     le prix eBay est le prix livré (frais de port compris). « état supposé » : 1 si l'annonce ne précise
     pas son état (on suppose le très bon état), 0 s'il est indiqué, None pour les relevés d'avant l'enregistrement de cette information.
     Une annonce non revue depuis plus de `jours` jours
-    avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}."""
+    avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}.
+    `publiees` (dictionnaire facultatif) reçoit {lien: date de publication AAAA-MM-JJ} : le jour du relevé moins l'âge de l'annonce, pris au premier relevé qui la contient.
+    Un âge de 0 sur Vinted peut vouloir dire « date illisible » : il ne compte pas comme une date connue."""
     fichiers = sorted(fichiers)
     if not fichiers:
         return {}
@@ -245,6 +263,7 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES):
                     fdp = prix_livre_vinted(prix) - prix      # lignes sans frais (avant la colonne fdp, ou Leboncoin à 0) : même prix livré que Vinted et eBay, mêmes frais par défaut que le bot
                 else:
                     fdp = 0.0
+                publiee_le(r, jour, publiees)
                 vues[(r["isbn13"], r["lien"])] = (r["etat"], round(prix + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
     sortie = {}
@@ -534,7 +553,8 @@ def main():
     # être contrôlé à la main (bon livre ? bon état ?). Absent tant qu'aucun relevé ne les a enregistrées.
     dossier_occasion = DB.parent.parent / "raw" / "occasion"
     fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if not any(s in f.name for s in importer_leboncoin.SOURCES))         # eBay
-    annonces = annonces_cumulees(fichiers_ann)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
+    publiees = {}          # date de publication de chaque annonce, quand le relevé la donne
+    annonces = annonces_cumulees(fichiers_ann, publiees=publiees)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
     # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
     fichiers_lbc = sorted(dossier_occasion.glob("annonces-leboncoin-20*.csv"))
@@ -543,7 +563,7 @@ def main():
     for f in dossier_occasion.glob("vendus-leboncoin-20*.csv"):
         with open(f, newline="", encoding="utf-8") as fh:
             liens_vendus.update(r["lien"] for r in csv.DictReader(fh))
-    for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN).items():
+    for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN, publiees=publiees).items():
         for etat, liste in par_etat.items():
             liste = [a for a in liste if a[2] not in liens_vendus]
             if liste:
@@ -555,7 +575,7 @@ def main():
     for f in dossier_occasion.glob("vendus-vinted-20*.csv"):
         with open(f, newline="", encoding="utf-8") as fh:
             liens_vendus_vinted.update(r["lien"] for r in csv.DictReader(fh))
-    for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED).items():
+    for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED, publiees=publiees).items():
         for etat, liste in par_etat.items():
             liste = [a for a in liste if a[2] not in liens_vendus_vinted]          # le prix est déjà livré : la colonne fdp du relevé est ajoutée par annonces_cumulees
             if liste:
@@ -600,7 +620,7 @@ def main():
         captures = mettre_a_jour_captures(captures_avant, annonces, premieres, maintenant[:10], maintenant=maintenant)
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines,
-                                          "premieres": premieres, "captures": captures},
+                                          "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
         if fichiers_ann:
@@ -614,6 +634,7 @@ def main():
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := extraire_butin(annonces, revue)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
+                                                          "publiees": {a_[2]: publiees[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in publiees},
                                                           "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

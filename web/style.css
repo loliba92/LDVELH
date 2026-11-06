@@ -2724,3 +2724,10 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-reperesite { position: absolute; top: -5px; width: 2px; height: 18px; margin-left: -1px; background: var(--text); }
 .an-moi { position: absolute; top: -4px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--gold); border: 2px solid #fff; box-sizing: border-box; box-shadow: 0 0 0 1px rgba(0, 0, 0, .6); }
 .an-barre-bornes { display: flex; justify-content: space-between; margin-top: 6px; color: var(--muted); font-size: var(--t-xs); font-variant-numeric: tabular-nums; }
+/* Annonces : fraîcheur */
+.an-age { white-space: nowrap; }
+.an-age-vert { color: #8fd3a8; font-weight: 700; }
+.an-age-neutre { color: var(--text); }
+.an-age-moyen { color: var(--muted); }
+.an-age-ancien { color: #f0a5b0; }
+.an-age-x { color: var(--muted); font-style: italic; }
