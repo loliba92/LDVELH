@@ -103,7 +103,7 @@ CODE_LIMITE = 75          # code de sortie « limite d'appels du jour atteinte �
 
 
 class QuotaEbay(RuntimeError):
-    """eBay répond 429 : la limite d'appels du jour est atteinte (environ 5 000 ; un relevé complet en fait environ 2 400)."""
+    """eBay répond 429 : la limite d'appels du jour est atteinte (environ 5 000 ; un relevé par balayage en fait environ 200)."""
 
 
 def annonces(isbn, token, http=requests, modalites="FIXED_PRICE"):
@@ -625,6 +625,42 @@ def annonces_connues(dossier):
         return {m.group(1) for r in csv.DictReader(f) for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m}
 
 
+# Relevé quotidien par balayage : plus aucune recherche édition par édition (décision du propriétaire). Les recherches larges ci-dessous ramènent toutes les
+# annonces récentes du domaine, puis chacune est rattachée à son édition par le titre (concordance stricte), comme dans l'essai du 6 novembre : 715 annonces
+# rattachées dont 259 nouvelles, pour environ 200 appels. Retirées après l'essai : « ldvelh lot », « dungeons », « elder craft », « scriptarium » et les
+# séries qui ne ramenaient rien (Fabled Lands, Les Chroniques d'Hamalron, Littéraction).
+REQUETES_RELEVE = ("ldvelh", "livre dont vous êtes le héros", "ldvelh livre dont vous êtes le héros", "ldvelh graal", "ldvelh loup solitaire",
+                   "ldvelh sorcellerie", "défis fantastiques", "livre jeu", "alkonost")
+SERIES_SANS_RESULTAT = {"fabled lands", "les chroniques d'hamalron", "littéraction"}
+PAGES_RELEVE = 10          # 10 pages de 200 annonces au plus par requête, des plus récentes aux plus anciennes
+
+
+def balayer(token, fiches, pages=PAGES_RELEVE, http=requests, pause=0):
+    """Annonces à prix fixe de toutes les recherches larges (REQUETES_RELEVE et séries du catalogue), sans doublon : {numéro d'annonce: annonce}.
+    Chaque annonce est marquée « _titre_seul » : elle n'est rattachée à une édition que si tous les mots du titre concordent.
+    Une requête qui échoue (hors limite d'appels) est notée dans le journal et les autres continuent ; la limite d'appels arrête tout."""
+    pool = {}
+    requetes = list(REQUETES_RELEVE) + [q for q in requetes_series(fiches) if q.lower() not in SERIES_SANS_RESULTAT]
+    for q in requetes:
+        try:
+            items = annonces_pages(q, token, http, "FIXED_PRICE", pages, pause=pause)
+        except QuotaEbay:
+            raise
+        except requests.RequestException as e:
+            print(f"  requête « {q} » en échec ({type(e).__name__}) : les autres continuent", file=sys.stderr)
+            continue
+        for it in items:
+            pool.setdefault(numero_annonce(it.get("itemId")), {**it, "_titre_seul": True})
+    return pool
+
+
+def rattacher(pool, cat, fiches, jour):
+    """{isbn13: annonces} : chaque annonce du balayage va à toutes les éditions dont le titre concorde (les ambiguïtés sont tranchées ensuite)."""
+    items = list(pool.values())
+    return {isbn: [it for it, _etat, _prix, _ancienne in retenues(items, jour, titre, annees, fiches.get(isbn))]
+            for isbn, titre, nb_ed, livre, annees in cat}
+
+
 def essayer_large(a, token):
     """Mesure un balayage large (« ldvelh », « livre dont vous êtes le héros »…) : annonces renvoyées, rattachées à une édition du catalogue
     (mêmes filtres que le relevé, concordance stricte du titre) et NOUVELLES (absentes du dernier relevé enregistré). Rien n'est enregistré,
@@ -667,6 +703,7 @@ def main():
     p.add_argument("--essais", type=int, help="compare plusieurs requêtes (ISBN-13, ISBN-10, titre…) sur N éditions, sans enregistrement")
     p.add_argument("--essai-modalites", dest="essai_modalites", type=int, help="compare les annonces à prix fixe, aux enchères et en petites annonces sur N éditions (comptages seulement)")
     p.add_argument("--essai-large", dest="essai_large", type=int, help="balayage large (« ldvelh »…) : N pages de 200 annonces par requête, comptages seulement (3 conseillé)")
+    p.add_argument("--essai-releve", dest="essai_releve", action="store_true", help="relevé complet par balayage SANS enregistrement : comptages et comparaison avec le dernier relevé")
     p.add_argument("--essai-version", dest="essai_version", type=int, help="essai en deux étapes (titre, description, image) sur N éditions « archive seule » (aucun enregistrement)")
     p.add_argument("--essai-photos", dest="essai_photos", type=int, help="essai de la comparaison de photos sur de vraies annonces, N éditions tirées au hasard (aucun enregistrement)")
     p.add_argument("--sortie", default=str(RACINE / "data" / "raw" / "occasion"))
@@ -710,8 +747,11 @@ def main():
     lignes, par_isbn = [], {}
     import editions
     fiches = {r["isbn13"]: r for r in editions.load() if r.get("isbn13")}
-    for isbn, titre, nb_ed, livre, annees in cat:
-        par_isbn[isbn] = chercher_elargi(isbn, titre, token, fiches.get(isbn), pause=PAUSE)
+    pool = balayer(token, fiches, pause=PAUSE)
+    if not pool:
+        sys.exit("Le balayage n'a renvoyé aucune annonce : relevé abandonné, rien n'est enregistré.")
+    print(f"Balayage : {len(pool)} annonces renvoyées par les recherches larges.")
+    par_isbn = rattacher(pool, cat, fiches, jour)
     import reconciliation_image                                  # réconciliation par image : une annonce vue sous plusieurs éditions va à celle dont la jaquette lui ressemble
     par_isbn = reconciliation_image.reconcilier(par_isbn, {c[0]: c[3] for c in cat}, RACINE / "web" / "covers")
     par_isbn = reconciliation_image.verifier_photos(par_isbn, RACINE / "web" / "covers")      # toute annonce retenue : la photo doit montrer l'édition à laquelle elle est rattachée
@@ -722,6 +762,12 @@ def main():
         lignes += agreger(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn), prix_tbe=tbe.get(isbn))
         annonces_gardees += lignes_annonces(par_isbn[isbn], isbn, jour, titre, annees, fiches.get(isbn))
     sortie = Path(a.sortie)
+    if a.essai_releve:
+        connues = annonces_connues(sortie)
+        gardees = {m.group(1) for r in annonces_gardees for m in [re.search(r"/itm/(\d+)", r.get("lien", ""))] if m}
+        print(f"Essai du relevé par balayage (rien n'est enregistré) : {len(pool)} annonces renvoyées, {len(gardees)} gardées après les filtres et la vérification des photos, "
+              f"{len(lignes)} lignes de cote ; dernier relevé : {len(connues)} annonces ; nouvelles : {len(gardees - connues)} ; connues non retrouvées : {len(connues - gardees)}.")
+        return
     sortie.mkdir(parents=True, exist_ok=True)
     fichier = sortie / f"ebay-{jour.isoformat()}.csv"
     with open(fichier, "w", newline="", encoding="utf-8") as f:
@@ -732,7 +778,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=CHAMPS_ANNONCES)
         w.writeheader()
         w.writerows(annonces_gardees)
-    print(f"{len(isbns)} éditions interrogées, {len(lignes)} lignes écrites dans {fichier}")
+    print(f"{len(isbns)} éditions rattachées, {len(lignes)} lignes écrites dans {fichier}")
 
 
 if __name__ == "__main__":
