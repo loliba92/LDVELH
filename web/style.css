@@ -2707,3 +2707,10 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
   .tb-liens { grid-column: 2; grid-row: 2; flex-direction: column; margin-top: 0; min-width: 12rem; }
   .tb-liens .bouton { width: 100%; }
 }
+/* Annonces : préréglages */
+.rc-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 4px 0 6px; }
+.rc-presets-lib { color: var(--muted); font: 600 var(--t-sm) var(--f-ui); letter-spacing: .04em; text-transform: uppercase; }
+.rc-presets button { min-height: 40px; padding: 4px 14px; border: 1px solid var(--gold); border-radius: var(--r); background: transparent; color: var(--gold); font: 700 var(--t-base) var(--f-ui); cursor: pointer; }
+.rc-presets button:hover { background: rgba(217, 180, 95, .14); }
+.rc-preset-txt { margin: 0 0 6px; }
+.rc-filtre span b { font-weight: 700; margin-left: 4px; }

@@ -171,6 +171,14 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
     <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
     <details class="rc-acc" id="rc-acc" open>
     <summary>Filtres et tri <span class="rc-nb" id="rc-nb-filtres"></span></summary>
+    <div class="rc-presets" id="rc-presets" role="group" aria-label="Préréglages">
+      <span class="rc-presets-lib">Préréglages</span>
+      <button type="button" data-preset="chasse">Chasse</button>
+      <button type="button" data-preset="veille">Veille</button>
+      <button type="button" data-preset="comparaison">Comparaison</button>
+      <button type="button" data-preset="verification">Vérification</button>
+    </div>
+    <p class="sous rc-preset-txt" id="rc-preset-txt" hidden></p>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>
@@ -186,7 +194,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
       </select></label>
     </div>
     <div class="rc-rapides" role="group" aria-label="Filtres rapides">
-      <label class="rc-filtre"><input type="checkbox" id="rc-trouver"><span>★ À trouver</span></label>
+      <label class="rc-filtre"><input type="checkbox" id="rc-trouver"><span>★ À trouver <b id="rc-nb-trouver"></b></span></label>
       <label class="rc-filtre"><input type="checkbox" id="rc-pep"><span>Pépites</span></label>
       <label class="rc-filtre"><input type="checkbox" id="rc-bon"><span>Pas cher et mieux</span></label>
       <label class="rc-filtre"><input type="checkbox" id="rc-sans"><span>Sans réserve</span></label>
@@ -230,6 +238,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
           <option value="tres_bon">Très bon</option>
         </select></label>
         <label class="pp-tri"><span>Prix de</span><input type="number" id="rc-pmin" inputmode="decimal" min="0" step="1" placeholder="0" class="rc-prix-champ"> <span>à</span> <input type="number" id="rc-pmax" inputmode="decimal" min="0" step="1" placeholder="999" class="rc-prix-champ"> <span>€</span></label>
+        <label class="case"><input type="checkbox" id="rc-verif"><span>À vérifier seulement</span></label>
         <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
       </div>
     </div>

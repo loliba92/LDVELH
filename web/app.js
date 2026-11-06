@@ -210,7 +210,7 @@
     $('#reinit').addEventListener('click', () => { const { h, vue, tri, g, onglet } = S; S = { ...defaut(), h, vue, tri, g, onglet }; synchroniser(); changer(); });
     $('#bascule').addEventListener('click', () => basculerSelecteur());
     $('#fiche').addEventListener('click', (e) => { if (e.target === $('#fiche')) $('#fiche').close(); });
-    $('#fiche').addEventListener('close', () => { inviterApresFiches(); const id = RETOUR_FICHE; RETOUR_FICHE = ''; if (!id) return; setTimeout(() => { const el = document.querySelector(`[data-id="${id.replace(/"/g, '')}"]`); if (el) el.focus({ preventScroll: true }); }, 0); });
+    $('#fiche').addEventListener('close', () => { inviterApresFiches(); if (RETOUR_PAGE) { const v = RETOUR_PAGE; RETOUR_PAGE = ''; location.replace(v); return; } const id = RETOUR_FICHE; RETOUR_FICHE = ''; if (!id) return; setTimeout(() => { const el = document.querySelector(`[data-id="${id.replace(/"/g, '')}"]`); if (el) el.focus({ preventScroll: true }); }, 0); });
     window.addEventListener('hashchange', () => {
       const h = location.hash.slice(1);
       if (h && !h.includes('=')) return;      // simple ancre de section (#cote, #apropos…) : les filtres restent
@@ -294,6 +294,9 @@
     const h = p.toString();
     history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
   }
+  // Fiche ouverte depuis la page Annonces : à la fermeture, on retourne sur cette page (filtres et position remis par la page)
+  let RETOUR_PAGE = '';
+  try { if (/#fiche=/.test(location.hash)) RETOUR_PAGE = sessionStorage.getItem('cdh-retour-fiche') || ''; sessionStorage.removeItem('cdh-retour-fiche'); } catch (e) { /* sans stockage : retour à l'étagère */ }
   let FICHE_URL = '', CORR_URL = false;     // « #fiche=<id>&corriger=1 » : ouvre la fiche (et son bloc « Corriger la fiche » pour un niveau2)
   function lireAdresse() {
     const p = new URLSearchParams(location.hash.slice(1));
