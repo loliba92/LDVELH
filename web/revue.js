@@ -864,6 +864,7 @@
     const pepRc = $('#rc-pep'), bonRc = $('#rc-bon'), serieRc = $('#rc-serie'), editionRc = $('#rc-edition'), editeurRc = $('#rc-editeur'), etatfRc = $('#rc-etatf'), pminRc = $('#rc-pmin'), tempRc = $('#rc-temp'), pmaxRc = $('#rc-pmax'), effacerRc = $('#rc-effacer'), nbPlus = $('#rc-nb-filtres');
     const boutonsQuand = [...document.querySelectorAll('#rc-quand [data-quand]')], boutonsVue = [...document.querySelectorAll('#rc-vue [data-vue]')];
     let modeVue = 'grille', periode = 'tout';
+    const accRc = $('#rc-acc'); if (accRc && window.matchMedia('(max-width: 600px)').matches) accRc.open = false;          // replié sur téléphone, ouvert sur ordinateur
     boutonsQuand.forEach((b) => b.addEventListener('click', () => { periode = b.dataset.quand; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); limite = 60; dessinerRecues(); }));
     try { const m = localStorage.getItem('cdh-annonces-vue'); if (m === 'liste' || m === 'grille') modeVue = m; } catch (e) { /* sans stockage : jaquettes */ }
     boutonsVue.forEach((b) => { b.setAttribute('aria-pressed', String(b.dataset.vue === modeVue)); b.addEventListener('click', () => { modeVue = b.dataset.vue; boutonsVue.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); try { localStorage.setItem('cdh-annonces-vue', modeVue); } catch (e) { /* tant pis */ } limite = 60; dessinerRecues(); }); });
@@ -997,7 +998,8 @@
         && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))
         .sort(comparerRc(triRc ? triRc.value : 'recent'));
       const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, tempRc && tempRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
-      if (nbPlus) nbPlus.textContent = dansPlus ? `(${dansPlus})` : '';
+      const actifs = dansPlus + [periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
+      if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
       if (effacerRc) effacerRc.hidden = !(dansPlus || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">

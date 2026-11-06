@@ -2678,3 +2678,9 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-t-pale { opacity: .6; border-style: dashed; }
 .an-temprow { display: flex; align-items: center; min-height: 1.6em; }
 .an-liq { color: var(--muted); }
+.rc-acc { margin: 8px 0; border: 1px solid var(--line); border-radius: var(--r); padding: 0 12px; }
+.rc-acc > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 8px; color: var(--gold); font: 700 var(--t-base) var(--f-ui); }
+.rc-acc[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.rc-acc .pp-outils:first-of-type { margin-top: 4px; }
+.rc-acc .rc-plus { margin: 4px 0 12px; }
+@media (max-width: 600px) { .rc-periode { display: flex; width: 100%; gap: 6px; flex-wrap: nowrap; margin: 4px 0 8px; } .rc-vue { margin: 4px 0 8px; } .rc-periode button { flex: 1 1 auto; padding: 4px 6px; font-size: .9rem; white-space: nowrap; } }
