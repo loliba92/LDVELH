@@ -937,16 +937,30 @@
     };
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
-    const quandRc = (a) => (heureConnue({ premiere: a.premiere }) ? new Date(a.premiere).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·') : a.vue ? jourCourt(a.vue) : '');
     // Ordres de tri : date et heure d'apparition (à défaut, dernier jour vu), série et numéro, prix, écart au prix du site, origine
-    const quandCle = (a) => a.premiere || a.vue || '';
-    // Jour d'arrivée (heure de Paris) : « Aujourd'hui » = le jour même, « Cette semaine » = les 7 derniers jours
+    // Date de publication de l'annonce (donnée par le relevé : eBay, Leboncoin, Vinted) ; à défaut, le jour où le site l'a vue pour la première fois (donnée estimée)
     const jourParis = (d) => d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-    const jourArrivee = (a) => { const c = quandCle(a); return c.length > 10 && !Number.isNaN(Date.parse(c)) ? jourParis(new Date(c)) : c.slice(0, 10); };
+    const ecartJours = (iso) => Math.round((Date.parse(jourParis(new Date()) + 'T12:00:00Z') - Date.parse(iso.slice(0, 10) + 'T12:00:00Z')) / 86400000);
+    function fraicheurDe(a) {
+      if (a.publiee) return { jours: Math.max(0, ecartJours(a.publiee)), estime: false };
+      if (a.fam === 'vinted' && a.premiere) { const c = a.premiere; const j = c.length > 10 && !Number.isNaN(Date.parse(c)) ? jourParis(new Date(c)) : c.slice(0, 10); return { jours: Math.max(0, ecartJours(j)), estime: true }; }
+      return { jours: null, estime: false };
+    }
+    const quandCle = (a) => (a.publiee || (a.premiere || a.vue || '').slice(0, 10)) + '|' + (a.premiere || '');
+    const ageTexte = (a) => {
+      if (a.ageJ == null) return 'date inconnue';
+      const n = a.ageJ, base = a.ageEstime ? 'vue' : 'publiée';
+      if (n === 0) return `${base} aujourd'hui`;
+      if (n === 1) return `${base} hier`;
+      if (n < 60) return `${base} il y a ${n}\u00a0j`;
+      return `${base} il y a ${Math.round(n / 30)}\u00a0mois`;
+    };
+    const ageClasse = (a) => (a.ageJ == null || a.ageEstime ? 'an-age-x' : a.ageJ <= 2 ? 'an-age-vert' : a.ageJ <= 14 ? 'an-age-neutre' : a.ageJ <= 30 ? 'an-age-moyen' : 'an-age-ancien');
+    const ageHtml = (a) => `<span class="an-age ${ageClasse(a)}"${a.publiee ? ` title="Publiée le ${esc(new Date(a.publiee + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }))}"` : ''}>${esc(ageTexte(a))}</span>`;
     const dansPeriode = (a) => {
       if (periode === 'tout') return true;
-      const j = jourArrivee(a);
-      return periode === 'auj' ? j === jourParis(new Date()) : j >= jourParis(new Date(Date.now() - 6 * 86400000));
+      if (a.ageJ == null) return false;
+      return periode === 'auj' ? a.ageJ === 0 : a.ageJ <= 6;
     };
     const parRecent = (a, b) => quandCle(b).localeCompare(quandCle(a)) || a.prix - b.prix;
     const numeroDe = (a) => parseInt(a.ed.numero, 10) || 0;
@@ -980,8 +994,8 @@
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '' });
-          toutes[toutes.length - 1].nouveau = nouvelle(toutes[toutes.length - 1]);
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
+          { const z = toutes[toutes.length - 1]; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
       });
       TOUTES_RC = toutes; redessinerCapt();
@@ -1025,7 +1039,7 @@
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${quandRc(a) ? `<span class="rc-quand">${esc(quandRc(a))}</span>` : ''}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
       </article>`;
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
@@ -1039,7 +1053,7 @@
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
           ${a.pub != null ? `<span class="an-site">site ${eur(a.pub)} · ${ecartHtml(a)}</span>` : ''}
           ${barrePrix(a)}
-          <span class="an-meta">${ABR_ETAT[a.cle]} · ${NOM[a.fam]}${quandRc(a) ? ' · ' + esc(quandRc(a)) : ''}${a.partie ? ' · plus vue' : ''}</span>
+          <span class="an-meta">${ABR_ETAT[a.cle]} · ${NOM[a.fam]} · ${ageHtml(a)}${a.partie ? ' · plus vue' : ''}</span>
         </article>`;
       };
       const page = vues.slice(0, limite);

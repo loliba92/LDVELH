@@ -320,3 +320,21 @@ class TestPrixTbeEnVente(unittest.TestCase):
         self.assertEqual(export_site.prix_tbe_en_vente(15.5), 10.85)
         self.assertEqual(export_site.prix_tbe_en_vente(13.9), 9.73)
         self.assertEqual(export_site.prix_tbe_en_vente(10), 7.0)
+
+
+class TestPubliees(unittest.TestCase):
+    def test_date_de_publication_du_premier_releve(self):
+        d = Path(tempfile.mkdtemp())
+        (d / "annonces-2026-10-21.csv").write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par\n111,bon,10.00,A,http://a,5,isbn\n", encoding="utf-8")
+        (d / "annonces-2026-10-23.csv").write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par\n111,bon,10.00,A,http://a,7,isbn\n", encoding="utf-8")
+        pub = {}
+        annonces_cumulees(sorted(d.glob("annonces-*.csv")), publiees=pub)
+        self.assertEqual(pub, {"http://a": "2026-10-16"})
+
+    def test_age_inconnu_ou_vinted_a_zero_ne_donne_pas_de_date(self):
+        d = Path(tempfile.mkdtemp())
+        (d / "annonces-2026-10-21.csv").write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par\n"
+                                                    "111,bon,10.00,A,http://a,,isbn\n111,bon,10.00,B,http://b,0,vinted\n111,bon,10.00,C,http://c,0,isbn\n", encoding="utf-8")
+        pub = {}
+        annonces_cumulees(sorted(d.glob("annonces-*.csv")), publiees=pub)
+        self.assertEqual(pub, {"http://c": "2026-10-21"})
