@@ -114,6 +114,21 @@
    "recalibre": false
   },
   {
+   "id": "9791040809630",
+   "isbn13": "9791040809630",
+   "titre": "Reine des dragons",
+   "serie": "Reine",
+   "numero": "2",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 19.9,
+   "apres": 14.5,
+   "pct": -0.271,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070519040",
    "isbn13": "9782070519040",
    "titre": "Le Démon des Profondeurs",
@@ -172,9 +187,24 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9791040809630",
+   "isbn13": "9791040809630",
+   "titre": "Reine des dragons",
+   "serie": "Reine",
+   "numero": "2",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 12.59,
+   "apres": 11.19,
+   "pct": -0.111,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 13,
  "modele": {
   "actif": false,
   "n_paires": 128,

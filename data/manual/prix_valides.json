@@ -2373,6 +2373,24 @@
    "le": "2026-11-01",
    "par": "loliba (superadmin)"
   },
+  "9791040809630|bon": {
+   "prix": 11.19,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9791040809630|convenable": {
+   "prix": 7.7,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
+  "9791040809630|tres_bon": {
+   "prix": 14.5,
+   "decision": "corrige",
+   "le": "2026-11-06",
+   "par": "loliba (superadmin)"
+  },
   "9791097577025|convenable": {
    "prix": 6.0,
    "decision": "corrige",
