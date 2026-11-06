@@ -1369,7 +1369,7 @@
   // pour savoir d'un coup d'œil quand le dernier a tourné et s'il a réussi. Gardé cinq minutes dans le navigateur.
   // Lots automatiques suivis : fichier du lot, nom affiché, et ce qu'il fait (pour les pastilles de l'accueil, niveau 3 seul)
   const FAMILLES = [
-    ['prix-ebay.yml', 'Relevé des prix', 'Met à jour les cotes à partir des annonces eBay et des prix en librairie. Un jour sur deux, vers 6 h, ou à la demande ; environ 1 h 30.'],
+    ['prix-ebay.yml', 'Import eBay', 'Met à jour les cotes à partir des annonces eBay et des prix en librairie. Chaque jour vers 6 h : balayage rapide, et relevé complet (environ 1 h 30) un jour sur deux ; ou à la demande.'],
     ['releve-leboncoin.yml', 'Import Leboncoin', 'Met la cote à jour avec les annonces reçues du bot sur Leboncoin. La date est celle de la dernière réception ; orange après 2 h sans import, de 6 h à 23 h.'],
     ['releve-leboncoin.yml', 'Import Vinted', 'Met la cote à jour avec les annonces reçues du bot sur Vinted. La date est celle de la dernière réception ; orange après 2 h sans import, de 6 h à 23 h.'],
     ['ajout-isbn.yml', 'Ajout de livres', 'Ajoute au site les livres envoyés depuis la page « Ajouter des livres ».'],
@@ -1510,12 +1510,13 @@
     const CLE = 'cdh-rv-lots2';
     const lire = () => { try { const c = JSON.parse(sessionStorage.getItem(CLE) || 'null'); if (c && Date.now() - c.t < 300000) return Promise.resolve(c.runs); } catch (e) { /* pas de cache */ }
       return Promise.all(FAMILLES.map(([f]) => fetch(`https://api.github.com/repos/loliba92/LDVELH/actions/workflows/${f}/runs?per_page=5`, { headers: { Accept: 'application/vnd.github+json' } })
-        .then((r) => (r.ok ? r.json() : { workflow_runs: [] })).then((d) => { const l = d.workflow_runs || []; const x = l[0] || null; if (x) x.reussi = l.find((y) => y.status === 'completed' && y.conclusion === 'success') || null; return x; }).catch(() => null)))
+        .then((r) => (r.ok ? r.json() : { illisible: true })).then((d) => { if (d.illisible) return { illisible: true }; const l = d.workflow_runs || []; const x = l[0] || null; if (x) x.reussi = l.find((y) => y.status === 'completed' && y.conclusion === 'success') || null; return x; }).catch(() => ({ illisible: true }))))
         .then((l) => {
           const runs = {};
-          l.forEach((x, i) => { if (x) runs[FAMILLES[i][0]] = { st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at, u: x.html_url, ok: x.reussi ? x.reussi.updated_at : null }; });
-          if (!Object.keys(runs).length) throw new Error('indisponible');
-          try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ }
+          let illisibles = 0;
+          l.forEach((x, i) => { if (x && x.illisible) { illisibles += 1; runs[FAMILLES[i][0]] = { illisible: true }; return; } if (x) runs[FAMILLES[i][0]] = { st: x.status, c: x.conclusion, t: x.status === 'completed' ? x.updated_at : x.run_started_at, u: x.html_url, ok: x.reussi ? x.reussi.updated_at : null }; });
+          if (!Object.keys(runs).length || illisibles === FAMILLES.length) throw new Error('indisponible');
+          if (!illisibles) try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), runs })); } catch (e) { /* idem */ }          // une lecture refusée n'est pas gardée : elle est retentée au prochain affichage
           return runs;
         }); };
     lire().then((runs) => {
@@ -1523,6 +1524,7 @@
       const quand = (r) => { const d = new Date(r.t); return `${depuisMin(d)} (${d.toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })})`; };
       const lots = FAMILLES.map(([f, nom, aide], i) => {
         const r = runs[f];
+        if (r && r.illisible) return { nom, aide, cls: 'vide', quand: 'non lisible pour le moment (limite GitHub)', txt: 'non lisible pour le moment', u: '', detail: '', discret: f === DISCRET, imports: false, source: null };
         const source = f === 'releve-leboncoin.yml' && nom === 'Import Leboncoin' ? 'leboncoin' : f === 'releve-leboncoin.yml' && nom === 'Import Vinted' ? 'vinted' : null;
         if (!r) return { nom, aide, cls: 'vide', quand: 'pas d\'exécution récente', txt: 'pas d\'exécution récente', u: '', detail: '', discret: f === DISCRET, imports: source || (f === IMPORTS_LBC || f === IMPORTS_VINTED), source };
         const [txt, cls] = etat(r), d = new Date(r.t), jours = (Date.now() - d.getTime()) / 86400000;
