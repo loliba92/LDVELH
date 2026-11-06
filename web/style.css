@@ -2766,3 +2766,5 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .opp-carte .opp-chiffres { font-size: var(--t-base); }
 .opp-carte .opp-bas { margin: 6px 0 0; font-size: var(--t-sm); color: var(--muted); }
 .opp-carte .opp-fiab { font-size: var(--t-xs); }
+.opp-carte .opp-marche { margin: 6px 0 0; color: var(--text); font-size: var(--t-sm); line-height: 1.4; }
+.opp-carte .opp-raison { margin: 4px 0 0; color: #f0a5b0; font-size: var(--t-sm); line-height: 1.4; }
