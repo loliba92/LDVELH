@@ -151,6 +151,11 @@ def _revue_prix():
 
 
 RECUES_ONGLET = '''  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>'''
+ANALYSE_ONGLET = '''  <button type="button" role="tab" data-pane="analyse" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analyse</span></button>'''
+ANALYSE_PANNEAU = '''<div class="rv-pane" id="pane-analyse" role="tabpanel" hidden>
+  <p class="chapeau">Le rythme des annonces captées chaque jour, par origine, avec le jour en cours. Réservé à Zagor.</p>
+  <div class="captures-zone" id="captures-analyse"></div>
+</div>'''
 INDICE_ONGLET = '''  <button type="button" role="tab" data-pane="indice" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Indice</span></button>'''
 INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden>
   <p class="chapeau">Indice de marché par édition, au dernier relevé (100 au premier jour mesuré). Suivi interne : il n'entre dans aucun prix.</p>
@@ -158,10 +163,10 @@ INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden
   <div id="ind-liste"></div>
 </div>'''
 RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden>
-  <p class="chapeau">Toutes les annonces (eBay, Leboncoin, Vinted, librairies, revendeurs), pas seulement les bonnes affaires. Chaque ligne indique l'origine et la date. Changez l'ordre avec « Trier par ».</p>
-  <div class="captures-zone" id="captures-recues"></div>
+  <p class="chapeau">Voici les annonces captées par le site, toutes origines confondues. <strong>La Cote du Héros n'est affiliée à aucun site de vente</strong> : nous restons neutres.</p>
   <div class="pp-barre">
     <p class="sous" id="rc-etat" role="status" aria-live="polite"></p>
+    <div class="rv-onglets rc-vue" id="rc-vue" role="group" aria-label="Affichage des annonces"><button type="button" data-vue="grille" aria-pressed="true">Jaquettes</button><button type="button" data-vue="liste" aria-pressed="false">Liste</button></div>
     <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
@@ -192,6 +197,7 @@ RECUES_PANNEAU = '''<div class="rv-pane" id="pane-recues" role="tabpanel" hidden
         <option value="cher">Très chers</option>
       </select></label>
       <label class="case"><input type="checkbox" id="rc-trouver"><span>Mes « à trouver » seulement</span></label>
+      <label class="case"><input type="checkbox" id="rc-new"><span>Nouvelles (24 h)</span></label>
       <label class="case"><input type="checkbox" id="rc-sans"><span>Sans point à vérifier</span></label>
       <label class="case"><input type="checkbox" id="rc-enligne" checked><span>Revues au dernier relevé seulement</span></label>
     </div>
@@ -213,9 +219,10 @@ def _butin():
         if l.startswith("<h1>Prix et corrections"):
             l = "<h1>Butins et Annonces</h1>"
         if 'data-pane="pepites"' in l:
-            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">') + "\n" + RECUES_ONGLET
+            l = l.replace(' aria-selected="false" hidden>', ' aria-selected="true">') + "\n" + RECUES_ONGLET + "\n" + ANALYSE_ONGLET
         if l.startswith('<div class="rv-pane" id="pane-ajout"'):
             lignes.append(RECUES_PANNEAU)
+            lignes.append(ANALYSE_PANNEAU)
         lignes.append(l)
     return "\n".join(lignes)
 
