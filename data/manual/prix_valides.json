@@ -2980,6 +2980,24 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782253042358|bon": {
+   "prix": 11.6,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782253042358|convenable": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782253042358|tres_bon": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
   "9782352946434|convenable": {
    "prix": 8.0,
    "decision": "corrige",
