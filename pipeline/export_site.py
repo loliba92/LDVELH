@@ -94,6 +94,29 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
 
 JOURS_VINTED = 14          # même règle que Leboncoin : en ligne tant que le bot ne la signale pas vendue
 JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n'est pas signalée vendue : le bot ne revoit que les 50 plus récentes, une annonce plus ancienne n'y reparaît pas. Écartée après 14 jours sans être revue
+def annonces_marche(dossier):
+    """{isbn13: {état: [prix des annonces en ligne]}} d'après les relevés eBay, Leboncoin et Vinted, avec les mêmes règles que la liste des annonces :
+    eBay en ligne s'il a été revu au dernier relevé, Leboncoin et Vinted en ligne jusqu'à preuve du contraire (voir JOURS_LEBONCOIN, JOURS_VINTED)
+    et tant qu'ils ne sont pas signalés vendus. Les offres de librairie et des revendeurs n'entrent pas ici. Sert à ne pas laisser une cote au-dessus du marché."""
+    sortie = {}
+    def ajouter(liste_par_isbn):
+        for isbn, par_etat in liste_par_isbn.items():
+            for etat, lignes in par_etat.items():
+                sortie.setdefault(isbn, {}).setdefault(etat, []).extend(l[0] for l in lignes)
+    fichiers_ebay = sorted(f for f in dossier.glob("annonces-*.csv") if not any(src in f.name for src in importer_leboncoin.SOURCES))
+    if fichiers_ebay:
+        dernier = fichiers_ebay[-1].stem[-10:]
+        ajouter({isbn: {e: [l for l in lignes if l[4] >= dernier] for e, lignes in par_etat.items()} for isbn, par_etat in annonces_cumulees(fichiers_ebay).items()})
+    for source, jours, fichier_vendus in (("leboncoin", JOURS_LEBONCOIN, "vendus-leboncoin-20*.csv"), ("vinted", JOURS_VINTED, "vendus-vinted-20*.csv")):
+        vendus = set()
+        for f in dossier.glob(fichier_vendus):
+            with open(f, newline="", encoding="utf-8") as fh:
+                vendus.update(r["lien"] for r in csv.DictReader(fh))
+        ajouter({isbn: {e: [l for l in lignes if l[2] not in vendus] for e, lignes in par_etat.items()}
+                 for isbn, par_etat in annonces_cumulees(sorted(dossier.glob(f"annonces-{source}-20*.csv")), jours=jours).items()})
+    return sortie
+
+
 def duree_en_ligne(source, type_prix, jour, aujourdhui, vente_le=None):
     """Jours pendant lesquels une annonce Leboncoin ou Vinted est présumée en ligne, d'après la règle du site (en ligne jusqu'à preuve du contraire,
     14 jours au plus, voir JOURS_LEBONCOIN). Le bot ne revoit pas les annonces : la durée est l'âge de la capture. 0 si elle est inconnue, trop
@@ -483,6 +506,13 @@ def main():
     for par_etat in sans_valide.values():
         etats.repartir(par_etat, ratios)
         etats.completer(par_etat, ratios)
+    # Marché : une cote non validée au-dessus de toutes les annonces en ligne de son état (au moins 2) est ramenée à leur médiane avant le lissage,
+    # qui l'y rapproche chaque jour (un prix validé ou le prix du neuf n'est jamais touché).
+    isbn_de = {r["version_key"]: r["isbn13"] for r in cx.execute(REQUETE) if r["isbn13"]}
+    marche = annonces_marche(DB.parent.parent / "raw" / "occasion") if args.db == DB else {}
+    nb_plafonnes = sum(etats.plafonner_au_marche(par_etat, marche.get(isbn_de.get(vk), {})) for vk, par_etat in prix.items())
+    for vk, par_etat in sans_valide.items():
+        etats.plafonner_au_marche(par_etat, marche.get(isbn_de.get(vk), {}))
     # Lissage quotidien : le prix du jour dépend de celui de la veille (voir etats.lisser). Appliqué à partir du 22 octobre 2026, après la
     # remise à zéro du relevé du 21 (annonces d'autres objets retirées), pour ne pas bloquer cette correction.
     nb_lisses = 0
@@ -491,11 +521,13 @@ def main():
         if veilles:
             veille = max(veilles, key=lambda h: h["date"])["prix"]
             gains = etats.charger_gains(DB.parent.parent / "manual" / "ratios_etats.json")
-            isbn_de = {r["version_key"]: r["isbn13"] for r in cx.execute(REQUETE) if r["isbn13"]}
             for vk, par_etat in prix.items():
                 isbn_v = isbn_de.get(vk)
                 if isbn_v:
                     nb_lisses += etats.lisser(par_etat, {e: veille.get(f"{isbn_v}|{e}") for e in ETATS}, gains)
+    nb_coherents = sum(etats.lisser_coherence(par_etat) for par_etat in prix.values())          # cohérence des trois états, biais à la baisse
+    for par_etat in sans_valide.values():
+        etats.lisser_coherence(par_etat)
     nb_ajustes = sum(aligner(par_etat, ecart) for par_etat in prix.values())
     for par_etat in sans_valide.values():
         aligner(par_etat, ecart)
@@ -528,7 +560,7 @@ def main():
             "prix": {e: (p.get(e) or {}).get("prix") for e in ETATS},
             **({"prix_editeur": editeur[isbn]} if isbn and isbn in editeur else {}),
             "nb_obs": {e: len(brut.get(r["version_key"], {}).get(e, [])) for e in ETATS},
-            "prix_info": {e: {**{k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "par", "neuf") if k in p[e]},
+            "prix_info": {e: {**{k: p[e][k] for k in ("source", "nature", "nb", "date", "confiance", "ajuste", "recalibre", "deduit", "repartition", "valide", "calcule", "decision", "par", "neuf", "plafonne_marche", "coherence") if k in p[e]},
                               **({"sans_validation": [round(sv["prix"], 2), sv.get("source")]} if p[e].get("valide") and (sv := (sans_valide.get(r["version_key"], {}).get(e) or {})).get("prix") else {})}
                           for e in ETATS if p.get(e)},
         })
@@ -545,6 +577,7 @@ def main():
         base = mouvements.instantane(base_versions, max(dates_arch) if dates_arch else args.aujourdhui)
         mv = mouvements.mettre_a_jour(versions, args.aujourdhui, base, modele, hist_chemin, sortie / "mouvements.json")
         print(f"Prix validés par le propriétaire appliqués : {nb_valides}")
+        print(f"Marché : {nb_plafonnes} cote(s) ramenée(s) à la médiane des annonces en ligne ; cohérence des états : {nb_coherents} prix ajusté(s)")
         print(f"États répartis 40/60 sur les éditions à prix actuel : {nb_repartis} prix modifiés ; états déduits pour les autres : {nb_deduits} ({ratios})")
         print(f"Annonces de toutes anciennetés ajoutées à la cote : {nb_toutes} lignes (décotes : {decotes}) ; incertitude de l'archive apprise : {sig_arch}")
         print(f"Mouvements depuis {mv['precedent']} : {mv['nb_modifiees']} prix modifiés sur {mv['nb_comparees']}, "

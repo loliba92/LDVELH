@@ -141,6 +141,78 @@ def lisser(par_etat, precedents, gains=GAINS_DEFAUT):
     return n
 
 
+# Cohérence et marché, intégrées au calcul : les trois états d'une édition restent cohérents entre eux et ne dépassent pas les annonces en ligne.
+BIAIS_BAISSE = 5          # relever un prix coûte 5 fois plus cher que le baisser : l'écart se comble surtout en baissant le prix trop haut
+CONVENABLE_MAX = 0.85     # le convenable ne dépasse pas 85 % du bon état
+TBE_MAX = 1.9             # le très bon état ne dépasse pas 1,9 fois le bon état
+MARGE_MARCHE = 1.05       # une cote est « au-dessus du marché » au-delà de 5 % de l'annonce la plus chère
+MIN_ANNONCES_MARCHE = 2   # en dessous de 2 annonces en ligne, on laisse le lissage faire le travail
+
+
+def plafonner_au_marche(par_etat, annonces):
+    """Cible d'un état (avant lissage) ramenée à la médiane de ses annonces en ligne quand elle les dépasse de plus de 5 % et que l'état a au moins
+    2 annonces. annonces : {état: [prix des annonces en ligne]}. Un prix validé et le prix du neuf (règle du propriétaire) ne sont jamais touchés.
+    Les annonces à 3 fois le très bon état ou plus sont écartées. Renvoie le nombre d'états ramenés."""
+    n = 0
+    tbe = (par_etat.get("tres_bon") or {}).get("prix")
+    for e in ETATS:
+        v = par_etat.get(e)
+        if not v or not v.get("prix") or v.get("source") in ("validé", "neuf") or v.get("neuf"):
+            continue
+        prix = [p for p in annonces.get(e, []) if not (tbe and p >= 3 * tbe)]
+        if len(prix) >= MIN_ANNONCES_MARCHE and v["prix"] > MARGE_MARCHE * max(prix):
+            par_etat[e] = {**v, "prix": round(statistics.median(prix), 2), "source": "actuel", "nature": "annonces", "nb": len(prix),
+                           "confiance": "faible", "plafonne_marche": True, "deduit": False}
+            n += 1
+    return n
+
+
+def _poids_coherence(v):
+    if v.get("source") == "validé":
+        return 1000.0                                 # prix du propriétaire : jamais déplacé
+    if v.get("source") == "neuf" or v.get("neuf"):
+        return 10.0
+    if v.get("source") == "archives" or v.get("deduit"):
+        return 0.5
+    return 1.0 + min(v.get("nb") or 0, 5)
+
+
+def lisser_coherence(par_etat):
+    """Ajustement minimal des trois états : déplacés le moins possible (en pourcentage), les mieux appuyés le moins, avec un biais à la baisse.
+    Contraintes : convenable ≤ 85 % du bon état ; bon état ≤ très bon état ≤ 1,9 fois le bon état. Renvoie le nombre d'états déplacés (au moins 2 %)."""
+    ks = [e for e in ETATS if par_etat.get(e) and par_etat[e].get("prix")]
+    if len(ks) < 2:
+        return 0
+    u = {k: math.log(par_etat[k]["prix"]) for k in ks}
+    w = {k: _poids_coherence(par_etat[k]) for k in ks}
+    cons = [("convenable", "bon", math.log(1 / CONVENABLE_MAX), math.inf), ("bon", "tres_bon", 0.0, math.log(TBE_MAX)),
+            ("convenable", "tres_bon", math.log(1 / CONVENABLE_MAX), math.inf)]
+    cons = [c for c in cons if c[0] in ks and c[1] in ks]
+    for _ in range(200):
+        ok = True
+        for bas, haut, mn, mx in cons:
+            d = u[haut] - u[bas]
+            cible = mn if d < mn - 1e-9 else mx if d > mx + 1e-9 else None
+            if cible is None:
+                continue
+            ok = False
+            g = cible - d
+            wb = w[bas] * (BIAIS_BAISSE if g < 0 else 1)
+            wh = w[haut] * (BIAIS_BAISSE if g > 0 else 1)
+            u[haut] += g * wb / (wb + wh)
+            u[bas] -= g * wh / (wb + wh)
+        if ok:
+            break
+    n = 0
+    for k in ks:
+        nouveau = round(math.exp(u[k]), 2)
+        avant = par_etat[k]["prix"]
+        if abs(nouveau / avant - 1) >= 0.02:
+            par_etat[k] = {**par_etat[k], "prix": nouveau, "coherence": True}
+            n += 1
+    return n
+
+
 def rapports_mesures(triplets):
     """triplets : [(convenable, bon, tres_bon)] d'éditions où les trois états ont un prix. Médianes des rapports à titre indicatif."""
     if not triplets:
