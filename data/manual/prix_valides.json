@@ -2723,6 +2723,24 @@
    "decision": "confirme",
    "le": "2026-10-15"
   },
+  "9782070662241|bon": {
+   "prix": 4.24,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782070662241|convenable": {
+   "prix": 2.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782070662241|tres_bon": {
+   "prix": 8.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
   "9782070662258|convenable": {
    "prix": 4.0,
    "decision": "corrige",

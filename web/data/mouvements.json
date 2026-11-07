@@ -2,7 +2,7 @@
  "date": "2026-11-07",
  "precedent": "2026-11-06",
  "nb_comparees": 1512,
- "nb_modifiees": 992,
+ "nb_modifiees": 993,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -99,6 +99,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070662241",
+   "isbn13": "9782070662241",
+   "titre": "Le Captif du Roi-Sorcier",
+   "serie": "Loup Solitaire",
+   "numero": "611",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 5.56,
+   "apres": 2.0,
+   "pct": -0.64,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070335398",
    "isbn13": "9782070335398",
    "titre": "Les Prisonniers du Temps",
@@ -189,6 +204,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070662241",
+   "isbn13": "9782070662241",
+   "titre": "Le Captif du Roi-Sorcier",
+   "serie": "Loup Solitaire",
+   "numero": "611",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 6.4,
+   "apres": 4.24,
+   "pct": -0.338,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333639",
    "isbn13": "9782070333639",
    "titre": "Le Temps de la Malédiction",
@@ -247,39 +277,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070509485",
-   "isbn13": "9782070509485",
-   "titre": "Les Maîtres des Ténèbres",
-   "serie": "Loup Solitaire",
-   "numero": "290",
-   "version": "V2",
-   "etat": "tres_bon",
-   "avant": 16.47,
-   "apres": 12.85,
-   "pct": -0.22,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070506743",
-   "isbn13": "9782070506743",
-   "titre": "Les Cryptes de la Terreur",
-   "serie": "Loup*Ardent",
-   "numero": "319",
-   "version": "V2",
-   "etat": "tres_bon",
-   "avant": 14.62,
-   "apres": 11.42,
-   "pct": -0.219,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 59,
+ "nb_grands_mouvements": 61,
  "modele": {
   "actif": false,
   "n_paires": 128,
