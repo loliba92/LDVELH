@@ -435,6 +435,7 @@
     $('#compte').textContent = `${liste.length} livre${liste.length > 1 ? 's' : ''} sur ${DATA.length}`;
     $('#nb-onglet').textContent = String(liste.length);
     majHorsLot(liste);
+    majIncohLot(liste);
     afficherCote(liste);
     afficherHisto();
     afficherCollection();
@@ -930,6 +931,69 @@
     } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
     return false;
   }
+  // Lissage de cohérence (livres « Prix à vérifier ») : les trois cotes sont déplacées le moins possible, en pourcentage, pour que le convenable reste à 85 % du bon état
+  // au plus et le très bon état à 1,9 fois le bon état au plus. Plus une cote est appuyée (prix validé, annonces, prix du neuf), moins elle bouge ; une archive bouge davantage.
+  const LISSAGE_LOT_MAX = 0.25;          // au-delà de 25 % de variation, le livre se corrige depuis sa fiche
+  function lissageCoherence(b) {
+    const ks = ETATS.map((e) => e.k).filter((k) => b.prix[k] != null);
+    if (ks.length < 2) return null;
+    const u = {}, w = {}, L = Math.log, r2 = (v) => Math.round(v * 100) / 100;
+    ks.forEach((k) => { const i = infoPrix(b, k) || {}; u[k] = L(b.prix[k]); w[k] = i.valide ? 4 : i.source === 'neuf' ? 10 : (i.source === 'archives' || i.deduit) ? 0.5 : 1 + Math.min(i.nb || 0, 5); });
+    const cons = [['convenable', 'bon', L(1 / 0.85), Infinity], ['bon', 'tres_bon', 0, L(1.9)], ['convenable', 'tres_bon', L(1 / 0.85), Infinity]].filter(([x, y]) => ks.includes(x) && ks.includes(y));
+    for (let it = 0; it < 200; it += 1) {
+      let ok = true;
+      cons.forEach(([bas, haut, mn, mx]) => {
+        const d = u[haut] - u[bas], cible = d < mn - 1e-9 ? mn : d > mx + 1e-9 ? mx : null;
+        if (cible === null) return;
+        ok = false;
+        const g = cible - d, wb = w[bas], wh = w[haut];          // l'écart est comblé en proportion inverse du poids
+        u[haut] += g * wb / (wb + wh); u[bas] -= g * wh / (wb + wh);
+      });
+      if (ok) break;
+    }
+    const nv = {}, change = new Set();
+    let ampleur = 0;
+    ks.forEach((k) => { nv[k] = r2(Math.exp(u[k])); const v = Math.abs(nv[k] / b.prix[k] - 1); ampleur = Math.max(ampleur, v); if (v >= 0.02) change.add(k); });
+    if (!change.size) return null;
+    if (change.has('convenable') && change.has('tres_bon')) change.add('bon');          // le lot recalculerait sinon le bon état entre les deux
+    const lot = ETATS.map((e) => (change.has(e.k) ? String(nv[e.k]) : ''));
+    return { nv, change, ampleur, ligne: `${b.isbn13} ; ${lot.join(' ; ')}`, texte: ETATS.filter((e) => change.has(e.k)).map((e) => `${e.nom || e.court} ${fmt(b.prix[e.k])} → ${fmt(nv[e.k])}`).join(' · ') };
+  }
+  function blocLissage(b) {
+    const m = b.isbn13 ? lissageCoherence(b) : null;
+    if (!m) return '';
+    return `<div class="incoh-lissage" id="incoh-lissage"><ul class="hors-apres">${ETATS.filter((e) => m.change.has(e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(m.nv[e.k])}</strong></li>`).join('')}</ul>
+      <p class="sous">Ajustement minimal : les prix les mieux appuyés par des annonces bougent le moins. Votre prix prime ensuite sur le calcul.</p>
+      <div class="corriger-actions"><button type="button" class="bouton" id="incoh-go">Corriger ces prix</button></div><p class="corriger-msg" id="incoh-msg" role="status" hidden></p></div>`;
+  }
+  function brancherLissage(b) {
+    const go = $('#incoh-go');
+    if (!go) return;
+    go.addEventListener('click', async () => {
+      const m = lissageCoherence(b), msg = $('#incoh-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      if (!m) return;
+      go.disabled = true; await envoyerCorrections([m.ligne], dire); go.disabled = false;
+    });
+  }
+  // Barre au-dessus de l'étagère avec le filtre « Prix incohérents » : lissage de tous les livres affichés dont la variation reste modérée, après confirmation
+  function majIncohLot(liste) {
+    const z = $('#incoh-lot');
+    if (!z) return;
+    if (!(S.incoh && estNiveau3())) { z.hidden = true; z.innerHTML = ''; return; }
+    const plans = liste.filter((b) => b.isbn13 && incoherence(b)).map((b) => [b, lissageCoherence(b)]).filter(([, m]) => m);
+    const lot = plans.filter(([, m]) => m.ampleur <= LISSAGE_LOT_MAX), relire = plans.length - lot.length;
+    z.hidden = false;
+    if (!plans.length) { z.innerHTML = '<p>Aucun livre à lisser.</p>'; return; }
+    z.innerHTML = `<p><strong>${plans.length} livre${plans.length > 1 ? 's' : ''}</strong> à lisser : ${lot.length} corrigeable${lot.length > 1 ? 's' : ''} d'un coup (variation de 25 % au plus)${relire ? `, ${relire} à corriger depuis la fiche` : ''}.</p>${lot.length ? `<button type="button" class="bouton" id="incoh-lot-go">Lisser les ${lot.length} livres</button>` : ''}<p class="corriger-msg" id="incoh-lot-msg" role="status" hidden></p>`;
+    const go = $('#incoh-lot-go');
+    if (!go) return;
+    go.addEventListener('click', async () => {
+      const msg = $('#incoh-lot-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+      const apercu = lot.slice(0, 12).map(([b, m]) => `• ${b.titre} (${b.version}) : ${m.texte}`).join('\n') + (lot.length > 12 ? `\n… et ${lot.length - 12} autre${lot.length - 12 > 1 ? 's' : ''}` : '');
+      if (!window.confirm(`Lisser ${lot.length} livre${lot.length > 1 ? 's' : ''} ?\n\n${apercu}`)) return;
+      go.disabled = true; await envoyerCorrections(lot.map(([, m]) => m.ligne), dire); go.disabled = false;
+    });
+  }
   // Barre au-dessus de l'étagère quand le filtre « cote au-dessus des annonces » est actif : baisse de tous les livres affichés, après confirmation
   function majHorsLot(liste) {
     const z = $('#hors-lot');
@@ -1232,7 +1296,7 @@
         <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
-        ${estNiveau3() && incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>` : ''}
+        ${estNiveau3() && incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
         ${estNiveau3() ? '<div class="hors-marche" id="hors-marche" hidden></div>' : ''}
         ${blocCorriger(b)}
 
@@ -1261,6 +1325,7 @@
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
     brancherFicheCollection(b);
     brancherCorriger();
+    if (estNiveau3()) brancherLissage(b);
     if (voitAnnonces()) remplirAnnonces(b);
     if (estNiveau2()) remplirOffre(b);
     $('#fermer').addEventListener('click', () => dlg.close());
