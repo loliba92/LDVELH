@@ -663,13 +663,12 @@
     } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
     go.disabled = false;
   });
-  // Points à vérifier d'une annonce (liste vide si rien à vérifier : exemplaire de librairie, ou état indiqué par l'ISBN)
-  const pointsAVerifier = (origine, suppose, lien) => {
-    const points = [], c = corrigees()[lien], editionSure = c && c.statut !== 'exclue';          // édition confirmée ou corrigée par le propriétaire
-    if (origine === 'librairie') return points;
-    if (origine === 'titre' && !editionSure) points.push("Édition à vérifier");
-    if (origine === 'leboncoin' || origine === 'vinted') points.push(editionSure ? "État à vérifier" : "Édition et état à vérifier");
-    else if (suppose === 1) points.push("État supposé très bon");
+  // Points à vérifier d'une annonce (liste vide si rien à vérifier). Leboncoin et Vinted : le bot a comparé la photo aux jaquettes et n'envoie que les annonces dont
+  // l'édition est nette ; l'état est celui du vendeur. eBay trouvée par le titre : photo comparée à la jaquette au relevé, annonce gardée seulement si elle concorde.
+  const pointsAVerifier = (origine, suppose) => {
+    const points = [];
+    if (origine === 'librairie' || origine === 'leboncoin' || origine === 'vinted') return points;
+    if (suppose === 1) points.push("État supposé très bon");
     else if (suppose == null) points.push("État à confirmer");
     return points;
   };
@@ -1122,7 +1121,7 @@
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose, lien), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
           // une librairie n'est pas une annonce de particulier : sa cote suit sa propre règle
           { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
