@@ -2,10 +2,25 @@
  "date": "2026-11-07",
  "precedent": "2026-11-06",
  "nb_comparees": 1512,
- "nb_modifiees": 993,
+ "nb_modifiees": 995,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 6,
  "hausses": [
+  {
+   "id": "9782070587650",
+   "isbn13": "9782070587650",
+   "titre": "Les Pirates de Shadaki",
+   "serie": "Loup Solitaire",
+   "numero": "765",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 53.0,
+   "apres": 75.0,
+   "pct": 0.415,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070544059",
    "isbn13": "9782070544059",
@@ -219,6 +234,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070587650",
+   "isbn13": "9782070587650",
+   "titre": "Les Pirates de Shadaki",
+   "serie": "Loup Solitaire",
+   "numero": "765",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 148.0,
+   "apres": 100.0,
+   "pct": -0.324,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333639",
    "isbn13": "9782070333639",
    "titre": "Le Temps de la Malédiction",
@@ -262,24 +292,9 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070335381",
-   "isbn13": "9782070335381",
-   "titre": "Dans les Entrailles de Torgar",
-   "serie": "Loup Solitaire",
-   "numero": "538",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 36.57,
-   "apres": 28.44,
-   "pct": -0.222,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 61,
+ "nb_grands_mouvements": 63,
  "modele": {
   "actif": false,
   "n_paires": 128,
