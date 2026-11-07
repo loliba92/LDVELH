@@ -639,6 +639,8 @@
   const SVG_VENTE = '<svg class="sel-ico sel-vente" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="12" r="7"/><path d="M10 12h12M19 9l3 3-3 3"/></svg>';
   // Une annonce de vente ne parle que des livres que l'on possède (jamais ceux de la liste « À trouver »)
   const dansMaCollection = (b) => !COLL_PRET || !!COLL[b.id];
+  const REMISES_LOT = [[11, 0.25], [6, 0.20], [3, 0.15], [2, 0.10]];          // [nombre de livres, remise] : mêmes paliers que le bot (lbc-cote, config/cote.py)
+  const remiseLot = (n) => (REMISES_LOT.find(([seuil]) => n >= seuil) || [0, 0])[1];
   function majBarreLot() {
     let z = $('#barre-sel');
     if (!SEL_LOT.size || !voitAnnonces() || !$('#resultats')) { if (z) z.hidden = true; return; }
@@ -664,17 +666,15 @@
     const lignes = [];
     if (!cotes) lignes.push('Pas de cote pour cette sélection');
     else {
-      // Remise de lot : la plus forte entre le nombre de livres et le montant (un gros lot se négocie plus fort) ; le port d'un lot est un seul colis
-      const parNombre = n >= 21 ? 0.20 : n >= 11 ? 0.15 : n >= 6 ? 0.10 : n >= 3 ? 0.05 : 0;
-      const parMontant = achat >= 400 ? 0.20 : achat >= 200 ? 0.15 : achat >= 100 ? 0.10 : achat >= 50 ? 0.05 : 0;
-      const remise = Math.max(parNombre, parMontant), offreLot = Math.floor(achat * (1 - remise));
+      // Remise de lot selon le nombre de livres, mêmes paliers que le bot Leboncoin et Vinted (un gros lot se négocie plus fort) ; le port d'un lot est un seul colis
+      const remise = remiseLot(n), offreLot = Math.floor(achat * (1 - remise));
       lignes.push(`${SVG_ACHAT}<b>Offrez</b> ${eurosArr(offreLot)}${remise ? ` <span class="nowrap">(−${Math.round(remise * 100)} % lot)</span>` : ''} ${nA ? ` ${pastille(ptsA / nA)}` : ''}`);
       lignes.push(`${SVG_VENTE}<b>Affichez</b> ${eurosArr(vente)} · min. ${eurosArr(achat)}${nV ? ` ${pastille(ptsV / nV)}` : ''}${possedes ? ' <button type="button" class="sel-lien" data-sel-annonce>Créer l\'annonce</button>' : ''}`);
       if (!possedes) lignes.push('<span class="sel-sous">Aucun livre de la sélection n\'est dans votre collection : pas d\'annonce de vente</span>');
       if (cotes < n) lignes.push(`<span class="sel-sous">${n - cotes} livre${n - cotes > 1 ? 's' : ''} sans cote, non chiffré${n - cotes > 1 ? 's' : ''}</span>`);
       { const pl = portLot(cotes); lignes.push(`<span class="sel-sous">Port Mondial Relay : ${eurosArr(pl.prix)} + ${eurosArr(FRAIS_PLATEFORME)} de frais (≈ ${(Math.round(pl.kg * 10) / 10).toLocaleString('fr-FR')} kg${pl.colis > 1 ? `, ${pl.colis} colis` : ''})</span>`); }
     }
-    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, moins une remise de lot (nombre de livres ou montant : 5 % dès 3 livres ou 50 €, jusqu'à 20 % dès 21 livres ou 400 €), frais de plateforme (Vinted ou Leboncoin) : 1 € par achat ; port en plus : un seul colis, tarif Mondial Relay en point relais selon le poids estimé (environ ${POIDS_LIVRE * 1000} g par livre plus ${POIDS_EMBALLAGE * 1000} g d'emballage). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
+    z.title = `Achat : la cote du guide arrondie à l'euro inférieur, moins une remise de lot (10 % dès 2 livres, 15 % dès 3, 20 % dès 6, 25 % dès 11), frais de plateforme (Vinted ou Leboncoin) : 1 € par achat ; port en plus : un seul colis, tarif Mondial Relay en point relais selon le poids estimé (environ ${POIDS_LIVRE * 1000} g par livre plus ${POIDS_EMBALLAGE * 1000} g d'emballage). Les vendeurs affichent la cote plus une marge de négociation qui dépend de la rareté et de la liquidité du marché. Pastilles : facilité d'après la rareté, le nombre d'annonces et leur durée en ligne. Marché : ${ANN ? (avecAnn ? annN + ' annonce' + (annN > 1 ? 's' : '') + ' en ligne, dès ' + eurosArr(annMin) : 'aucune annonce en ligne') : 'chargement'}. Livre de votre collection : cote à l\'état de l\'exemplaire ; sinon, médiane des états.`;
     z.innerHTML = `<div class="sel-tete"><b>${n} livre${n > 1 ? 's' : ''} dans le lot</b><button type="button" class="retirer" data-sel-vider>Vider</button></div><div class="sel-texte">${lignes.map((l) => `<span>${l}</span>`).join('')}</div>`;
     if (!ANN) chargerAnnonces().then(() => majBarreLot());
   }
