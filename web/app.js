@@ -931,8 +931,9 @@
     } catch (e) { dire('Envoi impossible : vérifiez votre connexion.'); }
     return false;
   }
-  // Lissage de cohérence (livres « Prix à vérifier ») : les trois cotes sont déplacées le moins possible, en pourcentage, pour que le convenable reste à 85 % du bon état
+  // Lissage de cohérence (livres « Prix à vérifier ») : les trois cotes sont déplacées le moins possible, en pourcentage, avec un biais à la baisse, pour que le convenable reste à 85 % du bon état
   // au plus et le très bon état à 1,9 fois le bon état au plus. Plus une cote est appuyée (prix validé, annonces, prix du neuf), moins elle bouge ; une archive bouge davantage.
+  const BIAIS_BAISSE = 5;          // relever un prix coûte 5 fois plus cher que le baisser : l'écart se comble surtout en baissant le prix trop haut
   const LISSAGE_LOT_MAX = 0.25;          // au-delà de 25 % de variation, le livre se corrige depuis sa fiche
   function lissageCoherence(b) {
     const ks = ETATS.map((e) => e.k).filter((k) => b.prix[k] != null);
@@ -946,7 +947,7 @@
         const d = u[haut] - u[bas], cible = d < mn - 1e-9 ? mn : d > mx + 1e-9 ? mx : null;
         if (cible === null) return;
         ok = false;
-        const g = cible - d, wb = w[bas], wh = w[haut];          // l'écart est comblé en proportion inverse du poids
+        const g = cible - d, wb = w[bas] * (g < 0 ? BIAIS_BAISSE : 1), wh = w[haut] * (g > 0 ? BIAIS_BAISSE : 1);          // l'écart est comblé en proportion inverse du poids ; le prix qui monterait pèse BIAIS_BAISSE fois plus
         u[haut] += g * wb / (wb + wh); u[bas] -= g * wh / (wb + wh);
       });
       if (ok) break;
@@ -963,7 +964,7 @@
     const m = b.isbn13 ? lissageCoherence(b) : null;
     if (!m) return '';
     return `<div class="incoh-lissage" id="incoh-lissage"><ul class="hors-apres">${ETATS.filter((e) => m.change.has(e.k)).map((e) => `<li>${esc(e.nom || e.court)} : ${fmt(b.prix[e.k])} → <strong>${fmt(m.nv[e.k])}</strong></li>`).join('')}</ul>
-      <p class="sous">Ajustement minimal : les prix les mieux appuyés par des annonces bougent le moins. Votre prix prime ensuite sur le calcul.</p>
+      <p class="sous">Ajustement minimal, biaisé à la baisse : on baisse surtout le prix trop haut, et les prix les mieux appuyés par des annonces bougent le moins. Votre prix prime ensuite sur le calcul.</p>
       <div class="corriger-actions"><button type="button" class="bouton" id="incoh-go">Corriger ces prix</button></div><p class="corriger-msg" id="incoh-msg" role="status" hidden></p></div>`;
   }
   function brancherLissage(b) {
