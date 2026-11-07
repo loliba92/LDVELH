@@ -53,13 +53,14 @@ def lisser(observations, aujourdhui, sigma_hist=None, jours_minces=(), decote=1.
     m = var = derniere = None
     for o in sorted(observations, key=lambda x: x.date):
         sigma = sigma_hist if (o.type == "historique" and sigma_hist) else SIGMA[o.type]
-        r = (sigma * (FACTEUR_MINCE if (o.type == "prix_demande" and o.date in jours_minces) else 1)) ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
+        mince = o.type == "prix_demande" and o.date in jours_minces and o.duree < DUREE_ISOLEE          # une annonce isolée restée 7 jours n'est plus un relevé mince
+        r = (sigma * (FACTEUR_MINCE if mince else 1)) ** 2 / min(max(o.nb, 1), PLAFOND_ANNONCES)
         y = log(o.prix * (decote if o.type == "prix_demande" else 1))      # une annonce est un prix demandé : on vise le prix qui se conclut
         if m is None:
             m, var = y, r
         else:
             var += BRUIT_SEMAINE * max(0, (o.date - derniere).days) / 7
-            seuil = ECART_ALERTE_MINCE if (o.type == "prix_demande" and o.date in jours_minces) else ECART_ALERTE
+            seuil = ECART_ALERTE_MINCE if mince else ECART_ALERTE
             if abs(y - m) > seuil * sqrt(var + r):
                 r *= 4
             gain = var / (var + r)

@@ -154,5 +154,12 @@ class TestEstimation(unittest.TestCase):
         self.assertLess(r["prix"], 30.0)
 
 
+    def test_annonce_isolee_durable_pese_plus_qu_un_releve_mince(self):
+        archive = Obs(30.0, "historique", AUJ - timedelta(days=30), 1)
+        mince = Obs(20.0, "prix_demande", AUJ - timedelta(days=8), 1)
+        durable = Obs(20.0, "prix_demande", AUJ - timedelta(days=8), 1, 8)
+        self.assertLess(estimer([archive, durable], AUJ)["prix"], estimer([archive, mince], AUJ)["prix"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

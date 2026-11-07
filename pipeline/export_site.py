@@ -94,6 +94,19 @@ def aligner(par_etat, ecart=etats.ECART_DEFAUT):
 
 JOURS_VINTED = 14          # même règle que Leboncoin : en ligne tant que le bot ne la signale pas vendue
 JOURS_LEBONCOIN = 14       # une annonce Leboncoin reste en ligne tant qu'elle n'est pas signalée vendue : le bot ne revoit que les 50 plus récentes, une annonce plus ancienne n'y reparaît pas. Écartée après 14 jours sans être revue
+def duree_en_ligne(source, type_prix, jour, aujourdhui, vente_le=None):
+    """Jours pendant lesquels une annonce Leboncoin ou Vinted est présumée en ligne, d'après la règle du site (en ligne jusqu'à preuve du contraire,
+    14 jours au plus, voir JOURS_LEBONCOIN). Le bot ne revoit pas les annonces : la durée est l'âge de la capture. 0 si elle est inconnue, trop
+    ancienne, ou si une vente probable a été signalée depuis pour la même source, le même livre et le même état. Sert à ne pas écarter une
+    annonce isolée qui dure (voir estimation.DUREE_ISOLEE)."""
+    if source not in ("leboncoin", "vinted") or type_prix != "prix_demande":
+        return 0
+    age = (aujourdhui - date.fromisoformat(jour)).days
+    if age > JOURS_LEBONCOIN or (vente_le is not None and vente_le >= jour):
+        return 0
+    return max(age, 0)
+
+
 JOURS_INCERTAINES = 14      # annonce « à vérifier » : écartée après 14 jours sans être revue, comme Leboncoin et Vinted
 JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultable ce nombre de jours après sa dernière observation
 
@@ -366,10 +379,16 @@ def main():
     cx = sqlite3.connect(args.db)
     cx.row_factory = sqlite3.Row
     brut = {}
-    for cle, etat, type_prix, jour, valeur, nb, source in cx.execute(PRIX):
+    lignes_prix = list(cx.execute(PRIX))
+    ventes_le = {}          # (livre, état, source) -> dernier jour d'une vente probable signalée
+    for cle, etat, type_prix, jour, valeur, nb, source in lignes_prix:
+        if type_prix == "vente_probable":
+            ventes_le[(cle, etat, source)] = max(jour, ventes_le.get((cle, etat, source), ""))
+    for cle, etat, type_prix, jour, valeur, nb, source in lignes_prix:
         if args.db == DB and source == "ebay_api":
             continue                                                                  # eBay : remplacé par la cote v2 (pipeline/cote_v2.py)
-        brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb))
+        duree = duree_en_ligne(source, type_prix, jour, args.aujourdhui, ventes_le.get((cle, etat, source)))
+        brut.setdefault(cle, {}).setdefault(etat, []).append(Obs(valeur, type_prix, date.fromisoformat(jour), nb, duree))
     valides = validations.lire()                                                          # prix validés par le propriétaire
     ecart = etats.charger_ecart(DB.parent.parent / "manual" / "ratios_etats.json")                  # écart minimal entre deux états
     ratios = etats.charger_ratios(DB.parent.parent / "manual" / "ratios_etats.json")      # rapports entre états (propriétaire)
