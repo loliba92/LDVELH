@@ -54,6 +54,30 @@ class TestCoteV2(unittest.TestCase):
         jours = cote_v2.charger_jours(d)
         self.assertEqual(sorted(jours), [date(2026, 10, 27)])
 
+    def test_annonce_isolee_en_ligne_depuis_sept_jours(self):
+        jours = {date(2026, 10, d): [ligne(60)] for d in (20, 22, 24, 27)}
+        obs = cote_v2.evenements(jours, "9782070000001", "bon")
+        self.assertEqual([o.duree for o in obs], [7])
+        import estimation, tempfile
+        d = Path(tempfile.mkdtemp())
+        for j in (20, 22, 24, 27):
+            (d / f"annonces-2026-10-{j}.csv").write_text("isbn13,etat,prix,titre,lien,port\n9782070000001,bon,60.00,t,https://www.ebay.fr/itm/1,0.00\n", encoding="utf-8")
+        brut = {}
+        self.assertEqual(cote_v2.appliquer(brut, {"9782070000001": "v1"}, d), 1)
+        self.assertEqual(brut["v1"]["bon"][0].duree, 7)
+
+    def test_annonce_isolee_recente_reste_ecartee(self):
+        import tempfile
+        d = Path(tempfile.mkdtemp())
+        for j in (25, 26, 27):
+            (d / f"annonces-2026-10-{j}.csv").write_text("isbn13,etat,prix,titre,lien,port\n9782070000001,bon,60.00,t,https://www.ebay.fr/itm/1,0.00\n", encoding="utf-8")
+        self.assertEqual(cote_v2.appliquer({}, {"9782070000001": "v1"}, d), 0)
+
+    def test_annonce_disparue_n_a_pas_de_duree(self):
+        jours = {date(2026, 10, 20): [ligne(60)], date(2026, 10, 27): [ligne(15, "https://x/9")]}
+        obs = [o for o in cote_v2.evenements(jours, "9782070000001", "bon") if o.type == "prix_demande"]
+        self.assertEqual([o.duree for o in obs], [0, 0])      # l’ancienne annonce a disparu, la nouvelle vient d’apparaître
+
 
 if __name__ == "__main__":
     unittest.main()

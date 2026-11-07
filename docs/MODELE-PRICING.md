@@ -54,6 +54,8 @@ Le **gain** (part de l'écart rattrapée en un jour) dépend du nombre d'annonce
 
 Un prix du neuf (prix éditeur) prend le gain maximal ; un prix d'archive ou déduit des autres états, le gain minimal. Un prix **validé** par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de « prix de la veille » ensuite. Les gains se règlent dans `data/manual/ratios_etats.json` (clé `gains_lissage`). Effet : une annonce isolée, ou retirée, ne fait plus sauter un prix ; un prix appuyé sur plusieurs annonces rejoint sa cible en quelques jours (cible 42 € contre 5 € la veille, trois annonces : 16 € le premier jour, environ 39 € au bout de sept). Sans prix de la veille, la cible est prise telle quelle. Règle en vigueur depuis le 23 octobre 2026, en remplacement du plafond de 10 % par jour.
 
+**Annonce isolée (eBay).** Une édition n'a une cote venant d'eBay que si au moins deux annonces de l'état sont en ligne au dernier relevé, ou une seule restée en ligne au même prix depuis 7 jours (`DUREE_ISOLEE`). Un relevé mince très éloigné de l'archive (plus de 2,5 fois) est écarté, sauf si son annonce dure depuis 7 jours. Cette durée n'est suivie que pour eBay, dont les relevés quotidiens permettent de savoir qu'une annonce reste en ligne.
+
 ## 4. Indice de liquidité (0 à 100)
 
 Combinaison pondérée, à calibrer :

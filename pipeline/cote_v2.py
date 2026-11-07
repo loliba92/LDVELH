@@ -61,11 +61,16 @@ def evenements(jours, isbn, etat):
     for lien, par_jour in vues.items():
         jours_vus = sorted(par_jour)
         prec = None
+        debut_prix = None
         for d in jours_vus:
             if prec is None or par_jour[d] != prec:
                 obs.append(estimation.Obs(par_jour[d], "prix_demande", d, 1))     # apparition ou changement de prix
+                debut_prix = len(obs) - 1
             prec = par_jour[d]
         derniere_vue = jours_vus[-1]
+        if derniere_vue == dates[-1] and debut_prix is not None:                   # encore en ligne au dernier relevé : durée au prix actuel
+            o = obs[debut_prix]
+            obs[debut_prix] = o._replace(duree=(derniere_vue - o.date).days)
         absents = [d for d in dates if d > derniere_vue]                          # relevés faits depuis, sans l'annonce
         if len(absents) >= 2 and absents[0] in complets and absents[1] in complets:
             obs.append(estimation.Obs(par_jour[derniere_vue], "vente_probable", absents[1], 1))     # absente deux fois de suite, relevés complets : probablement vendue
@@ -85,8 +90,8 @@ def serie(jours, isbn, etat):
 
 def appliquer(brut, cle_isbn, dossier):
     """Remplace, dans `brut` (observations par édition et par état), les annonces eBay par la v2.
-    Règle : une édition n'a une cote venant d'eBay que si au moins deux annonces sont en ligne le dernier jour ;
-    sinon elle garde son repère (archive). cle_isbn : {isbn13: version_key}. Renvoie le nombre d'observations ajoutées."""
+    Règle : une édition n'a une cote venant d'eBay que si au moins deux annonces sont en ligne le dernier jour,
+    ou une seule restée en ligne au même prix depuis 7 jours ; sinon elle garde son repère (archive). cle_isbn : {isbn13: version_key}. Renvoie le nombre d'observations ajoutées."""
     jours = charger_jours(dossier)
     if not jours:
         return 0
@@ -99,9 +104,9 @@ def appliquer(brut, cle_isbn, dossier):
         if cle is None:
             continue
         actives = [r for r in jours[dernier] if r.get("isbn13") == isbn and r.get("etat") == etat]
-        if len(actives) < 2:
-            continue                                  # pas de cote sans repère : moins de deux annonces actuelles
         obs = evenements(jours, isbn, etat)
+        if len(actives) < 2 and not (len(actives) == 1 and any(o.duree >= estimation.DUREE_ISOLEE for o in obs)):
+            continue                                  # pas de cote sans repère : moins de deux annonces actuelles, sauf une annonce isolée en ligne depuis 7 jours
         brut.setdefault(cle, {}).setdefault(etat, []).extend(obs)
         nb += len(obs)
     return nb
