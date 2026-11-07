@@ -956,21 +956,22 @@
    "par": "loliba (superadmin)"
   },
   "9782070336098|bon": {
-   "prix": 43.61,
+   "prix": 26.78,
    "decision": "corrige",
    "le": "2026-11-07",
    "par": "loliba (superadmin)"
   },
   "9782070336098|convenable": {
-   "prix": 37.06,
+   "prix": 14.2,
    "decision": "corrige",
    "le": "2026-11-07",
    "par": "loliba (superadmin)"
   },
   "9782070336098|tres_bon": {
-   "prix": 45.15,
-   "decision": "confirme",
-   "le": "2026-10-17"
+   "prix": 45.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
   },
   "9782070336104|bon": {
    "prix": 62.67,
