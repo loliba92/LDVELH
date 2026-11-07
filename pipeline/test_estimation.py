@@ -144,5 +144,15 @@ class TestEstimation(unittest.TestCase):
         self.assertEqual((r["nature"], r["nb"]), ("ventes", 1))
 
 
+    def test_annonce_isolee_lointaine_ecartee_sauf_si_elle_dure(self):
+        archive = Obs(30.0, "historique", AUJ - timedelta(days=30), 1)
+        recente = Obs(8.0, "prix_demande", AUJ, 1)
+        durable = Obs(8.0, "prix_demande", AUJ - timedelta(days=8), 1, 8)
+        self.assertEqual(estimer([archive, recente], AUJ)["source"], "archives")          # annonce récente, 3,75 fois sous l'archive : écartée
+        r = estimer([archive, durable], AUJ)
+        self.assertNotEqual(r["source"], "archives")                                      # même annonce restée 8 jours en ligne : elle compte
+        self.assertLess(r["prix"], 30.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

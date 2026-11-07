@@ -16,7 +16,7 @@ from datetime import date
 from math import exp, log, sqrt
 from statistics import median
 
-Obs = namedtuple("Obs", "prix type date nb")
+Obs = namedtuple("Obs", "prix type date nb duree", defaults=(0,))      # duree : jours pendant lesquels l'annonce est restée en ligne à ce prix (0 : inconnu)
 
 POIDS_TYPE = {"vente_reelle": 1.0, "vente_probable": 0.6, "rachat": 0.4, "prix_demande": 0.3, "historique": 0.2}
 ACTUELS = {"vente_reelle", "vente_probable", "rachat", "prix_demande"}
@@ -35,6 +35,7 @@ BRUIT_SEMAINE = 0.02    # variance de dérive du log du prix par semaine
 ECART_ALERTE = 3.0      # au-delà de 3 écarts-types, l'observation est jugée suspecte et son poids divisé par 4
 ECART_ALERTE_MINCE = 1.5  # pour un relevé de moins de NB_FIABLE annonces, on est plus strict : 1,5 écart-type
 FACTEUR_MINCE = 2.0     # l'incertitude d'un relevé mince (moins de NB_FIABLE annonces) est multipliée par 2 : il déplace peu l'estimation
+DUREE_ISOLEE = 7        # une annonce isolée restée en ligne au même prix depuis 7 jours n'est plus jugée absurde : elle compte, avec la prudence du lissage
 FACTEUR_ABERRANT = 2.5  # un relevé mince dont le prix s'écarte de plus de 2,5 fois de l'archive est écarté (annonce isolée absurde)
 SEUIL_ACTUEL = 0.7      # part du poids venant d'observations actuelles pour parler de cote « actuelle »
 
@@ -101,7 +102,7 @@ def estimer(observations, aujourdhui=None, sigma_hist=None, decote=1.0):
     archive = [o.prix for o in observations if o.type == "historique"]
     ref = median(archive) if archive else None
     def aberrante(o):                                         # relevé mince très éloigné de l'archive : on ne le croit pas
-        return o.type == "prix_demande" and o.date in jours_minces and ref and abs(log(o.prix / ref)) > log(FACTEUR_ABERRANT)
+        return o.type == "prix_demande" and o.date in jours_minces and o.duree < DUREE_ISOLEE and ref and abs(log(o.prix / ref)) > log(FACTEUR_ABERRANT)
     obs = [o for o in observations if not aberrante(o)]
     if not obs:
         return None
