@@ -1,6 +1,6 @@
 name: Corriger des cotes
 
-# Lancé depuis la fiche d'un livre (formulaire « Corriger les cotes », réservé au propriétaire) ou à la main :
+# Lancé depuis la fiche d'un livre (formulaire « Corriger les cotes », réservé au propriétaire) ou depuis une annonce (« Corriger l'édition » : lignes « annonce ; lien ; statut ; édition ; note »), ou à la main :
 # Actions > Run workflow > une correction par ligne ou séparées par « | » : ISBN ; convenable ; bon état ; très bon état
 on:
   workflow_dispatch:
@@ -50,6 +50,7 @@ jobs:
         run: |
           python pipeline/test_validations.py
           python pipeline/test_corriger_prix.py
+          python pipeline/test_corrections_annonces.py
       - name: Enregistrer les prix
         run: python pipeline/corriger_prix.py "$CORRECTIONS" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Base et données du site
@@ -64,6 +65,6 @@ jobs:
           AVANT="$(git rev-parse HEAD)"
           # Si main a avancé pendant le lot, on repart de sa dernière version et on rejoue les corrections (voir .github/scripts/publier.sh)
           REJOUER='python pipeline/corriger_prix.py "$CORRECTIONS" && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
-            .github/scripts/publier.sh "Cotes corrigées depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" data/manual/prix_valides.json data/processed/cotes-historique.json web/data data/processed/annonces.json data/processed/butin.json web/evolutions.html web/revue-prix.html web/livre web/sitemap.xml web/robots.txt
+            .github/scripts/publier.sh "Cotes corrigées depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" data/manual/prix_valides.json data/manual/annonces_corrigees.json data/raw/occasion data/processed/cotes-historique.json web/data data/processed/annonces.json data/processed/butin.json web/evolutions.html web/revue-prix.html web/livre web/sitemap.xml web/robots.txt
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml

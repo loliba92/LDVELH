@@ -31,6 +31,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import corrections_annonces
 import editions
 import prix_aberrants
 from prix_neuf import prix_livre_vinted
@@ -256,13 +257,22 @@ def reagreger(dossier=None, lots=None):
     dossier = Path(dossier or DOSSIER)
     lots = charger_lots() if lots is None else lots
     tbe = prix_aberrants.charger_tbe()
+    corrections = corrections_annonces.lire()          # éditions corrigées ou annonces exclues par le propriétaire
+    promues = corrections_annonces.promues(corrections)
     for source in SOURCES:
-        for fic in sorted(dossier.glob(f"annonces-{source}-20*.csv")):
-            jour = fic.stem[-10:]
-            _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, datees=True, tbe=tbe))
+        jours = {f.stem[-10:] for f in dossier.glob(f"annonces-{source}-20*.csv")}
+        if promues:
+            jours |= {f.stem[-10:] for f in dossier.glob(f"incertaines-{source}-20*.csv")}          # une annonce incertaine rattachée à une édition devient certaine
+        for jour in sorted(jours):
+            lignes = list(_lire(dossier / nom_fichier("annonces", source, jour)).values())
+            if promues:
+                deja = {r["lien"] for r in lignes}
+                lignes += [r for (lien, _), r in _lire_incertaines(dossier / nom_fichier("incertaines", source, jour)).items() if lien in promues and lien not in deja]
+            if lignes:
+                _ecrire(dossier / nom_fichier("agregat", source, jour), COLONNES_AGREGAT, _agreger(corrections_annonces.corriger(lignes, corrections), jour, lots, datees=True, tbe=tbe))
         for fic in sorted(dossier.glob(f"vendus-{source}-20*.csv")):
             jour = fic.stem[-10:]
-            _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(_lire(fic).values(), jour, lots, tbe=tbe))
+            _ecrire(dossier / nom_fichier("agregat_vendus", source, jour), COLONNES_AGREGAT, _agreger(corrections_annonces.corriger(_lire(fic).values(), corrections), jour, lots, tbe=tbe))
 
 
 def importer(corps, aujourdhui=None, dossier=None, connues=None):

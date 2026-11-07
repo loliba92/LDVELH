@@ -21,6 +21,7 @@ import editions
 from estimation import Obs, estimer
 from prix_neuf import FRAIS_LIBRAIRIE, prix_livre_vinted
 import calibration
+import corrections_annonces
 import cote_v2
 import importer_leboncoin
 import mouvements
@@ -293,7 +294,7 @@ def publiee_le(ligne, jour, publiees):
         return
 
 
-def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None):
+def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections=None):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
     Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation, état supposé]. Depuis le relevé à colonne « port »,
@@ -302,7 +303,9 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None):
     Une annonce non revue depuis plus de `jours` jours
     avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}.
     `publiees` (dictionnaire facultatif) reçoit {lien: date de publication AAAA-MM-JJ} : le jour du relevé moins l'âge de l'annonce, pris au premier relevé qui la contient.
-    Un âge de 0 sur Vinted peut vouloir dire « date illisible » : il ne compte pas comme une date connue."""
+    Un âge de 0 sur Vinted peut vouloir dire « date illisible » : il ne compte pas comme une date connue.
+    Les corrections du propriétaire (voir corrections_annonces.py) s'appliquent : édition changée ou annonce exclue."""
+    corrections = corrections_annonces.lire() if corrections is None else corrections
     fichiers = sorted(fichiers)
     if not fichiers:
         return {}
@@ -310,7 +313,7 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None):
     for f in fichiers:
         jour = f.stem[-10:]
         with open(f, encoding="utf-8", newline="") as fh:
-            for r in csv.DictReader(fh):
+            for r in corrections_annonces.corriger(csv.DictReader(fh), corrections):
                 supp = (r.get("etat_suppose") or "").strip()
                 prix = float(r["prix"])
                 brut_fdp = (r.get("fdp") or "").strip()
@@ -664,6 +667,16 @@ def main():
         for isbn, par_etat in annonces_cumulees(sorted(dossier_occasion.glob(f"annonces-{revendeur}-20*.csv")), jours=JOURS_VINTED).items():
             for etat, liste in par_etat.items():
                 annonces.setdefault(isbn, {}).setdefault(etat, []).extend(liste)
+    corrections = corrections_annonces.lire()
+    promues = corrections_annonces.promues(corrections)
+    if promues:          # annonce d'édition incertaine rattachée à une édition par le propriétaire : elle devient certaine
+        for source in importer_leboncoin.SOURCES:
+            for isbn, par_etat in annonces_cumulees(sorted(dossier_occasion.glob(f"incertaines-{source}-20*.csv")), jours=JOURS_INCERTAINES, corrections=corrections).items():
+                for etat, liste in par_etat.items():
+                    presentes = {a[2] for a in annonces.get(isbn, {}).get(etat, [])}
+                    nouvelles = [a for a in liste if a[2] in promues and a[2] not in presentes]
+                    if nouvelles:
+                        annonces.setdefault(isbn, {}).setdefault(etat, []).extend(nouvelles)
     liens_certains = liens_vendus | liens_vendus_vinted | {a[2] for par in annonces.values() for liste in par.values() for a in liste}
     incertaines = {}          # annonces « à vérifier » : à part, elles n'entrent ni dans la cote, ni dans le Butin, ni dans les totaux
     for source in importer_leboncoin.SOURCES:
@@ -707,7 +720,7 @@ def main():
                          "vinted": fichiers_vinted[-1].stem[-10:] if fichiers_vinted else None}
         chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines,
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines, "corrigees": corrections,
                                           "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}

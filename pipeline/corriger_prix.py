@@ -11,6 +11,9 @@ entre les deux, avec les mêmes rapports que le site, et remplace un ancien bon 
 un bon état déjà validé n'est recalculé que s'il sort de l'intervalle [convenable, très bon état] après la correction.
 Un mot « reset » (ou « calcul ») à la place d'un prix retire la validation de cet état : la cote repart des annonces.
     9782070585168 ; ; reset ; reset
+Une ligne « annonce ; <lien> ; <statut> ; <édition> ; <note> » corrige une annonce (voir corrections_annonces.py) : statut confirmee, reaffectee
+(édition = ISBN13 de la bonne édition) ou exclue (édition vide). Exemple :
+    annonce ; https://www.vinted.fr/items/123-le-livre ; reaffectee ; 9782070335398 ; photo de la V2
 Usage : python pipeline/corriger_prix.py "9782070585168 ; 25 ; ; 60"
 """
 import json
@@ -21,6 +24,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import corrections_annonces
 import editions
 import etats
 import validations
@@ -59,6 +63,9 @@ def lire(texte):
         if not ligne or ligne.startswith("#"):
             continue
         champs = [c.strip() for c in ligne.split(";")] + ["", "", "", "", ""]
+        if champs[0].lower() == "annonce":
+            out.append({"annonce": True, "brut": ligne, "lien": champs[1], "statut": champs[2].lower(), "isbn13": champs[3], "note": champs[4]})
+            continue
         prix = {}
         for etat, brut in zip(ORDRE, champs[1:4]):
             if brut.lower().startswith(("reset", "calcul")):
@@ -72,7 +79,7 @@ def lire(texte):
     return out
 
 
-def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur=""):
+def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur="", chemin_annonces=corrections_annonces.CHEMIN):
     """Enregistre les corrections. Renvoie [(statut, isbn, texte)] ; statut : ok | refuse."""
     connus = {r["isbn13"]: r for r in editions.load(base) if r.get("isbn13")}
     jour = editions.today()
@@ -80,7 +87,28 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur=""):
     par = validations.nom_propre(auteur)
     valides = validations.lire(chemin)
     ratios = etats.charger_ratios(RATIOS)
+    annonces_corrigees = {}
     for e in lire(texte):
+        if e.get("annonce"):
+            isbn_cible = e["isbn13"]
+            if e["statut"] != "exclue":
+                try:
+                    isbn_cible = editions.normalize_isbn(e["isbn13"])[0]
+                except ValueError:
+                    bilan.append(("refuse", e["lien"], "annonce : ISBN de l'édition invalide"))
+                    continue
+                if isbn_cible not in connus:
+                    bilan.append(("refuse", e["lien"], "annonce : édition absente de la base"))
+                    continue
+            nouvelle = {"statut": e["statut"], "le": jour, **({"par": par} if par else {}), **({"note": e["note"]} if e["note"] else {}),
+                        **({"isbn13": isbn_cible} if e["statut"] != "exclue" else {})}
+            if not corrections_annonces._propre(e["lien"], nouvelle):
+                bilan.append(("refuse", e["lien"], "annonce : lien, statut ou édition incorrect"))
+                continue
+            annonces_corrigees[e["lien"]] = nouvelle
+            cible = f"{connus[isbn_cible]['titre']} ({connus[isbn_cible]['version']})" if e["statut"] != "exclue" else "exclue"
+            bilan.append(("ok", e["lien"], f"annonce {e['statut']} : {cible}"))
+            continue
         try:
             isbn = editions.normalize_isbn(e["brut"])[0]
         except ValueError:
@@ -113,6 +141,8 @@ def appliquer(texte, chemin=validations.CHEMIN, base=None, auteur=""):
         if recalcule is not None:
             detail += " (bon état recalculé)"
         bilan.append(("ok", isbn, f"{connus[isbn]['titre']} ({connus[isbn]['version']}) : {detail}"))
+    if annonces_corrigees:
+        corrections_annonces.enregistrer(annonces_corrigees, chemin_annonces)
     if envoi:
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as f:
             json.dump({"valides": envoi}, f)

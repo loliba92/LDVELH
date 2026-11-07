@@ -628,12 +628,47 @@
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
   const SEUIL_ABERRANT = 3;          // une annonce à 3 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
+  // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
+  const corrigees = () => (ANN && ANN.corrigees) || {};
+  let NB_CORR = 0;
+  // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
+  function panneauCorrection(a) {
+    const livre = (INFO_ED[a.ed.id] || {}).livre;
+    const eds = Object.values(INFO_ED).filter((x) => livre && x.livre === livre && x.isbn).sort((x, y) => String(x.version).localeCompare(String(y.version), 'fr', { numeric: true }));
+    if (!estNiveau3() || !a.lien || !eds.length) return '';
+    const c = corrigees()[a.lien], nom = `corr-${NB_CORR += 1}`;
+    const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'confirmee' ? 'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
+    const opt = (x) => `<label class="corr-opt"><input type="radio" name="${nom}" value="${esc(x.isbn)}"${x.isbn === a.ed.isbn ? ' checked' : ''}>${x.mini ? `<img src="${esc(x.mini)}" alt="" width="40" height="56" loading="lazy">` : ''}<span>${esc(x.version)}${x.annee ? ' · ' + esc(x.annee) : ''}${x.isbn === a.ed.isbn ? ' <small>(actuelle)</small>' : ''}</span></label>`;
+    return `<details class="corr-ann" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${fait ? ' · ' : ''}${fait}</summary>
+      <p class="sous">Ouvrez l'annonce, comparez sa photo aux jaquettes, puis choisissez l'édition. Votre choix remplace celui du relevé, aussi pour les relevés suivants.</p>
+      <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
+      <label class="corr-note">Note <input type="text" maxlength="120" placeholder="facultatif"></label>
+      <button type="button" class="bouton bouton-clair corr-go">Enregistrer</button><p class="corr-msg" role="status" hidden></p></details>`;
+  }
+  document.addEventListener('click', async (e) => {
+    const go = e.target.closest && e.target.closest('.corr-go');
+    if (!go) return;
+    const bloc = go.closest('.corr-ann'), msg = bloc.querySelector('.corr-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
+    const choix = bloc.querySelector('input[type=radio]:checked');
+    if (!choix) return dire('Choisissez une édition, ou « exclure l\'annonce ».');
+    const statut = choix.value === 'exclue' ? 'exclue' : choix.value === bloc.dataset.isbn ? 'confirmee' : 'reaffectee';
+    const note = (bloc.querySelector('.corr-note input').value || '').replace(/[;|\r\n]+/g, ' ').trim();
+    if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
+    go.disabled = true; dire('Envoi en cours…');
+    try {
+      const r = await lancer('corriger-prix.yml', { corrections: `annonce ; ${bloc.dataset.lien} ; ${statut} ; ${statut === 'exclue' ? '' : choix.value} ; ${note}` });
+      if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
+      else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
+      else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+    } catch (err) { dire('Envoi impossible : vérifiez votre connexion.'); }
+    go.disabled = false;
+  });
   // Points à vérifier d'une annonce (liste vide si rien à vérifier : exemplaire de librairie, ou état indiqué par l'ISBN)
-  const pointsAVerifier = (origine, suppose) => {
-    const points = [];
+  const pointsAVerifier = (origine, suppose, lien) => {
+    const points = [], c = corrigees()[lien], editionSure = c && c.statut !== 'exclue';          // édition confirmée ou corrigée par le propriétaire
     if (origine === 'librairie') return points;
-    if (origine === 'titre') points.push("Édition à vérifier");
-    if (origine === 'leboncoin' || origine === 'vinted') points.push("Édition et état à vérifier");
+    if (origine === 'titre' && !editionSure) points.push("Édition à vérifier");
+    if (origine === 'leboncoin' || origine === 'vinted') points.push(editionSure ? "État à vérifier" : "Édition et état à vérifier");
     else if (suppose === 1) points.push("État supposé très bon");
     else if (suppose == null) points.push("État à confirmer");
     return points;
@@ -1020,6 +1055,7 @@
           <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
           <p class="opp-marche">En ligne : ${o.m.n} annonce${o.m.n > 1 ? 's' : ''}${o.m.n > 1 ? ` de ${eur(o.m.bas)} à ${eur(o.m.haut)}` : ''}${o.m.disparues.length ? ` · disparues (vendues ?) : ${o.m.disparues.slice(0, 4).map((x) => eur(x)).join(', ')}` : ''}</p>
           ${o.raison ? `<p class="opp-raison">${esc(o.raison)}</p>` : ''}
+          ${panneauCorrection(a)}
           <p class="opp-bas">${ageHtml(a)} · <a class="opp-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a></p>
         </article>`;
       }).join('');
@@ -1086,7 +1122,7 @@
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose, lien), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
           // une librairie n'est pas une annonce de particulier : sa cote suit sa propre règle
           { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
@@ -1150,6 +1186,7 @@
           ${a.pub != null ? `<span class="an-site">site ${eur(a.pub)} · ${ecartHtml(a)}</span>` : ''}
           ${barrePrix(a)}
           <span class="an-meta">${ABR_ETAT[a.cle]} · ${NOM[a.fam]} · ${ageHtml(a)}${a.partie ? ' · plus vue' : ''}</span>
+          ${panneauCorrection(a)}
         </article>`;
       };
       const page = vues.slice(0, limite);
@@ -1356,7 +1393,7 @@
 
   const JAQ = {}, RAR = {}, EDITEUR = {};
   fetch('data/historique.json').then((r) => (r.ok ? r.json() : null)).catch(() => null).then((h) => { HISTO = h; const d = document.getElementById('rv-date'); if (d && h && h.dates.length) d.textContent = `Dernière publication des prix : ${jour(h.dates[h.dates.length - 1])}.`; if (EDITIONS.length) afficher(); });
-  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { mini: b.couverture || b.couverture_mini || '', editeur: (b.editeur || '').trim(), annee: b.annee || '', rarete: (b.rarete || {}).niveau || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
+  fetch('data/versions.json').then((r) => r.json()).then((v) => v.forEach((b) => { INFO_ED[b.id] = { livre: b.livre_id, isbn: b.isbn13 || '', version: b.version || '', mini: b.couverture || b.couverture_mini || '', editeur: (b.editeur || '').trim(), annee: b.annee || '', rarete: (b.rarete || {}).niveau || '' }; if (b.couverture) JAQ[b.id] = b.couverture; if (b.rarete) RAR[b.id] = b.rarete; EDITEUR[b.id] = (b.editeur || '').trim(); })).catch(() => {})
     .then(() => fetch('data/revue.json')).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); }).then((d) => {
     const par = new Map();
     d.forEach((l) => { if (!par.has(l.id)) par.set(l.id, { id: l.id, isbn: l.isbn, titre: l.titre, serie: l.serie, numero: l.numero, version: l.version, etats: {} }); par.get(l.id).etats[l.etat] = l; });

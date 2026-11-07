@@ -2775,3 +2775,17 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .hors-apres strong { color: var(--or, #d4a437); }
 .hors-lot { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--bord, #3a3326); border-radius: var(--r); }
 .hors-lot p { margin: 0 0 6px; }
+
+/* Corriger l'édition d'une annonce (Zagor) */
+.corr-ann { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 6px; font-size: .9rem; }
+.corr-ann > summary { cursor: pointer; color: var(--gold); font-weight: 600; min-height: 32px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.corr-fait { color: var(--ok, #6fcf97); font-weight: 600; }
+.corr-opts { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.corr-opt { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); cursor: pointer; }
+.corr-opt:has(input:checked) { border-color: var(--gold); background: rgba(212, 164, 55, .12); }
+.corr-opt img { border-radius: 2px; object-fit: cover; }
+.corr-exclure { flex-basis: 100%; }
+.corr-note { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.corr-note input { flex: 1; min-width: 0; }
+.corr-msg { margin: 6px 0 0; font-weight: 600; }
+.corr-opt span, .corr-note { text-transform: none; letter-spacing: normal; }
