@@ -179,5 +179,47 @@ class TestLissage(unittest.TestCase):
             self.assertEqual(etats.charger_gains(f), etats.GAINS_DEFAUT)
 
 
+class TestCoherenceEtMarche(unittest.TestCase):
+    def test_lissage_de_coherence_est_minimal_et_biaise_a_la_baisse(self):
+        p = {"convenable": {"prix": 18.03, "source": "mixte", "nb": 1}, "bon": {"prix": 18.84, "source": "actuel", "nb": 2},
+             "tres_bon": {"prix": 88.72, "source": "archives"}}
+        self.assertEqual(etats.lisser_coherence(p), 3)
+        self.assertEqual([p[e]["prix"] for e in etats.ETATS], [16.24, 19.66, 37.36])
+        self.assertTrue(all(p[e]["coherence"] for e in etats.ETATS))
+        self.assertLessEqual(p["convenable"]["prix"], 0.85 * p["bon"]["prix"] + 0.01)
+        self.assertLessEqual(p["tres_bon"]["prix"], 1.9 * p["bon"]["prix"] + 0.01)
+
+    def test_des_prix_deja_coherents_ne_bougent_pas(self):
+        p = {"convenable": {"prix": 10, "source": "actuel", "nb": 3}, "bon": {"prix": 15, "source": "actuel", "nb": 3}, "tres_bon": {"prix": 22, "source": "actuel", "nb": 3}}
+        self.assertEqual(etats.lisser_coherence(p), 0)
+        self.assertEqual([p[e]["prix"] for e in etats.ETATS], [10, 15, 22])
+
+    def test_un_prix_valide_ne_bouge_pas(self):
+        p = {"convenable": {"prix": 30, "source": "validé"}, "bon": {"prix": 31, "source": "archives"}, "tres_bon": {"prix": 40, "source": "archives"}}
+        etats.lisser_coherence(p)
+        self.assertEqual(p["convenable"]["prix"], 30)
+        self.assertLess(p["bon"]["prix"], 31 * 1.3)
+        self.assertLessEqual(30, 0.85 * p["bon"]["prix"] + 0.05)          # à l’arrondi près
+
+    def test_plafond_au_marche_demande_deux_annonces(self):
+        base = lambda: {"tres_bon": {"prix": 40.0, "source": "archives", "nb": 1}}
+        p = base()
+        self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0]}), 0)                  # une seule annonce : on laisse le temps faire
+        self.assertEqual(p["tres_bon"]["prix"], 40.0)
+        self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 24.0]}), 1)
+        self.assertEqual((p["tres_bon"]["prix"], p["tres_bon"]["source"], p["tres_bon"]["nb"]), (22.0, "actuel", 2))
+
+    def test_plafond_ignore_les_prix_valides_le_neuf_et_les_annonces_aberrantes(self):
+        for v in ({"prix": 40.0, "source": "validé"}, {"prix": 40.0, "source": "neuf", "neuf": True}):
+            p = {"tres_bon": v}
+            self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 24.0]}), 0)
+        p = {"tres_bon": {"prix": 40.0, "source": "archives"}}
+        self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 130.0]}), 0)           # 130 € = plus de 3 fois le très bon état : écartée, il ne reste qu'une annonce
+
+    def test_cote_proche_des_annonces_n_est_pas_touchee(self):
+        p = {"bon": {"prix": 21.0, "source": "actuel", "nb": 2}}
+        self.assertEqual(etats.plafonner_au_marche(p, {"bon": [20.0, 24.0]}), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
