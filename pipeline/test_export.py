@@ -1,7 +1,8 @@
 import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from export_site import mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
+from datetime import date
+from export_site import duree_en_ligne, mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
 
 
 def e(prix):
@@ -308,6 +309,27 @@ class TestMinis(unittest.TestCase):
         (self.dossier / "small" / "111.webp").unlink()
         fabriquer_minis(self.dossier)
         self.assertFalse((self.dossier / "mini" / "111.webp").exists())
+
+
+class TestDureeEnLigne(unittest.TestCase):
+    AUJ = date(2026, 11, 7)
+
+    def test_annonce_vinted_capturee_il_y_a_huit_jours(self):
+        self.assertEqual(duree_en_ligne("vinted", "prix_demande", "2026-10-30", self.AUJ), 8)
+
+    def test_annonce_recente_a_une_duree_courte(self):
+        self.assertEqual(duree_en_ligne("leboncoin", "prix_demande", "2026-11-05", self.AUJ), 2)
+
+    def test_annonce_trop_ancienne_n_est_plus_presumee_en_ligne(self):
+        self.assertEqual(duree_en_ligne("leboncoin", "prix_demande", "2026-10-20", self.AUJ), 0)
+
+    def test_vente_probable_signalee_depuis_annule_la_duree(self):
+        self.assertEqual(duree_en_ligne("leboncoin", "prix_demande", "2026-10-30", self.AUJ, vente_le="2026-11-02"), 0)
+        self.assertEqual(duree_en_ligne("leboncoin", "prix_demande", "2026-10-30", self.AUJ, vente_le="2026-10-28"), 8)
+
+    def test_ebay_et_archives_sont_hors_de_cette_regle(self):
+        self.assertEqual(duree_en_ligne("ebay_api", "prix_demande", "2026-10-30", self.AUJ), 0)
+        self.assertEqual(duree_en_ligne("vinted", "vente_probable", "2026-10-30", self.AUJ), 0)
 
 
 if __name__ == "__main__":
