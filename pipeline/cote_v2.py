@@ -14,16 +14,19 @@ import csv
 from datetime import date, timedelta
 from pathlib import Path
 
+import corrections_annonces
 import estimation
 
 DECOTE = 0.85   # décote des prix demandés (voir estimation.py)
 COUVERTURE_MINI = 0.85    # un relevé est complet s'il compte au moins 85 % des annonces du relevé précédent
 
 
-def charger_jours(dossier):
+def charger_jours(dossier, corrections=None):
     """{date: [lignes]} des relevés eBay quotidiens (annonces-AAAA-MM-JJ.csv).
     Seuls les relevés qui ont la colonne « port » sont lus : leur prix est le prix total avec les frais de port.
-    Les relevés d'avant (sans frais de port) ne sont pas mélangés à ceux-ci, pour ne pas fabriquer une hausse artificielle."""
+    Les relevés d'avant (sans frais de port) ne sont pas mélangés à ceux-ci, pour ne pas fabriquer une hausse artificielle.
+    Les corrections du propriétaire (édition changée, annonce exclue) s'appliquent à chaque ligne."""
+    corrections = corrections_annonces.lire() if corrections is None else corrections
     jours = {}
     for f in sorted(Path(dossier).glob("annonces-????-??-??.csv")):
         jour = date.fromisoformat(f.stem[-10:])
@@ -31,7 +34,7 @@ def charger_jours(dossier):
             lecteur = csv.DictReader(h)
             if "port" not in (lecteur.fieldnames or []):
                 continue
-            jours[jour] = list(lecteur)
+            jours[jour] = corrections_annonces.corriger(lecteur, corrections)
     return jours
 
 

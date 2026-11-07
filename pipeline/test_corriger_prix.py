@@ -116,5 +116,40 @@ class TestCorrections(unittest.TestCase):
         self.assertEqual({k[1]: x["decision"] for k, x in v.items()}, {"convenable": "confirme", "bon": "confirme", "tres_bon": "confirme"})
 
 
+class TestCorrectionAnnonce(unittest.TestCase):
+    LIEN = "https://www.vinted.fr/items/123-la-malediction-de-naar"
+
+    def base(self):
+        d = Path(tempfile.mkdtemp())
+        rows = [dict(zip(editions.COLUMNS, [""] * len(editions.COLUMNS)), id="9782070585168", isbn13="9782070585168", titre="La Malédiction de Naar", version="V1")]
+        editions.save(rows, d / "e.csv")
+        return str(d / "e.csv"), d / "v.json", d / "a.json"
+
+    def test_reaffectation_enregistree(self):
+        base, chemin, ca = self.base()
+        bilan = c.appliquer(f"annonce ; {self.LIEN} ; reaffectee ; 9782070585168 ; photo de la V1", chemin, base, "Marc", ca)
+        self.assertEqual(bilan[0][0], "ok")
+        corr = json.loads(ca.read_text(encoding="utf-8"))["annonces"][self.LIEN]
+        self.assertEqual((corr["statut"], corr["isbn13"], corr["par"], corr["note"]), ("reaffectee", "9782070585168", "Marc", "photo de la V1"))
+
+    def test_exclusion_sans_edition(self):
+        base, chemin, ca = self.base()
+        self.assertEqual(c.appliquer(f"annonce ; {self.LIEN} ; exclue ; ; lot de trois livres", chemin, base, "", ca)[0][0], "ok")
+        self.assertEqual(json.loads(ca.read_text(encoding="utf-8"))["annonces"][self.LIEN]["statut"], "exclue")
+
+    def test_refus(self):
+        base, chemin, ca = self.base()
+        for ligne in (f"annonce ; {self.LIEN} ; reaffectee ; 123", f"annonce ; {self.LIEN} ; reaffectee ; 9782070333707",
+                      f"annonce ; pas-un-lien ; confirmee ; 9782070585168", f"annonce ; {self.LIEN} ; inconnu ; 9782070585168"):
+            self.assertEqual(c.appliquer(ligne, chemin, base, "", ca)[0][0], "refuse", ligne)
+        self.assertFalse(ca.exists())
+
+    def test_melange_avec_des_prix(self):
+        base, chemin, ca = self.base()
+        bilan = c.appliquer(f"9782070585168 ; 25 | annonce ; {self.LIEN} ; confirmee ; 9782070585168", chemin, base, "", ca)
+        self.assertEqual([b[0] for b in bilan], ["ok", "ok"])
+        self.assertTrue(ca.exists() and chemin.exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

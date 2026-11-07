@@ -54,6 +54,12 @@ Le **gain** (part de l'écart rattrapée en un jour) dépend du nombre d'annonce
 
 Un prix du neuf (prix éditeur) prend le gain maximal ; un prix d'archive ou déduit des autres états, le gain minimal. Un prix **validé** par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de « prix de la veille » ensuite. Les gains se règlent dans `data/manual/ratios_etats.json` (clé `gains_lissage`). Effet : une annonce isolée, ou retirée, ne fait plus sauter un prix ; un prix appuyé sur plusieurs annonces rejoint sa cible en quelques jours (cible 42 € contre 5 € la veille, trois annonces : 16 € le premier jour, environ 39 € au bout de sept). Sans prix de la veille, la cible est prise telle quelle. Règle en vigueur depuis le 23 octobre 2026, en remplacement du plafond de 10 % par jour.
 
+## Correction d'une annonce (édition, exclusion)
+
+Une annonce est reconnue à son lien. Depuis une carte de l'Analyse ou de l'onglet Annonces (Zagor), « Corriger l'édition » montre les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis enregistre un choix : **confirmée** (l'édition est bonne), **rattachée à une autre édition**, ou **exclue** (autre livre, lot). Le choix passe par le lot « Corriger des cotes » (ligne `annonce ; lien ; statut ; édition ; note`) et s'écrit dans `data/manual/annonces_corrigees.json` (`pipeline/corrections_annonces.py`).
+
+La correction s'applique à chaque reconstruction, aux relevés passés comme futurs : liste des annonces, cote eBay (`cote_v2.charger_jours`), agrégats Leboncoin et Vinted (`importer_leboncoin.reagreger`). Une annonce d'édition incertaine rattachée à une édition devient certaine : elle entre dans les annonces et la cote. Le libellé « Édition à vérifier » disparaît pour une édition confirmée ou corrigée.
+
 ## Cohérence des états et alignement sur le marché (intégrés au calcul)
 
 Deux étapes évitent d'avoir à corriger les cotes à la main (`etats.py`, appelées par `export_site.py`) :
