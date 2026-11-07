@@ -637,6 +637,24 @@
    "le": "2026-11-07",
    "par": "loliba (superadmin)"
   },
+  "9782070334193|bon": {
+   "prix": 12.31,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782070334193|convenable": {
+   "prix": 9.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782070334193|tres_bon": {
+   "prix": 15.0,
+   "decision": "corrige",
+   "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
   "9782070334209|convenable": {
    "prix": 10.0,
    "decision": "corrige",
