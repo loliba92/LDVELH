@@ -2,7 +2,7 @@
  "date": "2026-11-08",
  "precedent": "2026-11-07",
  "nb_comparees": 1518,
- "nb_modifiees": 879,
+ "nb_modifiees": 881,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -69,6 +69,51 @@
  ],
  "baisses": [
   {
+   "id": "9782070610440",
+   "isbn13": "9782070610440",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V3",
+   "etat": "tres_bon",
+   "avant": 52.73,
+   "apres": 12.0,
+   "pct": -0.772,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070610440",
+   "isbn13": "9782070610440",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V3",
+   "etat": "convenable",
+   "avant": 18.77,
+   "apres": 6.0,
+   "pct": -0.68,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070610440",
+   "isbn13": "9782070610440",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V3",
+   "etat": "bon",
+   "avant": 27.76,
+   "apres": 8.99,
+   "pct": -0.676,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333332",
    "isbn13": "9782070333332",
    "titre": "La Malédiction du Pharaon",
@@ -99,7 +144,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 6,
+ "nb_grands_mouvements": 9,
  "modele": {
   "actif": false,
   "n_paires": 129,

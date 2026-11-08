@@ -2477,15 +2477,21 @@
    "par": "loliba (superadmin)"
   },
   "9782070610440|bon": {
-   "prix": 27.76,
+   "prix": 8.99,
    "decision": "corrige",
-   "le": "2026-11-07",
+   "le": "2026-11-08",
+   "par": "loliba (superadmin)"
+  },
+  "9782070610440|convenable": {
+   "prix": 6.0,
+   "decision": "corrige",
+   "le": "2026-11-08",
    "par": "loliba (superadmin)"
   },
   "9782070610440|tres_bon": {
-   "prix": 52.73,
+   "prix": 12.0,
    "decision": "corrige",
-   "le": "2026-11-07",
+   "le": "2026-11-08",
    "par": "loliba (superadmin)"
   },
   "9782070610471|convenable": {
