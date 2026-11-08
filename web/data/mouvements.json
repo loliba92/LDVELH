@@ -2,7 +2,7 @@
  "date": "2026-11-08",
  "precedent": "2026-11-07",
  "nb_comparees": 1518,
- "nb_modifiees": 881,
+ "nb_modifiees": 882,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -114,6 +114,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070568734",
+   "isbn13": "9782070568734",
+   "titre": "Les Mercenaires du Levant",
+   "serie": "Défis Fantastiques",
+   "numero": "698",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 53.54,
+   "apres": 47.02,
+   "pct": -0.122,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
+  },
+  {
    "id": "9782070333332",
    "isbn13": "9782070333332",
    "titre": "La Malédiction du Pharaon",
@@ -144,7 +159,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 129,
