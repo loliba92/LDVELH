@@ -2423,6 +2423,14 @@
     chargerAnnonces().then(() => { if (ANN && $('#coll-corps')) afficherCollection(); });
   }
 
+  // Annonces d'un livre à trouver : recherches sur les sites de la fiche, en une ligne (sans compte, les sites réservés mènent à la connexion)
+  function htmlAnnoncesATrouver(b) {
+    const masque = cotesMasquees();
+    return `<p class="sous chercher-annonces">Annonces : ${liensRecherche(b).map(([nom, url]) => masque && nom !== 'Amazon'
+      ? `<button type="button" class="bouton-lien" data-invite aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`
+      : `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join(' · ')}</p>`;
+  }
+
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
@@ -2452,6 +2460,7 @@
           return `<div class="prix-bloc"><p class="prix-ligne"><b>Offrez ${eurosArr(offre(p))}</b> <span class="sous">+ ${eurosArr(FRAIS_PORT)} de port + ${eurosArr(FRAIS_PLATEFORME)} de frais</span> ${pastille(pointsAchat(b))}</p>
             <p class="sous prix-detail">Négociable : les vendeurs demandent environ ${eurosArr(v.prix)}${!ANN ? '' : l.length ? ` · ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'}</p></div>`;
         })()}
+        ${htmlAnnoncesATrouver(b)}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 
