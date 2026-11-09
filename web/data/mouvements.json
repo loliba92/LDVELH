@@ -2,10 +2,25 @@
  "date": "2026-11-09",
  "precedent": "2026-11-08",
  "nb_comparees": 1521,
- "nb_modifiees": 884,
+ "nb_modifiees": 886,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782070333691",
+   "isbn13": "9782070333691",
+   "titre": "La Pierre de la Sagesse",
+   "serie": "Loup Solitaire",
+   "numero": "369",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 9.28,
+   "apres": 10.88,
+   "pct": 0.172,
+   "nature": "annonces",
+   "nb": 9,
+   "recalibre": false
+  },
   {
    "id": "9782070506798",
    "isbn13": "9782070506798",
@@ -174,7 +189,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
   "n_paires": 130,
