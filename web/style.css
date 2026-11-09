@@ -2789,3 +2789,4 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .corr-note input { flex: 1; min-width: 0; }
 .corr-msg { margin: 6px 0 0; font-weight: 600; }
 .corr-opt span, .corr-note { text-transform: none; letter-spacing: normal; }
+.rc-ligne > .corr-ann { grid-column: 1 / -1; }
