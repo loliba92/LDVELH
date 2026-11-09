@@ -24,6 +24,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070656523",
+   "isbn13": "9782070656523",
+   "titre": "L'Epreuve des champions",
+   "serie": "Défis Fantastiques",
+   "numero": "385",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 5.35,
+   "apres": 3.0,
+   "pct": -0.439,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333387",
    "isbn13": "9782070333387",
    "titre": "Le Magicien des Glaces",
@@ -49,6 +64,21 @@
    "avant": 25.7,
    "apres": 18.85,
    "pct": -0.267,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070656523",
+   "isbn13": "9782070656523",
+   "titre": "L'Epreuve des champions",
+   "serie": "Défis Fantastiques",
+   "numero": "385",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 6.59,
+   "apres": 4.85,
+   "pct": -0.264,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -144,7 +174,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
   "n_paires": 129,

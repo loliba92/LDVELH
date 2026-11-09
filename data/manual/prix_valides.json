@@ -2695,6 +2695,24 @@
    "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
+  "9782070656523|bon": {
+   "prix": 4.85,
+   "decision": "corrige",
+   "le": "2026-11-09",
+   "par": "loliba (superadmin)"
+  },
+  "9782070656523|convenable": {
+   "prix": 3.0,
+   "decision": "corrige",
+   "le": "2026-11-09",
+   "par": "loliba (superadmin)"
+  },
+  "9782070656523|tres_bon": {
+   "prix": 7.0,
+   "decision": "corrige",
+   "le": "2026-11-09",
+   "par": "loliba (superadmin)"
+  },
   "9782070656530|bon": {
    "prix": 35.0,
    "decision": "corrige",
