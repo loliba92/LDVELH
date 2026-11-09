@@ -2428,7 +2428,14 @@
     const masque = cotesMasquees();
     return `<p class="sous chercher-annonces">Annonces : ${liensRecherche(b).map(([nom, url]) => masque && nom !== 'Amazon'
       ? `<button type="button" class="bouton-lien" data-invite aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`
-      : `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join(' · ')}</p>`;
+      : `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join(' · ')}</p>${htmlAnnoncesRelevees(b)}`;
+  }
+  // Annonces relevées en ligne pour ce livre (le moins cher d'abord), comme sur la fiche ; réservées aux comptes qui voient les annonces
+  function htmlAnnoncesRelevees(b) {
+    if (!voitAnnonces() || !ANN) return '';
+    const l = annoncesEnLigne(b).slice().sort((x, y) => x[0] - y[0]);
+    if (!l.length) return '';
+    return `<details class="annonces-atrouver"><summary>${l.length} annonce${l.length > 1 ? 's' : ''} en ligne</summary><div class="annonces-corps"><ul>${l.map(([prix, titre, lien, origine]) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span></li>`).join('')}</ul></div></details>`;
   }
 
   function htmlATrouver() {
