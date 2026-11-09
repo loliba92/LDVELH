@@ -2,7 +2,7 @@
  "date": "2026-11-09",
  "precedent": "2026-11-08",
  "nb_comparees": 1521,
- "nb_modifiees": 881,
+ "nb_modifiees": 882,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -23,6 +23,21 @@
   }
  ],
  "baisses": [
+  {
+   "id": "9782070333387",
+   "isbn13": "9782070333387",
+   "titre": "Le Magicien des Glaces",
+   "serie": "L'Œil Noir",
+   "numero": "338",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 28.18,
+   "apres": 19.55,
+   "pct": -0.306,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070511983",
    "isbn13": "9782070511983",
@@ -84,7 +99,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 5,
+ "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
   "n_paires": 129,
