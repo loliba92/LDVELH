@@ -1,11 +1,12 @@
 """Corrections d'annonces faites par le propriétaire (Analyse, Annonces, fiche : « Corriger l'édition »).
 
 Une annonce est reconnue à son lien. Le fichier `data/manual/annonces_corrigees.json` a la forme
-  {"annonces": {"<lien>": {"statut": "confirmee" | "reaffectee" | "exclue", "isbn13": "<édition retenue>", "le": "AAAA-MM-JJ", "par": "nom", "note": "..."}}}
+  {"annonces": {"<lien>": {"statut": "confirmee" | "reaffectee" | "exclue" | "vendue", "isbn13": "<édition retenue>", "le": "AAAA-MM-JJ", "par": "nom", "note": "..."}}}
 - confirmee : l'édition (isbn13) est bonne, l'annonce n'est plus « à vérifier ». Pour une annonce d'édition incertaine, c'est l'édition choisie : l'annonce
   devient certaine et entre dans les annonces et la cote ;
 - reaffectee : l'annonce va à une autre édition (isbn13) ; ses prix et sa place dans la cote suivent ;
-- exclue : l'annonce n'est pas ce livre (autre livre, lot, hors sujet) ; elle sort des annonces et de la cote.
+- exclue : l'annonce n'est pas ce livre (autre livre, lot, hors sujet) ; elle sort des annonces et de la cote ;
+- vendue : l'annonce reste affichée avec la mention « Vendu » ; son édition (isbn13) suit le même traitement que confirmee.
 La correction s'applique aux relevés à chaque reconstruction (annonces, cote eBay, agrégats Leboncoin et Vinted) : elle tient pour les relevés
 passés et futurs, et un nouveau relevé ne la défait pas. Elle se saisit par le lot « Corriger des cotes » (lignes « annonce ; lien ; édition ; note »).
 """
@@ -15,7 +16,7 @@ from datetime import date
 from pathlib import Path
 
 CHEMIN = Path(__file__).resolve().parent.parent / "data" / "manual" / "annonces_corrigees.json"
-STATUTS = ("confirmee", "reaffectee", "exclue")
+STATUTS = ("confirmee", "reaffectee", "exclue", "vendue")
 
 
 def _propre(lien, v):
