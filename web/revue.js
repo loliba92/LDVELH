@@ -630,6 +630,8 @@
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
   const corrigees = () => (ANN && ANN.corrigees) || {};
+  // Mention « Vendu » : l'annonce reste affichée (correction « vendue »)
+  const vendueHtml = (a) => (corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
   function panneauCorrection(a) {
@@ -637,11 +639,11 @@
     const eds = Object.values(INFO_ED).filter((x) => livre && x.livre === livre && x.isbn).sort((x, y) => String(x.version).localeCompare(String(y.version), 'fr', { numeric: true }));
     if (!estNiveau3() || !a.lien || !eds.length) return '';
     const c = corrigees()[a.lien], nom = `corr-${NB_CORR += 1}`;
-    const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'confirmee' ? 'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
+    const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'vendue' ? 'Annonce marquée vendue par vous' : c.statut === 'confirmee' ?'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
     const opt = (x) => `<label class="corr-opt"><input type="radio" name="${nom}" value="${esc(x.isbn)}"${x.isbn === a.ed.isbn ? ' checked' : ''}>${x.mini ? `<img src="${esc(x.mini)}" alt="" width="40" height="56" loading="lazy">` : ''}<span>${esc(x.version)}${x.annee ? ' · ' + esc(x.annee) : ''}${x.isbn === a.ed.isbn ? ' <small>(actuelle)</small>' : ''}</span></label>`;
     return `<details class="corr-ann" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${fait ? ' · ' : ''}${fait}</summary>
       <p class="sous">Ouvrez l'annonce, comparez sa photo aux jaquettes, puis choisissez l'édition. Votre choix remplace celui du relevé, aussi pour les relevés suivants.</p>
-      <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
+      <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="checkbox" class="corr-vendu-case"${c && c.statut === 'vendue' ? ' checked' : ''}><span>Annonce vendue : l'afficher avec la mention « Vendu »</span></label><label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
       <label class="corr-note">Note <input type="text" maxlength="120" placeholder="facultatif"></label>
       <button type="button" class="bouton bouton-clair corr-go">Enregistrer</button><p class="corr-msg" role="status" hidden></p></details>`;
   }
@@ -651,7 +653,8 @@
     const bloc = go.closest('.corr-ann'), msg = bloc.querySelector('.corr-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
     const choix = bloc.querySelector('input[type=radio]:checked');
     if (!choix) return dire('Choisissez une édition, ou « exclure l\'annonce ».');
-    const statut = choix.value === 'exclue' ? 'exclue' : choix.value === bloc.dataset.isbn ? 'confirmee' : 'reaffectee';
+    const vendu = bloc.querySelector('.corr-vendu-case').checked;
+    const statut = choix.value === 'exclue' ? 'exclue' : vendu ? 'vendue' : choix.value === bloc.dataset.isbn ? 'confirmee' : 'reaffectee';
     const note = (bloc.querySelector('.corr-note input').value || '').replace(/[;|\r\n]+/g, ' ').trim();
     if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
     go.disabled = true; dire('Envoi en cours…');
@@ -739,7 +742,7 @@
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
-      `<span class="meta pp-source">Source : ${source}</span>` +
+      `<span class="meta pp-source">Source : ${source}</span>` + vendueHtml(p) +
       (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + panneauCorrection(p) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
@@ -1170,7 +1173,7 @@
       const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
         ${panneauCorrection(a)}
       </article>`;
       const carteGrille = (a) => {
@@ -1179,7 +1182,7 @@
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
           <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>

@@ -30,6 +30,11 @@ class TestCorrectionsAnnonces(unittest.TestCase):
         l = ca.corriger([{"lien": LIEN, "isbn13": "9782070000001"}], corr("confirmee", "9782070000001"))
         self.assertEqual(l[0]["isbn13"], "9782070000001")
 
+    def test_vendue_reste_affichee_avec_son_edition(self):
+        l = ca.corriger([{"lien": LIEN, "isbn13": "9782070000001"}], corr("vendue", "9782070000001"))
+        self.assertEqual(l, [{"lien": LIEN, "isbn13": "9782070000001"}])
+        self.assertEqual(ca.promues(corr("vendue", "9782070000001")), {LIEN})
+
     def test_sans_correction_rien_ne_change(self):
         lignes = [{"lien": LIEN, "isbn13": "9782070000001"}]
         self.assertEqual(ca.corriger(lignes, {}), lignes)
