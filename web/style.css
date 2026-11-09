@@ -2272,6 +2272,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 899px) { .barre-bas .nb-pep { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; } }
 .a-trouver .l-livre { flex: 1 1 0; min-width: 0; }
 .a-trouver li > .retirer { flex: none; }
+.a-trouver .chercher-annonces { flex: 1 1 100%; margin: 0; font-size: var(--t-sm); overflow-wrap: anywhere; }
+.a-trouver .chercher-annonces button.bouton-lien { display: inline; min-height: 0; padding: 0; font: inherit; color: var(--accent); }
 /* Pépite du jour (Zagor) : le titre garde toute sa largeur, « Retirer » et « Marquer vendue » passent sur leur propre ligne */
 .a-trouver .pep-jour-li .l-livre { flex: 1 1 100%; }
 .pep-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; }
