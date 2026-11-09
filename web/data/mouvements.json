@@ -2,7 +2,7 @@
  "date": "2026-11-09",
  "precedent": "2026-11-08",
  "nb_comparees": 1521,
- "nb_modifiees": 886,
+ "nb_modifiees": 888,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -39,6 +39,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070651344",
+   "isbn13": "9782070651344",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 19.61,
+   "apres": 10.11,
+   "pct": -0.484,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070656523",
    "isbn13": "9782070656523",
    "titre": "L'Epreuve des champions",
@@ -49,6 +64,21 @@
    "avant": 5.35,
    "apres": 3.0,
    "pct": -0.439,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070651344",
+   "isbn13": "9782070651344",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 21.19,
+   "apres": 13.0,
+   "pct": -0.387,
    "nature": "validé",
    "nb": 0,
    "recalibre": false
@@ -144,6 +174,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070651344",
+   "isbn13": "9782070651344",
+   "titre": "La Créature venue du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "415",
+   "version": "V4",
+   "etat": "convenable",
+   "avant": 8.68,
+   "apres": 7.0,
+   "pct": -0.194,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070512676",
    "isbn13": "9782070512676",
    "titre": "Les Pirates de Shadaki",
@@ -172,24 +217,9 @@
    "nature": "archives",
    "nb": 1,
    "recalibre": false
-  },
-  {
-   "id": "9782070333783",
-   "isbn13": "9782070333783",
-   "titre": "Le Chemin Maudit",
-   "serie": "L'Œil Noir",
-   "numero": "378",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 67.73,
-   "apres": 60.55,
-   "pct": -0.106,
-   "nature": "annonces",
-   "nb": 6,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 12,
+ "nb_grands_mouvements": 15,
  "modele": {
   "actif": false,
   "n_paires": 130,
