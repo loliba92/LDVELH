@@ -2325,9 +2325,9 @@
     z.innerHTML = `<section class="tb-carte" aria-label="Butins et Annonces">
       <p class="tb-titre">Butins et Annonces</p>
       <div class="tb-chiffres">
-        <div class="tb-chiffre"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
-        <div class="tb-chiffre"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small>${niv3 ? donutVerdicts(d.v, f) : ''}</div>
-        <div class="tb-chiffre"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
+        <div class="tb-chiffre tb-butin"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
+        <div class="tb-chiffre tb-annonces"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>${niv3 ? donutVerdicts(d.v, f) : ''}
+        <div class="tb-chiffre tb-ajouts"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
       </div>
       <div class="tb-liens"><a class="bouton" href="butin.html#pepites">Voir le Butin</a><a class="bouton bouton-clair" href="butin.html#recues">Voir les annonces</a>${niv3 ? '<a class="bouton bouton-clair" href="butin.html#analyse">Analyse</a>' : ''}</div>
     </section>`;
