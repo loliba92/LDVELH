@@ -2704,6 +2704,13 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .tb-chiffre small { color: var(--muted); font-size: var(--t-sm); line-height: 1.35; }
 .tb-chiffre small .tb-evol { font: 700 var(--t-sm) var(--f-ui); }
 .tb-chiffre small .tb-hausse { color: #8fd3a8; } .tb-chiffre small .tb-baisse { color: #f0a5b0; }
+.tb-donut { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.tb-donut svg { flex: none; }
+.tb-donut li { min-width: 0; }
+@media (max-width: 700px) { .tb-donut { flex-wrap: wrap; } .tb-donut ul { flex: 1 1 100%; grid-template-columns: 1fr; } }
+.tb-donut ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; font-size: var(--t-xs); color: var(--muted); line-height: 1.45; }
+.tb-donut li i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.tb-donut b { font: inherit; color: var(--text); font-variant-numeric: tabular-nums; margin-left: 4px; white-space: nowrap; }
 .tb-liens { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .tb-liens .bouton { min-height: 40px; padding: 6px 16px; font-size: var(--t-base); }
 @media (max-width: 600px) {

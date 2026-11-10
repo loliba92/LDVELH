@@ -2268,6 +2268,35 @@
     });
     return n;
   }
+  // Répartition des annonces en ligne par verdict (même règle que les pastilles), pour le donut de l'accueil
+  const VERDICTS_DONUT = [['pepite', 'Pépite', '#d4a437'], ['dessous', 'Pas cher', '#7fd69c'], ['dans', 'Dans les prix', '#c9c2b0'], ['dessus', 'Trop cher', '#e0875a'], ['cher', 'Très cher', '#f08f99']];
+  function repartitionVerdicts() {
+    if (!ANN || !ANN.annonces) return null;
+    const v = { pepite: 0, dessous: 0, dans: 0, dessus: 0, cher: 0, total: 0 };
+    Object.entries(ANN.annonces).forEach(([isbn, parEtat]) => {
+      const b = DATA.find((x) => x.isbn13 === isbn);
+      if (!b || !b.prix) return;
+      Object.entries(parEtat).forEach(([cle, liste]) => (liste || []).forEach(([prix, , , origine, vue]) => {
+        const partie = !!(vue && !enLigne(origine) && ANN.date_ebay && vue < ANN.date_ebay);
+        const k = verdictImport(prix, b.prix[cle]);
+        if (!k || partie) return;
+        v[k === 'super' ? 'pepite' : k] += 1; v.total += 1;
+      }));
+    });
+    return v;
+  }
+  // Donut discret : une couronne par verdict, la légende donne les effectifs
+  const donutVerdicts = (v, f) => {
+    if (!v || !v.total) return '';
+    let cumul = 0;
+    const segments = VERDICTS_DONUT.map(([k, , c]) => {
+      const p = (100 * (v[k] || 0)) / v.total;
+      const seg = `<circle r="15.9155" cx="18" cy="18" fill="none" stroke="${c}" stroke-width="4.5" stroke-dasharray="${p.toFixed(2)} ${(100 - p).toFixed(2)}" stroke-dashoffset="${(25 - cumul).toFixed(2)}"/>`;
+      cumul += p; return seg;
+    }).join('');
+    const legende = VERDICTS_DONUT.map(([k, lib, c]) => `<li><i style="background:${c}"></i>${lib} <b>${f(v[k] || 0)}</b></li>`).join('');
+    return `<div class="tb-donut"><svg viewBox="0 0 36 36" width="64" height="64" role="img" aria-label="Répartition des annonces en ligne : ${VERDICTS_DONUT.map(([k, lib]) => lib + ' ' + f(v[k] || 0)).join(', ')}"><g transform="rotate(-90 18 18)">${segments}</g></svg><ul>${legende}</ul></div>`;
+  };
   // Les totaux restent affichés : gardés sur l'appareil (derniers chiffres connus), « … » tant qu'on n'en a aucun, jamais une carte qui disparaît
   const CLE_COMPTEURS = 'cdh-compteurs-accueil';
   const compteursGardes = () => { try { return JSON.parse(localStorage.getItem(CLE_COMPTEURS) || 'null') || {}; } catch (e) { return {}; } };
@@ -2282,9 +2311,11 @@
     if (nb != null) d.nb = nb;
     if (na != null) d.na = na;
     if (sous != null) d.sous = sous;
+    const rep = niv3 && DATA.length ? repartitionVerdicts() : null;
+    if (rep && rep.total) d.v = rep;
     const aj = ajoutsSur24h();
     if (aj) d.aj = aj;
-    if (nb != null || na != null || sous != null || aj) garderCompteurs(d);
+    if (nb != null || na != null || sous != null || aj || rep) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
     // Tableau de bord « Butins et Annonces » : trois chiffres (pépites du Butin, annonces en ligne, ajouts sur 24 h), puis les accès ; l'analyse est pour le Zagor
     const f = (v) => (v == null ? '…' : Number(v).toLocaleString('fr-FR'));
@@ -2295,7 +2326,7 @@
       <p class="tb-titre">Butins et Annonces</p>
       <div class="tb-chiffres">
         <div class="tb-chiffre"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
-        <div class="tb-chiffre"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>
+        <div class="tb-chiffre"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small>${niv3 ? donutVerdicts(d.v, f) : ''}</div>
         <div class="tb-chiffre"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
       </div>
       <div class="tb-liens"><a class="bouton" href="butin.html#pepites">Voir le Butin</a><a class="bouton bouton-clair" href="butin.html#recues">Voir les annonces</a>${niv3 ? '<a class="bouton bouton-clair" href="butin.html#analyse">Analyse</a>' : ''}</div>
