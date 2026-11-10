@@ -1053,7 +1053,7 @@
         const a = o.a, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`, n = (a.tous || []).length;
         const num = a.ed.numero && !/^0+$/.test(a.ed.numero) ? ' n° ' + esc(a.ed.numero) : '';
         return `<article class="opp-carte opp-${o.fiab}">
-          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
+          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a>${vendueHtml(a)}<span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
           <p class="opp-meta">${esc(a.ed.serie)}${num} · ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${n} annonce${n > 1 ? 's' : ''} de ce livre dans cet état</p>
           <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
           <p class="opp-marche">En ligne : ${o.m.n} annonce${o.m.n > 1 ? 's' : ''}${o.m.n > 1 ? ` de ${eur(o.m.bas)} à ${eur(o.m.haut)}` : ''}${o.m.disparues.length ? ` · disparues (vendues ?) : ${o.m.disparues.slice(0, 4).map((x) => eur(x)).join(', ')}` : ''}</p>
