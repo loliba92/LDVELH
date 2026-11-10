@@ -634,14 +634,15 @@
   const vendueHtml = (a) => (corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
-  function panneauCorrection(a) {
+  // En mode lite (liste Annonces), le panneau reste replié : le bouton « Corriger » de la ligne l'ouvre
+  function panneauCorrection(a, lite) {
     const livre = (INFO_ED[a.ed.id] || {}).livre;
     const eds = Object.values(INFO_ED).filter((x) => livre && x.livre === livre && x.isbn).sort((x, y) => String(x.version).localeCompare(String(y.version), 'fr', { numeric: true }));
     if (!estNiveau3() || !a.lien || !eds.length) return '';
     const c = corrigees()[a.lien], nom = `corr-${NB_CORR += 1}`;
     const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'vendue' ? 'Annonce marquée vendue par vous' : c.statut === 'confirmee' ?'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
     const opt = (x) => `<label class="corr-opt"><input type="radio" name="${nom}" value="${esc(x.isbn)}"${x.isbn === a.ed.isbn ? ' checked' : ''}>${x.mini ? `<img src="${esc(x.mini)}" alt="" width="40" height="56" loading="lazy">` : ''}<span>${esc(x.version)}${x.annee ? ' · ' + esc(x.annee) : ''}${x.isbn === a.ed.isbn ? ' <small>(actuelle)</small>' : ''}</span></label>`;
-    return `<details class="corr-ann" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${fait ? ' · ' : ''}${fait}</summary>
+    return `<details class="corr-ann${lite ? ' corr-lite' : ''}" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${!lite && fait ? ' · ' : ''}${lite ? '' : fait}</summary>${lite && fait ? `<p class="corr-fait-txt">${fait}</p>` : ''}
       <p class="sous">Ouvrez l'annonce, comparez sa photo aux jaquettes, puis choisissez l'édition. Votre choix remplace celui du relevé, aussi pour les relevés suivants.</p>
       <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="checkbox" class="corr-vendu-case"${c && c.statut === 'vendue' ? ' checked' : ''}><span>Annonce vendue : l'afficher avec la mention « Vendu »</span></label><label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
       <label class="corr-note">Note <input type="text" maxlength="120" placeholder="facultatif"></label>
@@ -1170,19 +1171,22 @@
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : `, dont ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
-      const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
+      const carteListe = (a) => {
+        const corr = panneauCorrection(a, true);
+        return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
-        ${panneauCorrection(a)}
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
+        ${corr}
       </article>`;
+      };
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
         const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
@@ -1196,7 +1200,11 @@
       liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carteGrille).join('') + '</div>' : '<div class="rc-liste">' + page.map(carteListe).join('') + '</div>') + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
       appliquerDefilement();
     };
-    liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
+    liste.addEventListener('click', (e) => {
+      const corr = e.target.closest && e.target.closest('.corr-bouton');
+      if (corr) { const d = corr.closest('article').querySelector(':scope > .corr-lite'); if (d) { d.open = !d.open; corr.setAttribute('aria-expanded', String(d.open)); } return; }
+      if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); }
+    });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
