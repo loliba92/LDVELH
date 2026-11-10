@@ -1897,6 +1897,17 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .annonces-corps .ann-vs .rc-pastille { font-size:var(--t-xs); line-height: 1.5; white-space: nowrap; }
 .annonces-corps .ann-vs .rc-vs { color: var(--muted); }
 .annonces-corps .ann-titre { grid-column: 2; justify-self: start; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size:var(--t-xs); }
+/* Une annonce par ligne : le titre prend la place disponible, les étiquettes passent à la ligne si besoin */
+.annonces-corps li.ann-li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.annonces-corps .ann-li > * { flex: none; }
+.annonces-corps .ann-li .ann-prix { min-width: 4.6em; text-align: right; }
+.annonces-corps .ann-li .ann-lien-titre { flex: 1 1 12em; min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 701px) { .annonces-corps .ann-li .ann-lien-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+.annonces-corps .ann-site { font-size:var(--t-sm); color: var(--muted); white-space: nowrap; }
+.annonces-corps .ann-exclure { margin-left: auto; min-height: 28px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
+.annonces-corps .ann-exclure:hover, .annonces-corps .ann-exclure:focus-visible { color: var(--gold); border-color: var(--gold); }
+.annonces-corps .ann-exclure:disabled { opacity: .6; cursor: default; }
+.annonces-fiche .ann-msg { margin: 6px 0 0; font-weight: 600; }
 
 /* Fenêtre de bienvenue : bandeau illustré en haut (même illustration que l'accueil) */
 .dlg-bienvenue .bienvenue-img { display: block; width: calc(100% + 44px); max-width: none; height: 120px; margin: -22px -22px 14px; object-fit: cover; object-position: center 30%; border-radius: 11px 11px 0 0; }
@@ -2257,6 +2268,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-ligne2 .rc-trouver { flex: none; }
 .rc-ligne2 .rc-src { flex: none; }
 .rc-ligne2 .rc-fiche { flex: none; margin-left: auto; font-size:var(--t-sm); font-weight: 600; color: var(--gold); text-decoration: none; white-space: nowrap; }
+.rc-ligne2 .rc-actions { flex: none; margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.rc-ligne2 .rc-actions .rc-fiche { margin-left: 0; }
 .rc-ligne2 .rc-fiche:hover { text-decoration: underline; }
 
 /* Pépites des livres « à trouver » */
@@ -2792,4 +2805,12 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .corr-msg { margin: 6px 0 0; font-weight: 600; }
 .corr-opt span, .corr-note { text-transform: none; letter-spacing: normal; }
 .rc-ligne > .corr-ann { grid-column: 1 / -1; }
+/* Mode lite : le panneau n'occupe de place que lorsqu'il est ouvert par le bouton « Corriger » */
+.corr-lite:not([open]) { margin: 0; padding: 0; border: 0; }
+.corr-lite > summary { display: none; }
+.corr-fait-txt { margin: 0 0 6px; color: var(--ok, #6fcf97); font-weight: 600; }
+.corr-bouton { min-height: 28px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
+.corr-bouton:hover, .corr-bouton[aria-expanded="true"] { color: var(--gold); border-color: var(--gold); }
+/* Pancarte « Vendu » en travers de la jaquette */
+.an-pancarte { position: absolute; left: -26%; right: -26%; top: 38%; z-index: 1; padding: 4px 0; background: #b3262f; color: #fff; text-align: center; font: 800 .8rem/1.2 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-35deg); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none; }
 .an-vendu { display: inline-block; align-self: flex-start; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .72rem/1.5 var(--f-ui); white-space: nowrap; }

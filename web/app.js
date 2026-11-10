@@ -1039,8 +1039,18 @@
   }
   function blocAnnonces(b) {
     return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
-      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
+      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p></details>`;
   }
+  // Exclure une annonce depuis la fiche (Zagor) : même envoi que « Corriger l'édition » dans Annonces
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-exclure-annonce]');
+    if (!b || !estNiveau3()) return;
+    const msg = b.closest('.annonces-fiche').querySelector('.ann-msg');
+    if (!window.confirm('Exclure cette annonce de la cote ? Elle ne figurera plus parmi les annonces après le prochain relevé.')) return;
+    b.disabled = true;
+    await envoyerCorrections([`annonce ; ${b.dataset.exclureAnnonce} ; exclue ; ; `], (t) => { msg.textContent = t; msg.hidden = false; });
+    b.disabled = false;
+  });
   function remplirAnnonces(b) {
     const zone = $('#annonces-corps');
     if (!zone) return;
@@ -1062,6 +1072,12 @@
       const inc = ANN && ANN.incertaines ? fratrie.flatMap((x) => ANN.incertaines[x.isbn13] || []).filter((a) => !incVues.has(a[2]) && incVues.add(a[2])) : [];          // édition incertaine : à vérifier, hors prix
       const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'vinted' ? 'Vinted' : o === 'librairie' ? 'Librairie' : REVENDEURS[o] || 'eBay');
       const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</li>`;
+      // Une annonce par ligne : prix, titre, verdict face à la cote de son état, origine ; le Zagor peut l'exclure
+      const ligneFiche = ([prix, titre, lien, origine, vue], cote) => {
+        const v = verdictImport(prix, cote), ecart = cote != null ? Math.round((prix / cote - 1) * 100) : 0;
+        const plusVue = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);
+        return `<li class="ann-li"><span class="ann-prix">${fmt(prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}${cote != null ? `<span class="ann-site">site ${fmt(cote)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>` : ''}<span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(vue)}">plus vue</span>` : ''}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
+      };
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
@@ -1072,9 +1088,7 @@
         const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
         const partie = ([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : pas retrouvée par la recherche (retirée, vendue ou simplement manquée)
         const nbPartie = l.filter(partie).length;
-        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => {
-          const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => ligneFiche(a, b.prix[e.k])).join('')}</ul>`;
       }).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
     });
   }
