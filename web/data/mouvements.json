@@ -2,7 +2,7 @@
  "date": "2026-11-10",
  "precedent": "2026-11-09",
  "nb_comparees": 1521,
- "nb_modifiees": 874,
+ "nb_modifiees": 875,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -37,8 +37,54 @@
    "recalibre": false
   }
  ],
- "baisses": [],
- "nb_grands_mouvements": 2,
+ "baisses": [
+  {
+   "id": "9782070506972",
+   "isbn13": "9782070506972",
+   "titre": "La Cité des Pièges",
+   "serie": "Sorcellerie!",
+   "numero": "294",
+   "version": "V2",
+   "etat": "tres_bon",
+   "avant": 21.43,
+   "apres": 12.0,
+   "pct": -0.44,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070506972",
+   "isbn13": "9782070506972",
+   "titre": "La Cité des Pièges",
+   "serie": "Sorcellerie!",
+   "numero": "294",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 11.58,
+   "apres": 7.0,
+   "pct": -0.396,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070506972",
+   "isbn13": "9782070506972",
+   "titre": "La Cité des Pièges",
+   "serie": "Sorcellerie!",
+   "numero": "294",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 15.17,
+   "apres": 9.71,
+   "pct": -0.36,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
+ "nb_grands_mouvements": 5,
  "modele": {
   "actif": false,
   "n_paires": 132,
