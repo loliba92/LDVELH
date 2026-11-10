@@ -1071,7 +1071,7 @@
       const incVues = new Set();
       const inc = ANN && ANN.incertaines ? fratrie.flatMap((x) => ANN.incertaines[x.isbn13] || []).filter((a) => !incVues.has(a[2]) && incVues.add(a[2])) : [];          // édition incertaine : à vérifier, hors prix
       const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'vinted' ? 'Vinted' : o === 'librairie' ? 'Librairie' : REVENDEURS[o] || 'eBay');
-      const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</li>`;
+      const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li class="ann-li"><span class="ann-prix">${fmt(prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
       // Une annonce par ligne : prix, titre, verdict face à la cote de son état, origine ; le Zagor peut l'exclure
       const ligneFiche = ([prix, titre, lien, origine, vue], cote) => {
         const v = verdictImport(prix, cote), ecart = cote != null ? Math.round((prix / cote - 1) * 100) : 0;
@@ -1081,7 +1081,7 @@
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
-      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, a[5] > 1 ? `1 édition sur ${a[5]} possibles` : 'édition à confirmer')).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
+      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
       zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '') + ETATS.map((e) => {
         const l = par ? par[e.k] : null;
         if (!l || !l.length) return '';
