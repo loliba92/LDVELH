@@ -2,7 +2,7 @@
  "date": "2026-11-11",
  "precedent": "2026-11-10",
  "nb_comparees": 1521,
- "nb_modifiees": 872,
+ "nb_modifiees": 874,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -18,6 +18,21 @@
    "apres": 8.17,
    "pct": 0.188,
    "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
+   "id": "9782070311156",
+   "isbn13": "9782070311156",
+   "titre": "L'Homme en rouge et la bande des Quatre",
+   "serie": "Non classée",
+   "numero": null,
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 3.5,
+   "apres": 4.0,
+   "pct": 0.143,
+   "nature": "annonces",
    "nb": 1,
    "recalibre": false
   }
@@ -144,7 +159,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
   "n_paires": 132,
