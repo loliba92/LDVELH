@@ -14,28 +14,40 @@
     for (var i = 0; i < 12; i += 1) somme += Number(n[i]) * (i % 2 ? 3 : 1);
     return (10 - (somme % 10)) % 10 === Number(n[12]) ? n : null;
   }
-  // Une ligne peut porter « ISBN ; série ; numéro ; titre » : seul l'ISBN compte ici
-  function isbnDe(ligne) { return ligne.split(';')[0].trim(); }
+  // Une ligne peut porter « ISBN ; série ; numéro ; titre » ; sans ISBN, la ligne commence par le titre
+  function premierChamp(ligne) { return ligne.split(';')[0].trim(); }
+  function cleTitre(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\W+/g, ' ').trim(); }
   function lignes() { return texte.value.split('\n').map(function (x) { return x.trim(); }).filter(function (x) { return x; }); }
   function majCompte() { compte.textContent = lignes().length + ' ISBN'; }
   function dire(t) { msg.textContent = t; msg.hidden = false; }
   function echapper(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
   // Livres déjà au guide : versions.json, chargé une seule fois. Sans lui, le contrôle ne signale que les erreurs de saisie.
-  var connus = null;
+  var connus = null, titres = {};
   function connusDuGuide() {
     if (connus) return Promise.resolve(connus);
     return fetch('data/versions.json').then(function (r) { return r.json(); }).then(function (d) {
       connus = {};
       d.forEach(function (v) { if (v.isbn13) connus[v.isbn13] = v.titre || 'titre inconnu'; });
+      titres = {};
+      d.forEach(function (v) { if (v.titre) titres[cleTitre(v.titre)] = true; });
       return connus;
     }).catch(function () { return {}; });
   }
   function controler(l) {
     return connusDuGuide().then(function (deja) {
-      var vus = {};
+      var vus = {}, vusTitres = {};
       return l.map(function (ligne) {
-        var isbn = isbnValide(isbnDe(ligne));
+        var champ = premierChamp(ligne);
+        if (champ && !/^[\d\s-]+X?$/i.test(champ)) {          // un titre : livre sans ISBN
+          var cle = cleTitre(champ);
+          if (!cle) return { ligne: ligne, statut: 'invalide' };
+          if (vusTitres[cle]) return { ligne: ligne, statut: 'doublon' };
+          vusTitres[cle] = true;
+          if (titres[cle]) return { ligne: ligne, statut: 'connu', titre: champ };
+          return { ligne: ligne, statut: 'nouveau' };
+        }
+        var isbn = isbnValide(champ);
         if (!isbn) return { ligne: ligne, statut: 'invalide' };
         if (vus[isbn]) return { ligne: ligne, isbn: isbn, statut: 'doublon' };
         vus[isbn] = true;
