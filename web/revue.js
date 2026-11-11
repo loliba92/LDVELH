@@ -808,9 +808,15 @@
       const max = Math.max(10, ...tot), saut = n <= 8 ? 1 : largeur < 420 ? 4 : 2;
       const px = (k) => g + k * pas + pas / 2, y = (v) => 16 + h - (v / max) * h;
       let svg = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
+      // Courbe lissée : chaque segment est une Bézier cubique, tangentes de Catmull-Rom ; la courbe reste dans l'échelle
+      const pts = jours.map((j, k) => [px(k), y(tot[k])]), bas = 16 + h, haut = 16;
+      const borne = (v) => Math.min(bas, Math.max(haut, v));
+      const tangente = (k) => { const avant = pts[Math.max(k - 1, 0)], apres = pts[Math.min(k + 1, n - 1)]; return [(apres[0] - avant[0]) / 6, (apres[1] - avant[1]) / 6]; };
       for (let k = 1; k < n; k += 1) {
+        const a = pts[k - 1], b = pts[k], ta = tangente(k - 1), tb = tangente(k);
+        const c1 = [a[0] + ta[0], borne(a[1] + ta[1])], c2 = [b[0] - tb[0], borne(b[1] - tb[1])];
         const estime = depuis && jours[k].cle < depuis;
-        svg += `<line x1="${px(k - 1)}" y1="${y(tot[k - 1])}" x2="${px(k)}" y2="${y(tot[k])}" class="cp-total${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
+        svg += `<path d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}" class="cp-total${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
       }
       jours.forEach((j, k) => {
         const estime = depuis && j.cle < depuis;
