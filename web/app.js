@@ -2321,11 +2321,15 @@
     const f = (v) => (v == null ? '…' : Number(v).toLocaleString('fr-FR'));
     const evol = d.aj && d.aj[1] ? Math.round(100 * (d.aj[0] - d.aj[1]) / d.aj[1]) : null;
     const evolTxt = evol == null ? (d.aj ? '' : 'en cours de calcul') : `<span class="tb-evol ${evol >= 0 ? 'tb-hausse' : 'tb-baisse'}">${evol >= 0 ? '▲' : '▼'} ${Math.abs(evol)}\u00a0%</span> · 24 h avant : ${d.aj[1]}`;
-    const sousTxt = niv3 && d.sous != null ? `dont ${f(d.sous)} sous notre estimation` : 'au dernier relevé';
+    // Zagor : la part des annonces sous notre estimation, le nombre entre parenthèses
+    const partSous = niv3 && d.sous != null && d.v && d.v.total ? Math.round((100 * d.sous) / d.v.total) : null;
+    const sousTxt = niv3 && d.sous != null
+      ? (partSous != null ? `${partSous}\u00a0% &lt; estimation <span class="tb-nb">(${f(d.sous)})</span>` : `dont ${f(d.sous)} sous notre estimation`)
+      : 'au dernier relevé';
     z.innerHTML = `<section class="tb-carte" aria-label="Butins et Annonces">
       <p class="tb-titre">Butins et Annonces</p>
       <div class="tb-chiffres">
-        <div class="tb-chiffre tb-butin"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
+        <div class="tb-chiffre tb-butin"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>- de 50\u00a0% du prix</small></div>
         <div class="tb-chiffre tb-annonces"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>${niv3 ? donutVerdicts(d.v, f) : ''}
         <div class="tb-chiffre tb-ajouts"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
       </div>
