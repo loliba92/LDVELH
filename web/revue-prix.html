@@ -64,7 +64,7 @@
   <button type="button" role="tab" data-pane="prix" aria-selected="true"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.2"/></svg><span>Prix</span></button>
   <button type="button" role="tab" data-pane="tendances" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg><span>Tendances</span></button>
   <button type="button" role="tab" data-pane="pepites" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/></svg><span>Butin</span></button>
-  
+  <button type="button" role="tab" data-pane="ajout" aria-selected="false"><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Ajouter</span></button>
   <button type="button" role="tab" data-pane="indice" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Indice</span></button>
 </div>
 <div class="rv-pane" id="pane-prix" role="tabpanel">
@@ -142,7 +142,29 @@
   <p class="sous" id="ind-etat" role="status" aria-live="polite"></p>
   <div id="ind-liste"></div>
 </div>
-
+<div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
+<section class="rv-ajout" aria-labelledby="aj-titre">
+  <h2 id="aj-titre">Ajouter des livres</h2>
+  <p>Collez un ou plusieurs ISBN, un par ligne (les tirets sont acceptés). Pour un livre qu'aucun catalogue ne connaît, ajoutez après l'ISBN la série, le numéro et le titre, séparés par un point-virgule :</p>
+  <p><code class="aj-exemple">9791097577025 ; Fabled Lands ; 1 ; Le Royaume déchiré</code></p>
+  <p>Pour un livre sans ISBN, écrivez son titre, puis éventuellement la série et le numéro :</p>
+  <p><code class="aj-exemple">Cthulhu, le pacte d'Innsmouth ; L'Appel de Cthulhu ; 3</code></p>
+  <label class="sr-only" for="aj-texte">Liste d'ISBN</label>
+  <textarea id="aj-texte" rows="6" spellcheck="false" autocomplete="off" placeholder="9791097577025&#10;2-07-033370-1&#10;9782070583805 ; Destins ; 731 ; Le Pirate des Sept Mers&#10;Cthulhu, le pacte d'Innsmouth"></textarea>
+  <div class="rv-ajout-actions"><button type="button" class="bouton" id="aj-verifier">Vérifier la liste</button></div>
+  <div id="aj-resultat" hidden>
+    <p id="aj-bilan" class="rv-ajout-bilan" role="status"></p>
+    <ul id="aj-liste" class="aj-liste"></ul>
+    <p class="rv-ajout-etapes"><strong>Pour les enregistrer</strong> : <span id="aj-etapes"></span></p>
+    <p class="rv-ajout-bilan" id="aj-msg" role="status" hidden></p>
+    <div class="rv-ajout-actions">
+      <button type="button" class="bouton" id="aj-lancer" hidden>Ajouter maintenant</button>
+      <button type="button" class="bouton" id="aj-copier">Copier la liste à ajouter</button>
+      <button type="button" class="bouton-lien" id="aj-telecharger">Télécharger la liste</button>
+    </div>
+  </div>
+</section>
+</div>
 
 </main>
 
@@ -181,7 +203,7 @@
 <script src="scan.js"></script>
 <script src="compte.js"></script>
 <script src="pages.js"></script>
-<script src="acces.js?v=472"></script>
-<script src="revue.js?v=472"></script>
+<script src="acces.js?v=474"></script>
+<script src="revue.js?v=474"></script>
 </body>
 </html>
