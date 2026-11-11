@@ -442,7 +442,7 @@
     $('#bloc-tri').hidden = S.vue === 'groupe';
     $('#bloc-groupe').hidden = S.vue !== 'groupe';
     if (!liste.length) {
-      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.' + (window.Relais && window.Relais.configure() ? ' Un livre manque au guide ? <button type="button" class="bouton-lien" data-demande>Demandez son ajout</button>.' : '') + '</p>';
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.' + (window.Relais && window.Relais.configure() ? ' Un livre manque au guide ? <a href="ajouter.html">Ajouter le livre</a>.' : '') + '</p>';
     } else if (S.vue === 'etagere') {
       afficherEtagere(liste);
     } else if (S.vue === 'liste') {

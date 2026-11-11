@@ -1770,6 +1770,15 @@ ul.scan-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px
 }
 .etats-carte button[aria-pressed="true"]::before { content: "✓ "; content: "✓ " / ""; font-weight: 800; }
 .rayon .livre-carte .ouvrir .infos { flex: 1 1 auto; }      /* le pavé « À vendre » / « À trouver » reste d'un seul bloc quand une carte voisine a un titre plus long */
+/* Ajouter des livres : scanner en haut, liste, puis un seul bouton d'envoi */
+.aj-scan { margin: 4px 0 0; }
+.aj-scan .scan-bouton { width: 100%; min-height: 52px; height: auto; margin: 0; justify-content: center; }
+.aj-ou { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: var(--t-sm); }
+.aj-ou::before, .aj-ou::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.aj-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
+.aj-pied .sous { margin: 0; }
+.aj-envoi { width: 100%; min-height: 52px; }
+.aj-envoi:disabled { opacity: .4; cursor: not-allowed; }
 .rv-ajout-actions .scan-bouton { margin: 0; height: 44px; min-height: 44px; padding: 0 16px; align-self: center; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; white-space: nowrap; }      /* même rangée et même hauteur que « Vérifier la liste » */
 
 /* Bandeau « Donnez votre avis » : une ligne discrète pour les visiteurs connectés qui reviennent souvent */
