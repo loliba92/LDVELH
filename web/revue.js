@@ -419,6 +419,7 @@
     });
   }
   function initAjout() {
+    if (!$('#aj-texte')) return;                       // pas d'onglet Ajouter sur cette page
     document.addEventListener('cdh-scan-ajout', () => { clearTimeout(minuterieScan); minuterieScan = setTimeout(envoiAutoScan, 1200); });
     $('#aj-verifier').addEventListener('click', () => { chargerCatalogue().then(verifierListe); });
     $('#aj-copier').addEventListener('click', () => {
@@ -442,6 +443,7 @@
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }
   function initReglages() {
+    if (!$('#aj-lancer')) return;                     // pas d'onglet Ajouter sur cette page
     $('#aj-lancer').addEventListener('click', async () => {
       const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
       if (!jeton()) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
