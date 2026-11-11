@@ -1511,7 +1511,7 @@
      99.35
     ]
    ],
-   "indice_moyenne": 80.69
+   "indice_moyenne": 80.61
   },
   "V5 · Gallimard Jeunesse": {
    "indice": 81.88,
@@ -3539,16 +3539,16 @@
   "V4 · Gallimard": {
    "depuis": "2026-10-11",
    "date": "2026-11-11",
-   "variation_pct": -19.31,
+   "variation_pct": -19.39,
    "debut": 100.0,
-   "fin": 80.69,
+   "fin": 80.61,
    "prix_observes": 102,
    "series": [
     {
      "serie": "Sorcellerie!",
      "livres": 4,
      "annonces": 23,
-     "contribution_pct": -2.02,
+     "contribution_pct": -2.01,
      "debut": 100.0,
      "fin": 75.17,
      "variation_pct": -24.83
@@ -3557,7 +3557,7 @@
      "serie": "Défis Fantastiques",
      "livres": 22,
      "annonces": 176,
-     "contribution_pct": -10.59,
+     "contribution_pct": -10.58,
      "debut": 100.0,
      "fin": 79.39,
      "variation_pct": -20.61
@@ -3566,10 +3566,10 @@
      "serie": "Loup Solitaire",
      "livres": 20,
      "annonces": 112,
-     "contribution_pct": -6.7,
+     "contribution_pct": -6.79,
      "debut": 100.0,
-     "fin": 83.46,
-     "variation_pct": -16.54
+     "fin": 83.25,
+     "variation_pct": -16.75
     }
    ]
   },

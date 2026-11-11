@@ -3,11 +3,6 @@
   "n_paires": 132,
   "calcule_le": "2026-11-11",
   "par_etat": {
-    "bon": {
-      "rapport": 0.929,
-      "ecart": 0.272,
-      "n": 115
-    },
     "tres_bon": {
       "rapport": 0.834,
       "ecart": 0.202,
@@ -17,6 +12,11 @@
       "rapport": 0.916,
       "ecart": 0.27,
       "n": 3
+    },
+    "bon": {
+      "rapport": 0.929,
+      "ecart": 0.272,
+      "n": 115
     }
   },
   "erreur_modele": 0.265,
@@ -35,9 +35,9 @@
     }
   },
   "sigma_archive": {
-    "bon": 0.272,
     "tres_bon": 0.25,
-    "convenable": 0.27
+    "convenable": 0.27,
+    "bon": 0.272
   },
   "rapports_etats_mesures_archives": {
     "n": 421,

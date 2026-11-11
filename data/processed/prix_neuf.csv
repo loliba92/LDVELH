@@ -4,6 +4,8 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782010117244,,indisponible,5.76,2026-11-11,leslibraires.fr
 9782010117251,,indisponible,12.72,2026-11-11,leslibraires.fr
 9782010119927,,indisponible,,2026-11-11,leslibraires.fr
+9782010119965,,indisponible,6.8,2026-11-11,leslibraires.fr
+9782010119972,,indisponible,,2026-11-11,leslibraires.fr
 9782012000728,,indisponible,15.9,2026-11-11,leslibraires.fr
 9782012000735,,indisponible,,2026-11-11,leslibraires.fr
 9782070311156,,indisponible,,2026-11-11,leslibraires.fr
@@ -28,7 +30,6 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782070332977,,indisponible,,2026-11-11,leslibraires.fr
 9782070332984,,indisponible,16.95,2026-11-11,leslibraires.fr
 9782070333103,,indisponible,,2026-11-11,leslibraires.fr
-9782070333110,,indisponible,6.0,2026-11-11,leslibraires.fr
 9782070333141,,indisponible,16.95,2026-11-11,leslibraires.fr
 9782070333158,,indisponible,16.95,2026-11-11,leslibraires.fr
 9782070333165,,indisponible,16.95,2026-11-11,leslibraires.fr
@@ -116,7 +117,6 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782070335046,,indisponible,42.9,2026-11-11,leslibraires.fr
 9782070335053,,indisponible,,2026-11-11,leslibraires.fr
 9782070335060,,indisponible,59.0,2026-11-11,leslibraires.fr
-9782070335121,,indisponible,,2026-11-11,leslibraires.fr
 9782070335220,,indisponible,,2026-11-11,leslibraires.fr
 9782070335275,,indisponible,,2026-11-11,leslibraires.fr
 9782070335282,,indisponible,,2026-11-11,leslibraires.fr
@@ -223,7 +223,6 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782070511945,,indisponible,,2026-11-11,leslibraires.fr
 9782070511969,,indisponible,,2026-11-11,leslibraires.fr
 9782070511976,,indisponible,,2026-11-11,leslibraires.fr
-9782070511983,,indisponible,,2026-11-11,leslibraires.fr
 9782070511990,,indisponible,12.72,2026-11-11,leslibraires.fr
 9782070512607,,indisponible,,2026-11-11,leslibraires.fr
 9782070512614,,indisponible,,2026-11-11,leslibraires.fr
@@ -336,6 +335,7 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782070592272,,indisponible,,2026-11-11,leslibraires.fr
 9782070593378,,indisponible,,2026-11-11,leslibraires.fr
 9782070595457,,indisponible,85.0,2026-11-11,leslibraires.fr
+9782070610327,,indisponible,3.5,2026-11-11,leslibraires.fr
 9782070610334,,indisponible,,2026-11-11,leslibraires.fr
 9782070610341,,indisponible,3.5,2026-11-11,leslibraires.fr
 9782070610358,,indisponible,,2026-11-11,leslibraires.fr
@@ -386,6 +386,7 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782070662258,8.9,en_stock,,2026-11-11,leslibraires.fr
 9782070662265,8.9,en_stock,,2026-11-11,leslibraires.fr
 9782070662272,8.9,en_stock,,2026-11-11,leslibraires.fr
+9782070662289,8.9,en_stock,,2026-11-11,leslibraires.fr
 9782070662296,8.9,en_stock,,2026-11-11,leslibraires.fr
 9782070662302,8.9,en_stock,,2026-11-11,leslibraires.fr
 9782070665808,,indisponible,,2026-11-11,leslibraires.fr
@@ -470,6 +471,9 @@ isbn13,prix,disponibilite,prix_occasion,date,source
 9782490523351,,indisponible,,2026-11-11,leslibraires.fr
 9782490523375,,indisponible,,2026-11-11,leslibraires.fr
 9782490523399,,indisponible,,2026-11-11,leslibraires.fr
+9782491233068,,indisponible,,2026-11-11,leslibraires.fr
+9782803414857,,indisponible,,2026-11-11,leslibraires.fr
+9782803414871,,indisponible,,2026-11-11,leslibraires.fr
 9782954363127,,indisponible,,2026-11-11,leslibraires.fr
 9791040805618,19.9,en_stock,,2026-11-11,leslibraires.fr
 9791040809630,19.9,en_stock,,2026-11-11,leslibraires.fr
