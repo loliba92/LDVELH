@@ -2405,6 +2405,13 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .cp-cadre { position: relative; margin-bottom: 8px; }
 .cp-svg { display: block; max-width: 100%; height: auto; overflow: visible; }
 .cp-grille { stroke: var(--line); stroke-width: 1; }
+.cp-total { stroke: var(--gold); stroke-width: 2; stroke-linecap: round; fill: none; }
+.cp-total.cp-estime { opacity: .5; stroke-dasharray: 4 4; }
+.cp-total.cp-encours { stroke-dasharray: 3 3; }
+.cp-total-pt { fill: var(--gold); }
+.cp-total-pt.cp-encours { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.cp-val { fill: var(--text); font: 600 10px var(--f-ui); }
+.cp-titre-total { margin: 14px 0 4px; font-weight: 600; }
 .cp-axe { fill: var(--muted); font: 600 11px var(--f-ui); }
 .cp-ligne { stroke-width: 2; stroke-linecap: round; fill: none; }
 .cp-ligne.cp-estime { opacity: .6; stroke-dasharray: 4 4; }
