@@ -65,6 +65,7 @@ window.Compte = (function () {
     else if (e.cle === 'erreur') h += '<button type="button" class="bouton bouton-clair" data-compte="sync">Réessayer</button>';
     else if (e.cle === 'choix') h += '<button type="button" class="bouton" data-compte="sync">Choisir maintenant</button>';
     h += '<ul class="compte-liste">' +
+      '<li><a href="communaute.html">' + ico('equipe') + 'Communauté</a></li>' +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butins et Annonces</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="evolutions.html">' + ico('butin') + 'Évolutions des prix</a></li>' : '') +
