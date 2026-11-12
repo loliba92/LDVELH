@@ -152,9 +152,14 @@ def _revue_prix():
 RECUES_ONGLET = '''  <button type="button" role="tab" data-pane="recues" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>Annonces</span></button>'''
 ANALYSE_ONGLET = '''  <button type="button" role="tab" data-pane="analyse" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analyse</span></button>'''
 ANALYSE_PANNEAU = '''<div class="rv-pane" id="pane-analyse" role="tabpanel" hidden>
-  <p class="chapeau">Le rythme des annonces captées chaque jour, puis les opportunités d'achat. Réservé à Zagor.</p>
-  <div class="captures-zone" id="captures-analyse"></div>
-  <div class="opp-zone" id="opp-zone"></div>
+  <div class="an-onglets" id="an-nav" role="tablist" aria-label="Sections de l'analyse">
+    <button type="button" role="tab" data-sous="affaires" id="onglet-an-affaires" aria-controls="an-affaires" aria-selected="true">Affaires</button>
+    <button type="button" role="tab" data-sous="rythme" id="onglet-an-rythme" aria-controls="an-rythme" aria-selected="false" tabindex="-1">Rythme</button>
+    <button type="button" role="tab" data-sous="marche" id="onglet-an-marche" aria-controls="an-marche" aria-selected="false" tabindex="-1">Marché</button>
+  </div>
+  <div class="an-pane" id="an-affaires" role="tabpanel" aria-labelledby="onglet-an-affaires"><div class="opp-zone" id="opp-zone"></div></div>
+  <div class="an-pane" id="an-rythme" role="tabpanel" aria-labelledby="onglet-an-rythme" hidden><div class="captures-zone" id="captures-analyse"></div></div>
+  <div class="an-pane" id="an-marche" role="tabpanel" aria-labelledby="onglet-an-marche" hidden><div class="stats-zone" id="stats-analyse"></div></div>
 </div>'''
 INDICE_ONGLET = '''  <button type="button" role="tab" data-pane="indice" aria-selected="false" hidden><svg class="rv-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Indice</span></button>'''
 INDICE_PANNEAU = '''<div class="rv-pane" id="pane-indice" role="tabpanel" hidden>
