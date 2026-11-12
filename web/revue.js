@@ -872,6 +872,8 @@
       return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents, échelle en nombre d'annonces">${svg}</svg>`;
     }
     const dessinerCaptures = () => {
+      const statsZone = document.getElementById('stats-analyse');          // onglet « Marché » : statistiques par plateforme et par tranche de prix
+      if (statsZone) statsZone.innerHTML = estNiveau3() ? statsHtml() : '';
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
       if (!zones.length || !BUT) return;
@@ -911,21 +913,20 @@
         + `<tr><th scope="row">Évolution sur ${moitie} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
       const horaires = courbesHoraires(c.heures, Date.now());
       const html = `<section class="captures" aria-label="Annonces captées par jour">
-        <h3 class="captures-titre">Annonces captées par jour</h3>
         <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
         <p class="cp-bilan cp-jour">${aujourdhui ? `Aujourd'hui, à cette heure : <b>${nbSrc(aujourdhui.v)}</b> annonce${nbSrc(aujourdhui.v) > 1 ? 's' : ''} <span class="sous">(jour en cours, non compté dans les moyennes)</span>` : `Aujourd'hui : <span class="sous">pas encore compté, le premier comptage arrive au prochain relevé.</span>`}</p>
         <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b>${debutSource(src)}</li>`).join('')}</ul>
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
         <p class="sous cp-titre-total">Heure par heure (heure de Paris)</p>
         <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
         <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
         <p class="cp-info-h" aria-live="polite">Touchez un point pour voir les chiffres de l'heure.</p>
-        <p class="sous cp-titre-total">Total des annonces par jour</p>
-        <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
-        <details class="captures-acc"><summary>Tableau des chiffres</summary>
+        <details class="captures-acc"><summary>Détails : total par jour et tableau</summary>
+          <p class="sous cp-titre-total">Total des annonces par jour</p>
+          <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
       zones.forEach((z) => {
@@ -1148,7 +1149,6 @@
         </article>`;
       }).join('');
       zone.innerHTML = `<section class="opp" aria-label="Opportunités d'achat">
-        <h3 class="captures-titre">Opportunités d'achat</h3>
         <p class="sous">Annonces assez sous le prix du site pour être revendues avec au moins 5 € de marge nette et 25 % de rendement. Triées par marge, la fiabilité compte : une marge énorme est souvent une erreur d'édition ou d'état.</p>
         <div class="opp-params"><label>Revente à <input type="number" id="opp-vente" min="10" max="150" step="1" value="${paramsOpp.vente}" inputmode="numeric"> % du prix du site</label><label>Frais de vente <input type="number" id="opp-frais" min="0" max="50" step="0.5" value="${paramsOpp.frais}" inputmode="decimal"> €</label></div>
         <p class="sous opp-bilan"><b>${liste.length}</b> opportunité${liste.length > 1 ? 's' : ''}, dont <b>${hautes}</b> de fiabilité haute${liste.length > nbOppAffichees ? ` · ${nbOppAffichees} affichées` : ''}. Prix demandés (pas des ventes) : la cote a ses marges d'erreur.</p>
@@ -1452,6 +1452,24 @@
   initRecues();
   initIndice();
   initNav();
+  // Analyse : trois sous-onglets (Affaires, Rythme, Marché), les Affaires d'abord
+  function initSousOnglets() {
+    const boutons = [...document.querySelectorAll('#an-nav [data-sous]')];
+    if (!boutons.length) return;
+    const montrer = (nom, focus) => {
+      boutons.forEach((b) => { const actif = b.dataset.sous === nom; b.setAttribute('aria-selected', String(actif)); b.tabIndex = actif ? 0 : -1; if (actif && focus) b.focus(); });
+      document.querySelectorAll('.an-pane').forEach((p) => { p.hidden = p.id !== 'an-' + nom; });
+      if (nom === 'rythme') redessinerCapt();
+    };
+    boutons.forEach((b, i) => {
+      b.addEventListener('click', () => montrer(b.dataset.sous));
+      b.addEventListener('keydown', (e) => {
+        const cible = { ArrowRight: boutons[(i + 1) % boutons.length], ArrowLeft: boutons[(i - 1 + boutons.length) % boutons.length], Home: boutons[0], End: boutons[boutons.length - 1] }[e.key];
+        if (cible) { e.preventDefault(); montrer(cible.dataset.sous, true); }
+      });
+    });
+  }
+  initSousOnglets();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
   let pepitesOuvertes = false, recuesOuvertes = false, analyseOuverte = false;
   function majAnnonces() {
