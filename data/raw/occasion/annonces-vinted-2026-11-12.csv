@@ -1,198 +1,199 @@
-isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp
-9782070333714,bon,9.00,La cité interdite LDVLH,https://www.vinted.fr/items/6096825378-la-cite-interdite-ldvlh,365,vinted,4.15
-9782070333714,bon,9.90,"La Cité Interdite, Astre d'Or",https://www.vinted.fr/items/9724259728-la-cite-interdite-astre-dor,60,vinted,4.20
-9782070333714,convenable,9.90,"Livre dont vous êtes le héros ""La cité interdite"" (édition 1986)",https://www.vinted.fr/items/9974377499-livre-dont-vous-etes-le-heros-la-cite-interdite-edition-1986,56,vinted,4.20
-9782070333714,bon,10.00,Ldvelh la cité interdite,https://www.vinted.fr/items/10053221226-ldvelh-la-cite-interdite,49,vinted,4.20
-9782070506736,bon,9.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/5600869860-un-livre-dont-vous-etes-le-heros,365,vinted,4.15
-9782070506736,bon,8.00,Astre d'or Tome 1 le sorcier Majdar,https://www.vinted.fr/items/6185348406-astre-dor-tome-1-le-sorcier-majdar,540,vinted,4.10
-9782070506736,bon,10.00,Un livre dont vous êtes le héros Le sorcier Majdar de Ian Page et Joe Dever,https://www.vinted.fr/items/7624765863-un-livre-dont-vous-etes-le-heros-le-sorcier-majdar-de-ian-page-et-joe-dever,330,vinted,4.20
-9782070506736,bon,8.00,Le sorcier Majdar V2,https://www.vinted.fr/items/8167304024-le-sorcier-majdar-v2,240,vinted,4.10
-9782070333707,bon,10.00,Le sorcier Majdar un livre dont vous êtes le héros,https://www.vinted.fr/items/7364677797-le-sorcier-majdar-un-livre-dont-vous-etes-le-heros,360,vinted,4.20
-9782070333707,bon,10.00,Le Sorcier Majdar Astre d'Or LDVELH,https://www.vinted.fr/items/7662574391-le-sorcier-majdar-astre-dor-ldvelh,330,vinted,4.20
-9782070332526,bon,8.00,Ldvelh Le sorcier de la montagne de feu,https://www.vinted.fr/items/10766006892-ldvelh-le-sorcier-de-la-montagne-de-feu,0,vinted,4.10
-9782070333318,bon,8.00,"L’Ultime Combat de la Horde, Un livre dont vous êtes le héros, J.H. Brennan, 1988",https://www.vinted.fr/items/10764617067-lultime-combat-de-la-horde-un-livre-dont-vous-etes-le-heros-jh-brennan-1988,0,vinted,4.10
-9782070332878,bon,7.00,"La Sorcière des Neiges, Un livre dont vous êtes le héros, Ian Livingstone, EO 1985",https://www.vinted.fr/items/10764780002-la-sorciere-des-neiges-un-livre-dont-vous-etes-le-heros-ian-livingstone-eo-1985,0,vinted,4.05
-9782070333547,bon,9.00,Terreur hors du temps. Un livre dont vous êtes le heros.,https://www.vinted.fr/items/10764948066-terreur-hors-du-temps-un-livre-dont-vous-etes-le-heros,0,vinted,4.15
-9782070332861,bon,8.00,"Le Manoir de l’Enfer, Un livre dont vous êtes le héros, Steve Jackson, 1990",https://www.vinted.fr/items/10764924864-le-manoir-de-lenfer-un-livre-dont-vous-etes-le-heros-steve-jackson-1990,0,vinted,4.10
-9782070506842,bon,8.50,Les grottes de kalte LDVELH,https://www.vinted.fr/items/10765358933-les-grottes-de-kalte-ldvelh,0,vinted,4.12
-9782070334704,bon,14.00,"Livre dont vous etes le heros, Les Démons du Manmarch,pas d ups",https://www.vinted.fr/items/10765264744-livre-dont-vous-etes-le-heros-les-demons-du-manmarchpas-d-ups,0,vinted,4.40
-9782075132343,bon,20.00,Un livre dont vous êtes le héros La sorcière des neige,https://www.vinted.fr/items/10765362432-un-livre-dont-vous-etes-le-heros-la-sorciere-des-neige,0,vinted,4.70
-9782070335282,bon,15.00,Bardik le Voleur - Simon Farrell,https://www.vinted.fr/items/10766383718-bardik-le-voleur-simon-farrell,0,vinted,4.45
-9782070335046,bon,12.00,Péreim le Chevalier,https://www.vinted.fr/items/10766473470-pereim-le-chevalier,0,vinted,4.30
-9782070333912,bon,15.00,Le Grand maître d'Irsmun,https://www.vinted.fr/items/10766554318-le-grand-maitre-dirsmun,0,vinted,4.45
-9782070334155,bon,18.00,Défis fantastiques tome 24,https://www.vinted.fr/items/10766718728-defis-fantastiques-tome-24,0,vinted,4.60
-9782070334278,bon,30.00,Les Seigneurs de la guerre rare dans cet état,https://www.vinted.fr/items/10766822906-les-seigneurs-de-la-guerre-rare-dans-cet-etat,0,vinted,5.20
-9782070332915,bon,8.00,La traversée infernale,https://www.vinted.fr/items/10767250869-la-traversee-infernale,0,vinted,4.10
-9782070332939,bon,12.90,Les Collines Maléfiques - Steve Jackson - Sorcellerie 1 - Folio Junior LDVELH,https://www.vinted.fr/items/10769046252-les-collines-malefiques-steve-jackson-sorcellerie-1-folio-junior-ldvelh,0,vinted,4.34
-9782070332687,bon,9.90,La Citadelle du Chaos - Steve Jackson - Défis Fantastiques 2 - Folio Junior LDVELH,https://www.vinted.fr/items/10769085606-la-citadelle-du-chaos-steve-jackson-defis-fantastiques-2-folio-junior-ldvelh,0,vinted,4.20
-9782070566891,bon,35.00,Un duel dans le yorkshire,https://www.vinted.fr/items/10769289510-un-duel-dans-le-yorkshire,0,vinted,5.45
-9782070335756,bon,35.00,Le maître du feu - livre dont vous êtes le héros,https://www.vinted.fr/items/10769256221-le-maitre-du-feu-livre-dont-vous-etes-le-heros,0,vinted,5.45
-9782070336326,bon,20.00,Le maître chanteur d’Appledore - livre dont vous êtes le héros,https://www.vinted.fr/items/10769359954-le-maitre-chanteur-dappledore-livre-dont-vous-etes-le-heros,0,vinted,4.70
-9782070567195,bon,17.00,Pour l’honneur de la reine - livre dont vous êtes le héros,https://www.vinted.fr/items/10769327803-pour-lhonneur-de-la-reine-livre-dont-vous-etes-le-heros,0,vinted,4.55
-9782070509638,bon,15.00,La légion des morts - livre dont vous êtes le héros,https://www.vinted.fr/items/10769577254-la-legion-des-morts-livre-dont-vous-etes-le-heros,0,vinted,4.45
-9782075138253,bon,9.00,Les grottes de Kalte- livre dont vous êtes le héros,https://www.vinted.fr/items/10769611805-les-grottes-de-kalte-livre-dont-vous-etes-le-heros,0,vinted,4.15
-9782070332908,bon,6.99,Loup Solitaire Tome 1 : Les Maitres Des Tenebres - Joe Dever,https://www.vinted.fr/items/10770094492-loup-solitaire-tome-1-les-maitres-des-tenebres-joe-dever,0,vinted,4.05
-9782070332915,bon,7.99,La traversée infernale loup solitaire 2 - Joe Dever,https://www.vinted.fr/items/10770135891-la-traversee-infernale-loup-solitaire-2-joe-dever,0,vinted,4.10
-9782070566389,bon,35.00,Livre Dont Vous Êtes Le Héros (ldvelh): La Légende des Guerriers Fantômes en BÉ+,https://www.vinted.fr/items/10770959680-livre-dont-vous-etes-le-heros-ldvelh-la-legende-des-guerriers-fantomes-en-be,0,vinted,5.45
-9782070332960,bon,9.00,Les Grottes de Kalte – Loup Solitaire tome 3 – Joe Dever – Folio Junior 1985,https://www.vinted.fr/items/10771804517-les-grottes-de-kalte-loup-solitaire-tome-3-joe-dever-folio-junior-1985,0,vinted,4.15
-9782070336227,bon,19.00,Livre Dont Vous Êtes Le Héros (ldvelh): Meurtre au Club Diogène BÉ,https://www.vinted.fr/items/10771790848-livre-dont-vous-etes-le-heros-ldvelh-meurtre-au-club-diogene-be,0,vinted,4.65
-9782070336234,bon,15.00,Livre Dont Vous Êtes Le Héros (ldvelh): L'émeraude de la Rivière Noire BÉ,https://www.vinted.fr/items/10771793103-livre-dont-vous-etes-le-heros-ldvelh-lemeraude-de-la-riviere-noire-be,0,vinted,4.45
-9782070333684,bon,19.00,Le Tombeau des Maléfices – J.H. Brennan – Quête du Graal Tome 7 – Folio Junior,https://www.vinted.fr/items/10771822167-le-tombeau-des-malefices-jh-brennan-quete-du-graal-tome-7-folio-junior,0,vinted,4.65
-9782070333639,bon,19.00,Le Temps de la Malédiction – Quête du Graal Tome 6 – J.H. Brennan – Folio Junior,https://www.vinted.fr/items/10771840627-le-temps-de-la-malediction-quete-du-graal-tome-6-jh-brennan-folio-junior,0,vinted,4.65
-9782070333332,bon,17.00,La Malédiction du Pharaon – Folio Junior Dragon d'Or 4 – Livre dont vous êtes le héros,https://www.vinted.fr/items/10771861190-la-malediction-du-pharaon-folio-junior-dragon-dor-4-livre-dont-vous-etes-le-heros,0,vinted,4.55
-9782070566891,bon,30.00,Livre Dont Vous Êtes Le Héros (ldvelh): Un Duel dans le Yorkshire ÉO et BÉ,https://www.vinted.fr/items/10771850348-livre-dont-vous-etes-le-heros-ldvelh-un-duel-dans-le-yorkshire-eo-et-be,0,vinted,5.20
-9782070332670,bon,14.00,L'Île du Roi Lézard – Ian Livingstone – Défis fantastiques – Folio Junior,https://www.vinted.fr/items/10771879382-lile-du-roi-lezard-ian-livingstone-defis-fantastiques-folio-junior,0,vinted,4.40
-9782070567195,bon,25.00,Livre Dont Vous Êtes Le Héros (ldvelh): Pour l'Honneur de la Reine BÉ+,https://www.vinted.fr/items/10771869634-livre-dont-vous-etes-le-heros-ldvelh-pour-lhonneur-de-la-reine-be,0,vinted,4.95
-9782070332977,bon,8.00,Loup Solitaire Tome 4 – Le Gouffre maudit – Joe Dever – Folio Junior,https://www.vinted.fr/items/10771893508-loup-solitaire-tome-4-le-gouffre-maudit-joe-dever-folio-junior,0,vinted,4.10
-9782070567898,bon,35.00,Livre Dont Vous Êtes Le Héros (ldvelh): L'Héritier Disparu en v1 BÉ+,https://www.vinted.fr/items/10771883548-livre-dont-vous-etes-le-heros-ldvelh-lheritier-disparu-en-v1-be,0,vinted,5.45
-9782070567683,bon,24.00,Livre Dont Vous Êtes Le Héros (ldvelh): Le Mystère de Compton BÉ+,https://www.vinted.fr/items/10771900193-livre-dont-vous-etes-le-heros-ldvelh-le-mystere-de-compton-be,0,vinted,4.90
-9782070506927,bon,24.00,La Forêt de la malédiction – Ian Livingstone – Première édition 1984 – Livre dont vous êtes le héros,https://www.vinted.fr/items/10771911194-la-foret-de-la-malediction-ian-livingstone-premiere-edition-1984-livre-dont-vous-etes-le-heros,0,vinted,4.90
-9782070514526,bon,16.00,Livre Dont Vous Êtes Le Héros (ldvelh): Pour l'Honneur de la Reine (v2),https://www.vinted.fr/items/10771916823-livre-dont-vous-etes-le-heros-ldvelh-pour-lhonneur-de-la-reine-v2,0,vinted,4.50
-9782070506804,tres_bon,9.00,La Petite Aiguille magique – Contes du Gai Pierrot n°63 – 1967 – Livre jeunesse vintage,https://www.vinted.fr/items/9790289062-la-petite-aiguille-magique-contes-du-gai-pierrot-ndeg63-1967-livre-jeunesse-vintage,60,vinted,4.15
-9782070334056,bon,8.00,La guerre des sorciers. Un livre dont vous êtes le héros.,https://www.vinted.fr/items/7718057732-la-guerre-des-sorciers-un-livre-dont-vous-etes-le-heros,330,vinted,4.10
-9782070334056,bon,8.00,Astre d'Or Tome 4 : La Guerre des Sorciers Broché,https://www.vinted.fr/items/8243047687-astre-dor-tome-4-la-guerre-des-sorciers-broche,240,vinted,4.10
-9782070334056,convenable,8.00,Livre La guerre des sorciers,https://www.vinted.fr/items/9276816770-livre-la-guerre-des-sorciers,120,vinted,4.10
-9782070334056,bon,9.00,La guerre des sorciers - Livre dont vous êtes le héro,https://www.vinted.fr/items/10505449908-la-guerre-des-sorciers-livre-dont-vous-etes-le-hero,14,vinted,4.15
-9782070506798,convenable,8.00,"Un livre dont vous êtes le héros ""Le royaume de l'oubli"" de Ian Page",https://www.vinted.fr/items/8202919523-un-livre-dont-vous-etes-le-heros-le-royaume-de-loubli-de-ian-page,240,vinted,4.10
-9782070506781,bon,10.00,"Astre d'or, tome 2 - La Cité interdite",https://www.vinted.fr/items/5267779808-astre-dor-tome-2-la-cite-interdite,730,vinted,4.20
-9782070506781,bon,9.90,"La cité interdite , astre d'or 2",https://www.vinted.fr/items/6869086476-la-cite-interdite-astre-dor-2,420,vinted,4.20
-9782070506781,bon,9.00,Livre,https://www.vinted.fr/items/9882703939-livre,60,vinted,4.15
-9782070506781,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/10567193242-livre-dont-vous-etes-le-heros,14,vinted,4.20
-9782070333653,tres_bon,9.00,"L'odyssée d' altheos, un livre dont .",https://www.vinted.fr/items/7005641343-lodyssee-d-altheos-un-livre-dont,420,vinted,4.15
-9782070333653,convenable,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/9627927263-livre-dont-vous-etes-le-heros,90,vinted,3.95
-9782070333646,bon,8.00,LDVELH livre dont vous êtes le héros Le labyrinthe du roi Minos,https://www.vinted.fr/items/8190564534-ldvelh-livre-dont-vous-etes-le-heros-le-labyrinthe-du-roi-minos,240,vinted,4.10
-9782070333646,bon,10.00,Le Labyrinthe du Roi Minos – Chroniques Crétoises,https://www.vinted.fr/items/9441365141-le-labyrinthe-du-roi-minos-chroniques-cretoises,90,vinted,4.20
-9782070333646,bon,10.00,Le Labyrinthe du roi Minos - Le labyrinthe du roi Minos,https://www.vinted.fr/items/10026642803-le-labyrinthe-du-roi-minos-le-labyrinthe-du-roi-minos,56,vinted,4.20
-9782070333646,bon,8.00,Le Labyrinthe du roi minos,https://www.vinted.fr/items/10047008691-le-labyrinthe-du-roi-minos,49,vinted,4.10
-9782070333646,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/10362245812-livre-dont-vous-etes-le-heros,28,vinted,4.20
-9782070333646,bon,8.00,Le Labyrinthe du roi Minos,https://www.vinted.fr/items/10616316577-le-labyrinthe-du-roi-minos,7,vinted,4.10
-9782070333516,bon,6.00,La Vengeance d'Althéos,https://www.vinted.fr/items/10217150375-la-vengeance-daltheos,35,vinted,4.00
-9782070333516,bon,10.00,La vengeance d'Althéos,https://www.vinted.fr/items/10315737374-la-vengeance-daltheos,28,vinted,4.20
-9782070512713,bon,35.00,Le peuple maudit mark smith un livre dont vous êtes le héros,https://www.vinted.fr/items/5977002102-le-peuple-maudit-mark-smith-un-livre-dont-vous-etes-le-heros,365,vinted,5.45
-9782070512713,bon,60.00,un livre dont vous êtes le héros,https://www.vinted.fr/items/7120552182-un-livre-dont-vous-etes-le-heros,390,vinted,6.70
-9782070512713,bon,37.00,Le peuple maudit (Destins 3) - M. Smith,https://www.vinted.fr/items/7216075159-le-peuple-maudit-destins-3-m-smith,390,vinted,5.55
-9782070512713,bon,32.00,Ldvelh Le Peuple Maudit livre dont vous etes le heros,https://www.vinted.fr/items/7330242285-ldvelh-le-peuple-maudit-livre-dont-vous-etes-le-heros,360,vinted,5.30
-9782070583805,bon,60.00,LDVELH - le pirate des sept mers,https://www.vinted.fr/items/6655256588-ldvelh-le-pirate-des-sept-mers,480,vinted,6.70
-9782070583799,bon,37.00,Ldvelh - L'Etoile de la Destinée (Destins 2),https://www.vinted.fr/items/7234852092-ldvelh-letoile-de-la-destinee-destins-2,390,vinted,5.55
-9782070583799,bon,40.00,L'Étoile de la Destinée,https://www.vinted.fr/items/7632892270-letoile-de-la-destinee,330,vinted,5.70
-9782070334872,bon,11.00,Ldvelh. Darian le magicien.,https://www.vinted.fr/items/7842475753-ldvelh-darian-le-magicien,300,vinted,4.25
-9782070334872,bon,12.00,Darian le magicien,https://www.vinted.fr/items/8594900470-darian-le-magicien,210,vinted,4.30
-9782070334872,bon,12.00,Darian Le Magicien - Farrell,https://www.vinted.fr/items/8946727833-darian-le-magicien-farrell,150,vinted,4.30
-9782070334872,bon,13.00,Darian le Magicien - Double Jeu 2 - Livre dont vous êtes le héros,https://www.vinted.fr/items/9219212241-darian-le-magicien-double-jeu-2-livre-dont-vous-etes-le-heros,120,vinted,4.35
-9782070334872,convenable,10.00,Coréus le Prince - Simon Farrell et Jon Sutherland - LDVELH,https://www.vinted.fr/items/9270031043-coreus-le-prince-simon-farrell-et-jon-sutherland-ldvelh,120,vinted,4.20
-9782070334872,bon,12.00,Darian le magicien ldveh,https://www.vinted.fr/items/9909626353-darian-le-magicien-ldveh,60,vinted,4.30
-9782070334872,tres_bon,10.00,Livre dont vous êtes le héros: Darian le Magicien,https://www.vinted.fr/items/9984156439-livre-dont-vous-etes-le-heros-darian-le-magicien,56,vinted,4.20
-9782070334872,bon,10.00,Livre dont vous êtes le héros darian le magicien 487 folio junior 1988 vintage,https://www.vinted.fr/items/9997452644-livre-dont-vous-etes-le-heros-darian-le-magicien-487-folio-junior-1988-vintage,56,vinted,4.20
-9782070334872,bon,8.90,Darian le Magicien LDVELH,https://www.vinted.fr/items/10290956646-darian-le-magicien-ldvelh,28,vinted,4.14
-9782070334872,bon,10.00,Darian Le magicien,https://www.vinted.fr/items/10534680575-darian-le-magicien,14,vinted,4.20
-9782070662296,bon,6.00,Le Combat des Loups - Joe Dever,https://www.vinted.fr/items/10770911280-le-combat-des-loups-joe-dever,0,vinted,4.00
-9782070333646,bon,10.00,Livre dont vous êtes le héros Le Labyrinthe du roi Minos,https://www.vinted.fr/items/10774319709-livre-dont-vous-etes-le-heros-le-labyrinthe-du-roi-minos,0,vinted,4.20
-9782070334223,bon,10.00,Livre dont vous êtes le héros Le carillon de la mort,https://www.vinted.fr/items/10774370829-livre-dont-vous-etes-le-heros-le-carillon-de-la-mort,0,vinted,4.20
-9782070544028,bon,7.00,Livre dont vous êtes le héros le tombeau du vampire v2,https://www.vinted.fr/items/9273232164-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire-v2,120,vinted,4.05
-9782070333165,bon,6.00,Le tombeau du vampire,https://www.vinted.fr/items/5859416964-le-tombeau-du-vampire,365,vinted,4.00
-9782070333165,bon,8.00,Ldvelh Le tombeau du vampire,https://www.vinted.fr/items/7491992864-ldvelh-le-tombeau-du-vampire,360,vinted,4.10
-9782070333165,bon,8.00,Le Tombeau du Vampire - Livre dont vous êtes le héros,https://www.vinted.fr/items/7265078314-le-tombeau-du-vampire-livre-dont-vous-etes-le-heros,390,vinted,4.10
-9782070333165,bon,9.00,Le Tombeau du Vampire (ldvelh - Dragon d'Or - n°1),https://www.vinted.fr/items/8488011030-le-tombeau-du-vampire-ldvelh-dragon-dor-ndeg1,210,vinted,4.15
-9782070333165,bon,8.00,Le livre dont vous êtes le héros « Le tombeau du vampire »,https://www.vinted.fr/items/8496811503-le-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,210,vinted,4.10
-9782070333165,bon,8.00,Le tombeau du vampire,https://www.vinted.fr/items/8594968705-le-tombeau-du-vampire,210,vinted,4.10
-9782070333165,bon,8.00,Un livre dont vous êtes le héros Le tombeau du vampire,https://www.vinted.fr/items/8611096056-un-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,210,vinted,4.10
-9782070333165,convenable,8.00,Un livre dont vous êtes le héros le tombeau du vampire,https://www.vinted.fr/items/9025796359-un-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,150,vinted,4.10
-9782070335275,bon,10.00,Livres sont vous êtes le héros coréus le prince 527 vintage 1989 folio junior,https://www.vinted.fr/items/9997645607-livres-sont-vous-etes-le-heros-coreus-le-prince-527-vintage-1989-folio-junior,56,vinted,4.20
-9782070520312,bon,40.00,Chroniques oubliés initiation au jeu d'aventure,https://www.vinted.fr/items/10359893883-chroniques-oublies-initiation-au-jeu-daventure,0,vinted,5.70
-9782075100793,bon,3.00,La Cité des Voleurs - Ian Livingstone,https://www.vinted.fr/items/10759935603-la-cite-des-voleurs-ian-livingstone,0,vinted,3.85
-9782070332694,bon,5.00,La Forêt de la malédiction- Ian Livingstone,https://www.vinted.fr/items/10762615098-la-foret-de-la-malediction-ian-livingstone,0,vinted,3.95
-9782075100793,bon,10.00,La cité des voleurs,https://www.vinted.fr/items/10763681677-la-cite-des-voleurs,0,vinted,4.20
-9782070586134,bon,65.00,Le Sépulcre des ombres Défis Fantastiques,https://www.vinted.fr/items/10774158312-le-sepulcre-des-ombres-defis-fantastiques,0,vinted,6.95
-9782070647323,bon,100.00,Collection un livre dont vous êtes le héros,https://www.vinted.fr/items/10774680269-collection-un-livre-dont-vous-etes-le-heros,0,vinted,8.70
-9782070333332,convenable,5.00,La malédiction du Pharaon Oliver Johnson,https://www.vinted.fr/items/8272760231-la-malediction-du-pharaon-oliver-johnson,240,vinted,3.95
-9782070333332,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8685905744-livre-dont-vous-etes-le-heros,180,vinted,3.95
-9782070333332,bon,6.00,La malédiction du pharaon un livre dont vous etes le heros,https://www.vinted.fr/items/10239715058-la-malediction-du-pharaon-un-livre-dont-vous-etes-le-heros,35,vinted,4.00
-9782070333271,bon,6.00,Livre dont vous êtes le héros Dragon d'Or Vol.3,https://www.vinted.fr/items/5363133839-livre-dont-vous-etes-le-heros-dragon-dor-vol3,730,vinted,4.00
-9782070333271,convenable,6.00,Le Seigneur de l'ombre - livre dont vous êtes le heros,https://www.vinted.fr/items/9444363093-le-seigneur-de-lombre-livre-dont-vous-etes-le-heros,90,vinted,4.00
-9782070333172,tres_bon,6.00,Livre dont vous êtes le héros Dragon d'Or Vol.2,https://www.vinted.fr/items/5363128432-livre-dont-vous-etes-le-heros-dragon-dor-vol2,730,vinted,4.00
-9782070333172,bon,6.00,Ldvelh Livre dont vous êtes le héros Le Dieu Perdu Dragon D'or Tome 2,https://www.vinted.fr/items/8670052169-ldvelh-livre-dont-vous-etes-le-heros-le-dieu-perdu-dragon-dor-tome-2,180,vinted,4.00
-9782070333172,bon,6.00,Ldvelh le dieu perdu,https://www.vinted.fr/items/10321923134-ldvelh-le-dieu-perdu,28,vinted,4.00
-9782070333172,bon,6.00,Le Livre dont vous êtes le héros : dragon d'or - le dieu perdu - 317,https://www.vinted.fr/items/10332494648-le-livre-dont-vous-etes-le-heros-dragon-dor-le-dieu-perdu-317,28,vinted,4.00
-9782070333172,tres_bon,6.00,Un livre dont vous êtes le héros. Dragon d'or 2. Le Dieu Perdu,https://www.vinted.fr/items/10352621324-un-livre-dont-vous-etes-le-heros-dragon-dor-2-le-dieu-perdu,28,vinted,4.00
-9782070546022,tres_bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8420889930-livre-dont-vous-etes-le-heros,210,vinted,4.20
-9782070333929,bon,10.00,L'oeil du dragon un livre dont vous etes le heros,https://www.vinted.fr/items/10230225979-loeil-du-dragon-un-livre-dont-vous-etes-le-heros,35,vinted,4.20
-9782070546039,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8418587951-livre-dont-vous-etes-le-heros,210,vinted,4.20
-9782070333561,bon,9.90,Le Château des âmes damnées,https://www.vinted.fr/items/7423688680-le-chateau-des-ames-damnees,360,vinted,4.20
-9782070333561,bon,9.99,Le château des âmes damnées un livre dont vous êtes le héros,https://www.vinted.fr/items/7918176000-le-chateau-des-ames-damnees-un-livre-dont-vous-etes-le-heros,300,vinted,4.20
-9782070333561,bon,10.00,Ldvelh Le château des Âmes damnées,https://www.vinted.fr/items/8229865485-ldvelh-le-chateau-des-ames-damnees,240,vinted,4.20
-9782070333561,convenable,12.00,Le château des âmes damnées. Un livre dont vous êtes le héros.,https://www.vinted.fr/items/9072213851-le-chateau-des-ames-damnees-un-livre-dont-vous-etes-le-heros,150,vinted,4.30
-9782070333561,bon,12.00,Le château des âmes damnées,https://www.vinted.fr/items/9184551204-le-chateau-des-ames-damnees,120,vinted,4.30
-9782070333561,tres_bon,8.00,Ldvelh - Le château des âmes damnées,https://www.vinted.fr/items/9827294704-ldvelh-le-chateau-des-ames-damnees,60,vinted,4.10
-9782070333561,tres_bon,12.00,Le château des âmes damnées,https://www.vinted.fr/items/9877152994-le-chateau-des-ames-damnees,60,vinted,4.30
-9782070335497,bon,9.90,Initiation à La Magie Morris,https://www.vinted.fr/items/10765419750-initiation-a-la-magie-morris,0,vinted,4.20
-9782070332984,bon,7.00,Ldvelh le mercenaire de l’espace,https://www.vinted.fr/items/10775161064-ldvelh-le-mercenaire-de-lespace,0,vinted,4.05
-9782070332960,bon,7.00,Ldvelh les grottes de Kalte,https://www.vinted.fr/items/10775185204-ldvelh-les-grottes-de-kalte,0,vinted,4.05
-9782070332977,bon,7.00,Ldvelh le gouffre maudit,https://www.vinted.fr/items/10775274044-ldvelh-le-gouffre-maudit,0,vinted,4.05
-9782070649808,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8937265038-livre-dont-vous-etes-le-heros,150,vinted,4.20
-9782070649808,tres_bon,14.00,ldvelh La nuit du Nécromancien,https://www.vinted.fr/items/9403204030-ldvelh-la-nuit-du-necromancien,90,vinted,4.40
-9782070648108,tres_bon,20.00,Livre code de la route,https://www.vinted.fr/items/4383207525-livre-code-de-la-route,730,vinted,4.70
-9782070648108,tres_bon,14.00,LDVEH Défis Fantastiques T22 - Le Pirate de l'Au-delà v4 (2013),https://www.vinted.fr/items/8872845056-ldveh-defis-fantastiques-t22-le-pirate-de-lau-dela-v4-2013,180,vinted,4.40
-9782070665808,tres_bon,12.00,Livre dont vous êtes le héros - L'oeil d'émeraude - défis fantastiques,https://www.vinted.fr/items/5486445355-livre-dont-vous-etes-le-heros-loeil-demeraude-defis-fantastiques,365,vinted,4.30
-9782070665808,tres_bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/7191212241-un-livre-dont-vous-etes-le-heros,390,vinted,4.20
-9782070665808,tres_bon,10.00,Ldvelh- L'oeil d'emeraude - v4,https://www.vinted.fr/items/7257268819-ldvelh-loeil-demeraude-v4,390,vinted,4.20
-9782070573226,bon,14.00,Livre dont vous êtes le héros - L'Oeil d'émeraude - défis fantastiques,https://www.vinted.fr/items/5445197866-livre-dont-vous-etes-le-heros-loeil-demeraude-defis-fantastiques,365,vinted,4.40
-9782070573226,bon,25.00,L’œil d’Emeraude,https://www.vinted.fr/items/8130703193-loeil-demeraude,270,vinted,4.95
-9782070573226,tres_bon,15.00,Livre dont vous êtes le héros - édition 3,https://www.vinted.fr/items/8780498834-livre-dont-vous-etes-le-heros-edition-3,180,vinted,4.45
-9782075084598,tres_bon,18.00,Livre dont vous êtes le héros - Le Sang des Zombies - défis fantastiques,https://www.vinted.fr/items/7768235912-livre-dont-vous-etes-le-heros-le-sang-des-zombies-defis-fantastiques,300,vinted,4.60
-9782075084598,bon,14.00,Un livre dont vous êtes le héros le sang des zombies,https://www.vinted.fr/items/8105505838-un-livre-dont-vous-etes-le-heros-le-sang-des-zombies,270,vinted,4.40
-9782070660667,bon,14.00,Livre,https://www.vinted.fr/items/7037114904-livre,420,vinted,4.40
-9782070651412,tres_bon,20.00,La nuit du loup garou,https://www.vinted.fr/items/8103825545-la-nuit-du-loup-garou,270,vinted,4.70
-9782070651412,tres_bon,23.00,La nuit du loup garou,https://www.vinted.fr/items/8376824207-la-nuit-du-loup-garou,240,vinted,4.85
-9782070651412,tres_bon,16.00,Livre,https://www.vinted.fr/items/9061270441-livre,150,vinted,4.50
-9782070651412,tres_bon,25.00,La nuit du loup-garou - Ldvelh,https://www.vinted.fr/items/9161866263-la-nuit-du-loup-garou-ldvelh,120,vinted,4.95
-9782070651412,bon,20.00,Livre,https://www.vinted.fr/items/9446044190-livre,90,vinted,4.70
-9782070651412,bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/9783783774-un-livre-dont-vous-etes-le-heros,60,vinted,4.20
-9782070651412,tres_bon,25.00,La nuit du loup-garou - Un Livre dont vous êtes le Héros - Défis Fantastiques 21 Ian Livingstone,https://www.vinted.fr/items/9940517940-la-nuit-du-loup-garou-un-livre-dont-vous-etes-le-heros-defis-fantastiques-21-ian-livingstone,60,vinted,4.95
-9782070506842,bon,5.99,Les grottes de Kalte loup solitaire 3 - Dever Joe,https://www.vinted.fr/items/10776428637-les-grottes-de-kalte-loup-solitaire-3-dever-joe,0,vinted,4.00
-9782075100748,tres_bon,5.00,ldvelh Livre dont vous êtes le héros La fôret de la malédiction,https://www.vinted.fr/items/9569614384-ldvelh-livre-dont-vous-etes-le-heros-la-foret-de-la-malediction,90,vinted,3.95
-9782075100649,bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/6588214253-le-sorcier-de-la-montagne-de-feu,480,vinted,3.95
-9782075100649,tres_bon,5.00,Un livre dont vous êtes le héros Le sorcier et la montagne de feu,https://www.vinted.fr/items/7279058438-un-livre-dont-vous-etes-le-heros-le-sorcier-et-la-montagne-de-feu,390,vinted,3.95
-9782075100649,bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/8013698918-le-sorcier-de-la-montagne-de-feu,270,vinted,3.95
-9782075100649,bon,5.00,livre dont vous etes le Heros le sorcier de la montagne de fei,https://www.vinted.fr/items/7708038567-livre-dont-vous-etes-le-heros-le-sorcier-de-la-montagne-de-fei,330,vinted,3.95
-9782075100649,bon,5.00,Livre enfant,https://www.vinted.fr/items/8099244139-livre-enfant,270,vinted,3.95
-9782075100649,tres_bon,6.00,Livre Le sorcier de la montagne de feu,https://www.vinted.fr/items/9775401989-livre-le-sorcier-de-la-montagne-de-feu,60,vinted,4.00
-9782075100649,bon,6.00,Livre le sorcier de la montagne de feu,https://www.vinted.fr/items/9953663461-livre-le-sorcier-de-la-montagne-de-feu,56,vinted,4.00
-9782075100649,bon,6.00,Livre dont vous êtes le héros..,https://www.vinted.fr/items/10471199471-livre-dont-vous-etes-le-heros,21,vinted,4.00
-9782075100649,tres_bon,6.00,Le sorcier de la montagne de feu ldvelh,https://www.vinted.fr/items/10471371208-le-sorcier-de-la-montagne-de-feu-ldvelh,21,vinted,4.00
-9782070335923,bon,30.00,L'Élu des six clans - Luke Sharp un livre dont vous êtes le héros.,https://www.vinted.fr/items/10776643665-lelu-des-six-clans-luke-sharp-un-livre-dont-vous-etes-le-heros,0,vinted,5.20
-9782070333646,bon,20.00,Le Labyrinthe du roi Minos - un livre dont vous êtes le héros.,https://www.vinted.fr/items/10776725994-le-labyrinthe-du-roi-minos-un-livre-dont-vous-etes-le-heros,0,vinted,4.70
-9782070335404,bon,7.50,Les esclaves de l'eternite,https://www.vinted.fr/items/10776780526-les-esclaves-de-leternite,0,vinted,4.08
-9782070334049,bon,15.00,La grande menace des robots,https://www.vinted.fr/items/10776854986-la-grande-menace-des-robots,0,vinted,4.45
-9782070332700,bon,15.00,La galaxie tragique,https://www.vinted.fr/items/10776906541-la-galaxie-tragique,0,vinted,4.45
-9782075138222,bon,11.90,"""Un livre dont vous êtes le Héros"" : La créature venue du Chaos",https://www.vinted.fr/items/4585930269-un-livre-dont-vous-etes-le-heros-la-creature-venue-du-chaos,730,vinted,4.29
-9782075138222,tres_bon,10.00,la créature venu du chaos - un livre dont vous êtes le héros,https://www.vinted.fr/items/5133503252-la-creature-venu-du-chaos-un-livre-dont-vous-etes-le-heros,730,vinted,4.20
-9782075138222,tres_bon,15.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/6447015340-livre-dont-vous-etes-le-heros,510,vinted,4.45
-9782075138222,tres_bon,15.00,Défis fantastiques 13 - le créature venue du chaos,https://www.vinted.fr/items/6900150822-defis-fantastiques-13-le-creature-venue-du-chaos,420,vinted,4.45
-9782075138222,tres_bon,10.00,La Créature venue du Chaos Un livre dont vous êtes le héros Défis fantastiques 13 - 2020,https://www.vinted.fr/items/8008925320-la-creature-venue-du-chaos-un-livre-dont-vous-etes-le-heros-defis-fantastiques-13-2020,270,vinted,4.20
-9782075138222,bon,16.00,Roman où l’on mène l’histoire racontée,https://www.vinted.fr/items/8641569595-roman-ou-lon-mene-lhistoire-racontee,210,vinted,4.50
-9782075138222,tres_bon,10.00,Ldvelh - la créature venue du chaos,https://www.vinted.fr/items/9657731633-ldvelh-la-creature-venue-du-chaos,60,vinted,4.20
-9782075138222,bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/9676930678-un-livre-dont-vous-etes-le-heros,60,vinted,4.20
-9782075132343,tres_bon,14.00,Défis fantastiques 7 - la sorcière des neiges,https://www.vinted.fr/items/6911468387-defis-fantastiques-7-la-sorciere-des-neiges,420,vinted,4.40
-9782075132299,bon,12.00,le livre vous êtes le héros,https://www.vinted.fr/items/7921001802-le-livre-vous-etes-le-heros,300,vinted,4.30
-9782070334223,bon,3.00,Le carillon de la mort,https://www.vinted.fr/items/10777035233-le-carillon-de-la-mort,0,vinted,3.85
-9782070332670,convenable,4.90,Un livre dont vous êtes le héros,https://www.vinted.fr/items/10375789389-un-livre-dont-vous-etes-le-heros,28,vinted,3.94
-9782070647408,tres_bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/9052940985-le-sorcier-de-la-montagne-de-feu,150,vinted,3.95
-9782070647408,tres_bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/9161960596-livre-dont-vous-etes-le-heros,120,vinted,3.95
-9782070647408,bon,5.00,Le Sorcier de la Montagne de Feu - Défis Fantastiques n°1 - LDVELH,https://www.vinted.fr/items/9289372751-le-sorcier-de-la-montagne-de-feu-defis-fantastiques-ndeg1-ldvelh,120,vinted,3.95
-9782070647408,bon,5.00,Ldvelh Le sorcier de la montagne de feu,https://www.vinted.fr/items/9648864669-ldvelh-le-sorcier-de-la-montagne-de-feu,90,vinted,3.95
-9782070647408,bon,4.50,LDVELH le sorcier de la montagne de feu - défis fantastiques,https://www.vinted.fr/items/10196787139-ldvelh-le-sorcier-de-la-montagne-de-feu-defis-fantastiques,42,vinted,3.92
-9782070610327,bon,5.00,Le sorcier de la montagne de feu livre dont vous êtes le héros,https://www.vinted.fr/items/9315610061-le-sorcier-de-la-montagne-de-feu-livre-dont-vous-etes-le-heros,120,vinted,3.95
-9782070509195,bon,5.00,Le sorcier de la montagne de feu V2,https://www.vinted.fr/items/1242658541-le-sorcier-de-la-montagne-de-feu-v2,1825,vinted,3.95
-9782070509195,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/6391070514-livre-dont-vous-etes-le-heros,510,vinted,3.95
-9782070509195,bon,5.00,Le Sorcier de la Montagne de Feu,https://www.vinted.fr/items/9325692076-le-sorcier-de-la-montagne-de-feu,120,vinted,3.95
-9782070332694,convenable,4.50,"LDVELH ""la forêt de la malédiction""",https://www.vinted.fr/items/9797001454-ldvelh-la-foret-de-la-malediction,60,vinted,3.92
-9782070506729,bon,5.00,Un livre dont vous êtes le héros: Défis Fantastique 2 La citadelle du chaos,https://www.vinted.fr/items/5744586249-un-livre-dont-vous-etes-le-heros-defis-fantastique-2-la-citadelle-du-chaos,365,vinted,3.95
-9782070506729,tres_bon,5.00,La Citadelle du Chaos - LDVELH,https://www.vinted.fr/items/5789726389-la-citadelle-du-chaos-ldvelh,365,vinted,3.95
-9782070506729,bon,5.00,"Livre dont vous êtes le héros "" La citadelle du chaos """,https://www.vinted.fr/items/6207052886-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos,540,vinted,3.95
-9782070506729,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8051424982-livre-dont-vous-etes-le-heros,270,vinted,3.95
-9782070506729,bon,5.00,"un livre dont vous êtes le héros, la citadelle du chaos",https://www.vinted.fr/items/9216701383-un-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos,120,vinted,3.95
-9782070506729,convenable,4.90,📚Livre Dont Vous Êtes Le Héros La Citadelle Du Chaos Steve Jackson Folio Junior,https://www.vinted.fr/items/9369429418-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos-steve-jackson-folio-junior,120,vinted,3.94
-9782070332687,bon,5.00,LDVELH défis fantastiques la citadelle du chaos,https://www.vinted.fr/items/6750897371-ldvelh-defis-fantastiques-la-citadelle-du-chaos,450,vinted,3.95
-9782070332687,bon,5.00,La Citadelle du Chaos,https://www.vinted.fr/items/9754590321-la-citadelle-du-chaos,60,vinted,3.95
-9782070332687,bon,5.00,La citadelle du chaos (folio junior livre heros) - Steve Jackson,https://www.vinted.fr/items/10650655100-la-citadelle-du-chaos-folio-junior-livre-heros-steve-jackson,7,vinted,3.95
-9782070333110,bon,5.00,Le Temple de la terreur - ldvelh,https://www.vinted.fr/items/10778911309-le-temple-de-la-terreur-ldvelh,0,vinted,3.95
+isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp,lot,confirmation
+9782070333714,bon,9.00,La cité interdite LDVLH,https://www.vinted.fr/items/6096825378-la-cite-interdite-ldvlh,365,vinted,4.15,,
+9782070333714,bon,9.90,"La Cité Interdite, Astre d'Or",https://www.vinted.fr/items/9724259728-la-cite-interdite-astre-dor,60,vinted,4.20,,
+9782070333714,convenable,9.90,"Livre dont vous êtes le héros ""La cité interdite"" (édition 1986)",https://www.vinted.fr/items/9974377499-livre-dont-vous-etes-le-heros-la-cite-interdite-edition-1986,56,vinted,4.20,,
+9782070333714,bon,10.00,Ldvelh la cité interdite,https://www.vinted.fr/items/10053221226-ldvelh-la-cite-interdite,49,vinted,4.20,,
+9782070506736,bon,9.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/5600869860-un-livre-dont-vous-etes-le-heros,365,vinted,4.15,,
+9782070506736,bon,8.00,Astre d'or Tome 1 le sorcier Majdar,https://www.vinted.fr/items/6185348406-astre-dor-tome-1-le-sorcier-majdar,540,vinted,4.10,,
+9782070506736,bon,10.00,Un livre dont vous êtes le héros Le sorcier Majdar de Ian Page et Joe Dever,https://www.vinted.fr/items/7624765863-un-livre-dont-vous-etes-le-heros-le-sorcier-majdar-de-ian-page-et-joe-dever,330,vinted,4.20,,
+9782070506736,bon,8.00,Le sorcier Majdar V2,https://www.vinted.fr/items/8167304024-le-sorcier-majdar-v2,240,vinted,4.10,,
+9782070333707,bon,10.00,Le sorcier Majdar un livre dont vous êtes le héros,https://www.vinted.fr/items/7364677797-le-sorcier-majdar-un-livre-dont-vous-etes-le-heros,360,vinted,4.20,,
+9782070333707,bon,10.00,Le Sorcier Majdar Astre d'Or LDVELH,https://www.vinted.fr/items/7662574391-le-sorcier-majdar-astre-dor-ldvelh,330,vinted,4.20,,
+9782070332526,bon,8.00,Ldvelh Le sorcier de la montagne de feu,https://www.vinted.fr/items/10766006892-ldvelh-le-sorcier-de-la-montagne-de-feu,0,vinted,4.10,,
+9782070333318,bon,8.00,"L’Ultime Combat de la Horde, Un livre dont vous êtes le héros, J.H. Brennan, 1988",https://www.vinted.fr/items/10764617067-lultime-combat-de-la-horde-un-livre-dont-vous-etes-le-heros-jh-brennan-1988,0,vinted,4.10,,
+9782070332878,bon,7.00,"La Sorcière des Neiges, Un livre dont vous êtes le héros, Ian Livingstone, EO 1985",https://www.vinted.fr/items/10764780002-la-sorciere-des-neiges-un-livre-dont-vous-etes-le-heros-ian-livingstone-eo-1985,0,vinted,4.05,,
+9782070333547,bon,9.00,Terreur hors du temps. Un livre dont vous êtes le heros.,https://www.vinted.fr/items/10764948066-terreur-hors-du-temps-un-livre-dont-vous-etes-le-heros,0,vinted,4.15,,
+9782070332861,bon,8.00,"Le Manoir de l’Enfer, Un livre dont vous êtes le héros, Steve Jackson, 1990",https://www.vinted.fr/items/10764924864-le-manoir-de-lenfer-un-livre-dont-vous-etes-le-heros-steve-jackson-1990,0,vinted,4.10,,
+9782070506842,bon,8.50,Les grottes de kalte LDVELH,https://www.vinted.fr/items/10765358933-les-grottes-de-kalte-ldvelh,0,vinted,4.12,,
+9782070334704,bon,14.00,"Livre dont vous etes le heros, Les Démons du Manmarch,pas d ups",https://www.vinted.fr/items/10765264744-livre-dont-vous-etes-le-heros-les-demons-du-manmarchpas-d-ups,0,vinted,4.40,,
+9782075132343,bon,20.00,Un livre dont vous êtes le héros La sorcière des neige,https://www.vinted.fr/items/10765362432-un-livre-dont-vous-etes-le-heros-la-sorciere-des-neige,0,vinted,4.70,,
+9782070335282,bon,15.00,Bardik le Voleur - Simon Farrell,https://www.vinted.fr/items/10766383718-bardik-le-voleur-simon-farrell,0,vinted,4.45,,
+9782070335046,bon,12.00,Péreim le Chevalier,https://www.vinted.fr/items/10766473470-pereim-le-chevalier,0,vinted,4.30,,
+9782070333912,bon,15.00,Le Grand maître d'Irsmun,https://www.vinted.fr/items/10766554318-le-grand-maitre-dirsmun,0,vinted,4.45,,
+9782070334155,bon,18.00,Défis fantastiques tome 24,https://www.vinted.fr/items/10766718728-defis-fantastiques-tome-24,0,vinted,4.60,,
+9782070334278,bon,30.00,Les Seigneurs de la guerre rare dans cet état,https://www.vinted.fr/items/10766822906-les-seigneurs-de-la-guerre-rare-dans-cet-etat,0,vinted,5.20,,
+9782070332915,bon,8.00,La traversée infernale,https://www.vinted.fr/items/10767250869-la-traversee-infernale,0,vinted,4.10,,
+9782070332939,bon,12.90,Les Collines Maléfiques - Steve Jackson - Sorcellerie 1 - Folio Junior LDVELH,https://www.vinted.fr/items/10769046252-les-collines-malefiques-steve-jackson-sorcellerie-1-folio-junior-ldvelh,0,vinted,4.34,,
+9782070332687,bon,9.90,La Citadelle du Chaos - Steve Jackson - Défis Fantastiques 2 - Folio Junior LDVELH,https://www.vinted.fr/items/10769085606-la-citadelle-du-chaos-steve-jackson-defis-fantastiques-2-folio-junior-ldvelh,0,vinted,4.20,,
+9782070566891,bon,35.00,Un duel dans le yorkshire,https://www.vinted.fr/items/10769289510-un-duel-dans-le-yorkshire,0,vinted,5.45,,
+9782070335756,bon,35.00,Le maître du feu - livre dont vous êtes le héros,https://www.vinted.fr/items/10769256221-le-maitre-du-feu-livre-dont-vous-etes-le-heros,0,vinted,5.45,,
+9782070336326,bon,20.00,Le maître chanteur d’Appledore - livre dont vous êtes le héros,https://www.vinted.fr/items/10769359954-le-maitre-chanteur-dappledore-livre-dont-vous-etes-le-heros,0,vinted,4.70,,
+9782070567195,bon,17.00,Pour l’honneur de la reine - livre dont vous êtes le héros,https://www.vinted.fr/items/10769327803-pour-lhonneur-de-la-reine-livre-dont-vous-etes-le-heros,0,vinted,4.55,,
+9782070509638,bon,15.00,La légion des morts - livre dont vous êtes le héros,https://www.vinted.fr/items/10769577254-la-legion-des-morts-livre-dont-vous-etes-le-heros,0,vinted,4.45,,
+9782075138253,bon,9.00,Les grottes de Kalte- livre dont vous êtes le héros,https://www.vinted.fr/items/10769611805-les-grottes-de-kalte-livre-dont-vous-etes-le-heros,0,vinted,4.15,,
+9782070332908,bon,6.99,Loup Solitaire Tome 1 : Les Maitres Des Tenebres - Joe Dever,https://www.vinted.fr/items/10770094492-loup-solitaire-tome-1-les-maitres-des-tenebres-joe-dever,0,vinted,4.05,,
+9782070332915,bon,7.99,La traversée infernale loup solitaire 2 - Joe Dever,https://www.vinted.fr/items/10770135891-la-traversee-infernale-loup-solitaire-2-joe-dever,0,vinted,4.10,,
+9782070566389,bon,35.00,Livre Dont Vous Êtes Le Héros (ldvelh): La Légende des Guerriers Fantômes en BÉ+,https://www.vinted.fr/items/10770959680-livre-dont-vous-etes-le-heros-ldvelh-la-legende-des-guerriers-fantomes-en-be,0,vinted,5.45,,
+9782070332960,bon,9.00,Les Grottes de Kalte – Loup Solitaire tome 3 – Joe Dever – Folio Junior 1985,https://www.vinted.fr/items/10771804517-les-grottes-de-kalte-loup-solitaire-tome-3-joe-dever-folio-junior-1985,0,vinted,4.15,,
+9782070336227,bon,19.00,Livre Dont Vous Êtes Le Héros (ldvelh): Meurtre au Club Diogène BÉ,https://www.vinted.fr/items/10771790848-livre-dont-vous-etes-le-heros-ldvelh-meurtre-au-club-diogene-be,0,vinted,4.65,,
+9782070336234,bon,15.00,Livre Dont Vous Êtes Le Héros (ldvelh): L'émeraude de la Rivière Noire BÉ,https://www.vinted.fr/items/10771793103-livre-dont-vous-etes-le-heros-ldvelh-lemeraude-de-la-riviere-noire-be,0,vinted,4.45,,
+9782070333684,bon,19.00,Le Tombeau des Maléfices – J.H. Brennan – Quête du Graal Tome 7 – Folio Junior,https://www.vinted.fr/items/10771822167-le-tombeau-des-malefices-jh-brennan-quete-du-graal-tome-7-folio-junior,0,vinted,4.65,,
+9782070333639,bon,19.00,Le Temps de la Malédiction – Quête du Graal Tome 6 – J.H. Brennan – Folio Junior,https://www.vinted.fr/items/10771840627-le-temps-de-la-malediction-quete-du-graal-tome-6-jh-brennan-folio-junior,0,vinted,4.65,,
+9782070333332,bon,17.00,La Malédiction du Pharaon – Folio Junior Dragon d'Or 4 – Livre dont vous êtes le héros,https://www.vinted.fr/items/10771861190-la-malediction-du-pharaon-folio-junior-dragon-dor-4-livre-dont-vous-etes-le-heros,0,vinted,4.55,,
+9782070566891,bon,30.00,Livre Dont Vous Êtes Le Héros (ldvelh): Un Duel dans le Yorkshire ÉO et BÉ,https://www.vinted.fr/items/10771850348-livre-dont-vous-etes-le-heros-ldvelh-un-duel-dans-le-yorkshire-eo-et-be,0,vinted,5.20,,
+9782070332670,bon,14.00,L'Île du Roi Lézard – Ian Livingstone – Défis fantastiques – Folio Junior,https://www.vinted.fr/items/10771879382-lile-du-roi-lezard-ian-livingstone-defis-fantastiques-folio-junior,0,vinted,4.40,,
+9782070567195,bon,25.00,Livre Dont Vous Êtes Le Héros (ldvelh): Pour l'Honneur de la Reine BÉ+,https://www.vinted.fr/items/10771869634-livre-dont-vous-etes-le-heros-ldvelh-pour-lhonneur-de-la-reine-be,0,vinted,4.95,,
+9782070332977,bon,8.00,Loup Solitaire Tome 4 – Le Gouffre maudit – Joe Dever – Folio Junior,https://www.vinted.fr/items/10771893508-loup-solitaire-tome-4-le-gouffre-maudit-joe-dever-folio-junior,0,vinted,4.10,,
+9782070567898,bon,35.00,Livre Dont Vous Êtes Le Héros (ldvelh): L'Héritier Disparu en v1 BÉ+,https://www.vinted.fr/items/10771883548-livre-dont-vous-etes-le-heros-ldvelh-lheritier-disparu-en-v1-be,0,vinted,5.45,,
+9782070567683,bon,24.00,Livre Dont Vous Êtes Le Héros (ldvelh): Le Mystère de Compton BÉ+,https://www.vinted.fr/items/10771900193-livre-dont-vous-etes-le-heros-ldvelh-le-mystere-de-compton-be,0,vinted,4.90,,
+9782070506927,bon,24.00,La Forêt de la malédiction – Ian Livingstone – Première édition 1984 – Livre dont vous êtes le héros,https://www.vinted.fr/items/10771911194-la-foret-de-la-malediction-ian-livingstone-premiere-edition-1984-livre-dont-vous-etes-le-heros,0,vinted,4.90,,
+9782070514526,bon,16.00,Livre Dont Vous Êtes Le Héros (ldvelh): Pour l'Honneur de la Reine (v2),https://www.vinted.fr/items/10771916823-livre-dont-vous-etes-le-heros-ldvelh-pour-lhonneur-de-la-reine-v2,0,vinted,4.50,,
+9782070506804,tres_bon,9.00,La Petite Aiguille magique – Contes du Gai Pierrot n°63 – 1967 – Livre jeunesse vintage,https://www.vinted.fr/items/9790289062-la-petite-aiguille-magique-contes-du-gai-pierrot-ndeg63-1967-livre-jeunesse-vintage,60,vinted,4.15,,
+9782070334056,bon,8.00,La guerre des sorciers. Un livre dont vous êtes le héros.,https://www.vinted.fr/items/7718057732-la-guerre-des-sorciers-un-livre-dont-vous-etes-le-heros,330,vinted,4.10,,
+9782070334056,bon,8.00,Astre d'Or Tome 4 : La Guerre des Sorciers Broché,https://www.vinted.fr/items/8243047687-astre-dor-tome-4-la-guerre-des-sorciers-broche,240,vinted,4.10,,
+9782070334056,convenable,8.00,Livre La guerre des sorciers,https://www.vinted.fr/items/9276816770-livre-la-guerre-des-sorciers,120,vinted,4.10,,
+9782070334056,bon,9.00,La guerre des sorciers - Livre dont vous êtes le héro,https://www.vinted.fr/items/10505449908-la-guerre-des-sorciers-livre-dont-vous-etes-le-hero,14,vinted,4.15,,
+9782070506798,convenable,8.00,"Un livre dont vous êtes le héros ""Le royaume de l'oubli"" de Ian Page",https://www.vinted.fr/items/8202919523-un-livre-dont-vous-etes-le-heros-le-royaume-de-loubli-de-ian-page,240,vinted,4.10,,
+9782070506781,bon,10.00,"Astre d'or, tome 2 - La Cité interdite",https://www.vinted.fr/items/5267779808-astre-dor-tome-2-la-cite-interdite,730,vinted,4.20,,
+9782070506781,bon,9.90,"La cité interdite , astre d'or 2",https://www.vinted.fr/items/6869086476-la-cite-interdite-astre-dor-2,420,vinted,4.20,,
+9782070506781,bon,9.00,Livre,https://www.vinted.fr/items/9882703939-livre,60,vinted,4.15,,
+9782070506781,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/10567193242-livre-dont-vous-etes-le-heros,14,vinted,4.20,,
+9782070333653,tres_bon,9.00,"L'odyssée d' altheos, un livre dont .",https://www.vinted.fr/items/7005641343-lodyssee-d-altheos-un-livre-dont,420,vinted,4.15,,
+9782070333653,convenable,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/9627927263-livre-dont-vous-etes-le-heros,90,vinted,3.95,,
+9782070333646,bon,8.00,LDVELH livre dont vous êtes le héros Le labyrinthe du roi Minos,https://www.vinted.fr/items/8190564534-ldvelh-livre-dont-vous-etes-le-heros-le-labyrinthe-du-roi-minos,240,vinted,4.10,,
+9782070333646,bon,10.00,Le Labyrinthe du Roi Minos – Chroniques Crétoises,https://www.vinted.fr/items/9441365141-le-labyrinthe-du-roi-minos-chroniques-cretoises,90,vinted,4.20,,
+9782070333646,bon,10.00,Le Labyrinthe du roi Minos - Le labyrinthe du roi Minos,https://www.vinted.fr/items/10026642803-le-labyrinthe-du-roi-minos-le-labyrinthe-du-roi-minos,56,vinted,4.20,,
+9782070333646,bon,8.00,Le Labyrinthe du roi minos,https://www.vinted.fr/items/10047008691-le-labyrinthe-du-roi-minos,49,vinted,4.10,,
+9782070333646,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/10362245812-livre-dont-vous-etes-le-heros,28,vinted,4.20,,
+9782070333646,bon,8.00,Le Labyrinthe du roi Minos,https://www.vinted.fr/items/10616316577-le-labyrinthe-du-roi-minos,7,vinted,4.10,,
+9782070333516,bon,6.00,La Vengeance d'Althéos,https://www.vinted.fr/items/10217150375-la-vengeance-daltheos,35,vinted,4.00,,
+9782070333516,bon,10.00,La vengeance d'Althéos,https://www.vinted.fr/items/10315737374-la-vengeance-daltheos,28,vinted,4.20,,
+9782070512713,bon,35.00,Le peuple maudit mark smith un livre dont vous êtes le héros,https://www.vinted.fr/items/5977002102-le-peuple-maudit-mark-smith-un-livre-dont-vous-etes-le-heros,365,vinted,5.45,,
+9782070512713,bon,60.00,un livre dont vous êtes le héros,https://www.vinted.fr/items/7120552182-un-livre-dont-vous-etes-le-heros,390,vinted,6.70,,
+9782070512713,bon,37.00,Le peuple maudit (Destins 3) - M. Smith,https://www.vinted.fr/items/7216075159-le-peuple-maudit-destins-3-m-smith,390,vinted,5.55,,
+9782070512713,bon,32.00,Ldvelh Le Peuple Maudit livre dont vous etes le heros,https://www.vinted.fr/items/7330242285-ldvelh-le-peuple-maudit-livre-dont-vous-etes-le-heros,360,vinted,5.30,,
+9782070583805,bon,60.00,LDVELH - le pirate des sept mers,https://www.vinted.fr/items/6655256588-ldvelh-le-pirate-des-sept-mers,480,vinted,6.70,,
+9782070583799,bon,37.00,Ldvelh - L'Etoile de la Destinée (Destins 2),https://www.vinted.fr/items/7234852092-ldvelh-letoile-de-la-destinee-destins-2,390,vinted,5.55,,
+9782070583799,bon,40.00,L'Étoile de la Destinée,https://www.vinted.fr/items/7632892270-letoile-de-la-destinee,330,vinted,5.70,,
+9782070334872,bon,11.00,Ldvelh. Darian le magicien.,https://www.vinted.fr/items/7842475753-ldvelh-darian-le-magicien,300,vinted,4.25,,
+9782070334872,bon,12.00,Darian le magicien,https://www.vinted.fr/items/8594900470-darian-le-magicien,210,vinted,4.30,,
+9782070334872,bon,12.00,Darian Le Magicien - Farrell,https://www.vinted.fr/items/8946727833-darian-le-magicien-farrell,150,vinted,4.30,,
+9782070334872,bon,13.00,Darian le Magicien - Double Jeu 2 - Livre dont vous êtes le héros,https://www.vinted.fr/items/9219212241-darian-le-magicien-double-jeu-2-livre-dont-vous-etes-le-heros,120,vinted,4.35,,
+9782070334872,convenable,10.00,Coréus le Prince - Simon Farrell et Jon Sutherland - LDVELH,https://www.vinted.fr/items/9270031043-coreus-le-prince-simon-farrell-et-jon-sutherland-ldvelh,120,vinted,4.20,,
+9782070334872,bon,12.00,Darian le magicien ldveh,https://www.vinted.fr/items/9909626353-darian-le-magicien-ldveh,60,vinted,4.30,,
+9782070334872,tres_bon,10.00,Livre dont vous êtes le héros: Darian le Magicien,https://www.vinted.fr/items/9984156439-livre-dont-vous-etes-le-heros-darian-le-magicien,56,vinted,4.20,,
+9782070334872,bon,10.00,Livre dont vous êtes le héros darian le magicien 487 folio junior 1988 vintage,https://www.vinted.fr/items/9997452644-livre-dont-vous-etes-le-heros-darian-le-magicien-487-folio-junior-1988-vintage,56,vinted,4.20,,
+9782070334872,bon,8.90,Darian le Magicien LDVELH,https://www.vinted.fr/items/10290956646-darian-le-magicien-ldvelh,28,vinted,4.14,,
+9782070334872,bon,10.00,Darian Le magicien,https://www.vinted.fr/items/10534680575-darian-le-magicien,14,vinted,4.20,,
+9782070662296,bon,6.00,Le Combat des Loups - Joe Dever,https://www.vinted.fr/items/10770911280-le-combat-des-loups-joe-dever,0,vinted,4.00,,
+9782070333646,bon,10.00,Livre dont vous êtes le héros Le Labyrinthe du roi Minos,https://www.vinted.fr/items/10774319709-livre-dont-vous-etes-le-heros-le-labyrinthe-du-roi-minos,0,vinted,4.20,,
+9782070334223,bon,10.00,Livre dont vous êtes le héros Le carillon de la mort,https://www.vinted.fr/items/10774370829-livre-dont-vous-etes-le-heros-le-carillon-de-la-mort,0,vinted,4.20,,
+9782070544028,bon,7.00,Livre dont vous êtes le héros le tombeau du vampire v2,https://www.vinted.fr/items/9273232164-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire-v2,120,vinted,4.05,,
+9782070333165,bon,6.00,Le tombeau du vampire,https://www.vinted.fr/items/5859416964-le-tombeau-du-vampire,365,vinted,4.00,,
+9782070333165,bon,8.00,Ldvelh Le tombeau du vampire,https://www.vinted.fr/items/7491992864-ldvelh-le-tombeau-du-vampire,360,vinted,4.10,,
+9782070333165,bon,8.00,Le Tombeau du Vampire - Livre dont vous êtes le héros,https://www.vinted.fr/items/7265078314-le-tombeau-du-vampire-livre-dont-vous-etes-le-heros,390,vinted,4.10,,
+9782070333165,bon,9.00,Le Tombeau du Vampire (ldvelh - Dragon d'Or - n°1),https://www.vinted.fr/items/8488011030-le-tombeau-du-vampire-ldvelh-dragon-dor-ndeg1,210,vinted,4.15,,
+9782070333165,bon,8.00,Le livre dont vous êtes le héros « Le tombeau du vampire »,https://www.vinted.fr/items/8496811503-le-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,210,vinted,4.10,,
+9782070333165,bon,8.00,Le tombeau du vampire,https://www.vinted.fr/items/8594968705-le-tombeau-du-vampire,210,vinted,4.10,,
+9782070333165,bon,8.00,Un livre dont vous êtes le héros Le tombeau du vampire,https://www.vinted.fr/items/8611096056-un-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,210,vinted,4.10,,
+9782070333165,convenable,8.00,Un livre dont vous êtes le héros le tombeau du vampire,https://www.vinted.fr/items/9025796359-un-livre-dont-vous-etes-le-heros-le-tombeau-du-vampire,150,vinted,4.10,,
+9782070335275,bon,10.00,Livres sont vous êtes le héros coréus le prince 527 vintage 1989 folio junior,https://www.vinted.fr/items/9997645607-livres-sont-vous-etes-le-heros-coreus-le-prince-527-vintage-1989-folio-junior,56,vinted,4.20,,
+9782070520312,bon,40.00,Chroniques oubliés initiation au jeu d'aventure,https://www.vinted.fr/items/10359893883-chroniques-oublies-initiation-au-jeu-daventure,0,vinted,5.70,,
+9782075100793,bon,3.00,La Cité des Voleurs - Ian Livingstone,https://www.vinted.fr/items/10759935603-la-cite-des-voleurs-ian-livingstone,0,vinted,3.85,,
+9782070332694,bon,5.00,La Forêt de la malédiction- Ian Livingstone,https://www.vinted.fr/items/10762615098-la-foret-de-la-malediction-ian-livingstone,0,vinted,3.95,,
+9782075100793,bon,10.00,La cité des voleurs,https://www.vinted.fr/items/10763681677-la-cite-des-voleurs,0,vinted,4.20,,
+9782070586134,bon,65.00,Le Sépulcre des ombres Défis Fantastiques,https://www.vinted.fr/items/10774158312-le-sepulcre-des-ombres-defis-fantastiques,0,vinted,6.95,,
+9782070647323,bon,100.00,Collection un livre dont vous êtes le héros,https://www.vinted.fr/items/10774680269-collection-un-livre-dont-vous-etes-le-heros,0,vinted,8.70,,
+9782070333332,convenable,5.00,La malédiction du Pharaon Oliver Johnson,https://www.vinted.fr/items/8272760231-la-malediction-du-pharaon-oliver-johnson,240,vinted,3.95,,
+9782070333332,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8685905744-livre-dont-vous-etes-le-heros,180,vinted,3.95,,
+9782070333332,bon,6.00,La malédiction du pharaon un livre dont vous etes le heros,https://www.vinted.fr/items/10239715058-la-malediction-du-pharaon-un-livre-dont-vous-etes-le-heros,35,vinted,4.00,,
+9782070333271,bon,6.00,Livre dont vous êtes le héros Dragon d'Or Vol.3,https://www.vinted.fr/items/5363133839-livre-dont-vous-etes-le-heros-dragon-dor-vol3,730,vinted,4.00,,
+9782070333271,convenable,6.00,Le Seigneur de l'ombre - livre dont vous êtes le heros,https://www.vinted.fr/items/9444363093-le-seigneur-de-lombre-livre-dont-vous-etes-le-heros,90,vinted,4.00,,
+9782070333172,tres_bon,6.00,Livre dont vous êtes le héros Dragon d'Or Vol.2,https://www.vinted.fr/items/5363128432-livre-dont-vous-etes-le-heros-dragon-dor-vol2,730,vinted,4.00,,
+9782070333172,bon,6.00,Ldvelh Livre dont vous êtes le héros Le Dieu Perdu Dragon D'or Tome 2,https://www.vinted.fr/items/8670052169-ldvelh-livre-dont-vous-etes-le-heros-le-dieu-perdu-dragon-dor-tome-2,180,vinted,4.00,,
+9782070333172,bon,6.00,Ldvelh le dieu perdu,https://www.vinted.fr/items/10321923134-ldvelh-le-dieu-perdu,28,vinted,4.00,,
+9782070333172,bon,6.00,Le Livre dont vous êtes le héros : dragon d'or - le dieu perdu - 317,https://www.vinted.fr/items/10332494648-le-livre-dont-vous-etes-le-heros-dragon-dor-le-dieu-perdu-317,28,vinted,4.00,,
+9782070333172,tres_bon,6.00,Un livre dont vous êtes le héros. Dragon d'or 2. Le Dieu Perdu,https://www.vinted.fr/items/10352621324-un-livre-dont-vous-etes-le-heros-dragon-dor-2-le-dieu-perdu,28,vinted,4.00,,
+9782070546022,tres_bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8420889930-livre-dont-vous-etes-le-heros,210,vinted,4.20,,
+9782070333929,bon,10.00,L'oeil du dragon un livre dont vous etes le heros,https://www.vinted.fr/items/10230225979-loeil-du-dragon-un-livre-dont-vous-etes-le-heros,35,vinted,4.20,,
+9782070546039,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8418587951-livre-dont-vous-etes-le-heros,210,vinted,4.20,,
+9782070333561,bon,9.90,Le Château des âmes damnées,https://www.vinted.fr/items/7423688680-le-chateau-des-ames-damnees,360,vinted,4.20,,
+9782070333561,bon,9.99,Le château des âmes damnées un livre dont vous êtes le héros,https://www.vinted.fr/items/7918176000-le-chateau-des-ames-damnees-un-livre-dont-vous-etes-le-heros,300,vinted,4.20,,
+9782070333561,bon,10.00,Ldvelh Le château des Âmes damnées,https://www.vinted.fr/items/8229865485-ldvelh-le-chateau-des-ames-damnees,240,vinted,4.20,,
+9782070333561,convenable,12.00,Le château des âmes damnées. Un livre dont vous êtes le héros.,https://www.vinted.fr/items/9072213851-le-chateau-des-ames-damnees-un-livre-dont-vous-etes-le-heros,150,vinted,4.30,,
+9782070333561,bon,12.00,Le château des âmes damnées,https://www.vinted.fr/items/9184551204-le-chateau-des-ames-damnees,120,vinted,4.30,,
+9782070333561,tres_bon,8.00,Ldvelh - Le château des âmes damnées,https://www.vinted.fr/items/9827294704-ldvelh-le-chateau-des-ames-damnees,60,vinted,4.10,,
+9782070333561,tres_bon,12.00,Le château des âmes damnées,https://www.vinted.fr/items/9877152994-le-chateau-des-ames-damnees,60,vinted,4.30,,
+9782070335497,bon,9.90,Initiation à La Magie Morris,https://www.vinted.fr/items/10765419750-initiation-a-la-magie-morris,0,vinted,4.20,,
+9782070332984,bon,7.00,Ldvelh le mercenaire de l’espace,https://www.vinted.fr/items/10775161064-ldvelh-le-mercenaire-de-lespace,0,vinted,4.05,,
+9782070332960,bon,7.00,Ldvelh les grottes de Kalte,https://www.vinted.fr/items/10775185204-ldvelh-les-grottes-de-kalte,0,vinted,4.05,,
+9782070332977,bon,7.00,Ldvelh le gouffre maudit,https://www.vinted.fr/items/10775274044-ldvelh-le-gouffre-maudit,0,vinted,4.05,,
+9782070649808,bon,10.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8937265038-livre-dont-vous-etes-le-heros,150,vinted,4.20,,
+9782070649808,tres_bon,14.00,ldvelh La nuit du Nécromancien,https://www.vinted.fr/items/9403204030-ldvelh-la-nuit-du-necromancien,90,vinted,4.40,,
+9782070648108,tres_bon,20.00,Livre code de la route,https://www.vinted.fr/items/4383207525-livre-code-de-la-route,730,vinted,4.70,,
+9782070648108,tres_bon,14.00,LDVEH Défis Fantastiques T22 - Le Pirate de l'Au-delà v4 (2013),https://www.vinted.fr/items/8872845056-ldveh-defis-fantastiques-t22-le-pirate-de-lau-dela-v4-2013,180,vinted,4.40,,
+9782070665808,tres_bon,12.00,Livre dont vous êtes le héros - L'oeil d'émeraude - défis fantastiques,https://www.vinted.fr/items/5486445355-livre-dont-vous-etes-le-heros-loeil-demeraude-defis-fantastiques,365,vinted,4.30,,
+9782070665808,tres_bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/7191212241-un-livre-dont-vous-etes-le-heros,390,vinted,4.20,,
+9782070665808,tres_bon,10.00,Ldvelh- L'oeil d'emeraude - v4,https://www.vinted.fr/items/7257268819-ldvelh-loeil-demeraude-v4,390,vinted,4.20,,
+9782070573226,bon,14.00,Livre dont vous êtes le héros - L'Oeil d'émeraude - défis fantastiques,https://www.vinted.fr/items/5445197866-livre-dont-vous-etes-le-heros-loeil-demeraude-defis-fantastiques,365,vinted,4.40,,
+9782070573226,bon,25.00,L’œil d’Emeraude,https://www.vinted.fr/items/8130703193-loeil-demeraude,270,vinted,4.95,,
+9782070573226,tres_bon,15.00,Livre dont vous êtes le héros - édition 3,https://www.vinted.fr/items/8780498834-livre-dont-vous-etes-le-heros-edition-3,180,vinted,4.45,,
+9782075084598,tres_bon,18.00,Livre dont vous êtes le héros - Le Sang des Zombies - défis fantastiques,https://www.vinted.fr/items/7768235912-livre-dont-vous-etes-le-heros-le-sang-des-zombies-defis-fantastiques,300,vinted,4.60,,
+9782075084598,bon,14.00,Un livre dont vous êtes le héros le sang des zombies,https://www.vinted.fr/items/8105505838-un-livre-dont-vous-etes-le-heros-le-sang-des-zombies,270,vinted,4.40,,
+9782070660667,bon,14.00,Livre,https://www.vinted.fr/items/7037114904-livre,420,vinted,4.40,,
+9782070651412,tres_bon,20.00,La nuit du loup garou,https://www.vinted.fr/items/8103825545-la-nuit-du-loup-garou,270,vinted,4.70,,
+9782070651412,tres_bon,23.00,La nuit du loup garou,https://www.vinted.fr/items/8376824207-la-nuit-du-loup-garou,240,vinted,4.85,,
+9782070651412,tres_bon,16.00,Livre,https://www.vinted.fr/items/9061270441-livre,150,vinted,4.50,,
+9782070651412,tres_bon,25.00,La nuit du loup-garou - Ldvelh,https://www.vinted.fr/items/9161866263-la-nuit-du-loup-garou-ldvelh,120,vinted,4.95,,
+9782070651412,bon,20.00,Livre,https://www.vinted.fr/items/9446044190-livre,90,vinted,4.70,,
+9782070651412,bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/9783783774-un-livre-dont-vous-etes-le-heros,60,vinted,4.20,,
+9782070651412,tres_bon,25.00,La nuit du loup-garou - Un Livre dont vous êtes le Héros - Défis Fantastiques 21 Ian Livingstone,https://www.vinted.fr/items/9940517940-la-nuit-du-loup-garou-un-livre-dont-vous-etes-le-heros-defis-fantastiques-21-ian-livingstone,60,vinted,4.95,,
+9782070506842,bon,5.99,Les grottes de Kalte loup solitaire 3 - Dever Joe,https://www.vinted.fr/items/10776428637-les-grottes-de-kalte-loup-solitaire-3-dever-joe,0,vinted,4.00,,
+9782075100748,tres_bon,5.00,ldvelh Livre dont vous êtes le héros La fôret de la malédiction,https://www.vinted.fr/items/9569614384-ldvelh-livre-dont-vous-etes-le-heros-la-foret-de-la-malediction,90,vinted,3.95,,
+9782075100649,bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/6588214253-le-sorcier-de-la-montagne-de-feu,480,vinted,3.95,,
+9782075100649,tres_bon,5.00,Un livre dont vous êtes le héros Le sorcier et la montagne de feu,https://www.vinted.fr/items/7279058438-un-livre-dont-vous-etes-le-heros-le-sorcier-et-la-montagne-de-feu,390,vinted,3.95,,
+9782075100649,bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/8013698918-le-sorcier-de-la-montagne-de-feu,270,vinted,3.95,,
+9782075100649,bon,5.00,livre dont vous etes le Heros le sorcier de la montagne de fei,https://www.vinted.fr/items/7708038567-livre-dont-vous-etes-le-heros-le-sorcier-de-la-montagne-de-fei,330,vinted,3.95,,
+9782075100649,bon,5.00,Livre enfant,https://www.vinted.fr/items/8099244139-livre-enfant,270,vinted,3.95,,
+9782075100649,tres_bon,6.00,Livre Le sorcier de la montagne de feu,https://www.vinted.fr/items/9775401989-livre-le-sorcier-de-la-montagne-de-feu,60,vinted,4.00,,
+9782075100649,bon,6.00,Livre le sorcier de la montagne de feu,https://www.vinted.fr/items/9953663461-livre-le-sorcier-de-la-montagne-de-feu,56,vinted,4.00,,
+9782075100649,bon,6.00,Livre dont vous êtes le héros..,https://www.vinted.fr/items/10471199471-livre-dont-vous-etes-le-heros,21,vinted,4.00,,
+9782075100649,tres_bon,6.00,Le sorcier de la montagne de feu ldvelh,https://www.vinted.fr/items/10471371208-le-sorcier-de-la-montagne-de-feu-ldvelh,21,vinted,4.00,,
+9782070335923,bon,30.00,L'Élu des six clans - Luke Sharp un livre dont vous êtes le héros.,https://www.vinted.fr/items/10776643665-lelu-des-six-clans-luke-sharp-un-livre-dont-vous-etes-le-heros,0,vinted,5.20,,
+9782070333646,bon,20.00,Le Labyrinthe du roi Minos - un livre dont vous êtes le héros.,https://www.vinted.fr/items/10776725994-le-labyrinthe-du-roi-minos-un-livre-dont-vous-etes-le-heros,0,vinted,4.70,,
+9782070335404,bon,7.50,Les esclaves de l'eternite,https://www.vinted.fr/items/10776780526-les-esclaves-de-leternite,0,vinted,4.08,,
+9782070334049,bon,15.00,La grande menace des robots,https://www.vinted.fr/items/10776854986-la-grande-menace-des-robots,0,vinted,4.45,,
+9782070332700,bon,15.00,La galaxie tragique,https://www.vinted.fr/items/10776906541-la-galaxie-tragique,0,vinted,4.45,,
+9782075138222,bon,11.90,"""Un livre dont vous êtes le Héros"" : La créature venue du Chaos",https://www.vinted.fr/items/4585930269-un-livre-dont-vous-etes-le-heros-la-creature-venue-du-chaos,730,vinted,4.29,,
+9782075138222,tres_bon,10.00,la créature venu du chaos - un livre dont vous êtes le héros,https://www.vinted.fr/items/5133503252-la-creature-venu-du-chaos-un-livre-dont-vous-etes-le-heros,730,vinted,4.20,,
+9782075138222,tres_bon,15.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/6447015340-livre-dont-vous-etes-le-heros,510,vinted,4.45,,
+9782075138222,tres_bon,15.00,Défis fantastiques 13 - le créature venue du chaos,https://www.vinted.fr/items/6900150822-defis-fantastiques-13-le-creature-venue-du-chaos,420,vinted,4.45,,
+9782075138222,tres_bon,10.00,La Créature venue du Chaos Un livre dont vous êtes le héros Défis fantastiques 13 - 2020,https://www.vinted.fr/items/8008925320-la-creature-venue-du-chaos-un-livre-dont-vous-etes-le-heros-defis-fantastiques-13-2020,270,vinted,4.20,,
+9782075138222,bon,16.00,Roman où l’on mène l’histoire racontée,https://www.vinted.fr/items/8641569595-roman-ou-lon-mene-lhistoire-racontee,210,vinted,4.50,,
+9782075138222,tres_bon,10.00,Ldvelh - la créature venue du chaos,https://www.vinted.fr/items/9657731633-ldvelh-la-creature-venue-du-chaos,60,vinted,4.20,,
+9782075138222,bon,10.00,Un livre dont vous êtes le héros,https://www.vinted.fr/items/9676930678-un-livre-dont-vous-etes-le-heros,60,vinted,4.20,,
+9782075132343,tres_bon,14.00,Défis fantastiques 7 - la sorcière des neiges,https://www.vinted.fr/items/6911468387-defis-fantastiques-7-la-sorciere-des-neiges,420,vinted,4.40,,
+9782075132299,bon,12.00,le livre vous êtes le héros,https://www.vinted.fr/items/7921001802-le-livre-vous-etes-le-heros,300,vinted,4.30,,
+9782070334223,bon,3.00,Le carillon de la mort,https://www.vinted.fr/items/10777035233-le-carillon-de-la-mort,0,vinted,3.85,,
+9782070332670,convenable,4.90,Un livre dont vous êtes le héros,https://www.vinted.fr/items/10375789389-un-livre-dont-vous-etes-le-heros,28,vinted,3.94,,
+9782070647408,tres_bon,5.00,Le sorcier de la montagne de feu,https://www.vinted.fr/items/9052940985-le-sorcier-de-la-montagne-de-feu,150,vinted,3.95,,
+9782070647408,tres_bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/9161960596-livre-dont-vous-etes-le-heros,120,vinted,3.95,,
+9782070647408,bon,5.00,Le Sorcier de la Montagne de Feu - Défis Fantastiques n°1 - LDVELH,https://www.vinted.fr/items/9289372751-le-sorcier-de-la-montagne-de-feu-defis-fantastiques-ndeg1-ldvelh,120,vinted,3.95,,
+9782070647408,bon,5.00,Ldvelh Le sorcier de la montagne de feu,https://www.vinted.fr/items/9648864669-ldvelh-le-sorcier-de-la-montagne-de-feu,90,vinted,3.95,,
+9782070647408,bon,4.50,LDVELH le sorcier de la montagne de feu - défis fantastiques,https://www.vinted.fr/items/10196787139-ldvelh-le-sorcier-de-la-montagne-de-feu-defis-fantastiques,42,vinted,3.92,,
+9782070610327,bon,5.00,Le sorcier de la montagne de feu livre dont vous êtes le héros,https://www.vinted.fr/items/9315610061-le-sorcier-de-la-montagne-de-feu-livre-dont-vous-etes-le-heros,120,vinted,3.95,,
+9782070509195,bon,5.00,Le sorcier de la montagne de feu V2,https://www.vinted.fr/items/1242658541-le-sorcier-de-la-montagne-de-feu-v2,1825,vinted,3.95,,
+9782070509195,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/6391070514-livre-dont-vous-etes-le-heros,510,vinted,3.95,,
+9782070509195,bon,5.00,Le Sorcier de la Montagne de Feu,https://www.vinted.fr/items/9325692076-le-sorcier-de-la-montagne-de-feu,120,vinted,3.95,,
+9782070332694,convenable,4.50,"LDVELH ""la forêt de la malédiction""",https://www.vinted.fr/items/9797001454-ldvelh-la-foret-de-la-malediction,60,vinted,3.92,,
+9782070506729,bon,5.00,Un livre dont vous êtes le héros: Défis Fantastique 2 La citadelle du chaos,https://www.vinted.fr/items/5744586249-un-livre-dont-vous-etes-le-heros-defis-fantastique-2-la-citadelle-du-chaos,365,vinted,3.95,,
+9782070506729,tres_bon,5.00,La Citadelle du Chaos - LDVELH,https://www.vinted.fr/items/5789726389-la-citadelle-du-chaos-ldvelh,365,vinted,3.95,,
+9782070506729,bon,5.00,"Livre dont vous êtes le héros "" La citadelle du chaos """,https://www.vinted.fr/items/6207052886-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos,540,vinted,3.95,,
+9782070506729,bon,5.00,Livre dont vous êtes le héros,https://www.vinted.fr/items/8051424982-livre-dont-vous-etes-le-heros,270,vinted,3.95,,
+9782070506729,bon,5.00,"un livre dont vous êtes le héros, la citadelle du chaos",https://www.vinted.fr/items/9216701383-un-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos,120,vinted,3.95,,
+9782070506729,convenable,4.90,📚Livre Dont Vous Êtes Le Héros La Citadelle Du Chaos Steve Jackson Folio Junior,https://www.vinted.fr/items/9369429418-livre-dont-vous-etes-le-heros-la-citadelle-du-chaos-steve-jackson-folio-junior,120,vinted,3.94,,
+9782070332687,bon,5.00,LDVELH défis fantastiques la citadelle du chaos,https://www.vinted.fr/items/6750897371-ldvelh-defis-fantastiques-la-citadelle-du-chaos,450,vinted,3.95,,
+9782070332687,bon,5.00,La Citadelle du Chaos,https://www.vinted.fr/items/9754590321-la-citadelle-du-chaos,60,vinted,3.95,,
+9782070332687,bon,5.00,La citadelle du chaos (folio junior livre heros) - Steve Jackson,https://www.vinted.fr/items/10650655100-la-citadelle-du-chaos-folio-junior-livre-heros-steve-jackson,7,vinted,3.95,,
+9782070333110,bon,5.00,Le Temple de la terreur - ldvelh,https://www.vinted.fr/items/10778911309-le-temple-de-la-terreur-ldvelh,0,vinted,3.95,,
+9782491233068,tres_bon,6.00,Un Slasher Dont Vous êtes Le Héros - Alexandre Sanchez,https://www.vinted.fr/items/10774869771-un-slasher-dont-vous-etes-le-heros-alexandre-sanchez,0,vinted,4.00,,
