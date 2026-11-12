@@ -1,16 +1,19 @@
-isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp
-9782070333516,bon,15.00,Tome 1 série Chroniques Crétoise - Un livre dont vous êtes le héros- Folio Junior - 1986,https://www.leboncoin.fr/ad/livres/3307514636,1,leboncoin,4.45
-9782070332823,convenable,8.00,Tome 1 série Double Jeu - Un livre dont vous êtes le héros - folio junior - 1987,https://www.leboncoin.fr/ad/livres/3307519271,1,leboncoin,4.10
-9782070333271,convenable,7.00,Livre dont vous êtes le héros Le seigneur de l'ombre,https://www.leboncoin.fr/ad/livres/3307531159,1,leboncoin,4.05
-9782070333424,bon,14.00,LVDELH - L’Oeil Noir : Le navire des âmes perdues,https://www.leboncoin.fr/ad/livres/3307531679,1,leboncoin,4.40
-9782070566389,bon,35.00,Livre Dont Vous Êtes Le Héros (LDVELH): La Légende des Guerriers Fantômes en BÉ+,https://www.leboncoin.fr/ad/livres/3307537956,1,leboncoin,5.45
-9782070333103,bon,9.00,Livre la couronne des rois,https://www.leboncoin.fr/ad/livres/3307509373,1,leboncoin,4.15
-9782070333509,bon,7.00,Livre dont vous êtes le héros Défis sanglants sur l'Océan,https://www.leboncoin.fr/ad/livres/3307574018,0,leboncoin,4.05
-9782070335022,bon,24.50,"Défis et sortilèges, Tome 2 : Keldrilh le Ménestrel",https://www.leboncoin.fr/ad/livres/3238214720,112,leboncoin,4.92
-9782070332984,bon,8.00,LDVELH – Le Mercenaire de l’Espace – Défis Fantastiques – Folio Junior,https://www.leboncoin.fr/ad/livres/3307645275,0,leboncoin,4.10
-9782070332892,bon,10.00,LDVELH – Le Talisman de la Mort – Défis Fantastiques – Folio Junior,https://www.leboncoin.fr/ad/livres/3307645687,0,leboncoin,4.20
-9782070333646,tres_bon,7.00,Livre dont vous etes le heros : Le Labyrinthe du Roi Minos,https://www.leboncoin.fr/ad/livres/3307781709,0,leboncoin,4.05
-9782070336074,convenable,15.00,"LDVELH Le Sceptre Noir, V1, mauvais état",https://www.leboncoin.fr/ad/livres/3307830548,0,leboncoin,4.45
-9782070335848,bon,20.00,"LDVELH Le Vampire du Château Noir, V1, bon état",https://www.leboncoin.fr/ad/livres/3307833055,0,leboncoin,4.70
-9782070335060,bon,18.00,"LDVELH L'Empire des Hommes-Lézards, V1, bon état",https://www.leboncoin.fr/ad/livres/3307838089,0,leboncoin,4.60
-9782070332984,tres_bon,15.00,Le Mercenaire de l'Espace - Défis Fantastiques n°12 (Folio Junior - Tbe ) Description (à copier-coller),https://www.leboncoin.fr/ad/livres/3307926329,0,leboncoin,4.45
+isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp,lot,confirmation
+9782070333516,bon,15.00,Tome 1 série Chroniques Crétoise - Un livre dont vous êtes le héros- Folio Junior - 1986,https://www.leboncoin.fr/ad/livres/3307514636,1,leboncoin,4.45,,
+9782070332823,convenable,8.00,Tome 1 série Double Jeu - Un livre dont vous êtes le héros - folio junior - 1987,https://www.leboncoin.fr/ad/livres/3307519271,1,leboncoin,4.10,,
+9782070333271,convenable,7.00,Livre dont vous êtes le héros Le seigneur de l'ombre,https://www.leboncoin.fr/ad/livres/3307531159,1,leboncoin,4.05,,
+9782070333424,bon,14.00,LVDELH - L’Oeil Noir : Le navire des âmes perdues,https://www.leboncoin.fr/ad/livres/3307531679,1,leboncoin,4.40,,
+9782070566389,bon,35.00,Livre Dont Vous Êtes Le Héros (LDVELH): La Légende des Guerriers Fantômes en BÉ+,https://www.leboncoin.fr/ad/livres/3307537956,1,leboncoin,5.45,,
+9782070333103,bon,9.00,Livre la couronne des rois,https://www.leboncoin.fr/ad/livres/3307509373,1,leboncoin,4.15,,
+9782070333509,bon,7.00,Livre dont vous êtes le héros Défis sanglants sur l'Océan,https://www.leboncoin.fr/ad/livres/3307574018,0,leboncoin,4.05,,
+9782070335022,bon,24.50,"Défis et sortilèges, Tome 2 : Keldrilh le Ménestrel",https://www.leboncoin.fr/ad/livres/3238214720,112,leboncoin,4.92,,
+9782070332984,bon,8.00,LDVELH – Le Mercenaire de l’Espace – Défis Fantastiques – Folio Junior,https://www.leboncoin.fr/ad/livres/3307645275,0,leboncoin,4.10,,
+9782070332892,bon,10.00,LDVELH – Le Talisman de la Mort – Défis Fantastiques – Folio Junior,https://www.leboncoin.fr/ad/livres/3307645687,0,leboncoin,4.20,,
+9782070333646,tres_bon,7.00,Livre dont vous etes le heros : Le Labyrinthe du Roi Minos,https://www.leboncoin.fr/ad/livres/3307781709,0,leboncoin,4.05,,
+9782070336074,convenable,15.00,"LDVELH Le Sceptre Noir, V1, mauvais état",https://www.leboncoin.fr/ad/livres/3307830548,0,leboncoin,4.45,,
+9782070335848,bon,20.00,"LDVELH Le Vampire du Château Noir, V1, bon état",https://www.leboncoin.fr/ad/livres/3307833055,0,leboncoin,4.70,,
+9782070335060,bon,18.00,"LDVELH L'Empire des Hommes-Lézards, V1, bon état",https://www.leboncoin.fr/ad/livres/3307838089,0,leboncoin,4.60,,
+9782070332984,tres_bon,15.00,Le Mercenaire de l'Espace - Défis Fantastiques n°12 (Folio Junior - Tbe ) Description (à copier-coller),https://www.leboncoin.fr/ad/livres/3307926329,0,leboncoin,4.45,,
+9782075138253,tres_bon,5.00,Un livre dont vous êtes le héros Les grottes de Kalte,https://www.leboncoin.fr/ad/livres/3307885979,0,leboncoin,3.95,,
+9782070586134,tres_bon,65.00,Le sépulcre des ombres Ian Livingstone,https://www.leboncoin.fr/ad/livres/3307656731,0,leboncoin,6.95,,
+9782070334025,convenable,5.00,"Collection Un livre dont vous êtes le héros,Épouvante n°2, Frankenstein le Maudit,1989, JH Brennan Folio Junior",https://www.leboncoin.fr/ad/livres/3307724635,0,leboncoin,3.95,,
