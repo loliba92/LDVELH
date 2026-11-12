@@ -2846,14 +2846,19 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-pancarte { position: absolute; left: -26%; right: -26%; top: 38%; z-index: 1; padding: 4px 0; background: #b3262f; color: #fff; text-align: center; font: 800 .8rem/1.2 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-35deg); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none; }
 .an-vendu { display: inline-block; align-self: flex-start; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .72rem/1.5 var(--f-ui); white-space: nowrap; }
 
-/* Heure par heure : aujourd'hui plein, hier en tirets, moyenne en pointillés */
-.cp-h { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
-.cp-h-jour { stroke: var(--gold); }
-.cp-h-veille { stroke: var(--muted); stroke-dasharray: 4 4; }
-.cp-h-moy { stroke: var(--muted); stroke-dasharray: 1 3; stroke-width: 2.5; }
-.cp-h-pt { fill: var(--gold); }
+/* Heure par heure : trois couleurs distinctes, légende identique au tracé */
+.cp-h { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
+.cp-h-jour { stroke: #d4a437; }
+.cp-h-veille { stroke: #6cb4ee; stroke-dasharray: 5 4; }
+.cp-h-moy { stroke: #c9c2b0; stroke-dasharray: 1.5 3.5; stroke-width: 2.5; }
+.cp-h-pt { fill: #d4a437; }
+.cp-h-val { fill: var(--text); font: 600 10px var(--f-ui); }
+.cp-echelle { font-size: 10px; }
 .cp-legende-h { margin: 2px 0 6px; font-size: var(--t-sm); }
-.cp-h-l { display: inline-block; width: 16px; height: 0; border-top: 2px solid; margin: 0 4px 3px 8px; vertical-align: middle; }
-.cp-h-l.cp-h-jour { border-color: var(--gold); }
-.cp-h-l.cp-h-veille { border-color: var(--muted); border-top-style: dashed; }
-.cp-h-l.cp-h-moy { border-color: var(--muted); border-top-style: dotted; }
+.cp-h-l { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid; margin: 0 5px 3px 10px; vertical-align: middle; }
+.cp-h-l.cp-h-jour { border-color: #d4a437; }
+.cp-h-l.cp-h-veille { border-color: #6cb4ee; border-top-style: dashed; }
+.cp-h-l.cp-h-moy { border-color: #c9c2b0; border-top-style: dotted; }
+.cp-h-hit { fill: transparent; cursor: pointer; }
+.cp-h-hit:focus-visible { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.cp-info-h { min-height: 1.5em; margin: 6px 0 0; font-weight: 600; color: var(--text); font-size: var(--t-sm); }

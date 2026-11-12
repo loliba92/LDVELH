@@ -844,9 +844,9 @@
       return { aujourd, veille, moyenne, heureCourante: Number(heureParis.format(maintenant)), nbAutres: autres.length };
     }
     function svgHoraire(c, largeur) {
-      // Axe de 5 h à 23 h : la nuit, le bot ne tourne pas
-      const debut = 5, n = 24 - debut, H = 140, g = 8, b = 22, h = H - b - 16, pas = (largeur - 2 * g) / n;
-      const px = (k) => g + k * pas + pas / 2;
+      // Axe de 5 h à 23 h : la nuit, le bot ne tourne pas. Échelle à gauche, repères horizontaux.
+      const debut = 5, n = 24 - debut, H = 150, gauche = 34, g = 8, b = 22, h = H - b - 16, pas = (largeur - gauche - g) / n;
+      const px = (k) => gauche + k * pas + pas / 2;
       const tranche = (v) => v.slice(debut);
       const aujourd = tranche(c.aujourd), veille = tranche(c.veille), moyenne = tranche(c.moyenne), courante = c.heureCourante - debut;
       const toutes = [...aujourd, ...veille, ...moyenne].filter((v) => v != null);
@@ -855,13 +855,21 @@
         const pts = valeurs.map((v, k) => (v == null ? null : `${px(k).toFixed(1)},${y(v).toFixed(1)}`)).filter(Boolean);
         return pts.length > 1 ? `<polyline points="${pts.join(' ')}" class="${cls}"/>` : '';
       };
-      let svg = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
+      const echelle = [0, Math.round(max / 2), Math.round(max)];
+      let svg = echelle.map((v) => `<line x1="${gauche}" x2="${largeur - g}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${gauche - 5}" y="${y(v) + 4}" class="cp-axe cp-echelle" text-anchor="end">${v}</text>`).join('');
       svg += ligne(moyenne, 'cp-h cp-h-moy');
       svg += ligne(veille, 'cp-h cp-h-veille');
       svg += ligne(aujourd.map((v, k) => (k <= courante ? v : null)), 'cp-h cp-h-jour');
-      aujourd.forEach((v, k) => { if (v != null && k <= courante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="2.5" class="cp-h-pt"/>`; });
+      aujourd.forEach((v, k) => { if (v != null && k <= courante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="3" class="cp-h-pt"/><text x="${px(k)}" y="${y(v) - 6}" class="cp-h-val" text-anchor="middle">${v}</text>`; });
+      // Zones cliquables : chaque heure donne les chiffres sous le graphique
+      for (let k = 0; k < n; k += 1) {
+        const a = aujourd[k], v = veille[k], m = moyenne[k], ref = a ?? v ?? m;
+        if (ref == null) continue;
+        const txt = `${k + debut} h · aujourd'hui : ${a ?? '–'} · hier : ${v ?? '–'} · moyenne : ${m == null ? '–' : Math.round(m)}`;
+        svg += `<circle cx="${px(k)}" cy="${y(ref)}" r="10" class="cp-h-hit" data-txt="${esc(txt)}" tabindex="0" role="button" aria-label="${esc(txt)}"/>`;
+      }
       for (let k = debut; k < 24; k += 3) svg += `<text x="${px(k - debut)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
-      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents">${svg}</svg>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents, échelle en nombre d'annonces">${svg}</svg>`;
     }
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
@@ -914,6 +922,7 @@
         <p class="sous cp-titre-total">Heure par heure (heure de Paris)</p>
         <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
         <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
+        <p class="cp-info-h" aria-live="polite">Touchez un point pour voir les chiffres de l'heure.</p>
         <p class="sous cp-titre-total">Total des annonces par jour</p>
         <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
@@ -922,6 +931,12 @@
       zones.forEach((z) => {
         const ouvert = !!(z.querySelector('.captures-acc') || {}).open;
         z.innerHTML = html;
+        const info = z.querySelector('.cp-info-h');
+        z.querySelectorAll('.cp-h-hit').forEach((pt) => {
+          const montre = () => { if (info) info.textContent = pt.dataset.txt; };
+          pt.addEventListener('click', montre);
+          pt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); montre(); } });
+        });
         if (ouvert) z.querySelector('.captures-acc').open = true;
         const cadre = z.querySelector('.cp-cadre'), bulle = z.querySelector('.cp-bulle');
         const montrer = (col) => {
