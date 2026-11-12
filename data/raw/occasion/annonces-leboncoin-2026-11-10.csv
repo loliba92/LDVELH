@@ -1,34 +1,37 @@
-isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp
-9782075138222,tres_bon,8.00,STEVE JACKSON / La créature venue du chaos,https://www.leboncoin.fr/ad/livres/3306085330,0,leboncoin,4.10
-9782070334162,convenable,2.00,La Dernière Invasion - un livre dont vous êtes le héros,https://www.leboncoin.fr/ad/livres/3306137564,0,leboncoin,3.80
-9782070335039,tres_bon,11.00,Livre dont vous êtes le héros: Caithness l’Elementaliste,https://www.leboncoin.fr/ad/livres/3306178279,0,leboncoin,4.25
-9782070335022,tres_bon,10.00,Livre dont vous êtes le héros: Keldrilh le Ménestrel,https://www.leboncoin.fr/ad/livres/3306180350,0,leboncoin,4.20
-9782070335046,tres_bon,13.00,Livre dont vous êtes le héros: Pereim le Chevalier,https://www.leboncoin.fr/ad/livres/3306183486,0,leboncoin,4.35
-9782070509430,tres_bon,57.00,Loup Solitaire Tome 21 - Le Voyage De La Pierre De Lune,https://www.leboncoin.fr/ad/livres/3306249009,0,leboncoin,6.55
-9782070506835,tres_bon,55.00,Loup Solitaire Tome 7 - La Forteresse Maudite,https://www.leboncoin.fr/ad/livres/3306250346,0,leboncoin,6.45
-9782070509218,bon,15.00,"Défis fantastiques, numéro 6 - Le Labyrinthe de la mort",https://www.leboncoin.fr/ad/livres/3306256578,0,leboncoin,4.45
-9782070336104,bon,50.00,Livre dont vous êtes le héros: Clovis le Chevalier,https://www.leboncoin.fr/ad/livres/3306192543,0,leboncoin,6.20
-9782070583782,bon,36.00,Livre dont vous êtes le héros: le Peuple Maudit,https://www.leboncoin.fr/ad/livres/3306196822,0,leboncoin,5.50
-9782070333639,tres_bon,50.00,Quete Du Graal Tome 6 - Le Temps De La Malediction,https://www.leboncoin.fr/ad/livres/3306224994,0,leboncoin,6.20
-9782070610471,tres_bon,15.00,Défis Fantastiques Tome 16 - Retour À La Montagne De Feu,https://www.leboncoin.fr/ad/livres/3306234820,0,leboncoin,4.45
-9782070509454,tres_bon,15.00,"J'ai Loup solitaire, numéro 13 - Les Druides de Cener",https://www.leboncoin.fr/ad/livres/3306237828,0,leboncoin,4.45
-9782070649525,tres_bon,15.00,Loup Solitaire Tome 12 - Le Crépuscule Des Maîtres,https://www.leboncoin.fr/ad/livres/3306239616,0,leboncoin,4.45
-9782070333684,tres_bon,55.00,J'ai Quête Du Graal Tome 7 - Le Tombeau Des Maléfices,https://www.leboncoin.fr/ad/livres/3306240708,0,leboncoin,6.45
-9782070569649,bon,60.00,J'ai Loup Solitaire Tome 18 - La Porte D'Ombre,https://www.leboncoin.fr/ad/livres/3306242843,0,leboncoin,6.70
-9782070568802,tres_bon,80.00,Loup Solitaire Tome 17 - La Tour De Cristal,https://www.leboncoin.fr/ad/livres/3306243959,0,leboncoin,7.70
-9782070506897,bon,25.00,J'ai Loup Solitaire Tome 16 - L'héritage De Vashna,https://www.leboncoin.fr/ad/livres/3306245994,0,leboncoin,4.95
-9782070334155,bon,28.00,Defis Fantastiques Tome 24 - La Creature Venue Du Chaos Steve Jackson,https://www.leboncoin.fr/ad/livres/3306248719,0,leboncoin,5.10
-9782070506880,tres_bon,50.00,Loup Solitaire Tome 15 - La Croisade Du Désespoir,https://www.leboncoin.fr/ad/livres/3306258631,0,leboncoin,6.20
-9782070506910,tres_bon,95.00,Loup Solitaire Tome 20 - La Malédiction De Naar,https://www.leboncoin.fr/ad/livres/3306262015,0,leboncoin,8.45
-9782070506774,bon,15.00,J'ai Quête Du Graal Tome 2 - L'antre Des Dragons,https://www.leboncoin.fr/ad/livres/3306264165,0,leboncoin,4.45
-9782070335862,convenable,40.00,Defis Fantastiques Tome 37 - Les Sombres Cohortes,https://www.leboncoin.fr/ad/livres/3306279828,0,leboncoin,5.70
-9782070332694,bon,30.00,Defis Fantastiques Tome 3 - La Foret De La Malediction,https://www.leboncoin.fr/ad/livres/3306254578,0,leboncoin,5.20
-9782070546022,bon,5.00,L’Oeil du Dragon Dave Morris,https://www.leboncoin.fr/ad/livres/3306374178,0,leboncoin,3.95
-9782070332823,bon,18.00,"Collection Un livre dont vous êtes le héros, Double Jeu numéro 1, V1 1988, Issel Le Guerrier Folio Junior",https://www.leboncoin.fr/ad/livres/3306420781,0,leboncoin,4.60
-9782010116988,convenable,9.00,"La Saga du Prêtre Jean, livre jeu, ""L'Oeil du Sphinx"", volume 2, Haute Tension,1986",https://www.leboncoin.fr/ad/livres/3306428678,0,leboncoin,4.15
-9782070334193,bon,18.00,"Collection Un livre dont vous êtes le héros, Quête du Graal numéro 8, La Légion des Morts, JH Brennan, 1987, V1Folio Junior",https://www.leboncoin.fr/ad/livres/3306433495,0,leboncoin,4.60
-9782070335930,convenable,15.00,Un livre dont vous êtes le héros : Le Volcan de Zamarra,https://www.leboncoin.fr/ad/livres/3306533883,0,leboncoin,4.45
-9782070334872,convenable,12.00,Un livre dont vous êtes le héros : Darian le Magicien,https://www.leboncoin.fr/ad/livres/3306537340,0,leboncoin,4.30
-9782070334735,bon,12.00,LDVELH : le chasseur des étoiles,https://www.leboncoin.fr/ad/livres/3306368370,0,leboncoin,4.30
-9782070332960,tres_bon,10.00,Livre dont vous êtes le héros - Loup Solitaire 3 : Les Grottes de Kalte (Folio Junior),https://www.leboncoin.fr/ad/livres/3306369263,0,leboncoin,4.20
-9782070651344,tres_bon,10.00,Livre dont vous êtes le héros La créature venue du chaos,https://www.leboncoin.fr/ad/livres/3285890770,31,leboncoin,4.20
+isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp,lot,confirmation
+9782075138222,tres_bon,8.00,STEVE JACKSON / La créature venue du chaos,https://www.leboncoin.fr/ad/livres/3306085330,0,leboncoin,4.10,,
+9782070334162,convenable,2.00,La Dernière Invasion - un livre dont vous êtes le héros,https://www.leboncoin.fr/ad/livres/3306137564,0,leboncoin,3.80,,
+9782070335039,tres_bon,11.00,Livre dont vous êtes le héros: Caithness l’Elementaliste,https://www.leboncoin.fr/ad/livres/3306178279,0,leboncoin,4.25,,
+9782070335022,tres_bon,10.00,Livre dont vous êtes le héros: Keldrilh le Ménestrel,https://www.leboncoin.fr/ad/livres/3306180350,0,leboncoin,4.20,,
+9782070335046,tres_bon,13.00,Livre dont vous êtes le héros: Pereim le Chevalier,https://www.leboncoin.fr/ad/livres/3306183486,0,leboncoin,4.35,,
+9782070509430,tres_bon,57.00,Loup Solitaire Tome 21 - Le Voyage De La Pierre De Lune,https://www.leboncoin.fr/ad/livres/3306249009,0,leboncoin,6.55,,
+9782070506835,tres_bon,55.00,Loup Solitaire Tome 7 - La Forteresse Maudite,https://www.leboncoin.fr/ad/livres/3306250346,0,leboncoin,6.45,,
+9782070509218,bon,15.00,"Défis fantastiques, numéro 6 - Le Labyrinthe de la mort",https://www.leboncoin.fr/ad/livres/3306256578,0,leboncoin,4.45,,
+9782070336104,bon,50.00,Livre dont vous êtes le héros: Clovis le Chevalier,https://www.leboncoin.fr/ad/livres/3306192543,0,leboncoin,6.20,,
+9782070583782,bon,36.00,Livre dont vous êtes le héros: le Peuple Maudit,https://www.leboncoin.fr/ad/livres/3306196822,0,leboncoin,5.50,,
+9782070333639,tres_bon,50.00,Quete Du Graal Tome 6 - Le Temps De La Malediction,https://www.leboncoin.fr/ad/livres/3306224994,0,leboncoin,6.20,,
+9782070610471,tres_bon,15.00,Défis Fantastiques Tome 16 - Retour À La Montagne De Feu,https://www.leboncoin.fr/ad/livres/3306234820,0,leboncoin,4.45,,
+9782070509454,tres_bon,15.00,"J'ai Loup solitaire, numéro 13 - Les Druides de Cener",https://www.leboncoin.fr/ad/livres/3306237828,0,leboncoin,4.45,,
+9782070649525,tres_bon,15.00,Loup Solitaire Tome 12 - Le Crépuscule Des Maîtres,https://www.leboncoin.fr/ad/livres/3306239616,0,leboncoin,4.45,,
+9782070333684,tres_bon,55.00,J'ai Quête Du Graal Tome 7 - Le Tombeau Des Maléfices,https://www.leboncoin.fr/ad/livres/3306240708,0,leboncoin,6.45,,
+9782070569649,bon,60.00,J'ai Loup Solitaire Tome 18 - La Porte D'Ombre,https://www.leboncoin.fr/ad/livres/3306242843,0,leboncoin,6.70,,
+9782070568802,tres_bon,80.00,Loup Solitaire Tome 17 - La Tour De Cristal,https://www.leboncoin.fr/ad/livres/3306243959,0,leboncoin,7.70,,
+9782070506897,bon,25.00,J'ai Loup Solitaire Tome 16 - L'héritage De Vashna,https://www.leboncoin.fr/ad/livres/3306245994,0,leboncoin,4.95,,
+9782070334155,bon,28.00,Defis Fantastiques Tome 24 - La Creature Venue Du Chaos Steve Jackson,https://www.leboncoin.fr/ad/livres/3306248719,0,leboncoin,5.10,,
+9782070506880,tres_bon,50.00,Loup Solitaire Tome 15 - La Croisade Du Désespoir,https://www.leboncoin.fr/ad/livres/3306258631,0,leboncoin,6.20,,
+9782070506910,tres_bon,95.00,Loup Solitaire Tome 20 - La Malédiction De Naar,https://www.leboncoin.fr/ad/livres/3306262015,0,leboncoin,8.45,,
+9782070506774,bon,15.00,J'ai Quête Du Graal Tome 2 - L'antre Des Dragons,https://www.leboncoin.fr/ad/livres/3306264165,0,leboncoin,4.45,,
+9782070335862,convenable,40.00,Defis Fantastiques Tome 37 - Les Sombres Cohortes,https://www.leboncoin.fr/ad/livres/3306279828,0,leboncoin,5.70,,
+9782070332694,bon,30.00,Defis Fantastiques Tome 3 - La Foret De La Malediction,https://www.leboncoin.fr/ad/livres/3306254578,0,leboncoin,5.20,,
+9782070546022,bon,5.00,L’Oeil du Dragon Dave Morris,https://www.leboncoin.fr/ad/livres/3306374178,0,leboncoin,3.95,,
+9782070332823,bon,18.00,"Collection Un livre dont vous êtes le héros, Double Jeu numéro 1, V1 1988, Issel Le Guerrier Folio Junior",https://www.leboncoin.fr/ad/livres/3306420781,0,leboncoin,4.60,,
+9782010116988,convenable,9.00,"La Saga du Prêtre Jean, livre jeu, ""L'Oeil du Sphinx"", volume 2, Haute Tension,1986",https://www.leboncoin.fr/ad/livres/3306428678,0,leboncoin,4.15,,
+9782070334193,bon,18.00,"Collection Un livre dont vous êtes le héros, Quête du Graal numéro 8, La Légion des Morts, JH Brennan, 1987, V1Folio Junior",https://www.leboncoin.fr/ad/livres/3306433495,0,leboncoin,4.60,,
+9782070335930,convenable,15.00,Un livre dont vous êtes le héros : Le Volcan de Zamarra,https://www.leboncoin.fr/ad/livres/3306533883,0,leboncoin,4.45,,
+9782070334872,convenable,12.00,Un livre dont vous êtes le héros : Darian le Magicien,https://www.leboncoin.fr/ad/livres/3306537340,0,leboncoin,4.30,,
+9782070334735,bon,12.00,LDVELH : le chasseur des étoiles,https://www.leboncoin.fr/ad/livres/3306368370,0,leboncoin,4.30,,
+9782070332960,tres_bon,10.00,Livre dont vous êtes le héros - Loup Solitaire 3 : Les Grottes de Kalte (Folio Junior),https://www.leboncoin.fr/ad/livres/3306369263,0,leboncoin,4.20,,
+9782070651344,tres_bon,10.00,Livre dont vous êtes le héros La créature venue du chaos,https://www.leboncoin.fr/ad/livres/3285890770,31,leboncoin,4.20,,
+9782070332694,convenable,9.00,Lot de 2 Livres dont vous êtes le héros : La Forêt de la Malédiction + La Sorcière des Neiges,https://www.leboncoin.fr/ad/livres/3306370881,0,leboncoin,4.15,9782070332694|9782070332878,confirmé
+9782070332861,bon,10.00,"Collection Un livre dont vous êtes le héros, Défis Fantastiques,lot de 2 livres, numéro 10 et numéro 12, Le Manoir de l Enfer 1985 et Le Mercenaire de l Espace 1989 Folio Junior",https://www.leboncoin.fr/ad/livres/3306278582,0,leboncoin,4.20,9782070332861|9782070332984,semi-confirmé
+9782070333363,bon,12.00,"Collection Un livre dont vous êtes le héros, Défis Fantastiques lot de 3 livres, La Planète Rebelle 18, 1987, La Forteresse du Cauchemar 25, 1991, Les Rôdeurs de la Nuit 29 V1 1988 Folio Junior",https://www.leboncoin.fr/ad/livres/3306287727,0,leboncoin,4.30,9782070333363|9782070334179|9782070335220,semi-confirmé
