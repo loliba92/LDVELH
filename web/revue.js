@@ -924,9 +924,9 @@
         <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
         <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
         <p class="cp-info-h" aria-live="polite">Touchez un point pour voir les chiffres de l'heure.</p>
-        <details class="captures-acc"><summary>Détails : total par jour et tableau</summary>
-          <p class="sous cp-titre-total">Total des annonces par jour</p>
-          <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
+        <p class="sous cp-titre-total">Total des annonces par jour</p>
+        <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
+        <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
       zones.forEach((z) => {
