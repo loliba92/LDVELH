@@ -2367,9 +2367,7 @@
     if (!v.length) return null;
     return v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
   };
-  // Frais ajoutés au prix d'une annonce (relevé) ; sans relevé, frais de port estimés
-  const fraisDe = (a) => (ANN && ANN.frais && ANN.frais[a[2]] != null ? ANN.frais[a[2]] : FRAIS_PORT);
-  const moinsCher = (liste) => (liste.length ? Math.max(0, Math.min(...liste.map((a) => a[0] - fraisDe(a)))) : null);
+  const moinsCher = (liste) => (liste.length ? Math.max(0, Math.min(...liste.map((a) => a[0])) - FRAIS_PORT) : null);
   // Offre d'achat : la cote arrondie à l'euro inférieur (9,5 € → 9 €)
   const offre = (p) => Math.floor(p);
   // Marge de négociation à la vente : d'après la rareté (plus c'est rare, plus on peut afficher haut) et la liquidité du marché (facile : +5 points ; difficile : −5)

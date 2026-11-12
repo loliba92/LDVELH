@@ -294,7 +294,7 @@ def publiee_le(ligne, jour, publiees):
         return
 
 
-def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections=None, frais=None):
+def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections=None):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
     Chaque ligne : [prix, titre, lien, trouvée par, date de dernière observation, état supposé]. Depuis le relevé à colonne « port »,
@@ -303,7 +303,6 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections
     Une annonce non revue depuis plus de `jours` jours
     avant le dernier relevé est écartée. Renvoie {isbn13: {état: [lignes]}}.
     `publiees` (dictionnaire facultatif) reçoit {lien: date de publication AAAA-MM-JJ} : le jour du relevé moins l'âge de l'annonce, pris au premier relevé qui la contient.
-    `frais` (dictionnaire facultatif) reçoit {lien: frais ajoutés au prix} pour les lignes dont les frais sont connus ou estimés (Leboncoin, Vinted).
     Un âge de 0 sur Vinted peut vouloir dire « date illisible » : il ne compte pas comme une date connue.
     Les corrections du propriétaire (voir corrections_annonces.py) s'appliquent : édition changée ou annonce exclue."""
     corrections = corrections_annonces.lire() if corrections is None else corrections
@@ -324,8 +323,6 @@ def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections
                     fdp = prix_livre_vinted(prix) - prix      # lignes sans frais (avant la colonne fdp, ou Leboncoin à 0) : même prix livré que Vinted et eBay, mêmes frais par défaut que le bot
                 else:
                     fdp = 0.0
-                if frais is not None and (brut_fdp or r["trouvee_par"] in ("vinted", "leboncoin")):
-                    frais[r["lien"]] = round(fdp, 2)          # frais ajoutés au prix affiché : la fiche les retire pour montrer le prix nu
                 publiee_le(r, jour, publiees)
                 vues[(r["isbn13"], r["lien"])] = (r["etat"], round(prix + fdp, 2), r["titre"], r["trouvee_par"], jour, int(supp) if supp in ("0", "1") else None)
     limite = (date.fromisoformat(fichiers[-1].stem[-10:]) - timedelta(days=jours)).isoformat()
@@ -640,7 +637,6 @@ def main():
     dossier_occasion = DB.parent.parent / "raw" / "occasion"
     fichiers_ann = sorted(f for f in dossier_occasion.glob("annonces-*.csv") if not any(s in f.name for s in importer_leboncoin.SOURCES))         # eBay
     publiees = {}          # date de publication de chaque annonce, quand le relevé la donne
-    frais = {}          # frais ajoutés au prix de chaque annonce Leboncoin / Vinted (la fiche les retire pour afficher le prix nu)
     annonces = annonces_cumulees(fichiers_ann, publiees=publiees)          # toutes les annonces vues, pas seulement celles du dernier relevé (voir annonces_cumulees)
     # Annonces Leboncoin envoyées par le bot du propriétaire (pipeline/importer_leboncoin.py) : même présentation, mais leur propre date de relevé,
     # pour qu'un relevé eBay plus récent ne les fasse pas passer pour « plus en ligne ».
@@ -650,7 +646,7 @@ def main():
     for f in dossier_occasion.glob("vendus-leboncoin-20*.csv"):
         with open(f, newline="", encoding="utf-8") as fh:
             liens_vendus.update(r["lien"] for r in csv.DictReader(fh))
-    for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN, publiees=publiees, frais=frais).items():
+    for isbn, par_etat in annonces_cumulees(fichiers_lbc, jours=JOURS_LEBONCOIN, publiees=publiees).items():
         for etat, liste in par_etat.items():
             liste = [a for a in liste if a[2] not in liens_vendus]
             if liste:
@@ -662,7 +658,7 @@ def main():
     for f in dossier_occasion.glob("vendus-vinted-20*.csv"):
         with open(f, newline="", encoding="utf-8") as fh:
             liens_vendus_vinted.update(r["lien"] for r in csv.DictReader(fh))
-    for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED, publiees=publiees, frais=frais).items():
+    for isbn, par_etat in annonces_cumulees(fichiers_vinted, jours=JOURS_VINTED, publiees=publiees).items():
         for etat, liste in par_etat.items():
             liste = [a for a in liste if a[2] not in liens_vendus_vinted]          # le prix est déjà livré : la colonne fdp du relevé est ajoutée par annonces_cumulees
             if liste:
@@ -725,7 +721,6 @@ def main():
         chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines, "corrigees": corrections,
-                                          "frais": {a[2]: frais[a[2]] for par_etat in annonces.values() for liste in par_etat.values() for a in liste if a[2] in frais},
                                           "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
