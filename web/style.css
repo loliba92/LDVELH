@@ -2869,3 +2869,7 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-onglets button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 .an-pane[hidden] { display: none; }
 .stats-zone:empty { display: none; }
+
+/* Liste de tous les livres : niveau de prix, ou prix exact pour un compte connecté */
+.livre-niveau { margin-left: 6px; color: var(--gold); font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.livre-niveau.livre-prix { font-variant-numeric: tabular-nums; letter-spacing: 0; }
