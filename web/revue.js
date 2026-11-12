@@ -419,6 +419,7 @@
     });
   }
   function initAjout() {
+    if (!$('#aj-texte')) return;                       // pas d'onglet Ajouter sur cette page
     document.addEventListener('cdh-scan-ajout', () => { clearTimeout(minuterieScan); minuterieScan = setTimeout(envoiAutoScan, 1200); });
     $('#aj-verifier').addEventListener('click', () => { chargerCatalogue().then(verifierListe); });
     $('#aj-copier').addEventListener('click', () => {
@@ -442,6 +443,7 @@
     $('#aj-lancer').hidden = !jeton() || !AJOUT.some((a) => a.statut === 'nouveau');
   }
   function initReglages() {
+    if (!$('#aj-lancer')) return;                     // pas d'onglet Ajouter sur cette page
     $('#aj-lancer').addEventListener('click', async () => {
       const msg = $('#aj-msg'), dire = (t) => { msg.textContent = t; msg.hidden = false; };
       if (!jeton()) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
@@ -634,14 +636,15 @@
   const vendueHtml = (a) => (corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
-  function panneauCorrection(a) {
+  // En mode lite (liste Annonces), le panneau reste replié : le bouton « Corriger » de la ligne l'ouvre
+  function panneauCorrection(a, lite) {
     const livre = (INFO_ED[a.ed.id] || {}).livre;
     const eds = Object.values(INFO_ED).filter((x) => livre && x.livre === livre && x.isbn).sort((x, y) => String(x.version).localeCompare(String(y.version), 'fr', { numeric: true }));
     if (!estNiveau3() || !a.lien || !eds.length) return '';
     const c = corrigees()[a.lien], nom = `corr-${NB_CORR += 1}`;
     const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'vendue' ? 'Annonce marquée vendue par vous' : c.statut === 'confirmee' ?'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
     const opt = (x) => `<label class="corr-opt"><input type="radio" name="${nom}" value="${esc(x.isbn)}"${x.isbn === a.ed.isbn ? ' checked' : ''}>${x.mini ? `<img src="${esc(x.mini)}" alt="" width="40" height="56" loading="lazy">` : ''}<span>${esc(x.version)}${x.annee ? ' · ' + esc(x.annee) : ''}${x.isbn === a.ed.isbn ? ' <small>(actuelle)</small>' : ''}</span></label>`;
-    return `<details class="corr-ann" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${fait ? ' · ' : ''}${fait}</summary>
+    return `<details class="corr-ann${lite ? ' corr-lite' : ''}" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${!lite && fait ? ' · ' : ''}${lite ? '' : fait}</summary>${lite && fait ? `<p class="corr-fait-txt">${fait}</p>` : ''}
       <p class="sous">Ouvrez l'annonce, comparez sa photo aux jaquettes, puis choisissez l'édition. Votre choix remplace celui du relevé, aussi pour les relevés suivants.</p>
       <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="checkbox" class="corr-vendu-case"${c && c.statut === 'vendue' ? ' checked' : ''}><span>Annonce vendue : l'afficher avec la mention « Vendu »</span></label><label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
       <label class="corr-note">Note <input type="text" maxlength="120" placeholder="facultatif"></label>
@@ -798,7 +801,79 @@
       const base = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
       return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="group" aria-label="Annonces captées par jour et par plateforme, ${n} derniers jours">${base}${lignes}${points}${zones}${etiquettes}</svg>`;
     }
+    // Total des annonces nouvelles par jour : une courbe, un point par jour, la valeur au-dessus quand la place le permet
+    function svgTotal(jours, depuis, largeur) {
+      // Échelle à gauche : le minimum et le maximum de la période, avec repères horizontaux
+      const H = 130, gauche = 34, g = 8, b = 22, h = H - b - 16, n = jours.length, pas = (largeur - gauche - g) / n;
+      const tot = jours.map((j) => SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0));
+      const min = Math.min(...tot), max = Math.max(...tot, min + 1), saut = n <= 8 ? 1 : largeur < 420 ? 4 : 2;
+      const px = (k) => gauche + k * pas + pas / 2, y = (v) => 16 + h - ((v - min) / (max - min)) * h;
+      let svg = [min, max].map((v) => `<line x1="${gauche}" x2="${largeur - g}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="cp-grille"/><text x="${gauche - 5}" y="${(y(v) + 4).toFixed(1)}" class="cp-axe cp-echelle" text-anchor="end">${v}</text>`).join('');
+      const pts = jours.map((j, k) => [px(k), y(tot[k])]), bas = 16 + h, haut = 16;
+      const borne = (v) => Math.min(bas, Math.max(haut, v));
+      const tangente = (k) => { const avant = pts[Math.max(k - 1, 0)], apres = pts[Math.min(k + 1, n - 1)]; return [(apres[0] - avant[0]) / 6, (apres[1] - avant[1]) / 6]; };
+      for (let k = 1; k < n; k += 1) {
+        const a = pts[k - 1], bb = pts[k], ta = tangente(k - 1), tb = tangente(k);
+        const c1 = [a[0] + ta[0], borne(a[1] + ta[1])], c2 = [bb[0] - tb[0], borne(bb[1] - tb[1])];
+        const estime = depuis && jours[k].cle < depuis;
+        svg += `<path d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${bb[0].toFixed(1)},${bb[1].toFixed(1)}" class="cp-total${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
+      }
+      jours.forEach((j, k) => {
+        const estime = depuis && j.cle < depuis;
+        if (!estime) svg += `<circle cx="${px(k)}" cy="${y(tot[k])}" r="3" class="cp-total-pt${j.enCours ? ' cp-encours' : ''}"/>`;
+        if (pas >= 20 && !estime) svg += `<text x="${px(k)}" y="${y(tot[k]) - 7}" class="cp-val" text-anchor="middle">${tot[k]}</text>`;
+        if ((n - 1 - k) % saut === 0) svg += `<text x="${px(k)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${jourCourtCapt(j.cle)}</text>`;
+      });
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Total des annonces nouvelles par jour, ${n} derniers jours, de ${min} à ${max}">${svg}</svg>`;
+    }
+    // Heure par heure (axe x = heure de Paris) : aujourd'hui, hier, et la moyenne des autres jours gardés
+    const heureParis = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' });
+    const jourParis = (t) => new Date(t).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    function courbesHoraires(heures, maintenant) {
+      const par = {};
+      Object.entries(heures || {}).forEach(([cle, n]) => {
+        const t = Date.parse(cle + ':00:00Z'); if (Number.isNaN(t)) return;
+        const j = jourParis(t), h = Number(heureParis.format(t));
+        (par[j] = par[j] || Array(24).fill(null));
+        par[j][h] = (par[j][h] ?? 0) + n;
+      });
+      const aujj = jourParis(maintenant), hier = jourParis(maintenant - 86400000);
+      const aujourd = par[aujj] || Array(24).fill(null), veille = par[hier] || Array(24).fill(null);
+      const autres = Object.keys(par).filter((j) => j !== aujj).map((j) => par[j]);
+      const moyenne = Array.from({ length: 24 }, (_, h) => { const v = autres.map((x) => x[h]).filter((x) => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; });
+      return { aujourd, veille, moyenne, heureCourante: Number(heureParis.format(maintenant)), nbAutres: autres.length };
+    }
+    function svgHoraire(c, largeur) {
+      // Axe de 5 h à 23 h : la nuit, le bot ne tourne pas. Échelle à gauche, repères horizontaux.
+      const debut = 5, n = 24 - debut, H = 150, gauche = 34, g = 8, b = 22, h = H - b - 16, pas = (largeur - gauche - g) / n;
+      const px = (k) => gauche + k * pas + pas / 2;
+      const tranche = (v) => v.slice(debut);
+      const aujourd = tranche(c.aujourd), veille = tranche(c.veille), moyenne = tranche(c.moyenne), courante = c.heureCourante - debut;
+      const toutes = [...aujourd, ...veille, ...moyenne].filter((v) => v != null);
+      const max = Math.max(10, ...toutes), y = (v) => 16 + h - (v / max) * h;
+      const ligne = (valeurs, cls) => {
+        const pts = valeurs.map((v, k) => (v == null ? null : `${px(k).toFixed(1)},${y(v).toFixed(1)}`)).filter(Boolean);
+        return pts.length > 1 ? `<polyline points="${pts.join(' ')}" class="${cls}"/>` : '';
+      };
+      const echelle = [0, Math.round(max / 2), Math.round(max)];
+      let svg = echelle.map((v) => `<line x1="${gauche}" x2="${largeur - g}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${gauche - 5}" y="${y(v) + 4}" class="cp-axe cp-echelle" text-anchor="end">${v}</text>`).join('');
+      svg += ligne(moyenne, 'cp-h cp-h-moy');
+      svg += ligne(veille, 'cp-h cp-h-veille');
+      svg += ligne(aujourd.map((v, k) => (k <= courante ? v : null)), 'cp-h cp-h-jour');
+      aujourd.forEach((v, k) => { if (v != null && k <= courante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="3" class="cp-h-pt"/><text x="${px(k)}" y="${y(v) - 6}" class="cp-h-val" text-anchor="middle">${v}</text>`; });
+      // Zones cliquables : chaque heure donne les chiffres sous le graphique
+      for (let k = 0; k < n; k += 1) {
+        const a = aujourd[k], v = veille[k], m = moyenne[k], ref = a ?? v ?? m;
+        if (ref == null) continue;
+        const txt = `${k + debut} h · aujourd'hui : ${a ?? '–'} · hier : ${v ?? '–'} · moyenne : ${m == null ? '–' : Math.round(m)}`;
+        svg += `<circle cx="${px(k)}" cy="${y(ref)}" r="10" class="cp-h-hit" data-txt="${esc(txt)}" tabindex="0" role="button" aria-label="${esc(txt)}"/>`;
+      }
+      for (let k = debut; k < 24; k += 3) svg += `<text x="${px(k - debut)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents, échelle en nombre d'annonces">${svg}</svg>`;
+    }
     const dessinerCaptures = () => {
+      const statsZone = document.getElementById('stats-analyse');          // onglet « Marché » : statistiques par plateforme et par tranche de prix
+      if (statsZone) statsZone.innerHTML = estNiveau3() ? statsHtml() : '';
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
       if (!zones.length || !BUT) return;
@@ -836,21 +911,33 @@
       const pied = `<tr><th scope="row">Total ${m} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
         + `<tr><th scope="row">Moyenne par jour</th>${SOURCES_CAPT.map(([src]) => `<td>${fmt1(moy(complets, src))}</td>`).join('')}<td><b>${fmt1(moy(complets))}</b></td></tr>`
         + `<tr><th scope="row">Évolution sur ${moitie} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
+      const horaires = courbesHoraires(c.heures, Date.now());
       const html = `<section class="captures" aria-label="Annonces captées par jour">
-        <h3 class="captures-titre">Annonces captées par jour</h3>
         <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
         <p class="cp-bilan cp-jour">${aujourdhui ? `Aujourd'hui, à cette heure : <b>${nbSrc(aujourdhui.v)}</b> annonce${nbSrc(aujourdhui.v) > 1 ? 's' : ''} <span class="sous">(jour en cours, non compté dans les moyennes)</span>` : `Aujourd'hui : <span class="sous">pas encore compté, le premier comptage arrive au prochain relevé.</span>`}</p>
         <ul class="cp-legende">${SOURCES_CAPT.map(([src, nom]) => `<li><span class="cp-pastille cp-${src}" aria-hidden="true"></span>${nom} <b>${somme(complets, src)}</b>${debutSource(src)}</li>`).join('')}</ul>
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
+        <p class="sous cp-titre-total">Heure par heure (heure de Paris)</p>
+        <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
+        <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
+        <p class="cp-info-h" aria-live="polite">Touchez un point pour voir les chiffres de l'heure.</p>
+        <p class="sous cp-titre-total">Total des annonces par jour</p>
+        <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
           <div class="captures-defile"><table class="captures-table"><caption class="sr-only">Nombre d'annonces nouvelles captées chaque jour, par plateforme</caption>
             <thead><tr><th scope="col">Jour</th>${SOURCES_CAPT.map(([, nom]) => `<th scope="col">${nom}</th>`).join('')}<th scope="col">Total</th></tr></thead><tbody>${lignes}</tbody><tfoot>${pied}</tfoot></table></div></details></section>`;
       zones.forEach((z) => {
         const ouvert = !!(z.querySelector('.captures-acc') || {}).open;
         z.innerHTML = html;
+        const info = z.querySelector('.cp-info-h');
+        z.querySelectorAll('.cp-h-hit').forEach((pt) => {
+          const montre = () => { if (info) info.textContent = pt.dataset.txt; };
+          pt.addEventListener('click', montre);
+          pt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); montre(); } });
+        });
         if (ouvert) z.querySelector('.captures-acc').open = true;
         const cadre = z.querySelector('.cp-cadre'), bulle = z.querySelector('.cp-bulle');
         const montrer = (col) => {
@@ -1052,7 +1139,7 @@
         const a = o.a, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`, n = (a.tous || []).length;
         const num = a.ed.numero && !/^0+$/.test(a.ed.numero) ? ' n° ' + esc(a.ed.numero) : '';
         return `<article class="opp-carte opp-${o.fiab}">
-          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
+          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a>${vendueHtml(a)}<span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
           <p class="opp-meta">${esc(a.ed.serie)}${num} · ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${n} annonce${n > 1 ? 's' : ''} de ce livre dans cet état</p>
           <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
           <p class="opp-marche">En ligne : ${o.m.n} annonce${o.m.n > 1 ? 's' : ''}${o.m.n > 1 ? ` de ${eur(o.m.bas)} à ${eur(o.m.haut)}` : ''}${o.m.disparues.length ? ` · disparues (vendues ?) : ${o.m.disparues.slice(0, 4).map((x) => eur(x)).join(', ')}` : ''}</p>
@@ -1062,7 +1149,6 @@
         </article>`;
       }).join('');
       zone.innerHTML = `<section class="opp" aria-label="Opportunités d'achat">
-        <h3 class="captures-titre">Opportunités d'achat</h3>
         <p class="sous">Annonces assez sous le prix du site pour être revendues avec au moins 5 € de marge nette et 25 % de rendement. Triées par marge, la fiabilité compte : une marge énorme est souvent une erreur d'édition ou d'état.</p>
         <div class="opp-params"><label>Revente à <input type="number" id="opp-vente" min="10" max="150" step="1" value="${paramsOpp.vente}" inputmode="numeric"> % du prix du site</label><label>Frais de vente <input type="number" id="opp-frais" min="0" max="50" step="0.5" value="${paramsOpp.frais}" inputmode="decimal"> €</label></div>
         <p class="sous opp-bilan"><b>${liste.length}</b> opportunité${liste.length > 1 ? 's' : ''}, dont <b>${hautes}</b> de fiabilité haute${liste.length > nbOppAffichees ? ` · ${nbOppAffichees} affichées` : ''}. Prix demandés (pas des ventes) : la cote a ses marges d'erreur.</p>
@@ -1121,10 +1207,10 @@
       const toutes = [], sw = souhaits();
       Object.keys(ANN.annonces).forEach((isbn) => {
         const ed = parIsbn.get(isbn); if (!ed) return;
-        ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
+        ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose, nu]) => {
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
-          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
+          toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, nuAff: nu != null ? nu : prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
           // une librairie n'est pas une annonce de particulier : sa cote suit sa propre règle
           { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
@@ -1170,20 +1256,23 @@
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : `, dont ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
-      const carteListe = (a) => `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
+      const carteListe = (a) => {
+        const corr = panneauCorrection(a, true);
+        return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
-        <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span>
-        ${panneauCorrection(a)}
+        <b class="rc-prix">${eur(a.nuAff)}</b>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
+        ${corr}
       </article>`;
+      };
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
         const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
-          <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
+          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <div class="an-prixlien"><b class="rc-prix">${eur(a.nuAff)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
           ${a.pub != null ? `<span class="an-site">site ${eur(a.pub)} · ${ecartHtml(a)}</span>` : ''}
@@ -1196,7 +1285,11 @@
       liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carteGrille).join('') + '</div>' : '<div class="rc-liste">' + page.map(carteListe).join('') + '</div>') + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
       appliquerDefilement();
     };
-    liste.addEventListener('click', (e) => { if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); } });
+    liste.addEventListener('click', (e) => {
+      const corr = e.target.closest && e.target.closest('.corr-bouton');
+      if (corr) { const d = corr.closest('article').querySelector(':scope > .corr-lite'); if (d) { d.open = !d.open; corr.setAttribute('aria-expanded', String(d.open)); } return; }
+      if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); }
+    });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     verdict.addEventListener('change', () => { limite = 60; dessinerRecues(); });
@@ -1359,6 +1452,24 @@
   initRecues();
   initIndice();
   initNav();
+  // Analyse : trois sous-onglets (Affaires, Rythme, Marché), les Affaires d'abord
+  function initSousOnglets() {
+    const boutons = [...document.querySelectorAll('#an-nav [data-sous]')];
+    if (!boutons.length) return;
+    const montrer = (nom, focus) => {
+      boutons.forEach((b) => { const actif = b.dataset.sous === nom; b.setAttribute('aria-selected', String(actif)); b.tabIndex = actif ? 0 : -1; if (actif && focus) b.focus(); });
+      document.querySelectorAll('.an-pane').forEach((p) => { p.hidden = p.id !== 'an-' + nom; });
+      if (nom === 'rythme') redessinerCapt();
+    };
+    boutons.forEach((b, i) => {
+      b.addEventListener('click', () => montrer(b.dataset.sous));
+      b.addEventListener('keydown', (e) => {
+        const cible = { ArrowRight: boutons[(i + 1) % boutons.length], ArrowLeft: boutons[(i - 1 + boutons.length) % boutons.length], Home: boutons[0], End: boutons[boutons.length - 1] }[e.key];
+        if (cible) { e.preventDefault(); montrer(cible.dataset.sous, true); }
+      });
+    });
+  }
+  initSousOnglets();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
   let pepitesOuvertes = false, recuesOuvertes = false, analyseOuverte = false;
   function majAnnonces() {

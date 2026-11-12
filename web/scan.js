@@ -193,7 +193,7 @@
         return { ok: true, texte: `✓ ${isbn} ajouté à la liste` };
       },
     }));
-    const actions = document.querySelector('#aj-verifier') && document.querySelector('#aj-verifier').parentNode;     // à côté de « Vérifier la liste », même rangée, même hauteur
-    if (actions) actions.appendChild(b); else texte.parentNode.insertBefore(b, texte.nextSibling);
+    const zone = document.getElementById('aj-scan');          // en haut de la carte, pleine largeur
+    if (zone) zone.appendChild(b); else texte.parentNode.insertBefore(b, texte.nextSibling);
   }
 })();

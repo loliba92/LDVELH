@@ -518,13 +518,14 @@ dialog.parcours[open] { display: flex; }
 /* Barre de menu du bas (téléphones) : l'en-tête n'est pas collant et ses liens disparaissent, donc la navigation reste à portée de pouce */
 .barre-bas { display: none; }
 @media (max-width: 700px) {
-  .barre-bas { position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: stretch;
-    padding: 0 4px env(safe-area-inset-bottom); background: var(--walnut); border-top: 3px double var(--brass); box-shadow: 0 -6px 18px rgba(0, 0, 0, .28); }
-  .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 58px; padding: 6px 2px;
+  .barre-bas { position: fixed; z-index: 40; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: stretch;
+    padding: 0 6px; height: 68px; border-radius: 999px; background: var(--walnut); border: 1px solid var(--brass); box-shadow: 0 10px 28px rgba(0, 0, 0, .45); }
+  .barre-bas a, .barre-bas button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; padding: 6px 2px; border-radius: 999px;
     background: none; border: 0; color: var(--walnut-text); font: 600 .68rem/1.1 var(--f-ui); letter-spacing: 0; text-decoration: none; text-align: center; cursor: pointer; text-wrap: balance; }
   .barre-bas svg { flex: none; }
   .barre-bas a[aria-current], .barre-bas button[aria-current="page"] { color: var(--gold); }
-  .barre-bas a[aria-current]::before, .barre-bas button[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; background: var(--gold); border-radius: 0 0 3px 3px; }
+  .barre-bas a[aria-current], .barre-bas button[aria-current="page"] { background: rgba(212, 164, 55, .14); }
+  .barre-bas a[aria-current]::before, .barre-bas button[aria-current="page"]::before { content: none; }
   .barre-bas .barre-centre { color: var(--gold); }
   .barre-bas .barre-centre svg { width: 34px; height: 34px; padding: 5px; margin-top: -14px; border-radius: 50%; background: var(--gold); color: var(--walnut); border: 3px solid var(--walnut); box-shadow: 0 0 0 1px var(--gold); }
   .barre-bas a:focus-visible, .barre-bas button:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; border-radius: 6px; }
@@ -1770,6 +1771,15 @@ ul.scan-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px
 }
 .etats-carte button[aria-pressed="true"]::before { content: "✓ "; content: "✓ " / ""; font-weight: 800; }
 .rayon .livre-carte .ouvrir .infos { flex: 1 1 auto; }      /* le pavé « À vendre » / « À trouver » reste d'un seul bloc quand une carte voisine a un titre plus long */
+/* Ajouter des livres : scanner en haut, liste, puis un seul bouton d'envoi */
+.aj-scan { margin: 4px 0 0; }
+.aj-scan .scan-bouton { width: 100%; min-height: 52px; height: auto; margin: 0; justify-content: center; }
+.aj-ou { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: var(--t-sm); }
+.aj-ou::before, .aj-ou::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.aj-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
+.aj-pied .sous { margin: 0; }
+.aj-envoi { width: 100%; min-height: 52px; }
+.aj-envoi:disabled { opacity: .4; cursor: not-allowed; }
 .rv-ajout-actions .scan-bouton { margin: 0; height: 44px; min-height: 44px; padding: 0 16px; align-self: center; display: inline-flex; flex-direction: row; align-items: center; justify-content: center; white-space: nowrap; }      /* même rangée et même hauteur que « Vérifier la liste » */
 
 /* Bandeau « Donnez votre avis » : une ligne discrète pour les visiteurs connectés qui reviennent souvent */
@@ -1897,6 +1907,17 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .annonces-corps .ann-vs .rc-pastille { font-size:var(--t-xs); line-height: 1.5; white-space: nowrap; }
 .annonces-corps .ann-vs .rc-vs { color: var(--muted); }
 .annonces-corps .ann-titre { grid-column: 2; justify-self: start; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size:var(--t-xs); }
+/* Une annonce par ligne : le titre prend la place disponible, les étiquettes passent à la ligne si besoin */
+.annonces-corps li.ann-li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.annonces-corps .ann-li > * { flex: none; }
+.annonces-corps .ann-li .ann-prix { min-width: 4.6em; text-align: right; }
+.annonces-corps .ann-li .ann-lien-titre { flex: 1 1 12em; min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 701px) { .annonces-corps .ann-li .ann-lien-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+.annonces-corps .ann-site { font-size:var(--t-sm); color: var(--muted); white-space: nowrap; }
+.annonces-corps .ann-exclure { margin-left: auto; min-height: 28px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
+.annonces-corps .ann-exclure:hover, .annonces-corps .ann-exclure:focus-visible { color: var(--gold); border-color: var(--gold); }
+.annonces-corps .ann-exclure:disabled { opacity: .6; cursor: default; }
+.annonces-fiche .ann-msg { margin: 6px 0 0; font-weight: 600; }
 
 /* Fenêtre de bienvenue : bandeau illustré en haut (même illustration que l'accueil) */
 .dlg-bienvenue .bienvenue-img { display: block; width: calc(100% + 44px); max-width: none; height: 120px; margin: -22px -22px 14px; object-fit: cover; object-position: center 30%; border-radius: 11px 11px 0 0; }
@@ -2257,6 +2278,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-ligne2 .rc-trouver { flex: none; }
 .rc-ligne2 .rc-src { flex: none; }
 .rc-ligne2 .rc-fiche { flex: none; margin-left: auto; font-size:var(--t-sm); font-weight: 600; color: var(--gold); text-decoration: none; white-space: nowrap; }
+.rc-ligne2 .rc-actions { flex: none; margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.rc-ligne2 .rc-actions .rc-fiche { margin-left: 0; }
 .rc-ligne2 .rc-fiche:hover { text-decoration: underline; }
 
 /* Pépites des livres « à trouver » */
@@ -2272,6 +2295,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 @media (max-width: 899px) { .barre-bas .nb-pep { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; } }
 .a-trouver .l-livre { flex: 1 1 0; min-width: 0; }
 .a-trouver li > .retirer { flex: none; }
+.a-trouver .chercher-annonces { flex: 1 1 100%; margin: 0; font-size: var(--t-sm); overflow-wrap: anywhere; }
+.a-trouver .chercher-annonces button.bouton-lien { display: inline; min-height: 0; padding: 0; font: inherit; color: var(--accent); }
 /* Pépite du jour (Zagor) : le titre garde toute sa largeur, « Retirer » et « Marquer vendue » passent sur leur propre ligne */
 .a-trouver .pep-jour-li .l-livre { flex: 1 1 100%; }
 .pep-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; }
@@ -2380,6 +2405,13 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .cp-cadre { position: relative; margin-bottom: 8px; }
 .cp-svg { display: block; max-width: 100%; height: auto; overflow: visible; }
 .cp-grille { stroke: var(--line); stroke-width: 1; }
+.cp-total { stroke: var(--gold); stroke-width: 2; stroke-linecap: round; fill: none; }
+.cp-total.cp-estime { opacity: .5; stroke-dasharray: 4 4; }
+.cp-total.cp-encours { stroke-dasharray: 3 3; }
+.cp-total-pt { fill: var(--gold); }
+.cp-total-pt.cp-encours { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.cp-val { fill: var(--text); font: 600 10px var(--f-ui); }
+.cp-titre-total { margin: 14px 0 4px; font-weight: 600; }
 .cp-axe { fill: var(--muted); font: 600 11px var(--f-ui); }
 .cp-ligne { stroke-width: 2; stroke-linecap: round; fill: none; }
 .cp-ligne.cp-estime { opacity: .6; stroke-dasharray: 4 4; }
@@ -2688,13 +2720,27 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .tb-chiffre span { font: 600 1rem/1.3 var(--f-ui); color: var(--text); }
 .tb-chiffre small { color: var(--muted); font-size: var(--t-sm); line-height: 1.35; }
 .tb-chiffre small .tb-evol { font: 700 var(--t-sm) var(--f-ui); }
+.tb-chiffre small .tb-nb { font: inherit; color: var(--muted); font-weight: 400; white-space: nowrap; }
 .tb-chiffre small .tb-hausse { color: #8fd3a8; } .tb-chiffre small .tb-baisse { color: #f0a5b0; }
+.tb-donut { display: flex; align-items: center; gap: 10px; margin-top: 6px; grid-column: 2; grid-row: 2; }
+.tb-donut svg { flex: none; }
+.tb-donut li { min-width: 0; }
+.tb-donut ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; font-size: var(--t-xs); color: var(--muted); line-height: 1.45; }
+.tb-donut li i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.tb-donut b { font: inherit; color: var(--text); font-variant-numeric: tabular-nums; margin-left: 4px; white-space: nowrap; }
 .tb-liens { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .tb-liens .bouton { min-height: 40px; padding: 6px 16px; font-size: var(--t-base); }
 @media (max-width: 600px) {
   .tb-chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
-  .tb-chiffre:nth-child(3) { grid-column: 1 / -1; padding-left: 0; border-left: 0; padding-top: 12px; border-top: 1px solid var(--line); }
-  .tb-chiffre:nth-child(2) { padding-left: 14px; }
+  /* Téléphone : annonces | butin, puis donut | légende, puis ajouts */
+  .tb-chiffre { padding-left: 0; border-left: 0; }
+  .tb-annonces { grid-column: 1; grid-row: 1; }
+  .tb-annonces small { font-size: .8rem; }
+  .tb-butin { grid-column: 2; grid-row: 1; padding-left: 12px; border-left: 1px solid var(--line); }
+  .tb-donut { display: contents; }
+  .tb-donut svg { grid-column: 1; grid-row: 2; justify-self: center; align-self: center; }
+  .tb-donut ul { grid-column: 2; grid-row: 2; }
+  .tb-ajouts { grid-column: 1 / -1; grid-row: 3; padding-top: 12px; border-top: 1px solid var(--line); }
   .tb-liens .bouton { flex: 1 1 auto; }
 }
 .rc-legende { margin: 4px 0 12px; font-size: var(--t-base); color: var(--muted); }
@@ -2790,4 +2836,40 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .corr-msg { margin: 6px 0 0; font-weight: 600; }
 .corr-opt span, .corr-note { text-transform: none; letter-spacing: normal; }
 .rc-ligne > .corr-ann { grid-column: 1 / -1; }
+/* Mode lite : le panneau n'occupe de place que lorsqu'il est ouvert par le bouton « Corriger » */
+.corr-lite:not([open]) { margin: 0; padding: 0; border: 0; }
+.corr-lite > summary { display: none; }
+.corr-fait-txt { margin: 0 0 6px; color: var(--ok, #6fcf97); font-weight: 600; }
+.corr-bouton { min-height: 28px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
+.corr-bouton:hover, .corr-bouton[aria-expanded="true"] { color: var(--gold); border-color: var(--gold); }
+/* Pancarte « Vendu » en travers de la jaquette */
+.an-pancarte { position: absolute; left: -26%; right: -26%; top: 38%; z-index: 1; padding: 4px 0; background: #b3262f; color: #fff; text-align: center; font: 800 .8rem/1.2 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-35deg); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none; }
 .an-vendu { display: inline-block; align-self: flex-start; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .72rem/1.5 var(--f-ui); white-space: nowrap; }
+
+/* Heure par heure : trois couleurs distinctes, légende identique au tracé */
+.cp-h { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
+.cp-h-jour { stroke: #d4a437; }
+.cp-h-veille { stroke: #6cb4ee; stroke-dasharray: 5 4; }
+.cp-h-moy { stroke: #c9c2b0; stroke-dasharray: 1.5 3.5; stroke-width: 2.5; }
+.cp-h-pt { fill: #d4a437; }
+.cp-h-val { fill: var(--text); font: 600 10px var(--f-ui); }
+.cp-echelle { font-size: 10px; }
+.cp-legende-h { margin: 2px 0 6px; font-size: var(--t-sm); }
+.cp-h-l { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid; margin: 0 5px 3px 10px; vertical-align: middle; }
+.cp-h-l.cp-h-jour { border-color: #d4a437; }
+.cp-h-l.cp-h-veille { border-color: #6cb4ee; border-top-style: dashed; }
+.cp-h-l.cp-h-moy { border-color: #c9c2b0; border-top-style: dotted; }
+.cp-h-hit { fill: transparent; cursor: pointer; }
+.cp-h-hit:focus-visible { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.cp-info-h { min-height: 1.5em; margin: 6px 0 0; font-weight: 600; color: var(--text); font-size: var(--t-sm); }
+
+/* Analyse : trois sous-onglets de même largeur, sans défilement horizontal */
+.an-onglets { display: flex; gap: 6px; margin: 4px 0 14px; }
+.an-onglets button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 700 1rem var(--f-ui); cursor: pointer; white-space: nowrap; }
+.an-onglets button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.an-pane[hidden] { display: none; }
+.stats-zone:empty { display: none; }
+
+/* Liste de tous les livres : niveau de prix, ou prix exact pour un compte connecté */
+.livre-niveau { margin-left: 6px; color: var(--gold); font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.livre-niveau.livre-prix { font-variant-numeric: tabular-nums; letter-spacing: 0; }

@@ -294,6 +294,29 @@ def publiee_le(ligne, jour, publiees):
         return
 
 
+def frais_par_lien(dossier):
+    """Prix nu et frais de chaque annonce, même règle que annonces_cumulees : {lien: (prix nu, frais)}."""
+    sortie = {}
+    for f in sorted(dossier.glob("annonces-*-20*.csv")) + sorted(dossier.glob("incertaines-*-20*.csv")):
+        with open(f, encoding="utf-8", newline="") as fh:
+            for r in csv.DictReader(fh):
+                prix = float(r["prix"])
+                brut_fdp = (r.get("fdp") or "").strip()
+                if brut_fdp and not (r["trouvee_par"] == "leboncoin" and float(brut_fdp) == 0):
+                    fdp = float(brut_fdp)
+                elif r["trouvee_par"] in ("vinted", "leboncoin"):
+                    fdp = prix_livre_vinted(prix) - prix
+                else:
+                    fdp = 0.0
+                sortie[r["lien"]] = (round(prix, 2), round(fdp, 2))
+    return sortie
+
+
+def avec_frais(par_isbn, frais):
+    """Chaque annonce garde son prix affiché (colonne 1) et ajoute son prix nu et ses frais (colonnes 7 et 8). Les calculs n'en tiennent pas compte."""
+    return {isbn: {e: [ligne + list(frais[ligne[2]]) if ligne[2] in frais else ligne for ligne in liste] for e, liste in par.items()} for isbn, par in par_isbn.items()}
+
+
 def annonces_cumulees(fichiers, jours=JOURS_ANNONCES, publiees=None, corrections=None):
     """Annonces de tous les relevés quotidiens (annonces-AAAA-MM-JJ.csv), sans doublon.
     Une annonce est reconnue à son lien ; c'est sa version la plus récente qui compte (prix, état, titre).
@@ -697,6 +720,7 @@ def main():
         # Annonces : réservées aux sorciers et aux Zagors. Elles ne sont pas publiées sur le site : le relais les lit dans data/processed/.
         chemin_ann = DB.parent.parent / "processed" / "annonces.json"
         chemin_disp = DB.parent.parent / "processed" / "disparues.json"
+        frais = frais_par_lien(DB.parent.parent / "raw" / "occasion")
         try:
             anciennes = json.loads(chemin_ann.read_text(encoding="utf-8")).get("premieres")        # None : fichier d'avant cette information
         except (OSError, ValueError):
@@ -720,7 +744,7 @@ def main():
                          "vinted": fichiers_vinted[-1].stem[-10:] if fichiers_vinted else None}
         chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": annonces, "incertaines": incertaines, "corrigees": corrections,
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": avec_frais(annonces, frais), "incertaines": incertaines, "corrigees": corrections,
                                           "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
@@ -733,7 +757,7 @@ def main():
                         pass
         # Butin : seulement les bonnes affaires, pour les niveaux 2 et 3 (le relais ne leur sert pas le fichier complet)
         (DB.parent.parent / "processed" / "butin.json").write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := extraire_butin(annonces, revue)),
+                                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := avec_frais(extraire_butin(annonces, revue), frais)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
                                                           "publiees": {a_[2]: publiees[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in publiees},
                                                           "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},

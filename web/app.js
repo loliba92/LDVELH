@@ -442,7 +442,7 @@
     $('#bloc-tri').hidden = S.vue === 'groupe';
     $('#bloc-groupe').hidden = S.vue !== 'groupe';
     if (!liste.length) {
-      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.' + (window.Relais && window.Relais.configure() ? ' Un livre manque au guide ? <button type="button" class="bouton-lien" data-demande>Demandez son ajout</button>.' : '') + '</p>';
+      $('#resultats').innerHTML = '<p class="vide-global">Aucun livre ne répond à ces critères. Élargissez la sélection ou effacez un filtre.' + (window.Relais && window.Relais.configure() ? ' Un livre manque au guide ? <a href="ajouter.html">Ajouter le livre</a>.' : '') + '</p>';
     } else if (S.vue === 'etagere') {
       afficherEtagere(liste);
     } else if (S.vue === 'liste') {
@@ -1039,8 +1039,18 @@
   }
   function blocAnnonces(b) {
     return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
-      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div></details>`;
+      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p></details>`;
   }
+  // Exclure une annonce depuis la fiche (Zagor) : même envoi que « Corriger l'édition » dans Annonces
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest && e.target.closest('[data-exclure-annonce]');
+    if (!b || !estNiveau3()) return;
+    const msg = b.closest('.annonces-fiche').querySelector('.ann-msg');
+    if (!window.confirm('Exclure cette annonce de la cote ? Elle ne figurera plus parmi les annonces après le prochain relevé.')) return;
+    b.disabled = true;
+    await envoyerCorrections([`annonce ; ${b.dataset.exclureAnnonce} ; exclue ; ; `], (t) => { msg.textContent = t; msg.hidden = false; });
+    b.disabled = false;
+  });
   function remplirAnnonces(b) {
     const zone = $('#annonces-corps');
     if (!zone) return;
@@ -1052,7 +1062,7 @@
       let par = null;          // {état: [[prix, titre, lien, origine, vue, supposé, version]]} : cette édition, la moins chère d'abord
       if (ANN && ANN.annonces) {
         const vues = new Set(), m = {};
-        fratrie.forEach((x) => { const p = ANN.annonces[x.isbn13]; if (p) ETATS.forEach((e) => (p[e.k] || []).forEach((a) => { if (vues.has(a[2])) return; vues.add(a[2]); (m[e.k] = m[e.k] || []).push([a[0], a[1], a[2], a[3], a[4], a[5], x.version]); })); });
+        fratrie.forEach((x) => { const p = ANN.annonces[x.isbn13]; if (p) ETATS.forEach((e) => (p[e.k] || []).forEach((a) => { if (vues.has(a[2])) return; vues.add(a[2]); (m[e.k] = m[e.k] || []).push([a[0], a[1], a[2], a[3], a[4], a[5], x.version, a[6]]); })); });
         ETATS.forEach((e) => { if (m[e.k]) m[e.k].sort((u, v) => u[0] - v[0]); });
         par = Object.keys(m).length ? m : null;
       }
@@ -1061,20 +1071,24 @@
       const incVues = new Set();
       const inc = ANN && ANN.incertaines ? fratrie.flatMap((x) => ANN.incertaines[x.isbn13] || []).filter((a) => !incVues.has(a[2]) && incVues.add(a[2])) : [];          // édition incertaine : à vérifier, hors prix
       const nomOrigine = (o) => (o === 'leboncoin' ? 'Leboncoin' : o === 'vinted' ? 'Vinted' : o === 'librairie' ? 'Librairie' : REVENDEURS[o] || 'eBay');
-      const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</li>`;
+      const ligneAnn = ([prix, titre, lien, origine], ...etiquettes) => `<li class="ann-li"><span class="ann-prix">${fmt(prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
+      // Une annonce par ligne : prix, titre, verdict face à la cote de son état, origine ; le Zagor peut l'exclure
+      const ligneFiche = ([prix, titre, lien, origine, vue, , , nu], cote) => {
+        const v = verdictImport(prix, cote), ecart = cote != null ? Math.round((prix / cote - 1) * 100) : 0;
+        const plusVue = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);
+        return `<li class="ann-li"><span class="ann-prix">${fmt(nu != null ? nu : prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${ANN && ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : ''}${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}${cote != null ? `<span class="ann-site">site ${fmt(cote)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>` : ''}<span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(vue)}">plus vue</span>` : ''}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
+      };
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
-      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, a[5] > 1 ? `1 édition sur ${a[5]} possibles` : 'édition à confirmer')).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
+      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><ul>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</ul><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
       zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '') + ETATS.map((e) => {
         const l = par ? par[e.k] : null;
         if (!l || !l.length) return '';
         const disp = l.length > 1 && l[l.length - 1][0] > l[0][0] * 3 ? ' · prix très dispersés' : '';
         const partie = ([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);          // annonce non revue au dernier relevé : pas retrouvée par la recherche (retirée, vendue ou simplement manquée)
         const nbPartie = l.filter(partie).length;
-        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => {
-          const [prix, titre, lien, origine, vue] = a;
-          return `<li><span class="ann-prix">${fmt(prix)}</span><a href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a><span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${partie(a) ? `<span class="ann-titre">plus vue depuis le ${dateCourte(vue)}</span>` : ''}</li>`; }).join('')}</ul>`;
+        return `<h4>${esc(e.long)} · ${l.length} annonce${l.length > 1 ? 's' : ''}${disp}</h4><ul>${l.map((a) => ligneFiche(a, b.prix[e.k])).join('')}</ul>`;
       }).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>`;
     });
   }
@@ -2254,6 +2268,35 @@
     });
     return n;
   }
+  // Répartition des annonces en ligne par verdict (même règle que les pastilles), pour le donut de l'accueil
+  const VERDICTS_DONUT = [['pepite', 'Pépite', '#d4a437'], ['dessous', 'Pas cher', '#7fd69c'], ['dans', 'Dans les prix', '#c9c2b0'], ['dessus', 'Trop cher', '#e0875a'], ['cher', 'Très cher', '#f08f99']];
+  function repartitionVerdicts() {
+    if (!ANN || !ANN.annonces) return null;
+    const v = { pepite: 0, dessous: 0, dans: 0, dessus: 0, cher: 0, total: 0 };
+    Object.entries(ANN.annonces).forEach(([isbn, parEtat]) => {
+      const b = DATA.find((x) => x.isbn13 === isbn);
+      if (!b || !b.prix) return;
+      Object.entries(parEtat).forEach(([cle, liste]) => (liste || []).forEach(([prix, , , origine, vue]) => {
+        const partie = !!(vue && !enLigne(origine) && ANN.date_ebay && vue < ANN.date_ebay);
+        const k = verdictImport(prix, b.prix[cle]);
+        if (!k || partie) return;
+        v[k === 'super' ? 'pepite' : k] += 1; v.total += 1;
+      }));
+    });
+    return v;
+  }
+  // Donut discret : une couronne par verdict, la légende donne les effectifs
+  const donutVerdicts = (v, f) => {
+    if (!v || !v.total) return '';
+    let cumul = 0;
+    const segments = VERDICTS_DONUT.map(([k, , c]) => {
+      const p = (100 * (v[k] || 0)) / v.total;
+      const seg = `<circle r="15.9155" cx="18" cy="18" fill="none" stroke="${c}" stroke-width="4.5" stroke-dasharray="${p.toFixed(2)} ${(100 - p).toFixed(2)}" stroke-dashoffset="${(25 - cumul).toFixed(2)}"/>`;
+      cumul += p; return seg;
+    }).join('');
+    const legende = VERDICTS_DONUT.map(([k, lib, c]) => `<li><i style="background:${c}"></i>${lib} <b>${f(v[k] || 0)}</b></li>`).join('');
+    return `<div class="tb-donut"><svg viewBox="0 0 36 36" width="64" height="64" role="img" aria-label="Répartition des annonces en ligne : ${VERDICTS_DONUT.map(([k, lib]) => lib + ' ' + f(v[k] || 0)).join(', ')}"><g transform="rotate(-90 18 18)">${segments}</g></svg><ul>${legende}</ul></div>`;
+  };
   // Les totaux restent affichés : gardés sur l'appareil (derniers chiffres connus), « … » tant qu'on n'en a aucun, jamais une carte qui disparaît
   const CLE_COMPTEURS = 'cdh-compteurs-accueil';
   const compteursGardes = () => { try { return JSON.parse(localStorage.getItem(CLE_COMPTEURS) || 'null') || {}; } catch (e) { return {}; } };
@@ -2268,21 +2311,27 @@
     if (nb != null) d.nb = nb;
     if (na != null) d.na = na;
     if (sous != null) d.sous = sous;
+    const rep = niv3 && DATA.length ? repartitionVerdicts() : null;
+    if (rep && rep.total) d.v = rep;
     const aj = ajoutsSur24h();
     if (aj) d.aj = aj;
-    if (nb != null || na != null || sous != null || aj) garderCompteurs(d);
+    if (nb != null || na != null || sous != null || aj || rep) garderCompteurs(d);
     const n = (v) => (v == null ? '…' : v);
     // Tableau de bord « Butins et Annonces » : trois chiffres (pépites du Butin, annonces en ligne, ajouts sur 24 h), puis les accès ; l'analyse est pour le Zagor
     const f = (v) => (v == null ? '…' : Number(v).toLocaleString('fr-FR'));
     const evol = d.aj && d.aj[1] ? Math.round(100 * (d.aj[0] - d.aj[1]) / d.aj[1]) : null;
     const evolTxt = evol == null ? (d.aj ? '' : 'en cours de calcul') : `<span class="tb-evol ${evol >= 0 ? 'tb-hausse' : 'tb-baisse'}">${evol >= 0 ? '▲' : '▼'} ${Math.abs(evol)}\u00a0%</span> · 24 h avant : ${d.aj[1]}`;
-    const sousTxt = niv3 && d.sous != null ? `dont ${f(d.sous)} sous notre estimation` : 'au dernier relevé';
+    // Zagor : la part des annonces sous notre estimation, le nombre entre parenthèses
+    const partSous = niv3 && d.sous != null && d.v && d.v.total ? Math.round((100 * d.sous) / d.v.total) : null;
+    const sousTxt = niv3 && d.sous != null
+      ? (partSous != null ? `${partSous}\u00a0% &lt; estimation <span class="tb-nb">(${f(d.sous)})</span>` : `dont ${f(d.sous)} sous notre estimation`)
+      : 'au dernier relevé';
     z.innerHTML = `<section class="tb-carte" aria-label="Butins et Annonces">
       <p class="tb-titre">Butins et Annonces</p>
       <div class="tb-chiffres">
-        <div class="tb-chiffre"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>à 50\u00a0% du prix du site ou moins</small></div>
-        <div class="tb-chiffre"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>
-        <div class="tb-chiffre"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
+        <div class="tb-chiffre tb-butin"><b>${f(d.nb)}</b><span>pépite${d.nb > 1 ? 's' : ''} au Butin</span><small>- de 50\u00a0% du prix</small></div>
+        <div class="tb-chiffre tb-annonces"><b>${f(d.na)}</b><span>annonce${d.na > 1 ? 's' : ''} en ligne</span><small>${sousTxt}</small></div>${niv3 ? donutVerdicts(d.v, f) : ''}
+        <div class="tb-chiffre tb-ajouts"><b>${d.aj ? '+' + f(d.aj[0]) : '…'}</b><span>ajoutée${d.aj && d.aj[0] > 1 ? 's' : ''} sur 24\u00a0h</span><small>${evolTxt}</small></div>
       </div>
       <div class="tb-liens"><a class="bouton" href="butin.html#pepites">Voir le Butin</a><a class="bouton bouton-clair" href="butin.html#recues">Voir les annonces</a>${niv3 ? '<a class="bouton bouton-clair" href="butin.html#analyse">Analyse</a>' : ''}</div>
     </section>`;
@@ -2423,6 +2472,14 @@
     chargerAnnonces().then(() => { if (ANN && $('#coll-corps')) afficherCollection(); });
   }
 
+  // Annonces d'un livre à trouver : recherches sur les sites de la fiche, en une ligne (sans compte, les sites réservés mènent à la connexion)
+  function htmlAnnoncesATrouver(b) {
+    const masque = cotesMasquees();
+    return `<p class="sous chercher-annonces">Annonces : ${liensRecherche(b).map(([nom, url]) => masque && nom !== 'Amazon'
+      ? `<button type="button" class="bouton-lien" data-invite aria-label="${nom} : réservé aux comptes connectés, se connecter">${nom}</button>`
+      : `<a href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Chercher ${esc(b.titre)} sur ${nom} (nouvel onglet)">${nom}</a>`).join(' · ')}</p>`;
+  }
+
   function htmlATrouver() {
     const lignes = Object.keys(SOUH).filter((id) => !COLL[id]).map(livreDe).filter(Boolean);
     if (!lignes.length) return '';
@@ -2452,6 +2509,7 @@
           return `<div class="prix-bloc"><p class="prix-ligne"><b>Offrez ${eurosArr(offre(p))}</b> <span class="sous">+ ${eurosArr(FRAIS_PORT)} de port + ${eurosArr(FRAIS_PLATEFORME)} de frais</span> ${pastille(pointsAchat(b))}</p>
             <p class="sous prix-detail">Négociable : les vendeurs demandent environ ${eurosArr(v.prix)}${!ANN ? '' : l.length ? ` · ${l.length} annonce${l.length > 1 ? 's' : ''}, dès ${eurosArr(m)}` : ' · aucune annonce en ligne'}</p></div>`;
         })()}
+        ${htmlAnnoncesATrouver(b)}
         ${(() => { const pp = pepitesDe(b); return pp.length ? `<div class="pep-liste">${pp.map((x) => `<a class="pep" href="${esc(x.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite ${fmt(x.prix)} (${nomOrigine(x.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(x.prix)}</b> <span class="pep-d">${x.etat}${x.pct != null ? ' · −' + x.pct + ' %' : ''} · ${nomOrigine(x.origine)}</span> ↗</a>`).join('')}</div>` : ''; })()}</li>`).join('')}</ul>`;
   }
 

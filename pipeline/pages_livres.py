@@ -247,13 +247,48 @@ def page_livre(b, freres, web, frag):
 '''
 
 
+JS_INDEX = r'''<script>
+(function () {
+  // Comptes connectés : le niveau de prix laisse la place au prix exact en bon état ; visiteurs : le niveau reste
+  var lignes = document.querySelectorAll('.livre-liste li[data-isbn]'), fait = false;
+  if (!lignes.length) return;
+  function afficher() {
+    var C = window.Compte;
+    if (fait || !C || !C.role || !C.role()) return;
+    fait = true;
+    fetch('../data/versions.json').then(function (r) { return r.ok ? r.json() : []; }).then(function (liste) {
+      var prix = {}, euro = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+      liste.forEach(function (b) { if (b.prix && b.prix.bon != null) prix[b.isbn13] = b.prix.bon; });
+      lignes.forEach(function (li) {
+        var p = prix[li.getAttribute('data-isbn')], z = li.querySelector('.livre-niveau');
+        if (p == null || !z) return;
+        z.textContent = 'BE ' + euro.format(p);
+        z.setAttribute('aria-label', 'prix en bon état : ' + euro.format(p));
+        z.className = 'livre-niveau livre-prix';
+      });
+    }).catch(function () { fait = false; });
+  }
+  document.addEventListener('cdh-compte', afficher);
+  afficher();
+  setTimeout(afficher, 1500);
+})();
+</script>'''
+
+
+def niveau_liste(b):
+    """Niveau de prix du livre pour la liste : le plus haut des trois états (0 : pas de prix)."""
+    return max((niveau((b.get("prix") or {}).get(k)) for k, _, _ in ETATS), default=0)
+
+
 def page_index(livres, frag):
     par_serie = {}
     for b in livres:
         par_serie.setdefault(b.get("serie") or "Hors série", []).append(b)
     sections = []
     for serie in sorted(par_serie, key=lambda s: slug(s)):
-        lignes = "".join(f'<li><a href="{e(b["isbn13"])}.html">{e(b["titre"])}</a> <span class="sous">{e(numero(b).strip())} · {e(b["version"])}</span></li>'
+        lignes = "".join(f'<li data-isbn="{e(b["isbn13"])}"><a href="{e(b["isbn13"])}.html">{e(b["titre"])}</a> <span class="sous">{e(numero(b).strip())} · {e(b["version"])}</span>'
+                         + (f' <span class="livre-niveau" aria-label="niveau de prix {n} sur 5">{"€" * n}</span>' if (n := niveau_liste(b)) else '')
+                         + '</li>'
                          for b in sorted(par_serie[serie], key=cle_tri))
         sections.append(f'<h2 id="{slug(serie)}">{e(serie)} <span class="sous">({len(par_serie[serie])})</span></h2><ul class="livre-liste">{lignes}</ul>')
     description = f"Les {len(livres)} éditions de livres dont vous êtes le héros suivies par La Cote du Héros, classées par série : Défis Fantastiques, Loup Solitaire et bien d'autres."
@@ -319,6 +354,7 @@ def page_index(livres, frag):
 <script src="../scan.js"></script>
 <script src="../compte.js"></script>
 <script src="../pages.js"></script>
+{JS_INDEX}
 </body>
 </html>
 '''
