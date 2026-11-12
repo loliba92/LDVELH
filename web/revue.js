@@ -844,21 +844,24 @@
       return { aujourd, veille, moyenne, heureCourante: Number(heureParis.format(maintenant)), nbAutres: autres.length };
     }
     function svgHoraire(c, largeur) {
-      const H = 140, g = 8, b = 22, h = H - b - 16, pas = (largeur - 2 * g) / 24;
+      // Axe de 5 h à 23 h : la nuit, le bot ne tourne pas
+      const debut = 5, n = 24 - debut, H = 140, g = 8, b = 22, h = H - b - 16, pas = (largeur - 2 * g) / n;
       const px = (k) => g + k * pas + pas / 2;
-      const toutes = [...c.aujourd, ...c.veille, ...c.moyenne].filter((v) => v != null);
+      const tranche = (v) => v.slice(debut);
+      const aujourd = tranche(c.aujourd), veille = tranche(c.veille), moyenne = tranche(c.moyenne), courante = c.heureCourante - debut;
+      const toutes = [...aujourd, ...veille, ...moyenne].filter((v) => v != null);
       const max = Math.max(10, ...toutes), y = (v) => 16 + h - (v / max) * h;
       const ligne = (valeurs, cls) => {
         const pts = valeurs.map((v, k) => (v == null ? null : `${px(k).toFixed(1)},${y(v).toFixed(1)}`)).filter(Boolean);
         return pts.length > 1 ? `<polyline points="${pts.join(' ')}" class="${cls}"/>` : '';
       };
       let svg = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
-      svg += ligne(c.moyenne, 'cp-h cp-h-moy');
-      svg += ligne(c.veille, 'cp-h cp-h-veille');
-      svg += ligne(c.aujourd.map((v, k) => (k <= c.heureCourante ? v : null)), 'cp-h cp-h-jour');
-      c.aujourd.forEach((v, k) => { if (v != null && k <= c.heureCourante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="2.5" class="cp-h-pt"/>`; });
-      for (let k = 0; k < 24; k += 3) svg += `<text x="${px(k)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
-      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure : aujourd'hui, hier et la moyenne des jours précédents">${svg}</svg>`;
+      svg += ligne(moyenne, 'cp-h cp-h-moy');
+      svg += ligne(veille, 'cp-h cp-h-veille');
+      svg += ligne(aujourd.map((v, k) => (k <= courante ? v : null)), 'cp-h cp-h-jour');
+      aujourd.forEach((v, k) => { if (v != null && k <= courante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="2.5" class="cp-h-pt"/>`; });
+      for (let k = debut; k < 24; k += 3) svg += `<text x="${px(k - debut)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents">${svg}</svg>`;
     }
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
