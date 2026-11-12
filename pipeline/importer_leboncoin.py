@@ -3,9 +3,11 @@
 Le bot (hors de ce dépôt, sur l'ordinateur du propriétaire) ouvre chaque soir une issue intitulée « Relevé Leboncoin AAAA-MM-JJ » dont le texte contient
 un bloc ```csv``` : une ligne par annonce reconnue avec certitude (édition unique, état indiqué, pas de lot).
 
-    isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date,verif
+    isbn13,etat,prix,fdp,titre,lien,statut,age_jours,date,verif,lot,confirmation
 
 verif (facultatif) : « 1 » pour une annonce dont l'édition n'est pas sûre (titre seul, plusieurs éditions possibles) ; une ligne par édition possible, même lien.
+lot (facultatif) : les ISBN des livres d'une annonce de lot, séparés par « | » (un livre en plusieurs exemplaires est répété) ; le prix de l'annonce est réparti entre eux
+au prorata de leur prix de référence. confirmation (facultatif) : « confirmé » (ISBN lus sur les photos) ou « semi-confirmé » (livres identifiés par le texte).
 fdp (frais de port et de plateforme, facultatif) s'ajoute au prix affiché dans les annonces ; la médiane de la cote reste calculée sur le prix nu.
 Sans cette colonne : 0 pour Leboncoin (retrait possible), protection acheteurs + port pour Vinted (tout se commande).
 
@@ -40,6 +42,8 @@ DOSSIER = editions.ROOT / "data" / "raw" / "occasion"
 LOTS = editions.ROOT / "data" / "manual" / "lots_annonces.json"
 ETATS = ("convenable", "bon", "tres_bon")
 STATUTS = ("actif", "vendu")
+CONFIRMATIONS = ("confirmé", "semi-confirmé")
+MAX_LIVRES_LOT = 40
 MAX_LIGNES = 300
 PRIX_MIN, PRIX_MAX = 0.5, 3000.0
 FDP_MAX = 30.0                                # frais de port et frais de la plateforme : au-delà, la ligne est refusée
@@ -83,7 +87,7 @@ def nom_fichier(genre, source, jour):
     """annonces-/vendus-/incertaines-<source>-JOUR.csv (annonces) ; <source>-JOUR.csv et <source>-vendus-JOUR.csv (agrégats pour la cote)."""
     return {"annonces": f"annonces-{source}-{jour}.csv", "vendus": f"vendus-{source}-{jour}.csv", "incertaines": f"incertaines-{source}-{jour}.csv",
             "agregat": f"{source}-{jour}.csv", "agregat_vendus": f"{source}-vendus-{jour}.csv"}[genre]
-COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "fdp"]       # fdp : frais ajoutés au prix (Vinted : protection acheteurs et port)
+COLONNES_ANNONCES = ["isbn13", "etat", "prix", "titre", "lien", "age_jours", "trouvee_par", "fdp", "lot", "confirmation"]       # fdp : frais ajoutés au prix (Vinted : protection acheteurs et port)
 COLONNES_AGREGAT = ["isbn13", "date", "etat", "nb_annonces", "prix_min", "prix_median", "prix_max"]
 
 
@@ -155,8 +159,25 @@ def valider(r, aujourdhui, connues):
         lien = f"{lien}#{etat}-{round(prix * 100)}"               # plusieurs offres d'un même revendeur partagent le lien du livre : l'état et le prix les distinguent
     elif fdp is None or (source == "leboncoin" and fdp == 0):       # relevé d'un bot plus ancien, ou Leboncoin à 0 : même prix livré que Vinted et eBay (protection 0,70 € + 5 % et port 3 €)
         fdp = round(prix_livre_vinted(prix) - prix, 2)
+    lot, confirmation = "", ""
+    brut_lot = str(r.get("lot") or "").strip()
+    if brut_lot:
+        if verif or source in REVENDEURS:
+            return None, "lot non admis ici"
+        try:
+            livres = [editions.normalize_isbn(x)[0] for x in brut_lot.split("|") if x.strip()]
+        except ValueError:
+            return None, "lot : ISBN invalide"
+        if not 2 <= len(livres) <= MAX_LIVRES_LOT:
+            return None, "lot : nombre de livres invraisemblable"
+        if any(x not in connues for x in livres):
+            return None, "lot : édition inconnue"
+        confirmation = (r.get("confirmation") or "").strip()
+        if confirmation not in CONFIRMATIONS:
+            return None, f"lot : confirmation inconnue ({confirmation or 'vide'})"
+        lot, isbn = "|".join(livres), livres[0]
     return {"isbn13": isbn, "etat": etat, "prix": f"{prix:.2f}", "fdp": f"{fdp:.2f}", "titre": titre, "lien": lien, "age_jours": age,
-            "trouvee_par": source, "statut": statut, "date": jour.isoformat(), "verif": verif}, None
+            "trouvee_par": source, "statut": statut, "date": jour.isoformat(), "verif": verif, "lot": lot, "confirmation": confirmation}, None
 
 
 def _lire(chemin):
@@ -184,20 +205,43 @@ def _ecrire(chemin, colonnes, lignes):
         w.writerows(lignes)
 
 
-def charger_lots(chemin=None):
+def _lots_du_bot(dossier, tbe):
+    """Lots envoyés par le bot (colonne « lot » des fichiers d'annonces) : {lien: {"isbns", "quantites", "poids", "confirmation"}}.
+    Le poids d'un livre est son prix de référence (très bon état publié) ; sans prix, la moyenne des autres."""
+    lots = {}
+    for fichier in sorted(Path(dossier).glob("annonces-*-20*.csv")) + sorted(Path(dossier).glob("vendus-*-20*.csv")):
+        for r in _lire(fichier).values():
+            livres = [x for x in str(r.get("lot") or "").split("|") if x]
+            if len(livres) < 2:
+                continue
+            quantites = {}
+            for x in livres:
+                quantites[x] = quantites.get(x, 0) + 1
+            connus = [tbe[x] for x in quantites if tbe.get(x)]
+            moyen = sum(connus) / len(connus) if connus else 1.0
+            lots[r["lien"]] = {"isbns": list(quantites), "quantites": quantites, "confirmation": r.get("confirmation") or "",
+                               "poids": {x: tbe.get(x) or moyen for x in quantites}}
+    return lots
+
+
+def charger_lots(chemin=None, dossier=None):
     """Annonces qui vendent plusieurs livres d'un coup : {lien: {"isbns": [...], "poids": {isbn: prix de référence}}}.
-    Le fichier data/manual/lots_annonces.json est tenu à la main (le titre de l'annonce ne dit pas toujours que c'est un lot)."""
+    Le fichier data/manual/lots_annonces.json est tenu à la main (le titre de l'annonce ne dit pas toujours que c'est un lot) ; il l'emporte sur les lots envoyés par le bot."""
+    lots = _lots_du_bot(dossier or DOSSIER, prix_aberrants.charger_tbe())
     chemin = Path(chemin or LOTS)
     if not chemin.exists():
-        return {}
+        return lots
     brut = json.loads(chemin.read_text(encoding="utf-8"))
-    return {x["lien"]: {"isbns": x["isbns"], "poids": x["poids"]} for x in brut if x.get("lien") and x.get("isbns") and x.get("poids")}
+    lots.update({x["lien"]: {"isbns": x["isbns"], "poids": x["poids"]} for x in brut if x.get("lien") and x.get("isbns") and x.get("poids")})
+    return lots
 
 
 def repartir_lot(prix, lot):
-    """Prix d'un lot réparti entre ses livres au prorata de leur prix de référence : [(isbn, part)]."""
+    """Prix d'un lot réparti entre ses livres au prorata de leur prix de référence : [(isbn, part d'un exemplaire)].
+    Un livre en plusieurs exemplaires (`quantites`) pèse autant de fois ; la part renvoyée est celle d'un exemplaire."""
+    quantites = lot.get("quantites") or {}
     poids = [float(lot["poids"][i]) for i in lot["isbns"]]
-    total = sum(poids)
+    total = sum(w * quantites.get(i, 1) for i, w in zip(lot["isbns"], poids))
     return [(i, prix * w / total) for i, w in zip(lot["isbns"], poids)]
 
 
@@ -208,7 +252,8 @@ def etaler_lots(annonces, lots):
     vues = [(isbn, etat, list(a)) for isbn, par in annonces.items() for etat, liste in par.items() for a in liste if a[2] in lots]
     for isbn, etat, a in vues:
         lot = lots[a[2]]
-        prefixe = "Lot de %d livres · " % len(lot["isbns"])
+        nombre = sum((lot.get("quantites") or {}).values()) or len(lot["isbns"])
+        prefixe = "Lot de %d livres%s · " % (nombre, " (%s)" % lot["confirmation"] if lot.get("confirmation") else "")
         titre = prefixe + str(a[1]).removeprefix(prefixe)
         part_de = dict(repartir_lot(a[0], lot))
         for i in lot["isbns"]:

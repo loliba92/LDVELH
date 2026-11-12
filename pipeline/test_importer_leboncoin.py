@@ -230,10 +230,60 @@ class TestImporter(unittest.TestCase):
             self.assertEqual({r["isbn13"]: r for r in lire(d, "leboncoin-2026-10-24.csv")}, apres)
 
     def test_les_lots_enregistres_sont_valides(self):
-        for lien, lot in imp.charger_lots().items():
+        with tempfile.TemporaryDirectory() as vide:          # le fichier tenu à la main seulement, sans les lots du bot
+            lots = imp.charger_lots(dossier=vide)
+        for lien, lot in lots.items():
             self.assertTrue(lien.startswith("https://www.leboncoin.fr/"))
             self.assertTrue(set(lot["isbns"]) <= set(lot["poids"]) and all(float(v) > 0 for v in lot["poids"].values()))
 
+
+
+ENTETE_LOT = "isbn13,etat,prix,titre,lien,statut,age_jours,date,lot,confirmation\n"
+
+
+def corps_lot(*lignes):
+    return "```csv\n" + ENTETE_LOT + "".join(lignes) + "```\n"
+
+
+def ligne_lot(lot, confirmation="confirmé", prix="69", lien="https://www.vinted.fr/items/10777931586-lot"):
+    return f'{lot.split("|")[0]},bon,{prix},"lot livres dont vous êtes le héro",{lien},actif,2,2026-10-24,{lot},{confirmation}\n'
+
+
+class TestLotsDuBot(unittest.TestCase):
+    LIEN = "https://www.vinted.fr/items/10777931586-lot"
+
+    def test_un_lot_envoye_par_le_bot_est_accepte_avec_ses_livres(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(corps_lot(ligne_lot(f"{ISBN_A}|{ISBN_B}")), JOUR, d, CONNUES)
+            self.assertEqual((b["acceptees"], b["refusees"]), (1, 0))
+            r = lire(d, "annonces-vinted-2026-10-24.csv")[0]
+            self.assertEqual((r["lot"], r["confirmation"]), (f"{ISBN_A}|{ISBN_B}", "confirmé"))
+
+    def test_le_prix_du_lot_est_reparti_dans_la_cote(self):
+        with tempfile.TemporaryDirectory() as d:
+            imp.importer(corps_lot(ligne_lot(f"{ISBN_A}|{ISBN_B}", prix="40")), JOUR, d, CONNUES)
+            with mock.patch.object(imp.prix_aberrants, "charger_tbe", lambda chemin=None: {ISBN_A: 10.0, ISBN_B: 30.0}):
+                lots = imp.charger_lots(dossier=d)
+                imp.reagreger(d, lots)
+            cote = {r["isbn13"]: r["prix_median"] for r in lire(d, "vinted-2026-10-24.csv")}
+            self.assertEqual(cote, {ISBN_A: "10.00", ISBN_B: "30.00"})
+
+    def test_un_livre_en_deux_exemplaires_pese_deux_fois(self):
+        lot = {"isbns": [ISBN_A, ISBN_B], "quantites": {ISBN_A: 2, ISBN_B: 1}, "poids": {ISBN_A: 10.0, ISBN_B: 10.0}}
+        self.assertEqual([(i, round(p, 2)) for i, p in imp.repartir_lot(30.0, lot)], [(ISBN_A, 10.0), (ISBN_B, 10.0)])
+
+    def test_la_mention_lot_et_la_confirmation_sont_affichees(self):
+        lots = {"L": {"isbns": ["a", "b"], "quantites": {"a": 2, "b": 1}, "poids": {"a": 1, "b": 1}, "confirmation": "semi-confirmé"}}
+        annonces = {"a": {"bon": [[30.0, "Mes livres", "L", "vinted", "2026-10-24", None]]}}
+        imp.etaler_lots(annonces, lots)
+        self.assertEqual(annonces["b"]["bon"][0][1], "Lot de 3 livres (semi-confirmé) · Mes livres")
+
+    def test_lot_refuse_si_une_edition_est_inconnue_ou_confirmation_absente(self):
+        with tempfile.TemporaryDirectory() as d:
+            b = imp.importer(corps_lot(ligne_lot(f"{ISBN_A}|9782070000000"), ligne_lot(f"{ISBN_A}|{ISBN_B}", confirmation="", lien="https://www.vinted.fr/items/2-x"),
+                                       ligne_lot(f"{ISBN_A}", lien="https://www.vinted.fr/items/3-x")), JOUR, d, CONNUES)
+            self.assertEqual(b["acceptees"], 0)
+            self.assertEqual(b["refusees"], 3)
 
 
 class TestAVerifier(unittest.TestCase):
