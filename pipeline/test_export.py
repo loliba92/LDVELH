@@ -162,6 +162,18 @@ class TestAnnoncesFdp(unittest.TestCase):
         self.assertEqual({a[2]: a[0] for a in liste}, {"https://www.vinted.fr/items/1-a": 14.2, "https://www.leboncoin.fr/ad/livres/2": 16.3,
                                                        "https://www.vinted.fr/items/3-c": 14.2})            # Leboncoin sans fdp : même prix livré que Vinted
 
+    def test_les_frais_ajoutes_sont_consignes_par_lien(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "annonces-vinted-2026-10-27.csv"
+            f.write_text("isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp\n111,bon,10.00,A,https://www.vinted.fr/items/1-a,1,vinted,4.20\n"
+                         "111,bon,12.00,B,https://www.leboncoin.fr/ad/livres/2,1,leboncoin,\n"
+                         "111,bon,9.00,D,https://www.ebay.fr/itm/4,1,isbn,\n", encoding="utf-8")
+            frais = {}
+            annonces_cumulees([f], frais=frais)
+        self.assertEqual(frais, {"https://www.vinted.fr/items/1-a": 4.2, "https://www.leboncoin.fr/ad/livres/2": 4.3})            # eBay : prix déjà livré, pas de frais consignés
+
 
 class TestCaptures(unittest.TestCase):
     def annonces(self, *lignes):
