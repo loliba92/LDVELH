@@ -803,20 +803,20 @@
     }
     // Total des annonces nouvelles par jour : une courbe, un point par jour, la valeur au-dessus quand la place le permet
     function svgTotal(jours, depuis, largeur) {
-      const H = 120, g = 8, b = 22, h = H - b - 16, n = jours.length, pas = (largeur - 2 * g) / n;
+      // Échelle à gauche : le minimum et le maximum de la période, avec repères horizontaux
+      const H = 130, gauche = 34, g = 8, b = 22, h = H - b - 16, n = jours.length, pas = (largeur - gauche - g) / n;
       const tot = jours.map((j) => SOURCES_CAPT.reduce((t, [src]) => t + (j.v[src] || 0), 0));
-      const max = Math.max(10, ...tot), saut = n <= 8 ? 1 : largeur < 420 ? 4 : 2;
-      const px = (k) => g + k * pas + pas / 2, y = (v) => 16 + h - (v / max) * h;
-      let svg = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
-      // Courbe lissée : chaque segment est une Bézier cubique, tangentes de Catmull-Rom ; la courbe reste dans l'échelle
+      const min = Math.min(...tot), max = Math.max(...tot, min + 1), saut = n <= 8 ? 1 : largeur < 420 ? 4 : 2;
+      const px = (k) => gauche + k * pas + pas / 2, y = (v) => 16 + h - ((v - min) / (max - min)) * h;
+      let svg = [min, max].map((v) => `<line x1="${gauche}" x2="${largeur - g}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="cp-grille"/><text x="${gauche - 5}" y="${(y(v) + 4).toFixed(1)}" class="cp-axe cp-echelle" text-anchor="end">${v}</text>`).join('');
       const pts = jours.map((j, k) => [px(k), y(tot[k])]), bas = 16 + h, haut = 16;
       const borne = (v) => Math.min(bas, Math.max(haut, v));
       const tangente = (k) => { const avant = pts[Math.max(k - 1, 0)], apres = pts[Math.min(k + 1, n - 1)]; return [(apres[0] - avant[0]) / 6, (apres[1] - avant[1]) / 6]; };
       for (let k = 1; k < n; k += 1) {
-        const a = pts[k - 1], b = pts[k], ta = tangente(k - 1), tb = tangente(k);
-        const c1 = [a[0] + ta[0], borne(a[1] + ta[1])], c2 = [b[0] - tb[0], borne(b[1] - tb[1])];
+        const a = pts[k - 1], bb = pts[k], ta = tangente(k - 1), tb = tangente(k);
+        const c1 = [a[0] + ta[0], borne(a[1] + ta[1])], c2 = [bb[0] - tb[0], borne(bb[1] - tb[1])];
         const estime = depuis && jours[k].cle < depuis;
-        svg += `<path d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}" class="cp-total${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
+        svg += `<path d="M${a[0].toFixed(1)},${a[1].toFixed(1)} C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${bb[0].toFixed(1)},${bb[1].toFixed(1)}" class="cp-total${estime ? ' cp-estime' : ''}${jours[k].enCours ? ' cp-encours' : ''}"/>`;
       }
       jours.forEach((j, k) => {
         const estime = depuis && j.cle < depuis;
@@ -824,7 +824,7 @@
         if (pas >= 20 && !estime) svg += `<text x="${px(k)}" y="${y(tot[k]) - 7}" class="cp-val" text-anchor="middle">${tot[k]}</text>`;
         if ((n - 1 - k) % saut === 0) svg += `<text x="${px(k)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${jourCourtCapt(j.cle)}</text>`;
       });
-      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Total des annonces nouvelles par jour, ${n} derniers jours">${svg}</svg>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Total des annonces nouvelles par jour, ${n} derniers jours, de ${min} à ${max}">${svg}</svg>`;
     }
     // Heure par heure (axe x = heure de Paris) : aujourd'hui, hier, et la moyenne des autres jours gardés
     const heureParis = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' });
