@@ -1,9 +1,10 @@
-isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp
-9782070333530,bon,10.00,Tome 1 série Les Portes Interdites - Un livre dont vous êtes le héros- folio junior - 1985,https://www.leboncoin.fr/ad/livres/3307516921,1,leboncoin,4.20
-9782070586134,tres_bon,65.00,Le sépulcre des ombres Ian Livingstone,https://www.leboncoin.fr/ad/livres/3307656731,0,leboncoin,6.95
-9782070333721,bon,5.00,Les parchemins de Kettsuin - la voie du tigre - livre dont vous êtes le héros,https://www.leboncoin.fr/ad/livres/3307660637,0,leboncoin,3.95
-9782070334025,convenable,5.00,"Collection Un livre dont vous êtes le héros,Épouvante n°2, Frankenstein le Maudit,1989, JH Brennan Folio Junior",https://www.leboncoin.fr/ad/livres/3307724635,0,leboncoin,3.95
-9782070333189,bon,5.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307747378,0,leboncoin,3.95
-9782070333318,bon,5.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307751244,0,leboncoin,3.95
-9782070332878,convenable,4.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307754431,0,leboncoin,3.90
-9782070332960,tres_bon,5.00,Un livre dont vous êtes le héros Les grottes de Kalte,https://www.leboncoin.fr/ad/livres/3307885979,0,leboncoin,3.95
+isbn13,etat,prix,titre,lien,age_jours,trouvee_par,fdp,lot,confirmation
+9782070333530,bon,10.00,Tome 1 série Les Portes Interdites - Un livre dont vous êtes le héros- folio junior - 1985,https://www.leboncoin.fr/ad/livres/3307516921,1,leboncoin,4.20,,
+9782070586134,tres_bon,65.00,Le sépulcre des ombres Ian Livingstone,https://www.leboncoin.fr/ad/livres/3307656731,0,leboncoin,6.95,,
+9782070333721,bon,5.00,Les parchemins de Kettsuin - la voie du tigre - livre dont vous êtes le héros,https://www.leboncoin.fr/ad/livres/3307660637,0,leboncoin,3.95,,
+9782070334025,convenable,5.00,"Collection Un livre dont vous êtes le héros,Épouvante n°2, Frankenstein le Maudit,1989, JH Brennan Folio Junior",https://www.leboncoin.fr/ad/livres/3307724635,0,leboncoin,3.95,,
+9782070333189,bon,5.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307747378,0,leboncoin,3.95,,
+9782070333318,bon,5.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307751244,0,leboncoin,3.95,,
+9782070332878,convenable,4.00,Livre dont vous êtes le heros,https://www.leboncoin.fr/ad/livres/3307754431,0,leboncoin,3.90,,
+9782070332960,tres_bon,5.00,Un livre dont vous êtes le héros Les grottes de Kalte,https://www.leboncoin.fr/ad/livres/3307885979,0,leboncoin,3.95,,
+9782070332946,bon,10.00,Livre dont vous êtes le héros,https://www.leboncoin.fr/ad/livres/3307934162,0,leboncoin,4.20,,
