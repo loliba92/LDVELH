@@ -26,6 +26,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Contrôler le service worker et les pages gardées
+        run: |
+          test "$(wc -c < web/sw.js)" -gt 500 || { echo "web/sw.js est vide ou tronqué : publication refusée"; exit 1; }
+          grep -q "const VERSION = 'cdh-v" web/sw.js || { echo "web/sw.js sans numéro de version : publication refusée"; exit 1; }
+          grep -q 'id="an-nav"' web/butin.html || { echo "web/butin.html sans les sous-onglets de l'Analyse : publication refusée"; exit 1; }
       - uses: actions/configure-pages@v5
         with:
           enablement: true
