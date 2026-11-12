@@ -219,9 +219,14 @@
   <div id="rc-liste"></div>
 </div>
 <div class="rv-pane" id="pane-analyse" role="tabpanel" hidden>
-  <p class="chapeau">Le rythme des annonces captées chaque jour, puis les opportunités d'achat. Réservé à Zagor.</p>
-  <div class="captures-zone" id="captures-analyse"></div>
-  <div class="opp-zone" id="opp-zone"></div>
+  <div class="an-onglets" id="an-nav" role="tablist" aria-label="Sections de l'analyse">
+    <button type="button" role="tab" data-sous="affaires" id="onglet-an-affaires" aria-controls="an-affaires" aria-selected="true">Affaires</button>
+    <button type="button" role="tab" data-sous="rythme" id="onglet-an-rythme" aria-controls="an-rythme" aria-selected="false" tabindex="-1">Rythme</button>
+    <button type="button" role="tab" data-sous="marche" id="onglet-an-marche" aria-controls="an-marche" aria-selected="false" tabindex="-1">Marché</button>
+  </div>
+  <div class="an-pane" id="an-affaires" role="tabpanel" aria-labelledby="onglet-an-affaires"><div class="opp-zone" id="opp-zone"></div></div>
+  <div class="an-pane" id="an-rythme" role="tabpanel" aria-labelledby="onglet-an-rythme" hidden><div class="captures-zone" id="captures-analyse"></div></div>
+  <div class="an-pane" id="an-marche" role="tabpanel" aria-labelledby="onglet-an-marche" hidden><div class="stats-zone" id="stats-analyse"></div></div>
 </div>
 <div class="rv-pane" id="pane-ajout" role="tabpanel" hidden>
 <section class="rv-ajout" aria-labelledby="aj-titre">

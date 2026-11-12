@@ -2862,3 +2862,10 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .cp-h-hit { fill: transparent; cursor: pointer; }
 .cp-h-hit:focus-visible { fill: none; stroke: var(--gold); stroke-width: 1.5; }
 .cp-info-h { min-height: 1.5em; margin: 6px 0 0; font-weight: 600; color: var(--text); font-size: var(--t-sm); }
+
+/* Analyse : trois sous-onglets de même largeur, sans défilement horizontal */
+.an-onglets { display: flex; gap: 6px; margin: 4px 0 14px; }
+.an-onglets button { flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 700 1rem var(--f-ui); cursor: pointer; white-space: nowrap; }
+.an-onglets button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.an-pane[hidden] { display: none; }
+.stats-zone:empty { display: none; }
