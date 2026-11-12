@@ -1255,7 +1255,9 @@
       if (effacerRc) effacerRc.hidden = !(dansPlus || (aberrRc && aberrRc.checked) || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
-      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's' : ''} sur ${toutes.length}${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : `, dont ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      // En ligne : même règle que le chiffre de l'accueil (ni annonces eBay « plus vues », ni lignes de lots, ni offres de revendeurs)
+      const nbEnLigne = toutes.filter((a) => !a.partie && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
+      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's affichées' : ' affichée'} sur ${toutes.length} retenues (dont ${nbEnLigne} en ligne, comme sur l'accueil)${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : ` ; ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => {
         const corr = panneauCorrection(a, true);
         return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
