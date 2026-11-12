@@ -826,6 +826,40 @@
       });
       return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Total des annonces nouvelles par jour, ${n} derniers jours">${svg}</svg>`;
     }
+    // Heure par heure (axe x = heure de Paris) : aujourd'hui, hier, et la moyenne des autres jours gardés
+    const heureParis = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris' });
+    const jourParis = (t) => new Date(t).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    function courbesHoraires(heures, maintenant) {
+      const par = {};
+      Object.entries(heures || {}).forEach(([cle, n]) => {
+        const t = Date.parse(cle + ':00:00Z'); if (Number.isNaN(t)) return;
+        const j = jourParis(t), h = Number(heureParis.format(t));
+        (par[j] = par[j] || Array(24).fill(null));
+        par[j][h] = (par[j][h] ?? 0) + n;
+      });
+      const aujj = jourParis(maintenant), hier = jourParis(maintenant - 86400000);
+      const aujourd = par[aujj] || Array(24).fill(null), veille = par[hier] || Array(24).fill(null);
+      const autres = Object.keys(par).filter((j) => j !== aujj).map((j) => par[j]);
+      const moyenne = Array.from({ length: 24 }, (_, h) => { const v = autres.map((x) => x[h]).filter((x) => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; });
+      return { aujourd, veille, moyenne, heureCourante: Number(heureParis.format(maintenant)), nbAutres: autres.length };
+    }
+    function svgHoraire(c, largeur) {
+      const H = 140, g = 8, b = 22, h = H - b - 16, pas = (largeur - 2 * g) / 24;
+      const px = (k) => g + k * pas + pas / 2;
+      const toutes = [...c.aujourd, ...c.veille, ...c.moyenne].filter((v) => v != null);
+      const max = Math.max(10, ...toutes), y = (v) => 16 + h - (v / max) * h;
+      const ligne = (valeurs, cls) => {
+        const pts = valeurs.map((v, k) => (v == null ? null : `${px(k).toFixed(1)},${y(v).toFixed(1)}`)).filter(Boolean);
+        return pts.length > 1 ? `<polyline points="${pts.join(' ')}" class="${cls}"/>` : '';
+      };
+      let svg = `<line x1="${g}" x2="${largeur - g}" y1="${y(0)}" y2="${y(0)}" class="cp-grille"/>`;
+      svg += ligne(c.moyenne, 'cp-h cp-h-moy');
+      svg += ligne(c.veille, 'cp-h cp-h-veille');
+      svg += ligne(c.aujourd.map((v, k) => (k <= c.heureCourante ? v : null)), 'cp-h cp-h-jour');
+      c.aujourd.forEach((v, k) => { if (v != null && k <= c.heureCourante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="2.5" class="cp-h-pt"/>`; });
+      for (let k = 0; k < 24; k += 3) svg += `<text x="${px(k)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure : aujourd'hui, hier et la moyenne des jours précédents">${svg}</svg>`;
+    }
     const dessinerCaptures = () => {
       const zones = document.querySelectorAll('.captures-zone');
       const c = BUT && BUT.captures;
@@ -864,6 +898,7 @@
       const pied = `<tr><th scope="row">Total ${m} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
         + `<tr><th scope="row">Moyenne par jour</th>${SOURCES_CAPT.map(([src]) => `<td>${fmt1(moy(complets, src))}</td>`).join('')}<td><b>${fmt1(moy(complets))}</b></td></tr>`
         + `<tr><th scope="row">Évolution sur ${moitie} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${texteEvol(evolution(src))}</td>`).join('')}<td><b>${texteEvol(pTotal)}</b></td></tr>`;
+      const horaires = courbesHoraires(c.heures, Date.now());
       const html = `<section class="captures" aria-label="Annonces captées par jour">
         <h3 class="captures-titre">Annonces captées par jour</h3>
         <p class="cp-bilan"><b>${somme(complets)}</b> annonces en ${m} jours · <b>${fmt1(moy(complets))}</b> par jour en moyenne</p>
@@ -873,6 +908,9 @@
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
         <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>${statsHtml()}
+        <p class="sous cp-titre-total">Heure par heure (heure de Paris)</p>
+        <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
+        <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
         <p class="sous cp-titre-total">Total des annonces par jour</p>
         <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
