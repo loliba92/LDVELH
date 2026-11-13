@@ -2,7 +2,7 @@
  "date": "2026-11-13",
  "precedent": "2026-11-12",
  "nb_comparees": 1530,
- "nb_modifiees": 872,
+ "nb_modifiees": 871,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -45,8 +45,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 6.37,
-   "apres": 7.11,
-   "pct": 0.116,
+   "apres": 7.12,
+   "pct": 0.118,
    "nature": "annonces",
    "nb": 7,
    "recalibre": false
@@ -103,8 +103,8 @@
  "modele": {
   "actif": false,
   "n_paires": 134,
-  "gain": 0.034,
-  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
-  "rapport_global": 0.922
+  "gain": 0.038,
+  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+  "rapport_global": 0.916
  }
 }
