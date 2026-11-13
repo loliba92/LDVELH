@@ -856,12 +856,25 @@
       const moyenne = Array.from({ length: 24 }, (_, h) => { const v = autres.map((x) => x[h]).filter((x) => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; });
       return { aujourd, veille, moyenne, heureCourante: Number(heureParis.format(maintenant)), nbAutres: autres.length };
     }
+    // Cumul depuis 5 h : chaque courbe est le total des annonces arrivées depuis 5 h (aujourd'hui jusqu'à l'heure en cours, hier et la moyenne jusqu'à 23 h)
+    const DEBUT_H = 5;
+    function cumulHoraire(c) {
+      const cumul = (valeurs, jusqu) => { let total = 0, vu = false; return valeurs.slice(DEBUT_H).map((v, k) => { if (k > jusqu) return null; if (v != null) { total += v; vu = true; } return vu ? total : null; }); };
+      const n = 24 - DEBUT_H, courante = Math.min(Math.max(c.heureCourante - DEBUT_H, -1), n - 1);
+      return { aujourd: cumul(c.aujourd, courante), veille: cumul(c.veille, n - 1), moyenne: cumul(c.moyenne, n - 1), courante, brut: { a: c.aujourd.slice(DEBUT_H), v: c.veille.slice(DEBUT_H), m: c.moyenne.slice(DEBUT_H) } };
+    }
+    // La comparaison à l'heure en cours : ce que dit le graphique d'un coup d'œil
+    function texteHoraire(c) {
+      const x = cumulHoraire(c), k = x.courante;
+      if (k < 0 || x.aujourd[k] == null) return 'Touchez un point pour voir les chiffres de l\'heure.';
+      const m = x.moyenne[k];
+      return `À ${k + DEBUT_H} h : ${x.aujourd[k]} annonce${x.aujourd[k] > 1 ? 's' : ''} depuis 5 h aujourd'hui · hier à la même heure : ${x.veille[k] ?? '–'} · moyenne : ${m == null ? '–' : Math.round(m)}. Touchez un point pour une autre heure.`;
+    }
     function svgHoraire(c, largeur) {
       // Axe de 5 h à 23 h : la nuit, le bot ne tourne pas. Échelle à gauche, repères horizontaux.
-      const debut = 5, n = 24 - debut, H = 150, gauche = 34, g = 8, b = 22, h = H - b - 16, pas = (largeur - gauche - g) / n;
+      const debut = DEBUT_H, n = 24 - debut, H = 150, gauche = 34, g = 8, b = 22, h = H - b - 16, pas = (largeur - gauche - g) / n;
       const px = (k) => gauche + k * pas + pas / 2;
-      const tranche = (v) => v.slice(debut);
-      const aujourd = tranche(c.aujourd), veille = tranche(c.veille), moyenne = tranche(c.moyenne), courante = c.heureCourante - debut;
+      const { aujourd, veille, moyenne, courante, brut } = cumulHoraire(c);
       const toutes = [...aujourd, ...veille, ...moyenne].filter((v) => v != null);
       const max = Math.max(10, ...toutes), y = (v) => 16 + h - (v / max) * h;
       const ligne = (valeurs, cls) => {
@@ -872,17 +885,20 @@
       let svg = echelle.map((v) => `<line x1="${gauche}" x2="${largeur - g}" y1="${y(v)}" y2="${y(v)}" class="cp-grille"/><text x="${gauche - 5}" y="${y(v) + 4}" class="cp-axe cp-echelle" text-anchor="end">${v}</text>`).join('');
       svg += ligne(moyenne, 'cp-h cp-h-moy');
       svg += ligne(veille, 'cp-h cp-h-veille');
-      svg += ligne(aujourd.map((v, k) => (k <= courante ? v : null)), 'cp-h cp-h-jour');
-      aujourd.forEach((v, k) => { if (v != null && k <= courante) svg += `<circle cx="${px(k)}" cy="${y(v)}" r="3" class="cp-h-pt"/><text x="${px(k)}" y="${y(v) - 6}" class="cp-h-val" text-anchor="middle">${v}</text>`; });
+      svg += ligne(aujourd, 'cp-h cp-h-jour');
+      if (courante >= 0) {          // l'heure en cours : un point sur chacune des trois courbes, pour comparer à la même heure
+        [[moyenne, 'cp-h-pt cp-h-pt-moy'], [veille, 'cp-h-pt cp-h-pt-veille'], [aujourd, 'cp-h-pt']].forEach(([serie, cls]) => { if (serie[courante] != null) svg += `<circle cx="${px(courante)}" cy="${y(serie[courante])}" r="3.5" class="${cls}"/>`; });
+      }
       // Zones cliquables : chaque heure donne les chiffres sous le graphique
       for (let k = 0; k < n; k += 1) {
         const a = aujourd[k], v = veille[k], m = moyenne[k], ref = a ?? v ?? m;
         if (ref == null) continue;
-        const txt = `${k + debut} h · aujourd'hui : ${a ?? '–'} · hier : ${v ?? '–'} · moyenne : ${m == null ? '–' : Math.round(m)}`;
+        const dont = brut.a[k] != null && a != null ? ` (dont ${brut.a[k]} à cette heure)` : '';
+        const txt = `À ${k + debut} h, depuis 5 h : aujourd'hui ${a ?? '–'}${dont} · hier ${v ?? '–'} · moyenne ${m == null ? '–' : Math.round(m)}`;
         svg += `<circle cx="${px(k)}" cy="${y(ref)}" r="10" class="cp-h-hit" data-txt="${esc(txt)}" tabindex="0" role="button" aria-label="${esc(txt)}"/>`;
       }
       for (let k = debut; k < 24; k += 3) svg += `<text x="${px(k - debut)}" y="${H - 6}" class="cp-axe" text-anchor="middle">${k}h</text>`;
-      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles heure par heure, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents, échelle en nombre d'annonces">${svg}</svg>`;
+      return `<svg class="cp-svg" viewBox="0 0 ${largeur} ${H}" width="100%" role="img" aria-label="Annonces nouvelles cumulées depuis 5 h, de 5 h à 23 h : aujourd'hui, hier et la moyenne des jours précédents, échelle en nombre d'annonces">${svg}</svg>`;
     }
     const dessinerCaptures = () => {
       const statsZone = document.getElementById('stats-analyse');          // onglet « Marché » : statistiques par plateforme et par tranche de prix
@@ -933,10 +949,10 @@
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
         <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
-        <p class="sous cp-titre-total">Heure par heure (heure de Paris)</p>
+        <p class="sous cp-titre-total">Cumul depuis 5 h, au fil de la journée (heure de Paris)</p>
         <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
         <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
-        <p class="cp-info-h" aria-live="polite">Touchez un point pour voir les chiffres de l'heure.</p>
+        <p class="cp-info-h" aria-live="polite">${esc(texteHoraire(horaires))}</p>
         <p class="sous cp-titre-total">Total des annonces par jour</p>
         <div class="cp-cadre">${svgTotal(jours, c.depuis, largeur)}</div>
         <details class="captures-acc"><summary>Tableau des chiffres</summary>
