@@ -730,6 +730,13 @@
   };
   // Super pépite : au moins 30 € d'économie et au moins 70 % de réduction sur le prix du site
   const superPepite = (p) => p.pub - p.prix >= ECONOMIE_FORTE && p.prix <= (1 - 0.7) * p.pub;
+  // Annonce de lot : le prix de la carte est la part de ce livre ; la mention donne le nombre de livres et le prix total de l'annonce
+  const lotHtml = (p) => {
+    const m = /^Lot de (\d+) livres/.exec(p.titre || '');
+    if (!m) return '';
+    const total = BUT && BUT.lots && BUT.lots[p.lien];
+    return `<span class="meta pp-lot">Lot de ${m[1]} livres${total ? ` · annonce à ${eur(total)}` : ''} · prix = part de ce livre</span>`;
+  };
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
@@ -746,7 +753,7 @@
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
-      `<span class="meta pp-source">Source : ${source}</span>` + vendueHtml(p) +
+      `<span class="meta pp-source">Source : ${source}</span>` + lotHtml(p) + vendueHtml(p) +
       (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + panneauCorrection(p) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
