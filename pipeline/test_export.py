@@ -2,7 +2,7 @@ import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from datetime import date
-from export_site import duree_en_ligne, mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, totaux_lots, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
+from export_site import duree_en_ligne, mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, totaux_lots, liens_vendus_le, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
 
 
 def e(prix):
@@ -237,6 +237,22 @@ class TestLotsAuButin(unittest.TestCase):
         b = extraire_butin(ann, revue)
         self.assertEqual(sorted(b), ["111", "222"])
         self.assertEqual(totaux_lots(ann, b), {"u1": 12})
+
+
+class TestVendues(unittest.TestCase):
+    def test_le_jour_de_vente_est_celui_du_premier_fichier(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            for jour in ("2026-11-05", "2026-11-09"):
+                Path(d, f"vendus-leboncoin-{jour}.csv").write_text("isbn13,etat,prix,titre,lien\n111,bon,5,t,u1\n", encoding="utf-8")
+            Path(d, "vendus-vinted-2026-11-09.csv").write_text("isbn13,etat,prix,titre,lien\n222,bon,5,t,v1\n", encoding="utf-8")
+            self.assertEqual(liens_vendus_le(Path(d), "leboncoin"), {"u1": "2026-11-05"})
+            self.assertEqual(liens_vendus_le(Path(d), "vinted"), {"v1": "2026-11-09"})
+
+    def test_une_annonce_vendue_nest_plus_comptee_en_ligne(self):
+        ann = {"111": {"bon": [[9, "d", "u4", "leboncoin", "2026-10-27", None], [8, "e", "u5", "leboncoin", "2026-10-27", None]]}}
+        self.assertEqual(calculer_offre(ann, {}, None, "2026-10-27", {"u4": "2026-11-12"})["111"]["lbc"], 1)
 
 
 class TestOffre(unittest.TestCase):
