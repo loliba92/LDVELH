@@ -2,7 +2,7 @@
  "date": "2026-11-13",
  "precedent": "2026-11-12",
  "nb_comparees": 1527,
- "nb_modifiees": 870,
+ "nb_modifiees": 872,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -15,8 +15,8 @@
    "version": "V3",
    "etat": "tres_bon",
    "avant": 9.42,
-   "apres": 11.12,
-   "pct": 0.18,
+   "apres": 11.14,
+   "pct": 0.183,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -67,6 +67,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070334025",
+   "isbn13": "9782070334025",
+   "titre": "Frankenstein le Maudit",
+   "serie": "Epouvante!",
+   "numero": "402",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 6.59,
+   "apres": 7.33,
+   "pct": 0.112,
+   "nature": "annonces",
+   "nb": 32,
+   "recalibre": false
+  },
+  {
    "id": "9791097577247",
    "isbn13": "9791097577247",
    "titre": "Cyclades",
@@ -99,12 +114,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 6,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
-  "n_paires": 140,
-  "gain": 0.03,
-  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
-  "rapport_global": 0.931
+  "n_paires": 141,
+  "gain": 0.024,
+  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
+  "rapport_global": 0.933
  }
 }
