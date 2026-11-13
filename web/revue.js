@@ -631,7 +631,7 @@
   const SEUIL_ABERRANT = 3;          // une annonce à 3 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
-  const corrigees = () => (ANN && ANN.corrigees) || {};
+  const corrigees = () => Object.assign({}, BUT && BUT.corrigees, ANN && ANN.corrigees);          // le Butin porte les annonces vendues de ses cartes, même sans le fichier complet
   // Mention « Vendu » : l'annonce reste affichée (correction « vendue »)
   const vendueHtml = (a) => (corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
@@ -739,6 +739,7 @@
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><a class="couv" href="./#fiche=${encodeURIComponent(p.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(p.ed.titre)}">${img}` +
       (superPepite(p) ? `<span class="pp-super">Super pépite</span>` : '') +
+      (vendueHtml(p) ? '<span class="an-pancarte">Vendu</span>' : '') +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
       `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></a>` +
