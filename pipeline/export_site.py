@@ -138,6 +138,18 @@ JOURS_ANNONCES = 120      # une annonce qui n'est plus en ligne reste consultabl
 ECONOMIE_FORTE = 30          # économie à partir de laquelle une annonce est mise en tête du Butin, même au-dessus de la moitié
 
 
+def totaux_lots(annonces, butin):
+    """{lien: prix total demandé} des annonces de lot présentes au Butin : somme des parts de leurs livres."""
+    liens = {a[2] for par in butin.values() for liste in par.values() for a in liste if str(a[1]).startswith("Lot de ")}
+    totaux = {}
+    for par in annonces.values():
+        for liste in par.values():
+            for a in liste:
+                if a[2] in liens:
+                    totaux[a[2]] = round(totaux.get(a[2], 0) + a[0], 2)
+    return totaux
+
+
 def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
     """Le Butin seul : les annonces à 50 % du prix du site ou moins (3 € d'économie au moins), même édition, même état.
     Les sorciers ne reçoivent que ce sous-ensemble ; la liste complète des annonces est réservée au Zagor."""
@@ -148,7 +160,7 @@ def extraire_butin(annonces, revue, seuil=0.5, economie_mini=3):
             prix_site = publie.get((isbn, etat))
             if not prix_site:
                 continue
-            gardees = [a for a in liste if (a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini or prix_site - a[0] >= ECONOMIE_FORTE) and not str(a[1]).startswith("Lot de ")]
+            gardees = [a for a in liste if (a[0] <= seuil * prix_site and prix_site - a[0] >= economie_mini or prix_site - a[0] >= ECONOMIE_FORTE)]
             if gardees:
                 butin.setdefault(isbn, {})[etat] = gardees
     return butin
@@ -760,6 +772,7 @@ def main():
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := avec_frais(extraire_butin(annonces, revue), frais)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
                                                           "publiees": {a_[2]: publiees[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in publiees},
+                                                          "lots": totaux_lots(annonces, butin),
                                                           "corrigees": {a_[2]: {"statut": corrections[a_[2]]["statut"]} for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in corrections},
                                                           "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},

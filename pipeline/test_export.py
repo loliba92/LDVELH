@@ -2,7 +2,7 @@ import sys, tempfile, unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from datetime import date
-from export_site import duree_en_ligne, mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
+from export_site import duree_en_ligne, mettre_a_jour_disparues, aligner, annonces_cumulees, annonces_incertaines, extraire_butin, totaux_lots, calculer_offre, premieres_vues, fabriquer_minis, source_de_ligne
 
 
 def e(prix):
@@ -227,6 +227,16 @@ class TestButinVinted(unittest.TestCase):
                                     [prix_livre_vinted(16.0), "b", "https://www.vinted.fr/items/2-b", "vinted", "2026-10-27", None]]}}
         butin = extraire_butin(annonces, revue)
         self.assertEqual([a[1] for a in butin["111"]["bon"]], ["a"])
+
+
+class TestLotsAuButin(unittest.TestCase):
+    def test_un_lot_entre_au_butin_avec_son_prix_total(self):
+        ann = {"111": {"bon": [[5, "Lot de 2 livres · x", "u1", "leboncoin", "2026-10-27", None]]},
+               "222": {"bon": [[7, "Lot de 2 livres · x", "u1", "leboncoin", "2026-10-27", None]]}}
+        revue = [{"isbn": "111", "etat": "bon", "publie": 40}, {"isbn": "222", "etat": "bon", "publie": 40}]
+        b = extraire_butin(ann, revue)
+        self.assertEqual(sorted(b), ["111", "222"])
+        self.assertEqual(totaux_lots(ann, b), {"u1": 12})
 
 
 class TestOffre(unittest.TestCase):
