@@ -1076,7 +1076,7 @@
       const ligneFiche = ([prix, titre, lien, origine, vue, , , nu], cote) => {
         const v = verdictImport(prix, cote), ecart = cote != null ? Math.round((prix / cote - 1) * 100) : 0;
         const plusVue = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);
-        return `<li class="ann-li"><span class="ann-prix"${nu != null && nu !== prix ? ` title="${esc(`Prix livré, dont ${fmt(Math.round((prix - nu) * 100) / 100)} de frais`)}"` : ''}>${fmt(prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${ANN && ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : ''}${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}${cote != null ? `<span class="ann-site">site ${fmt(cote)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>` : ''}<span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(vue)}">plus vue</span>` : ''}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
+        return `<li class="ann-li"><span class="ann-prix"${nu != null && nu !== prix ? ` title="${esc(`Prix livré, dont ${fmt(Math.round((prix - nu) * 100) / 100)} de frais`)}"` : ''}>${fmt(prix)}</span><a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>${ANN && ((ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[lien])) ? '<span class="an-vendu">Vendu</span>' : ''}${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}${cote != null ? `<span class="ann-site">site ${fmt(cote)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>` : ''}<span class="ann-titre">${nomOrigine(origine)}</span>${origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(vue)}">plus vue</span>` : ''}${estNiveau3() ? `<button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button>` : ''}</li>`;
       };
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
       if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
@@ -2041,6 +2041,7 @@
     if (!par) return [];
     const lignes = [];
     ETATS.forEach((e) => (par[e.k] || []).forEach(([prix, titre, lien, origine, vue]) => {
+      if (OFFRE.vendues && OFFRE.vendues[lien]) return;      // signalée vendue : plus en ligne
       if (!enLigne(origine) && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;      // eBay non revue au dernier relevé : plus retenue
       const pub = b.prix[e.k];
       lignes.push({ prix, lien, origine, etat: ABREGE[e.k], pub, pct: pub ? Math.round((1 - prix / pub) * 100) : null });
@@ -2212,7 +2213,7 @@
   const nbNouveauxButin = () => {
     if (!niveau2Connu() || !OFFRE || !OFFRE.premieres) return 0;
     const depuis = butinVuLe();
-    return Object.values(OFFRE.premieres).filter((t) => typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;
+    return Object.entries(OFFRE.premieres).filter(([lien, t]) => !(OFFRE.vendues && OFFRE.vendues[lien]) && typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;          // une annonce signalée vendue n'est plus une nouveauté
   };
   // Totaux de l'accueil (sorciers et Zagor) : annonces du Butin (niveaux 2 et 3), annonces reçues (niveau 3), chacun avec le lien vers son détail.
   // Le Butin se compte comme sur sa page : annonces à 50 % du prix du site ou moins (3 € d'économie au moins), eBay seulement si revue au dernier relevé.
@@ -2225,7 +2226,8 @@
       Object.entries(parEtat).forEach(([cle, liste]) => {
         const pub = b.prix[cle];
         if (!pub) return;
-        (liste || []).forEach(([prix, , , origine, vue]) => {
+        (liste || []).forEach(([prix, , lien, origine, vue]) => {
+          if (OFFRE.vendues && OFFRE.vendues[lien]) return;          // signalée vendue : barrée au Butin, mais plus comptée
           if (origine === 'librairie' && cle === 'convenable') return;
           if (!enLigne(origine) && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;
           if (prix <= 0.5 * pub && pub - prix >= 3) n += 1;

@@ -633,7 +633,9 @@
   // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
   const corrigees = () => Object.assign({}, BUT && BUT.corrigees, ANN && ANN.corrigees);          // le Butin porte les annonces vendues de ses cartes, même sans le fichier complet
   // Mention « Vendu » : l'annonce reste affichée (correction « vendue »)
-  const vendueHtml = (a) => (corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue' ? '<span class="an-vendu">Vendu</span>' : '');
+  // Vendue : marquée par vous (correction « vendue »), ou signalée vendue par le robot de relevé (barrée pendant sept jours)
+  const estVendue = (a) => !!((corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien]));
+  const vendueHtml = (a) => (estVendue(a) ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
   // En mode lite (liste Annonces), le panneau reste replié : le bouton « Corriger » de la ligne l'ouvre
@@ -1264,7 +1266,7 @@
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
       // En ligne : même règle que le chiffre de l'accueil (ni annonces eBay « plus vues », ni lignes de lots, ni offres de revendeurs)
-      const nbEnLigne = toutes.filter((a) => !a.partie && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
+      const nbEnLigne = toutes.filter((a) => !a.partie && !estVendue(a) && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's affichées' : ' affichée'} sur ${toutes.length} retenues (dont ${nbEnLigne} en ligne, comme sur l'accueil)${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : ` ; ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => {
         const corr = panneauCorrection(a, true);
