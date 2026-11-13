@@ -2,7 +2,7 @@
  "date": "2026-11-13",
  "precedent": "2026-11-12",
  "nb_comparees": 1530,
- "nb_modifiees": 875,
+ "nb_modifiees": 872,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -19,36 +19,6 @@
    "pct": 0.179,
    "nature": "archives",
    "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782010119965",
-   "isbn13": "9782010119965",
-   "titre": "La Nuit du météore",
-   "serie": "Non classée",
-   "numero": null,
-   "version": "V1",
-   "etat": "bon",
-   "avant": 9.68,
-   "apres": 11.3,
-   "pct": 0.167,
-   "nature": "annonces",
-   "nb": 3,
-   "recalibre": false
-  },
-  {
-   "id": "9782070333288",
-   "isbn13": "9782070333288",
-   "titre": "Les Portes de l'Au-delà",
-   "serie": "Quête du Graal",
-   "numero": "328",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 5.34,
-   "apres": 6.14,
-   "pct": 0.15,
-   "nature": "annonces",
-   "nb": 6,
    "recalibre": false
   },
   {
@@ -129,7 +99,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 8,
+ "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
   "n_paires": 134,
