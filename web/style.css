@@ -2852,7 +2852,8 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .cp-h-veille { stroke: #6cb4ee; stroke-dasharray: 5 4; }
 .cp-h-moy { stroke: #c9c2b0; stroke-dasharray: 1.5 3.5; stroke-width: 2.5; }
 .cp-h-pt { fill: #d4a437; }
-.cp-h-val { fill: var(--text); font: 600 10px var(--f-ui); }
+.cp-h-pt-veille { fill: #6cb4ee; }
+.cp-h-pt-moy { fill: #c9c2b0; }
 .cp-echelle { font-size: 10px; }
 .cp-legende-h { margin: 2px 0 6px; font-size: var(--t-sm); }
 .cp-h-l { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid; margin: 0 5px 3px 10px; vertical-align: middle; }
