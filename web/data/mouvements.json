@@ -2,10 +2,25 @@
  "date": "2026-11-13",
  "precedent": "2026-11-12",
  "nb_comparees": 1530,
- "nb_modifiees": 871,
+ "nb_modifiees": 876,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 3,
  "hausses": [
+  {
+   "id": "9782070333837",
+   "isbn13": "9782070333837",
+   "titre": "Les Spectres de l'Angoisse",
+   "serie": "Défis Fantastiques",
+   "numero": "383",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 33.18,
+   "apres": 39.18,
+   "pct": 0.181,
+   "nature": "annonces",
+   "nb": 12,
+   "recalibre": false
+  },
   {
    "id": "9782070575176",
    "isbn13": "9782070575176",
@@ -22,6 +37,51 @@
    "recalibre": false
   },
   {
+   "id": "9782010119965",
+   "isbn13": "9782010119965",
+   "titre": "La Nuit du météore",
+   "serie": "Non classée",
+   "numero": null,
+   "version": "V1",
+   "etat": "bon",
+   "avant": 9.68,
+   "apres": 11.3,
+   "pct": 0.167,
+   "nature": "annonces",
+   "nb": 3,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333288",
+   "isbn13": "9782070333288",
+   "titre": "Les Portes de l'Au-delà",
+   "serie": "Quête du Graal",
+   "numero": "328",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 5.34,
+   "apres": 6.14,
+   "pct": 0.15,
+   "nature": "annonces",
+   "nb": 6,
+   "recalibre": false
+  },
+  {
+   "id": "9791097577247",
+   "isbn13": "9791097577247",
+   "titre": "Cyclades",
+   "serie": "Littéraction",
+   "numero": null,
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 14.43,
+   "apres": 16.5,
+   "pct": 0.143,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070333271",
    "isbn13": "9782070333271",
    "titre": "Le Seigneur de l'Ombre",
@@ -34,6 +94,36 @@
    "pct": 0.116,
    "nature": "annonces",
    "nb": 7,
+   "recalibre": false
+  },
+  {
+   "id": "9791097577247",
+   "isbn13": "9791097577247",
+   "titre": "Cyclades",
+   "serie": "Littéraction",
+   "numero": null,
+   "version": "V1",
+   "etat": "bon",
+   "avant": 10.9,
+   "apres": 12.16,
+   "pct": 0.116,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9791097577247",
+   "isbn13": "9791097577247",
+   "titre": "Cyclades",
+   "serie": "Littéraction",
+   "numero": null,
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.71,
+   "apres": 7.44,
+   "pct": 0.109,
+   "nature": "annonces",
+   "nb": 1,
    "recalibre": false
   }
  ],
@@ -54,7 +144,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 3,
+ "nb_grands_mouvements": 9,
  "modele": {
   "actif": false,
   "n_paires": 134,
