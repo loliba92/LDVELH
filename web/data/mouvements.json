@@ -2,9 +2,9 @@
  "date": "2026-11-13",
  "precedent": "2026-11-12",
  "nb_comparees": 1527,
- "nb_modifiees": 870,
+ "nb_modifiees": 871,
  "mediane_variation": 0.0,
- "nouvelles_cotes": 0,
+ "nouvelles_cotes": 3,
  "hausses": [
   {
    "id": "9782070575176",
@@ -15,8 +15,8 @@
    "version": "V3",
    "etat": "tres_bon",
    "avant": 9.42,
-   "apres": 11.11,
-   "pct": 0.179,
+   "apres": 11.12,
+   "pct": 0.18,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -102,9 +102,9 @@
  "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
-  "n_paires": 134,
-  "gain": 0.038,
-  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
-  "rapport_global": 0.916
+  "n_paires": 135,
+  "gain": 0.035,
+  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
+  "rapport_global": 0.917
  }
 }
