@@ -760,6 +760,7 @@ def main():
                                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": (butin := avec_frais(extraire_butin(annonces, revue), frais)),
                                                           "premieres": {a_[2]: premieres[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in premieres},
                                                           "publiees": {a_[2]: publiees[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in publiees},
+                                                          "corrigees": {a_[2]: {"statut": corrections[a_[2]]["statut"]} for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in corrections},
                                                           "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},
                                                           "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None)},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
