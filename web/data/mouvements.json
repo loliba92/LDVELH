@@ -7,21 +7,6 @@
  "nouvelles_cotes": 3,
  "hausses": [
   {
-   "id": "9782070333837",
-   "isbn13": "9782070333837",
-   "titre": "Les Spectres de l'Angoisse",
-   "serie": "Défis Fantastiques",
-   "numero": "383",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 33.18,
-   "apres": 39.18,
-   "pct": 0.181,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
-  {
    "id": "9782070575176",
    "isbn13": "9782070575176",
    "titre": "Les Druides de Cener",
@@ -144,7 +129,7 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 9,
+ "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
   "n_paires": 134,
