@@ -629,6 +629,8 @@
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
   const SEUIL_ABERRANT = 3;          // une annonce à 3 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
+  const JOURS_PLUS_VUE = 7;          // une annonce eBay « plus vue » reste dans les pépites (Butin et Annonces) ce nombre de jours après sa dernière observation
+  const plusVueRecente = (vue, dateEbay) => !!vue && !!dateEbay && Math.round((Date.parse(dateEbay) - Date.parse(vue)) / 86400000) <= JOURS_PLUS_VUE;
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
   const corrigees = () => Object.assign({}, BUT && BUT.corrigees, ANN && ANN.corrigees);          // le Butin porte les annonces vendues de ses cartes, même sans le fichier complet
@@ -713,10 +715,11 @@
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
         if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
-        if (!enLigne(origine) && vue && BUT.date_ebay && vue < BUT.date_ebay) return;                 // non revue au dernier relevé : le Butin ne retient que ce qui a été revu
-        if ((prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) && pub - prix < ECONOMIE_FORTE) return;
+        const partie = !enLigne(origine) && !!vue && !!BUT.date_ebay && vue < BUT.date_ebay;          // eBay non revue au dernier relevé : gardée sept jours, signalée « plus vue »
+        if (partie && !plusVueRecente(vue, BUT.date_ebay)) return;
+        if (prix > SEUIL_PEPITE * pub || pub - prix < ECONOMIE_MINI) return;
         const raisons = pointsAVerifier(origine, suppose);
-        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue, premiere: (BUT.premieres && BUT.premieres[lien]) || vue });
+        lignes.push({ ed, cle, lib, prix, pub, titre, lien, origine, raisons, vue, partie, premiere: (BUT.premieres && BUT.premieres[lien]) || vue });
       });
     }));
     return lignes.sort((x, y) => (y.pub - y.prix) - (x.pub - x.prix));
@@ -755,7 +758,7 @@
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
-      `<span class="meta pp-source">Source : ${source}</span>` + lotHtml(p) + vendueHtml(p) +
+      `<span class="meta pp-source">Source : ${source}</span>` + lotHtml(p) + (p.partie ? '<span class="meta pp-plusvue">Plus vue au dernier relevé : peut-être vendue</span>' : '') + vendueHtml(p) +
       (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + panneauCorrection(p) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
@@ -1253,7 +1256,7 @@
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
       const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
       const vues = toutes.filter((a) => (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie) && !(aberrRc && aberrRc.checked && a.aberrant)
-        && (!pepRc || !pepRc.checked || a.v === 'pepite' || a.v === 'super') && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
+        && (!pepRc || !pepRc.checked || ((a.v === 'pepite' || a.v === 'super') && !(a.fam === 'librairie' && a.cle === 'convenable') && (!a.partie || plusVueRecente(a.vue, ANN.date_ebay)))) && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
         && (!pminRc || pminRc.value === '' || a.prix >= Number(pminRc.value)) && (!pmaxRc || pmaxRc.value === '' || a.prix <= Number(pmaxRc.value)))

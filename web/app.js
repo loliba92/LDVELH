@@ -2216,7 +2216,7 @@
     return Object.entries(OFFRE.premieres).filter(([lien, t]) => !(OFFRE.vendues && OFFRE.vendues[lien]) && typeof t === 'string' && t.length > 10 && Date.parse(t) > depuis).length;          // une annonce signalée vendue n'est plus une nouveauté
   };
   // Totaux de l'accueil (sorciers et Zagor) : annonces du Butin (niveaux 2 et 3), annonces reçues (niveau 3), chacun avec le lien vers son détail.
-  // Le Butin se compte comme sur sa page : annonces à 50 % du prix du site ou moins (3 € d'économie au moins), eBay seulement si revue au dernier relevé.
+  // Le Butin se compte comme sur sa page : annonces à 50 % du prix du site ou moins (3 € d'économie au moins), eBay « plus vue » gardée sept jours.
   function nbButinTotal() {
     if (!OFFRE || !OFFRE.annonces) return null;
     let n = 0;
@@ -2229,7 +2229,7 @@
         (liste || []).forEach(([prix, , lien, origine, vue]) => {
           if (OFFRE.vendues && OFFRE.vendues[lien]) return;          // signalée vendue : barrée au Butin, mais plus comptée
           if (origine === 'librairie' && cle === 'convenable') return;
-          if (!enLigne(origine) && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay) return;
+          if (!enLigne(origine) && vue && OFFRE.date_ebay && vue < OFFRE.date_ebay && Math.round((Date.parse(OFFRE.date_ebay) - Date.parse(vue)) / 86400000) > 7) return;          // eBay « plus vue » : gardée sept jours, comme au Butin
           if (prix <= 0.5 * pub && pub - prix >= 3) n += 1;
         });
       });
