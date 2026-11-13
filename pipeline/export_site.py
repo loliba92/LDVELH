@@ -756,7 +756,7 @@ def main():
                          "vinted": fichiers_vinted[-1].stem[-10:] if fichiers_vinted else None}
         chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
-                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": avec_frais(annonces, frais), "incertaines": incertaines, "corrigees": corrections,
+                                          "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": avec_frais(annonces, frais), "incertaines": incertaines, "corrigees": corrections, "lots": totaux_lots(annonces, annonces),
                                           "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}

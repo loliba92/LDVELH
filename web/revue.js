@@ -730,13 +730,12 @@
   };
   // Super pépite : au moins 30 € d'économie et au moins 70 % de réduction sur le prix du site
   const superPepite = (p) => p.pub - p.prix >= ECONOMIE_FORTE && p.prix <= (1 - 0.7) * p.pub;
-  // Annonce de lot : le prix de la carte est la part de ce livre ; la mention donne le nombre de livres et le prix total de l'annonce
-  const lotHtml = (p) => {
-    const m = /^Lot de (\d+) livres/.exec(p.titre || '');
-    if (!m) return '';
-    const total = BUT && BUT.lots && BUT.lots[p.lien];
-    return `<span class="meta pp-lot">Lot de ${m[1]} livres${total ? ` · annonce à ${eur(total)}` : ''} · prix = part de ce livre</span>`;
-  };
+  // Annonce de lot : le prix affiché est la part du livre ; on donne le nombre de livres et le prix total de l'annonce
+  const eurLot = (v) => eur(v).replace(' ', '\u00a0');
+  const nbLot = (a) => { const m = /^Lot de (\d+) livres/.exec(a.titre || ''); return m ? m[1] : ''; };
+  const totalLot = (a) => (ANN && ANN.lots && ANN.lots[a.lien]) || (BUT && BUT.lots && BUT.lots[a.lien]) || 0;
+  const lotBadge = (a) => (nbLot(a) ? `<span class="an-lot">Lot de ${nbLot(a)}</span>` : '');
+  const lotHtml = (a) => (nbLot(a) ? `<span class="meta pp-lot">Lot de ${nbLot(a)} livres${totalLot(a) ? ` · annonce à ${eurLot(totalLot(a))}` : ''} · prix = part de ce livre</span>` : '');
   function cartePepite(p) {
     const eco = p.pub - p.prix, pct = Math.round((1 - p.prix / p.pub) * 100), solide = !p.raisons.length;
     const num = p.ed.numero && !/^0+$/.test(p.ed.numero) ? ' n° ' + esc(p.ed.numero) : '';
@@ -747,6 +746,7 @@
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><a class="couv" href="./#fiche=${encodeURIComponent(p.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(p.ed.titre)}">${img}` +
       (superPepite(p) ? `<span class="pp-super">Super pépite</span>` : '') +
       (vendueHtml(p) ? '<span class="an-pancarte">Vendu</span>' : '') +
+      lotBadge(p) +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
       `<span class="pp-voile"><strong class="pp-prix">${eur(p.prix)}</strong><span class="pp-pct">−${pct} %</span></span></a>` +
@@ -1271,7 +1271,7 @@
         return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${nbLot(a) ? `<span class="an-lot-ligne" title="Annonce de lot : le prix est la part de ce livre">Lot de ${nbLot(a)} livres${totalLot(a) ? ' · ' + eurLot(totalLot(a)) : ''}</span>` : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
         ${corr}
       </article>`;
       };
@@ -1280,11 +1280,12 @@
         const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${lotBadge(a)}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
           <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
+          ${nbLot(a) ? lotHtml(a).replace('meta pp-lot', 'an-meta an-lot-txt') : ''}
           ${a.pub != null ? `<span class="an-site">site ${eur(a.pub)} · ${ecartHtml(a)}</span>` : ''}
           ${barrePrix(a)}
           <span class="an-meta">${ABR_ETAT[a.cle]} · ${NOM[a.fam]} · ${ageHtml(a)}${a.partie ? ' · plus vue' : ''}</span>

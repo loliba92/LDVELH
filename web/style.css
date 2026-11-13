@@ -2873,3 +2873,8 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 /* Liste de tous les livres : niveau de prix, ou prix exact pour un compte connecté */
 .livre-niveau { margin-left: 6px; color: var(--gold); font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
 .livre-niveau.livre-prix { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+
+/* Annonce de lot : étiquette sur la jaquette (Butin, Annonces), pastille en liste */
+.an-lot { position: absolute; left: 6px; top: 6px; z-index: 2; padding: 1px 9px; border-radius: 999px; background: var(--gold); color: var(--on-accent, #111); font: 800 .72rem/1.5 var(--f-ui); white-space: nowrap; }
+.an-lot-ligne { display: inline-block; padding: 0 8px; border: 1px solid var(--gold); border-radius: 999px; color: var(--gold); font: 700 .72rem/1.5 var(--f-ui); }
+.an-lot-txt { display: block; color: var(--muted); }
