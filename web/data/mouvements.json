@@ -2,7 +2,7 @@
  "date": "2026-11-14",
  "precedent": "2026-11-13",
  "nb_comparees": 1530,
- "nb_modifiees": 883,
+ "nb_modifiees": 884,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -45,36 +45,20 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 60.09,
-   "apres": 66.73,
-   "pct": 0.111,
+   "apres": 66.68,
+   "pct": 0.11,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   }
  ],
- "baisses": [
-  {
-   "id": "9782070334094",
-   "isbn13": "9782070334094",
-   "titre": "A Feu et a Sang",
-   "serie": "Histoire",
-   "numero": "409",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 23.81,
-   "apres": 20.94,
-   "pct": -0.121,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  }
- ],
- "nb_grands_mouvements": 4,
+ "baisses": [],
+ "nb_grands_mouvements": 3,
  "modele": {
   "actif": false,
-  "n_paires": 164,
-  "gain": 0.008,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "n_paires": 162,
+  "gain": -0.001,
+  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
   "rapport_global": 0.916
  }
 }
