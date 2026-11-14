@@ -628,7 +628,7 @@
   // Point à vérifier : voir pointsAVerifier ; sans point, l'annonce est retenue sans réserve.
   // « À trouver » de la personne (liste gardée sur l'appareil et synchronisée avec son Drive) : les annonces de ces livres sont signalées
   const souhaits = () => { try { return JSON.parse(localStorage.getItem('cote-souhaits-v1') || '{}') || {}; } catch (e) { return {}; } };
-  const SEUIL_ABERRANT = 3;          // une annonce à 3 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
+  const SEUIL_ABERRANT = 2;          // une annonce à 2 fois le prix du très bon état ou plus : prix fou ou annonce trompeuse, affichée mais exclue de la cote (décision du propriétaire ; même seuil dans pipeline/prix_aberrants.py)
   const JOURS_PLUS_VUE = 7;          // une annonce eBay « plus vue » reste dans les pépites (Butin et Annonces) ce nombre de jours après sa dernière observation
   const plusVueRecente = (vue, dateEbay) => !!vue && !!dateEbay && Math.round((Date.parse(dateEbay) - Date.parse(vue)) / 86400000) <= JOURS_PLUS_VUE;
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
@@ -705,7 +705,7 @@
     const tabTr = `<table class="captures-table"><caption class="sr-only">Statistiques par tranche de prix</caption>${tete(['Tranche', 'Annonces', 'Pépites', 'Part de pépites'])}<tbody>${tranches.map((g) => ligne(g, (x) => `<td>${x.n}</td><td>${x.pep}</td><td>${pct(x.n ? x.pep / x.n : null)}</td>`)).join('')}</tbody></table>`;
     return `<div class="stats-rc">${resume}<h4 class="stats-titre">Par plateforme</h4><div class="captures-defile">${tabPlat}</div><h4 class="stats-titre">Par tranche de prix</h4><div class="captures-defile">${tabTr}</div></div>`;
   }
-  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) + (TOUTES_RC.nbAberrantes ? `<p class="sous">${TOUTES_RC.nbAberrantes} annonces à 3 fois le prix du très bon état ou plus sont exclues de ces chiffres.</p>` : '') : '');
+  const statsHtml = () => (TOUTES_RC && TOUTES_RC.length ? statsRecues(TOUTES_RC) + (TOUTES_RC.nbAberrantes ? `<p class="sous">${TOUTES_RC.nbAberrantes} annonces à 2 fois le prix du très bon état ou plus sont exclues de ces chiffres.</p>` : '') : '');
   let dessinerPepites = () => {};
   function pepites() {
     const lignes = [];
@@ -1093,7 +1093,7 @@
       const txt = `${cat ? cat + ' : ' : ''}annonces de ${eur(a.lot.min)} à ${eur(a.lot.max)}, médiane ${eur(a.lot.med)}${site ? `. Le trait marque le prix du site, ${eur(a.pub)}` : ''}`;
       return `<span class="rc-therm" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><span class="rc-therm-piste">${site ? `<span class="rc-therm-rep" style="left:${(place(a.pub) * 100).toFixed(1)}%"></span>` : ''}<span class="rc-therm-pt" style="left:${(place(a.prix) * 100).toFixed(1)}%"></span></span>${extreme || !cat ? '' : `<span class="rc-therm-txt">${cat}</span>`}</span>`;
     };
-    const exclueHtml = '<span class="an-exclu" title="Prix à 3 fois le très bon état ou plus : annonce affichée, mais écartée du calcul de la cote.">Exclue du pricing</span>';
+    const exclueHtml = '<span class="an-exclu" title="Prix à 2 fois le très bon état ou plus : annonce affichée, mais écartée du calcul de la cote.">Exclue du pricing</span>';
     // Écart au prix du site : rouge au-dessus, vert en dessous
     const ecartHtml = (a) => {
       const e = Math.round((a.prix / a.pub - 1) * 100);
@@ -1286,7 +1286,7 @@
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
       // En ligne : même règle que le chiffre de l'accueil (ni annonces eBay « plus vues », ni lignes de lots, ni offres de revendeurs)
       const nbEnLigne = toutes.filter((a) => !a.partie && !estVendue(a) && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
-      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's affichées' : ' affichée'} sur ${toutes.length} retenues (dont ${nbEnLigne} en ligne, comme sur l'accueil)${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 3 fois le très bon état ou plus)` : ` ; ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 3 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
+      etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's affichées' : ' affichée'} sur ${toutes.length} retenues (dont ${nbEnLigne} en ligne, comme sur l'accueil)${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 2 fois le très bon état ou plus)` : ` ; ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 2 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => {
         const corr = panneauCorrection(a, true);
         return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">

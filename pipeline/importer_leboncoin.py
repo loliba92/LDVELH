@@ -268,7 +268,7 @@ def etaler_lots(annonces, lots):
 def _agreger(lignes, jour, lots=None, datees=False, tbe=None):
     """Une annonce de lot n'est pas le prix d'un livre : sa part de chaque livre remplace le prix entier.
     `datees` : chaque annonce est datée de sa publication (jour du relevé moins son âge), pas du jour où elle a été vue ; son poids dans la cote baisse avec son ancienneté.
-    `tbe` : {isbn13: prix du très bon état} ; une annonce dont le prix livré atteint 3 fois ce prix est écartée de la cote (elle reste dans les fichiers d'annonces)."""
+    `tbe` : {isbn13: prix du très bon état} ; une annonce dont le prix livré atteint 2 fois ce prix est écartée de la cote (elle reste dans les fichiers d'annonces)."""
     lots = lots or {}
     groupes = {}
     fin = date.fromisoformat(jour)

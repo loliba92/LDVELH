@@ -214,7 +214,7 @@ class TestCoherenceEtMarche(unittest.TestCase):
             p = {"tres_bon": v}
             self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 24.0]}), 0)
         p = {"tres_bon": {"prix": 40.0, "source": "archives"}}
-        self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 130.0]}), 0)           # 130 € = plus de 3 fois le très bon état : écartée, il ne reste qu'une annonce
+        self.assertEqual(etats.plafonner_au_marche(p, {"tres_bon": [20.0, 130.0]}), 0)           # 130 € = plus de 2 fois le très bon état : écartée, il ne reste qu'une annonce
 
     def test_cote_proche_des_annonces_n_est_pas_touchee(self):
         p = {"bon": {"prix": 21.0, "source": "actuel", "nb": 2}}
