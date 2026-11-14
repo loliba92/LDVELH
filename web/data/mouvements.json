@@ -7,21 +7,6 @@
  "nouvelles_cotes": 0,
  "hausses": [
   {
-   "id": "9782070333837",
-   "isbn13": "9782070333837",
-   "titre": "Les Spectres de l'Angoisse",
-   "serie": "Défis Fantastiques",
-   "numero": "383",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 32.63,
-   "apres": 38.96,
-   "pct": 0.194,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
-  {
    "id": "9782070334858",
    "isbn13": "9782070334858",
    "titre": "Pour l'Indépendance",
@@ -83,7 +68,7 @@
   }
  ],
  "baisses": [],
- "nb_grands_mouvements": 5,
+ "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
   "n_paires": 143,
