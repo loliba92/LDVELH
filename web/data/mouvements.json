@@ -2,7 +2,7 @@
  "date": "2026-11-14",
  "precedent": "2026-11-13",
  "nb_comparees": 1530,
- "nb_modifiees": 872,
+ "nb_modifiees": 875,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -19,6 +19,21 @@
    "pct": 0.194,
    "nature": "annonces",
    "nb": 12,
+   "recalibre": false
+  },
+  {
+   "id": "9782070334858",
+   "isbn13": "9782070334858",
+   "titre": "Pour l'Indépendance",
+   "serie": "Histoire",
+   "numero": "485",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 19.97,
+   "apres": 23.01,
+   "pct": 0.152,
+   "nature": "annonces",
+   "nb": 7,
    "recalibre": false
   },
   {
@@ -68,12 +83,12 @@
   }
  ],
  "baisses": [],
- "nb_grands_mouvements": 4,
+ "nb_grands_mouvements": 5,
  "modele": {
   "actif": false,
-  "n_paires": 142,
-  "gain": 0.017,
+  "n_paires": 143,
+  "gain": 0.019,
   "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.934
+  "rapport_global": 0.935
  }
 }
