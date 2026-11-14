@@ -2,25 +2,10 @@
  "date": "2026-11-14",
  "precedent": "2026-11-13",
  "nb_comparees": 1530,
- "nb_modifiees": 878,
+ "nb_modifiees": 883,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
  "hausses": [
-  {
-   "id": "9782070334858",
-   "isbn13": "9782070334858",
-   "titre": "Pour l'Indépendance",
-   "serie": "Histoire",
-   "numero": "485",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 19.97,
-   "apres": 23.34,
-   "pct": 0.169,
-   "nature": "annonces",
-   "nb": 9,
-   "recalibre": false
-  },
   {
    "id": "9782075084499",
    "isbn13": "9782075084499",
@@ -37,21 +22,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070333783",
-   "isbn13": "9782070333783",
-   "titre": "Le Chemin Maudit",
-   "serie": "L'Œil Noir",
-   "numero": "378",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 60.09,
-   "apres": 67.02,
-   "pct": 0.115,
-   "nature": "annonces",
-   "nb": 6,
-   "recalibre": false
-  },
-  {
    "id": "9791097577247",
    "isbn13": "9791097577247",
    "titre": "Cyclades",
@@ -65,15 +35,46 @@
    "nature": "archives",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070333783",
+   "isbn13": "9782070333783",
+   "titre": "Le Chemin Maudit",
+   "serie": "L'Œil Noir",
+   "numero": "378",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 60.09,
+   "apres": 66.73,
+   "pct": 0.111,
+   "nature": "annonces",
+   "nb": 5,
+   "recalibre": false
   }
  ],
- "baisses": [],
+ "baisses": [
+  {
+   "id": "9782070334094",
+   "isbn13": "9782070334094",
+   "titre": "A Feu et a Sang",
+   "serie": "Histoire",
+   "numero": "409",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 23.81,
+   "apres": 20.94,
+   "pct": -0.121,
+   "nature": "annonces",
+   "nb": 5,
+   "recalibre": false
+  }
+ ],
  "nb_grands_mouvements": 4,
  "modele": {
   "actif": false,
-  "n_paires": 170,
-  "gain": 0.022,
+  "n_paires": 162,
+  "gain": 0.025,
   "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.942
+  "rapport_global": 0.932
  }
 }
