@@ -887,7 +887,7 @@
   };
   // Les annonces d'un livre : toutes ses éditions (V1, V2…), pas seulement celle qui est ouverte
   const editionIsbn = (b) => (b.isbn13 ? [b] : []);          // annonces et offre de l'édition de la fiche seulement : une V1 ne se compare pas aux V2 ou V3
-  // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %), avec au moins MIN_ANNONCES annonces en ligne pour l'état que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 3 fois le très bon état ou plus sont écartées.
+  // Cotes validées à la main ou d'archives (jamais recalculées) plus chères (de plus de 5 %), avec au moins MIN_ANNONCES annonces en ligne pour l'état que toutes les annonces en ligne du même état (annonces chargées, Zagor). Les annonces à 2 fois le très bon état ou plus sont écartées.
   const MIN_ANNONCES = 2;          // en dessous, on laisse le lissage quotidien rapprocher la cote du marché
   function horsMarche(b) {
     if (!ANN || !ANN.annonces || !b.isbn13) return null;

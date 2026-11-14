@@ -5,9 +5,9 @@ import prix_aberrants as pa
 
 
 class TestPrixAberrants(unittest.TestCase):
-    def test_seuil_a_trois_fois(self):
-        self.assertFalse(pa.est_aberrant(29.9, 10))
-        self.assertTrue(pa.est_aberrant(30, 10))
+    def test_seuil_a_deux_fois(self):
+        self.assertFalse(pa.est_aberrant(19.9, 10))
+        self.assertTrue(pa.est_aberrant(20, 10))
         self.assertTrue(pa.est_aberrant(476, 15.8))
 
     def test_sans_reference(self):

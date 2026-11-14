@@ -1,8 +1,8 @@
-"""Annonces à prix aberrant : 3 fois le prix du très bon état de leur édition, ou plus. Elles restent affichées mais sont écartées de la cote."""
+"""Annonces à prix aberrant : 2 fois le prix du très bon état de leur édition, ou plus. Elles restent affichées mais sont écartées de la cote."""
 import json
 from pathlib import Path
 
-SEUIL = 3          # décision du propriétaire : à partir de 3 fois le très bon état, le prix est jugé fou ou trompeur
+SEUIL = 2          # décision du propriétaire : à partir de 2 fois le très bon état, le prix est jugé fou ou trompeur
 REVUE = Path(__file__).resolve().parent.parent / "web" / "data" / "revue.json"
 
 

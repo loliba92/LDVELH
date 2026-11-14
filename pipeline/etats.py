@@ -11,6 +11,8 @@ import math
 import statistics
 from pathlib import Path
 
+import prix_aberrants
+
 ETATS = ("convenable", "bon", "tres_bon")
 ECART_DEFAUT = 1.20      # état supérieur au moins 20 % au-dessus de l'état inférieur quand les prix se contredisent
 DEFAUT = {"convenable": 0.40, "bon": 0.60, "tres_bon": 1.0}
@@ -152,14 +154,14 @@ MIN_ANNONCES_MARCHE = 2   # en dessous de 2 annonces en ligne, on laisse le liss
 def plafonner_au_marche(par_etat, annonces):
     """Cible d'un état (avant lissage) ramenée à la médiane de ses annonces en ligne quand elle les dépasse de plus de 5 % et que l'état a au moins
     2 annonces. annonces : {état: [prix des annonces en ligne]}. Un prix validé et le prix du neuf (règle du propriétaire) ne sont jamais touchés.
-    Les annonces à 3 fois le très bon état ou plus sont écartées. Renvoie le nombre d'états ramenés."""
+    Les annonces à 2 fois le très bon état ou plus sont écartées. Renvoie le nombre d'états ramenés."""
     n = 0
     tbe = (par_etat.get("tres_bon") or {}).get("prix")
     for e in ETATS:
         v = par_etat.get(e)
         if not v or not v.get("prix") or v.get("source") in ("validé", "neuf") or v.get("neuf"):
             continue
-        prix = [p for p in annonces.get(e, []) if not (tbe and p >= 3 * tbe)]
+        prix = [p for p in annonces.get(e, []) if not (tbe and p >= prix_aberrants.SEUIL * tbe)]
         if len(prix) >= MIN_ANNONCES_MARCHE and v["prix"] > MARGE_MARCHE * max(prix):
             par_etat[e] = {**v, "prix": round(statistics.median(prix), 2), "source": "actuel", "nature": "annonces", "nb": len(prix),
                            "confiance": "faible", "plafonne_marche": True, "deduit": False}
