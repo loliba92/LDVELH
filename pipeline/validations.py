@@ -1,7 +1,7 @@
 """Prix validés par le propriétaire (boutons « Confirmer » / « Corriger » de la page « Vérifier les prix »).
 
-Un prix validé prime sur tout le reste (archives, annonces eBay, règle 40/60, correctifs de cohérence) : il est affiché
-tel quel jusqu'à ce que le propriétaire le change. Le fichier `data/manual/prix_valides.json` a la forme
+Un prix validé prime sur tout le reste (archives, annonces eBay, règle 40/60, correctifs de cohérence) le jour de la validation.
+Les jours suivants, il sert de prix de la veille et le prix converge vers la cible du jour (lissage). Le fichier `data/manual/prix_valides.json` a la forme
   {"valides": {"<isbn13>|<etat>": {"prix": 27.5, "decision": "confirme" | "corrige", "le": "2026-10-14", "par": "Nom d'admin (facultatif)"}}}
 La page produit un fichier de même forme (« Envoyer mes validations ») ; `importer` le fusionne dans le fichier du dépôt.
 """
@@ -10,6 +10,8 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
+
+import etats
 
 ETATS = ("convenable", "bon", "tres_bon")
 DECISIONS = ("confirme", "corrige")
@@ -81,13 +83,20 @@ def retirer(cles, chemin=CHEMIN):
     return len(retirees)
 
 
-def appliquer(par_etat, isbn, valides):
-    """Remplace dans `par_etat` ({etat: estimation}) les prix validés ; garde le prix calculé dans « calcule ». Renvoie le nombre."""
+def appliquer(par_etat, isbn, valides, jour=None, veille=None, cibles=None, gains=None):
+    """Remplace dans `par_etat` ({etat: estimation}) les prix validés ; garde le prix calculé dans « calcule ».
+    Le jour de la validation, le prix validé vaut tel quel. Les jours suivants (jour, veille et cibles donnés), il sert de prix
+    de la veille : le prix glisse vers la cible du jour au rythme du lissage. Renvoie le nombre de prix validés appliqués tels quels."""
     n = 0
     for e in ETATS:
         v = valides.get((isbn, e))
         if v:
             avant = (par_etat.get(e) or {}).get("prix")
+            cible, depart = (cibles or {}).get(e) or {}, (veille or {}).get(e)
+            if jour and v["le"] < jour and depart and cible.get("prix"):
+                par_etat[e] = {**cible, "prix": round(depart + etats.gain_de(cible, gains or etats.GAINS_DEFAUT) * (cible["prix"] - depart), 2),
+                               "lisse": True, "cible": cible["prix"]}
+                continue
             par_etat[e] = {"prix": v["prix"], "source": "validé", "nature": "validé", "nb": 0, "date": v["le"],
                            "confiance": "validée", "valide": True, "decision": v["decision"], "calcule": avant}
             if v.get("par"):

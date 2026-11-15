@@ -85,7 +85,7 @@ def completer(par_etat, ratios):
 #     prix du jour = prix de la veille + gain × (cible du jour − prix de la veille)
 # La « cible » est l'estimation recalculée chaque jour à partir des données (annonces, archives, rapports entre états). Le gain
 # (part de l'écart rattrapée en un jour) dépend de la confiance : plus il y a d'annonces, plus le prix suit vite sa cible.
-# Un prix validé par le propriétaire n'est jamais lissé : il remplace la cible, et c'est lui qui sert de prix de la veille ensuite.
+# Un prix validé par le propriétaire remplace la cible le jour de la validation, puis sert de prix de la veille (voir validations.appliquer).
 GAINS_DEFAUT = {0: 0.10, 1: 0.10, 2: 0.20, 3: 0.30}      # selon le nombre d'annonces (3 = trois ou plus) ; 0 : prix déduit ou d'archive
 
 
