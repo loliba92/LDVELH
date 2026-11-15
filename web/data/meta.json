@@ -18,7 +18,7 @@
   "nb_prix_actuels": 1023,
   "calibration": {
     "actif": false,
-    "n_paires": 171,
+    "n_paires": 173,
     "gain": 0.017,
     "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
     "calcule_le": "2026-11-15",
