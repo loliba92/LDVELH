@@ -135,8 +135,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 13.81,
-   "apres": 17.88,
-   "pct": 0.295,
+   "apres": 17.9,
+   "pct": 0.296,
    "nature": "annonces",
    "nb": 11,
    "recalibre": false
@@ -372,9 +372,9 @@
  "nb_grands_mouvements": 78,
  "modele": {
   "actif": false,
-  "n_paires": 187,
-  "gain": 0.024,
-  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
+  "n_paires": 188,
+  "gain": 0.014,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
   "rapport_global": 0.911
  }
 }
