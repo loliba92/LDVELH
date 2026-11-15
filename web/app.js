@@ -1537,7 +1537,7 @@
   // Une annonce : le titre et le prix sur la première ligne, le verdict et le détail sur la seconde ; toute la ligne ouvre l'annonce
   const ligneImport = (a) => {
     const { ed, pub, vendu, v } = infosImport(a);
-    const nom = ed ? `${ed.titre} (${ed.version})` : a.isbn;
+    const nom = ed ? (a.verif ? ed.titre : `${ed.titre} (${ed.version})`) : a.isbn;          // une édition à vérifier s'affiche sans numéro de version
     const src = /(^|\.)vinted\./i.test((a.lien || '').split('/')[2] || '') ? 'Vinted' : 'Leboncoin';
     const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
     const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
