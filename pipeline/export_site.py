@@ -566,6 +566,7 @@ def main():
     # Lissage quotidien : le prix du jour dépend de celui de la veille (voir etats.lisser). Appliqué à partir du 22 octobre 2026, après la
     # remise à zéro du relevé du 21 (annonces d'autres objets retirées), pour ne pas bloquer cette correction.
     nb_lisses = 0
+    veille, gains = {}, etats.GAINS_DEFAUT
     if args.aujourdhui.isoformat() >= LISSAGE_DEPUIS:
         veilles = [h for h in mouvements.charger(DB.parent.parent / "processed" / "cotes-historique.json") if h["date"] < args.aujourdhui.isoformat()]
         if veilles:
@@ -592,7 +593,9 @@ def main():
         cle_de[r["id"]] = r["version_key"]
         p = dict(prix.get(r["version_key"], {}))
         isbn = r["isbn13"]
-        nb_valides += validations.appliquer(p, isbn, valides) if isbn else 0       # un prix validé prime sur tout le reste
+        # Un prix validé vaut le jour de la validation ; ensuite il sert de prix de la veille et converge vers la cible.
+        nb_valides += validations.appliquer(p, isbn, valides, args.aujourdhui.isoformat(), {e: veille.get(f"{isbn}|{e}") for e in ETATS},
+                                            sans_valide.get(r["version_key"], {}), gains) if isbn else 0
         image = editions.cle_image(r["id"], isbn)                  # ISBN, ou identifiant simplifié pour une fiche sans ISBN
         petite = f"covers/small/{image}.webp" if (COVERS / "small" / f"{image}.webp").exists() else None
         grande = f"covers/medium/{image}.webp" if (COVERS / "medium" / f"{image}.webp").exists() else None

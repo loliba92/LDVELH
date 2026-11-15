@@ -133,7 +133,7 @@ Limite : cette règle n'est pas confirmée par les données (archives : 62 % et 
 
 
 ## Prix validés par le propriétaire (Confirmer / Corriger)
-Sur la page « Vérifier les prix », chaque prix a deux boutons : **Confirmer** garde le prix affiché, **Corriger** en fixe un autre (on peut aussi saisir un prix pour un état qui n'en a pas). Un prix validé **prime sur tout** : archives, annonces eBay, règle 40/60, correctifs de cohérence. Il est affiché tel quel jusqu'à ce que le propriétaire le change, et le prix que le site aurait calculé est gardé à côté (« le site calculait… »).
+Sur la page « Vérifier les prix », chaque prix a deux boutons : **Confirmer** garde le prix affiché, **Corriger** en fixe un autre (on peut aussi saisir un prix pour un état qui n'en a pas). Un prix validé **prime sur tout** le jour de la validation : archives, annonces eBay, règle 40/60, correctifs de cohérence. Les jours suivants, il sert de prix de la veille et le prix converge graduellement vers la cible calculée (lissage quotidien). Le prix que le site aurait calculé est gardé à côté (« le site calculait… »).
 
 Fonctionnement : le site est statique, les validations sont d'abord gardées dans le navigateur (aucune donnée envoyée), puis le propriétaire télécharge un fichier (`prix-valides-AAAA-MM-JJ.json`) et le transmet. `python pipeline/validations.py <fichier>` le fusionne dans `data/manual/prix_valides.json` (entrées invalides refusées, la plus récente l'emporte) ; l'export (`export_site.py`) applique ces prix, champ `valide` dans `prix_info` et dans `revue.json`. Les prix validés ne sont plus « À vérifier ».
 
