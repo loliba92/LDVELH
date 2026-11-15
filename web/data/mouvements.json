@@ -2,7 +2,7 @@
  "date": "2026-11-15",
  "precedent": "2026-11-14",
  "nb_comparees": 1533,
- "nb_modifiees": 1429,
+ "nb_modifiees": 1430,
  "mediane_variation": -0.006,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -30,8 +30,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 14.4,
-   "apres": 21.87,
-   "pct": 0.519,
+   "apres": 21.85,
+   "pct": 0.517,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -60,8 +60,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 9.6,
-   "apres": 13.96,
-   "pct": 0.454,
+   "apres": 13.95,
+   "pct": 0.453,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -75,8 +75,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 24.0,
-   "apres": 34.89,
-   "pct": 0.454,
+   "apres": 34.86,
+   "pct": 0.452,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 14.66,
-   "apres": 20.01,
-   "pct": 0.365,
+   "apres": 20.02,
+   "pct": 0.366,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
@@ -142,6 +142,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070520329",
+   "isbn13": "9782070520329",
+   "titre": "Les Accessoires du Maître",
+   "serie": "L'Œil Noir",
+   "numero": "000",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 13.67,
+   "apres": 17.61,
+   "pct": 0.288,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
    "id": "9782070584413",
    "isbn13": "9782070584413",
    "titre": "Le Combat des Loups",
@@ -154,21 +169,6 @@
    "pct": 0.288,
    "nature": "archives",
    "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070520329",
-   "isbn13": "9782070520329",
-   "titre": "Les Accessoires du Maître",
-   "serie": "L'Œil Noir",
-   "numero": "000",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 13.67,
-   "apres": 17.56,
-   "pct": 0.285,
-   "nature": "archives",
-   "nb": 1,
    "recalibre": false
   },
   {
@@ -372,9 +372,9 @@
  "nb_grands_mouvements": 77,
  "modele": {
   "actif": false,
-  "n_paires": 182,
-  "gain": 0.02,
+  "n_paires": 183,
+  "gain": 0.016,
   "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.913
+  "rapport_global": 0.912
  }
 }
