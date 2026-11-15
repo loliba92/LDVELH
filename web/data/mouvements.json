@@ -204,10 +204,10 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 18,
+ "nb_grands_mouvements": 19,
  "modele": {
   "actif": false,
-  "n_paires": 171,
+  "n_paires": 173,
   "gain": 0.017,
   "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
   "rapport_global": 0.94
