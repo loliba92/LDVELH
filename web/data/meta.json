@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-11-14",
+  "genere_le": "2026-11-15",
   "nb_versions": 537,
   "nb_livres": 295,
   "nb_series": 45,
@@ -15,14 +15,14 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 1029,
+  "nb_prix_actuels": 1023,
   "calibration": {
     "actif": false,
-    "n_paires": 170,
-    "gain": 0.022,
+    "n_paires": 171,
+    "gain": 0.017,
     "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-    "calcule_le": "2026-11-14",
-    "rapport_global": 0.942,
+    "calcule_le": "2026-11-15",
+    "rapport_global": 0.94,
     "nb_recalibres": 0
   }
 }
