@@ -2,10 +2,26 @@
  "date": "2026-11-15",
  "precedent": "2026-11-14",
  "nb_comparees": 1533,
- "nb_modifiees": 884,
+ "nb_modifiees": 886,
  "mediane_variation": 0.0,
  "nouvelles_cotes": 3,
- "hausses": [],
+ "hausses": [
+  {
+   "id": "9782070520329",
+   "isbn13": "9782070520329",
+   "titre": "Les Accessoires du Maître",
+   "serie": "L'Œil Noir",
+   "numero": "000",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 20.5,
+   "apres": 23.62,
+   "pct": 0.152,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  }
+ ],
  "baisses": [
   {
    "id": "9782070332892",
@@ -128,6 +144,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070520329",
+   "isbn13": "9782070520329",
+   "titre": "Les Accessoires du Maître",
+   "serie": "L'Œil Noir",
+   "numero": "000",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 91.06,
+   "apres": 44.87,
+   "pct": -0.507,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070336326",
    "isbn13": "9782070336326",
    "titre": "Le Maître Chanteur d'Appledore",
@@ -171,29 +202,14 @@
    "nature": "validé",
    "nb": 0,
    "recalibre": false
-  },
-  {
-   "id": "9782070334032",
-   "isbn13": "9782070334032",
-   "titre": "La Forteresse Maudite",
-   "serie": "Loup Solitaire",
-   "numero": "403",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 23.5,
-   "apres": 17.35,
-   "pct": -0.262,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 14,
+ "nb_grands_mouvements": 16,
  "modele": {
   "actif": false,
-  "n_paires": 165,
-  "gain": 0.012,
+  "n_paires": 164,
+  "gain": 0.009,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.935
+  "rapport_global": 0.932
  }
 }
