@@ -2440,6 +2440,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .captures-table th:first-child { text-align: left; font-weight: 600; }
 .captures-table thead th { color: var(--muted); font: 700 .75rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; }
 .captures-table tr.auj th, .captures-table tr.auj td { color: var(--gold); }
+.captures-table tr.cp-ecarte th, .captures-table tr.cp-ecarte td { color: var(--muted); font-style: italic; }
 @media (max-width: 520px) { .captures-acc { padding: 0 8px 10px; } .captures-table { font-size:var(--t-sm); } .captures-table th, .captures-table td { padding: 6px 3px; } .captures-table thead th { font-size:var(--t-xs); letter-spacing: 0; } }
 
 /* Lien vers le tableau, sur l'accueil */

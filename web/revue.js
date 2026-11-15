@@ -792,6 +792,7 @@
     // Annonces captées par jour : colonnes empilées + tableau
     const SOURCES_CAPT = [['ebay', 'eBay'], ['leboncoin', 'Leboncoin'], ['vinted', 'Vinted'], ['librairie', 'Librairies'], ...Object.entries(REVENDEURS)];
     const jourCourtCapt = (cle) => new Date(cle + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'numeric' });
+    const JOURS_ECARTES_CAPT = ['2026-11-14'];          // comptage anormal : écarté des graphiques et des moyennes
     function svgCaptures(jours, depuis, largeur) {
       const H = 190, g = 8, b = 26, h = H - 20 - b, n = jours.length, pas = (largeur - 2 * g) / n;
       const max = Math.max(10, ...jours.map((j) => Math.max(...SOURCES_CAPT.map(([src]) => j.v[src] || 0))));
@@ -847,6 +848,7 @@
       Object.entries(heures || {}).forEach(([cle, n]) => {
         const t = Date.parse(cle + ':00:00Z'); if (Number.isNaN(t)) return;
         const j = jourParis(t), h = Number(heureParis.format(t));
+        if (JOURS_ECARTES_CAPT.includes(j)) return;
         (par[j] = par[j] || Array(24).fill(null));
         par[j][h] = (par[j][h] ?? 0) + n;
       });
@@ -912,8 +914,12 @@
       const cleJour = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
       // Du 25 octobre à hier (15 jours au plus) pour les moyennes ; le jour en cours s'ajoute au graphique et au tableau, sans entrer dans les moyennes
       const DEBUT_CAPT = '2026-10-25';
-      const complets = [];
-      for (let k = 15; k >= 1; k -= 1) { const cle = cleJour(k); if (cle >= DEBUT_CAPT) complets.push({ cle, v: c.jours[cle] || {} }); }
+      const complets = [], ecartes = [];
+      for (let k = 15; k >= 1; k -= 1) {
+        const cle = cleJour(k);
+        if (cle < DEBUT_CAPT) continue;
+        (JOURS_ECARTES_CAPT.includes(cle) ? ecartes : complets).push({ cle, v: c.jours[cle] || {} });          // un jour écarté reste dans le tableau, hors graphiques et moyennes
+      }
       const aujourdhui = c.jours[cleJour(0)] ? { cle: cleJour(0), v: c.jours[cleJour(0)], enCours: true } : null;          // sans comptage du jour : pas de point inventé
       const jours = aujourdhui ? complets.concat(aujourdhui) : complets, m = complets.length, moitie = Math.min(7, Math.floor(m / 2)), tendanceOk = m >= 6;
       const recents = complets.slice(m - moitie), avant = complets.slice(m - 2 * moitie, m - moitie);
@@ -932,10 +938,10 @@
       const estimes = c.depuis && jours.some((j) => j.cle < c.depuis);
       const depuis = c.depuis ? new Date(c.depuis + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : '';
       const largeur = Math.max(300, Math.min(760, (document.documentElement.clientWidth || 360) - 56));
-      const lignes = jours.slice().reverse().map((j, k) => {
-        const quand = new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '') + (j.enCours ? ' (en cours)' : '');
+      const lignes = jours.concat(ecartes.map((j) => ({ ...j, ecarte: true }))).sort((a, b) => b.cle.localeCompare(a.cle)).map((j) => {
+        const quand = new Date(j.cle + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'numeric' }).replace('.', '') + (j.enCours ? ' (en cours)' : '') + (j.ecarte ? ' (écarté)' : '');
         const total = nbSrc(j.v);
-        return `<tr><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
+        return `<tr${j.ecarte ? ' class="cp-ecarte"' : ''}><th scope="row">${esc(quand)}</th>${SOURCES_CAPT.map(([src]) => `<td>${j.v[src] || '–'}</td>`).join('')}<td><b>${total || '–'}</b></td></tr>`;
       }).join('');
       const pied = `<tr><th scope="row">Total ${m} jours</th>${SOURCES_CAPT.map(([src]) => `<td>${somme(complets, src)}</td>`).join('')}<td><b>${somme(complets)}</b></td></tr>`
         + `<tr><th scope="row">Moyenne par jour</th>${SOURCES_CAPT.map(([src]) => `<td>${fmt1(moy(complets, src))}</td>`).join('')}<td><b>${fmt1(moy(complets))}</b></td></tr>`
@@ -948,7 +954,7 @@
         <p class="cp-tendance">${pTotal == null ? `Tendance : ${verdictEvol(pTotal)}.` : `<b class="${pTotal >= 0.1 ? 'cp-hausse' : pTotal <= -0.1 ? 'cp-baisse' : ''}">${texteEvol(pTotal)}</b> : ${verdictEvol(pTotal)}.`}
           ${tendanceOk ? `<span class="sous">${moitie} derniers jours : ${fmt1(moy(recents))} par jour. ${moitie} jours d'avant : ${fmt1(moy(avant))} par jour.</span>` : ''}</p>
         <div class="cp-cadre">${svgCaptures(jours, c.depuis, largeur)}<div class="cp-bulle" hidden></div></div>
-        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}</p>
+        <p class="sous">Annonces nouvelles, comptées le jour où elles apparaissent. ${aujourdhui ? " Le dernier point (pointillé, creux) est le jour en cours : il n'est pas fini." : ''}${estimes ? ` Comptage commencé le ${esc(depuis)} : les jours d'avant sont estimés (pointillés).` : ''}${ecartes.length ? ` ${ecartes.length > 1 ? 'Jours écartés' : 'Jour écarté'} des graphiques et des moyennes (comptage anormal) : ${ecartes.map((j) => esc(jourCourtCapt(j.cle))).join(', ')}. ${ecartes.length > 1 ? 'Ils restent' : 'Il reste'} dans le tableau.` : ''}</p>
         <p class="sous cp-titre-total">Cumul depuis 5 h, au fil de la journée (heure de Paris)</p>
         <p class="sous cp-legende-h"><span class="cp-h-l cp-h-jour"></span>aujourd'hui <span class="cp-h-l cp-h-veille"></span>hier <span class="cp-h-l cp-h-moy"></span>moyenne de ${horaires.nbAutres} jour${horaires.nbAutres > 1 ? 's' : ''} précédent${horaires.nbAutres > 1 ? 's' : ''}</p>
         <div class="cp-cadre">${svgHoraire(horaires, largeur)}</div>
