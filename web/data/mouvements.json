@@ -7,21 +7,6 @@
  "nouvelles_cotes": 6,
  "hausses": [
   {
-   "id": "9782070566440",
-   "isbn13": "9782070566440",
-   "titre": "Les Héritiers de Dorgan",
-   "serie": "Défis et Sortilèges",
-   "numero": "648",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 4.32,
-   "apres": 9.16,
-   "pct": 1.12,
-   "nature": "annonces",
-   "nb": 2,
-   "recalibre": false
-  },
-  {
    "id": "9782380240269",
    "isbn13": "9782380240269",
    "titre": "OUT THERE - L'Exil - RPG BooK",
@@ -52,6 +37,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 6.48,
+   "apres": 9.72,
+   "pct": 0.5,
+   "nature": "annonces",
+   "nb": 6,
+   "recalibre": false
+  },
+  {
    "id": "9782070581344",
    "isbn13": "9782070581344",
    "titre": "Les Sept Serpents",
@@ -75,25 +75,10 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 24.0,
-   "apres": 34.9,
+   "apres": 34.89,
    "pct": 0.454,
    "nature": "archives",
    "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070566440",
-   "isbn13": "9782070566440",
-   "titre": "Les Héritiers de Dorgan",
-   "serie": "Défis et Sortilèges",
-   "numero": "648",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 6.48,
-   "apres": 9.31,
-   "pct": 0.437,
-   "nature": "annonces",
-   "nb": 2,
    "recalibre": false
   },
   {
@@ -120,8 +105,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 14.66,
-   "apres": 20.0,
-   "pct": 0.364,
+   "apres": 20.01,
+   "pct": 0.365,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
@@ -180,8 +165,23 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 13.67,
-   "apres": 17.55,
-   "pct": 0.284,
+   "apres": 17.56,
+   "pct": 0.285,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
+   "id": "9782070512645",
+   "isbn13": "9782070512645",
+   "titre": "Le Voleur d'Ames",
+   "serie": "Défis Fantastiques",
+   "numero": "530",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 6.32,
+   "apres": 7.9,
+   "pct": 0.25,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -369,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 75,
+ "nb_grands_mouvements": 77,
  "modele": {
   "actif": false,
-  "n_paires": 181,
-  "gain": 0.011,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.915
+  "n_paires": 182,
+  "gain": 0.02,
+  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
+  "rapport_global": 0.913
  }
 }
