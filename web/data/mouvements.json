@@ -7,6 +7,21 @@
  "nouvelles_cotes": 3,
  "hausses": [
   {
+   "id": "9782070332861",
+   "isbn13": "9782070332861",
+   "titre": "Le Manoir de l'Enfer",
+   "serie": "Défis Fantastiques",
+   "numero": "286",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.81,
+   "apres": 17.9,
+   "pct": 0.296,
+   "nature": "annonces",
+   "nb": 11,
+   "recalibre": false
+  },
+  {
    "id": "9782070520329",
    "isbn13": "9782070520329",
    "titre": "Les Accessoires du Maître",
@@ -204,12 +219,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 20,
+ "nb_grands_mouvements": 21,
  "modele": {
   "actif": false,
-  "n_paires": 178,
-  "gain": 0.015,
-  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.938
+  "n_paires": 176,
+  "gain": 0.009,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "rapport_global": 0.932
  }
 }
