@@ -422,3 +422,15 @@ class TestDisparues(unittest.TestCase):
     def test_une_source_sans_releve_est_ignoree(self):
         annonces = {"111": {"bon": [[10.0, "A", "http://a", "amazon", "2026-11-01", 0]]}}
         self.assertEqual(mettre_a_jour_disparues({}, annonces, {}, {"ebay": "2026-11-05"}, "2026-11-06"), {})
+
+
+class TestEtapesValidation(unittest.TestCase):
+    def test_garde_les_jours_recents_par_source(self):
+        from datetime import timedelta
+        from export_site import etapes_validation
+        with tempfile.TemporaryDirectory() as d:
+            for jour in (date.today(), date.today() - timedelta(days=90)):
+                (Path(d) / f"etapes-{jour.isoformat()}.csv").write_text("source,etape1,etape2,non_validee,lot,hors_genre\nvinted,6,3,1,1,0\nleboncoin,2,0,0,0,1\n", encoding="utf-8")
+            r = etapes_validation(Path(d))
+            self.assertEqual(list(r), [date.today().isoformat()])
+            self.assertEqual(r[date.today().isoformat()]["vinted"], {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1, "hors_genre": 0})

@@ -331,6 +331,19 @@ def publiee_le(ligne, jour, publiees):
         return
 
 
+def etapes_validation(dossier, jours=30):
+    """Validation des annonces par étape, par jour et par source, sur les derniers jours : {jour: {source: {étape: nombre}}} (fichiers etapes-JOUR.csv)."""
+    limite = (date.today() - timedelta(days=jours)).isoformat()
+    sortie = {}
+    for f in sorted(dossier.glob("etapes-20*.csv")):
+        if f.stem[-10:] < limite:
+            continue
+        with open(f, encoding="utf-8", newline="") as fh:
+            for r in csv.DictReader(fh):
+                sortie.setdefault(f.stem[-10:], {})[r["source"]] = {k: int(r[k]) for k in importer_leboncoin.COLONNES_ETAPES[1:]}
+    return sortie
+
+
 def frais_par_lien(dossier):
     """Prix nu et frais de chaque annonce, même règle que annonces_cumulees : {lien: (prix nu, frais)}."""
     sortie = {}
@@ -784,7 +797,8 @@ def main():
         chemin_disp.write_text(json.dumps(mettre_a_jour_disparues(disparues_avant, annonces, premieres, dates_releves, maintenant[:10]), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         chemin_ann.write_text(json.dumps({"date": date_ann, "date_ebay": fichiers_ann[-1].stem[-10:] if fichiers_ann else None,
                                           "date_lbc": fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, "annonces": avec_frais(annonces, frais), "incertaines": incertaines, "corrigees": corrections, "lots": totaux_lots(annonces, annonces), "vendues": vendues_recentes,
-                                          "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures},
+                                          "premieres": premieres, "publiees": {l: publiees[l] for l in premieres if l in publiees}, "captures": captures,
+                                          "etapes": etapes_validation(DB.parent.parent / "raw" / "occasion")},
                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         ages_ebay = {}
         if fichiers_ann:

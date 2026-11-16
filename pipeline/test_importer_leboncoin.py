@@ -370,3 +370,41 @@ class TestPrixAberrants(unittest.TestCase):
     def test_sans_prix_de_reference_rien_n_est_ecarte(self):
         lignes = [{"isbn13": "111", "etat": "bon", "prix": "500", "fdp": "0", "lien": "http://a", "age_jours": "0"}]
         self.assertEqual(imp._agreger(lignes, "2026-10-24", {}, tbe={})[0]["nb_annonces"], 1)
+
+
+class TestEtapes(unittest.TestCase):
+    BLOC = '```csv\nisbn13,etat\n```\n\n```json\n{"etapes":{"jours":{"2026-11-16":{"vinted":{"etape1":6,"etape2":3,"non_validee":1,"lot":1,"hors_genre":0},"leboncoin":{"etape1":2,"etape2":0,"non_validee":0,"lot":0,"hors_genre":1}}}}}\n```\n'
+
+    def test_le_bloc_json_est_lu(self):
+        e = imp.extraire_etapes(self.BLOC)["2026-11-16"]
+        self.assertEqual(e["vinted"], {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1, "hors_genre": 0})
+        self.assertEqual(e["leboncoin"]["hors_genre"], 1)
+
+    def test_le_csv_reste_le_premier_bloc(self):
+        self.assertNotIn("etapes", imp.extraire_csv(self.BLOC))
+
+    def test_sans_bloc_ou_bloc_illisible_rien_n_est_lu(self):
+        self.assertEqual(imp.extraire_etapes("```csv\na\n```"), {})
+        self.assertEqual(imp.extraire_etapes("```json\n{pas du json\n```"), {})
+        self.assertEqual(imp.extraire_etapes('```json\n{"etapes":{"jours":[1]}}\n```'), {})
+
+    def test_valeurs_incorrectes_refusees(self):
+        brut = '```json\n{"etapes":{"jours":{"hier":{"vinted":{"etape1":1,"etape2":0,"non_validee":0,"lot":0,"hors_genre":0}},"2026-11-16":{"vinted":{"etape1":-4,"etape2":0,"non_validee":0,"lot":0,"hors_genre":0},"leboncoin":{"etape1":"x"}}}}}\n```'
+        self.assertEqual(imp.extraire_etapes(brut), {})
+
+    def test_le_dernier_comptage_du_jour_remplace_le_precedent(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(imp.enregistrer_etapes(imp.extraire_etapes(self.BLOC), d), 1)
+            nouveau = imp.extraire_etapes(self.BLOC.replace('"etape1":6', '"etape1":9'))
+            imp.enregistrer_etapes({"2026-11-16": {"vinted": nouveau["2026-11-16"]["vinted"]}}, d)
+            with open(Path(d) / "etapes-2026-11-16.csv", newline="", encoding="utf-8") as f:
+                lignes = {r["source"]: r for r in csv.DictReader(f)}
+            self.assertEqual(lignes["vinted"]["etape1"], "9")
+            self.assertEqual(lignes["leboncoin"]["etape1"], "2")          # l'autre source est conservée
+
+    def test_importer_ecrit_le_fichier_sans_toucher_aux_annonces(self):
+        with tempfile.TemporaryDirectory() as d:
+            bilan = imp.importer(self.BLOC, date(2026, 11, 16), d, connues=set())
+            self.assertEqual(bilan["etapes"], 1)
+            self.assertEqual(sorted(p.name for p in Path(d).iterdir()), ["etapes-2026-11-16.csv"])
+            self.assertIn("Validation par étape : 1 jour(s)", imp.compte_rendu(bilan))

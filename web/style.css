@@ -2493,7 +2493,7 @@ button.rc-pastille-radar:focus-visible { outline: 3px solid var(--gold); outline
 .captures-table thead th { color: var(--muted); font: 700 .75rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; }
 .captures-table tr.auj th, .captures-table tr.auj td { color: var(--gold); }
 .captures-table tr.cp-ecarte th, .captures-table tr.cp-ecarte td { color: var(--muted); font-style: italic; }
-.couv-zone { --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; margin: 12px 0; }
+.couv-zone { --c-ok: #5aa876; --c-non: #c4465a; --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; margin: 12px 0; }
 .couv-choix { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
 .couv-choix button { min-height: 40px; padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 700 .85rem var(--f-ui); cursor: pointer; }
 .couv-choix button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
@@ -2504,6 +2504,16 @@ button.rc-pastille-radar:focus-visible { outline: 3px solid var(--gold); outline
 .couv-barre i { display: block; height: 100%; border-radius: 3px; }
 .couv-barres b { text-align: right; font-variant-numeric: tabular-nums; }
 .couv-titre { margin: 18px 0 8px; font-size: 1.05rem; }
+.val-liste { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 16px; }
+.val-ligne { display: grid; gap: 6px; }
+.val-nom { display: flex; align-items: center; gap: 8px; font-weight: 700; flex-wrap: wrap; }
+.val-legende i { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.val-nom small, .val-legende small { color: var(--muted); font-weight: 400; font-size: .8rem; }
+.val-barre { display: flex; height: 16px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+.val-barre i { display: block; height: 100%; }
+.val-legende { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .88rem; }
+.val-legende > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.val-part { font-size: .82rem; }
 .couv-liste { list-style: none; margin: 0 0 12px; padding: 0; }
 .couv-liste li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .couv-liste a { font-weight: 600; overflow-wrap: anywhere; }

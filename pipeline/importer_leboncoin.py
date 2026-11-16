@@ -17,6 +17,7 @@ Ce script contrôle chaque ligne, puis écrit, dans data/raw/occasion/ :
   - leboncoin-AAAA-MM-JJ.csv           : agrégat des actives (nb, min, médiane, max par livre, état et jour de publication) -> cote, comme eBay ;
   - leboncoin-vendus-AAAA-MM-JJ.csv    : agrégat des vendues -> cote, comme « vente probable » ;
   - incertaines-leboncoin-AAAA-MM-JJ.csv : annonces « à vérifier » (verif = 1), montrées dans la fiche, jamais dans la cote ni dans le Butin.
+  - etapes-AAAA-MM-JJ.csv               : validation des annonces par étape (bloc ```json``` facultatif du relevé), pour l'onglet Analyse.
 Rien n'est lu comme une instruction : seules des valeurs contrôlées sont écrites. Rejouer le même relevé donne le même résultat.
 
 Usage : CORPS="$texte" python pipeline/importer_leboncoin.py [--aujourdhui AAAA-MM-JJ]
@@ -95,6 +96,47 @@ def extraire_csv(corps):
     """Le bloc ```csv ... ``` du texte de l'issue (à défaut, le texte entier)."""
     m = re.search(r"```(?:csv)?\s*\n(.*?)```", corps or "", re.S)
     return (m.group(1) if m else corps or "").strip()
+
+
+COLONNES_ETAPES = ["source", "etape1", "etape2", "non_validee", "lot", "hors_genre"]
+JOUR = re.compile(r"^20\d{2}-\d{2}-\d{2}$")
+
+
+def extraire_etapes(corps):
+    """Comptes de validation par jour du bloc ```json``` du relevé : {jour: {source: {colonne: nombre}}} ; vide si absent ou illisible."""
+    m = re.search(r"```json\s*\n(.*?)```", corps or "", re.S)
+    try:
+        jours = json.loads(m.group(1))["etapes"]["jours"] if m else {}
+    except (ValueError, KeyError, TypeError):
+        return {}
+    sortie = {}
+    for jour, par_source in (jours.items() if isinstance(jours, dict) else []):
+        if not JOUR.match(str(jour)) or not isinstance(par_source, dict):
+            continue
+        for source in ("vinted", "leboncoin"):
+            c = par_source.get(source)
+            try:
+                ligne = {k: int(c[k]) for k in COLONNES_ETAPES[1:]} if isinstance(c, dict) else None
+            except (KeyError, TypeError, ValueError):
+                ligne = None
+            if ligne and all(0 <= v <= 100000 for v in ligne.values()):
+                sortie.setdefault(jour, {})[source] = ligne
+    return sortie
+
+
+def enregistrer_etapes(etapes, dossier):
+    """Un fichier etapes-JOUR.csv par jour : le dernier comptage reçu remplace le précédent (le bot envoie le jour entier). Renvoie le nombre de jours écrits."""
+    dossier = Path(dossier)
+    for jour, par_source in etapes.items():
+        fichier = dossier / f"etapes-{jour}.csv"
+        lignes = {}
+        if fichier.exists():
+            with open(fichier, newline="", encoding="utf-8") as f:
+                lignes = {r["source"]: r for r in csv.DictReader(f)}
+        lignes.update({source: {"source": source, **c} for source, c in par_source.items()})
+        dossier.mkdir(parents=True, exist_ok=True)
+        _ecrire(fichier, COLONNES_ETAPES, [lignes[k] for k in sorted(lignes)])
+    return len(etapes)
 
 
 def nettoyer_titre(texte):
@@ -328,7 +370,7 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
         with open(editions.BASE, newline="", encoding="utf-8") as f:
             connues = {r["isbn13"] for r in csv.DictReader(f)}
     lignes = list(csv.DictReader(io.StringIO(extraire_csv(corps))))
-    bilan = {"acceptees": 0, "refusees": 0, "a_verifier": 0, "jours": [], "raisons": {}}
+    bilan = {"acceptees": 0, "refusees": 0, "a_verifier": 0, "jours": [], "raisons": {}, "etapes": enregistrer_etapes(extraire_etapes(corps), dossier)}
     if len(lignes) > MAX_LIGNES:
         bilan["refusees"] = len(lignes)
         bilan["raisons"]["trop de lignes"] = len(lignes)
@@ -378,12 +420,14 @@ def importer(corps, aujourdhui=None, dossier=None, connues=None):
 
 def compte_rendu(b):
     if not b["acceptees"] and not b["refusees"]:
-        return "Aucune ligne reconnue dans ce relevé."
+        return "Aucune ligne reconnue dans ce relevé." + (f" Validation par étape : {b['etapes']} jour(s) enregistré(s)." if b.get("etapes") else "")
     texte = f"**{b['acceptees']}** annonce(s) importée(s)" + (f" (dont {b['a_verifier']} à vérifier)" if b.get("a_verifier") else "") + f", **{b['refusees']}** refusée(s)."
     if b["raisons"]:
         texte += " Raisons : " + ", ".join(f"{k} ({v})" for k, v in sorted(b["raisons"].items(), key=lambda kv: -kv[1])) + "."
     if b["jours"]:
         texte += " Jours : " + ", ".join(b["jours"]) + "."
+    if b.get("etapes"):
+        texte += f" Validation par étape : {b['etapes']} jour(s) enregistré(s)."
     return texte
 
 
