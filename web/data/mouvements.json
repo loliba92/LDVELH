@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 21.86,
-   "apres": 28.58,
-   "pct": 0.307,
+   "apres": 28.59,
+   "pct": 0.308,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 13.95,
-   "apres": 17.87,
-   "pct": 0.281,
+   "apres": 17.88,
+   "pct": 0.282,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,8 +120,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 34.88,
-   "apres": 44.69,
-   "pct": 0.281,
+   "apres": 44.7,
+   "pct": 0.282,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -165,7 +165,7 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 17.58,
-   "apres": 21.31,
+   "apres": 21.3,
    "pct": 0.212,
    "nature": "archives",
    "nb": 1,
@@ -180,8 +180,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 6.44,
-   "apres": 7.74,
-   "pct": 0.202,
+   "apres": 7.73,
+   "pct": 0.2,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -201,6 +201,21 @@
    "pct": -0.157,
    "nature": "archives",
    "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333325",
+   "isbn13": "9782070333325",
+   "titre": "Les Trafiquants de Kelter",
+   "serie": "Défis Fantastiques",
+   "numero": "332",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 23.7,
+   "apres": 20.9,
+   "pct": -0.118,
+   "nature": "annonces",
+   "nb": 14,
    "recalibre": false
   },
   {
@@ -234,21 +249,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070333356",
-   "isbn13": "9782070333356",
-   "titre": "Rendez-vous avec la M.O.R.T",
-   "serie": "Défis Fantastiques",
-   "numero": "335",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 15.9,
-   "apres": 14.27,
-   "pct": -0.103,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  },
-  {
    "id": "9782070334247",
    "isbn13": "9782070334247",
    "titre": "L'Homme au Cheval de Brume",
@@ -261,6 +261,21 @@
    "pct": -0.103,
    "nature": "annonces",
    "nb": 14,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333356",
+   "isbn13": "9782070333356",
+   "titre": "Rendez-vous avec la M.O.R.T",
+   "serie": "Défis Fantastiques",
+   "numero": "335",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 15.9,
+   "apres": 14.28,
+   "pct": -0.102,
+   "nature": "annonces",
+   "nb": 5,
    "recalibre": false
   },
   {
@@ -279,12 +294,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 45,
+ "nb_grands_mouvements": 47,
  "modele": {
   "actif": false,
-  "n_paires": 198,
-  "gain": 0.027,
-  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
-  "rapport_global": 0.911
+  "n_paires": 199,
+  "gain": 0.021,
+  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
+  "rapport_global": 0.912
  }
 }
