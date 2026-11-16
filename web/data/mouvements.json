@@ -2,8 +2,8 @@
  "date": "2026-11-16",
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
- "nb_modifiees": 1429,
- "mediane_variation": -0.005,
+ "nb_modifiees": 1428,
+ "mediane_variation": -0.004,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -249,6 +249,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070333110",
+   "isbn13": "9782070333110",
+   "titre": "Le Temple de la Terreur",
+   "serie": "Défis Fantastiques",
+   "numero": "311",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 8.51,
+   "apres": 7.61,
+   "pct": -0.106,
+   "nature": "annonces",
+   "nb": 37,
+   "recalibre": false
+  },
+  {
    "id": "9782070333356",
    "isbn13": "9782070333356",
    "titre": "Rendez-vous avec la M.O.R.T",
@@ -294,11 +309,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 48,
+ "nb_grands_mouvements": 51,
  "modele": {
   "actif": false,
-  "n_paires": 221,
-  "gain": 0.006,
+  "n_paires": 220,
+  "gain": 0.014,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
   "rapport_global": 0.935
  }
