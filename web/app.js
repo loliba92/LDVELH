@@ -1389,8 +1389,8 @@
         </div>
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${estNiveau2() ? blocOffre() : ''}
-        ${estNiveau2() ? blocPosition() : ''}
         ${voitAnnonces() ? blocAnnonces(b) : ''}
+        ${estNiveau2() ? blocPosition() : ''}
         <h3>Détails du livre</h3>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
