@@ -269,6 +269,24 @@ class TestOffre(unittest.TestCase):
         self.assertEqual(o["111"], {"ebay": 2, "lbc": 2, "vin": 1, "lib": 1, "age": 30})
         self.assertNotIn("222", o)                                     # aucune annonce en ligne : pas de ligne (aucune offre)
 
+    def test_nouvelles_annonces_par_semaine_et_par_source(self):
+        premieres = {"u1": "2026-10-21T08:00Z", "u2": "2026-11-15T08:00Z", "u3": "2026-11-03T08:00Z", "u4": "2026-11-10T08:00Z",
+                     "u5": "2026-11-12T08:00Z", "u6": "2026-11-02T08:00Z", "u7": "2026-11-16T07:00Z"}
+        ann = {"111": {"bon": [[10, "a", "u1", "vinted", "2026-11-16", None],           # premier jour du suivi : tout le stock déjà en ligne, écarté
+                               [10, "b", "u2", "vinted", "2026-11-16", None],           # hier : cette semaine
+                               [10, "c", "u3", "vinted", "2026-11-16", None],           # il y a 13 jours : la semaine dernière
+                               [10, "d", "u4", "leboncoin", "2026-11-16", None],        # il y a 6 jours : cette semaine
+                               [10, "e", "u5", "titre", "2026-11-01", None],            # eBay plus revue : n'est plus en ligne, mais a été nouvelle (il y a 4 jours)
+                               [10, "Lot de 2 livres · f", "u6", "vinted", "2026-11-16", None],     # un lot n'est pas compté
+                               [10, "g", "u7", "vinted", "2026-11-16", None]]}}          # aujourd'hui : cette semaine
+        o = calculer_offre(ann, {}, "2026-11-16", "2026-11-16", (), premieres, "2026-11-16")
+        self.assertEqual(o["111"]["nouv"], {"vin": [0, 0, 1, 2], "lbc": [0, 0, 0, 1], "ebay": [0, 0, 0, 1]})
+        self.assertEqual((o["111"]["vin"], o["111"]["lbc"], o["111"]["ebay"]), (4, 1, 0))          # les comptes en ligne ne changent pas (l'annonce du premier jour y est)
+
+    def test_sans_dates_de_premiere_apparition_pas_de_nouvelles_annonces(self):
+        ann = {"111": {"bon": [[10, "a", "u2", "vinted", "2026-11-16", None]]}}
+        self.assertNotIn("nouv", calculer_offre(ann, {}, "2026-11-16", "2026-11-16")["111"])
+
     def test_offres_des_revendeurs_comptees_a_part(self):
         ann = {"111": {"bon": [[58.44, "a", "https://www.fnac.com/x#bon-5844", "fnac", "2026-10-20", None], [55.7, "b", "https://www.amazon.fr/dp/1#bon-5570", "amazon", "2026-10-20", None]]}}
         self.assertEqual(calculer_offre(ann, {}, "2026-10-26", "2026-10-27")["111"], {"ebay": 0, "lbc": 0, "vin": 0, "lib": 0, "age": None, "rev": 2})

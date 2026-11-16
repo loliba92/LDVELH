@@ -273,15 +273,26 @@ def mettre_a_jour_captures(captures, annonces, premieres, aujourdhui, jours_gard
     return captures
 
 
-def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc, vendues=()):
+def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc, vendues=(), premieres=None, aujourdhui=None):
     """Offre d'occasion par édition : nombre d'annonces en ligne au dernier relevé de chaque source (eBay, Leboncoin, exemplaires d'occasion en librairie)
     et âge médian des annonces eBay, en jours. Une annonce de lot n'est pas l'offre d'un livre seul : elle n'est pas comptée.
+    Avec `premieres` et `aujourdhui` : `nouv`, les nouvelles annonces des quatre dernières semaines par source ([il y a 3 semaines, …, cette semaine]).
+    Le premier jour du suivi est écarté : il regroupe tout le stock déjà en ligne.
     Servi avec le Butin (niveaux 2 et 3) : seulement des décomptes, jamais de lien ni de titre."""
     offre = {}
+    debut = min((str(d)[:10] for d in premieres.values() if d), default=None) if premieres else None
     for isbn, par_etat in annonces.items():
         ebay = lbc = vin = lib = rev = 0
+        nouv = {}
         for liste in par_etat.values():
             for prix, titre, lien, origine, vue, suppose in liste:
+                if aujourdhui and premieres and not str(titre).startswith("Lot de ") and origine not in importer_leboncoin.REVENDEURS:
+                    jour = str(premieres.get(lien) or "")[:10]
+                    if jour and jour != debut:
+                        age = (date.fromisoformat(aujourdhui) - date.fromisoformat(jour)).days
+                        if 0 <= age < 28:
+                            cle = {"vinted": "vin", "leboncoin": "lbc", "librairie": "lib"}.get(origine, "ebay")
+                            nouv.setdefault(cle, [0, 0, 0, 0])[3 - age // 7] += 1          # une annonce vendue a été nouvelle en son temps : elle compte
                 if str(titre).startswith("Lot de ") or lien in vendues:          # un lot n'est pas l'offre d'un livre ; une annonce vendue n'est plus en ligne
                     continue
                 if origine == "librairie":
@@ -299,6 +310,8 @@ def calculer_offre(annonces, ages_ebay, date_ebay, date_lbc, vendues=()):
             offre[isbn] = {"ebay": ebay, "lbc": lbc, "vin": vin, "lib": lib, "age": int(statistics.median(ages)) if ages else None}
             if rev:
                 offre[isbn]["rev"] = rev          # offres d'occasion des revendeurs (Amazon, Fnac, AbeBooks)
+            if nouv:
+                offre[isbn]["nouv"] = nouv
     return offre
 
 
@@ -790,7 +803,7 @@ def main():
                                                           "vendues": {a_[2]: vendues_recentes[a_[2]] for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in vendues_recentes},
                                                           "corrigees": {a_[2]: {"statut": corrections[a_[2]]["statut"]} for par_ in butin.values() for l_ in par_.values() for a_ in l_ if a_[2] in corrections},
                                                           "captures": {"jours": dict(list(captures["jours"].items())[-30:]), "depuis": captures.get("depuis"), "heures": captures["heures"], "maj": maintenant},
-                                                          "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, vendues_recentes)},
+                                                          "offre": calculer_offre(annonces, ages_ebay, fichiers_ann[-1].stem[-10:] if fichiers_ann else None, fichiers_lbc[-1].stem[-10:] if fichiers_lbc else None, vendues_recentes, premieres, args.aujourdhui.isoformat())},
                                                          ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "revue.json").write_text(json.dumps(revue, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (sortie / "tendances.json").write_text(json.dumps(tendances.calculer(revue, versions, mouvements.charger(hist_chemin), args.aujourdhui.isoformat()),
