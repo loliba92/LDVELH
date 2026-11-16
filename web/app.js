@@ -2077,7 +2077,7 @@
       <p class="sous">Déniché par La Cote du Héros.${p.vendue ? '' : ' Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.'} La Cote du Héros ne prend ni marge ni commission.</p></section>`;
     if (location.hash === '#pepite-jour' && !pjAtterri) { pjAtterri = true; const bloc = $('#pepite-jour'); if (bloc) bloc.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
-  // Menu du bas : « À trouver » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
+  // Menu du bas : « Annonces » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
   function majBadgePepites() {
     const b = $('#nb-pep-bas');
     if (!b) return;
