@@ -1078,13 +1078,17 @@
       if (prix <= 1.5 * pub) return 'dessus';
       return 'cher';
     };
-    const comparaison = (prix, pub, v, lot) => {
+    // La pastille du verdict ouvre le radar de l'annonce : un seul déclencheur par carte, rien de plus à l'écran
+    const pastilleVerdict = (v, libelle, cleRadar) => (cleRadar
+      ? `<button type="button" class="rc-pastille ${VERDICTS[v][1]} rc-pastille-radar" data-radar="${esc(cleRadar)}" aria-haspopup="dialog" aria-label="${esc(libelle)} : voir le radar de cette annonce">${libelle} ›</button>`
+      : `<span class="rc-pastille ${VERDICTS[v][1]}">${libelle}</span>`);
+    const comparaison = (prix, pub, v, lot, cleRadar) => {
       if (pub == null) return '<span class="rc-vs">pas de prix sur le site</span>';
       const ecart = Math.round((prix / pub - 1) * 100);
       // Le moins cher / le plus cher du même livre et du même état, quand il y a plusieurs annonces (sinon le verdict habituel)
       const extremeBas = lot && prix === lot.min && v === 'dessous', extremeHaut = lot && prix === lot.max && (v === 'dessus' || v === 'cher');
       const libelle = extremeBas ? 'Le moins cher' : extremeHaut ? 'Le plus cher' : VERDICTS[v][0];
-      return `<span class="rc-pastille ${VERDICTS[v][1]}">${libelle}</span><span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
+      return `${pastilleVerdict(v, libelle, cleRadar)}<span class="rc-vs">site ${eur(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %</span>`;
     };
     // Thermomètre : le rond est l'annonce, entre le moins cher et le plus cher du même livre et du même état ; le trait est le prix du site (même état).
     // L'échelle s'élargit au prix du site, pour que le trait reste dans la barre. Mêmes seuils que « Dans les prix » (10 % autour du prix du site).
@@ -1113,6 +1117,49 @@
       const txt = `${p.length} annonce${p.length > 1 ? 's' : ''} de ce livre dans le même état, de ${eur(Math.min(...p))} à ${eur(Math.max(...p))}. Cette annonce : ${eur(a.prix)}.${site != null ? ` Prix du site : ${eur(site)}.` : ''}`;
       return `<div class="an-barre" role="img" aria-label="${esc(txt)}" title="${esc(txt)}"><div class="an-barre-piste">${p.map((x) => `<i class="an-tick" style="left:${pos(x)}%"></i>`).join('')}${site != null ? `<i class="an-reperesite" style="left:${pos(site)}%"></i>` : ''}<i class="an-moi" style="left:${pos(a.prix)}%"></i></div><div class="an-barre-bornes"><span>${eur(bas)}</span><span>${eur(haut)}</span></div></div>`;
     };
+    // Radar de l'annonce : son prix comparé à la cote du livre, puis aux autres annonces du même livre et du même état. S'ouvre à la demande.
+    const RADAR = new Map();
+    const cleRadar = (a) => (a.pub == null ? '' : `${a.lien}|${a.ed.isbn}|${a.cle}`);
+    const ZONES_RADAR = [['Pépite', 'rd-z1'], ['Pas cher', 'rd-z2'], ['Dans les prix', 'rd-z3'], ['Trop cher', 'rd-z4'], ['Très cher', 'rd-z5']];
+    const positionRadar = (r) => (r <= 0.5 ? (r / 0.5) * 20 : r < 0.9 ? 20 + ((r - 0.5) / 0.4) * 20 : r <= 1.1 ? 40 + ((r - 0.9) / 0.2) * 20 : r <= 1.5 ? 60 + ((r - 1.1) / 0.4) * 20 : 80 + Math.min(1, (r - 1.5) / 1.5) * 20);
+    function ouvrirRadar(a) {
+      if (!a || a.pub == null) return;
+      let dlg = $('#radar-dialog');
+      if (!dlg) {
+        dlg = document.createElement('dialog');
+        dlg.id = 'radar-dialog'; dlg.className = 'an-dialog'; dlg.setAttribute('aria-labelledby', 'rd-titre');
+        dlg.innerHTML = '<div class="an-cadre"><div class="an-tete"><p class="surtitre" id="rd-titre">Radar de cette annonce</p><button type="button" class="bouton bouton-clair" id="rd-fermer">Fermer</button></div><div id="rd-corps" class="rd-corps"></div></div>';
+        document.body.appendChild(dlg);
+        dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.id === 'rd-fermer') dlg.close(); });
+      }
+      const e = Math.round((a.prix / a.pub - 1) * 100), r = a.prix / a.pub, abs = Math.abs(e);
+      const phrase = e > 0 ? `Cette annonce coûte ${abs} % de plus que la cote du livre (${eur(a.prix)} contre ${eur(a.pub)}).`
+        : e < 0 ? `Cette annonce coûte ${abs} % de moins que la cote du livre (${eur(a.prix)} contre ${eur(a.pub)}).` : `Cette annonce est au prix de la cote du livre (${eur(a.prix)}).`;
+      const p = a.tous || [a.prix], n = p.length, plusCheres = p.filter((x) => x > a.prix).length, moinsCheres = p.filter((x) => x < a.prix).length;
+      const med = a.lot ? a.lot.med : a.prix;
+      const rang = n < 2 ? "C'est la seule annonce de ce livre dans cet état."
+        : plusCheres === 0 && moinsCheres > 0 ? `C'est la plus chère des ${n} annonces de ce livre dans cet état.` : moinsCheres === 0 && plusCheres > 0 ? `C'est la moins chère des ${n} annonces de ce livre dans cet état.`
+        : `Moins chère que ${plusCheres} des ${n - 1} autres annonces de ce livre dans cet état.`;
+      const bas = Math.min(...p, a.pub), haut = Math.max(...p, a.pub), pos = (x) => (haut > bas ? ((x - bas) / (haut - bas)) * 100 : 50).toFixed(1);
+      const notes = [];
+      if (nbLot(a)) notes.push(`Annonce de lot : le prix est la part de ce livre dans un lot de ${nbLot(a)} livres.`);
+      if (a.points && a.points.length) notes.push(`À vérifier : ${a.points.join(' ; ')}.`);
+      if (a.partie) notes.push("Plus vue au dernier relevé : elle n'est peut-être plus en ligne.");
+      if (a.aberrant) notes.push('Prix de 2 fois le très bon état ou plus : annonce écartée du calcul de la cote.');
+      $('#rd-corps').innerHTML = `<p class="rd-livre"><b>${esc(a.ed.titre)}</b>${a.ed.version ? ` (${esc(a.ed.version)})` : ''} · ${esc((ETATS.find(([k]) => k === a.cle) || [])[1] || '')} · ${esc(NOM[a.fam])}</p>
+        <div class="fp-verdict"><b>${esc(VERDICTS[a.v][0])}</b>${esc(phrase)}</div>
+        <div class="fp-jauge"><div class="fp-jt"><span>Prix, comparé à la cote du livre</span></div>
+          <div class="rd-zones" role="img" aria-label="${esc(`${VERDICTS[a.v][0]} : ${phrase}`)}">${ZONES_RADAR.map(([, c]) => `<span class="${c}"></span>`).join('')}<i class="fp-tick"></i><i class="fp-rep" style="left:${Math.min(97, Math.max(3, positionRadar(r))).toFixed(1)}%"></i></div>
+          <div class="rd-noms">${ZONES_RADAR.map(([nom]) => `<span>${nom}</span>`).join('')}</div>
+          <p class="fp-phrase">Annonce : <b>${eur(a.prix)}</b> · cote du livre : <b>${eur(a.pub)}</b> (au milieu de «\u00a0Dans les prix\u00a0»).</p></div>
+        <div class="fp-jauge"><div class="fp-jt"><span>Parmi les annonces de ce livre</span><span>${n} annonce${n > 1 ? 's' : ''}</span></div>
+          <div class="fp-piste rd-nuage" role="img" aria-label="${esc(rang)}">${p.map((x) => `<i class="rd-tick" style="left:${pos(x)}%"></i>`).join('')}<i class="rd-cote" style="left:${pos(a.pub)}%"></i><i class="fp-rep" style="left:${pos(a.prix)}%"></i></div>
+          <div class="fp-ext"><span>${eur(Math.min(...p))}</span><span class="fp-med-t">médiane : ${eur(med)}</span><span>${eur(Math.max(...p))}</span></div>
+          <p class="fp-phrase">${esc(rang)} Le trait clair marque la cote du livre.</p></div>
+        ${notes.length ? `<ul class="rd-notes">${notes.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+        <p class="rd-lien"><a class="bouton" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Ouvrir l'annonce ↗<span class="sr-only"> (nouvel onglet)</span></a></p>`;
+      dlg.showModal();
+    }
     const jourCourt = (iso) => (iso ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '');
     // Quand l'annonce est apparue : date et heure si l'heure est connue (« 29 oct. · 10:18 »), sinon le jour de la dernière observation
     // Ordres de tri : date et heure d'apparition (à défaut, dernier jour vu), série et numéro, prix, écart au prix du site, origine
@@ -1298,7 +1345,7 @@
         return `<article class="rc-ligne${a.butin ? ' rc-butin' : ''}">
         <a class="rc-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">${esc(a.ed.titre)}<span class="sr-only"> : ouvrir l'annonce (nouvel onglet)</span></a>
         <b class="rc-prix">${eur(a.prix)}</b>
-        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${nbLot(a) ? `<span class="an-lot-ligne" title="Annonce de lot : le prix est la part de ce livre">Lot de ${nbLot(a)} livres${totalLot(a) ? ' · ' + eurLot(totalLot(a)) : ''}</span>` : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot)}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
+        <span class="rc-ligne2">${a.nouveau ? '<span class="an-new an-new-ligne">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${nbLot(a) ? `<span class="an-lot-ligne" title="Annonce de lot : le prix est la part de ce livre">Lot de ${nbLot(a)} livres${totalLot(a) ? ' · ' + eurLot(totalLot(a)) : ''}</span>` : ''}${vendueHtml(a)}${ageHtml(a)}${a.trouver ?'<span class="pp-trouver rc-trouver">★ À trouver</span>' : ''}${comparaison(a.prix, a.pub, a.v, a.lot, cleRadar(a))}${thermometre(a)}<span class="rc-src">${NOM[a.fam]}</span><span class="rc-meta">${esc(a.ed.serie)} ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]}${a.partie ? ' · plus vue' : ''}</span><span class="rc-actions">${corr ? '<button type="button" class="corr-bouton" aria-expanded="false">Corriger</button>' : ''}<a class="rc-fiche" href="./#fiche=${encodeURIComponent(a.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">Fiche ↗</a></span></span>
         ${corr}
       </article>`;
       };
@@ -1308,7 +1355,7 @@
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
           <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${lotBadge(a)}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
-          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : `<span class="rc-pastille ${VERDICTS[a.v][1]}">${VERDICTS[a.v][0]}</span>`}</div>
+          <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : pastilleVerdict(a.v, VERDICTS[a.v][0], cleRadar(a))}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
           <span class="an-serie">${esc(a.ed.serie)}${a.ed.numero ? ' n° ' + esc(a.ed.numero) : ''}${a.ed.version ? ' · ' + esc(a.ed.version) : ''}</span>
@@ -1319,11 +1366,14 @@
           ${panneauCorrection(a)}
         </article>`;
       };
+      RADAR.clear(); toutes.forEach((a) => { const k = cleRadar(a); if (k) RADAR.set(k, a); });
       const page = vues.slice(0, limite);
       liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carteGrille).join('') + '</div>' : '<div class="rc-liste">' + page.map(carteListe).join('') + '</div>') + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
       appliquerDefilement();
     };
     liste.addEventListener('click', (e) => {
+      const rd = e.target.closest && e.target.closest('.rc-pastille-radar');
+      if (rd) { ouvrirRadar(RADAR.get(rd.dataset.radar)); return; }
       const corr = e.target.closest && e.target.closest('.corr-bouton');
       if (corr) { const d = corr.closest('article').querySelector(':scope > .corr-lite'); if (d) { d.open = !d.open; corr.setAttribute('aria-expanded', String(d.open)); } return; }
       if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); }
