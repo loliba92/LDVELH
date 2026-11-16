@@ -3,7 +3,7 @@
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
  "nb_modifiees": 1432,
- "mediane_variation": -0.004,
+ "mediane_variation": -0.005,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 1.35,
-   "apres": 2.96,
-   "pct": 1.193,
+   "apres": 2.95,
+   "pct": 1.185,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 21.86,
-   "apres": 28.62,
-   "pct": 0.309,
+   "apres": 28.59,
+   "pct": 0.308,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -103,10 +103,10 @@
    "serie": "Sorcellerie!",
    "numero": "295",
    "version": "V4",
-   "etat": "tres_bon",
-   "avant": 34.88,
-   "apres": 44.74,
-   "pct": 0.283,
+   "etat": "convenable",
+   "avant": 13.95,
+   "apres": 17.88,
+   "pct": 0.282,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -118,9 +118,9 @@
    "serie": "Sorcellerie!",
    "numero": "295",
    "version": "V4",
-   "etat": "convenable",
-   "avant": 13.95,
-   "apres": 17.89,
+   "etat": "tres_bon",
+   "avant": 34.88,
+   "apres": 44.7,
    "pct": 0.282,
    "nature": "archives",
    "nb": 0,
@@ -180,8 +180,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 17.58,
-   "apres": 21.24,
-   "pct": 0.208,
+   "apres": 21.3,
+   "pct": 0.212,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -317,8 +317,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 14.81,
-   "apres": 13.27,
-   "pct": -0.104,
+   "apres": 13.28,
+   "pct": -0.103,
    "nature": "annonces",
    "nb": 14,
    "recalibre": false
@@ -342,9 +342,9 @@
  "nb_grands_mouvements": 52,
  "modele": {
   "actif": false,
-  "n_paires": 243,
-  "gain": 0.007,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.973
+  "n_paires": 246,
+  "gain": -0.001,
+  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
+  "rapport_global": 0.979
  }
 }
