@@ -2,8 +2,8 @@
  "date": "2026-11-16",
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
- "nb_modifiees": 1428,
- "mediane_variation": -0.004,
+ "nb_modifiees": 1430,
+ "mediane_variation": -0.005,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 1.35,
-   "apres": 2.95,
-   "pct": 1.185,
+   "apres": 2.96,
+   "pct": 1.193,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
@@ -212,8 +212,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 23.7,
-   "apres": 20.87,
-   "pct": -0.119,
+   "apres": 20.86,
+   "pct": -0.12,
    "nature": "annonces",
    "nb": 14,
    "recalibre": false
@@ -264,6 +264,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070333318",
+   "isbn13": "9782070333318",
+   "titre": "L'Ultime Combat de la Horde",
+   "serie": "Loup*Ardent",
+   "numero": "331",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 9.69,
+   "apres": 8.67,
+   "pct": -0.105,
+   "nature": "annonces",
+   "nb": 16,
+   "recalibre": false
+  },
+  {
    "id": "9782070333356",
    "isbn13": "9782070333356",
    "titre": "Rendez-vous avec la M.O.R.T",
@@ -309,11 +324,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 51,
+ "nb_grands_mouvements": 52,
  "modele": {
   "actif": false,
-  "n_paires": 220,
-  "gain": 0.014,
+  "n_paires": 223,
+  "gain": 0.005,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
   "rapport_global": 0.935
  }
