@@ -2441,6 +2441,22 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .captures-table thead th { color: var(--muted); font: 700 .75rem var(--f-ui); letter-spacing: .04em; text-transform: uppercase; }
 .captures-table tr.auj th, .captures-table tr.auj td { color: var(--gold); }
 .captures-table tr.cp-ecarte th, .captures-table tr.cp-ecarte td { color: var(--muted); font-style: italic; }
+.couv-zone { --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; margin: 12px 0; }
+.couv-choix { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.couv-choix button { min-height: 40px; padding: 6px 12px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); font: 700 .85rem var(--f-ui); cursor: pointer; }
+.couv-choix button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.couv-barres { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 6px; }
+.couv-barres li { display: grid; grid-template-columns: 5.6rem minmax(0, 1fr) 2.6rem; align-items: center; gap: 8px; }
+.couv-lib { color: var(--muted); font-size: .85rem; }
+.couv-barre { display: block; height: 14px; background: var(--surface); border-radius: 3px; overflow: hidden; }
+.couv-barre i { display: block; height: 100%; border-radius: 3px; }
+.couv-barres b { text-align: right; font-variant-numeric: tabular-nums; }
+.couv-titre { margin: 18px 0 8px; font-size: 1.05rem; }
+.couv-liste { list-style: none; margin: 0 0 12px; padding: 0; }
+.couv-liste li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.couv-liste a { font-weight: 600; overflow-wrap: anywhere; }
+.couv-liste .meta { grid-column: 1; color: var(--muted); font-size: .85rem; overflow-wrap: anywhere; }
+.couv-cote { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
 @media (max-width: 520px) { .captures-acc { padding: 0 8px 10px; } .captures-table { font-size:var(--t-sm); } .captures-table th, .captures-table td { padding: 6px 3px; } .captures-table thead th { font-size:var(--t-xs); letter-spacing: 0; } }
 
 /* Lien vers le tableau, sur l'accueil */

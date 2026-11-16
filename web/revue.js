@@ -683,7 +683,7 @@
     return points;
   };
   // Annonces reçues (Zagor) : toutes les annonces des derniers relevés, pour les statistiques du graphique
-  let TOUTES_RC = null, redessinerCapt = () => {};
+  let TOUTES_RC = null, redessinerCapt = () => {}, redessinerCouv = () => {};
   const TRANCHES = [[0, 5, 'Moins de 5 €'], [5, 10, '5 à 10 €'], [10, 20, '10 à 20 €'], [20, 50, '20 à 50 €'], [50, Infinity, '50 € et plus']];
   const estPepite = (a) => a.v === 'super' || a.v === 'pepite';
   // Parts par verdict (seules les annonces dont le site a un prix comptent)
@@ -1490,6 +1490,71 @@
   initRecues();
   initIndice();
   initNav();
+  // Couverture : nombre d'annonces par édition et par plateforme, pour voir ce que le bot détecte (niveau 3)
+  function initCouverture() {
+    const zone = document.getElementById('couverture-analyse');
+    if (!zone) return;
+    const PLATEFORMES = [['tout', 'Toutes'], ['vinted', 'Vinted'], ['leboncoin', 'Leboncoin'], ['ebay', 'eBay'], ['librairie', 'Librairies']];
+    const PERIODES = [[0, 'Toutes les annonces'], [7, 'Nouvelles sur 7 jours'], [30, 'Nouvelles sur 30 jours']];
+    const TRANCHES = [[0, 0, 'Aucune'], [1, 1, '1 annonce'], [2, 3, '2 à 3'], [4, 6, '4 à 6'], [7, 10, '7 à 10'], [11, Infinity, '11 et plus']];
+    const AFFICHEES = 40;
+    let plateforme = 'tout', periode = 0, affichees = AFFICHEES, essais = 0;
+    const famille = (o) => (o === 'leboncoin' || o === 'vinted' || o === 'librairie' ? o : REVENDEURS[o] ? 'revendeur' : 'ebay');
+    const jourParis = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
+    const coteDe = (ed) => Math.max(0, ...Object.values(ed.etats).map((l) => l.publie || 0));
+    function compter() {
+      const limite = periode ? jourParis(periode) : '', vues = new Set(), lignes = [];
+      EDITIONS.forEach((ed) => {
+        if (!ed.isbn || vues.has(ed.isbn)) return;
+        vues.add(ed.isbn);
+        const liens = new Set(), par = ANN.annonces[ed.isbn] || {};
+        Object.keys(par).forEach((etat) => (par[etat] || []).forEach(([, , lien, origine]) => {
+          if (plateforme !== 'tout' && famille(origine) !== plateforme) return;
+          if (limite && !(((ANN.premieres || {})[lien] || '').slice(0, 10) >= limite)) return;
+          liens.add(lien);
+        }));
+        lignes.push({ ed, n: liens.size });
+      });
+      return lignes;
+    }
+    redessinerCouv = () => {
+      if (!estNiveau3()) { zone.innerHTML = ''; return; }
+      if (!ANN || !EDITIONS.length) {
+        zone.innerHTML = `<p class="sous">${annChargees && !ANN ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé." : 'Chargement…'}</p>`;
+        if (essais < 8 && !(annChargees && !ANN)) { essais += 1; setTimeout(redessinerCouv, 700); }
+        return;
+      }
+      const lignes = compter(), total = lignes.length, sans = lignes.filter((l) => l.n === 0).length, avec = total - sans;
+      const tranches = TRANCHES.map(([min, max, lib]) => ({ lib, n: lignes.filter((l) => l.n >= min && l.n <= max).length }));
+      const maxi = Math.max(1, ...tranches.map((t) => t.n)), couleur = plateforme === 'tout' ? 'var(--gold)' : `var(--c-${plateforme})`;
+      const absentes = lignes.filter((l) => l.n === 0).sort((a, b) => coteDe(b.ed) - coteDe(a.ed) || a.ed.titre.localeCompare(b.ed.titre, 'fr'));
+      const pill = (liste, actuel, cle) => liste.map(([v, lib]) => `<button type="button" data-${cle}="${v}" aria-pressed="${String(v) === String(actuel)}">${lib}</button>`).join('');
+      const ligneEd = ({ ed }) => {
+        const cote = coteDe(ed), num = ed.numero && !/^0+$/.test(ed.numero) ? ` n° ${esc(ed.numero)}` : '';
+        return `<li><a href="./#fiche=${encodeURIComponent(ed.id)}">${esc(ed.titre)}</a><span class="meta">${esc(ed.serie)}${num} · ${esc(ed.version)}</span>${cote ? `<span class="couv-cote">${eur(cote)}</span>` : ''}</li>`;
+      };
+      zone.innerHTML = `<section class="couv" aria-label="Annonces par édition">
+        <p class="sous">Nombre d'annonces par édition (un ISBN). Les éditions sans annonce sont celles que le bot ne détecte pas.</p>
+        <div class="couv-choix" role="group" aria-label="Plateforme">${pill(PLATEFORMES, plateforme, 'pf')}</div>
+        <div class="couv-choix" role="group" aria-label="Période">${pill(PERIODES, periode, 'pe')}</div>
+        <p class="cp-bilan"><b>${avec}</b> éditions sur ${total} ont au moins une annonce (${total ? Math.round(100 * avec / total) : 0} %) · <b>${sans}</b> sans annonce</p>
+        <ul class="couv-barres" aria-label="Nombre d'éditions selon leur nombre d'annonces">${tranches.map((t) => `<li><span class="couv-lib">${t.lib}</span><span class="couv-barre"><i style="width:${t.n ? Math.max(2, Math.round(100 * t.n / maxi)) : 0}%;background:${couleur}"></i></span><b>${t.n}</b></li>`).join('')}</ul>
+        <p class="sous">${periode ? 'Nouvelles : annonces vues pour la première fois sur la période.' : 'Annonces retenues par le dernier relevé, y compris celles qui ne sont plus vues.'} Un lot compte pour chacun de ses livres.</p>
+        <h3 class="couv-titre">Éditions sans annonce (${sans}) <span class="sous">classées par cote</span></h3>
+        ${sans ? `<ul class="couv-liste">${absentes.slice(0, affichees).map(ligneEd).join('')}</ul>${absentes.length > affichees ? `<button type="button" class="bouton bouton-clair" data-suite>Voir les ${absentes.length - affichees} autres</button>` : ''}` : '<p class="sous">Toutes les éditions ont au moins une annonce.</p>'}
+      </section>`;
+    };
+    zone.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.pf) plateforme = b.dataset.pf;
+      else if (b.dataset.pe) periode = Number(b.dataset.pe);
+      else if (b.hasAttribute('data-suite')) affichees += AFFICHEES;
+      else return;
+      if (b.dataset.pf || b.dataset.pe) affichees = AFFICHEES;
+      redessinerCouv();
+    });
+  }
+  initCouverture();
   // Analyse : trois sous-onglets (Affaires, Rythme, Marché), les Affaires d'abord
   function initSousOnglets() {
     const boutons = [...document.querySelectorAll('#an-nav [data-sous]')];
@@ -1498,6 +1563,7 @@
       boutons.forEach((b) => { const actif = b.dataset.sous === nom; b.setAttribute('aria-selected', String(actif)); b.tabIndex = actif ? 0 : -1; if (actif && focus) b.focus(); });
       document.querySelectorAll('.an-pane').forEach((p) => { p.hidden = p.id !== 'an-' + nom; });
       if (nom === 'rythme') redessinerCapt();
+      if (nom === 'couverture') chargerAnnonces().then(() => redessinerCouv());
     };
     boutons.forEach((b, i) => {
       b.addEventListener('click', () => montrer(b.dataset.sous));
