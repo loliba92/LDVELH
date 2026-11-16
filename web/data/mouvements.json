@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 1.35,
-   "apres": 2.89,
-   "pct": 1.141,
+   "apres": 2.95,
+   "pct": 1.185,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
@@ -157,6 +157,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070520329",
+   "isbn13": "9782070520329",
+   "titre": "Les Accessoires du Maître",
+   "serie": "L'Œil Noir",
+   "numero": "000",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 17.58,
+   "apres": 21.33,
+   "pct": 0.213,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
    "id": "9782070584413",
    "isbn13": "9782070584413",
    "titre": "Le Combat des Loups",
@@ -169,21 +184,6 @@
    "pct": 0.202,
    "nature": "archives",
    "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782070520329",
-   "isbn13": "9782070520329",
-   "titre": "Les Accessoires du Maître",
-   "serie": "L'Œil Noir",
-   "numero": "000",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 17.58,
-   "apres": 21.1,
-   "pct": 0.2,
-   "nature": "archives",
-   "nb": 1,
    "recalibre": false
   }
  ],
@@ -234,21 +234,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070333356",
-   "isbn13": "9782070333356",
-   "titre": "Rendez-vous avec la M.O.R.T",
-   "serie": "Défis Fantastiques",
-   "numero": "335",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 15.9,
-   "apres": 14.27,
-   "pct": -0.103,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  },
-  {
    "id": "9782070334247",
    "isbn13": "9782070334247",
    "titre": "L'Homme au Cheval de Brume",
@@ -261,6 +246,21 @@
    "pct": -0.103,
    "nature": "annonces",
    "nb": 14,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333356",
+   "isbn13": "9782070333356",
+   "titre": "Rendez-vous avec la M.O.R.T",
+   "serie": "Défis Fantastiques",
+   "numero": "335",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 15.9,
+   "apres": 14.28,
+   "pct": -0.102,
+   "nature": "annonces",
+   "nb": 5,
    "recalibre": false
   },
   {
@@ -279,12 +279,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 46,
+ "nb_grands_mouvements": 45,
  "modele": {
   "actif": false,
   "n_paires": 194,
-  "gain": 0.013,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "gain": 0.033,
+  "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
   "rapport_global": 0.911
  }
 }
