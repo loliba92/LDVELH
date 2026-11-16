@@ -2184,7 +2184,7 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fp-jauge { margin: 14px 0 4px; }
 .fp-jt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; margin-bottom: 8px; font-weight: 700; }
 .fp-jt > span { white-space: nowrap; }
-.fp-jt > span:last-child { margin-left: auto; }
+.fp-jt > span:last-child:not(:first-child) { margin-left: auto; }
 .fp-piste { position: relative; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--line-strong, #3a3226), #6b5a35, var(--gold)); }
 .fp-rep { position: absolute; top: -5px; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); border: 3px solid var(--bg, #0c0a08); transform: translateX(-50%); }
 .fp-ext { display: flex; justify-content: space-between; margin-top: 12px; color: var(--muted); font-size: var(--t-sm, .85rem); }
@@ -2286,6 +2286,21 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .rc-pastille.rc-v-dans { color: var(--text); }
 .rc-pastille.rc-v-dessus { color: #e8b86b; border-color: #e8b86b; }
 .rc-pastille.rc-v-cher { color: #f08f99; border-color: #f08f99; }
+button.rc-pastille-radar { background: transparent; font-family: var(--f-ui); cursor: pointer; }
+button.rc-pastille-radar.rc-v-pepite, button.rc-pastille-radar.rc-v-super { background: var(--gold); }
+button.rc-pastille-radar:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.rd-corps { padding-bottom: 6px; }
+.rd-livre { margin: 0 0 4px; }
+.rd-zones { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; margin: 6px 0 0; height: 10px; }
+.rd-zones > span { display: block; height: 10px; }
+.rd-zones > span:first-child { border-radius: 6px 0 0 6px; } .rd-zones > span:nth-child(5) { border-radius: 0 6px 6px 0; }
+.rd-z1 { background: var(--gold); } .rd-z2 { background: #7fd69c; } .rd-z3 { background: #8b8170; } .rd-z4 { background: #e8b86b; } .rd-z5 { background: #f08f99; }
+.rd-noms { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; margin-top: 12px; color: var(--muted); font-size: .72rem; text-align: center; line-height: 1.25; }
+.rd-nuage { margin-top: 6px; }
+.rd-tick { position: absolute; top: -2px; width: 2px; height: 14px; background: var(--muted); opacity: .6; transform: translateX(-50%); }
+.rd-cote { position: absolute; top: -6px; width: 3px; height: 22px; background: var(--text); opacity: .85; transform: translateX(-50%); }
+.rd-notes { margin: 12px 0 0; padding-left: 18px; color: var(--muted); font-size: var(--t-sm, .9rem); }
+.rd-lien { margin: 14px 0 0; }
 
 /* Annonces reçues, lignes compactes : titre et prix, puis une ligne de détails (verdict, prix du site, série, état, origine, date) */
 .rc-liste { gap: 4px; }
