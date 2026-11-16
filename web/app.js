@@ -1530,24 +1530,27 @@
     if (prix <= 1.5 * pub) return 'dessus';
     return 'cher';
   };
+  // Un lot : une ligne par livre, au prix de sa part (prix livré réparti au prorata du prix du très bon état, comme le site)
+  const etalerImport = (a) => {
+    if (!(a.lot && a.lot.length > 1)) return [a];
+    const quantite = {}; a.lot.forEach((i) => { quantite[i] = (quantite[i] || 0) + 1; });
+    const isbns = Object.keys(quantite), tbe = isbns.map((i) => { const e = DATA.find((b) => b.isbn13 === i); return e && e.prix ? e.prix.tres_bon : null; });
+    const connus = tbe.filter((x) => x > 0), moyen = connus.length ? connus.reduce((s, x) => s + x, 0) / connus.length : 1;
+    const poids = tbe.map((x) => (x > 0 ? x : moyen)), total = isbns.reduce((s, i, k) => s + poids[k] * quantite[i], 0);
+    return isbns.map((i, k) => ({ ...a, isbn: i, prix: Math.round(a.prix * poids[k] / total * 100) / 100, fdp: 0, lotDe: { n: a.lot.length, prix: a.prix, fdp: a.fdp }, lot: [] }));
+  };
   const RANG_IMPORT = { super: -1, pepite: 0, dessous: 1, dans: 2, dessus: 3, cher: 4 };
   const infosImport = (a) => {
-    if (a.lot && a.lot.length > 1) {          // un lot : son prix est comparé à la somme des prix du site de ses livres, au même état
-      const k = etatDe(a.etat).k, vendu = a.statut === 'vendu', eds = a.lot.map((i) => DATA.find((b) => b.isbn13 === i));
-      const prix = eds.map((e) => (e && e.prix ? e.prix[k] : null));
-      const pub = prix.every((x) => x != null) ? Math.round(prix.reduce((s, x) => s + x, 0) * 100) / 100 : null;
-      return { ed: null, eds, pub, vendu, v: vendu ? null : verdictImport(a.prix, pub) };
-    }
     const ed = DATA.find((b) => b.isbn13 === a.isbn), pub = ed && ed.prix ? ed.prix[etatDe(a.etat).k] : null, vendu = a.statut === 'vendu';
     return { ed, pub, vendu, v: vendu || a.verif ? null : verdictImport(a.prix, pub) };          // une édition à vérifier n'a pas d'étiquette « pépite » : la décote n'est pas fiable
   };
   // Une annonce : le titre et le prix sur la première ligne, le verdict et le détail sur la seconde ; toute la ligne ouvre l'annonce
   const ligneImport = (a) => {
-    const { ed, eds, pub, vendu, v } = infosImport(a);
-    const nom = eds ? `Lot de ${eds.length} : ${eds.map((e, i) => (e ? e.titre : a.lot[i])).join(' + ')}` : ed ? (a.verif ? ed.titre : `${ed.titre} (${ed.version})`) : a.isbn;          // une édition à vérifier s'affiche sans numéro de version
+    const { ed, pub, vendu, v } = infosImport(a);
+    const nom = ed ? (a.verif ? ed.titre : `${ed.titre} (${ed.version})`) : a.isbn;          // une édition à vérifier s'affiche sans numéro de version
     const src = /(^|\.)vinted\./i.test((a.lien || '').split('/')[2] || '') ? 'Vinted' : 'Leboncoin';
     const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
-    const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', eds ? a.confirmation : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)}${eds ? ` (somme des ${eds.length} livres)` : ''} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
+    const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', a.lotDe ? `lot de ${a.lotDe.n} livres${a.confirmation ? ` (${a.confirmation})` : ''} · annonce à ${fmt(a.lotDe.prix)}${a.lotDe.fdp > 0 ? ` dont ${fmt(a.lotDe.fdp)} de frais` : ''}` : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
     return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce ${src} (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
       <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
@@ -1573,7 +1576,7 @@
       const total = avecAnnonces.reduce((t, im) => t + im.lignes.length, 0);
       const resume = imports.length ? `<p class="imp-resume"><b>24 dernières heures</b> · ${imports.length} import${imports.length > 1 ? 's' : ''} · ${total} annonce${total > 1 ? 's' : ''}</p>` : '';
       corps.innerHTML = resume + (avecAnnonces.length ? avecAnnonces.map((im) => {
-        const lignes = im.lignes.map((a, k) => [a, k]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map((x) => x[0]);
+        const lignes = im.lignes.flatMap(etalerImport).map((a, k) => [a, k]).sort((x, y) => rang(x[0]) - rang(y[0]) || x[1] - y[1]).map((x) => x[0]);
         return `<h4 class="imp-tete"><span class="imp-quand">${esc(quand(im.t))}</span><span class="imp-compte">${im.lignes.length} annonce${im.lignes.length > 1 ? 's' : ''}</span></h4><ul class="imp-liste">${lignes.map(ligneImport).join('')}</ul>`;
       }).join('') : '<p class="sous">Aucun import avec des annonces dans l\'historique récent.</p>')
         + (sans ? `<p class="sous">${sans} import${sans > 1 ? 's' : ''} sans nouvelle annonce.</p>` : '')
@@ -1687,7 +1690,7 @@
         if (!cible) return;
         const recents = imports.filter((im) => Date.parse(im.t) >= limite);
         const lignes = recents.flatMap((im) => im.lignes);
-        const n = lignes.length, p = lignes.filter((a) => infosImport(a).v === 'pepite').length;
+        const n = lignes.length, p = lignes.flatMap(etalerImport).filter((a) => infosImport(a).v === 'pepite').length;
         const dernier = imports.reduce((m, im) => Math.max(m, Date.parse(im.t) || 0), 0);
         const quand = dernier ? depuisMin(new Date(dernier)) : 'aucun import';
         const ligne = document.querySelector(`[data-imports][data-source="${source}"]`);
