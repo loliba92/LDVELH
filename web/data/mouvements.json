@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 1.35,
-   "apres": 2.95,
-   "pct": 1.185,
+   "apres": 2.94,
+   "pct": 1.178,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 0.81,
-   "apres": 1.49,
-   "pct": 0.84,
+   "apres": 1.5,
+   "pct": 0.852,
    "nature": "annonces",
    "nb": 1,
    "recalibre": false
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 21.86,
-   "apres": 28.59,
-   "pct": 0.308,
+   "apres": 28.56,
+   "pct": 0.306,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 13.95,
-   "apres": 17.88,
-   "pct": 0.282,
+   "apres": 17.86,
+   "pct": 0.28,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,8 +120,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 34.88,
-   "apres": 44.7,
-   "pct": 0.282,
+   "apres": 44.66,
+   "pct": 0.28,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -165,8 +165,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 17.58,
-   "apres": 21.3,
-   "pct": 0.212,
+   "apres": 21.35,
+   "pct": 0.214,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -180,8 +180,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 6.44,
-   "apres": 7.73,
-   "pct": 0.2,
+   "apres": 7.74,
+   "pct": 0.202,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -212,8 +212,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 23.7,
-   "apres": 20.9,
-   "pct": -0.118,
+   "apres": 20.87,
+   "pct": -0.119,
    "nature": "annonces",
    "nb": 14,
    "recalibre": false
@@ -249,6 +249,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070333356",
+   "isbn13": "9782070333356",
+   "titre": "Rendez-vous avec la M.O.R.T",
+   "serie": "Défis Fantastiques",
+   "numero": "335",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 15.9,
+   "apres": 14.27,
+   "pct": -0.103,
+   "nature": "annonces",
+   "nb": 5,
+   "recalibre": false
+  },
+  {
    "id": "9782070334247",
    "isbn13": "9782070334247",
    "titre": "L'Homme au Cheval de Brume",
@@ -262,44 +277,14 @@
    "nature": "annonces",
    "nb": 14,
    "recalibre": false
-  },
-  {
-   "id": "9782070333356",
-   "isbn13": "9782070333356",
-   "titre": "Rendez-vous avec la M.O.R.T",
-   "serie": "Défis Fantastiques",
-   "numero": "335",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 15.9,
-   "apres": 14.28,
-   "pct": -0.102,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  },
-  {
-   "id": "9782070506804",
-   "isbn13": "9782070506804",
-   "titre": "La Guerre des Sorciers",
-   "serie": "Astre d'Or",
-   "numero": "405",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 13.38,
-   "apres": 12.04,
-   "pct": -0.1,
-   "nature": "annonces",
-   "nb": 8,
-   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 47,
+ "nb_grands_mouvements": 46,
  "modele": {
   "actif": false,
-  "n_paires": 199,
-  "gain": 0.021,
-  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.912
+  "n_paires": 202,
+  "gain": 0.005,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "rapport_global": 0.915
  }
 }
