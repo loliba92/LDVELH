@@ -2356,8 +2356,6 @@
     nbButinNouveaux = n; majButin();
     majCompteursAccueil();
     if (estNiveau3Brut()) chargerAnnonces().then(() => majCompteursAccueil());
-    const bb = $('#nb-butin-bas');          // pastille sur « Accueil » dans la barre du bas (téléphone) : nouveaux butins, sorciers et Zagor seulement
-    if (bb) { bb.textContent = n ? String(n) : ''; bb.setAttribute('aria-label', n ? `${n} nouvelle${n > 1 ? 's' : ''} annonce${n > 1 ? 's' : ''}` : ''); }
     document.querySelectorAll('.menu-butin').forEach((l) => {
       l.hidden = !niv2;
       const b = l.querySelector('.nb-butin');
