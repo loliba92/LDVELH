@@ -1482,7 +1482,7 @@
   };
   // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
   async function lireImports(filtre_source = null) {
-    const CLE = 'cdh-imports-lbc-24h-v3';
+    const CLE = 'cdh-imports-lbc-24h-v4';
     try {
       const c = JSON.parse(sessionStorage.getItem(CLE) || 'null');
       if (c && Date.now() - c.t < 300000) {
@@ -1508,7 +1508,8 @@
         const nu = parseFloat(c[col('prix')]), lien = c[col('lien')] || '', vinted = /(^|\.)vinted\./i.test(lien.split('/')[2] || '');
         const brut = col('fdp') >= 0 ? (c[col('fdp')] || '').trim() : '';
         const fdp = brut !== '' ? parseFloat(brut) : vinted ? Math.round((nu * 0.05 + 0.7 + 3) * 100) / 100 : 0;
-        return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')], verif: col('verif') >= 0 && (c[col('verif')] || '').trim() === '1', source: vinted ? 'vinted' : 'leboncoin' };
+        return { isbn: c[col('isbn13')], etat: c[col('etat')], prix: Math.round((nu + (fdp || 0)) * 100) / 100, fdp: fdp || 0, titre: c[col('titre')], lien, statut: c[col('statut')], verif: col('verif') >= 0 && (c[col('verif')] || '').trim() === '1', source: vinted ? 'vinted' : 'leboncoin',
+          lot: (col('lot') >= 0 ? c[col('lot')] || '' : '').split('|').map((s) => s.trim()).filter(Boolean), confirmation: col('confirmation') >= 0 ? (c[col('confirmation')] || '').trim() : '' };
       });
       const sources = new Set(lignes.map((a) => a.source));
       return { t: x.created_at, lignes, sources: [...sources] };
@@ -1531,16 +1532,22 @@
   };
   const RANG_IMPORT = { super: -1, pepite: 0, dessous: 1, dans: 2, dessus: 3, cher: 4 };
   const infosImport = (a) => {
+    if (a.lot && a.lot.length > 1) {          // un lot : son prix est comparé à la somme des prix du site de ses livres, au même état
+      const k = etatDe(a.etat).k, vendu = a.statut === 'vendu', eds = a.lot.map((i) => DATA.find((b) => b.isbn13 === i));
+      const prix = eds.map((e) => (e && e.prix ? e.prix[k] : null));
+      const pub = prix.every((x) => x != null) ? Math.round(prix.reduce((s, x) => s + x, 0) * 100) / 100 : null;
+      return { ed: null, eds, pub, vendu, v: vendu ? null : verdictImport(a.prix, pub) };
+    }
     const ed = DATA.find((b) => b.isbn13 === a.isbn), pub = ed && ed.prix ? ed.prix[etatDe(a.etat).k] : null, vendu = a.statut === 'vendu';
     return { ed, pub, vendu, v: vendu || a.verif ? null : verdictImport(a.prix, pub) };          // une édition à vérifier n'a pas d'étiquette « pépite » : la décote n'est pas fiable
   };
   // Une annonce : le titre et le prix sur la première ligne, le verdict et le détail sur la seconde ; toute la ligne ouvre l'annonce
   const ligneImport = (a) => {
-    const { ed, pub, vendu, v } = infosImport(a);
-    const nom = ed ? (a.verif ? ed.titre : `${ed.titre} (${ed.version})`) : a.isbn;          // une édition à vérifier s'affiche sans numéro de version
+    const { ed, eds, pub, vendu, v } = infosImport(a);
+    const nom = eds ? `Lot de ${eds.length} : ${eds.map((e, i) => (e ? e.titre : a.lot[i])).join(' + ')}` : ed ? (a.verif ? ed.titre : `${ed.titre} (${ed.version})`) : a.isbn;          // une édition à vérifier s'affiche sans numéro de version
     const src = /(^|\.)vinted\./i.test((a.lien || '').split('/')[2] || '') ? 'Vinted' : 'Leboncoin';
     const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
-    const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
+    const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', eds ? a.confirmation : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)}${eds ? ` (somme des ${eds.length} livres)` : ''} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
     return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce ${src} (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
       <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
