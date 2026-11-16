@@ -81,6 +81,10 @@ Combinaison pondérée, à calibrer :
 
 Lecture : 70 et plus = rapide, 40 à 69 = moyen, moins de 40 = lent.
 
+**Sur la fiche (niveaux 2 et 3).** Faute de ventes réelles sur Vinted et Leboncoin, le site ne calcule pas cet indice. Le bloc « Positionnement du livre » montre deux signes indirects, sans note sur 100 :
+- *Où se situe ce livre ?* : un nuage des éditions du guide (annonces en ligne en largeur, cote très bon état en hauteur, échelles logarithmiques), avec l'édition en doré. Les mots « Beaucoup d'annonces », « Peu d'annonces », « Cher », « Abordable » viennent des rangs : 75 % et plus, 25 % et moins.
+- *Le marché est-il vivant ?* : les nouvelles annonces des quatre dernières semaines par plateforme (`nouv` dans `offre`, voir `calculer_offre`). Le premier jour du suivi est écarté : il regroupe tout le stock déjà en ligne. « Accélère » ou « Ralentit » : écart d'au moins 30 % et de 2 annonces entre cette semaine et la précédente.
+
 ## 5. Aide à la décision d'achat (chasse aux livres)
 
 ```

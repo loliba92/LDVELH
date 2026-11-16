@@ -1277,6 +1277,76 @@
     });
   }
 
+  // Positionnement (niveaux 2 et 3) : où se situe l'édition parmi les autres (annonces en ligne et cote), puis le rythme des nouvelles annonces
+  const blocPosition = () => '<section class="fiche-position fiche-carte" id="fp-zone" aria-labelledby="fp-titre"><h3 id="fp-titre">Positionnement du livre</h3><div id="fp-corps"><p class="sous">Chargement…</p></div></section>';
+  const SOURCES_FP = [['vin', 'Vinted', 'vinted'], ['ebay', 'eBay', 'ebay'], ['lbc', 'Leboncoin', 'leboncoin'], ['lib', 'Librairies', 'librairie']];
+  function remplirPosition(b) {
+    chargerOffre().then(() => {
+      const zone = $('#fp-corps');
+      if (ficheOuverte !== b.id || !zone) return;
+      if (!OFFRE || !OFFRE.offre || !b.isbn13) { zone.innerHTML = '<p class="sous">Pas encore de relevé d\'annonces.</p>'; return; }
+      const nbAnnonces = (o) => (o ? (o.ebay || 0) + (o.lbc || 0) + (o.vin || 0) + (o.lib || 0) + (o.rev || 0) : 0);
+      const coteFp = (x) => (x.prix && (x.prix.tres_bon || x.prix.bon)) || 0;
+      const pts = DATA.filter((x) => x.isbn13 && coteFp(x) > 0).map((x) => ({ id: x.id, n: nbAnnonces(OFFRE.offre[x.isbn13]), p: coteFp(x) }));
+      const moi = pts.find((x) => x.id === b.id);
+      const part = (f) => Math.round(100 * pts.filter(f).length / pts.length);
+      let haut = '';
+      if (moi && pts.length > 20) {
+        const pctN = part((x) => x.n < moi.n), pctP = part((x) => x.p < moi.p);
+        const mOffre = moi.n === 0 ? 'Aucune annonce' : pctN >= 75 ? 'Beaucoup d\'annonces' : pctN <= 25 ? 'Peu d\'annonces' : 'Offre courante';
+        const mPrix = pctP >= 75 ? 'Cher' : pctP <= 25 ? 'Abordable' : 'Prix moyen';
+        const beaucoup = moi.n > 0 && pctN >= 75, peu = moi.n === 0 || pctN <= 25, cher = pctP >= 75, bas = pctP <= 25;
+        const lecture = beaucoup && cher ? 'Beaucoup d\'offre pour un livre cher : le marché est actif.' : peu && cher ? 'Peu d\'offre pour un livre cher : il est difficile à trouver.'
+          : beaucoup && bas ? 'Beaucoup d\'offre pour un livre abordable : il est facile à trouver.' : peu && bas ? 'Peu d\'offre et un prix bas : un marché restreint.' : '';
+        const phrase = moi.n === 0 ? `Aucune annonce en ligne. Cote plus élevée que ${pctP}\u00a0% des éditions du guide.` : `Plus d'annonces que ${pctN}\u00a0% des éditions du guide, et plus cher que ${pctP}\u00a0% d'entre elles.`;
+        const W = 350, H = 220, gx = 36, gy = 10, gb = 30, dr = 12;
+        const nmax = Math.max(10, ...pts.map((x) => x.n)) + 1;
+        const lx = (n) => gx + (Math.log(n + 1) / Math.log(nmax + 1)) * (W - gx - dr);
+        const lo = Math.log(Math.max(1, Math.min(...pts.map((x) => x.p))) * 0.8), hi = Math.log(Math.max(...pts.map((x) => x.p)) * 1.15);
+        const ly = (p) => gy + (H - gy - gb) * (1 - (Math.log(p) - lo) / (hi - lo));
+        const med = (l) => { const s = [...l].sort((u, v) => u - v); return s[Math.floor(s.length / 2)]; };
+        const mn = med(pts.map((x) => x.n)), mp = med(pts.map((x) => x.p));
+        const reperes = [2, 5, 10, 20, 50, 100, 200, 500, 1000].filter((v) => v > Math.exp(lo) && v < Math.exp(hi));
+        const reperesY = reperes.filter((_, i) => reperes.length <= 5 || i % 2 === 0);
+        const reperesX = [0, 1, 3, 10, 30, 100].filter((v) => v < nmax);
+        const cx = lx(moi.n), cy = ly(moi.p), droite = cx > W * 0.72;          // l'étiquette passe à gauche du point seulement près du bord droit
+        const svgA = `<svg class="fp-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(`${b.titre} : ${moi.n} annonce${moi.n > 1 ? 's' : ''} en ligne, cote ${fmt(moi.p)}. ${mOffre}, ${mPrix.toLowerCase()}.`)}">`
+          + reperesY.map((v) => `<line x1="${gx}" x2="${W - dr}" y1="${ly(v).toFixed(1)}" y2="${ly(v).toFixed(1)}" class="fp-gr"/><text x="${gx - 5}" y="${(ly(v) + 3.5).toFixed(1)}" text-anchor="end" class="fp-ax">${v} €</text>`).join('')
+          + reperesX.map((v) => `<text x="${lx(v).toFixed(1)}" y="${H - gb + 14}" text-anchor="middle" class="fp-ax">${v}</text>`).join('')
+          + `<line x1="${lx(mn).toFixed(1)}" x2="${lx(mn).toFixed(1)}" y1="${gy}" y2="${H - gb}" class="fp-med"/><line x1="${gx}" x2="${W - dr}" y1="${ly(mp).toFixed(1)}" y2="${ly(mp).toFixed(1)}" class="fp-med"/>`
+          + pts.filter((x) => x.id !== b.id).map((x) => `<circle cx="${lx(x.n).toFixed(1)}" cy="${ly(x.p).toFixed(1)}" r="2.2" class="fp-pt"/>`).join('')
+          + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="12" class="fp-halo"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" class="fp-moi"/>`
+          + `<text x="${(droite ? cx - 11 : cx + 11).toFixed(1)}" y="${(cy < gy + 18 ? cy + 18 : cy - 12).toFixed(1)}" text-anchor="${droite ? 'end' : 'start'}" class="fp-nom">Ce livre</text>`
+          + `<text x="${((gx + W - dr) / 2).toFixed(1)}" y="${H - 3}" text-anchor="middle" class="fp-ax">annonces en ligne</text></svg>`;
+        haut = `<h4 class="fp-sous">Où se situe ce livre ?</h4><p class="sous">Chaque point gris est une édition du guide. Les pointillés sont les médianes.</p>
+          <div class="fp-cadre">${svgA}</div><p class="fp-pills"><span class="fp-pill">${mOffre}${moi.n ? ` : ${moi.n}` : ''}</span><span class="fp-pill">${mPrix} : ${fmt(moi.p)}</span></p>
+          <p class="fp-lecture">${esc(phrase)}${lecture ? ` ${esc(lecture)}` : ''}</p>`;
+      }
+      let bas = '';
+      const o = OFFRE.offre[b.isbn13] || {}, nouv = o.nouv || {};
+      if (Object.values(OFFRE.offre).some((x) => x.nouv)) {          // données publiées : sans elles, le graphique ne dirait rien de vrai
+        const par = [0, 1, 2, 3].map((k) => SOURCES_FP.map(([cle, , cls]) => [cls, (nouv[cle] || [0, 0, 0, 0])[k]]));
+        const tot = par.map((s) => s.reduce((t, [, v]) => t + v, 0)), maxi = Math.max(1, ...tot);
+        const noms = ['il y a 3 sem.', 'il y a 2 sem.', 'semaine dernière', 'cette semaine'];
+        const barres = par.map((s, k) => {
+          const x = 30 + k * 78; let y = 96, g = '';
+          s.forEach(([cls, v]) => { if (!v) return; const h = 74 * v / maxi; y -= h; g += `<rect x="${x}" y="${y.toFixed(1)}" width="54" height="${h.toFixed(1)}" rx="3" class="fp-b fp-b-${cls}"/>`; });
+          return `${g}<text x="${x + 27}" y="${tot[k] ? (y - 6).toFixed(1) : 90}" text-anchor="middle" class="fp-val">${tot[k]}</text><text x="${x + 27}" y="114" text-anchor="middle" class="fp-ax">${noms[k]}</text>`;
+        }).join('');
+        const [a0, a1] = [tot[3], tot[2]];
+        const verdict = tot.every((v) => v === 0) ? 'Aucune nouvelle annonce sur 4 semaines' : a0 > a1 * 1.3 && a0 - a1 >= 2 ? `Accélère : ${a0} cette semaine, ${a1} la semaine dernière`
+          : a0 < a1 * 0.7 && a1 - a0 >= 2 ? `Ralentit : ${a0} cette semaine, ${a1} la semaine dernière` : `Stable : ${a0} cette semaine, ${a1} la semaine dernière`;
+        const presentes = SOURCES_FP.filter(([cle]) => (nouv[cle] || []).some((v) => v));
+        const vide = tot.every((v) => v === 0);
+        bas = vide ? `<h4 class="fp-sous">Le marché est-il vivant ?</h4><p class="fp-pills"><span class="fp-pill">${esc(verdict)}</span></p>` : `<h4 class="fp-sous">Le marché est-il vivant ?</h4><p class="sous">Nouvelles annonces par semaine, vues pour la première fois.</p>
+          <div class="fp-cadre"><svg class="fp-svg" viewBox="0 0 350 122" width="100%" role="img" aria-label="${esc(`Nouvelles annonces par semaine : ${tot.join(', ')} (de la plus ancienne à la plus récente)`)}">${barres}<line x1="20" x2="340" y1="96" y2="96" class="fp-gr"/></svg></div>
+          ${presentes.length ? `<p class="fp-leg">${presentes.map(([, nom, cls]) => `<span><i class="fp-b-${cls}"></i>${nom}</span>`).join('')}</p>` : ''}
+          <p class="fp-pills"><span class="fp-pill">${esc(verdict)}</span></p>`;
+      }
+      zone.innerHTML = haut || bas ? haut + bas : '<p class="sous">Pas assez de données pour situer cette édition.</p>';
+    });
+  }
+
   function ouvrirFiche(id) {
     const b = DATA.find((x) => x.id === id);
     if (!b) return;
@@ -1319,6 +1389,7 @@
         </div>
         ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
         ${estNiveau2() ? blocOffre() : ''}
+        ${estNiveau2() ? blocPosition() : ''}
         ${voitAnnonces() ? blocAnnonces(b) : ''}
         <h3>Détails du livre</h3>
         <dl class="infos">
@@ -1342,7 +1413,7 @@
     brancherCorriger();
     if (estNiveau3()) brancherLissage(b);
     if (voitAnnonces()) remplirAnnonces(b);
-    if (estNiveau2()) remplirOffre(b);
+    if (estNiveau2()) { remplirOffre(b); remplirPosition(b); }
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));

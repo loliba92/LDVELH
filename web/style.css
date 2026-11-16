@@ -2163,6 +2163,27 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fo-jauge i.on { background: var(--gold); }
 .fo-niveau { font-size:var(--t-lg); }
 .fo-note { margin: 4px 0 0; }
+.fiche-position { --c-ebay: #3987e5; --c-leboncoin: #d95926; --c-vinted: #199e70; --c-librairie: #c98500; }
+.fp-sous { margin: 14px 0 2px; font-size: 1rem; }
+.fp-sous:first-of-type { margin-top: 2px; }
+.fp-sous + .sous { margin-top: 2px; }
+.fp-cadre { max-width: 520px; margin: 4px 0 6px; }
+.fp-svg { display: block; height: auto; }
+.fp-ax { fill: var(--muted); font-size: 10px; }
+.fp-gr { stroke: var(--line); stroke-width: 1; }
+.fp-med { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; opacity: .7; }
+.fp-pt { fill: var(--muted); opacity: .35; }
+.fp-halo { fill: var(--gold); opacity: .2; }
+.fp-moi { fill: var(--gold); stroke: var(--bg, #0a0908); stroke-width: 2; }
+.fp-nom { fill: var(--gold); font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.fp-val { fill: var(--text); font-size: 12px; font-weight: 700; }
+.fp-b-vinted { fill: var(--c-vinted); background: var(--c-vinted); } .fp-b-ebay { fill: var(--c-ebay); background: var(--c-ebay); }
+.fp-b-leboncoin { fill: var(--c-leboncoin); background: var(--c-leboncoin); } .fp-b-librairie { fill: var(--c-librairie); background: var(--c-librairie); }
+.fp-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 0; }
+.fp-pill { border: 1px solid var(--gold); color: var(--gold); border-radius: 999px; padding: 3px 10px; font-weight: 700; font-size: var(--t-sm, .85rem); }
+.fp-lecture { margin: 8px 0 0; color: var(--muted); font-size: var(--t-sm, .9rem); }
+.fp-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; color: var(--muted); font-size: var(--t-sm, .85rem); }
+.fp-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
 .annonces-fiche.fiche-carte { padding: 0 16px; }
 
 /* Collection sur la jaquette (fiche) : les trois états posés en bas de l'image, le reste en dessous */
