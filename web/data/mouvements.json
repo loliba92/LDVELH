@@ -2,7 +2,7 @@
  "date": "2026-11-16",
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
- "nb_modifiees": 1433,
+ "nb_modifiees": 1432,
  "mediane_variation": -0.005,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -157,6 +157,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070506873",
+   "isbn13": "9782070506873",
+   "titre": "Dans les Entrailles de Torgar",
+   "serie": "Loup Solitaire",
+   "numero": "538",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 5.27,
+   "apres": 6.53,
+   "pct": 0.239,
+   "nature": "annonces",
+   "nb": 14,
+   "recalibre": false
+  },
+  {
    "id": "9782070520329",
    "isbn13": "9782070520329",
    "titre": "Les Accessoires du Maître",
@@ -169,21 +184,6 @@
    "pct": 0.209,
    "nature": "archives",
    "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782070584413",
-   "isbn13": "9782070584413",
-   "titre": "Le Combat des Loups",
-   "serie": "Loup Solitaire",
-   "numero": "720",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 6.44,
-   "apres": 7.74,
-   "pct": 0.202,
-   "nature": "archives",
-   "nb": 0,
    "recalibre": false
   }
  ],
@@ -339,12 +339,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 51,
+ "nb_grands_mouvements": 52,
  "modele": {
   "actif": false,
-  "n_paires": 241,
-  "gain": -0.01,
-  "raison": "le modèle ne bat pas assez les archives (gain -1%, 15% exigés)",
-  "rapport_global": 0.972
+  "n_paires": 240,
+  "gain": -0.003,
+  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
+  "rapport_global": 0.97
  }
 }
