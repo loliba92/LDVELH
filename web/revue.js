@@ -1548,7 +1548,7 @@
     const PERIODES = [[0, 'Toutes les annonces'], [7, 'Nouvelles sur 7 jours'], [30, 'Nouvelles sur 30 jours']];
     const TRANCHES = [[0, 0, 'Aucune'], [1, 1, '1 annonce'], [2, 3, '2 à 3'], [4, 6, '4 à 6'], [7, 10, '7 à 10'], [11, Infinity, '11 et plus']];
     const AFFICHEES = 40;
-    let plateforme = 'tout', periode = 0, affichees = AFFICHEES, essais = 0;
+    let plateforme = 'tout', periode = 0, periodeV = 1, affichees = AFFICHEES, essais = 0;
     const famille = (o) => (o === 'leboncoin' || o === 'vinted' || o === 'librairie' ? o : REVENDEURS[o] ? 'revendeur' : 'ebay');
     const jourParis = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
     const coteDe = (ed) => Math.max(0, ...Object.values(ed.etats).map((l) => l.publie || 0));
@@ -1567,6 +1567,32 @@
       });
       return lignes;
     }
+    // Validation des annonces par étape (comptée par le bot, Vinted et Leboncoin) : étape 1 = liste de recherche, étape 2 = page ouverte, sinon non validée
+    const PERIODES_V = [[1, "Aujourd'hui"], [7, '7 jours'], [30, '30 jours']];
+    const ETAPES_V = [['etape1', 'Étape 1', 'var(--c-ok)'], ['etape2', 'Étape 2', 'var(--gold)'], ['non_validee', 'Non validées', 'var(--c-non)']];
+    function blocValidation(pill) {
+      const jours = Array.from({ length: periodeV }, (_, k) => (ANN.etapes || {})[jourParis(k)]).filter(Boolean);
+      const lignes = [['vinted', 'Vinted'], ['leboncoin', 'Leboncoin']].map(([src, nom]) => {
+        const c = { etape1: 0, etape2: 0, non_validee: 0, lot: 0, hors_genre: 0 };
+        jours.forEach((j) => Object.keys(c).forEach((k) => { c[k] += (j[src] || {})[k] || 0; }));
+        const total = c.etape1 + c.etape2 + c.non_validee;
+        if (!total) return `<li class="val-ligne"><span class="val-nom">${nom}</span><span class="sous">Aucune annonce comptée</span></li>`;
+        const etapes = ETAPES_V.filter(([k]) => src === 'vinted' || k !== 'etape2');          // Leboncoin donne tout dans la liste : pas d'étape 2
+        const part = (k) => Math.round(100 * c[k] / total);
+        const aPart = [c.lot ? `${c.lot} lot${c.lot > 1 ? 's' : ''}` : '', c.hors_genre ? `${c.hors_genre} hors du genre` : ''].filter(Boolean).join(', ');
+        return `<li class="val-ligne"><span class="val-nom">${nom} <small>${total} annonce${total > 1 ? 's' : ''}</small></span>
+          <span class="val-barre" role="img" aria-label="${etapes.map(([k, lib]) => `${lib} ${part(k)} %`).join(', ')}">${etapes.map(([k, , couleur]) => (c[k] ? `<i style="width:${100 * c[k] / total}%;background:${couleur}"></i>` : '')).join('')}</span>
+          <span class="val-legende">${etapes.map(([k, lib, couleur]) => `<span><i style="background:${couleur}"></i>${lib} <b>${part(k)} %</b> <small>${c[k]}</small></span>`).join('')}</span>
+          ${aPart ? `<span class="sous val-part">À part (hors pourcentages) : ${aPart}</span>` : ''}</li>`;
+      });
+      const nb = jours.length;
+      return `<div class="val">
+        <h3 class="couv-titre">Validation des annonces</h3>
+        <p class="sous">Part des annonces dont l'édition est établie dès la liste de recherche (étape 1), après ouverture de la page (étape 2, Vinted seulement), ou pas encore établie.</p>
+        <div class="couv-choix" role="group" aria-label="Période de la validation">${pill(PERIODES_V, periodeV, 'pv')}</div>
+        ${nb ? `<ul class="val-liste">${lignes.join('')}</ul><p class="sous">${nb} jour${nb > 1 ? 's' : ''} compté${nb > 1 ? 's' : ''} sur ${periodeV}. Les jours d'avant la première mesure ne sont pas comptés.</p>` : "<p class=\"sous\">Pas encore de comptage : il apparaîtra après le prochain relevé du bot.</p>"}
+      </div>`;
+    }
     redessinerCouv = () => {
       if (!estNiveau3()) { zone.innerHTML = ''; return; }
       if (!ANN || !EDITIONS.length) {
@@ -1584,6 +1610,8 @@
         return `<li><a href="./#fiche=${encodeURIComponent(ed.id)}">${esc(ed.titre)}</a><span class="meta">${esc(ed.serie)}${num} · ${esc(ed.version)}</span>${cote ? `<span class="couv-cote">${eur(cote)}</span>` : ''}</li>`;
       };
       zone.innerHTML = `<section class="couv" aria-label="Annonces par édition">
+        ${blocValidation(pill)}
+        <h3 class="couv-titre">Annonces par édition</h3>
         <p class="sous">Nombre d'annonces par édition (un ISBN). Les éditions sans annonce sont celles que le bot ne détecte pas.</p>
         <div class="couv-choix" role="group" aria-label="Plateforme">${pill(PLATEFORMES, plateforme, 'pf')}</div>
         <div class="couv-choix" role="group" aria-label="Période">${pill(PERIODES, periode, 'pe')}</div>
@@ -1598,6 +1626,7 @@
       const b = e.target.closest('button'); if (!b) return;
       if (b.dataset.pf) plateforme = b.dataset.pf;
       else if (b.dataset.pe) periode = Number(b.dataset.pe);
+      else if (b.dataset.pv) periodeV = Number(b.dataset.pv);
       else if (b.hasAttribute('data-suite')) affichees += AFFICHEES;
       else return;
       if (b.dataset.pf || b.dataset.pe) affichees = AFFICHEES;
