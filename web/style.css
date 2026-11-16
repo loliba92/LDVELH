@@ -2189,6 +2189,8 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fp-rep { position: absolute; top: -5px; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); border: 3px solid var(--bg, #0c0a08); transform: translateX(-50%); }
 .fp-ext { display: flex; justify-content: space-between; margin-top: 12px; color: var(--muted); font-size: var(--t-sm, .85rem); }
 .fp-med-t { text-align: center; opacity: .9; }
+.fp-ext > span small { display: block; opacity: .8; font-size: .72rem; }
+.fp-ext > span:first-child { text-align: left; } .fp-ext > span:last-child { text-align: right; }
 .fp-tick { position: absolute; left: 50%; top: -3px; width: 2px; height: 16px; background: var(--text); opacity: .45; transform: translateX(-50%); }
 .fp-note { margin-top: 10px; }
 .fp-ax-med { opacity: .9; }

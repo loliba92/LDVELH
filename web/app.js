@@ -1280,10 +1280,10 @@
   // Positionnement (niveaux 2 et 3) : où se situe l'édition parmi les autres (annonces en ligne et cote), puis le rythme des nouvelles annonces
   const blocPosition = () => '<section class="fiche-position fiche-carte" id="fp-zone" aria-labelledby="fp-titre"><h3 id="fp-titre">Le radar du héros</h3><div id="fp-corps"><p class="sous">Chargement…</p></div></section>';
   const SOURCES_FP = [['vin', 'Vinted', 'vinted'], ['ebay', 'eBay', 'ebay'], ['lbc', 'Leboncoin', 'leboncoin'], ['lib', 'Librairies', 'librairie']];
-  const TITRES_OFFRE_FP = { aucune: 'Aucune annonce en ce moment', peu: "Peu d'annonces", moyen: "Un nombre d'annonces moyen", beaucoup: "Beaucoup d'annonces" };
-  const TITRES_PRIX_FP = { cher: 'pour un livre cher', bas: 'pour un livre bon marché', moyen: 'à un prix moyen' };
+  const SENS_OFFRE_FP = { peu: 'rare à trouver', moyen: 'une offre moyenne', beaucoup: 'facile à trouver' };
+  const TITRES_PRIX_FP = { cher: ' et cher', bas: ' et bon marché', moyen: ', à un prix moyen' };
   const LECTURES_FP = {
-    'beaucoup/cher': "Le marché est actif : on en trouve facilement, mais il reste coûteux.", 'peu/cher': 'Il est difficile à trouver, et il est coûteux.',
+    'beaucoup/cher': "Le marché est actif : on en trouve facilement, mais il reste coûteux.", 'peu/cher': 'Peu de vendeurs et un prix élevé : il est difficile de mettre la main dessus.',
     'beaucoup/bas': 'Il est facile à trouver, et son prix reste bas.', 'peu/bas': 'Un petit marché : peu de vendeurs et un prix bas.',
     'beaucoup/moyen': 'On en trouve facilement, à un prix courant.', 'peu/moyen': 'Il est assez rare, à un prix courant.',
     'moyen/cher': "L'offre est courante, mais le prix est élevé.", 'moyen/bas': "L'offre est courante, et le prix est bas.",
@@ -1308,7 +1308,12 @@
         const pctN = part((x) => x.n < moi.n), pctP = part((x) => x.p < moi.p);
         const offre = moi.n === 0 ? 'aucune' : pctN >= 75 ? 'beaucoup' : pctN <= 25 ? 'peu' : 'moyen';
         const prix = pctP >= 75 ? 'cher' : pctP <= 25 ? 'bas' : 'moyen';
-        const titre = offre === 'aucune' ? TITRES_OFFRE_FP.aucune : `${TITRES_OFFRE_FP[offre]} ${TITRES_PRIX_FP[prix]}`;
+        const pl = (n) => `${n} annonce${n > 1 ? 's' : ''}`;
+        const titre = offre === 'aucune' ? 'Aucune annonce en ce moment' : `${pl(moi.n)} : ${SENS_OFFRE_FP[offre]}${TITRES_PRIX_FP[prix]}`;
+        // Seuils en nombre d'annonces : « rare à trouver » jusqu'à maxRare, « facile à trouver » à partir de minFacile (quart bas et quart haut des livres du guide)
+        const valeurs = [...new Set(pts.map((x) => x.n))].sort((u, v) => u - v);
+        const maxRare = Math.max(...valeurs.filter((v) => part((x) => x.n < v) <= 25), 0), minFacile = valeurs.find((v) => part((x) => x.n < v) >= 75);
+        const seuils = `Peu d'annonces, c'est rare à trouver : ${maxRare === 0 ? 'aucune annonce' : `${pl(maxRare)} ou moins`}.${minFacile != null ? ` Beaucoup d'annonces, c'est facile à trouver : ${pl(minFacile)} ou plus.` : ''} Ces seuils comparent ce livre aux autres livres du guide.`;
         const W = 350, H = 220, gx = 36, gy = 10, gb = 30, dr = 12;
         const nmax = Math.max(10, ...pts.map((x) => x.n)) + 1;
         const lx = (n) => gx + (Math.log(n + 1) / Math.log(nmax + 1)) * (W - gx - dr);
@@ -1326,11 +1331,12 @@
           + `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="12" class="fp-halo"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" class="fp-moi"/>`
           + `<text x="${(droite ? cx - 11 : cx + 11).toFixed(1)}" y="${(cy < gy + 18 ? cy + 18 : cy - 12).toFixed(1)}" text-anchor="${droite ? 'end' : 'start'}" class="fp-nom">Ce livre</text>`
           + `<text x="${gx - 6}" y="${gy + 4}" text-anchor="end" class="fp-ax">cher</text><text x="${gx - 6}" y="${H - gb}" text-anchor="end" class="fp-ax">pas cher</text>`
-          + `<text x="${gx}" y="${H - 8}" class="fp-ax">← peu</text><text x="${W - dr}" y="${H - 8}" text-anchor="end" class="fp-ax">beaucoup d'annonces →</text></svg>`;
+          + `<text x="${gx}" y="${H - 8}" class="fp-ax">← peu d'annonces</text><text x="${W - dr}" y="${H - 8}" text-anchor="end" class="fp-ax">beaucoup d'annonces →</text></svg>`;
         haut = `<p class="sous">Ce bloc compare cette édition aux autres éditions du guide : combien d'annonces, à quel prix, et si le marché bouge.</p>
           ${boite(titre, LECTURES_FP[`${offre}/${prix}`])}
-          ${jauge("Combien d'annonces ?", moi.n ? `${moi.n} en ce moment` : 'aucune en ce moment', moi.n ? pctN : 0, 'peu', 'beaucoup', moi.n ? `Plus d'annonces que <b>${pctN} livres sur 100</b>.` : 'Aucune annonce en ce moment.', `${mn} annonce${mn > 1 ? 's' : ''}`)}
+          ${jauge("Combien d'annonces ?", moi.n ? pl(moi.n) + ' en ce moment' : 'aucune en ce moment', moi.n ? pctN : 0, "peu<small>rare à trouver</small>", "beaucoup<small>facile à trouver</small>", moi.n ? `Plus d'annonces que <b>${pctN} livres sur 100</b>.` : 'Aucune annonce en ce moment.', `${mn}<small>annonce${mn > 1 ? 's' : ''}</small>`)}
           ${jauge('Quel prix ?', `${fmt(moi.p)} en ${moi.tbe ? 'très bon' : 'bon'} état`, pctP, 'bon marché', 'cher', `Plus cher que <b>${pctP} livres sur 100</b>.`, fmt(mp))}
+          <p class="sous fp-note">${seuils}</p>
           <p class="sous fp-note">La médiane est la valeur du livre «\u00a0du milieu\u00a0» : la moitié des livres du guide est en dessous, l'autre moitié au-dessus.</p>
           <details class="fp-detail"><summary>Voir tous les livres sur un graphique</summary>
             <p class="sous">Chaque point est une édition du guide. Plus il est à droite, plus il y a d'annonces ; plus il est haut, plus le livre est cher. Les pointillés marquent la médiane de tous les livres : ${mn} annonce${mn > 1 ? 's' : ''} et ${fmt(mp)}.</p>
