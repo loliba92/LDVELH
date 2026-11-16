@@ -2,7 +2,7 @@
  "date": "2026-11-16",
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
- "nb_modifiees": 1418,
+ "nb_modifiees": 1419,
  "mediane_variation": -0.005,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -234,21 +234,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070333356",
-   "isbn13": "9782070333356",
-   "titre": "Rendez-vous avec la M.O.R.T",
-   "serie": "Défis Fantastiques",
-   "numero": "335",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 15.9,
-   "apres": 14.27,
-   "pct": -0.103,
-   "nature": "annonces",
-   "nb": 5,
-   "recalibre": false
-  },
-  {
    "id": "9782070334247",
    "isbn13": "9782070334247",
    "titre": "L'Homme au Cheval de Brume",
@@ -261,6 +246,21 @@
    "pct": -0.103,
    "nature": "annonces",
    "nb": 14,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333356",
+   "isbn13": "9782070333356",
+   "titre": "Rendez-vous avec la M.O.R.T",
+   "serie": "Défis Fantastiques",
+   "numero": "335",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 15.9,
+   "apres": 14.28,
+   "pct": -0.102,
+   "nature": "annonces",
+   "nb": 5,
    "recalibre": false
   },
   {
@@ -283,8 +283,8 @@
  "modele": {
   "actif": false,
   "n_paires": 195,
-  "gain": 0.024,
-  "raison": "le modèle ne bat pas assez les archives (gain 2%, 15% exigés)",
-  "rapport_global": 0.912
+  "gain": 0.036,
+  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+  "rapport_global": 0.911
  }
 }
