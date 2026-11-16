@@ -2,7 +2,7 @@
  "date": "2026-11-16",
  "precedent": "2026-11-15",
  "nb_comparees": 1539,
- "nb_modifiees": 1430,
+ "nb_modifiees": 1431,
  "mediane_variation": -0.005,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 0.81,
-   "apres": 1.49,
-   "pct": 0.84,
+   "apres": 1.5,
+   "pct": 0.852,
    "nature": "annonces",
    "nb": 1,
    "recalibre": false
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 21.86,
-   "apres": 28.58,
-   "pct": 0.307,
+   "apres": 28.59,
+   "pct": 0.308,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 13.95,
-   "apres": 17.87,
-   "pct": 0.281,
+   "apres": 17.88,
+   "pct": 0.282,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -257,10 +257,10 @@
    "version": "V1",
    "etat": "bon",
    "avant": 8.51,
-   "apres": 7.61,
-   "pct": -0.106,
+   "apres": 7.59,
+   "pct": -0.108,
    "nature": "annonces",
-   "nb": 37,
+   "nb": 38,
    "recalibre": false
   },
   {
@@ -324,12 +324,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 49,
+ "nb_grands_mouvements": 50,
  "modele": {
   "actif": false,
-  "n_paires": 231,
-  "gain": 0.004,
-  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
-  "rapport_global": 0.956
+  "n_paires": 235,
+  "gain": -0.006,
+  "raison": "le modèle ne bat pas assez les archives (gain -1%, 15% exigés)",
+  "rapport_global": 0.964
  }
 }
