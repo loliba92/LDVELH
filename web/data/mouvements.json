@@ -2,7 +2,7 @@
  "date": "2026-11-17",
  "precedent": "2026-11-16",
  "nb_comparees": 1539,
- "nb_modifiees": 1434,
+ "nb_modifiees": 1430,
  "mediane_variation": -0.004,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 2.95,
-   "apres": 4.28,
-   "pct": 0.451,
+   "apres": 4.27,
+   "pct": 0.447,
    "nature": "annonces",
    "nb": 3,
    "recalibre": false
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.41,
+   "apres": 34.42,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -75,7 +75,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 28.59,
-   "apres": 34.66,
+   "apres": 34.64,
    "pct": 0.212,
    "nature": "ventes",
    "nb": 1,
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 17.88,
-   "apres": 21.43,
-   "pct": 0.199,
+   "apres": 21.41,
+   "pct": 0.197,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 44.7,
-   "apres": 53.56,
-   "pct": 0.198,
+   "apres": 53.52,
+   "pct": 0.197,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,8 +120,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 21.3,
-   "apres": 24.61,
-   "pct": 0.155,
+   "apres": 24.67,
+   "pct": 0.158,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -135,8 +135,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 7.75,
-   "apres": 8.92,
-   "pct": 0.151,
+   "apres": 8.93,
+   "pct": 0.152,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -242,7 +242,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.68,
+   "apres": 59.69,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
@@ -252,9 +252,9 @@
  "nb_grands_mouvements": 32,
  "modele": {
   "actif": false,
-  "n_paires": 265,
-  "gain": 0.002,
-  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
-  "rapport_global": 1.007
+  "n_paires": 264,
+  "gain": 0.011,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "rapport_global": 1.008
  }
 }
