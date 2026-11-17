@@ -377,8 +377,21 @@ class TestEtapes(unittest.TestCase):
 
     def test_le_bloc_json_est_lu(self):
         e = imp.extraire_etapes(self.BLOC)["2026-11-16"]
-        self.assertEqual(e["vinted"], {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1, "hors_genre": 0})
+        self.assertEqual({k: v for k, v in e["vinted"].items() if v}, {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1})
         self.assertEqual(e["leboncoin"]["hors_genre"], 1)
+
+    def test_les_raisons_sont_lues_et_enregistrees(self):
+        brut = '```json\n{"etapes":{"jours":{"2026-11-16":{"vinted":{"etape1":1,"etape2":0,"non_validee":3,"lot":0,"hors_genre":0,"r_supposee_sans_photo":2,"r_page_pas_lue":1}}}}}\n```'
+        e = imp.extraire_etapes(brut)["2026-11-16"]["vinted"]
+        self.assertEqual((e["r_supposee_sans_photo"], e["r_page_pas_lue"], e["r_a_identifier"]), (2, 1, 0))
+        with tempfile.TemporaryDirectory() as d:
+            imp.enregistrer_etapes({"2026-11-16": {"vinted": e}}, d)
+            with open(Path(d) / "etapes-2026-11-16.csv", newline="", encoding="utf-8") as f:
+                self.assertEqual(next(csv.DictReader(f))["r_supposee_sans_photo"], "2")
+
+    def test_raison_illisible_refuse_la_ligne(self):
+        brut = '```json\n{"etapes":{"jours":{"2026-11-16":{"vinted":{"etape1":1,"etape2":0,"non_validee":3,"lot":0,"hors_genre":0,"r_page_pas_lue":"x"}}}}}\n```'
+        self.assertEqual(imp.extraire_etapes(brut), {})
 
     def test_le_csv_reste_le_premier_bloc(self):
         self.assertNotIn("etapes", imp.extraire_csv(self.BLOC))

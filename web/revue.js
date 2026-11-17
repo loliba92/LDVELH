@@ -1570,19 +1570,25 @@
     // Validation des annonces par étape (comptée par le bot, Vinted et Leboncoin) : étape 1 = liste de recherche, étape 2 = page ouverte, sinon non validée
     const PERIODES_V = [[1, "Aujourd'hui"], [7, '7 jours'], [30, '30 jours']];
     const ETAPES_V = [['etape1', 'Étape 1', 'var(--c-ok)'], ['etape2', 'Étape 2', 'var(--gold)'], ['non_validee', 'Non validées', 'var(--c-non)']];
+    const RAISONS_V = [['r_supposee_attente', 'Édition supposée, photo en cours de comparaison'], ['r_supposee_sans_photo', 'Édition supposée, photo pas comparée'], ['r_supposee_photo_floue', 'Édition supposée, photo sans décision'],
+      ['r_supposee_photo_indispo', 'Édition supposée, photo non lue (plafond, pause ou erreur)'], ['r_supposee_sans_rapport', 'Édition supposée, photo sans rapport avec la jaquette'],
+      ['r_plusieurs_editions', 'Plusieurs éditions possibles'], ['r_page_pas_lue', 'Page pas lue'], ['r_a_identifier', 'Livre à identifier']];
     function blocValidation(pill) {
       const jours = Array.from({ length: periodeV }, (_, k) => (ANN.etapes || {})[jourParis(k)]).filter(Boolean);
       const lignes = [['vinted', 'Vinted'], ['leboncoin', 'Leboncoin']].map(([src, nom]) => {
         const c = { etape1: 0, etape2: 0, non_validee: 0, lot: 0, hors_genre: 0 };
+        RAISONS_V.forEach(([k]) => { c[k] = 0; });
         jours.forEach((j) => Object.keys(c).forEach((k) => { c[k] += (j[src] || {})[k] || 0; }));
         const total = c.etape1 + c.etape2 + c.non_validee;
         if (!total) return `<li class="val-ligne"><span class="val-nom">${nom}</span><span class="sous">Aucune annonce comptée</span></li>`;
         const etapes = ETAPES_V.filter(([k]) => src === 'vinted' || k !== 'etape2');          // Leboncoin donne tout dans la liste : pas d'étape 2
         const part = (k) => Math.round(100 * c[k] / total);
         const aPart = [c.lot ? `${c.lot} lot${c.lot > 1 ? 's' : ''}` : '', c.hors_genre ? `${c.hors_genre} hors du genre` : ''].filter(Boolean).join(', ');
+        const raisons = RAISONS_V.filter(([k]) => c[k] > 0);
         return `<li class="val-ligne"><span class="val-nom">${nom} <small>${total} annonce${total > 1 ? 's' : ''}</small></span>
           <span class="val-barre" role="img" aria-label="${etapes.map(([k, lib]) => `${lib} ${part(k)} %`).join(', ')}">${etapes.map(([k, , couleur]) => (c[k] ? `<i style="width:${100 * c[k] / total}%;background:${couleur}"></i>` : '')).join('')}</span>
           <span class="val-legende">${etapes.map(([k, lib, couleur]) => `<span><i style="background:${couleur}"></i>${lib} <b>${part(k)} %</b> <small>${c[k]}</small></span>`).join('')}</span>
+          ${raisons.length && c.non_validee ? `<ul class="val-raisons" aria-label="Pourquoi ${nom} reste non validé">${raisons.map(([k, lib]) => `<li><span>${lib}</span><b>${c[k]}</b></li>`).join('')}</ul>` : ''}
           ${aPart ? `<span class="sous val-part">À part (hors pourcentages) : ${aPart}</span>` : ''}</li>`;
       });
       const nb = jours.length;

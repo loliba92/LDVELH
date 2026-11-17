@@ -98,7 +98,10 @@ def extraire_csv(corps):
     return (m.group(1) if m else corps or "").strip()
 
 
-COLONNES_ETAPES = ["source", "etape1", "etape2", "non_validee", "lot", "hors_genre"]
+COLONNES_BASE_ETAPES = ["etape1", "etape2", "non_validee", "lot", "hors_genre"]
+COLONNES_RAISONS = ["r_supposee_attente", "r_supposee_sans_photo", "r_supposee_photo_floue", "r_supposee_photo_indispo", "r_supposee_sans_rapport",
+                    "r_plusieurs_editions", "r_page_pas_lue", "r_a_identifier"]          # pourquoi une annonce reste non validée (facultatif)
+COLONNES_ETAPES = ["source"] + COLONNES_BASE_ETAPES + COLONNES_RAISONS
 JOUR = re.compile(r"^20\d{2}-\d{2}-\d{2}$")
 
 
@@ -116,7 +119,9 @@ def extraire_etapes(corps):
         for source in ("vinted", "leboncoin"):
             c = par_source.get(source)
             try:
-                ligne = {k: int(c[k]) for k in COLONNES_ETAPES[1:]} if isinstance(c, dict) else None
+                ligne = {k: int(c[k]) for k in COLONNES_BASE_ETAPES} if isinstance(c, dict) else None
+                if ligne:
+                    ligne.update({k: int(c.get(k) or 0) for k in COLONNES_RAISONS})
             except (KeyError, TypeError, ValueError):
                 ligne = None
             if ligne and all(0 <= v <= 100000 for v in ligne.values()):
@@ -133,7 +138,7 @@ def enregistrer_etapes(etapes, dossier):
         if fichier.exists():
             with open(fichier, newline="", encoding="utf-8") as f:
                 lignes = {r["source"]: r for r in csv.DictReader(f)}
-        lignes.update({source: {"source": source, **c} for source, c in par_source.items()})
+        lignes.update({source: {"source": source, **dict.fromkeys(COLONNES_RAISONS, 0), **c} for source, c in par_source.items()})
         dossier.mkdir(parents=True, exist_ok=True)
         _ecrire(fichier, COLONNES_ETAPES, [lignes[k] for k in sorted(lignes)])
     return len(etapes)
