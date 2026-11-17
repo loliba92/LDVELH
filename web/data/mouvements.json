@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.42,
+   "apres": 34.41,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -75,7 +75,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 28.59,
-   "apres": 34.71,
+   "apres": 34.7,
    "pct": 0.214,
    "nature": "ventes",
    "nb": 1,
@@ -105,7 +105,7 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 44.7,
-   "apres": 53.63,
+   "apres": 53.62,
    "pct": 0.2,
    "nature": "archives",
    "nb": 0,
@@ -120,8 +120,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 21.3,
-   "apres": 24.52,
-   "pct": 0.151,
+   "apres": 24.53,
+   "pct": 0.152,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -204,6 +204,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070610419",
+   "isbn13": "9782070610419",
+   "titre": "Le Temple de la Terreur",
+   "serie": "Défis Fantastiques",
+   "numero": "311",
+   "version": "V3",
+   "etat": "bon",
+   "avant": 8.08,
+   "apres": 7.19,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 10,
+   "recalibre": false
+  },
+  {
    "id": "9782010117244",
    "isbn13": "9782010117244",
    "titre": "Les Mystères de Babylone",
@@ -242,19 +257,19 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.69,
+   "apres": 59.68,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 31,
+ "nb_grands_mouvements": 32,
  "modele": {
   "actif": false,
-  "n_paires": 259,
-  "gain": 0.008,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "n_paires": 261,
+  "gain": 0.002,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
   "rapport_global": 0.999
  }
 }
