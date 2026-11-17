@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.41,
+   "apres": 34.42,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -189,6 +189,21 @@
  ],
  "baisses": [
   {
+   "id": "9782070610341",
+   "isbn13": "9782070610341",
+   "titre": "La Forêt de la Malédiction",
+   "serie": "Défis Fantastiques",
+   "numero": "269",
+   "version": "V3",
+   "etat": "bon",
+   "avant": 6.38,
+   "apres": 5.57,
+   "pct": -0.127,
+   "nature": "annonces",
+   "nb": 7,
+   "recalibre": false
+  },
+  {
    "id": "9782010117244",
    "isbn13": "9782010117244",
    "titre": "Les Mystères de Babylone",
@@ -227,19 +242,19 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.68,
+   "apres": 59.69,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 30,
+ "nb_grands_mouvements": 31,
  "modele": {
   "actif": false,
-  "n_paires": 257,
-  "gain": -0.002,
-  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
+  "n_paires": 258,
+  "gain": 0.009,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
   "rapport_global": 0.999
  }
 }
