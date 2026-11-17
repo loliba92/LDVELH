@@ -340,7 +340,7 @@ def etapes_validation(dossier, jours=30):
             continue
         with open(f, encoding="utf-8", newline="") as fh:
             for r in csv.DictReader(fh):
-                sortie.setdefault(f.stem[-10:], {})[r["source"]] = {k: int(r[k]) for k in importer_leboncoin.COLONNES_ETAPES[1:]}
+                sortie.setdefault(f.stem[-10:], {})[r["source"]] = {k: int(r.get(k) or 0) for k in importer_leboncoin.COLONNES_ETAPES[1:]}
     return sortie
 
 

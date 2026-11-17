@@ -433,4 +433,4 @@ class TestEtapesValidation(unittest.TestCase):
                 (Path(d) / f"etapes-{jour.isoformat()}.csv").write_text("source,etape1,etape2,non_validee,lot,hors_genre\nvinted,6,3,1,1,0\nleboncoin,2,0,0,0,1\n", encoding="utf-8")
             r = etapes_validation(Path(d))
             self.assertEqual(list(r), [date.today().isoformat()])
-            self.assertEqual(r[date.today().isoformat()]["vinted"], {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1, "hors_genre": 0})
+            self.assertEqual({k: v for k, v in r[date.today().isoformat()]["vinted"].items() if v}, {"etape1": 6, "etape2": 3, "non_validee": 1, "lot": 1})          # ancien fichier sans raisons : 0
