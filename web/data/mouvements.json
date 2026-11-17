@@ -2,7 +2,7 @@
  "date": "2026-11-17",
  "precedent": "2026-11-16",
  "nb_comparees": 1539,
- "nb_modifiees": 1435,
+ "nb_modifiees": 1434,
  "mediane_variation": -0.004,
  "nouvelles_cotes": 6,
  "hausses": [
@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 1.49,
-   "apres": 2.11,
-   "pct": 0.416,
+   "apres": 2.12,
+   "pct": 0.423,
    "nature": "annonces",
    "nb": 1,
    "recalibre": false
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.42,
+   "apres": 34.41,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -75,8 +75,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 28.59,
-   "apres": 34.66,
-   "pct": 0.212,
+   "apres": 34.67,
+   "pct": 0.213,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 17.88,
-   "apres": 21.42,
-   "pct": 0.198,
+   "apres": 21.43,
+   "pct": 0.199,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -105,7 +105,7 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 44.7,
-   "apres": 53.55,
+   "apres": 53.57,
    "pct": 0.198,
    "nature": "archives",
    "nb": 0,
@@ -135,8 +135,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 21.3,
-   "apres": 24.62,
-   "pct": 0.156,
+   "apres": 24.59,
+   "pct": 0.154,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -227,19 +227,19 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.69,
+   "apres": 59.68,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 30,
+ "nb_grands_mouvements": 31,
  "modele": {
   "actif": false,
-  "n_paires": 249,
-  "gain": 0.009,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.984
+  "n_paires": 251,
+  "gain": 0.002,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 0.992
  }
 }
