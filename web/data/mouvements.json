@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 1.49,
-   "apres": 2.13,
-   "pct": 0.43,
+   "apres": 2.12,
+   "pct": 0.423,
    "nature": "annonces",
    "nb": 1,
    "recalibre": false
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.42,
+   "apres": 34.41,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -75,8 +75,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 28.59,
-   "apres": 34.7,
-   "pct": 0.214,
+   "apres": 34.69,
+   "pct": 0.213,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -90,8 +90,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 17.88,
-   "apres": 21.45,
-   "pct": 0.2,
+   "apres": 21.44,
+   "pct": 0.199,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 44.7,
-   "apres": 53.62,
-   "pct": 0.2,
+   "apres": 53.6,
+   "pct": 0.199,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,8 +120,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 21.3,
-   "apres": 24.53,
-   "pct": 0.152,
+   "apres": 24.55,
+   "pct": 0.153,
    "nature": "archives",
    "nb": 1,
    "recalibre": false
@@ -135,8 +135,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 7.75,
-   "apres": 8.91,
-   "pct": 0.15,
+   "apres": 8.92,
+   "pct": 0.151,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -242,19 +242,19 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.69,
+   "apres": 59.68,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 31,
+ "nb_grands_mouvements": 30,
  "modele": {
   "actif": false,
-  "n_paires": 260,
-  "gain": 0.009,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 0.999
+  "n_paires": 262,
+  "gain": 0.0,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 1.0
  }
 }
