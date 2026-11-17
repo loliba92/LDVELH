@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 1.49,
-   "apres": 2.12,
-   "pct": 0.423,
+   "apres": 2.11,
+   "pct": 0.416,
    "nature": "annonces",
    "nb": 1,
    "recalibre": false
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 27.68,
-   "apres": 34.41,
+   "apres": 34.42,
    "pct": 0.243,
    "nature": "annonces",
    "nb": 1,
@@ -157,21 +157,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070566440",
-   "isbn13": "9782070566440",
-   "titre": "Les Héritiers de Dorgan",
-   "serie": "Défis et Sortilèges",
-   "numero": "648",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 12.31,
-   "apres": 14.12,
-   "pct": 0.147,
-   "nature": "annonces",
-   "nb": 6,
-   "recalibre": false
-  },
-  {
    "id": "9782380240269",
    "isbn13": "9782380240269",
    "titre": "OUT THERE - L'Exil - RPG BooK",
@@ -184,6 +169,21 @@
    "pct": 0.146,
    "nature": "prix éditeur",
    "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 12.31,
+   "apres": 14.02,
+   "pct": 0.139,
+   "nature": "annonces",
+   "nb": 7,
    "recalibre": false
   }
  ],
@@ -227,7 +227,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 66.42,
-   "apres": 59.68,
+   "apres": 59.69,
    "pct": -0.101,
    "nature": "annonces",
    "nb": 5,
@@ -237,9 +237,9 @@
  "nb_grands_mouvements": 30,
  "modele": {
   "actif": false,
-  "n_paires": 247,
-  "gain": 0.002,
-  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
-  "rapport_global": 0.992
+  "n_paires": 246,
+  "gain": 0.01,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "rapport_global": 0.988
  }
 }
