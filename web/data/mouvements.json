@@ -2,40 +2,10 @@
  "date": "2026-11-18",
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
- "nb_modifiees": 1428,
+ "nb_modifiees": 1425,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
-  {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 2.1,
-   "apres": 2.66,
-   "pct": 0.267,
-   "nature": "annonces",
-   "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 4.27,
-   "apres": 5.32,
-   "pct": 0.246,
-   "nature": "annonces",
-   "nb": 3,
-   "recalibre": false
-  },
   {
    "id": "9782070520329",
    "isbn13": "9782070520329",
@@ -60,8 +30,8 @@
    "version": "V3",
    "etat": "tres_bon",
    "avant": 8.55,
-   "apres": 10.36,
-   "pct": 0.212,
+   "apres": 10.37,
+   "pct": 0.213,
    "nature": "annonces",
    "nb": 2,
    "recalibre": false
@@ -75,7 +45,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 31.24,
-   "apres": 37.68,
+   "apres": 37.67,
    "pct": 0.206,
    "nature": "annonces",
    "nb": 1,
@@ -90,10 +60,10 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 3.55,
-   "apres": 4.2,
-   "pct": 0.183,
+   "apres": 4.16,
+   "pct": 0.172,
    "nature": "archives",
-   "nb": 1,
+   "nb": 0,
    "recalibre": false
   },
   {
@@ -105,8 +75,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 34.42,
-   "apres": 40.2,
-   "pct": 0.168,
+   "apres": 40.24,
+   "pct": 0.169,
    "nature": "annonces",
    "nb": 2,
    "recalibre": false
@@ -120,7 +90,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 34.64,
-   "apres": 40.05,
+   "apres": 40.06,
    "pct": 0.156,
    "nature": "ventes",
    "nb": 1,
@@ -135,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 21.41,
-   "apres": 24.56,
-   "pct": 0.147,
+   "apres": 24.57,
+   "pct": 0.148,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -150,8 +120,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 53.52,
-   "apres": 61.41,
-   "pct": 0.147,
+   "apres": 61.43,
+   "pct": 0.148,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -185,24 +155,39 @@
    "nature": "prix éditeur",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070509225",
+   "isbn13": "9782070509225",
+   "titre": "Les Sombres Cohortes",
+   "serie": "Défis Fantastiques",
+   "numero": "586",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 6.74,
+   "apres": 7.5,
+   "pct": 0.113,
+   "nature": "annonces",
+   "nb": 8,
+   "recalibre": false
+  },
+  {
+   "id": "9782070512645",
+   "isbn13": "9782070512645",
+   "titre": "Le Voleur d'Ames",
+   "serie": "Défis Fantastiques",
+   "numero": "530",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 10.6,
+   "apres": 11.75,
+   "pct": 0.108,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
   }
  ],
  "baisses": [
-  {
-   "id": "9782010117244",
-   "isbn13": "9782010117244",
-   "titre": "Les Mystères de Babylone",
-   "serie": "La Saga du Prêtre Jean",
-   "numero": "4",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 13.84,
-   "apres": 12.32,
-   "pct": -0.11,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
   {
    "id": "9782070610341",
    "isbn13": "9782070610341",
@@ -219,11 +204,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 17,
+ "nb_grands_mouvements": 15,
  "modele": {
   "actif": false,
   "n_paires": 265,
-  "gain": 0.006,
+  "gain": 0.008,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
   "rapport_global": 1.015
  }
