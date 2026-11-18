@@ -1112,7 +1112,7 @@
         return `<div class="ann-cadre"><table class="ann-tab"><caption class="sr-only">Annonces retenues pour cette édition</caption><thead><tr>${ordre.map(th).join('')}${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${vues.map(ligneFiche).join('')}</tbody></table></div>${vues.length < lignes.length ? `<p class="ann-plus"><button type="button" class="bouton bouton-clair" data-ann-plus>Voir les ${lignes.length - vues.length} autres annonces</button></p>` : ''}`;
       };
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
-      if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
+      if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const dispersions = ETATS.map((e) => { const l = ((par && par[e.k]) || []).map((a) => a[0]); return l.length > 1 && Math.max(...l) > Math.min(...l) * 3 ? `${esc(e.long)} · ${l.length} annonces · prix très dispersés` : ''; }).filter(Boolean);
       const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Prix</th><th scope="col">Site</th><th scope="col">Annonce</th><th scope="col">Date</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
@@ -1298,7 +1298,7 @@
   }
 
   // Positionnement (niveaux 2 et 3) : où se situe l'édition parmi les autres (annonces en ligne et cote), puis le rythme des nouvelles annonces
-  const blocPosition = () => '<details class="fiche-position fiche-carte fiche-acc" id="fp-zone"><summary id="fp-titre">Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
+  const blocPosition = () => '<details class="fiche-position fiche-carte fiche-acc" id="fp-zone"><summary id="fp-titre">' + iconeAcc('radar') + 'Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
   const SOURCES_FP = [['vin', 'Vinted', 'vinted'], ['ebay', 'eBay', 'ebay'], ['lbc', 'Leboncoin', 'leboncoin'], ['lib', 'Librairies', 'librairie']];
   const SENS_OFFRE_FP = { peu: 'rare à trouver', moyen: 'une offre moyenne', beaucoup: 'facile à trouver' };
   const TITRES_PRIX_FP = { cher: ' et cher', bas: ' et bon marché', moyen: ', à un prix moyen' };
@@ -1427,7 +1427,7 @@
         </div>
         ${voitAnnonces() ? blocAnnonces(b) : blocRecherche(b)}
         ${estNiveau2() ? blocPosition() : ''}
-        <details class="fiche-carte fiche-acc fiche-details"><summary>Détails du livre et autres éditions</summary>
+        <details class="fiche-carte fiche-acc fiche-details"><summary>${iconeAcc('details')}Détails du livre et autres éditions</summary>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
@@ -1440,7 +1440,7 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         </details>
-        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>Outils de cotes</summary>
+        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>${iconeAcc('outils')}Outils de cotes</summary>
         ${incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
         <div class="hors-marche" id="hors-marche" hidden></div>
         ${blocCorriger(b)}</details>` : ''}
