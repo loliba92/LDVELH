@@ -1037,13 +1037,9 @@
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
-  // Petites icônes décoratives des accordéons de la fiche (couleur du texte)
-  const ICONES_ACC = { annonces: '<path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1.3"/>', radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
-    details: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h6"/>', outils: '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>' };
-  const iconeAcc = (k) => `<svg class="acc-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONES_ACC[k]}</svg>`;
   // Accordéon « Annonces » (sorciers et Zagor), replié : tableau, offre d'occasion, recherche en vente
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>${iconeAcc('annonces')}Annonces retenues</summary>
+    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p>
       ${estNiveau2() ? blocOffre() : ''}${blocRecherche(b)}</details>`;
   }
