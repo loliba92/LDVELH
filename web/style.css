@@ -1891,33 +1891,76 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .collection details.chiffres { margin: 0 0 8px; }
 @media (max-width: 800px) { .hc-grille { grid-template-columns: minmax(0, 1fr); } .hc-cles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .hc-cles li { padding: 8px; } .hc-cles b { font-size:var(--t-lg); } .hc-cles .cle-lib { font-size:var(--t-xs); letter-spacing: .08em; } }
 
-/* Fiche : annonces retenues derrière la cote (SuperAdmin) */
-.annonces-fiche { padding: 2px 16px; }
-.annonces-fiche summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
+/* Fiche : annonces retenues derrière la cote (sorciers et Zagor), en tableau */
+.fiche-acc.fiche-carte { padding: 0 12px; }
+.fiche-acc > summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
+/* Accordéons de la fiche : titre cliquable (clavier et toucher), contenu en dessous */
+.fiche-acc > summary { cursor: pointer; }
+.fiche-acc > summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.fiche-acc .fiche-carte { margin: 12px 0 0; padding: 8px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.fiche-acc > .fiche-details-corps, .fiche-details > .infos { margin-top: 4px; }
+.fiche-acc.fiche-details[open] { padding-bottom: 12px; }
+.fiche-acc.fiche-carte > h3 { margin: 22px 0 10px; }
+.fiche-acc > .liens-vente { margin-top: 4px; }
+/* Tendance du prix sous la jaquette */
+.fiche-tendance { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.fiche-tendance strong { display: block; font: 700 .72rem var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.fiche-tendance .ev-resume { margin: 0; }
+.fiche-tendance .sous { margin: 0; }
 .annonces-corps { padding: 2px 0 6px; }
-.annonces-corps h4 { margin: 12px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.annonces-corps ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.annonces-corps li { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); column-gap: 10px; align-items: baseline; line-height: 1.35; font-size:var(--t-base); overflow-wrap: anywhere; }
-.annonces-corps li a { color: var(--text); text-decoration: none; }
-.annonces-corps li a:hover, .annonces-corps li a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
-.annonces-corps .ann-prix { font-weight: 700; color: var(--gold); text-align: right; }
-.annonces-corps .ann-ligne { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; margin-top: 2px; min-width: 0; }
-.annonces-corps .ann-ligne .ann-titre { grid-column: auto; }
-.annonces-corps .ann-vs { display: contents; font-size:var(--t-sm); }
-.annonces-corps .ann-vs .rc-pastille { font-size:var(--t-xs); line-height: 1.5; white-space: nowrap; }
-.annonces-corps .ann-vs .rc-vs { color: var(--muted); }
-.annonces-corps .ann-titre { grid-column: 2; justify-self: start; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size:var(--t-xs); }
-/* Une annonce par ligne : le titre prend la place disponible, les étiquettes passent à la ligne si besoin */
-.annonces-corps li.ann-li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
-.annonces-corps .ann-li > * { flex: none; }
-.annonces-corps .ann-li .ann-prix { min-width: 4.6em; text-align: right; }
-.annonces-corps .ann-li .ann-lien-titre { flex: 1 1 12em; min-width: 0; overflow-wrap: anywhere; }
-@media (min-width: 701px) { .annonces-corps .ann-li .ann-lien-titre { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
-.annonces-corps .ann-site { font-size:var(--t-sm); color: var(--muted); white-space: nowrap; }
-.annonces-corps .ann-exclure { margin-left: auto; min-height: 28px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
+.annonces-corps h4 { margin: 14px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.ann-cadre { overflow-x: auto; }
+.ann-tab { width: 100%; border-collapse: collapse; font-size: var(--t-sm); line-height: 1.35; }
+.ann-tab th { padding: 4px 8px 6px; text-align: left; font: 700 .72rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
+.ann-tab td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: break-word; }
+.ann-tab tbody tr:last-child td { border-bottom: 0; }
+.ann-tab .ann-tri { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; min-height: 28px; }
+.ann-tab .ann-tri:hover, .ann-tab .ann-tri:focus-visible { color: var(--gold); }
+.ann-tab th[aria-sort="ascending"], .ann-tab th[aria-sort="descending"] { color: var(--gold); }
+.ann-tab .ann-prix { font-weight: 700; color: var(--gold); text-align: right; white-space: nowrap; }
+.ann-tab th.ann-th-prix { text-align: right; }
+.ann-tab .ann-etat, .ann-tab .ann-nom, .ann-tab .ann-date { white-space: nowrap; }
+.ann-tab .ann-date { color: var(--muted); }
+.ann-tab .ann-annonce { min-width: 11em; }
+.ann-tab .ann-annonce > * { margin-right: 6px; }
+.ann-tab a.ann-lien-titre { color: var(--text); text-decoration: none; overflow-wrap: break-word; }
+.ann-tab a.ann-lien-titre:hover, .ann-tab a.ann-lien-titre:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+.ann-tab .ann-site { display: block; }
+.ann-tab .rc-pastille { display: inline-block; }
+.ann-tab .rc-pastille { font-size: var(--t-xs); line-height: 1.5; white-space: nowrap; }
+.ann-tab .ann-site { font-size: var(--t-xs); color: var(--muted); white-space: nowrap; }
+.ann-tab .ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: var(--t-xs); }
+.ann-tab .an-vendu { margin-right: 6px; }
+.ann-tab .ann-act { text-align: right; }
+.annonces-corps .ann-exclure { min-height: 28px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
 .annonces-corps .ann-exclure:hover, .annonces-corps .ann-exclure:focus-visible { color: var(--gold); border-color: var(--gold); }
 .annonces-corps .ann-exclure:disabled { opacity: .6; cursor: default; }
 .annonces-fiche .ann-msg { margin: 6px 0 0; font-weight: 600; }
+.ann-disp { margin: 6px 0 0; }
+.ann-plus { margin: 8px 0 6px; }
+@media (max-width: 700px) {
+  /* Téléphone : une carte par annonce ; les en-têtes deviennent des boutons de tri */
+  .ann-cadre { overflow: visible; }
+  .ann-tab, .ann-tab tbody { display: block; }
+  .ann-tab thead { display: block; }
+  .ann-tab thead tr { display: flex; flex-wrap: wrap; gap: 2px 14px; padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); }
+  .ann-tab thead th { display: block; padding: 0; border: 0; }
+  .ann-tab thead th.ann-th-annonce, .ann-tab thead th.ann-th-act { display: none; }
+  .ann-tab-inc thead { display: none; }
+  .ann-tab tbody tr { display: grid; grid-template-columns: auto auto 1fr auto; grid-template-areas: "prix etat site date" "annonce annonce annonce annonce" "ecart ecart ecart act"; gap: 2px 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .ann-tab tbody tr:last-child { border-bottom: 0; }
+  .ann-tab td { padding: 0; border: 0; min-width: 0; }
+  .ann-tab .ann-prix { grid-area: prix; text-align: left; font-size: var(--t-md); }
+  .ann-tab .ann-etat { grid-area: etat; }
+  .ann-tab .ann-nom { grid-area: site; }
+  .ann-tab .ann-date { grid-area: date; text-align: right; }
+  .ann-tab .ann-annonce { grid-area: annonce; min-width: 0; margin-top: 2px; }
+  .ann-tab .ann-ecart { grid-area: ecart; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; }
+  .ann-tab .ann-site { display: inline; }
+  .ann-tab .ann-act { grid-area: act; align-self: center; }
+  .ann-tab-inc tbody tr { grid-template-areas: "prix nom nom date" "annonce annonce annonce annonce" "ecart ecart ecart act"; }
+  .ann-tab-inc .ann-nom { grid-area: nom; }
+}
 
 /* Fenêtre de bienvenue : bandeau illustré en haut (même illustration que l'accueil) */
 .dlg-bienvenue .bienvenue-img { display: block; width: calc(100% + 44px); max-width: none; height: 120px; margin: -22px -22px 14px; object-fit: cover; object-position: center 30%; border-radius: 11px 11px 0 0; }
@@ -2200,7 +2243,6 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fp-zone-t { fill: var(--muted); font-size: 8.5px; font-weight: 700; opacity: .8; }
 .fp-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; color: var(--muted); font-size: var(--t-sm, .85rem); }
 .fp-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-.annonces-fiche.fiche-carte { padding: 0 16px; }
 
 /* Collection sur la jaquette (fiche) : les trois états posés en bas de l'image, le reste en dessous */
 .couv-cadre { position: relative; }
