@@ -7,6 +7,36 @@
  "nouvelles_cotes": 0,
  "hausses": [
   {
+   "id": "9782070332892",
+   "isbn13": "9782070332892",
+   "titre": "Le Talisman de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 3.55,
+   "apres": 4.54,
+   "pct": 0.279,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782380240269",
+   "isbn13": "9782380240269",
+   "titre": "OUT THERE - L'Exil - RPG BooK",
+   "serie": "RPG BooK",
+   "numero": null,
+   "version": "V1",
+   "etat": "bon",
+   "avant": 7.35,
+   "apres": 9.02,
+   "pct": 0.227,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070520329",
    "isbn13": "9782070520329",
    "titre": "Les Accessoires du Maître",
@@ -52,21 +82,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 3.55,
-   "apres": 4.16,
-   "pct": 0.172,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782070585168",
    "isbn13": "9782070585168",
    "titre": "La Malédiction de Naar",
@@ -75,7 +90,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 34.42,
-   "apres": 40.24,
+   "apres": 40.23,
    "pct": 0.169,
    "nature": "annonces",
    "nb": 2,
@@ -170,24 +185,54 @@
    "nature": "annonces",
    "nb": 8,
    "recalibre": false
-  },
-  {
-   "id": "9782070512645",
-   "isbn13": "9782070512645",
-   "titre": "Le Voleur d'Ames",
-   "serie": "Défis Fantastiques",
-   "numero": "530",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 10.6,
-   "apres": 11.75,
-   "pct": 0.108,
-   "nature": "archives",
-   "nb": 1,
-   "recalibre": false
   }
  ],
  "baisses": [
+  {
+   "id": "9782070512652",
+   "isbn13": "9782070512652",
+   "titre": "Dans l'Enfer de la Jungle",
+   "serie": "Loup Solitaire",
+   "numero": "420",
+   "version": "V2",
+   "etat": "convenable",
+   "avant": 7.3,
+   "apres": 5.86,
+   "pct": -0.197,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332687",
+   "isbn13": "9782070332687",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 6.64,
+   "apres": 5.89,
+   "pct": -0.113,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782010117244",
+   "isbn13": "9782010117244",
+   "titre": "Les Mystères de Babylone",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "4",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.84,
+   "apres": 12.32,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 12,
+   "recalibre": false
+  },
   {
    "id": "9782070610341",
    "isbn13": "9782070610341",
@@ -202,14 +247,44 @@
    "nature": "annonces",
    "nb": 7,
    "recalibre": false
+  },
+  {
+   "id": "9782010116988",
+   "isbn13": "9782010116988",
+   "titre": "L'Oeil du Sphinx",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "2",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 9.84,
+   "apres": 8.84,
+   "pct": -0.102,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332687",
+   "isbn13": "9782070332687",
+   "titre": "La Citadelle du Chaos",
+   "serie": "Défis Fantastiques",
+   "numero": "268",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 14.73,
+   "apres": 13.24,
+   "pct": -0.101,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
   }
  ],
- "nb_grands_mouvements": 15,
+ "nb_grands_mouvements": 21,
  "modele": {
   "actif": false,
-  "n_paires": 265,
-  "gain": 0.008,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "n_paires": 266,
+  "gain": 0.001,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
   "rapport_global": 1.015
  }
 }
