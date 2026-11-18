@@ -1151,7 +1151,7 @@
   // Corriger la fiche (titre, série, numéro, suppression) : réservé aux niveau 2, envoyé par le service technique
   function blocFiche(b) {
     const series = [...new Set(DATA.map((x) => x.serie).filter(Boolean))].sort((x, y) => x.localeCompare(y, 'fr'));
-    return `<details class="corriger-fiche"><summary>Corriger la fiche</summary>
+    return `<div class="corriger-fiche">
       <form class="corriger" id="corriger-fiche" data-id="${esc(b.id)}">
         <p class="sous">Le titre et la série s'appliquent à toutes les éditions de ce livre ; le numéro, à cette édition seulement. Pour une nouvelle série, écrivez simplement son nom.</p>
         <div class="corriger-champs corriger-fiche-champs">
@@ -1164,7 +1164,7 @@
         ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
         <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
-      </form></details>`;
+      </form></div>`;
   }
   function brancherFiche() {
     const f = $('#corriger-fiche');
@@ -1248,7 +1248,7 @@
     if (!id || !DATA.some((b) => b.id === id)) return;
     ouvrirFiche(id);
     if (!CORR_URL) return;
-    const ouvrir = () => { const d = $('.corriger-fiche'); if (d) { d.open = true; const acc = d.closest('details.fiche-acc'); if (acc) acc.open = true; } return !!d; };
+    const ouvrir = () => { const d = $('.corriger-fiche'); if (d) { const acc = d.closest('details.fiche-acc'); if (acc) acc.open = true; } return !!d; };
     if (ouvrir()) return;
     const retenter = () => { if (!estNiveau3()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de niveau 2 arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
