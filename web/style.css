@@ -1903,8 +1903,9 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .fiche-acc.fiche-details[open] { padding-bottom: 12px; }
 .fiche-acc.fiche-carte > h3 { margin: 22px 0 10px; }
 .fiche-acc > .liens-vente { margin-top: 4px; }
-/* Tendance du prix sous la jaquette */
-.fiche-tendance { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+/* Taux de tendance à droite du titre des prix : retour à la ligne propre si étroit */
+.fiche-cotes-titre { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.fiche-cotes-titre .ev-pastille { font-size: .9rem; line-height: 1.4; }
 .annonces-corps { padding: 2px 0 6px; }
 .annonces-corps h4 { margin: 14px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .ann-cadre { overflow-x: auto; }

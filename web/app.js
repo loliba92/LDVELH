@@ -1104,12 +1104,12 @@
           ${celluleDate(r.lien, r.vue)}
           <td class="ann-ecart" data-l="Écart">${r.v ? `<span class="rc-pastille ${VERDICTS_IMP[r.v][1]}">${VERDICTS_IMP[r.v][0]}</span>` : ''}${r.cote != null ? `<span class="ann-site">site ${fmt(r.cote)} · ${r.ecart > 0 ? '+' : r.ecart < 0 ? '−' : ''}${Math.abs(r.ecart)} %</span>` : ''}</td>${boutonExclure(r.lien, r.titre)}</tr>`;
       };
-      // Tri par clic sur l'en-tête : état puis prix au départ ; un second clic inverse. La date va du plus récent au plus ancien ; l'écart du plus bas au plus haut.
+      // Tri par clic sur l'en-tête : prix croissant au départ, annonces sans prix en dernier ; un second clic inverse. La date va du plus récent au plus ancien ; l'écart du plus bas au plus haut.
       const TRIS_ANN = { prix: ['Prix', (x, y) => x.prix - y.prix], etat: ['État', (x, y) => x.ie - y.ie || x.prix - y.prix], site: ['Site', (x, y) => x.site.localeCompare(y.site, 'fr') || x.prix - y.prix],
         date: ['Date', (x, y) => (x.date < y.date ? 1 : x.date > y.date ? -1 : 0) || x.prix - y.prix], ecart: ['Écart', (x, y) => (x.ecart == null) - (y.ecart == null) || x.ecart - y.ecart || x.prix - y.prix] };
-      let tri = 'etat', sens = 1, toutes = false;          // dix lignes d'abord : un livre peut avoir plus de soixante annonces
+      let tri = 'prix', sens = 1, toutes = false;          // dix lignes d'abord : un livre peut avoir plus de soixante annonces
       const tableau = () => {
-        const f = TRIS_ANN[tri][1], lignes = [...lignesTab].sort((x, y) => sens * f(x, y)), vues = toutes ? lignes : lignes.slice(0, 10);
+        const f = TRIS_ANN[tri][1], avecPrix = lignesTab.filter((r) => r.prix != null).sort((x, y) => sens * f(x, y)), lignes = avecPrix.concat(lignesTab.filter((r) => r.prix == null)), vues = toutes ? lignes : lignes.slice(0, 10);
         const tete = Object.entries(TRIS_ANN).map(([k, [nom]]) => `<th scope="col" class="ann-th-${k}" aria-sort="${k === tri ? (sens > 0 ? 'ascending' : 'descending') : 'none'}"><button type="button" class="ann-tri" data-tri="${k}">${nom}<span aria-hidden="true">${k === tri ? (sens > 0 ? ' ▲' : ' ▼') : ''}</span></button></th>`);
         const ordre = ['prix', 'etat', 'site', 'annonce', 'date', 'ecart'];
         const th = (k) => (k === 'annonce' ? '<th scope="col" class="ann-th-annonce">Annonce</th>' : tete[Object.keys(TRIS_ANN).indexOf(k)]);
@@ -1119,7 +1119,7 @@
       if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const dispersions = ETATS.map((e) => { const l = ((par && par[e.k]) || []).map((a) => a[0]); return l.length > 1 && Math.max(...l) > Math.min(...l) * 3 ? `${esc(e.long)} · ${l.length} annonces · prix très dispersés` : ''; }).filter(Boolean);
-      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Prix</th><th scope="col">Site</th><th scope="col">Annonce</th><th scope="col">Date</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
+      const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Prix</th><th scope="col">Site</th><th scope="col">Annonce</th><th scope="col">Date</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${[...inc].sort((u, v) => ((u[0] == null) - (v[0] == null)) || u[0] - v[0]).map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
       zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '<div id="ann-tableau">' + tableau() + '</div>') + dispersions.map((t) => `<p class="sous ann-disp">${t}</p>`).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>` ;
       zone.addEventListener('click', (ev) => {
         if (ev.target.closest('[data-ann-plus]')) { toutes = true; $('#ann-tableau').innerHTML = tableau(); return; }
@@ -1255,7 +1255,7 @@
   }
   let ficheMasquee = null;      // les cotes étaient masquées quand la fiche a été dessinée : elle est redessinée dès que le compte est prêt
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
-  // Tendance du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3) : sous la jaquette
+  // Tendance du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3) : taux à droite du titre des prix
   function blocTendance(b, etat) {
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return '';
     const a = HIST.cotes[`${b.id}|${etat}`] || [];
@@ -1264,7 +1264,7 @@
     const pct = points[points.length - 1].v / points[0].v - 1;
     const pctTxt = `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')} %`;
     const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
-    return `<div class="fiche-tendance"><span class="ev-pastille ${couleur}">${pctTxt}</span></div>`;
+    return `<span class="ev-pastille ${couleur}">${pctTxt}</span>`;
   }
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
@@ -1411,16 +1411,16 @@
         <div class="fiche-haut">
           <div class="fiche-couv"><div class="couv-cadre">${b.couverture_grande
             ? `<img src="${esc(racine(b.couverture_grande))}" alt="Jaquette de ${esc(b.titre)}" width="300" height="420" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
-            : tuile(b)}<div class="coll-surimage" id="coll-sur">${collEtats(b)}</div></div><div class="coll-sous" id="coll-sous">${collSous(b)}</div>${estNiveau2() ? blocTendance(b, sel.k) : ''}</div>
+            : tuile(b)}<div class="coll-surimage" id="coll-sur">${collEtats(b)}</div></div><div class="coll-sous" id="coll-sous">${collSous(b)}</div></div>
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
             <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
             <div class="note-livre" id="note-livre" hidden></div>
-            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
+            ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Prix de cette édition${estNiveau2() ? blocTendance(b, sel.k) : ''}</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur repere" aria-label="${b.prix[e.k] == null ? 'sans cote' : 'niveau de prix ' + niveauCote(b.prix[e.k], e.k) + ' sur 5'}">${repere(b.prix[e.k], e.k)}</span></div>`).join('')}</div>
-        <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Prix de cette édition</h3>
+        <p class="sous legende-prix"><span class="niveaux">${LEGENDE_NIVEAUX}</span>Les prix estimés sont réservés aux comptes connectés.</p>` : `<h3 class="fiche-cotes-titre">Prix de cette édition${estNiveau2() ? blocTendance(b, sel.k) : ''}</h3>
         <div class="cotes">${ETATS.map((e) => `<div class="${e.k === sel.k ? 'choisi' : ''}"><span class="petit">${e.k === 'tres_bon' ? '<abbr title="Très bon état">TBE</abbr>' : e.court}</span><span class="valeur">${fmt(b.prix[e.k])}</span></div>`).join('')}</div>
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
           </div>
