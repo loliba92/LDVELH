@@ -1037,9 +1037,11 @@
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
+  // Accordéon « Annonces » (sorciers et Zagor), ouvert : tableau, offre d'occasion, recherche en vente
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche fiche-carte" id="annonces-fiche" open data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
-      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p></details>`;
+    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" open data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
+      <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p>
+      ${estNiveau2() ? blocOffre() : ''}${blocRecherche(b)}</details>`;
   }
   // Exclure une annonce depuis la fiche (Zagor) : même envoi que « Corriger l'édition » dans Annonces
   document.addEventListener('click', async (e) => {
@@ -1114,7 +1116,7 @@
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const dispersions = ETATS.map((e) => { const l = ((par && par[e.k]) || []).map((a) => a[0]); return l.length > 1 && Math.max(...l) > Math.min(...l) * 3 ? `${esc(e.long)} · ${l.length} annonces · prix très dispersés` : ''; }).filter(Boolean);
       const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Prix</th><th scope="col">Site</th><th scope="col">Annonce</th><th scope="col">Date</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
-      zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '<div id="ann-tableau">' + tableau() + '</div>') + dispersions.map((t) => `<p class="sous ann-disp">${t}</p>`).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>` + '<p class="sous">Date : publication de l\'annonce si elle est connue, sinon première observation, sinon dernière observation.</p>';
+      zone.innerHTML = (!par || !nb ? `<p class="sous">Aucune annonce retenue avec certitude pour cette édition.</p>` : '<div id="ann-tableau">' + tableau() + '</div>') + dispersions.map((t) => `<p class="sous ann-disp">${t}</p>`).join('') + aVerifier + `<p class="sous">Relevé du ${dateCourte(ANN.date_ebay || ANN.date)}. « Plus vue » : l'annonce n'est pas ressortie dans ce relevé (retirée, vendue ou simplement manquée) ; elle peut encore être en ligne. Prix demandés, pas des prix payés.</p>` ;
       zone.addEventListener('click', (ev) => {
         if (ev.target.closest('[data-ann-plus]')) { toutes = true; $('#ann-tableau').innerHTML = tableau(); return; }
         const t = ev.target.closest('[data-tri]');
@@ -1249,37 +1251,20 @@
   }
   let ficheMasquee = null;      // les cotes étaient masquées quand la fiche a été dessinée : elle est redessinée dès que le compte est prêt
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
-  // Évolution du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3)
-  function blocEvolution(b, etat) {
-    const titre = '<h3>Évolution du prix</h3>';
-    const carte = (corps) => `<section class="fiche-carte fiche-evolution">${titre}${corps}</section>`;
+  // Tendance du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3) : sous la jaquette
+  function blocTendance(b, etat) {
+    const carte = (corps) => `<div class="fiche-tendance"><strong>Évolution du prix</strong>${corps}</div>`;
     if (!HIST || !HIST.dates || HIST.dates.length < 2) return carte('<p class="sous">L\'évolution se construit avec les relevés : revenez dans quelques jours.</p>');
     const a = HIST.cotes[`${b.id}|${etat}`] || [];
     const points = HIST.dates.map((d, i) => ({ d, v: a[i] })).filter((p) => p.v != null && p.v > 0);
     if (points.length < 2) return carte('<p class="sous">Pas encore assez de relevés pour cet état.</p>');
     const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const eur = (v) => `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €`;     // sans arrondi à l'euro : les prix bas varient de quelques centimes
+    const eur = (v) => `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €`;
     const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
     const pctTxt = `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')} %`;
     const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? 'hausse' : 'baisse';
-    const lignes = points.slice(-10).map((p) => `<tr><th scope="row">${jour(p.d)}</th><td class="num">${fmtE(p.v)}</td></tr>`).join('');
-    // Courbe des relevés : l'axe ne part pas de zéro, pour que les variations se voient ; dates réparties selon le temps réel
-    const W = 640, H = 250, gl = 92, gr = 26, gh = 22, gb = 46;
-    const t = (d) => new Date(d + 'T12:00:00').getTime(), t0 = t(points[0].d), dt = (t(points[points.length - 1].d) - t0) || 1;
-    const vals = points.map((q) => q.v), vmin = Math.min(...vals), vmax = Math.max(...vals), marge = ((vmax - vmin) || vmax * 0.1) * 0.2;
-    const lo = vmin - marge, hi = vmax + marge;
-    const X = (d) => gl + ((t(d) - t0) / dt) * (W - gl - gr), Y = (v) => gh + ((hi - v) / (hi - lo)) * (H - gh - gb);
-    const trace = points.map((q, i) => `${i ? 'L' : 'M'}${X(q.d).toFixed(1)},${Y(q.v).toFixed(1)}`).join(' ');
-    const aire = `${trace} L${X(fin.d).toFixed(1)},${H - gb} L${X(debut.d).toFixed(1)},${H - gb} Z`;
     const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
-    const pts = points.map((q) => `<circle cx="${X(q.d).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="${q === fin ? 8 : 4.5}" class="ev-point${q === fin ? ' ev-fin' : ''}"><title>${jour(q.d)} : ${esc(fmtE(q.v))}</title></circle>`).join('');
-    const reperes = (vmax === vmin ? [vmax] : [vmax, vmin]).map((v) => `<line x1="${gl}" x2="${W - gr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" class="ev-grille"/><text x="${gl - 12}" y="${(Y(v) + 7).toFixed(1)}" text-anchor="end" class="ev-axe">${esc(eur(v))}</text>`).join('');
-    const graphe = `<figure class="ev-graph ${couleur}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe du prix de ${esc(fmtE(debut.v))} le ${jour(debut.d)} à ${esc(fmtE(fin.v))} le ${jour(fin.d)}">
-        ${reperes}<path d="${aire}" class="ev-aire"/><path d="${trace}" class="ev-ligne" fill="none"/>${pts}
-        <text x="${X(debut.d).toFixed(1)}" y="${H - 12}" text-anchor="start" class="ev-date">${jour(debut.d)}</text>
-        <text x="${X(fin.d).toFixed(1)}" y="${H - 12}" text-anchor="end" class="ev-date">${jour(fin.d)}</text></svg></figure>`;
-    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span></p>${graphe}
-      <details class="rf-chiffres"><summary>Voir les relevés</summary><table class="rf-table"><caption class="sr-only">Prix relevés pour cet état</caption><thead><tr><th scope="col">Relevé</th><th scope="col" class="num">Prix</th></tr></thead><tbody>${lignes}</tbody></table></details>`);
+    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span></p>`);
   }
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
@@ -1313,7 +1298,7 @@
   }
 
   // Positionnement (niveaux 2 et 3) : où se situe l'édition parmi les autres (annonces en ligne et cote), puis le rythme des nouvelles annonces
-  const blocPosition = () => '<details class="fiche-position fiche-carte" id="fp-zone"><summary id="fp-titre">Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
+  const blocPosition = () => '<details class="fiche-position fiche-carte fiche-acc" id="fp-zone"><summary id="fp-titre">Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
   const SOURCES_FP = [['vin', 'Vinted', 'vinted'], ['ebay', 'eBay', 'ebay'], ['lbc', 'Leboncoin', 'leboncoin'], ['lib', 'Librairies', 'librairie']];
   const SENS_OFFRE_FP = { peu: 'rare à trouver', moyen: 'une offre moyenne', beaucoup: 'facile à trouver' };
   const TITRES_PRIX_FP = { cher: ' et cher', bas: ' et bon marché', moyen: ', à un prix moyen' };
@@ -1426,7 +1411,7 @@
         <div class="fiche-haut">
           <div class="fiche-couv"><div class="couv-cadre">${b.couverture_grande
             ? `<img src="${esc(racine(b.couverture_grande))}" alt="Jaquette de ${esc(b.titre)}" width="300" height="420" decoding="async" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">`
-            : tuile(b)}<div class="coll-surimage" id="coll-sur">${collEtats(b)}</div></div><div class="coll-sous" id="coll-sous">${collSous(b)}</div></div>
+            : tuile(b)}<div class="coll-surimage" id="coll-sur">${collEtats(b)}</div></div><div class="coll-sous" id="coll-sous">${collSous(b)}</div>${estNiveau2() ? blocTendance(b, sel.k) : ''}</div>
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
@@ -1440,15 +1425,9 @@
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
           </div>
         </div>
-        ${voitAnnonces() ? blocAnnonces(b) : ''}
-        ${estNiveau2() ? blocOffre() : ''}
-        ${estNiveau3() ? `<section class="fiche-carte fiche-cotes-gestion">
-        ${estNiveau3() && incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
-        <div class="hors-marche" id="hors-marche" hidden></div>
-        ${blocCorriger(b)}</section>` : ''}
-        ${blocRecherche(b)}
-        ${estNiveau2() ? blocEvolution(b, sel.k) : ''}
-        <h3>Détails du livre</h3>
+        ${voitAnnonces() ? blocAnnonces(b) : blocRecherche(b)}
+        ${estNiveau2() ? blocPosition() : ''}
+        <details class="fiche-carte fiche-acc fiche-details"><summary>Détails du livre et autres éditions</summary>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
@@ -1460,7 +1439,11 @@
         <div class="autres">${autres.map((x) => `<button type="button" class="autre${x.id === b.id ? ' courante' : ''}" data-autre="${esc(x.id)}" aria-label="Édition ${esc(x.version)}${x.annee ? ', ' + x.annee : ''}">
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
-        ${estNiveau2() ? blocPosition() : ''}
+        </details>
+        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>Outils de cotes</summary>
+        ${incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
+        <div class="hors-marche" id="hors-marche" hidden></div>
+        ${blocCorriger(b)}</details>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
         ${estNiveau3Brut() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}</section>` : ''}
       </div>`;

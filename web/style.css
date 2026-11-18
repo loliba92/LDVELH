@@ -1892,9 +1892,21 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 @media (max-width: 800px) { .hc-grille { grid-template-columns: minmax(0, 1fr); } .hc-cles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .hc-cles li { padding: 8px; } .hc-cles b { font-size:var(--t-lg); } .hc-cles .cle-lib { font-size:var(--t-xs); letter-spacing: .08em; } }
 
 /* Fiche : annonces retenues derrière la cote (sorciers et Zagor), en tableau */
-.annonces-fiche { padding: 2px 12px; }
-.annonces-fiche summary, .fiche-position > summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
-.fiche-position { padding: 2px 16px; }
+.fiche-acc.fiche-carte { padding: 0 12px; }
+.fiche-acc > summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
+/* Accordéons de la fiche : titre cliquable (clavier et toucher), contenu en dessous */
+.fiche-acc > summary { cursor: pointer; }
+.fiche-acc > summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.fiche-acc .fiche-carte { margin: 12px 0 0; padding: 8px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; }
+.fiche-acc > .fiche-details-corps, .fiche-details > .infos { margin-top: 4px; }
+.fiche-acc.fiche-details[open] { padding-bottom: 12px; }
+.fiche-acc.fiche-carte > h3 { margin: 22px 0 10px; }
+.fiche-acc > .liens-vente { margin-top: 4px; }
+/* Tendance du prix sous la jaquette */
+.fiche-tendance { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.fiche-tendance strong { display: block; font: 700 .72rem var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.fiche-tendance .ev-resume { margin: 0; }
+.fiche-tendance .sous { margin: 0; }
 .annonces-corps { padding: 2px 0 6px; }
 .annonces-corps h4 { margin: 14px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .ann-cadre { overflow-x: auto; }
@@ -2231,7 +2243,6 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fp-zone-t { fill: var(--muted); font-size: 8.5px; font-weight: 700; opacity: .8; }
 .fp-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; color: var(--muted); font-size: var(--t-sm, .85rem); }
 .fp-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
-.annonces-fiche.fiche-carte { padding: 0 12px; }
 
 /* Collection sur la jaquette (fiche) : les trois états posés en bas de l'image, le reste en dessous */
 .couv-cadre { position: relative; }
