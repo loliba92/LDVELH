@@ -2,7 +2,7 @@
  "date": "2026-11-18",
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
- "nb_modifiees": 1431,
+ "nb_modifiees": 1432,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 31.24,
-   "apres": 37.7,
+   "apres": 37.71,
    "pct": 0.207,
    "nature": "annonces",
    "nb": 1,
@@ -90,7 +90,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 34.64,
-   "apres": 40.01,
+   "apres": 40.0,
    "pct": 0.155,
    "nature": "ventes",
    "nb": 1,
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 21.41,
-   "apres": 24.55,
-   "pct": 0.147,
+   "apres": 24.54,
+   "pct": 0.146,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,7 +120,7 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 53.52,
-   "apres": 61.36,
+   "apres": 61.34,
    "pct": 0.146,
    "nature": "archives",
    "nb": 0,
@@ -309,21 +309,6 @@
    "recalibre": false
   },
   {
-   "id": "9782010117244",
-   "isbn13": "9782010117244",
-   "titre": "Les Mystères de Babylone",
-   "serie": "La Saga du Prêtre Jean",
-   "numero": "4",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 13.84,
-   "apres": 12.32,
-   "pct": -0.11,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
-  {
    "id": "9782070610341",
    "isbn13": "9782070610341",
    "titre": "La Forêt de la Malédiction",
@@ -369,12 +354,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 26,
+ "nb_grands_mouvements": 25,
  "modele": {
   "actif": false,
-  "n_paires": 270,
-  "gain": 0.006,
+  "n_paires": 273,
+  "gain": 0.01,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.015
+  "rapport_global": 1.01
  }
 }
