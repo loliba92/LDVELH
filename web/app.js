@@ -1037,9 +1037,14 @@
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
+  // Petites icônes décoratives des accordéons de la fiche (couleur du texte)
+  const ICONES_ACC = { annonces: '<path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1.3"/>', radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    details: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h6"/>', outils: '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>',
+    gestion: '<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>' };
+  const iconeAcc = (k) => `<svg class="acc-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONES_ACC[k]}</svg>`;
   // Accordéon « Annonces » (sorciers et Zagor), replié : tableau, offre d'occasion, recherche en vente
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
+    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>${iconeAcc('annonces')}Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p>
       ${estNiveau2() ? blocOffre() : ''}${blocRecherche(b)}</details>`;
   }
@@ -1244,7 +1249,7 @@
     if (!id || !DATA.some((b) => b.id === id)) return;
     ouvrirFiche(id);
     if (!CORR_URL) return;
-    const ouvrir = () => { const d = $('.corriger-fiche'); if (d) d.open = true; return !!d; };
+    const ouvrir = () => { const d = $('.corriger-fiche'); if (d) { d.open = true; const acc = d.closest('details.fiche-acc'); if (acc) acc.open = true; } return !!d; };
     if (ouvrir()) return;
     const retenter = () => { if (!estNiveau3()) return; document.removeEventListener('cdh-compte', retenter); ouvrirFiche(id); ouvrir(); };   // le niveau de niveau 2 arrive après le chargement
     document.addEventListener('cdh-compte', retenter);
@@ -1445,7 +1450,7 @@
         <div class="hors-marche" id="hors-marche" hidden></div>
         ${blocCorriger(b)}</details>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
-        ${estNiveau3Brut() ? `<section class="fiche-gestion" aria-labelledby="fg-titre"><h2 class="fiche-gestion-titre" id="fg-titre">Gestion de la fiche</h2>${blocFiche(b)}</section>` : ''}
+        ${estNiveau3Brut() ? `<details class="fiche-carte fiche-acc fiche-gestion"><summary>${iconeAcc('gestion')}Gestion de la fiche</summary>${blocFiche(b)}</details>` : ''}
       </div>`;
     const dlg = $('#fiche');
     if (window.Notes) window.Notes.rendre($('#note-livre'), b.livre_id);
