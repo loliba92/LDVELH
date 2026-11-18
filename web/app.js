@@ -1037,9 +1037,9 @@
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
-  // Accordéon « Annonces » (sorciers et Zagor), ouvert : tableau, offre d'occasion, recherche en vente
+  // Accordéon « Annonces » (sorciers et Zagor), replié : tableau, offre d'occasion, recherche en vente
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" open data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
+    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p>
       ${estNiveau2() ? blocOffre() : ''}${blocRecherche(b)}</details>`;
   }
@@ -1264,7 +1264,7 @@
     const pctTxt = `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')} %`;
     const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? 'hausse' : 'baisse';
     const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
-    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span></p>`);
+    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous tend-long">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span><span class="sous tend-court">· ${sens === 'stable' ? 'stable' : `en ${sens}`} depuis le ${jour(debut.d)}</span></p>`);
   }
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
@@ -3459,8 +3459,8 @@
     if (sansCompte()) return '<button type="button" class="fiche-marque" data-compte="connecter">Ajouter à ma collection</button>';
     const c = COLL[b.id], v = c ? valeurLigne(b, c) : null;
     if (!c) return `<button type="button" class="fiche-marque trouver${SOUH[b.id] ? ' actif' : ''}" data-fe-trouver aria-pressed="${!!SOUH[b.id]}">À trouver</button>`;
-    return `<div class="coll-ligne"><label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label>
-      <button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button></div>
+    return `<div class="coll-ligne"><label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label></div>
+      <button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button>
       <p class="valeur-ex">${v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`}</p>`;
   }
   function brancherFicheCollection(b) {
