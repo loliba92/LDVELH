@@ -1164,6 +1164,13 @@
         ${window.Compte && window.Compte.role() === 'superadmin' ? `<label class="case corriger-suppr"><input type="checkbox" name="suppr"><span>Supprimer cette édition de la base (jaquette et prix compris)</span></label>
         <div class="corriger-actions"><button type="button" class="bouton bouton-clair" id="corriger-suppr" hidden>Supprimer définitivement cette édition</button></div>` : ''}
         <p class="corriger-msg" id="corriger-fiche-msg" role="status" hidden></p>
+      </form>
+      <form class="corriger jaquette-form" id="jaquette-fiche" data-id="${esc(b.id)}">
+        <p class="sous">Collez l'adresse d'une image : elle ajoute ou remplace la jaquette.</p>
+        <label class="jaquette-champ">Adresse de l'image<input type="url" name="adresse" inputmode="url" autocomplete="off" placeholder="https://" maxlength="500"></label>
+        <p class="jaquette-apercu" id="jaquette-apercu" hidden><img alt="Aperçu de la jaquette" referrerpolicy="no-referrer" decoding="async"></p>
+        <div class="corriger-actions"><button type="submit" class="bouton" disabled>Envoyer la jaquette</button></div>
+        <p class="corriger-msg" id="jaquette-msg" role="status" hidden></p>
       </form></div>`;
   }
   function brancherFiche() {
@@ -1194,6 +1201,35 @@
       if (!l.length) return dire("Rien n'a changé.");
       envoyer(l);
     });
+    // Jaquette : aperçu chargé dans le navigateur, puis envoi du lot « jaquette.yml » par la même chaîne que les corrections
+    const jf = $('#jaquette-fiche');
+    if (jf) {
+      const champ = jf.elements.adresse, bouton = jf.querySelector('button'), zone = $('#jaquette-apercu'), img = zone.querySelector('img'), jmsg = $('#jaquette-msg');
+      const jdire = (t) => { jmsg.textContent = t; jmsg.hidden = !t; };
+      let prete = '';          // adresse dont l'aperçu a bien chargé
+      champ.addEventListener('input', () => { prete = ''; bouton.disabled = true; zone.hidden = true; jdire(''); });
+      champ.addEventListener('change', () => {
+        const a = champ.value.trim();
+        if (!a) return;
+        if (!/^https:\/\/[^\s"<>]{4,480}$/.test(a)) return jdire('Entrez une adresse https.');
+        img.onload = () => { prete = a; zone.hidden = false; bouton.disabled = false; };
+        img.onerror = () => { prete = ''; zone.hidden = true; bouton.disabled = true; jdire("Aperçu impossible : cette adresse ne mène pas à une image."); };
+        img.src = a;
+      });
+      jf.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        if (!prete || prete !== champ.value.trim()) return jdire("Vérifiez d'abord l'aperçu de l'image.");
+        if (!(window.Relais && window.Relais.actif())) return jdire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
+        bouton.disabled = true; jdire('Envoi en cours…');
+        try {
+          const r = await window.Relais.envoyerLot('jaquette.yml', { identifiant: b.id, adresse: prete });
+          if (r.status === 204) jdire('Envoyé. La jaquette sera à jour dans environ 2 minutes : rechargez la page ensuite.');
+          else if (r.status === 401 || r.status === 403) jdire("Ce compte n'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.");
+          else jdire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+        } catch (e) { jdire('Envoi impossible : vérifiez votre connexion.'); }
+        bouton.disabled = false;
+      });
+    }
     if ($('#corriger-suppr')) $('#corriger-suppr').addEventListener('click', () => { if (window.confirm(`Supprimer « ${b.titre} » (${b.version}) de la base ? Cette action est définitive.`)) envoyer([`${b.id} ; supprimer`]); });
   }
   function blocCorriger(b) {

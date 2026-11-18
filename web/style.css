@@ -879,6 +879,12 @@ table.mouv .num { white-space: nowrap; }
 .rg-aide summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; }
 .rg-aide ol { margin: 6px 0 0; padding-left: 1.3em; }
 .rg-aide li { margin: 0 0 6px; }
+/* Jaquette : champ de l'adresse et aperçu avant envoi */
+.jaquette-form { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.jaquette-champ { display: flex; flex-direction: column; gap: 4px; font: 700 .85rem var(--f-ui); color: var(--muted); }
+.jaquette-champ input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); color: var(--text); font: 400 1rem var(--f-ui); }
+.jaquette-apercu { margin: 10px 0 0; }
+.jaquette-apercu img { display: block; max-width: 140px; max-height: 196px; width: auto; height: auto; border-radius: 3px; box-shadow: var(--shadow-cover); }
 @media (max-width: 420px) { .corriger-champs { grid-template-columns: 1fr; } }
 .corriger-fourchette { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 10px 0 4px; max-width: 360px; }
 .corriger-fourchette label { display: flex; flex-direction: column; gap: 4px; font: 700 .85rem var(--f-ui); color: var(--muted); }

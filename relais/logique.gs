@@ -1,4 +1,4 @@
-// Version du 2026-10-31 17:20 (heure de Paris) : annonces reçues ouvertes aux sorciers (annonces_lire, niveau sorcier).
+// Version du 2026-11-18 21:28 (heure de Paris) : lot jaquette.yml (jaquette d'un livre, Zagor).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -42,7 +42,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
   avis: 'heros'                   // un avis libre sur le site, envoyé par courriel à l'éditeur
 };
-var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'], 'communaute.yml': ['commandes'] };   // lots que le relais accepte de lancer, avec leurs champs
+var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'], 'communaute.yml': ['commandes'], 'jaquette.yml': ['identifiant', 'adresse'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
 

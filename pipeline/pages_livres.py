@@ -64,7 +64,7 @@ def liste_noms(texte):
 
 def couverture(web, b):
     for cle in ("couverture_grande", "couverture"):
-        c = b.get(cle)
+        c = (b.get(cle) or "").split("?")[0]          # sans le numéro de version (« ?v=2 ») : un fichier du dossier
         if c and (web / c).exists():
             return c
     return None
