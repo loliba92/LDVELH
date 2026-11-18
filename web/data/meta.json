@@ -19,10 +19,10 @@
   "calibration": {
     "actif": false,
     "n_paires": 266,
-    "gain": 0.001,
-    "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+    "gain": 0.006,
+    "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
     "calcule_le": "2026-11-18",
-    "rapport_global": 1.015,
+    "rapport_global": 1.014,
     "nb_recalibres": 0
   }
 }
