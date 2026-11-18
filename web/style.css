@@ -1903,11 +1903,9 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .fiche-acc.fiche-details[open] { padding-bottom: 12px; }
 .fiche-acc.fiche-carte > h3 { margin: 22px 0 10px; }
 .fiche-acc > .liens-vente { margin-top: 4px; }
-/* Tendance du prix sous la jaquette */
-.fiche-tendance { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
-.fiche-tendance strong { display: block; font: 700 .72rem var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.fiche-tendance .ev-resume { margin: 0; }
-.fiche-tendance .sous { margin: 0; }
+/* Taux de tendance à droite du titre des prix : retour à la ligne propre si étroit */
+.fiche-cotes-titre { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.fiche-cotes-titre .ev-pastille { font-size: .9rem; line-height: 1.4; }
 .annonces-corps { padding: 2px 0 6px; }
 .annonces-corps h4 { margin: 14px 0 6px; font: 700 .8rem var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .ann-cadre { overflow-x: auto; }
@@ -3005,7 +3003,6 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-lot-txt { display: block; color: var(--muted); }
 
 /* Fiche sur téléphone : titre et fermeture d'abord, puis la jaquette entière avec ses états dessous, puis la collection et la tendance, puis les prix */
-.tend-court { display: none; }
 @media (max-width: 700px) {
   .fiche-haut { gap: 10px; }
   .fiche-haut > div:last-child { display: contents; }
@@ -3018,7 +3015,4 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
   .coll-surimage .ex-etats { position: static; margin-top: 8px; box-shadow: none; }
   .coll-surimage .ex-etats button { background: var(--bg); }
   .coll-surimage .ex-etats button[aria-pressed="true"] { background: var(--accent); }
-  .fiche-tendance .tend-long { display: none; }
-  .fiche-tendance .tend-court { display: inline; }
-  .fiche-tendance .ev-resume { flex-wrap: wrap; gap: 4px 8px; }
 }
