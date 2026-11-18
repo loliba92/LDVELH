@@ -1425,6 +1425,10 @@
         <p class="sous legende-prix">${legendePrix(b, sel.k)}</p>`}
           </div>
         </div>
+        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>${iconeAcc('outils')}Outils de cotes</summary>
+        ${incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
+        <div class="hors-marche" id="hors-marche" hidden></div>
+        ${blocCorriger(b)}</details>` : ''}
         ${voitAnnonces() ? blocAnnonces(b) : blocRecherche(b)}
         ${estNiveau2() ? blocPosition() : ''}
         <details class="fiche-carte fiche-acc fiche-details"><summary>${iconeAcc('details')}Détails du livre et autres éditions</summary>
@@ -1440,10 +1444,6 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         </details>
-        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>${iconeAcc('outils')}Outils de cotes</summary>
-        ${incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
-        <div class="hors-marche" id="hors-marche" hidden></div>
-        ${blocCorriger(b)}</details>` : ''}
         ${prixAnciens() ? `<p class="sous" style="margin-top:16px">Cotes d'archives, issues d'un ancien relevé qui n'est plus mis à jour : un ordre de grandeur, pas la cote du jour.</p>` : ''}
         ${estNiveau3Brut() ? `<details class="fiche-carte fiche-acc fiche-gestion"><summary>${iconeAcc('gestion')}Gestion de la fiche</summary>${blocFiche(b)}</details>` : ''}
       </div>`;
@@ -3457,11 +3457,10 @@
   }
   function collSous(b) {
     if (sansCompte()) return '<button type="button" class="fiche-marque" data-compte="connecter">Ajouter à ma collection</button>';
-    const c = COLL[b.id], v = c ? valeurLigne(b, c) : null;
+    const c = COLL[b.id];
     if (!c) return `<button type="button" class="fiche-marque trouver${SOUH[b.id] ? ' actif' : ''}" data-fe-trouver aria-pressed="${!!SOUH[b.id]}">À trouver</button>`;
     return `<div class="coll-ligne"><label class="fiche-qte">Exemplaires <input type="number" id="c-qte" min="1" max="99" value="${c.qte}"></label></div>
-      <button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button>
-      <p class="valeur-ex">${v == null ? 'Sans cote pour cet état' : `Valeur estimée : ${fmt(v)}`}</p>`;
+      <button type="button" class="fiche-marque vendre${c.vendre ? ' actif' : ''}" data-fe-vendre aria-pressed="${!!c.vendre}">À vendre</button>`;
   }
   function brancherFicheCollection(b) {
     const zone = $('.fiche-couv');
