@@ -1,0 +1,71 @@
+name: Jaquette d'un livre
+
+# Lancé depuis la fiche d'un livre (« Gestion de la fiche », réservé au Zagor) ou à la main : Actions > Run workflow.
+# Une seule image est téléchargée (voir pipeline/jaquette.py) ; ajoute ou remplace la jaquette de la fiche, en trois tailles.
+on:
+  workflow_dispatch:
+    inputs:
+      identifiant:
+        description: "Identifiant de la fiche (ISBN-13, ou LOCAL-… pour un livre sans ISBN)"
+        required: true
+        type: string
+      adresse:
+        description: "Adresse https de l'image (jpeg, png ou webp)"
+        required: true
+        type: string
+      auteur:
+        description: "Nom de la personne qui envoie, transmis par le relais (ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+      identite:
+        description: "Connexion Google de la personne qui envoie (jeton rempli par le site, ne pas saisir)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+# Même file d'attente que les autres écritures de données.
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  jaquette:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      IDENTIFIANT: ${{ inputs.identifiant }}
+      ADRESSE: ${{ inputs.adresse }}
+      IDENTITE: ${{ inputs.identite }}
+      AUTEUR_RELAIS: ${{ inputs.auteur }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow pyjwt cryptography
+      - name: Vérifier l'identité de l'admin
+        run: python pipeline/identite.py
+      - name: Tests
+        run: python pipeline/test_jaquette.py
+      - name: Télécharger et enregistrer la jaquette
+        run: python pipeline/jaquette.py "$IDENTIFIANT" "$ADRESSE" --garder "$RUNNER_TEMP/jaquette.bin" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Base et données du site
+        run: |
+          python pipeline/build_db.py
+          python pipeline/export_site.py
+          python pipeline/construire_pages.py
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "jaquette"
+          git config user.email "jaquette@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          # Si main a avancé pendant le lot, on rejoue l'enregistrement depuis l'image déjà téléchargée (pas de second téléchargement)
+          REJOUER='python pipeline/jaquette.py "$IDENTIFIANT" --fichier "$RUNNER_TEMP/jaquette.bin" && python pipeline/build_db.py && python pipeline/export_site.py && python pipeline/construire_pages.py' \
+            .github/scripts/publier.sh "Jaquette de $IDENTIFIANT envoyée depuis le site ($(date +%F))${AUTEUR:+ par $AUTEUR}" web/covers web/data web/livre web/sitemap.xml web/robots.txt
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml

@@ -612,6 +612,10 @@ def main():
     dates_maj = {x["id"]: x["date_maj"] for x in editions.load(None)}      # date d'ajout (ou de dernière mise à jour) de la fiche
 
     fabriquer_minis()
+    try:
+        versions_jaquettes = json.loads((SORTIE / "jaquettes.json").read_text(encoding="utf-8"))      # voir pipeline/jaquette.py
+    except (OSError, ValueError):
+        versions_jaquettes = {}
     versions = []
     cle_de = {}
     nb_valides = 0
@@ -623,9 +627,10 @@ def main():
         nb_valides += validations.appliquer(p, isbn, valides, args.aujourdhui.isoformat(), {e: veille.get(f"{isbn}|{e}") for e in ETATS},
                                             sans_valide.get(r["version_key"], {}), gains) if isbn else 0
         image = editions.cle_image(r["id"], isbn)                  # ISBN, ou identifiant simplifié pour une fiche sans ISBN
-        petite = f"covers/small/{image}.webp" if (COVERS / "small" / f"{image}.webp").exists() else None
-        grande = f"covers/medium/{image}.webp" if (COVERS / "medium" / f"{image}.webp").exists() else None
-        mini = f"covers/mini/{image}.webp" if (COVERS / "mini" / f"{image}.webp").exists() else None
+        ver = f"?v={versions_jaquettes[image]}" if image in versions_jaquettes else ""          # jaquette remplacée depuis le site : adresse neuve, la copie des navigateurs est renouvelée
+        petite = f"covers/small/{image}.webp{ver}" if (COVERS / "small" / f"{image}.webp").exists() else None
+        grande = f"covers/medium/{image}.webp{ver}" if (COVERS / "medium" / f"{image}.webp").exists() else None
+        mini = f"covers/mini/{image}.webp{ver}" if (COVERS / "mini" / f"{image}.webp").exists() else None
         versions.append({
             "id": r["id"], "isbn13": r["isbn13"], "titre": r["titre_version"], "livre_id": r["livre_id"],
             "livre": r["livre"], "serie": r["serie"], "numero": r["numero_serie"],
