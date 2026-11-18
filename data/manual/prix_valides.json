@@ -730,7 +730,7 @@
   "9782070334254|tres_bon": {
    "prix": 35.5,
    "decision": "corrige",
-   "le": "2026-11-06",
+   "le": "2026-11-18",
    "par": "loliba (superadmin)"
   },
   "9782070334728|bon": {
@@ -1965,10 +1965,22 @@
    "le": "2026-11-15",
    "par": "loliba (superadmin)"
   },
+  "9782070567683|tres_bon": {
+   "prix": 20.27,
+   "decision": "corrige",
+   "le": "2026-11-18",
+   "par": "loliba (superadmin)"
+  },
   "9782070567690|convenable": {
    "prix": 15.18,
    "decision": "corrige",
    "le": "2026-11-07",
+   "par": "loliba (superadmin)"
+  },
+  "9782070567690|tres_bon": {
+   "prix": 25.7,
+   "decision": "corrige",
+   "le": "2026-11-18",
    "par": "loliba (superadmin)"
   },
   "9782070567874|bon": {

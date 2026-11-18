@@ -249,6 +249,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070567690",
+   "isbn13": "9782070567690",
+   "titre": "La Villa des Revenants",
+   "serie": "Super Sherlock",
+   "numero": "679",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 31.97,
+   "apres": 25.7,
+   "pct": -0.196,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070567683",
+   "isbn13": "9782070567683",
+   "titre": "Le Mystère de Compton",
+   "serie": "Super Sherlock",
+   "numero": "678",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 25.14,
+   "apres": 20.27,
+   "pct": -0.194,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
    "id": "9782070332687",
    "isbn13": "9782070332687",
    "titre": "La Citadelle du Chaos",
@@ -261,21 +291,6 @@
    "pct": -0.113,
    "nature": "validé",
    "nb": 0,
-   "recalibre": false
-  },
-  {
-   "id": "9782010117244",
-   "isbn13": "9782010117244",
-   "titre": "Les Mystères de Babylone",
-   "serie": "La Saga du Prêtre Jean",
-   "numero": "4",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 13.84,
-   "apres": 12.32,
-   "pct": -0.11,
-   "nature": "annonces",
-   "nb": 12,
    "recalibre": false
   },
   {
@@ -324,12 +339,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 23,
+ "nb_grands_mouvements": 24,
  "modele": {
   "actif": false,
-  "n_paires": 267,
-  "gain": -0.0,
-  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
-  "rapport_global": 1.015
+  "n_paires": 266,
+  "gain": 0.006,
+  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
+  "rapport_global": 1.014
  }
 }
