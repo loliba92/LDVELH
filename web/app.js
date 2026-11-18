@@ -1037,9 +1037,13 @@
       $('#hors-reset').disabled = true; await envoyerCorrections([`${b.isbn13} ; ${cases.join(' ; ')}`], dire); $('#hors-reset').disabled = false;
     });
   }
+  // Petites icônes décoratives des accordéons de la fiche (couleur du texte)
+  const ICONES_ACC = { annonces: '<path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1.3"/>', radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+    details: '<path d="M4 5a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/><path d="M8 7h6"/>', outils: '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>' };
+  const iconeAcc = (k) => `<svg class="acc-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICONES_ACC[k]}</svg>`;
   // Accordéon « Annonces » (sorciers et Zagor), replié : tableau, offre d'occasion, recherche en vente
   function blocAnnonces(b) {
-    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>Annonces retenues</summary>
+    return `<details class="annonces-fiche fiche-carte fiche-acc" id="annonces-fiche" data-id="${esc(b.id)}"><summary>${iconeAcc('annonces')}Annonces retenues</summary>
       <div class="annonces-corps" id="annonces-corps"><p class="sous">Chargement…</p></div><p class="corriger-msg ann-msg" role="status" hidden></p>
       ${estNiveau2() ? blocOffre() : ''}${blocRecherche(b)}</details>`;
   }
@@ -1112,7 +1116,7 @@
         return `<div class="ann-cadre"><table class="ann-tab"><caption class="sr-only">Annonces retenues pour cette édition</caption><thead><tr>${ordre.map(th).join('')}${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${vues.map(ligneFiche).join('')}</tbody></table></div>${vues.length < lignes.length ? `<p class="ann-plus"><button type="button" class="bouton bouton-clair" data-ann-plus>Voir les ${lignes.length - vues.length} autres annonces</button></p>` : ''}`;
       };
       const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
-      if (resume && (nb || inc.length)) resume.firstChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
+      if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const dispersions = ETATS.map((e) => { const l = ((par && par[e.k]) || []).map((a) => a[0]); return l.length > 1 && Math.max(...l) > Math.min(...l) * 3 ? `${esc(e.long)} · ${l.length} annonces · prix très dispersés` : ''; }).filter(Boolean);
       const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Prix</th><th scope="col">Site</th><th scope="col">Annonce</th><th scope="col">Date</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${inc.map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
@@ -1298,7 +1302,7 @@
   }
 
   // Positionnement (niveaux 2 et 3) : où se situe l'édition parmi les autres (annonces en ligne et cote), puis le rythme des nouvelles annonces
-  const blocPosition = () => '<details class="fiche-position fiche-carte fiche-acc" id="fp-zone"><summary id="fp-titre">Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
+  const blocPosition = () => '<details class="fiche-position fiche-carte fiche-acc" id="fp-zone"><summary id="fp-titre">' + iconeAcc('radar') + 'Le radar du héros</summary><div id="fp-corps"><p class="sous">Chargement…</p></div></details>';
   const SOURCES_FP = [['vin', 'Vinted', 'vinted'], ['ebay', 'eBay', 'ebay'], ['lbc', 'Leboncoin', 'leboncoin'], ['lib', 'Librairies', 'librairie']];
   const SENS_OFFRE_FP = { peu: 'rare à trouver', moyen: 'une offre moyenne', beaucoup: 'facile à trouver' };
   const TITRES_PRIX_FP = { cher: ' et cher', bas: ' et bon marché', moyen: ', à un prix moyen' };
@@ -1427,7 +1431,7 @@
         </div>
         ${voitAnnonces() ? blocAnnonces(b) : blocRecherche(b)}
         ${estNiveau2() ? blocPosition() : ''}
-        <details class="fiche-carte fiche-acc fiche-details"><summary>Détails du livre et autres éditions</summary>
+        <details class="fiche-carte fiche-acc fiche-details"><summary>${iconeAcc('details')}Détails du livre et autres éditions</summary>
         <dl class="infos">
               ${ligne('Auteurs', esc(b.auteurs))}${ligne('Traducteur', esc(b.traducteur))}${ligne('Illustrateur', esc(b.illustrateur))}
               ${ligne('Éditeur', esc(b.editeur))}${ligne('Collection', esc(b.collection))}${ligne('Année d\'édition', annee)}
@@ -1440,7 +1444,7 @@
           ${x.couverture ? `<img src="${esc(racine(x.couverture))}" alt="" width="88" height="124" loading="lazy" data-i="${esc((x.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(x)}
           <span class="v">${esc(x.version)}<small>${x.annee ?? ''}</small></span><span class="p">${coteTxt(x.prix[sel.k], sel.k, true)}</span></button>`).join('')}</div>` : ''}
         </details>
-        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>Outils de cotes</summary>
+        ${estNiveau3() ? `<details class="fiche-carte fiche-acc fiche-cotes-gestion"><summary>${iconeAcc('outils')}Outils de cotes</summary>
         ${incoherence(b) ? `<p class="sous incoh-fiche"><span class="incoh-flag">Prix à vérifier</span> ${esc(incoherence(b))}.</p>${blocLissage(b)}` : ''}
         <div class="hors-marche" id="hors-marche" hidden></div>
         ${blocCorriger(b)}</details>` : ''}
