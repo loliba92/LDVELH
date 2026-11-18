@@ -1099,7 +1099,7 @@
         const plusVue = !enLigne(r.origine) && !!(r.vue && ANN.date_ebay && r.vue < ANN.date_ebay);
         const vendu = ANN && ((ANN.corrigees && ANN.corrigees[r.lien] && ANN.corrigees[r.lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[r.lien]));
         return `<tr><td class="ann-prix" data-l="Prix"${r.nu != null && r.nu !== r.prix ? ` title="${esc(`Prix livré, dont ${fmt(Math.round((r.prix - r.nu) * 100) / 100)} de frais`)}"` : ''}>${fmt(r.prix)}</td>
-          <td class="ann-etat" data-l="État">${esc(r.e.court)}</td><td class="ann-nom" data-l="Site">${r.site}</td>
+          <td class="ann-etat" data-l="État"><span class="ann-badge ann-badge-${r.e.k}" role="img" title="${esc(r.e.long)}" aria-label="${esc(r.e.long)}">${ABREGE[r.e.k]}</span></td><td class="ann-nom" data-l="Site">${r.site}</td>
           <td class="ann-annonce">${lienAnn(r.origine, r.lien, r.titre)}${vendu ? '<span class="an-vendu">Vendu</span>' : ''}${r.origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(r.vue)}">plus vue</span>` : ''}</td>
           ${celluleDate(r.lien, r.vue)}
           <td class="ann-ecart" data-l="Écart">${r.v ? `<span class="rc-pastille ${VERDICTS_IMP[r.v][1]}">${VERDICTS_IMP[r.v][0]}</span>` : ''}${r.cote != null ? `<span class="ann-site">site ${fmt(r.cote)} · ${r.ecart > 0 ? '+' : r.ecart < 0 ? '−' : ''}${Math.abs(r.ecart)} %</span>` : ''}</td>${boutonExclure(r.lien, r.titre)}</tr>`;

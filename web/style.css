@@ -1919,6 +1919,10 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ann-tab .ann-prix { font-weight: 700; color: var(--gold); text-align: right; white-space: nowrap; }
 .ann-tab th.ann-th-prix { text-align: right; }
 .ann-tab .ann-etat, .ann-tab .ann-nom, .ann-tab .ann-date { white-space: nowrap; }
+/* Badge d'état : même taille pour les trois, distingués par le libellé, le trait et le fond */
+.ann-badge { display: inline-block; box-sizing: border-box; min-width: 3.2em; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; font: 700 var(--t-xs)/1.6 var(--f-ui); text-align: center; white-space: nowrap; color: var(--muted); }
+.ann-badge-bon { color: var(--text); border-color: var(--text); }
+.ann-badge-tres_bon { color: var(--gold); border-color: var(--gold); background: var(--accent-soft); }
 .ann-tab .ann-date { color: var(--muted); }
 .ann-tab .ann-annonce { min-width: 11em; }
 .ann-tab .ann-annonce > * { margin-right: 6px; }
