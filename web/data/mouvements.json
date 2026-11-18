@@ -2,8 +2,8 @@
  "date": "2026-11-18",
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
- "nb_modifiees": 1432,
- "mediane_variation": -0.003,
+ "nb_modifiees": 1431,
+ "mediane_variation": -0.004,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -157,6 +157,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070592265",
+   "isbn13": "9782070592265",
+   "titre": "Le Chasseur de Mages",
+   "serie": "Défis Fantastiques",
+   "numero": "767",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 98.35,
+   "apres": 109.37,
+   "pct": 0.112,
+   "nature": "annonces",
+   "nb": 8,
+   "recalibre": false
+  },
+  {
    "id": "9782070509225",
    "isbn13": "9782070509225",
    "titre": "Les Sombres Cohortes",
@@ -169,21 +184,6 @@
    "pct": 0.111,
    "nature": "annonces",
    "nb": 8,
-   "recalibre": false
-  },
-  {
-   "id": "9782070512645",
-   "isbn13": "9782070512645",
-   "titre": "Le Voleur d'Ames",
-   "serie": "Défis Fantastiques",
-   "numero": "530",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 10.6,
-   "apres": 11.75,
-   "pct": 0.108,
-   "nature": "archives",
-   "nb": 1,
    "recalibre": false
   }
  ],
@@ -309,6 +309,21 @@
    "recalibre": false
   },
   {
+   "id": "9782010117244",
+   "isbn13": "9782010117244",
+   "titre": "Les Mystères de Babylone",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "4",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.84,
+   "apres": 12.32,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 12,
+   "recalibre": false
+  },
+  {
    "id": "9782070610341",
    "isbn13": "9782070610341",
    "titre": "La Forêt de la Malédiction",
@@ -354,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 25,
+ "nb_grands_mouvements": 27,
  "modele": {
   "actif": false,
-  "n_paires": 273,
-  "gain": 0.01,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.01
+  "n_paires": 278,
+  "gain": 0.004,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 1.011
  }
 }
