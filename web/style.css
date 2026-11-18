@@ -2026,8 +2026,6 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .compte-liste .compte-section { list-style: none; color: var(--gold); font-size:var(--t-sm); letter-spacing: .08em; text-transform: uppercase; padding: 10px 0 2px; }
 
 /* Gestion de la fiche (niveau 3) : un seul bloc en bas, séparé de la lecture */
-.fiche-gestion { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--gold); }
-.fiche-gestion-titre { font-size:var(--t-sm); letter-spacing: .08em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
 
 /* Roll-forward : tableau dans l'écran, sur téléphone aussi ; cartes en deux colonnes quand il y en a quatre */
 .rf-defile { max-width: 100%; overflow-x: auto; }
