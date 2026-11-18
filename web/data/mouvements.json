@@ -294,6 +294,36 @@
    "recalibre": false
   },
   {
+   "id": "9782070586943",
+   "isbn13": "9782070586943",
+   "titre": "Le Voleur de Vie",
+   "serie": "Défis Fantastiques",
+   "numero": "745",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 93.67,
+   "apres": 83.24,
+   "pct": -0.111,
+   "nature": "annonces",
+   "nb": 2,
+   "recalibre": false
+  },
+  {
+   "id": "9782010117244",
+   "isbn13": "9782010117244",
+   "titre": "Les Mystères de Babylone",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "4",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.84,
+   "apres": 12.32,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 12,
+   "recalibre": false
+  },
+  {
    "id": "9782070610341",
    "isbn13": "9782070610341",
    "titre": "La Forêt de la Malédiction",
@@ -339,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 24,
+ "nb_grands_mouvements": 26,
  "modele": {
   "actif": false,
-  "n_paires": 266,
-  "gain": 0.006,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.014
+  "n_paires": 267,
+  "gain": -0.0,
+  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
+  "rapport_global": 1.015
  }
 }
