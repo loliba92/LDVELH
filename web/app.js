@@ -364,14 +364,13 @@
     const aligne = i && i.ajuste ? ' Alignée sur l\'état inférieur : un état supérieur ne vaut jamais moins qu\'un état inférieur.' : '';
     if (i && i.neuf) return `Édition encore en vente neuve : un exemplaire en très bon état est coté à 70 % du prix du neuf (le prix éditeur), car l'acheteur garde l'option du neuf. Les autres états en sont déduits (bon état ≈ 60 %, convenable ≈ 40 %).`;
     if (i && i.valide) return `Prix validé par le guide le ${dateCourte(i.date)}${i.decision === 'corrige' ? ' (corrigé à la main)' : ' (confirmé)'} : il prime sur les annonces et les archives.`;
-    if (i && i.repartition) return `Prix réparti entre les trois états d'après les annonces actuelles de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état), ${i.nb} annonce${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)} · confiance ${i.confiance}. Prix demandés, souvent supérieurs aux prix réellement payés.${aligne}`;
+    if (i && i.repartition) return `Prix réparti entre les trois états d'après les annonces actuelles de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état), ${i.nb} annonce${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)} · confiance ${i.confiance}.${aligne}`;
     if (i && i.deduit) return `Prix estimé d'après les autres états de cette édition (convenable ≈ 40 %, bon état ≈ 60 % du très bon état) : une estimation, pas un relevé.${aligne}`;
     if (i && i.recalibre) return `Cote d'archives remise à niveau : le modèle a appris l'écart entre les archives et les annonces actuelles. C'est une estimation, pas un relevé.${aligne}`;
     if (!estActuel(i)) return `Cote d'archives (ancien relevé) : un ordre de grandeur.${aligne}`;
     const mot = NATURES[i.nature] || 'observation';
     const base = `${i.nb} ${mot}${i.nb > 1 ? 's' : ''} relevée${i.nb > 1 ? 's' : ''} au ${dateCourte(i.date)}`;
-    const reserve = i.nature === 'annonces' ? ' Prix demandés, souvent supérieurs aux prix réellement payés.' : '';
-    return `${base} · confiance ${i.confiance}.${reserve}${aligne}`;
+    return `${base} · confiance ${i.confiance}.${aligne}`;
   }
   // Prix éditeur des éditions encore en vente (fiche du livre chez Gallimard Jeunesse) ou, à défaut, prix à la parution (notice BnF)
   function blocNeuf(b) {
@@ -1258,18 +1257,14 @@
   let ficheOuverte = null, RETOUR_FICHE = '';      // RETOUR_FICHE : la jaquette d'où l'on est venu, pour y remettre le focus à la fermeture
   // Tendance du prix d'une édition dans un état, d'après les relevés (niveaux 2 et 3) : sous la jaquette
   function blocTendance(b, etat) {
-    const carte = (corps) => `<div class="fiche-tendance"><strong>Évolution du prix</strong>${corps}</div>`;
-    if (!HIST || !HIST.dates || HIST.dates.length < 2) return carte('<p class="sous">L\'évolution se construit avec les relevés : revenez dans quelques jours.</p>');
+    if (!HIST || !HIST.dates || HIST.dates.length < 2) return '';
     const a = HIST.cotes[`${b.id}|${etat}`] || [];
     const points = HIST.dates.map((d, i) => ({ d, v: a[i] })).filter((p) => p.v != null && p.v > 0);
-    if (points.length < 2) return carte('<p class="sous">Pas encore assez de relevés pour cet état.</p>');
-    const jour = (d) => new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    const eur = (v) => `${v.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €`;
-    const debut = points[0], fin = points[points.length - 1], pct = fin.v / debut.v - 1;
+    if (points.length < 2) return '';
+    const pct = points[points.length - 1].v / points[0].v - 1;
     const pctTxt = `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')} %`;
-    const sens = Math.abs(pct) < 0.005 ? 'stable' : pct > 0 ? 'hausse' : 'baisse';
     const couleur = pct > 0.005 ? 'ev-hausse' : pct < -0.005 ? 'ev-baisse' : 'ev-stable';
-    return carte(`<p class="ev-resume"><span class="ev-pastille ${couleur}">${pctTxt}</span><span class="sous tend-long">${sens === 'stable' ? 'Prix stable' : `En ${sens}`} · de ${eur(debut.v)} (${jour(debut.d)}) à ${eur(fin.v)} (${jour(fin.d)})</span><span class="sous tend-court">· ${sens === 'stable' ? 'stable' : `en ${sens}`} depuis le ${jour(debut.d)}</span></p>`);
+    return `<div class="fiche-tendance"><span class="ev-pastille ${couleur}">${pctTxt}</span></div>`;
   }
 
   // Offre d'occasion d'une édition (niveaux 2 et 3) : nombre d'annonces en ligne au dernier relevé (eBay, Leboncoin, librairies), servi avec le Butin
