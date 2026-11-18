@@ -3,7 +3,7 @@
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
  "nb_modifiees": 1430,
- "mediane_variation": -0.004,
+ "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 31.24,
-   "apres": 37.68,
+   "apres": 37.69,
    "pct": 0.206,
    "nature": "annonces",
    "nb": 1,
@@ -90,7 +90,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 34.64,
-   "apres": 40.05,
+   "apres": 40.03,
    "pct": 0.156,
    "nature": "ventes",
    "nb": 1,
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 21.41,
-   "apres": 24.57,
-   "pct": 0.148,
+   "apres": 24.56,
+   "pct": 0.147,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -120,7 +120,7 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 53.52,
-   "apres": 61.41,
+   "apres": 61.39,
    "pct": 0.147,
    "nature": "archives",
    "nb": 0,
@@ -135,8 +135,8 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 8.93,
-   "apres": 9.99,
-   "pct": 0.119,
+   "apres": 10.0,
+   "pct": 0.12,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -309,21 +309,6 @@
    "recalibre": false
   },
   {
-   "id": "9782010117244",
-   "isbn13": "9782010117244",
-   "titre": "Les Mystères de Babylone",
-   "serie": "La Saga du Prêtre Jean",
-   "numero": "4",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 13.84,
-   "apres": 12.32,
-   "pct": -0.11,
-   "nature": "annonces",
-   "nb": 12,
-   "recalibre": false
-  },
-  {
    "id": "9782070610341",
    "isbn13": "9782070610341",
    "titre": "La Forêt de la Malédiction",
@@ -369,12 +354,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 27,
+ "nb_grands_mouvements": 25,
  "modele": {
   "actif": false,
   "n_paires": 267,
-  "gain": -0.002,
-  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
-  "rapport_global": 1.021
+  "gain": 0.002,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 1.015
  }
 }
