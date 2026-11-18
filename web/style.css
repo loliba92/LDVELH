@@ -1950,18 +1950,18 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
   .ann-tab thead th { display: block; padding: 0; border: 0; }
   .ann-tab thead th.ann-th-annonce, .ann-tab thead th.ann-th-act { display: none; }
   .ann-tab-inc thead { display: none; }
-  .ann-tab tbody tr { display: grid; grid-template-columns: auto auto 1fr auto; grid-template-areas: "prix etat site date" "annonce annonce annonce annonce" "ecart ecart ecart act"; gap: 2px 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .ann-tab tbody tr { display: grid; grid-template-columns: auto auto 1fr auto; grid-template-areas: "annonce annonce annonce annonce" "etat site date prix" "ecart ecart ecart act"; gap: 2px 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); }
   .ann-tab tbody tr:last-child { border-bottom: 0; }
   .ann-tab td { padding: 0; border: 0; min-width: 0; }
-  .ann-tab .ann-prix { grid-area: prix; text-align: left; font-size: var(--t-md); }
+  .ann-tab .ann-prix { grid-area: prix; text-align: right; font-size: var(--t-md); }
   .ann-tab .ann-etat { grid-area: etat; }
   .ann-tab .ann-nom { grid-area: site; }
-  .ann-tab .ann-date { grid-area: date; text-align: right; }
-  .ann-tab .ann-annonce { grid-area: annonce; min-width: 0; margin-top: 2px; }
+  .ann-tab .ann-date { grid-area: date; text-align: left; }
+  .ann-tab .ann-annonce { grid-area: annonce; min-width: 0; margin-bottom: 2px; }
   .ann-tab .ann-ecart { grid-area: ecart; display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; }
   .ann-tab .ann-site { display: inline; }
   .ann-tab .ann-act { grid-area: act; align-self: center; }
-  .ann-tab-inc tbody tr { grid-template-areas: "prix nom nom date" "annonce annonce annonce annonce" "ecart ecart ecart act"; }
+  .ann-tab-inc tbody tr { grid-template-areas: "annonce annonce annonce annonce" "nom nom date prix" "ecart ecart ecart act"; }
   .ann-tab-inc .ann-nom { grid-area: nom; }
 }
 
