@@ -3004,3 +3004,22 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-lot { position: absolute; left: 6px; top: 6px; z-index: 2; padding: 1px 9px; border-radius: 999px; background: var(--gold); color: var(--on-accent, #111); font: 800 .72rem/1.5 var(--f-ui); white-space: nowrap; }
 .an-lot-ligne { display: inline-block; padding: 0 8px; border: 1px solid var(--gold); border-radius: 999px; color: var(--gold); font: 700 .72rem/1.5 var(--f-ui); }
 .an-lot-txt { display: block; color: var(--muted); }
+
+/* Fiche sur téléphone : titre et fermeture d'abord, puis la jaquette entière avec ses états dessous, puis la collection et la tendance, puis les prix */
+.tend-court { display: none; }
+@media (max-width: 700px) {
+  .fiche-haut { gap: 10px; }
+  .fiche-haut > div:last-child { display: contents; }
+  .fiche-haut > div:last-child > * { order: 4; }
+  .fiche-haut > div:last-child > .fiche-tete { order: 1; }
+  .fiche-haut > div:last-child > .fiche-sous { order: 2; margin-bottom: 4px; }
+  .fiche-couv { order: 3; width: auto; margin: 0; }
+  .fiche-couv .couv-cadre { width: 180px; margin: 0 auto; }
+  .fiche-couv img { aspect-ratio: auto; object-fit: contain; }
+  .coll-surimage .ex-etats { position: static; margin-top: 8px; box-shadow: none; }
+  .coll-surimage .ex-etats button { background: var(--bg); }
+  .coll-surimage .ex-etats button[aria-pressed="true"] { background: var(--accent); }
+  .fiche-tendance .tend-long { display: none; }
+  .fiche-tendance .tend-court { display: inline; }
+  .fiche-tendance .ev-resume { flex-wrap: wrap; gap: 4px 8px; }
+}
