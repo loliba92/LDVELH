@@ -3,24 +3,9 @@
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
  "nb_modifiees": 1429,
- "mediane_variation": -0.003,
+ "mediane_variation": -0.004,
  "nouvelles_cotes": 0,
  "hausses": [
-  {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 3.55,
-   "apres": 4.54,
-   "pct": 0.279,
-   "nature": "validé",
-   "nb": 0,
-   "recalibre": false
-  },
   {
    "id": "9782380240269",
    "isbn13": "9782380240269",
@@ -185,9 +170,69 @@
    "nature": "annonces",
    "nb": 8,
    "recalibre": false
+  },
+  {
+   "id": "9782070512645",
+   "isbn13": "9782070512645",
+   "titre": "Le Voleur d'Ames",
+   "serie": "Défis Fantastiques",
+   "numero": "530",
+   "version": "V2",
+   "etat": "bon",
+   "avant": 10.6,
+   "apres": 11.75,
+   "pct": 0.108,
+   "nature": "archives",
+   "nb": 1,
+   "recalibre": false
   }
  ],
  "baisses": [
+  {
+   "id": "9782070332892",
+   "isbn13": "9782070332892",
+   "titre": "Le Talisman de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 4.27,
+   "apres": 1.04,
+   "pct": -0.756,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332892",
+   "isbn13": "9782070332892",
+   "titre": "Le Talisman de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 2.1,
+   "apres": 0.62,
+   "pct": -0.705,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782070332892",
+   "isbn13": "9782070332892",
+   "titre": "Le Talisman de la Mort",
+   "serie": "Défis Fantastiques",
+   "numero": "289",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 3.55,
+   "apres": 1.55,
+   "pct": -0.563,
+   "nature": "validé",
+   "nb": 0,
+   "recalibre": false
+  },
   {
    "id": "9782070512652",
    "isbn13": "9782070512652",
@@ -216,6 +261,21 @@
    "pct": -0.113,
    "nature": "validé",
    "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782010117244",
+   "isbn13": "9782010117244",
+   "titre": "Les Mystères de Babylone",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "4",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.84,
+   "apres": 12.32,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 12,
    "recalibre": false
   },
   {
@@ -264,12 +324,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 20,
+ "nb_grands_mouvements": 23,
  "modele": {
   "actif": false,
-  "n_paires": 266,
-  "gain": 0.006,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.014
+  "n_paires": 267,
+  "gain": -0.0,
+  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
+  "rapport_global": 1.015
  }
 }
