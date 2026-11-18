@@ -1331,7 +1331,6 @@ button.tr-ligne[aria-expanded="true"] .tr-nom::after { content: " ▴"; }
 
 /* Corriger la fiche (administrateurs) */
 .corriger-fiche { margin: 8px 0 12px; padding: 0; }
-.corriger-fiche summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 44px; display: flex; align-items: center; gap: 8px; }
 .corriger-fiche-champs { grid-template-columns: 2fr 2fr 1fr; }
 .corriger-suppr { margin-top: 12px; }
 @media (max-width: 560px) { .corriger-fiche-champs { grid-template-columns: 1fr; } }
