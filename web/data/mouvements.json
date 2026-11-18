@@ -2,7 +2,7 @@
  "date": "2026-11-18",
  "precedent": "2026-11-17",
  "nb_comparees": 1545,
- "nb_modifiees": 1438,
+ "nb_modifiees": 1440,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -45,8 +45,8 @@
    "version": "V3",
    "etat": "tres_bon",
    "avant": 8.55,
-   "apres": 10.34,
-   "pct": 0.209,
+   "apres": 10.33,
+   "pct": 0.208,
    "nature": "annonces",
    "nb": 2,
    "recalibre": false
@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 31.24,
-   "apres": 37.71,
+   "apres": 37.72,
    "pct": 0.207,
    "nature": "annonces",
    "nb": 1,
@@ -105,8 +105,8 @@
    "version": "V4",
    "etat": "bon",
    "avant": 34.64,
-   "apres": 40.0,
-   "pct": 0.155,
+   "apres": 39.98,
+   "pct": 0.154,
    "nature": "ventes",
    "nb": 1,
    "recalibre": false
@@ -120,7 +120,7 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 21.41,
-   "apres": 24.54,
+   "apres": 24.53,
    "pct": 0.146,
    "nature": "archives",
    "nb": 0,
@@ -135,7 +135,7 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 53.52,
-   "apres": 61.34,
+   "apres": 61.32,
    "pct": 0.146,
    "nature": "archives",
    "nb": 0,
@@ -180,7 +180,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 98.35,
-   "apres": 109.37,
+   "apres": 109.38,
    "pct": 0.112,
    "nature": "annonces",
    "nb": 8,
@@ -309,6 +309,21 @@
    "recalibre": false
   },
   {
+   "id": "9782010117244",
+   "isbn13": "9782010117244",
+   "titre": "Les Mystères de Babylone",
+   "serie": "La Saga du Prêtre Jean",
+   "numero": "4",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 13.84,
+   "apres": 12.32,
+   "pct": -0.11,
+   "nature": "annonces",
+   "nb": 12,
+   "recalibre": false
+  },
+  {
    "id": "9782070610341",
    "isbn13": "9782070610341",
    "titre": "La Forêt de la Malédiction",
@@ -354,12 +369,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 26,
+ "nb_grands_mouvements": 27,
  "modele": {
   "actif": false,
-  "n_paires": 287,
-  "gain": 0.008,
-  "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.007
+  "n_paires": 288,
+  "gain": 0.002,
+  "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
+  "rapport_global": 1.008
  }
 }
