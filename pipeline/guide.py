@@ -1,12 +1,14 @@
 """Guide de référence en PDF : jaquettes et cotes de tous les livres, série par série, à partir de web/data/versions.json et web/covers/.
 
-Usage : python pipeline/guide.py [--sortie guide.pdf] [--series "Loup Solitaire,Quête du Graal"]
+Usage : python pipeline/guide.py [--sortie guide.pdf] [--editeurs "Scriptarium,Hachette"] [--series "Loup Solitaire"]
+Plan : éditeur, puis version (V1 avant V2, ordre naturel), puis série par ordre alphabétique, livres par numéro. Une version commence toujours une nouvelle page.
 Aucune requête réseau. Le PDF n'est pas gardé dans le dépôt : il se génère à la demande (voir la description de la demande de fusion).
 Polices : Cormorant Garamond et Source Sans 3 (licence SIL OFL, web/fonts/), converties au vol en TrueType ; sans fontTools, polices de base du PDF.
 """
 import argparse
 import io
 import json
+import re
 import sys
 import tempfile
 import time
@@ -48,15 +50,35 @@ def _numero(v):
     return int(n) if n.isdigit() else 10 ** 6
 
 
-def grouper(versions, series=None):
-    """[(série, [livres triés par numéro puis version])], séries par ordre alphabétique ; `series` : noms à garder (sinon toutes)."""
-    par = {}
+def _rang_version(v):
+    """Tri naturel : V1, V2, … V10."""
+    m = re.search(r"\d+", str(v))
+    return (int(m.group()) if m else 10 ** 6, str(v))
+
+
+# Éditeurs retenus tels que la base les donne ; toute autre valeur (auteur, texte copié d'une page, série) va dans « Autres éditeurs ».
+EDITEURS_CONNUS = ("Gallimard", "Gallimard Jeunesse", "Alkonost", "Scriptarium", "Hachette", "Elder Craft", "Sarbacane", "Bragelonne")
+AUTRES = "Autres éditeurs"
+
+
+def editeur_de(v):
+    e = (v.get("editeur") or "").strip()
+    return e if e in EDITEURS_CONNUS else AUTRES
+
+
+def grouper(versions, series=None, editeurs=None):
+    """[(éditeur, [(version, [(série, [livres par numéro])])])] : éditeurs du plus fourni au moins fourni (« Autres éditeurs » en dernier),
+    versions en ordre naturel, séries par ordre alphabétique. On ne mélange jamais deux versions. `series` et `editeurs` : filtres d'essai."""
+    arbre = {}
     for v in versions:
         s = (v.get("serie") or "").strip() or "Hors série"
-        if series and s not in series:
+        e = editeur_de(v)
+        if (series and s not in series) or (editeurs and e not in editeurs):
             continue
-        par.setdefault(s, []).append(v)
-    return [(s, sorted(l, key=lambda v: (_numero(v), v.get("version_n") or 0, v.get("titre") or ""))) for s, l in sorted(par.items(), key=lambda x: x[0].casefold())]
+        arbre.setdefault(e, {}).setdefault(v.get("version") or "?", {}).setdefault(s, []).append(v)
+    ordre = sorted(arbre, key=lambda e: (e == AUTRES, -sum(len(l) for par in arbre[e].values() for l in par.values()), e.casefold()))
+    return [(e, [(ver, [(s, sorted(l, key=lambda v: (_numero(v), v.get("titre") or ""))) for s, l in sorted(arbre[e][ver].items(), key=lambda x: x[0].casefold())])
+                 for ver in sorted(arbre[e], key=_rang_version)]) for e in ordre]
 
 
 def polices(dossier):
@@ -131,17 +153,18 @@ def fiche(v, styles, date_cotes, web=WEB, police_titre="Times-Bold"):
             Paragraph(f"{num}{v.get('version') or ''}{' · ' + rare if rare else ''}", styles["meta"]), Paragraph(cotes, styles["cotes"])]
 
 
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None):
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None):
     """Écrit le PDF. Renvoie le nombre de livres."""
     genere_le = genere_le or date.today().isoformat()
-    groupes = grouper(versions, series)
+    groupes = grouper(versions, series, editeurs)
     dossier = tempfile.mkdtemp(prefix="guide-polices-")
     f_titre, f_titre_gras, f_texte, f_gras = polices(dossier)
     styles = {
         "titre": ParagraphStyle("titre", fontName=f_gras, fontSize=8.6, leading=10.4, textColor=TEXTE, alignment=TA_CENTER),
         "meta": ParagraphStyle("meta", fontName=f_texte, fontSize=7.6, leading=9.4, textColor=SOURDINE, alignment=TA_CENTER),
         "cotes": ParagraphStyle("cotes", fontName=f_gras, fontSize=7.6, leading=9.4, textColor=OR, alignment=TA_CENTER),
-        "serie": ParagraphStyle("serie", fontName=f_titre_gras, fontSize=26, leading=30, textColor=OR, spaceAfter=4 * mm),
+        "version": ParagraphStyle("version", fontName=f_titre_gras, fontSize=26, leading=30, textColor=OR, spaceAfter=4 * mm),
+        "serie": ParagraphStyle("serie", fontName=f_titre_gras, fontSize=17, leading=20, textColor=OR, spaceBefore=4 * mm, spaceAfter=3 * mm, keepWithNext=1),
         "corps": ParagraphStyle("corps", fontName=f_texte, fontSize=11, leading=16, textColor=TEXTE),
         "h1": ParagraphStyle("h1", fontName=f_titre_gras, fontSize=30, leading=34, textColor=OR, spaceAfter=8 * mm),
         "toc": ParagraphStyle("toc", fontName=f_texte, fontSize=10.5, leading=15, textColor=TEXTE),
@@ -169,32 +192,42 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
     class Doc(BaseDocTemplate):
         def afterFlowable(self, f):
-            if isinstance(f, Paragraph) and f.style.name == "serie":
-                self.notify("TOCEntry", (0, f.getPlainText(), self.page))
+            if isinstance(f, Paragraph) and f.style.name == "version":
+                if getattr(f, "editeur", None):
+                    self.notify("TOCEntry", (0, f.editeur, self.page))
+                self.notify("TOCEntry", (1, f.getPlainText(), self.page))
+            elif isinstance(f, Paragraph) and f.style.name == "serie":
+                self.notify("TOCEntry", (2, f.getPlainText(), self.page))
 
     doc = Doc(str(sortie), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=18 * mm,
               title="La Cote du Héros : guide de référence", author="La Cote du Héros")
     cadre = Frame(18 * mm, 18 * mm, A4[0] - 36 * mm, A4[1] - 34 * mm, id="c")
     doc.addPageTemplates([PageTemplate("couv", [Frame(0, 0, 1, 1)], onPage=couverture, autoNextPageTemplate="page"), PageTemplate("page", [cadre], onPage=fond)])
     sommaire = TableOfContents()
-    sommaire.levelStyles = [ParagraphStyle("t0", parent=styles["toc"])]
+    sommaire.levelStyles = [ParagraphStyle("t0", parent=styles["toc"], fontName=f_gras, spaceBefore=2.5 * mm), ParagraphStyle("t1", parent=styles["toc"], leftIndent=6 * mm, fontSize=9.5, leading=13),
+                            ParagraphStyle("t2", parent=styles["toc"], leftIndent=12 * mm, fontSize=8.5, leading=11.5, textColor=SOURDINE)]
     sommaire.dotsMinLevel = 0
-    nb = sum(len(l) for _, l in groupes)
+    nb = sum(len(l) for _, vs in groupes for _, ss in vs for _, l in ss)
     histoire = [Spacer(1, 1), PageBreak(),
                 Paragraph("Présentation", styles["h1"]),
                 Paragraph(f"La Cote du Héros suit les prix d'occasion des livres dont vous êtes le héros. Ce guide reprend {nb} éditions, série par série : "
                           "jaquette, titre, numéro, version, rareté et cotes.", styles["corps"]), Spacer(1, 4 * mm),
                 Paragraph("C = convenable, BE = bon état, TBE = très bon état. Les cotes sont des estimations, à la date du " + date_longue(date_cotes) + ".", styles["corps"]),
                 PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
-    for nom, livres in groupes:
-        histoire += [PageBreak(), Paragraph(nom, styles["serie"])]
-        cellules = [fiche(v, styles, date_cotes, web, f_titre_gras) for v in livres]
-        while len(cellules) % COLONNES:
-            cellules.append("")
-        lignes = [cellules[i:i + COLONNES] for i in range(0, len(cellules), COLONNES)]
-        t = Table(lignes, colWidths=[(A4[0] - 36 * mm) / COLONNES] * COLONNES, hAlign="CENTER")
-        t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("ALIGN", (0, 0), (-1, -1), "CENTER"), ("BOTTOMPADDING", (0, 0), (-1, -1), 5 * mm)]))
-        histoire.append(t)
+    for editeur, versions_ed in groupes:
+        for k, (version, series_v) in enumerate(versions_ed):
+            titre = Paragraph(f"{editeur} · {version}", styles["version"])
+            titre.editeur = editeur if k == 0 else None
+            histoire += [PageBreak(), titre]
+            for nom, livres in series_v:
+                histoire.append(Paragraph(nom, styles["serie"]))
+                cellules = [fiche(v, styles, date_cotes, web, f_titre_gras) for v in livres]
+                while len(cellules) % COLONNES:
+                    cellules.append("")
+                lignes = [cellules[i:i + COLONNES] for i in range(0, len(cellules), COLONNES)]
+                t = Table(lignes, colWidths=[(A4[0] - 36 * mm) / COLONNES] * COLONNES, hAlign="CENTER")
+                t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("ALIGN", (0, 0), (-1, -1), "CENTER"), ("BOTTOMPADDING", (0, 0), (-1, -1), 5 * mm)]))
+                histoire.append(t)
     doc.multiBuild(histoire)
     return nb
 
@@ -203,12 +236,14 @@ def main(argv=None):
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
+    a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
     args = a.parse_args(argv)
     debut = time.time()
     versions = json.loads((WEB / "data" / "versions.json").read_text(encoding="utf-8"))
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
-    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series)
+    editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
+    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s : {args.sortie}")
     return 0
 

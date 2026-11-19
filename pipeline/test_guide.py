@@ -11,8 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import guide as g
 
 
-def livre(titre, serie, numero, version, couverture=None, prix=(5.0, 8.0, 12.5), niveau="rare"):
-    return {"titre": titre, "serie": serie, "numero": numero, "version": version, "version_n": int(version[1:]), "couverture": couverture,
+def livre(titre, serie, numero, version, couverture=None, prix=(5.0, 8.0, 12.5), niveau="rare", editeur="Gallimard"):
+    return {"editeur": editeur, "titre": titre, "serie": serie, "numero": numero, "version": version, "version_n": int(version[1:]), "couverture": couverture,
             "rarete": {"niveau": niveau}, "prix": {"convenable": prix[0], "bon": prix[1], "tres_bon": prix[2]}}
 
 
@@ -24,13 +24,26 @@ class TestGuide(unittest.TestCase):
         self.versions = [livre("Zèbre", "Série B", "2", "V1", "covers/a.webp"), livre("Alpha", "Série A", "10", "V1", "covers/a.webp"),
                          livre("Beta", "Série A", "2", "V2", "covers/absente.webp", prix=(None, None, None)), livre("Beta", "Série A", "2", "V1")]
 
-    def test_series_alphabetiques_livres_par_numero_puis_version(self):
-        r = g.grouper(self.versions)
-        self.assertEqual([s for s, _ in r], ["Série A", "Série B"])
-        self.assertEqual([(v["numero"], v["version"]) for v in r[0][1]], [("2", "V1"), ("2", "V2"), ("10", "V1")])
+    def test_plan_editeur_version_serie(self):
+        v = [livre("A", "Série B", "2", "V10"), livre("B", "Série B", "10", "V2"), livre("C", "Série A", "3", "V2"), livre("D", "Série A", "1", "V1"), livre("E", "Série A", "2", "V2"),
+             livre("F", "X", "1", "V1", editeur="Alkonost"), livre("G", "Y", "1", "V1", editeur="<span>page copiée</span>"), livre("H", "Z", "1", "V1", editeur="Jean Nugent")]
+        r = g.grouper(v)
+        self.assertEqual([e for e, _ in r], ["Gallimard", "Alkonost", "Autres éditeurs"])          # le plus fourni d'abord, « Autres éditeurs » en dernier
+        gal = dict(r)["Gallimard"]
+        self.assertEqual([ver for ver, _ in gal], ["V1", "V2", "V10"])                              # ordre naturel, jamais V1 et V2 mélangés
+        self.assertEqual([[(s, [x["titre"] for x in l]) for s, l in series] for _, series in gal][1], [("Série A", ["E", "C"]), ("Série B", ["B"])])   # séries alphabétiques, livres par numéro
+        self.assertEqual(len(dict(r)["Autres éditeurs"][0][1][0][1]) + len(dict(r)["Autres éditeurs"][0][1]), 3)       # deux livres sans éditeur reconnu, deux séries
 
-    def test_filtre_de_series(self):
-        self.assertEqual([s for s, _ in g.grouper(self.versions, {"Série B"})], ["Série B"])
+    def test_un_editeur_inconnu_ou_vide_va_dans_autres(self):
+        self.assertEqual(g.editeur_de({"editeur": "Gallimard"}), "Gallimard")
+        self.assertEqual(g.editeur_de({"editeur": ""}), "Autres éditeurs")
+        self.assertEqual(g.editeur_de({}), "Autres éditeurs")
+        self.assertEqual(g.editeur_de({"editeur": "R.L Stine"}), "Autres éditeurs")
+
+    def test_filtres_d_essai(self):
+        r = g.grouper(self.versions, {"Série B"})
+        self.assertEqual([s for _, vs in r for _, ss in vs for s, _ in ss], ["Série B"])
+        self.assertEqual([e for e, _ in g.grouper(self.versions, editeurs={"Alkonost"})], [])
 
     def test_formats(self):
         self.assertEqual(g.euros(9.4), "9,40 €")
