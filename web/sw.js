@@ -20,6 +20,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  if (/\/guide-reference-/.test(url.pathname)) return;          // le guide PDF (plusieurs Mo) n'est pas gardé en copie locale
   e.respondWith((async () => {
     const cache = await caches.open(VERSION);
     if (stable(url)) {
