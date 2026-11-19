@@ -1637,13 +1637,18 @@
     return lignes;
   };
   // Tous les imports des 24 dernières heures (jusqu'à 200 demandes lues, deux pages au plus) ; s'il n'y en a aucun, les trois derniers
+  // Imports montrés : ceux des 24 dernières heures, sinon les trois derniers ; puis le filtre de source (même règle avec ou sans copie de session)
+  function choisirImports(tous, filtre_source) {
+    const limite = Date.now() - 24 * 3600 * 1000;
+    const recents = tous.filter((im) => Date.parse(im.t) >= limite && im.lignes.length > 0);
+    const imports = recents.length ? recents : tous.slice(0, 3).filter((im) => im.lignes.length > 0);
+    return imports.map((im) => ({ ...im, lignes: im.lignes.filter((a) => !filtre_source || a.source === filtre_source) })).filter((im) => im.lignes.length > 0);
+  }
   async function lireImports(filtre_source = null) {
     const CLE = 'cdh-imports-lbc-24h-v4';
     try {
       const c = JSON.parse(sessionStorage.getItem(CLE) || 'null');
-      if (c && Date.now() - c.t < 300000) {
-        return c.imports.map((im) => ({ ...im, lignes: im.lignes.filter((a) => !filtre_source || a.source === filtre_source) })).filter((im) => im.lignes.length > 0);
-      }
+      if (c && Date.now() - c.t < 300000) return choisirImports(c.imports, filtre_source);
     } catch (e) { /* pas de cache */ }
     const limite = Date.now() - 24 * 3600 * 1000;
     let demandes = [];
@@ -1670,10 +1675,8 @@
       const sources = new Set(lignes.map((a) => a.source));
       return { t: x.created_at, lignes, sources: [...sources] };
     });
-    const recents = tous.filter((im) => Date.parse(im.t) >= limite && im.lignes.length > 0);
-    const imports = recents.length ? recents : tous.slice(0, 3).filter((im) => im.lignes.length > 0);
     try { sessionStorage.setItem(CLE, JSON.stringify({ t: Date.now(), imports: tous })); } catch (e) { /* idem */ }
-    return imports.map((im) => ({ ...im, lignes: im.lignes.filter((a) => !filtre_source || a.source === filtre_source) })).filter((im) => im.lignes.length > 0);
+    return choisirImports(tous, filtre_source);
   }
   // Position du prix d'une annonce par rapport au prix du site (même état) : mêmes seuils que « Annonces reçues » et le Butin
   const VERDICTS_IMP = { super: ['🔥 Super pépite', 'rc-v-super'], pepite: ['Pépite', 'rc-v-pepite'], dessous: ['Pas cher', 'rc-v-dessous'], dans: ['Dans les prix', 'rc-v-dans'], dessus: ['Trop cher', 'rc-v-dessus'], cher: ['Très cher', 'rc-v-cher'] };
