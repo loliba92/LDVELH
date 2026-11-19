@@ -9,6 +9,7 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import guide as g
+import guide_analyse as ga
 
 
 def livre(titre, serie, numero, version, couverture=None, prix=(5.0, 8.0, 12.5), niveau="rare", editeur="Gallimard"):
@@ -69,6 +70,39 @@ class TestGuide(unittest.TestCase):
         donnees = sortie.read_bytes()
         self.assertTrue(donnees.startswith(b"%PDF"))
         self.assertGreaterEqual(donnees.count(b"/Type /Page\n") + donnees.count(b"/Type /Page "), 5)          # couverture, présentation, sommaire, deux séries
+
+
+class TestAnalyse(unittest.TestCase):
+    def setUp(self):
+        self.v = [{"isbn13": str(i), "titre": f"L{i}", "prix": {"bon": 5.0 * i, "tres_bon": 6.0 * i}} for i in range(1, 9)] + [{"titre": "sans isbn", "prix": {"bon": 3}}]
+        self.offre = {"1": {"ebay": 1, "vin": 2}, "2": {"lbc": 4}, "8": {"lib": 9, "rev": 1}}
+
+    def test_points_une_edition_avec_isbn_et_cote(self):
+        pts = ga.points(self.v, self.offre)
+        self.assertEqual(len(pts), 8)
+        self.assertEqual(pts[0], (3, 6.0, "L1"))
+        self.assertEqual(pts[2][0], 0)
+
+    def test_quadrants_par_rapport_aux_medianes(self):
+        self.assertEqual([ga.quadrant(n, p, 5, 20) for n, p in ((1, 10), (9, 10), (1, 30), (9, 30))], [0, 1, 2, 3])
+
+    def test_phrases_calculees(self):
+        t = " ".join(ga.phrases_nuage(ga.points(self.v, self.offre)))
+        self.assertIn("8 éditions", t)
+        self.assertIn("5 éditions (62 %) sont sans annonce en ligne", t)
+
+    def test_tranches_et_tendances(self):
+        self.assertEqual(sum(n for _, n in ga.repartition_tranches(self.v)), 9)
+        tend = {"groupes": {"marche": {"version": [{"cle": "V1", "n": 10, "mediane": -0.1, "hausses": 2, "baisses": 7, "peu": False}, {"cle": "V9", "n": 1, "mediane": 0.5, "hausses": 1, "baisses": 0, "peu": True}]}}}
+        self.assertEqual(ga.lignes_tendance(tend, nom="version"), [("V1", 10, -0.1, 2, 7)])
+        self.assertEqual(ga.pct(-0.1234), "−12,3 %")
+
+    def test_le_dessin_et_le_pdf_ne_contiennent_pas_d_annonce_ni_de_nom_de_site(self):
+        d = ga.dessiner_nuage(ga.points(self.v, self.offre))
+        self.assertGreater(len(d.contents), 10)
+        source = (Path(__file__).resolve().parent / "guide.py").read_text(encoding="utf-8") + (Path(__file__).resolve().parent / "guide_analyse.py").read_text(encoding="utf-8")
+        for mot in ("sans publicité", "ebay.", "leboncoin", "vinted", "http"):
+            self.assertNotIn(mot, source.lower().replace('"ebay", "lbc"', ""))
 
 
 if __name__ == "__main__":

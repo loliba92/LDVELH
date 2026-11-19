@@ -24,8 +24,11 @@ from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import BaseDocTemplate, Flowable, Frame, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle
+
+import guide_analyse as ga
 from reportlab.platypus.tableofcontents import TableOfContents
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 RACINE = Path(__file__).resolve().parent.parent
 WEB = RACINE / "web"
 COUVERTURE = Path(__file__).resolve().parent / "guide" / "couverture.jpg"
@@ -153,7 +156,54 @@ def fiche(v, styles, date_cotes, web=WEB, police_titre="Times-Bold"):
             Paragraph(f"{num}{v.get('version') or ''}{' · ' + rare if rare else ''}", styles["meta"]), Paragraph(cotes, styles["cotes"])]
 
 
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None):
+def _tableau(lignes, f_texte, f_gras, largeurs):
+    t = Table(lignes, colWidths=largeurs, hAlign="LEFT")
+    t.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, -1), f_texte), ("FONTNAME", (0, 0), (-1, 0), f_gras), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("TEXTCOLOR", (0, 0), (-1, -1), TEXTE),
+                           ("TEXTCOLOR", (0, 0), (-1, 0), OR), ("LINEBELOW", (0, 0), (-1, 0), 0.5, SOURDINE), ("ALIGN", (1, 0), (-1, -1), "RIGHT"), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5), ("TOPPADDING", (0, 0), (-1, -1), 2.5)]))
+    return t
+
+
+def section_analyse(versions, donnees, styles, date_cotes, polices):
+    """« Méthode et analyse » : méthode en termes généraux, nuage de points, état du marché. Les chiffres et phrases d'analyse sont calculés sur les données."""
+    f_texte, f_gras = polices
+    P = lambda t, st="corps": Paragraph(t, styles[st])  # noqa: E731
+    pts = ga.points(versions, donnees["offre"])
+    h = [PageBreak(), P("Méthode et analyse", "h1m"),
+         P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
+           "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
+         P("Le nuage de points", "h2"),
+         P("Chaque point est une édition. Plus il est à droite, plus il y a d'annonces en ligne ; plus il est haut, plus la cote est élevée. Les pointillés marquent les médianes de toutes les éditions. "
+           "La forme du point dit dans quel coin il se trouve : disque vide, bon marché et peu d'annonces ; carré, bon marché et beaucoup d'annonces ; triangle, cher et peu d'annonces ; disque plein, cher et beaucoup d'annonces."),
+         Spacer(1, 3 * mm), ga.dessiner_nuage(pts, police=f_texte, police_gras=f_gras), Spacer(1, 2 * mm)]
+    h += [P(t) for t in ga.phrases_nuage(pts)]
+    t = donnees["tendances"]
+    h += [PageBreak(), P("État du marché", "h1m")]
+    glob = (t.get("global") or {}).get("marche")
+    depart_fin = ga.indice_actuel(t)
+    if glob:
+        h.append(P(f"Depuis l'{t.get('reference', 'ancien relevé')}, {glob['n']} cotes ont été comparées : variation médiane {ga.pct(glob['mediane'])}, "
+                   f"{glob['hausses']} en hausse, {glob['baisses']} en baisse, {glob['stables']} stables."))
+    if depart_fin:
+        a, b = depart_fin
+        h.append(P(f"L'indice des cotes est passé de {str(a['indice']).replace('.', ',')} le {date_longue(a['date'])} à {str(b['indice']).replace('.', ',')} le {date_longue(b['date'])}."))
+    for titre, nom, filtre in (("Par version", "version", None), ("Par éditeur", "editeur", lambda c: c in ga.EDITEURS_TENDANCE)):
+        lignes = ga.lignes_tendance(t, filtre, nom)
+        if lignes:
+            h += [P(titre, "h2"), _tableau([["", "Éditions", "Variation médiane", "Hausses", "Baisses"]] + [[c, str(n), ga.pct(m), str(hh), str(bb)] for c, n, m, hh, bb in lignes], f_texte, f_gras,
+                                         [48 * mm, 24 * mm, 38 * mm, 22 * mm, 22 * mm])]
+    tr = ga.repartition_tranches(versions)
+    total = sum(n for _, n in tr) or 1
+    h += [P("Répartition des éditions par cote", "h2"), _tableau([["Cote (très bon état, sinon bon état)", "Éditions", "Part"]] + [[nom, str(n), f"{round(100 * n / total)} %"] for nom, n in tr], f_texte, f_gras, [70 * mm, 24 * mm, 24 * mm])]
+    hausses, baisses = ga.grands_mouvements(donnees["mouvements"])
+    for titre, liste in (("Plus fortes hausses de cote du dernier relevé", hausses), ("Plus fortes baisses de cote du dernier relevé", baisses)):
+        if liste:
+            h += [P(titre, "h2"), _tableau([["Livre", "Version", "Avant", "Après", "Variation"]] + [[ti[:34], v, euros(a), euros(b), ga.pct(pc)] for ti, v, a, b, pc in liste], f_texte, f_gras,
+                                          [66 * mm, 18 * mm, 24 * mm, 24 * mm, 24 * mm])]
+    h += [P("Limites", "h2"), P("Une cote est un ordre de grandeur, à la date indiquée : l'état réel d'un exemplaire peut l'éloigner. Les chiffres de cette section sont recalculés à chaque génération du guide.")]
+    return h
+
+
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair"):
     """Écrit le PDF. Renvoie le nombre de livres."""
     genere_le = genere_le or date.today().isoformat()
     groupes = grouper(versions, series, editeurs)
@@ -167,6 +217,8 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         "serie": ParagraphStyle("serie", fontName=f_titre_gras, fontSize=17, leading=20, textColor=OR, spaceBefore=4 * mm, spaceAfter=3 * mm, keepWithNext=1),
         "corps": ParagraphStyle("corps", fontName=f_texte, fontSize=11, leading=16, textColor=TEXTE),
         "h1": ParagraphStyle("h1", fontName=f_titre_gras, fontSize=30, leading=34, textColor=OR, spaceAfter=8 * mm),
+        "h1m": ParagraphStyle("h1m", fontName=f_titre_gras, fontSize=30, leading=34, textColor=OR, spaceAfter=6 * mm),
+        "h2": ParagraphStyle("h2", fontName=f_titre_gras, fontSize=17, leading=20, textColor=OR, spaceBefore=5 * mm, spaceAfter=2 * mm, keepWithNext=1),
         "toc": ParagraphStyle("toc", fontName=f_texte, fontSize=10.5, leading=15, textColor=TEXTE),
     }
     pied = f"La Cote du Héros · Guide de référence · généré le {date_longue(genere_le)}"
@@ -181,12 +233,24 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
     def couverture(c, doc):
         c.drawImage(str(COUVERTURE), 0, 0, A4[0], A4[1])
+        if sous_titre == "bandeau":          # variante : sous-titre doré sur un bandeau sombre
+            c.saveState()
+            c.setFillColor(HexColor("#0c0a08"), alpha=0.72)
+            c.rect(0, A4[1] - 70 * mm, A4[0], 13 * mm, fill=1, stroke=0)
+            c.restoreState()
         for decalage, couleur in ((0.6 * mm, FOND), (0, OR)):          # ombre sombre sous le texte doré : lisible sur l'illustration
             c.setFillColor(couleur)
             c.setFont(f_titre_gras, 54)
             c.drawCentredString(A4[0] / 2 + decalage, A4[1] - 48 * mm - decalage, "La Cote du Héros")
-            c.setFont(f_titre_gras, 26)
-            c.drawCentredString(A4[0] / 2 + decalage, A4[1] - 62 * mm - decalage, "Guide de référence")
+            if sous_titre == "clair":          # variante : sous-titre plus grand, en gras, ombre renforcée
+                for dx, dy in ((0.9 * mm, -0.9 * mm), (-0.9 * mm, -0.9 * mm), (0, -1.2 * mm)) if couleur == FOND else ((0, 0),):
+                    c.setFillColor(couleur)
+                    c.setFont(f_gras, 22)
+                    c.drawCentredString(A4[0] / 2 + dx, A4[1] - 63 * mm + dy, "Guide de référence")
+            else:
+                c.setFont(f_titre_gras, 26)
+                c.drawCentredString(A4[0] / 2 + decalage, A4[1] - 63 * mm - decalage, "Guide de référence")
+            c.setFillColor(couleur)
             c.setFont(f_gras, 12)
             c.drawCentredString(A4[0] / 2 + decalage, 18 * mm - decalage, f"Édition du {date_longue(genere_le)}")
 
@@ -196,6 +260,8 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                 if getattr(f, "editeur", None):
                     self.notify("TOCEntry", (0, f.editeur, self.page))
                 self.notify("TOCEntry", (1, f.getPlainText(), self.page))
+            elif isinstance(f, Paragraph) and f.style.name == "h1m":
+                self.notify("TOCEntry", (0, f.getPlainText(), self.page))
             elif isinstance(f, Paragraph) and f.style.name == "serie":
                 self.notify("TOCEntry", (2, f.getPlainText(), self.page))
 
@@ -213,7 +279,10 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                 Paragraph(f"La Cote du Héros suit les prix d'occasion des livres dont vous êtes le héros. Ce guide reprend {nb} éditions, série par série : "
                           "jaquette, titre, numéro, version, rareté et cotes.", styles["corps"]), Spacer(1, 4 * mm),
                 Paragraph("C = convenable, BE = bon état, TBE = très bon état. Les cotes sont des estimations, à la date du " + date_longue(date_cotes) + ".", styles["corps"]),
+                Spacer(1, 4 * mm), Paragraph("Le site reste gratuit ; s'il vous est utile, vous pouvez « Offrir un café » depuis le site.", styles["corps"]),
                 PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
+    if donnees is not False:
+        histoire += section_analyse(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, (f_texte, f_gras))
     for editeur, versions_ed in groupes:
         for k, (version, series_v) in enumerate(versions_ed):
             titre = Paragraph(f"{editeur} · {version}", styles["version"])
@@ -237,13 +306,14 @@ def main(argv=None):
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
+    a.add_argument("--couverture", default="clair", choices=("clair", "bandeau"), help="variante du sous-titre de couverture")
     args = a.parse_args(argv)
     debut = time.time()
     versions = json.loads((WEB / "data" / "versions.json").read_text(encoding="utf-8"))
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
     editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
-    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs)
+    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s : {args.sortie}")
     return 0
 
