@@ -6,11 +6,13 @@ on:
     branches: [main]
     paths:
       - "web/**"
+      - "data/manual/guide-jeton.txt"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -34,8 +36,19 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Préparer la sortie de publication
+        run: |
+          mkdir _site
+          cp -r web/. _site/
+      # Guide de référence en PDF, non listé : généré une fois par jour par guide-pdf.yml ; ici on se contente de le joindre à la sortie de publication (jamais dans un commit).
+      # Sans guide récent, la publication continue sans lui et le bouton reste caché. Le nom du fichier porte le jeton de data/manual/guide-jeton.txt.
+      - name: Joindre le guide de référence (PDF)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/joindre-guide.sh _site data/manual/guide-jeton.txt
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
