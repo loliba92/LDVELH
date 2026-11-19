@@ -2,7 +2,7 @@
  "date": "2026-11-19",
  "precedent": "2026-11-18",
  "nb_comparees": 1545,
- "nb_modifiees": 1447,
+ "nb_modifiees": 1446,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -19,6 +19,36 @@
    "pct": 0.663,
    "nature": "annonces",
    "nb": 5,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 29.2,
+   "apres": 37.18,
+   "pct": 0.273,
+   "nature": "annonces",
+   "nb": 4,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 40.24,
+   "apres": 49.49,
+   "pct": 0.23,
+   "nature": "annonces",
+   "nb": 2,
    "recalibre": false
   },
   {
@@ -97,21 +127,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070585168",
-   "isbn13": "9782070585168",
-   "titre": "La Malédiction de Naar",
-   "serie": "Loup Solitaire",
-   "numero": "749",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 40.24,
-   "apres": 45.5,
-   "pct": 0.131,
-   "nature": "annonces",
-   "nb": 2,
-   "recalibre": false
-  },
-  {
    "id": "9782070656523",
    "isbn13": "9782070656523",
    "titre": "L'Epreuve des champions",
@@ -172,23 +187,7 @@
    "recalibre": false
   }
  ],
- "baisses": [
-  {
-   "id": "9782070586943",
-   "isbn13": "9782070586943",
-   "titre": "Le Voleur de Vie",
-   "serie": "Défis Fantastiques",
-   "numero": "745",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 83.24,
-   "apres": 74.89,
-   "pct": -0.1,
-   "nature": "annonces",
-   "nb": 2,
-   "recalibre": false
-  }
- ],
+ "baisses": [],
  "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
