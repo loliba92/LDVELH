@@ -29,6 +29,12 @@
    "isbn13": "9782070335947",
    "par": "loliba (superadmin)"
   },
+  "https://www.leboncoin.fr/ad/livres/3306822560": {
+   "statut": "reaffectee",
+   "le": "2026-11-19",
+   "isbn13": "9782070506910",
+   "par": "loliba (superadmin)"
+  },
   "https://www.leboncoin.fr/ad/livres/3307258875": {
    "statut": "reaffectee",
    "le": "2026-11-13",
@@ -44,6 +50,12 @@
   "https://www.leboncoin.fr/ad/livres/3309342863": {
    "statut": "exclue",
    "le": "2026-11-14",
+   "par": "loliba (superadmin)"
+  },
+  "https://www.leboncoin.fr/ad/livres/3311079630": {
+   "statut": "vendue",
+   "le": "2026-11-19",
+   "isbn13": "9782010119927",
    "par": "loliba (superadmin)"
   },
   "https://www.leboncoin.fr/ad/livres/3311609162": {
@@ -65,8 +77,8 @@
   },
   "https://www.vinted.fr/items/10350189487-lot-de-4-ldvelh-tbe": {
    "statut": "reaffectee",
-   "le": "2026-11-13",
-   "isbn13": "9782070649815",
+   "le": "2026-11-19",
+   "isbn13": "9782070662302",
    "par": "loliba (superadmin)"
   },
   "https://www.vinted.fr/items/10472238596-il-sagit-dun-fan-made-bien-lire-lannonce-les-chevaliers-du-destin": {
