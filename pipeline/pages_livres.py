@@ -372,7 +372,7 @@ def plan_du_site(livres):
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(lignes) + "\n</urlset>\n"
 
 
-ROBOTS = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"
+ROBOTS = f"User-agent: *\nAllow: /\nDisallow: /guide-reference-\n\nSitemap: {SITE}/sitemap.xml\n"          # le guide PDF (voir pipeline/guide.py) n'est pas listé
 
 
 def editions_publiques(web):

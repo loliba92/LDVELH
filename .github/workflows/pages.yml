@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - "web/**"
+      - "pipeline/guide*.py"
+      - "data/manual/guide-jeton.txt"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -34,8 +36,24 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Préparer la sortie de publication
+        run: |
+          mkdir _site
+          cp -r web/. _site/
+      # Guide de référence en PDF, non listé : généré dans la sortie de publication seulement (jamais dans un commit). Le nom du fichier porte un jeton
+      # (data/manual/guide-jeton.txt) ; web/data/guide.json n'existe que dans la sortie. Une panne du guide ne bloque pas la publication du site.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Guide de référence (PDF)
+        continue-on-error: true
+        run: |
+          pip install pillow reportlab fonttools brotli
+          JETON="$(tr -d '[:space:]' < data/manual/guide-jeton.txt)"
+          python pipeline/guide.py --sortie "_site/guide-reference-$JETON.pdf"
+          printf '{"fichier":"guide-reference-%s.pdf","date":"%s"}\n' "$JETON" "$(date +%F)" > _site/data/guide.json
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
