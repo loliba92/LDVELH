@@ -1115,8 +1115,15 @@
         const th = (k) => (k === 'annonce' ? '<th scope="col" class="ann-th-annonce">Annonce</th>' : tete[Object.keys(TRIS_ANN).indexOf(k)]);
         return `<div class="ann-cadre"><table class="ann-tab"><caption class="sr-only">Annonces retenues pour cette édition</caption><thead><tr>${ordre.map(th).join('')}${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${vues.map(ligneFiche).join('')}</tbody></table></div>${vues.length < lignes.length ? `<p class="ann-plus"><button type="button" class="bouton bouton-clair" data-ann-plus>Voir les ${lignes.length - vues.length} autres annonces</button></p>` : ''}`;
       };
-      const nbParties = par ? ETATS.reduce((n, e) => n + (par[e.k] || []).filter(([, , , origine, vue]) => !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay)).length, 0) : 0;
-      if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${nbParties ? `, dont ${nbParties} plus vue${nbParties > 1 ? 's' : ''}` : ''}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
+      // Chaque annonce retenue compte une fois : plus vue, vendue, lot (pas l'offre d'un livre seul), sinon en ligne : même règle que « Offre d'occasion »
+      const cats = { ligne: 0, lot: 0, vendue: 0, plus: 0 };
+      ETATS.forEach((e) => ((par && par[e.k]) || []).forEach(([, titre, lien, origine, vue]) => {
+        const plus = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay), vendue = !!((ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[lien]));
+        cats[plus ? 'plus' : vendue ? 'vendue' : /^Lot de /.test(titre) ? 'lot' : 'ligne'] += 1;
+      }));
+      const segments = [cats.ligne && `${cats.ligne} en ligne`, cats.lot && `${cats.lot} lot${cats.lot > 1 ? 's' : ''}`, cats.vendue && `${cats.vendue} vendue${cats.vendue > 1 ? 's' : ''}`, cats.plus && `${cats.plus} plus vue${cats.plus > 1 ? 's' : ''}`].filter(Boolean);
+      const dont = nb > cats.ligne ? `, dont ${segments.length > 1 ? segments.slice(0, -1).join(', ') + ' et ' + segments[segments.length - 1] : segments[0]}` : '';
+      if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${dont}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
       const dispersions = ETATS.map((e) => { const l = ((par && par[e.k]) || []).map((a) => a[0]); return l.length > 1 && Math.max(...l) > Math.min(...l) * 3 ? `${esc(e.long)} · ${l.length} annonces · prix très dispersés` : ''; }).filter(Boolean);
       const aVerifier = !inc.length ? '' : `<h4>À vérifier · édition incertaine · ${inc.length} annonce${inc.length > 1 ? 's' : ''}</h4><div class="ann-cadre"><table class="ann-tab ann-tab-inc"><caption class="sr-only">Annonces à vérifier</caption><thead><tr><th scope="col">Annonce</th><th scope="col">Site</th><th scope="col">Date</th><th scope="col">Prix</th><th scope="col">Édition</th>${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${[...inc].sort((u, v) => ((u[0] == null) - (v[0] == null)) || u[0] - v[0]).map((a) => ligneAnn(a, ...(a[5] > 1 ? [`1 édition sur ${a[5]} possibles`] : []))).join('')}</tbody></table></div><p class="sous">Annonces dont l'édition n'est pas sûre (titre seul ou plusieurs éditions possibles) : elles ne comptent pas dans le prix.</p>`;
@@ -1327,7 +1334,7 @@
       const barres = neuf && n === 0 ? 3 : niv;
       const parties = [o.ebay && `${o.ebay} sur eBay`, o.lbc && `${o.lbc} sur Leboncoin`, o.vin && `${o.vin} sur Vinted`, o.lib && `${o.lib} en librairie (occasion)`, o.rev && `${o.rev} chez des revendeurs (occasion)`].filter(Boolean);
       const age = o.age == null ? '' : o.age >= 14 ? ` Annonces eBay en ligne depuis environ ${Math.round(o.age / 7)} semaines.` : ` Annonces eBay en ligne depuis ${o.age} jour${o.age > 1 ? 's' : ''}.`;
-      zone.innerHTML = `<p class="fo-ligne"><span class="fo-jauge" aria-hidden="true">${[1, 2, 3].map((i) => `<i${i <= barres ? ' class="on"' : ''}></i>`).join('')}</span><strong class="fo-niveau">${nom}</strong><span class="sous">${n ? `${n} annonce${n > 1 ? 's' : ''} : ${esc(parties.join(' · '))}` : 'aucune annonce trouvée au relevé'}</span></p>`
+      zone.innerHTML = `<p class="fo-ligne"><span class="fo-jauge" aria-hidden="true">${[1, 2, 3].map((i) => `<i${i <= barres ? ' class="on"' : ''}></i>`).join('')}</span>${n ? '' : `<strong class="fo-niveau">${nom}</strong>`}<span class="sous">${n ? `${n} annonce${n > 1 ? 's' : ''} en ligne : ${esc(parties.join(' · '))}` : 'aucune annonce trouvée au relevé'}</span></p>`
         + (neuf && n > 0 ? '<p class="sous">Encore en vente neuve.</p>' : '')
         + `<p class="sous fo-note">${esc(age.trim())} Relevé du ${esc(dateCourte(OFFRE.date_ebay || OFFRE.date))}.</p>`;
     });
@@ -1699,7 +1706,7 @@
     const ecart = pub ? Math.round((a.prix / pub - 1) * 100) : 0;
     const detail = [a.verif ? 'édition à vérifier' : '', etatDe(a.etat).long, a.fdp > 0 ? `dont ${fmt(a.fdp)} de frais` : '', a.lotDe ? `lot de ${a.lotDe.n} livres${a.confirmation ? ` (${a.confirmation})` : ''} · annonce à ${fmt(a.lotDe.prix)}${a.lotDe.fdp > 0 ? ` dont ${fmt(a.lotDe.fdp)} de frais` : ''}` : '', vendu ? 'vendu' : pub != null ? `site ${fmt(pub)} · ${ecart > 0 ? '+' : ecart < 0 ? '−' : ''}${Math.abs(ecart)} %` : 'pas de prix sur le site'].filter(Boolean).join(' · ');
     return `<li class="imp-li${vendu ? ' imp-vendu' : ''}"><a class="imp-titre" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce ${src} (nouvel onglet) : ${esc(nom)}">${esc(nom)}</a><b class="imp-prix">${fmt(a.prix)}</b>
-      <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
+      <span class="imp-ligne2"><span class="imp-src imp-src-${src === 'Vinted' ? 'v' : 'l'}">${src}</span>${a.lotDe ? `<span class="an-lot-ligne">Lot de ${a.lotDe.n}</span>` : ''}${v ? `<span class="rc-pastille ${VERDICTS_IMP[v][1]}">${VERDICTS_IMP[v][0]}</span>` : ''}<span>${esc(detail)}</span></span></li>`;
   };
   async function ouvrirImports(filtre_source = null) {
     let dlg = $('#imp-dialog');

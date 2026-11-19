@@ -1351,8 +1351,7 @@
       };
       const carteGrille = (a) => {
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
-        const initiale = esc((a.ed.serie || a.ed.titre || '?').trim().charAt(0).toUpperCase());
-        const image = info.mini ? `<img src="${esc(info.mini)}" alt="" width="320" height="523" loading="lazy" decoding="async">` : `<span class="an-jaq-vide" aria-hidden="true">${initiale}</span>`;
+        const image = info.mini ? `<img src="${esc(info.mini)}" alt="Jaquette de ${esc(a.ed.titre)}" width="320" height="523" loading="lazy" decoding="async">` : `<span class="jaq-vide pp-sans-jaq"><span>${esc(a.ed.titre)}</span></span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
           <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${lotBadge(a)}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
           <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : pastilleVerdict(a.v, VERDICTS[a.v][0], cleRadar(a))}</div>
