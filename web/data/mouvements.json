@@ -150,7 +150,7 @@
    "version": "V4",
    "etat": "convenable",
    "avant": 24.53,
-   "apres": 27.35,
+   "apres": 27.36,
    "pct": 0.115,
    "nature": "archives",
    "nb": 0,
@@ -192,9 +192,9 @@
  "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
-  "n_paires": 291,
+  "n_paires": 292,
   "gain": 0.006,
   "raison": "le modèle ne bat pas assez les archives (gain 1%, 15% exigés)",
-  "rapport_global": 1.015
+  "rapport_global": 1.014
  }
 }
