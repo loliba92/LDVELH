@@ -2,7 +2,7 @@
  "date": "2026-11-19",
  "precedent": "2026-11-18",
  "nb_comparees": 1545,
- "nb_modifiees": 1445,
+ "nb_modifiees": 1441,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 29.2,
-   "apres": 37.14,
-   "pct": 0.272,
+   "apres": 37.11,
+   "pct": 0.271,
    "nature": "annonces",
    "nb": 4,
    "recalibre": false
@@ -45,8 +45,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 40.24,
-   "apres": 49.48,
-   "pct": 0.23,
+   "apres": 49.44,
+   "pct": 0.229,
    "nature": "annonces",
    "nb": 2,
    "recalibre": false
@@ -127,6 +127,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070581344",
+   "isbn13": "9782070581344",
+   "titre": "Les Sept Serpents",
+   "serie": "Sorcellerie!",
+   "numero": "295",
+   "version": "V4",
+   "etat": "bon",
+   "avant": 39.98,
+   "apres": 44.84,
+   "pct": 0.122,
+   "nature": "ventes",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
    "id": "9782070656523",
    "isbn13": "9782070656523",
    "titre": "L'Epreuve des champions",
@@ -148,25 +163,10 @@
    "serie": "Sorcellerie!",
    "numero": "295",
    "version": "V4",
-   "etat": "bon",
-   "avant": 39.98,
-   "apres": 44.83,
-   "pct": 0.121,
-   "nature": "ventes",
-   "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782070581344",
-   "isbn13": "9782070581344",
-   "titre": "Les Sept Serpents",
-   "serie": "Sorcellerie!",
-   "numero": "295",
-   "version": "V4",
    "etat": "convenable",
    "avant": 24.53,
-   "apres": 27.36,
-   "pct": 0.115,
+   "apres": 27.37,
+   "pct": 0.116,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -180,8 +180,8 @@
    "version": "V4",
    "etat": "tres_bon",
    "avant": 61.32,
-   "apres": 68.4,
-   "pct": 0.115,
+   "apres": 68.42,
+   "pct": 0.116,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -191,9 +191,9 @@
  "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
-  "n_paires": 291,
-  "gain": -0.0,
-  "raison": "le modèle ne bat pas assez les archives (gain -0%, 15% exigés)",
-  "rapport_global": 1.015
+  "n_paires": 290,
+  "gain": -0.006,
+  "raison": "le modèle ne bat pas assez les archives (gain -1%, 15% exigés)",
+  "rapport_global": 1.018
  }
 }

@@ -70,6 +70,12 @@
    "isbn13": "9782070509249",
    "par": "loliba (superadmin)"
   },
+  "https://www.leboncoin.fr/ad/livres/3312541516|9782070332939": {
+   "statut": "reaffectee",
+   "le": "2026-11-19",
+   "isbn13": "9782070665822",
+   "par": "loliba (superadmin)"
+  },
   "https://www.vinted.fr/items/10052973811-lannee-du-singe-dor-de-coline-ford-edition-le-livre-de-poche": {
    "statut": "exclue",
    "le": "2026-11-09",
@@ -146,6 +152,11 @@
   "https://www.vinted.fr/items/10809039845-les-chroniques-oubliees-initiation-au-jeu-daventure": {
    "statut": "exclue",
    "le": "2026-11-16",
+   "par": "loliba (superadmin)"
+  },
+  "https://www.vinted.fr/items/10809482770-livre-jeu-enquete-devine-qui-est-le-coupable-avec-sherlock-holmes-larousse-jeunesse": {
+   "statut": "exclue",
+   "le": "2026-11-19",
    "par": "loliba (superadmin)"
   },
   "https://www.vinted.fr/items/10827295927-defis-fantastiques-le-fleau-de-titan-defis-fantastiques-ndeg-26-grand-format-litterature": {
