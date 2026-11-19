@@ -2781,7 +2781,6 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-carte.rc-butin .an-jaq { border-color: var(--gold); }
 .an-jaq { position: relative; display: block; aspect-ratio: 5 / 7; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
 .an-jaq img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.an-jaq-vide { display: grid; place-items: center; width: 100%; height: 100%; font: 700 2.4rem var(--f-ui); color: var(--muted); }
 .an-new { padding: 1px 8px; border-radius: 999px; background: var(--gold); color: #1b1403; font: 800 .72rem/1.5 var(--f-ui); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
 .an-jaq .an-new { position: absolute; top: 6px; left: 6px; }
 .an-new-ligne { flex: none; }
@@ -2910,12 +2909,16 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .an-age-x { color: var(--muted); font-style: italic; }
 .an-exclu { padding: 0 8px; border: 1px dashed var(--line-strong); border-radius: 4px; font: 700 var(--t-xs)/1.6 var(--f-ui); color: var(--muted); white-space: nowrap; }
 /* Annonces : jaquettes à la taille de l'étagère (mêmes colonnes, même format 5 / 7, même ombre) */
-.an-grille { grid-template-columns: repeat(auto-fill, 161px); justify-content: start; gap: 26px 18px; }          /* 161 px : largeur d'une jaquette de l'étagère sur ordinateur */
+.an-grille { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 26px 18px; }          /* colonnes souples, comme l'étagère et le Butin */
 .an-jaq { aspect-ratio: 5 / 7; border: 0; border-radius: 3px; background: var(--line); box-shadow: var(--shadow-cover); }
 .an-jaq img { border-radius: 3px; object-fit: cover; }
+.an-jaq img { transition: transform var(--t); }
+.an-carte:hover .an-jaq img, .an-carte:focus-within .an-jaq img { transform: translateY(-5px); }
+.an-carte a.an-jaq { color: inherit; text-decoration: none; }
+.an-carte .jaq-vide.pp-sans-jaq { box-sizing: border-box; width: 100%; height: 100%; padding: 10px; text-align: center; font-size: var(--t-lg); line-height: 1.2; overflow: hidden; }
 .an-carte.rc-butin .an-jaq { outline: 2px solid var(--gold); outline-offset: -2px; }
 .an-carte a.an-titre { font-size: 1rem; }
-@media (max-width: 600px) { .an-grille { grid-template-columns: repeat(2, 158px); justify-content: center; gap: 22px 12px; } }          /* 158 px : largeur d'une jaquette de l'étagère sur téléphone */
+@media (max-width: 600px) { .an-grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; } }          /* 158 px : largeur d'une jaquette de l'étagère sur téléphone */
 .pp-carte a.couv { color: inherit; text-decoration: none; }
 /* Analyse : opportunités d'achat */
 .opp { margin-bottom: 28px; }
