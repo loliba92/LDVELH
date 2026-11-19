@@ -430,11 +430,12 @@ class Fiche(Flowable):
         c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère")
 
 
-INTRO_TAILLE = 14          # corps de l'introduction (points) : réduit si le texte dépasse deux pages
+INTRO_TAILLE = 15.6          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
 INTRODUCTION = Path(__file__).resolve().parent / "guide" / "introduction.md"
 
 
 def _inline(t):
+    t = re.sub(r" ([:;!?»])", "\u00a0\\1", t.replace("« ", "«\u00a0"))          # espaces insécables avant « : ; ! ? » » et après « « »
     return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t.replace("&", "&amp;").replace("<", "&lt;"))
 
 
@@ -493,6 +494,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         "h1i": ParagraphStyle("h1i", fontName=f_titre_gras, fontSize=34, leading=38, textColor=C("titre"), spaceAfter=3 * mm),
         "exergue": ParagraphStyle("exergue", fontName=f_titre, fontSize=19, leading=25, textColor=C("or"), alignment=TA_CENTER, leftIndent=14 * mm, rightIndent=14 * mm),
         "corps_intro": ParagraphStyle("corps_intro", fontName=f_texte, fontSize=INTRO_TAILLE, leading=INTRO_TAILLE * 1.62, textColor=C("texte"), spaceAfter=4 * mm, leftIndent=8 * mm, rightIndent=8 * mm),
+        "puce_radar": ParagraphStyle("puce_radar", fontName=f_texte, fontSize=10.5, leading=15, textColor=C("texte"), leftIndent=5 * mm, bulletIndent=0, spaceAfter=1.4 * mm),
         "puce": ParagraphStyle("puce", fontName=f_texte, fontSize=INTRO_TAILLE, leading=INTRO_TAILLE * 1.62, textColor=C("texte"), leftIndent=15 * mm, rightIndent=8 * mm, bulletIndent=9 * mm, spaceAfter=2 * mm),
     }
     styles["corps_initiale"] = ParagraphStyle("corps_initiale", parent=styles["corps_intro"], autoLeading="max")
@@ -728,35 +730,41 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                 # les bandeaux d'éditeur, de version et de série ne sont jamais seuls en bas de page : au moins une rangée avec eux ; une rangée n'est jamais coupée ; V1 et V5 ne se mélangent pas dans une rangée
                 histoire += [KeepTogether((entete if i == 0 else []) + [tete] + rangs[:1])] + rangs[1:]
     if donnees is not False:
-        histoire += [NextPageTemplate("texte"), PageBreak()] + section_analyse(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
+        histoire += [NextPageTemplate("texte"), PageBreak()] + section_radar(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
     doc.multiBuild(histoire)
     construire.remplissage = (sum(remplissage.values()) / len(remplissage)) if remplissage else 0.0          # taux moyen de remplissage des pages du catalogue
     construire.pages_catalogue = len(remplissage)
     return nb
 
 
-def section_analyse(versions, donnees, styles, date_cotes, polices, st):
-    """« Méthode et analyse » : méthode en termes généraux, puis un état du marché à la date du guide, SANS chiffre (que des mots), calculé sur les données :
-    synthèse, nuage de points des séries, panorama par plateforme et par éditeur, points d'attention."""
+def section_radar(versions, donnees, styles, date_cotes, polices, st):
+    """Chapitre « Le radar du héros » : le radar du site pour tout le guide, un radar par grand éditeur (une bulle par série), puis les séries à surveiller.
+    Aucun chiffre : axes et zones en mots, phrases calculées à chaque génération."""
     f_titre, f_titre_gras, f_texte, f_gras = polices
     cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
-    textes, profs = ga.textes(versions, donnees, editeur_de, EDITEURS_CONNUS)
-    h = [P("Le marché à l'instant T", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 4 * mm),
+    profs = ga.profils(versions, donnees["offre"], editeur_de)
+    pts = ga.points_editions(versions, donnees["offre"])
+    h = [P("Le radar du héros", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
            "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
-         P("Le marché en bref", "h2")]
-    h += [P(t) for t in textes["synthese"]]
-    h += [P("Le nuage de points", "h2"),
-          P("Chaque point est une série, avec son éditeur entre parenthèses. Plus il est à droite, plus l'offre en ligne est fournie ; plus il est haut, plus les cotes sont élevées. "
-            "Les pointillés marquent le milieu du marché. La forme du point dit dans quel coin il se trouve : disque vide, offre faible et prix bas ; carré, offre forte et prix bas ; "
-            "triangle, offre faible et prix haut (série en tension) ; disque plein, offre forte et prix haut."),
-          Spacer(1, 3 * mm), ga.dessiner_nuage(profs, largeur=L_CADRE, police=f_texte, police_gras=f_gras, c=cx)]
-    h += [P("Par plateforme", "h2")] + [P(t) for t in textes["plateformes"]]
-    h += [P("Par éditeur", "h2")] + [P(t) for t in textes["editeurs"]]
-    if textes["attention"]:
-        h += [P("Points d'attention", "h2")] + [P(t) for t in textes["attention"]]
-    h += [P("Limites", "h2"), P("Un état du marché est une photographie à la date du guide : il décrit l'offre du moment, pas une tendance. Les phrases de cette section sont recalculées à chaque génération du guide.")]
+         P("Le radar de tout le guide", "h2"), ga.dessiner_radar(pts, (), L_CADRE, 128 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm)]
+    h += [P(t) for t in ga.lecture_globale(pts)]
+    editeurs = ga.grands_editeurs(profs)
+    for i, e in enumerate(editeurs):
+        ps = [p for p in profs if p["editeur"] == e]
+        bloc = [P(e, "h2")]
+        if i == 0:
+            bloc.append(P("Chaque bulle est une série, placée au centre de ses éditions ; plus elle est grosse, plus l'éditeur y compte d'éditions."))
+        bloc += [ga.dessiner_radar(pts, ps, L_CADRE, 84 * mm, f_texte, f_gras, cx)] + [P(t) for _, t in ga.verdicts_editeur(ps, pts)]
+        h.append(KeepTogether(bloc))
+    tendues, faciles = ga.series_a_surveiller(profs, pts)
+    if tendues or faciles:
+        puce = lambda l: [Paragraph(f"<b>{e} · {s_}</b>, {m}", styles["puce_radar"], bulletText="•") for e, s_, m in l]  # noqa: E731
+        colonnes = Table([[[P("En zone tendue", "h2")] + puce(tendues), [P("Faciles à trouver", "h2")] + puce(faciles)]], colWidths=[L_CADRE / 2, L_CADRE / 2], hAlign="LEFT")
+        colonnes.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 4 * mm)]))
+        h += [P("Les séries à surveiller", "h2"), P("Celles où l'offre se raréfie alors que les prix montent, et celles où l'on peut encore se servir sans attendre."), Spacer(1, 1 * mm), colonnes]
+    h += [P("Un radar est une photographie à la date du guide : il décrit l'offre du moment, pas une tendance. Ses phrases sont recalculées à chaque génération.")]
     return h
 
 
