@@ -1,0 +1,41 @@
+name: Guide de référence (PDF, une fois par jour)
+
+# Génère le guide PDF une fois par jour, après le relevé des prix de la journée, et le garde comme artefact (jamais dans un commit).
+# La publication du site (pages.yml) le joint à sa sortie sans le régénérer (.github/scripts/joindre-guide.sh).
+on:
+  workflow_run:
+    workflows: ["Relevé des prix (eBay et librairies)"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Groupe à part : la génération ne bloque ni ne retarde les publications ni les écritures de données (elle ne fait que lire).
+concurrency:
+  group: guide-pdf
+  cancel-in-progress: true
+
+jobs:
+  guide:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow reportlab fonttools brotli
+      - name: Tests du guide
+        run: python pipeline/test_guide.py
+      - name: Générer le guide
+        run: |
+          mkdir guide-sortie
+          python pipeline/guide.py --sortie guide-sortie/guide-reference.pdf
+          date +%F > guide-sortie/date.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: guide-pdf
+          path: guide-sortie
+          retention-days: 14

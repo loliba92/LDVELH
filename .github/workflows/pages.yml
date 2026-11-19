@@ -6,13 +6,13 @@ on:
     branches: [main]
     paths:
       - "web/**"
-      - "pipeline/guide*.py"
       - "data/manual/guide-jeton.txt"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -40,18 +40,13 @@ jobs:
         run: |
           mkdir _site
           cp -r web/. _site/
-      # Guide de référence en PDF, non listé : généré dans la sortie de publication seulement (jamais dans un commit). Le nom du fichier porte un jeton
-      # (data/manual/guide-jeton.txt) ; web/data/guide.json n'existe que dans la sortie. Une panne du guide ne bloque pas la publication du site.
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Guide de référence (PDF)
+      # Guide de référence en PDF, non listé : généré une fois par jour par guide-pdf.yml ; ici on se contente de le joindre à la sortie de publication (jamais dans un commit).
+      # Sans guide récent, la publication continue sans lui et le bouton reste caché. Le nom du fichier porte le jeton de data/manual/guide-jeton.txt.
+      - name: Joindre le guide de référence (PDF)
         continue-on-error: true
-        run: |
-          pip install pillow reportlab fonttools brotli
-          JETON="$(tr -d '[:space:]' < data/manual/guide-jeton.txt)"
-          python pipeline/guide.py --sortie "_site/guide-reference-$JETON.pdf"
-          printf '{"fichier":"guide-reference-%s.pdf","date":"%s"}\n' "$JETON" "$(date +%F)" > _site/data/guide.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/joindre-guide.sh _site data/manual/guide-jeton.txt
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
