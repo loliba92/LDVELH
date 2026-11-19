@@ -5,3 +5,6 @@ pillow
 opencv-python-headless
 pyjwt
 cryptography
+reportlab
+fonttools
+brotli
