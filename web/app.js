@@ -1054,7 +1054,7 @@
     const msg = b.closest('.annonces-fiche').querySelector('.ann-msg');
     if (!window.confirm('Exclure cette annonce de la cote ? Elle ne figurera plus parmi les annonces après le prochain relevé.')) return;
     b.disabled = true;
-    await envoyerCorrections([`annonce ; ${b.dataset.exclureAnnonce} ; exclue ; ; `], (t) => { msg.textContent = t; msg.hidden = false; });
+    await envoyerCorrections([`annonce ; ${b.dataset.exclureAnnonce} ; exclue ; ; ${b.dataset.origine ? ` ; ${b.dataset.origine}` : ''}`], (t) => { msg.textContent = t; msg.hidden = false; });
     b.disabled = false;
   });
   function remplirAnnonces(b) {
@@ -1086,7 +1086,9 @@
         return [vue ? String(vue).slice(0, 10) : '', 'Vue le'];
       };
       const celluleDate = (lien, vue) => { const [d, mot] = dateAnn(lien, vue); return `<td class="ann-date" data-l="Date"${d ? ` title="${mot} ${esc(dateCourte(d))}"` : ''}>${jourCourt(d)}</td>`; };
-      const boutonExclure = (lien, titre) => (estNiveau3() ? `<td class="ann-act"><button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}" aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button></td>` : '');
+      // Un livre d'un lot s'exclut seul : la demande porte alors son ISBN d'origine (celui d'avant une éventuelle correction)
+      const origineLot = (lien, titre) => { if (!/^Lot de /.test(titre)) return ''; const t = (ANN && ANN.corrigees) || {}, k = Object.keys(t).find((x) => x.indexOf(lien + '|') === 0 && t[x].isbn13 === b.isbn13); return k ? k.slice(lien.length + 1) : b.isbn13; };
+      const boutonExclure = (lien, titre) => (estNiveau3() ? `<td class="ann-act"><button type="button" class="ann-exclure" data-exclure-annonce="${esc(lien)}"${origineLot(lien, titre) ? ` data-origine="${esc(origineLot(lien, titre))}"` : ''} aria-label="Exclure cette annonce : ${esc(titre)}">Exclure</button></td>` : '');
       const lienAnn = (origine, lien, titre) => `<a class="ann-lien-titre" href="${esc(lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce (${nomOrigine(origine)}, nouvel onglet) : ${esc(titre)}">${esc(titre)} ↗</a>`;
       const ligneAnn = ([prix, titre, lien, origine, vue], ...etiquettes) => `<tr><td class="ann-annonce">${lienAnn(origine, lien, titre)}</td><td class="ann-nom" data-l="Site">${nomOrigine(origine)}</td>${celluleDate(lien, vue)}<td class="ann-prix" data-l="Prix">${fmt(prix)}</td><td class="ann-ecart" data-l="Édition">${etiquettes.map((t) => `<span class="ann-titre">${t}</span>`).join('')}</td>${boutonExclure(lien, titre)}</tr>`;
       // Une annonce par ligne : prix, état, site, titre (lien), date, verdict face à la cote de son état ; le Zagor peut l'exclure

@@ -636,7 +636,14 @@
   const corrigees = () => Object.assign({}, BUT && BUT.corrigees, ANN && ANN.corrigees);          // le Butin porte les annonces vendues de ses cartes, même sans le fichier complet
   // Mention « Vendu » : l'annonce reste affichée (correction « vendue »)
   // Vendue : marquée par vous (correction « vendue »), ou signalée vendue par le robot de relevé (barrée pendant sept jours)
-  const estVendue = (a) => !!((corrigees()[a.lien] && corrigees()[a.lien].statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien]));
+  // Correction d'une carte : celle de son livre dans un lot (clé « lien|ISBN d'origine »), sinon celle de l'annonce entière ; `origine` : l'ISBN d'origine du livre dans le lot
+  const corrCarte = (a) => {
+    const t = corrigees(), pre = a.lien + '|';
+    let c = null, origine = '';
+    Object.keys(t).forEach((k) => { if (k.indexOf(pre) === 0 && (k.slice(pre.length) === a.ed.isbn || t[k].isbn13 === a.ed.isbn)) { c = t[k]; origine = k.slice(pre.length); } });
+    return c ? { c, origine } : { c: t[a.lien] || null, origine: '' };
+  };
+  const estVendue = (a) => !!((corrCarte(a).c && corrCarte(a).c.statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien]));
   const vendueHtml = (a) => (estVendue(a) ? '<span class="an-vendu">Vendu</span>' : '');
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
@@ -645,10 +652,10 @@
     const livre = (INFO_ED[a.ed.id] || {}).livre;
     const eds = Object.values(INFO_ED).filter((x) => livre && x.livre === livre && x.isbn).sort((x, y) => String(x.version).localeCompare(String(y.version), 'fr', { numeric: true }));
     if (!estNiveau3() || !a.lien || !eds.length) return '';
-    const c = corrigees()[a.lien], nom = `corr-${NB_CORR += 1}`;
+    const cc = corrCarte(a), c = cc.c, nom = `corr-${NB_CORR += 1}`, origine = cc.origine || (nbLot(a) ? a.ed.isbn : '');          // origine : seulement pour un livre de lot
     const fait = c ? `<span class="corr-fait">${c.statut === 'exclue' ? 'Annonce exclue par vous' : c.statut === 'vendue' ? 'Annonce marquée vendue par vous' : c.statut === 'confirmee' ?'Édition confirmée par vous' : 'Édition corrigée par vous'}</span>` : '';
     const opt = (x) => `<label class="corr-opt"><input type="radio" name="${nom}" value="${esc(x.isbn)}"${x.isbn === a.ed.isbn ? ' checked' : ''}>${x.mini ? `<img src="${esc(x.mini)}" alt="" width="40" height="56" loading="lazy">` : ''}<span>${esc(x.version)}${x.annee ? ' · ' + esc(x.annee) : ''}${x.isbn === a.ed.isbn ? ' <small>(actuelle)</small>' : ''}</span></label>`;
-    return `<details class="corr-ann${lite ? ' corr-lite' : ''}" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}"><summary>Corriger l'édition${!lite && fait ? ' · ' : ''}${lite ? '' : fait}</summary>${lite && fait ? `<p class="corr-fait-txt">${fait}</p>` : ''}
+    return `<details class="corr-ann${lite ? ' corr-lite' : ''}" data-lien="${esc(a.lien)}" data-isbn="${esc(a.ed.isbn)}" data-origine="${esc(origine)}"><summary>Corriger l'édition${!lite && fait ? ' · ' : ''}${lite ? '' : fait}</summary>${lite && fait ? `<p class="corr-fait-txt">${fait}</p>` : ''}
       <p class="sous">Ouvrez l'annonce, comparez sa photo aux jaquettes, puis choisissez l'édition. Votre choix remplace celui du relevé, aussi pour les relevés suivants.</p>
       <div class="corr-opts">${eds.map(opt).join('')}<label class="corr-opt corr-exclure"><input type="checkbox" class="corr-vendu-case"${c && c.statut === 'vendue' ? ' checked' : ''}><span>Annonce vendue : l'afficher avec la mention « Vendu »</span></label><label class="corr-opt corr-exclure"><input type="radio" name="${nom}" value="exclue"><span>Pas ce livre, ou un lot : exclure l'annonce</span></label></div>
       <label class="corr-note">Note <input type="text" maxlength="120" placeholder="facultatif"></label>
@@ -666,7 +673,7 @@
     if (!(window.Relais && window.Relais.actif())) return dire('Votre connexion a expiré : reconnectez-vous avec le bouton du compte, en haut de la page.');
     go.disabled = true; dire('Envoi en cours…');
     try {
-      const r = await lancer('corriger-prix.yml', { corrections: `annonce ; ${bloc.dataset.lien} ; ${statut} ; ${statut === 'exclue' ? '' : choix.value} ; ${note}` });
+      const r = await lancer('corriger-prix.yml', { corrections: `annonce ; ${bloc.dataset.lien} ; ${statut} ; ${statut === 'exclue' ? '' : choix.value} ; ${note}${bloc.dataset.origine ? ` ; ${bloc.dataset.origine}` : ''}` });
       if (r.status === 204) dire('Envoyé. Le site sera à jour dans environ 2 minutes : rechargez la page ensuite.');
       else if (r.status === 401 || r.status === 403) dire('Ce compte n\'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.');
       else dire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);

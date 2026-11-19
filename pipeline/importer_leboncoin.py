@@ -292,10 +292,13 @@ def repartir_lot(prix, lot):
     return [(i, prix * w / total) for i, w in zip(lot["isbns"], poids)]
 
 
-def etaler_lots(annonces, lots):
+def etaler_lots(annonces, lots, corrections=None):
     """Présentation des annonces de lot : chaque livre du lot reçoit une ligne « Lot de N livres », au prix de sa part.
     `annonces` : {isbn: {état: [[prix, titre, lien, origine, vue, supposé]]}} (modifié en place). Sans cela, l'annonce n'apparaîtrait
-    que sous un seul des livres alors que sa part est comptée dans la cote de tous."""
+    que sous un seul des livres alors que sa part est comptée dans la cote de tous.
+    `corrections` (voir corrections_annonces.py) : une correction « lien|ISBN d'origine » ne touche que la carte de ce livre (réaffectée : la carte passe à
+    l'autre édition avec la même part ; exclue : la carte disparaît) ; les parts des autres livres ne changent pas."""
+    corrections = corrections_annonces.lire() if corrections is None else corrections
     vues = [(isbn, etat, list(a)) for isbn, par in annonces.items() for etat, liste in par.items() for a in liste if a[2] in lots]
     for isbn, etat, a in vues:
         lot = lots[a[2]]
@@ -304,7 +307,14 @@ def etaler_lots(annonces, lots):
         titre = prefixe + str(a[1]).removeprefix(prefixe)
         part_de = dict(repartir_lot(a[0], lot))
         for i in lot["isbns"]:
-            liste = annonces.setdefault(i, {}).setdefault(etat, [])
+            c = corrections.get(corrections_annonces.cle_livre(a[2], i))
+            cible = None if c and c["statut"] == "exclue" else (c["isbn13"] if c else i)
+            if cible != i:          # la carte quitte ce livre
+                avant = annonces.get(i, {}).get(etat, [])
+                avant[:] = [x for x in avant if x[2] != a[2]]
+            if cible is None:
+                continue
+            liste = annonces.setdefault(cible, {}).setdefault(etat, [])
             ligne = next((x for x in liste if x[2] == a[2]), None)
             if ligne is None:
                 liste.append([round(part_de[i], 2), titre, a[2], a[3], a[4], a[5]])
