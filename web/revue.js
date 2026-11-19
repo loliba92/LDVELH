@@ -1029,7 +1029,7 @@
     dessinerPepites();
   }
 
-  let ouvrirOnglet = () => {};
+  let ouvrirOnglet = () => {}, restaurerOnglet = () => {};
   // Onglet « Annonces reçues » (niveau 3 seul, page Butin) : toutes les annonces des derniers relevés, la plus récemment vue en premier
   let dessinerRecues = () => {};
   function initRecues() {
@@ -1505,7 +1505,9 @@
 
   function initNav() {
     const boutons = [...document.querySelectorAll('#rv-nav [data-pane]')];
-    const montrer = (nom) => {
+    let restauree = false;          // l'onglet demandé par l'adresse ou gardé en mémoire n'est rouvert qu'une fois, et jamais après un choix de la personne
+    const montrer = (nom, choix = false) => {
+      if (choix) { restauree = true; try { history.replaceState(history.state, '', '#' + nom); } catch (e) { /* adresse inchangée */ } }
       boutons.forEach((b) => { b.setAttribute('aria-selected', String(b.dataset.pane === nom)); b.tabIndex = b.dataset.pane === nom ? 0 : -1; });
       document.querySelectorAll('.rv-pane').forEach((p) => { p.hidden = p.id !== 'pane-' + nom; });
       document.dispatchEvent(new CustomEvent('cdh-pane', { detail: nom }));
@@ -1516,11 +1518,11 @@
       b.id = 'onglet-rv-' + b.dataset.pane; b.setAttribute('aria-controls', 'pane-' + b.dataset.pane);
       const pan = document.getElementById('pane-' + b.dataset.pane);
       if (pan) pan.setAttribute('aria-labelledby', b.id);
-      b.addEventListener('click', () => montrer(b.dataset.pane));
+      b.addEventListener('click', (e) => montrer(b.dataset.pane, e.isTrusted));
       b.addEventListener('keydown', (e) => {
         const visibles = boutons.filter((x) => !x.hidden), i = visibles.indexOf(b);
         const cible = { ArrowRight: visibles[(i + 1) % visibles.length], ArrowLeft: visibles[(i - 1 + visibles.length) % visibles.length], Home: visibles[0], End: visibles[visibles.length - 1] }[e.key];
-        if (cible) { e.preventDefault(); cible.focus(); montrer(cible.dataset.pane); }
+        if (cible) { e.preventDefault(); cible.focus(); montrer(cible.dataset.pane, true); }
       });
     });
     [['tendances', '#rv-tendances']].forEach(([nom, sel]) => {
@@ -1530,9 +1532,22 @@
       new MutationObserver(maj).observe(bloc, { attributes: true, attributeFilter: ['hidden'] });
       maj();
     });
-    let debut = (location.hash || '').slice(1);
-    try { debut = debut || sessionStorage.getItem('cdh-rv-pane') || ''; } catch (e) { /* idem */ }
-    if (boutons.some((b) => b.dataset.pane === debut) && !(boutons.find((b) => b.dataset.pane === debut) || {}).hidden) montrer(debut);
+    // Onglet voulu : l'adresse (#recues, #analyse… ; #annonces ouvre « Annonces » de cette page), sinon la mémoire de la session. Les droits arrivent après le chargement :
+    // on réessaie à chaque changement de compte, et un onglet interdit au profil laisse la page sur son premier onglet.
+    const voulu = () => {
+      let h = (location.hash || '').slice(1);
+      if (!boutons.some((x) => x.dataset.pane === h) && h === 'annonces') h = 'recues';
+      if (boutons.some((x) => x.dataset.pane === h)) return h;
+      try { h = sessionStorage.getItem('cdh-rv-pane') || ''; } catch (e) { h = ''; }
+      return boutons.some((x) => x.dataset.pane === h) ? h : '';
+    };
+    restaurerOnglet = () => {
+      if (restauree) return;
+      const nom = voulu(), b = boutons.find((x) => x.dataset.pane === nom);
+      if (b && !b.hidden) { restauree = true; montrer(nom); }
+    };
+    addEventListener('hashchange', () => { const h = (location.hash || '').slice(1); ouvrirOnglet(h === 'annonces' && !boutons.some((x) => x.dataset.pane === h) ? 'recues' : h); });
+    restaurerOnglet();
   }
   initAnnonces();
   initPepites();
@@ -1681,6 +1696,7 @@
     if (super_ && (ancre === '#analyse' || ancre === '#captures-recues') && !analyseOuverte) { analyseOuverte = true; ouvrirOnglet('analyse'); }          // ancien lien « annonces captées par jour »
     else if (niveau2 && ancre === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
+    restaurerOnglet();
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (niveau2) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
