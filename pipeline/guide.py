@@ -31,6 +31,12 @@ from reportlab.platypus.tableofcontents import TableOfContents
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import guide_analyse as ga
 
+# ---- RÉGLAGES à changer ici (valeur unique) : choix du propriétaire en attente ----
+STYLE_PAR_DEFAUT = "nuit"            # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
+SOUS_TITRE_PAR_DEFAUT = "clair"      # sous-titre de la couverture « huile » : "clair" ou "bandeau" (sans effet sur la couverture V1)
+COUVERTURE_PAR_DEFAUT = "v1"         # illustration de couverture : "v1" (héros et dragon) ou "huile" (ancienne couverture)
+# -------------------------------------------------------------------------------------
+
 RACINE = Path(__file__).resolve().parent.parent
 WEB = RACINE / "web"
 COUVERTURE = Path(__file__).resolve().parent / "guide" / "couverture.jpg"          # illustration « huile »
@@ -414,7 +420,7 @@ def legende(styles):
             ]
 
 
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False, visuel="v1", reperes="jauge"):
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre=SOUS_TITRE_PAR_DEFAUT, style=STYLE_PAR_DEFAUT, mention=False, visuel=COUVERTURE_PAR_DEFAUT, reperes="jauge"):
     """Écrit le PDF. Renvoie le nombre de livres."""
     st = STYLES[style]
     genere_le = genere_le or date.today().isoformat()
@@ -673,9 +679,9 @@ def main(argv=None):
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
-    a.add_argument("--style", default="nuit", choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
-    a.add_argument("--visuel-couverture", default="v1", choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
-    a.add_argument("--couverture", default="clair", choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
+    a.add_argument("--style", default=STYLE_PAR_DEFAUT, choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
+    a.add_argument("--visuel-couverture", default=COUVERTURE_PAR_DEFAUT, choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
+    a.add_argument("--couverture", default=SOUS_TITRE_PAR_DEFAUT, choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
     a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")
     args = a.parse_args(argv)
     debut = time.time()
