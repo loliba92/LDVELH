@@ -33,7 +33,8 @@ import guide_analyse as ga
 
 RACINE = Path(__file__).resolve().parent.parent
 WEB = RACINE / "web"
-COUVERTURE = Path(__file__).resolve().parent / "guide" / "couverture.jpg"
+COUVERTURE = Path(__file__).resolve().parent / "guide" / "couverture.jpg"          # illustration « huile »
+COUVERTURE_V1 = Path(__file__).resolve().parent / "guide" / "couverture-v1.jpg"          # illustration « V1 » (992 × 1586) : héros, dragon, château
 EMBLEME = WEB / "icons" / "icon-512.png"          # le sceau du site : le personnage encapuchonné
 SITE = "lacoteduheros.fr"
 LIEN_SITE = "https://lacoteduheros.fr"
@@ -176,6 +177,35 @@ def visuel_ouverture(style, indice, largeur_px=900):
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
+def couverture_v1(largeur_px=1240, art_mm=198, bas_coupe_px=210):
+    """Toile de la couverture V1 (A4 moins le bandeau du haut) : l'illustration est agrandie (rééchantillonnage Lanczos, accentuation légère), son bas (roche) est recoupé,
+    et la toile est prolongée vers le haut et sur les côtés par un fond flou tiré de l'illustration elle-même : un vrai espace de titre dans le ciel violet."""
+    from PIL import ImageFilter
+    px_mm = largeur_px / 210
+    haut_px = round(288 * px_mm)
+    with Image.open(COUVERTURE_V1) as src:
+        art = src.convert("RGB").crop((0, 0, src.width, src.height - bas_coupe_px))
+    f = art_mm * px_mm / art.width
+    art = art.resize((round(art.width * f), round(art.height * f)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2, percent=35, threshold=2))
+    fond = art.resize((largeur_px, haut_px), Image.LANCZOS).filter(ImageFilter.GaussianBlur(55))
+    fond = ImageEnhance.Brightness(fond).enhance(0.7)
+    x, y = (largeur_px - art.width) // 2, haut_px - art.height
+    masque = Image.new("L", art.size, 255)
+    bord = 38
+    pixels = masque.load()
+    for i in range(bord):
+        v = int(255 * i / bord)
+        for j in range(art.height):
+            pixels[i, j] = min(pixels[i, j], v)
+            pixels[art.width - 1 - i, j] = min(pixels[art.width - 1 - i, j], v)
+        for k in range(art.width):
+            pixels[k, i] = min(pixels[k, i], v)
+    fond.paste(art, (x, y), masque)
+    tampon = io.BytesIO()
+    fond.save(tampon, "JPEG", quality=84, optimize=True, progressive=True)
+    return ImageReader(io.BytesIO(tampon.getvalue()))
+
+
 def lettres(c, x, y, texte, police, taille, espace=0.8, centre=False):
     """Petites capitales espacées : texte en capitales, légèrement aéré."""
     t = c.beginText()
@@ -186,6 +216,7 @@ def lettres(c, x, y, texte, police, taille, espace=0.8, centre=False):
         x -= (pdfmetrics.stringWidth(texte, police, taille) + espace * len(texte)) / 2
     t.setTextOrigin(x, y)
     t.textOut(texte)
+    t.setCharSpace(0)
     c.drawText(t)
 
 
@@ -342,7 +373,7 @@ class Fiche(Flowable):
             x += pw + gap
 
 
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False):
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False, visuel="v1"):
     """Écrit le PDF. Renvoie le nombre de livres."""
     st = STYLES[style]
     genere_le = genere_le or date.today().isoformat()
@@ -450,7 +481,42 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.setFillColor(C("texte") if style == "parchemin" else C("or"))
         lettres(c, L_PAGE / 2, 19 * mm, f"La Cote du Héros · {SITE}", f_gras, 8, 1.5, centre=True)
 
+    def couverture_v1_page(c, doc):
+        """Couverture inspirée des couvertures de poche des années 1980 : bandeau uni en haut, grand titre dans le ciel, encadré blanc et adresse du site en bas."""
+        c.drawImage(couverture_v1(), 0, 0, L_PAGE, 288 * mm)
+        c.setFillColor(HexColor("#d2a64a"))          # or du site
+        c.rect(0, 288 * mm, L_PAGE, 9 * mm, fill=1, stroke=0)
+        c.setFillColor(HexColor("#0c0a08"))
+        lettres(c, L_PAGE / 2, 290.6 * mm, "La Cote du Héros", f_gras, 10, 3, centre=True)
+        c.saveState()
+        t = c.beginText()
+        c.setFillColor(HexColor("#f2e9d8"))
+        c.setStrokeColor(HexColor("#1a0d33"))
+        c.setLineWidth(1.1)
+        t.setTextRenderMode(2)          # remplissage crème et fin contour sombre
+        t.setFont(f_titre_gras, 50)
+        titre = "Guide de référence"
+        t.setTextOrigin((L_PAGE - pdfmetrics.stringWidth(titre, f_titre_gras, 50)) / 2, 262 * mm)
+        t.textOut(titre)
+        c.drawText(t)
+        c.restoreState()
+        c.setFillColor(HexColor("#f2e9d8"))
+        c.setFont(f_gras, 12)
+        c.drawCentredString(L_PAGE / 2, 252 * mm, f"Édition du {date_longue(genere_le)}")
+        c.setFillColor(HexColor("#ffffff"))          # encadré blanc : « Guide » et le sceau du site
+        c.rect(10 * mm, 10 * mm, 50 * mm, 22 * mm, fill=1, stroke=0)
+        c.setFillColor(HexColor("#0c0a08"))
+        c.setFont(f_titre_gras, 24)
+        c.drawString(14 * mm, 16.5 * mm, "Guide")
+        c.drawImage(embleme((140, 106, 28), 1.0, 256), 41 * mm, 13 * mm, 15 * mm, 15 * mm, mask="auto")
+        c.setFillColor(HexColor("#ffffff"))
+        c.setFont(f_gras, 9)
+        c.drawRightString(L_PAGE - 10 * mm, 12 * mm, SITE)
+        c.linkURL(LIEN_SITE, (L_PAGE - 50 * mm, 9 * mm, L_PAGE - 10 * mm, 17 * mm), relative=0)
+
     def couverture(c, doc):
+        if visuel == "v1":
+            return couverture_v1_page(c, doc)
         c.drawImage(str(COUVERTURE), 0, 0, L_PAGE, H_PAGE)
         c.drawImage(embleme((217, 180, 95), 1.0, 256), L_PAGE / 2 - 10 * mm, 33 * mm, 20 * mm, 20 * mm, mask="auto")          # sceau du site sous l'illustration, sans la masquer
         if sous_titre == "bandeau":
@@ -581,7 +647,8 @@ def main(argv=None):
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
     a.add_argument("--style", default="nuit", choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
-    a.add_argument("--couverture", default="clair", choices=("clair", "bandeau"), help="variante du sous-titre de couverture")
+    a.add_argument("--visuel-couverture", default="v1", choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
+    a.add_argument("--couverture", default="clair", choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
     a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")
     args = a.parse_args(argv)
     debut = time.time()
@@ -589,7 +656,7 @@ def main(argv=None):
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
     editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
-    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture, style=args.style, mention=args.mention_sorciers)
+    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture, style=args.style, mention=args.mention_sorciers, visuel=args.visuel_couverture)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s : {args.sortie}")
     return 0
 
