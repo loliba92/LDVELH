@@ -1729,6 +1729,7 @@
     dlg.showModal();
     try {
       const imports = await lireImports(filtre_source);
+      majLigneImports(true);          // la ligne de l'accueil reprend ce que la fenêtre vient de lire (copie de session : aucune requête de plus)
       const quand = (iso) => new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' ·');
       const rang = (a) => { const { v, vendu } = infosImport(a); return vendu ? 9 : v ? RANG_IMPORT[v] : 8; };          // les pépites d'abord, les annonces vendues à la fin
       const avecAnnonces = imports.filter((im) => im.lignes.length), sans = imports.length - avecAnnonces.length;
@@ -1836,14 +1837,25 @@
     } catch (e) { return false; }
   }
   // Lignes « Import Leboncoin » et « Import Vinted » de l'accueil : dernier import par source, ses livres et le total sur 24 h
-  async function majLigneImports() {
+  // « il y a X min » est recalculé chaque minute à partir de l'horodatage déjà lu (aucune requête) ; les données sont relues au retour de la page au premier plan
+  // si la lecture a plus de 5 minutes, et par la fenêtre des imports quand elle vient de les lire
+  const QUAND_IMPORTS = {};
+  let derniereMajImports = 0, derniereErreurImports = false;
+  const afficherQuandImports = () => Object.entries(QUAND_IMPORTS).forEach(([source, x]) => {
+    const cible = document.querySelector(`[data-imports][data-source="${source}"] .maj-quand`);
+    if (cible) cible.textContent = `${x.dernier ? depuisMin(new Date(x.dernier)) : 'aucun import'}${x.reste}`;
+  });
+  setInterval(afficherQuandImports, 60000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && derniereMajImports && Date.now() - derniereMajImports > 300000) majLigneImports(); });
+  async function majLigneImports(sansErreur = false) {
     const cibles = document.querySelectorAll('[data-imports][data-source] .maj-quand');
     if (!cibles.length) return;
     try {
       const limite = Date.now() - 24 * 3600 * 1000;
       const importsLbc = await lireImports('leboncoin');
       const importsVinted = await lireImports('vinted');
-      const aUnErreur = await verifierErrorDatadome();
+      const aUnErreur = sansErreur ? derniereErreurImports : await verifierErrorDatadome();
+      derniereErreurImports = aUnErreur; derniereMajImports = Date.now();
       const maj = (imports, source) => {
         const cible = document.querySelector(`[data-imports][data-source="${source}"] .maj-quand`);
         if (!cible) return;
@@ -1868,7 +1880,8 @@
         }
         const dern = imports.reduce((m, im) => (!m || Date.parse(im.t) > Date.parse(m.t) ? im : m), null), nd = dern ? dern.lignes.length : 0;   // livres du dernier import
         const dernierTxt = dern ? `+${nd} livre${nd > 1 ? 's' : ''} · ` : '';
-        cible.textContent = `${quand} · ${dernierTxt}${n ? `${n} sur 24 h${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre sur 24 h'}`;
+        QUAND_IMPORTS[source] = { dernier, reste: ` · ${dernierTxt}${n ? `${n} sur 24 h${p ? ` (${p} pépite${p > 1 ? 's' : ''})` : ''}` : 'aucun livre sur 24 h'}` };
+        afficherQuandImports();
       };
       maj(importsLbc, 'leboncoin');
       maj(importsVinted, 'vinted');
