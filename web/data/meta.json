@@ -22,7 +22,7 @@
     "gain": 0.003,
     "raison": "le modèle ne bat pas assez les archives (gain 0%, 15% exigés)",
     "calcule_le": "2026-11-19",
-    "rapport_global": 1.007,
+    "rapport_global": 1.01,
     "nb_recalibres": 0
   }
 }
