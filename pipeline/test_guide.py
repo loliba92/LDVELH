@@ -57,6 +57,19 @@ class TestGuide(unittest.TestCase):
         self.assertIsNone(g.jaquette_jpeg(self.web / "covers" / "x.webp"))
         self.assertTrue(g.jaquette_jpeg(self.web / "covers" / "a.webp").startswith(b"\xff\xd8"))
 
+    def test_les_deux_styles_et_les_metadonnees(self):
+        for style in ("nuit", "parchemin"):
+            sortie = self.web / f"{style}.pdf"
+            g.construire(self.versions, sortie, "2026-11-19", web=self.web, genere_le="2026-11-19", style=style, mention=(style == "nuit"))
+            donnees = sortie.read_bytes()
+            self.assertIn("La Cote du Héros".encode("latin-1", "replace")[:10], donnees)
+            self.assertIn(b"/Author (La Cote du H", donnees)
+            self.assertIn(b"lacoteduheros.fr", donnees)          # lien du site (annotation cliquable)
+
+    def test_pas_de_sans_publicite(self):
+        for f in ("guide.py", "guide_analyse.py"):
+            self.assertNotIn("sans publicité", (Path(__file__).resolve().parent / f).read_text(encoding="utf-8").lower())
+
     def test_pdf_complet_sans_reseau(self):
         def interdit(*a, **k):
             raise AssertionError("requête réseau")
@@ -101,7 +114,7 @@ class TestAnalyse(unittest.TestCase):
         d = ga.dessiner_nuage(ga.points(self.v, self.offre))
         self.assertGreater(len(d.contents), 10)
         source = (Path(__file__).resolve().parent / "guide.py").read_text(encoding="utf-8") + (Path(__file__).resolve().parent / "guide_analyse.py").read_text(encoding="utf-8")
-        for mot in ("sans publicité", "ebay.", "leboncoin", "vinted", "http"):
+        for mot in ("sans publicité", "ebay.", "leboncoin", "vinted"):
             self.assertNotIn(mot, source.lower().replace('"ebay", "lbc"', ""))
 
 

@@ -1,8 +1,9 @@
-"""Guide de référence en PDF : jaquettes et cotes de tous les livres, série par série, à partir de web/data/versions.json et web/covers/.
+"""Guide de référence en PDF : jaquettes et cotes de tous les livres, éditeur par éditeur, à partir de web/data/versions.json et web/covers/.
 
-Usage : python pipeline/guide.py [--sortie guide.pdf] [--editeurs "Scriptarium,Hachette"] [--series "Loup Solitaire"]
-Plan : éditeur, puis version (V1 avant V2, ordre naturel), puis série par ordre alphabétique, livres par numéro. Une version commence toujours une nouvelle page.
-Aucune requête réseau. Le PDF n'est pas gardé dans le dépôt : il se génère à la demande (voir la description de la demande de fusion).
+Usage : python pipeline/guide.py [--sortie guide.pdf] [--style nuit|parchemin] [--couverture clair|bandeau] [--editeurs "Scriptarium,Hachette"] [--series "Loup Solitaire"]
+                                 [--mention-sorciers]
+Plan : éditeur, puis version (V1 avant V2, ordre naturel), puis série par ordre alphabétique, livres par numéro. Un éditeur et une version commencent toujours une nouvelle page ;
+les séries d'une version s'enchaînent sans saut de page. Aucune requête réseau. Le PDF n'est pas gardé dans le dépôt : il se génère à la demande.
 Polices : Cormorant Garamond et Source Sans 3 (licence SIL OFL, web/fonts/), converties au vol en TrueType ; sans fontTools, polices de base du PDF.
 """
 import argparse
@@ -15,28 +16,42 @@ import time
 from datetime import date
 from pathlib import Path
 
-from PIL import Image
-from reportlab.lib.colors import HexColor
+from PIL import Image, ImageEnhance, ImageOps
+from reportlab.lib.colors import Color, HexColor
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import BaseDocTemplate, Flowable, Frame, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle
-
-import guide_analyse as ga
+from reportlab.platypus import BaseDocTemplate, Flowable, Frame, KeepTogether, NextPageTemplate, PageBreak, PageTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.platypus.tableofcontents import TableOfContents
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import guide_analyse as ga
+
 RACINE = Path(__file__).resolve().parent.parent
 WEB = RACINE / "web"
 COUVERTURE = Path(__file__).resolve().parent / "guide" / "couverture.jpg"
-OR, FOND, FOND_DOUX, TEXTE, SOURDINE = HexColor("#d9b45f"), HexColor("#0c0a08"), HexColor("#2a2412"), HexColor("#f2e9d8"), HexColor("#b8ad99")
+EMBLEME = WEB / "icons" / "icon-512.png"          # le sceau du site : le personnage encapuchonné
+SITE = "lacoteduheros.fr"
+LIEN_SITE = "https://lacoteduheros.fr"
 RARETE = {"tres_rare": "Très rare", "rare": "Rare", "peu_courant": "Peu courant", "courant": "Courant"}
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 42 mm (environ 140 points par pouce)
-COLONNES = 3
+LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 36 mm (environ 160 points par pouce)
+COLONNES = 4
+MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
+L_PAGE, H_PAGE = A4
+L_CADRE = L_PAGE - 2 * MARGE_X
+
+# Deux directions de style. « nuit » reprend la palette du site. « parchemin » : crème du papier de la couverture et brun encre (couleurs nouvelles, pour l'impression papier).
+STYLES = {
+    "nuit": {"fond": "#0c0a08", "texte": "#f2e9d8", "sourdine": "#b8ad99", "or": "#d9b45f", "titre": "#d9b45f", "filet": "#d2a64a", "pastille": "#2a2412", "grille": "#2c261e",
+             "ombre": (0, 0, 0), "ombre_alpha": 0.5, "filigrane": 0.065, "embleme": (217, 180, 95)},
+    "parchemin": {"fond": "#f3e9d2", "texte": "#2a2118", "sourdine": "#6d5d47", "or": "#8c6a1c", "titre": "#7a5a14", "filet": "#b08a37", "pastille": "#e6d6b0", "grille": "#d9c9a3",
+                  "ombre": (0.35, 0.25, 0.1), "ombre_alpha": 0.35, "filigrane": 0.10, "embleme": (140, 106, 28)},
+}
 
 
 def date_longue(iso):
@@ -117,67 +132,423 @@ def jaquette_jpeg(chemin):
         return None
 
 
-class Secours(Flowable):
-    """Cadre de remplacement d'une jaquette absente : le titre sur fond doré sombre."""
-    def __init__(self, titre, largeur, hauteur, police):
+_CACHE = {}
+
+
+def embleme(rgb, alpha=1.0, px=512):
+    """Le sceau du site recolorié : le doré devient `rgb`, le noir devient transparent, l'ensemble prend l'opacité `alpha` (filigrane à faible opacité, signature)."""
+    cle = (rgb, alpha, px)
+    if cle not in _CACHE:
+        with Image.open(EMBLEME) as im:
+            lum = ImageOps.autocontrast(im.convert("RGBA").resize((px, px), Image.LANCZOS).convert("L"), cutoff=1)
+            masque = lum.point(lambda v: int(min(255, v * 1.15) * alpha))
+            fond = Image.new("RGBA", (px, px), rgb + (0,))
+            fond.putalpha(masque)
+        tampon = io.BytesIO()
+        fond.save(tampon, "PNG", optimize=True)
+        _CACHE[cle] = tampon.getvalue()
+    return ImageReader(io.BytesIO(_CACHE[cle]))
+
+
+def visuel_ouverture(style, indice, largeur_px=900):
+    """Détail recadré de l'illustration de couverture, teinté : page d'ouverture d'un éditeur."""
+    cadres = ((0.72, 0.55, 0.56), (0.30, 0.74, 0.58), (0.28, 0.28, 0.58), (0.84, 0.36, 0.40))
+    cx, cy, lf = cadres[indice % len(cadres)]
+    with Image.open(COUVERTURE) as src:
+        w, h = src.size
+        cw = int(w * lf)
+        ch = int(cw * H_PAGE / L_PAGE)
+        x0 = min(max(0, int(w * cx - cw / 2)), w - cw)
+        y0 = min(max(0, int(h * cy - ch / 2)), h - ch)
+        im = src.convert("RGB").crop((x0, y0, x0 + cw, y0 + ch)).resize((largeur_px, round(largeur_px * H_PAGE / L_PAGE)), Image.LANCZOS)
+    if style == "nuit":
+        im = ImageEnhance.Brightness(im).enhance(0.62)
+        voile = Image.new("RGB", im.size, (12, 10, 8))
+        degrade = Image.linear_gradient("L").resize(im.size).point(lambda v: int(v * 0.85))          # plus sombre vers le bas
+        im = Image.composite(voile, im, degrade)
+    else:
+        sepia = ImageOps.colorize(ImageOps.grayscale(im), (58, 42, 20), (243, 233, 210))
+        im = Image.blend(im, sepia, 0.65)
+        crème = Image.new("RGB", im.size, (243, 233, 210))
+        im = Image.blend(im, crème, 0.35)
+    tampon = io.BytesIO()
+    im.save(tampon, "JPEG", quality=62, optimize=True, progressive=True)
+    return ImageReader(io.BytesIO(tampon.getvalue()))
+
+
+def lettres(c, x, y, texte, police, taille, espace=0.8, centre=False):
+    """Petites capitales espacées : texte en capitales, légèrement aéré."""
+    t = c.beginText()
+    t.setFont(police, taille)
+    t.setCharSpace(espace)
+    texte = texte.upper()
+    if centre:
+        x -= (pdfmetrics.stringWidth(texte, police, taille) + espace * len(texte)) / 2
+    t.setTextOrigin(x, y)
+    t.textOut(texte)
+    c.drawText(t)
+
+
+class Marqueur(Flowable):
+    """Flowable invisible : note à quel éditeur et à quelle version appartient la page en cours (pour l'en-tête, les onglets et la page d'ouverture)."""
+    def __init__(self, etat, **valeurs):
         super().__init__()
-        self.titre, self.largeur, self.hauteur, self.police = titre, largeur, hauteur, police
+        self.etat, self.valeurs = etat, valeurs
 
     def wrap(self, *_):
-        return self.largeur, self.hauteur
+        return 0, 0.01
 
     def draw(self):
-        c = self.canv
-        c.setFillColor(FOND_DOUX)
-        c.setStrokeColor(OR)
-        c.rect(0, 0, self.largeur, self.hauteur, fill=1, stroke=1)
-        p = Paragraph(self.titre, ParagraphStyle("s", fontName=self.police, fontSize=10, leading=12, alignment=TA_CENTER, textColor=OR))
-        w, h = p.wrap(self.largeur - 8 * mm, self.hauteur)
-        p.drawOn(c, 4 * mm, (self.hauteur - h) / 2)
+        self.etat.update(self.valeurs)
 
 
-def fiche(v, styles, date_cotes, web=WEB, police_titre="Times-Bold"):
-    """Cellule d'un livre : jaquette, titre, numéro et version, rareté, cotes C / BE / TBE."""
-    from reportlab.platypus import Image as Img
-    largeur = 42 * mm
-    hauteur = largeur * 7 / 5
-    jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
-    if jpeg:
-        with Image.open(io.BytesIO(jpeg)) as im:
-            hauteur = largeur * im.height / im.width
-        image = Img(io.BytesIO(jpeg), width=largeur, height=hauteur)
-    else:
-        image = Secours(v.get("titre") or "", largeur, hauteur, police_titre)
-    num = f"n° {v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
-    rare = RARETE.get((v.get("rarete") or {}).get("niveau"), "")
-    p = v.get("prix") or {}
-    cotes = f"C {euros(p.get('convenable'))} · BE {euros(p.get('bon'))} · TBE {euros(p.get('tres_bon'))}"
-    return [image, Spacer(1, 2 * mm), Paragraph(v.get("titre") or "", styles["titre"]),
-            Paragraph(f"{num}{v.get('version') or ''}{' · ' + rare if rare else ''}", styles["meta"]), Paragraph(cotes, styles["cotes"])]
+class Ornement(Flowable):
+    """Filet doré fin avec un petit losange au centre."""
+    def __init__(self, largeur, couleur):
+        super().__init__()
+        self.largeur, self.couleur = largeur, couleur
+
+    def wrap(self, *_):
+        return self.largeur, 5 * mm
+
+    def draw(self):
+        c, m = self.canv, self.largeur / 2
+        c.setStrokeColor(self.couleur)
+        c.setFillColor(self.couleur)
+        c.setLineWidth(0.5)
+        c.line(0, 2.5 * mm, m - 4 * mm, 2.5 * mm)
+        c.line(m + 4 * mm, 2.5 * mm, self.largeur, 2.5 * mm)
+        c.saveState()
+        c.translate(m, 2.5 * mm)
+        c.rotate(45)
+        c.rect(-1 * mm, -1 * mm, 2 * mm, 2 * mm, fill=1, stroke=0)
+        c.restoreState()
 
 
-def _tableau(lignes, f_texte, f_gras, largeurs):
-    t = Table(lignes, colWidths=largeurs, hAlign="LEFT")
-    t.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, -1), f_texte), ("FONTNAME", (0, 0), (-1, 0), f_gras), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("TEXTCOLOR", (0, 0), (-1, -1), TEXTE),
-                           ("TEXTCOLOR", (0, 0), (-1, 0), OR), ("LINEBELOW", (0, 0), (-1, 0), 0.5, SOURDINE), ("ALIGN", (1, 0), (-1, -1), "RIGHT"), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5), ("TOPPADDING", (0, 0), (-1, -1), 2.5)]))
-    return t
+class TitreVersion(Flowable):
+    """Tête d'une version : l'éditeur en petites capitales, la version en grand, un ornement."""
+    def __init__(self, editeur, version, st, polices):
+        super().__init__()
+        self.editeur, self.version, self.st, self.pol = editeur, version, st, polices
+
+    def getPlainText(self):
+        return f"{self.editeur} · {self.version}"
+
+    def wrap(self, *_):
+        return L_CADRE, 24 * mm
+
+    def draw(self):
+        c, st, (f_titre, f_titre_gras, f_texte, f_gras) = self.canv, self.st, self.pol
+        c.setFillColor(HexColor(st["sourdine"]))
+        lettres(c, 0, 19 * mm, self.editeur, f_gras, 8.5, 1.4)
+        c.setFillColor(HexColor(st["titre"]))
+        c.setFont(f_titre_gras, 38)
+        c.drawString(0, 7.5 * mm, self.version)
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setLineWidth(0.5)
+        c.line(pdfmetrics.stringWidth(self.version, f_titre_gras, 38) + 6 * mm, 11 * mm, L_CADRE, 11 * mm)
 
 
-def section_analyse(versions, donnees, styles, date_cotes, polices):
+class TeteSerie(Flowable):
+    """En-tête d'une série : petites capitales dorées, filet fin, nombre d'éditions."""
+    def __init__(self, nom, nb, st, polices):
+        super().__init__()
+        self.nom, self.nb, self.st, self.pol = nom, nb, st, polices
+
+    def getPlainText(self):
+        return self.nom
+
+    def wrap(self, *_):
+        return L_CADRE, 11 * mm
+
+    def draw(self):
+        c, st, (f_titre, f_titre_gras, f_texte, f_gras) = self.canv, self.st, self.pol
+        c.setFillColor(HexColor(st["titre"]))
+        c.setFont(f_titre_gras, 17)
+        c.drawString(0, 4 * mm, self.nom)
+        n = f"{self.nb} édition{'s' if self.nb > 1 else ''}"
+        c.setFillColor(HexColor(st["sourdine"]))
+        c.setFont(f_texte, 7.5)
+        c.drawRightString(L_CADRE, 4.4 * mm, n)
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setLineWidth(0.4)
+        c.line(0, 1.6 * mm, L_CADRE, 1.6 * mm)
+
+
+class Fiche(Flowable):
+    """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, pastilles C / BE / TBE."""
+    def __init__(self, v, st, polices, web):
+        super().__init__()
+        self.v, self.st, self.pol, self.web = v, st, polices, web
+        self.largeur = L_CADRE / COLONNES
+        self.iw = 36 * mm
+        jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
+        self.image = None
+        self.ih = self.iw * 7 / 5
+        if jpeg:
+            with Image.open(io.BytesIO(jpeg)) as im:
+                self.ih = self.iw * im.height / im.width
+            self.image = ImageReader(io.BytesIO(jpeg))
+        f_texte, f_gras = polices[2], polices[3]
+        self.titre = Paragraph(v.get("titre") or "", ParagraphStyle("t", fontName=f_gras, fontSize=8, leading=9.4, textColor=HexColor(st["texte"]), alignment=TA_CENTER))
+        self.th = max(self.titre.wrap(self.largeur - 3 * mm, 100 * mm)[1], 2 * 9.4)          # deux lignes réservées : les pastilles restent alignées d'un livre à l'autre
+
+    def wrap(self, *_):
+        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 9.2 * mm + 2.5 * mm
+        return self.largeur, self.h
+
+    def draw(self):
+        c, st, v = self.canv, self.st, self.v
+        f_texte, f_gras = self.pol[2], self.pol[3]
+        x0, y = (self.largeur - self.iw) / 2, self.h - self.ih
+        r, g, b = st["ombre"]
+        c.saveState()
+        for dec, a in ((2.2, 0.10), (1.5, 0.14), (0.8, 0.2)):          # ombre douce sous la jaquette
+            c.setFillColor(Color(r, g, b, alpha=a * st["ombre_alpha"] * 2))
+            c.rect(x0 + dec * mm / 1.6, y - dec * mm / 1.6, self.iw, self.ih, fill=1, stroke=0)
+        c.restoreState()
+        if self.image:
+            c.drawImage(self.image, x0, y, self.iw, self.ih)
+        else:          # cadre de secours : le titre sur fond doré sombre
+            c.setFillColor(HexColor(st["pastille"]))
+            c.setStrokeColor(HexColor(st["filet"]))
+            c.setLineWidth(0.6)
+            c.rect(x0, y, self.iw, self.ih, fill=1, stroke=1)
+            p = Paragraph(v.get("titre") or "", ParagraphStyle("s", fontName=self.pol[1], fontSize=9.5, leading=11.5, alignment=TA_CENTER, textColor=HexColor(st["titre"])))
+            _, ph = p.wrap(self.iw - 6 * mm, self.ih)
+            p.drawOn(c, x0 + 3 * mm, y + (self.ih - ph) / 2)
+        y -= 3 * mm
+        self.titre.drawOn(c, 1.5 * mm, y - self.th)
+        y -= self.th + 3.4 * mm
+        num = f"n° {v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
+        rare = RARETE.get((v.get("rarete") or {}).get("niveau"), "")
+        c.setFillColor(HexColor(st["sourdine"]))
+        c.setFont(f_texte, 7)
+        c.drawCentredString(self.largeur / 2, y, f"{num}{v.get('version') or ''}{' · ' + rare if rare else ''}")
+        y -= 1.6 * mm
+        prix = v.get("prix") or {}
+        pw, ph, gap = 13.6 * mm, 8 * mm, 1 * mm
+        x = (self.largeur - 3 * pw - 2 * gap) / 2
+        for lib, cle in (("C", "convenable"), ("BE", "bon"), ("TBE", "tres_bon")):          # pastilles arrondies comme les badges du site
+            c.setFillColor(HexColor(st["pastille"]))
+            c.setStrokeColor(HexColor(st["filet"]))
+            c.setLineWidth(0.4)
+            c.roundRect(x, y - ph, pw, ph, 2 * mm, fill=1, stroke=1)
+            c.setFillColor(HexColor(st["sourdine"]))
+            lettres(c, x + pw / 2, y - 2.9 * mm, lib, f_gras, 5.6, 0.6, centre=True)
+            c.setFillColor(HexColor(st["texte"]))
+            c.setFont(f_gras, 7.3)
+            c.drawCentredString(x + pw / 2, y - 6.4 * mm, euros(prix.get(cle)))
+            x += pw + gap
+
+
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False):
+    """Écrit le PDF. Renvoie le nombre de livres."""
+    st = STYLES[style]
+    genere_le = genere_le or date.today().isoformat()
+    groupes = grouper(versions, series, editeurs)
+    pol = polices(tempfile.mkdtemp(prefix="guide-polices-"))
+    f_titre, f_titre_gras, f_texte, f_gras = pol
+    C = lambda k: HexColor(st[k])  # noqa: E731
+    etat = {"editeur": None, "version": None, "versions": [], "index": 0, "nb": 0}
+    styles = {
+        "corps": ParagraphStyle("corps", fontName=f_texte, fontSize=10.5, leading=15.5, textColor=C("texte")),
+        "h1": ParagraphStyle("h1", fontName=f_titre_gras, fontSize=30, leading=34, textColor=C("titre"), spaceAfter=7 * mm),
+        "h1m": ParagraphStyle("h1m", fontName=f_titre_gras, fontSize=30, leading=34, textColor=C("titre"), spaceAfter=6 * mm),
+        "h2": ParagraphStyle("h2", fontName=f_titre_gras, fontSize=17, leading=20, textColor=C("titre"), spaceBefore=5 * mm, spaceAfter=2 * mm, keepWithNext=1),
+        "toc": ParagraphStyle("toc", fontName=f_texte, fontSize=10, leading=14, textColor=C("texte")),
+    }
+
+    def signature(c, y=10 * mm):
+        c.drawImage(embleme(st["embleme"], 1.0, 128), MARGE_X, y - 1.6 * mm, 5.2 * mm, 5.2 * mm, mask="auto")
+        c.setFillColor(C("sourdine"))
+        c.setFont(f_texte, 7.6)
+        c.drawString(MARGE_X + 7 * mm, y, f"La Cote du Héros · {SITE} · cotes du {date_longue(date_cotes)}")
+        c.linkURL(LIEN_SITE, (MARGE_X, y - 2 * mm, MARGE_X + 80 * mm, y + 4 * mm), relative=0)
+
+    def fond(c, doc):
+        c.setFillColor(C("fond"))
+        c.rect(0, 0, L_PAGE, H_PAGE, fill=1, stroke=0)
+        c.drawImage(embleme(st["embleme"], st["filigrane"], 512), L_PAGE * 0.5 - 62 * mm, H_PAGE * 0.40 - 62 * mm, 124 * mm, 124 * mm, mask="auto")          # filigrane très discret
+        if style == "parchemin":
+            c.setStrokeColor(C("grille"))
+            c.setLineWidth(0.6)
+            c.rect(6 * mm, 6 * mm, L_PAGE - 12 * mm, H_PAGE - 12 * mm, fill=0, stroke=1)
+
+    def pied(c, doc, entete=True):
+        c.setStrokeColor(C("filet"))
+        c.setLineWidth(0.4)
+        c.line(MARGE_X, 14.5 * mm, L_PAGE - MARGE_X, 14.5 * mm)
+        signature(c)
+        c.setFillColor(C("sourdine"))
+        lettres(c, L_PAGE - MARGE_X - pdfmetrics.stringWidth(str(doc.page), f_gras, 8) - 9 * mm, 10 * mm, "page", f_texte, 6.5, 1)
+        c.setFont(f_gras, 8)
+        c.drawRightString(L_PAGE - MARGE_X, 10 * mm, str(doc.page))
+        if mention:
+            c.setFillColor(C("sourdine"))
+            lettres(c, L_PAGE / 2, 17.5 * mm, "Document réservé aux sorciers de La Cote du Héros · ne pas diffuser", f_texte, 6.2, 0.5, centre=True)
+
+    def page_texte(c, doc):
+        pied(c, doc)
+
+    def page_catalogue(c, doc):
+        pied(c, doc)
+        c.setFillColor(C("sourdine"))
+        lettres(c, MARGE_X, H_PAGE - 12 * mm, f"{etat['editeur']} · {etat['version']}", f_gras, 7.5, 1.2)
+        lettres(c, L_PAGE - MARGE_X, H_PAGE - 12 * mm - 0, "", f_texte, 7)
+        c.setFillColor(C("sourdine"))
+        c.setFont(f_texte, 7)
+        c.drawRightString(L_PAGE - MARGE_X, H_PAGE - 12 * mm, "La Cote du Héros")
+        c.setStrokeColor(C("filet"))
+        c.setLineWidth(0.4)
+        c.line(MARGE_X, H_PAGE - 14.5 * mm, L_PAGE - MARGE_X, H_PAGE - 14.5 * mm)
+        for k, ver in enumerate(etat["versions"]):          # onglets de version sur le bord de la page
+            actif = ver == etat["version"]
+            ty = H_PAGE - 40 * mm - k * 24 * mm
+            c.setFillColor(C("or") if actif else C("pastille"))
+            c.setStrokeColor(C("filet"))
+            c.setLineWidth(0.5)
+            c.roundRect(L_PAGE - 6.5 * mm, ty, 9 * mm, 20 * mm, 2 * mm, fill=1, stroke=1)
+            c.saveState()
+            c.translate(L_PAGE - 2.6 * mm, ty + 10 * mm)
+            c.rotate(90)
+            c.setFillColor(C("fond") if actif else C("sourdine"))
+            c.setFont(f_gras, 8.5)
+            c.drawCentredString(0, -3 * mm, ver)
+            c.restoreState()
+
+    def page_ouverture(c, doc):
+        c.drawImage(visuel_ouverture(style, etat["index"]), 0, 0, L_PAGE, H_PAGE)
+        c.setStrokeColor(C("filet"))
+        c.setLineWidth(0.7)
+        c.rect(9 * mm, 9 * mm, L_PAGE - 18 * mm, H_PAGE - 18 * mm, fill=0, stroke=1)
+        c.setLineWidth(0.3)
+        c.rect(11 * mm, 11 * mm, L_PAGE - 22 * mm, H_PAGE - 22 * mm, fill=0, stroke=1)
+        c.drawImage(embleme(st["embleme"], 1.0, 256), L_PAGE / 2 - 11 * mm, H_PAGE - 52 * mm, 22 * mm, 22 * mm, mask="auto")
+        if style == "parchemin":          # bandeau crème sous le titre : lisible sur l'image
+            c.saveState()
+            c.setFillColor(C("fond"), alpha=0.82)
+            c.rect(11 * mm, H_PAGE * 0.52 - 48 * mm, L_PAGE - 22 * mm, 64 * mm, fill=1, stroke=0)
+            c.restoreState()
+        c.setFillColor(C("or"))
+        lettres(c, L_PAGE / 2, H_PAGE * 0.52, "Éditeur", f_gras, 11, 3, centre=True)
+        c.setFillColor(C("titre") if style == "parchemin" else C("or"))
+        taille = 54 if len(etat["editeur"]) < 14 else 40
+        c.setFont(f_titre_gras, taille)
+        c.drawCentredString(L_PAGE / 2, H_PAGE * 0.52 - 22 * mm, etat["editeur"])
+        c.setStrokeColor(C("filet"))
+        c.setLineWidth(0.6)
+        c.line(L_PAGE / 2 - 30 * mm, H_PAGE * 0.52 - 30 * mm, L_PAGE / 2 + 30 * mm, H_PAGE * 0.52 - 30 * mm)
+        c.setFillColor(C("texte"))
+        c.setFont(f_texte, 11)
+        c.drawCentredString(L_PAGE / 2, H_PAGE * 0.52 - 40 * mm, f"{etat['nb']} édition{'s' if etat['nb'] > 1 else ''} · {etat['nv']} version{'s' if etat['nv'] > 1 else ''}")
+        if style == "parchemin":
+            c.saveState()
+            c.setFillColor(C("fond"), alpha=0.82)
+            c.rect(11 * mm, 14 * mm, L_PAGE - 22 * mm, 12 * mm, fill=1, stroke=0)
+            c.restoreState()
+        c.setFillColor(C("texte") if style == "parchemin" else C("or"))
+        lettres(c, L_PAGE / 2, 19 * mm, f"La Cote du Héros · {SITE}", f_gras, 8, 1.5, centre=True)
+
+    def couverture(c, doc):
+        c.drawImage(str(COUVERTURE), 0, 0, L_PAGE, H_PAGE)
+        c.drawImage(embleme((217, 180, 95), 1.0, 256), L_PAGE / 2 - 10 * mm, 33 * mm, 20 * mm, 20 * mm, mask="auto")          # sceau du site sous l'illustration, sans la masquer
+        if sous_titre == "bandeau":
+            c.saveState()
+            c.setFillColor(HexColor("#0c0a08"), alpha=0.72)
+            c.rect(0, H_PAGE - 70 * mm, L_PAGE, 13 * mm, fill=1, stroke=0)
+            c.restoreState()
+        for decalage, couleur in ((0.6 * mm, HexColor("#0c0a08")), (0, HexColor("#d9b45f"))):          # ombre sombre sous le texte doré : lisible sur l'illustration
+            c.setFillColor(couleur)
+            c.setFont(f_titre_gras, 54)
+            c.drawCentredString(L_PAGE / 2 + decalage, H_PAGE - 48 * mm - decalage, "La Cote du Héros")
+            if sous_titre == "clair":
+                for dx, dy in ((0.9 * mm, -0.9 * mm), (-0.9 * mm, -0.9 * mm), (0, -1.2 * mm)) if decalage else ((0, 0),):
+                    c.setFont(f_gras, 22)
+                    c.drawCentredString(L_PAGE / 2 + dx, H_PAGE - 63 * mm + dy, "Guide de référence")
+            else:
+                c.setFont(f_titre_gras, 26)
+                c.drawCentredString(L_PAGE / 2 + decalage, H_PAGE - 63 * mm - decalage, "Guide de référence")
+            c.setFont(f_gras, 11)
+            c.drawCentredString(L_PAGE / 2 + decalage, 26 * mm - decalage, SITE)
+            c.setFont(f_gras, 12)
+            c.drawCentredString(L_PAGE / 2 + decalage, 19 * mm - decalage, f"Édition du {date_longue(genere_le)}")
+        c.linkURL(LIEN_SITE, (L_PAGE / 2 - 25 * mm, 24 * mm, L_PAGE / 2 + 25 * mm, 30 * mm), relative=0)
+
+    class Doc(BaseDocTemplate):
+        def afterFlowable(self, f):
+            if isinstance(f, TitreVersion):
+                self.notify("TOCEntry", (1, f.getPlainText(), self.page))
+            elif isinstance(f, TeteSerie):
+                self.notify("TOCEntry", (2, f.getPlainText(), self.page))
+            elif isinstance(f, Marqueur) and f.valeurs.get("niveau0"):
+                self.notify("TOCEntry", (0, f.valeurs["niveau0"], self.page))
+            elif isinstance(f, Paragraph) and f.style.name == "h1m":
+                self.notify("TOCEntry", (0, f.getPlainText(), self.page))
+
+    doc = Doc(str(sortie), pagesize=A4, leftMargin=MARGE_X, rightMargin=MARGE_X, topMargin=HAUT, bottomMargin=BAS,
+              title="La Cote du Héros · Guide de référence", author="La Cote du Héros", subject="Cotes et jaquettes des livres dont vous êtes le héros, par éditeur et par édition",
+              keywords="livres dont vous êtes le héros, livre-jeu, cote, jaquettes, lacoteduheros.fr", creator="La Cote du Héros")
+    cadre = Frame(MARGE_X, BAS, L_CADRE, H_PAGE - HAUT - BAS, id="c", leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+    doc.addPageTemplates([
+        PageTemplate("couv", [Frame(0, 0, L_PAGE, H_PAGE, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)], onPage=couverture, autoNextPageTemplate="texte"),
+        PageTemplate("texte", [Frame(MARGE_X, BAS, L_CADRE, H_PAGE - 24 * mm - BAS, id="t")], onPage=fond, onPageEnd=page_texte),
+        PageTemplate("ouverture", [Frame(0, 0, L_PAGE, H_PAGE, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)], onPage=lambda c, d: None, onPageEnd=page_ouverture),
+        PageTemplate("catalogue", [cadre], onPage=fond, onPageEnd=page_catalogue)])
+    sommaire = TableOfContents()
+    sommaire.levelStyles = [ParagraphStyle("t0", parent=styles["toc"], fontName=f_gras, spaceBefore=2.5 * mm, textColor=C("titre")), ParagraphStyle("t1", parent=styles["toc"], leftIndent=6 * mm, fontSize=9.5, leading=13),
+                            ParagraphStyle("t2", parent=styles["toc"], leftIndent=12 * mm, fontSize=8.5, leading=11.5, textColor=C("sourdine"))]
+    sommaire.dotsMinLevel = 0
+    nb = sum(len(l) for _, vs in groupes for _, ss in vs for _, l in ss)
+    histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak(),
+                Paragraph("Présentation", styles["h1"]), Ornement(40 * mm, C("filet")), Spacer(1, 5 * mm),
+                Paragraph(f"La Cote du Héros suit les prix d'occasion des livres dont vous êtes le héros. Ce guide reprend {nb} éditions, éditeur par éditeur, puis édition par édition : "
+                          "jaquette, titre, numéro, version, rareté et cotes.", styles["corps"]), Spacer(1, 4 * mm),
+                Paragraph("C = convenable, BE = bon état, TBE = très bon état. Les cotes sont des estimations, à la date du " + date_longue(date_cotes) + ".", styles["corps"]),
+                Spacer(1, 4 * mm), Paragraph("Le site reste gratuit ; s'il vous est utile, vous pouvez « Offrir un café » depuis le site.", styles["corps"]),
+                PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
+    if donnees is not False:
+        histoire += section_analyse(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
+    for k, (editeur, versions_ed) in enumerate(groupes):
+        nom_versions = [ver for ver, _ in versions_ed]
+        total = sum(len(l) for _, ss in versions_ed for _, l in ss)
+        histoire += [NextPageTemplate("ouverture"), PageBreak(), Marqueur(etat, editeur=editeur, versions=nom_versions, index=k, nb=total, nv=len(nom_versions), niveau0=editeur),
+                     NextPageTemplate("catalogue"), PageBreak()]
+        for j, (version, series_v) in enumerate(versions_ed):
+            if j:
+                histoire.append(PageBreak())
+            histoire += [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
+            for nom, livres in series_v:
+                cellules = [Fiche(v, st, pol, web) for v in livres]
+                while len(cellules) % COLONNES:
+                    cellules.append("")
+                rangs = []
+                for i in range(0, len(cellules), COLONNES):
+                    t = Table([cellules[i:i + COLONNES]], colWidths=[L_CADRE / COLONNES] * COLONNES, hAlign="LEFT")
+                    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
+                    rangs.append(t)
+                tete = TeteSerie(nom, len(livres), st, pol)
+                histoire += [KeepTogether([tete] + rangs[:2])] + rangs[2:]          # l'en-tête n'est jamais seul : au moins deux rangées avec lui ; une rangée n'est jamais coupée
+    doc.multiBuild(histoire)
+    return nb
+
+
+def section_analyse(versions, donnees, styles, date_cotes, polices, st):
     """« Méthode et analyse » : méthode en termes généraux, nuage de points, état du marché. Les chiffres et phrases d'analyse sont calculés sur les données."""
-    f_texte, f_gras = polices
-    P = lambda t, st="corps": Paragraph(t, styles[st])  # noqa: E731
+    f_titre, f_titre_gras, f_texte, f_gras = polices
+    cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     pts = ga.points(versions, donnees["offre"])
-    h = [PageBreak(), P("Méthode et analyse", "h1m"),
+    h = [PageBreak(), P("Méthode et analyse", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 4 * mm),
          P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
            "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
          P("Le nuage de points", "h2"),
          P("Chaque point est une édition. Plus il est à droite, plus il y a d'annonces en ligne ; plus il est haut, plus la cote est élevée. Les pointillés marquent les médianes de toutes les éditions. "
            "La forme du point dit dans quel coin il se trouve : disque vide, bon marché et peu d'annonces ; carré, bon marché et beaucoup d'annonces ; triangle, cher et peu d'annonces ; disque plein, cher et beaucoup d'annonces."),
-         Spacer(1, 3 * mm), ga.dessiner_nuage(pts, police=f_texte, police_gras=f_gras), Spacer(1, 2 * mm)]
+         Spacer(1, 3 * mm), ga.dessiner_nuage(pts, largeur=L_CADRE, police=f_texte, police_gras=f_gras, c=cx), Spacer(1, 2 * mm)]
     h += [P(t) for t in ga.phrases_nuage(pts)]
     t = donnees["tendances"]
-    h += [PageBreak(), P("État du marché", "h1m")]
+    h += [PageBreak(), P("État du marché", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 4 * mm)]
     glob = (t.get("global") or {}).get("marche")
     depart_fin = ga.indice_actuel(t)
     if glob:
@@ -186,119 +557,22 @@ def section_analyse(versions, donnees, styles, date_cotes, polices):
     if depart_fin:
         a, b = depart_fin
         h.append(P(f"L'indice des cotes est passé de {str(a['indice']).replace('.', ',')} le {date_longue(a['date'])} à {str(b['indice']).replace('.', ',')} le {date_longue(b['date'])}."))
-    for titre, nom, filtre in (("Par version", "version", None), ("Par éditeur", "editeur", lambda c: c in ga.EDITEURS_TENDANCE)):
-        lignes = ga.lignes_tendance(t, filtre, nom)
-        if lignes:
-            h += [P(titre, "h2"), _tableau([["", "Éditions", "Variation médiane", "Hausses", "Baisses"]] + [[c, str(n), ga.pct(m), str(hh), str(bb)] for c, n, m, hh, bb in lignes], f_texte, f_gras,
-                                         [48 * mm, 24 * mm, 38 * mm, 22 * mm, 22 * mm])]
+    lv = ga.lignes_tendance(t, None, "version")
+    if lv:
+        h += [P("Variation médiane des cotes, par version", "h2"), ga.barres([(f"{c} ({n} éditions)", m * 100) for c, n, m, _, _ in lv], L_CADRE, 5 * len(lv) * mm + 4 * mm, f_texte, f_gras, cx, divergent=True, unite="pct")]
     tr = ga.repartition_tranches(versions)
     total = sum(n for _, n in tr) or 1
-    h += [P("Répartition des éditions par cote", "h2"), _tableau([["Cote (très bon état, sinon bon état)", "Éditions", "Part"]] + [[nom, str(n), f"{round(100 * n / total)} %"] for nom, n in tr], f_texte, f_gras, [70 * mm, 24 * mm, 24 * mm])]
+    h += [P("Répartition des éditions par cote", "h2"), ga.barres([(nom, n) for nom, n in tr], L_CADRE, 5 * len(tr) * mm + 4 * mm, f_texte, f_gras, cx),
+          P(f"{total} éditions, selon leur cote en très bon état (à défaut en bon état).")]
     hausses, baisses = ga.grands_mouvements(donnees["mouvements"])
     for titre, liste in (("Plus fortes hausses de cote du dernier relevé", hausses), ("Plus fortes baisses de cote du dernier relevé", baisses)):
         if liste:
-            h += [P(titre, "h2"), _tableau([["Livre", "Version", "Avant", "Après", "Variation"]] + [[ti[:34], v, euros(a), euros(b), ga.pct(pc)] for ti, v, a, b, pc in liste], f_texte, f_gras,
-                                          [66 * mm, 18 * mm, 24 * mm, 24 * mm, 24 * mm])]
+            tab = Table([["Livre", "Version", "Avant", "Après", "Variation"]] + [[ti[:34], v, euros(a), euros(b), ga.pct(pc)] for ti, v, a, b, pc in liste], colWidths=[66 * mm, 18 * mm, 24 * mm, 24 * mm, 24 * mm], hAlign="LEFT")
+            tab.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, -1), f_texte), ("FONTNAME", (0, 0), (-1, 0), f_gras), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("TEXTCOLOR", (0, 0), (-1, -1), cx["texte"]),
+                                     ("TEXTCOLOR", (0, 0), (-1, 0), cx["or"]), ("LINEBELOW", (0, 0), (-1, 0), 0.5, cx["filet"]), ("ALIGN", (2, 0), (-1, -1), "RIGHT"), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5), ("TOPPADDING", (0, 0), (-1, -1), 2.5)]))
+            h += [P(titre, "h2"), tab]
     h += [P("Limites", "h2"), P("Une cote est un ordre de grandeur, à la date indiquée : l'état réel d'un exemplaire peut l'éloigner. Les chiffres de cette section sont recalculés à chaque génération du guide.")]
     return h
-
-
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair"):
-    """Écrit le PDF. Renvoie le nombre de livres."""
-    genere_le = genere_le or date.today().isoformat()
-    groupes = grouper(versions, series, editeurs)
-    dossier = tempfile.mkdtemp(prefix="guide-polices-")
-    f_titre, f_titre_gras, f_texte, f_gras = polices(dossier)
-    styles = {
-        "titre": ParagraphStyle("titre", fontName=f_gras, fontSize=8.6, leading=10.4, textColor=TEXTE, alignment=TA_CENTER),
-        "meta": ParagraphStyle("meta", fontName=f_texte, fontSize=7.6, leading=9.4, textColor=SOURDINE, alignment=TA_CENTER),
-        "cotes": ParagraphStyle("cotes", fontName=f_gras, fontSize=7.6, leading=9.4, textColor=OR, alignment=TA_CENTER),
-        "version": ParagraphStyle("version", fontName=f_titre_gras, fontSize=26, leading=30, textColor=OR, spaceAfter=4 * mm),
-        "serie": ParagraphStyle("serie", fontName=f_titre_gras, fontSize=17, leading=20, textColor=OR, spaceBefore=4 * mm, spaceAfter=3 * mm, keepWithNext=1),
-        "corps": ParagraphStyle("corps", fontName=f_texte, fontSize=11, leading=16, textColor=TEXTE),
-        "h1": ParagraphStyle("h1", fontName=f_titre_gras, fontSize=30, leading=34, textColor=OR, spaceAfter=8 * mm),
-        "h1m": ParagraphStyle("h1m", fontName=f_titre_gras, fontSize=30, leading=34, textColor=OR, spaceAfter=6 * mm),
-        "h2": ParagraphStyle("h2", fontName=f_titre_gras, fontSize=17, leading=20, textColor=OR, spaceBefore=5 * mm, spaceAfter=2 * mm, keepWithNext=1),
-        "toc": ParagraphStyle("toc", fontName=f_texte, fontSize=10.5, leading=15, textColor=TEXTE),
-    }
-    pied = f"La Cote du Héros · Guide de référence · généré le {date_longue(genere_le)}"
-
-    def fond(c, doc):
-        c.setFillColor(FOND)
-        c.rect(0, 0, *A4, fill=1, stroke=0)
-        c.setFont(f_texte, 8)
-        c.setFillColor(SOURDINE)
-        c.drawString(18 * mm, 10 * mm, pied)
-        c.drawRightString(A4[0] - 18 * mm, 10 * mm, f"page {doc.page}")
-
-    def couverture(c, doc):
-        c.drawImage(str(COUVERTURE), 0, 0, A4[0], A4[1])
-        if sous_titre == "bandeau":          # variante : sous-titre doré sur un bandeau sombre
-            c.saveState()
-            c.setFillColor(HexColor("#0c0a08"), alpha=0.72)
-            c.rect(0, A4[1] - 70 * mm, A4[0], 13 * mm, fill=1, stroke=0)
-            c.restoreState()
-        for decalage, couleur in ((0.6 * mm, FOND), (0, OR)):          # ombre sombre sous le texte doré : lisible sur l'illustration
-            c.setFillColor(couleur)
-            c.setFont(f_titre_gras, 54)
-            c.drawCentredString(A4[0] / 2 + decalage, A4[1] - 48 * mm - decalage, "La Cote du Héros")
-            if sous_titre == "clair":          # variante : sous-titre plus grand, en gras, ombre renforcée
-                for dx, dy in ((0.9 * mm, -0.9 * mm), (-0.9 * mm, -0.9 * mm), (0, -1.2 * mm)) if couleur == FOND else ((0, 0),):
-                    c.setFillColor(couleur)
-                    c.setFont(f_gras, 22)
-                    c.drawCentredString(A4[0] / 2 + dx, A4[1] - 63 * mm + dy, "Guide de référence")
-            else:
-                c.setFont(f_titre_gras, 26)
-                c.drawCentredString(A4[0] / 2 + decalage, A4[1] - 63 * mm - decalage, "Guide de référence")
-            c.setFillColor(couleur)
-            c.setFont(f_gras, 12)
-            c.drawCentredString(A4[0] / 2 + decalage, 18 * mm - decalage, f"Édition du {date_longue(genere_le)}")
-
-    class Doc(BaseDocTemplate):
-        def afterFlowable(self, f):
-            if isinstance(f, Paragraph) and f.style.name == "version":
-                if getattr(f, "editeur", None):
-                    self.notify("TOCEntry", (0, f.editeur, self.page))
-                self.notify("TOCEntry", (1, f.getPlainText(), self.page))
-            elif isinstance(f, Paragraph) and f.style.name == "h1m":
-                self.notify("TOCEntry", (0, f.getPlainText(), self.page))
-            elif isinstance(f, Paragraph) and f.style.name == "serie":
-                self.notify("TOCEntry", (2, f.getPlainText(), self.page))
-
-    doc = Doc(str(sortie), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=18 * mm,
-              title="La Cote du Héros : guide de référence", author="La Cote du Héros")
-    cadre = Frame(18 * mm, 18 * mm, A4[0] - 36 * mm, A4[1] - 34 * mm, id="c")
-    doc.addPageTemplates([PageTemplate("couv", [Frame(0, 0, 1, 1)], onPage=couverture, autoNextPageTemplate="page"), PageTemplate("page", [cadre], onPage=fond)])
-    sommaire = TableOfContents()
-    sommaire.levelStyles = [ParagraphStyle("t0", parent=styles["toc"], fontName=f_gras, spaceBefore=2.5 * mm), ParagraphStyle("t1", parent=styles["toc"], leftIndent=6 * mm, fontSize=9.5, leading=13),
-                            ParagraphStyle("t2", parent=styles["toc"], leftIndent=12 * mm, fontSize=8.5, leading=11.5, textColor=SOURDINE)]
-    sommaire.dotsMinLevel = 0
-    nb = sum(len(l) for _, vs in groupes for _, ss in vs for _, l in ss)
-    histoire = [Spacer(1, 1), PageBreak(),
-                Paragraph("Présentation", styles["h1"]),
-                Paragraph(f"La Cote du Héros suit les prix d'occasion des livres dont vous êtes le héros. Ce guide reprend {nb} éditions, série par série : "
-                          "jaquette, titre, numéro, version, rareté et cotes.", styles["corps"]), Spacer(1, 4 * mm),
-                Paragraph("C = convenable, BE = bon état, TBE = très bon état. Les cotes sont des estimations, à la date du " + date_longue(date_cotes) + ".", styles["corps"]),
-                Spacer(1, 4 * mm), Paragraph("Le site reste gratuit ; s'il vous est utile, vous pouvez « Offrir un café » depuis le site.", styles["corps"]),
-                PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
-    if donnees is not False:
-        histoire += section_analyse(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, (f_texte, f_gras))
-    for editeur, versions_ed in groupes:
-        for k, (version, series_v) in enumerate(versions_ed):
-            titre = Paragraph(f"{editeur} · {version}", styles["version"])
-            titre.editeur = editeur if k == 0 else None
-            histoire += [PageBreak(), titre]
-            for nom, livres in series_v:
-                histoire.append(Paragraph(nom, styles["serie"]))
-                cellules = [fiche(v, styles, date_cotes, web, f_titre_gras) for v in livres]
-                while len(cellules) % COLONNES:
-                    cellules.append("")
-                lignes = [cellules[i:i + COLONNES] for i in range(0, len(cellules), COLONNES)]
-                t = Table(lignes, colWidths=[(A4[0] - 36 * mm) / COLONNES] * COLONNES, hAlign="CENTER")
-                t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("ALIGN", (0, 0), (-1, -1), "CENTER"), ("BOTTOMPADDING", (0, 0), (-1, -1), 5 * mm)]))
-                histoire.append(t)
-    doc.multiBuild(histoire)
-    return nb
 
 
 def main(argv=None):
@@ -306,14 +580,16 @@ def main(argv=None):
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
+    a.add_argument("--style", default="nuit", choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
     a.add_argument("--couverture", default="clair", choices=("clair", "bandeau"), help="variante du sous-titre de couverture")
+    a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")
     args = a.parse_args(argv)
     debut = time.time()
     versions = json.loads((WEB / "data" / "versions.json").read_text(encoding="utf-8"))
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
     editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
-    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture)
+    nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture, style=args.style, mention=args.mention_sorciers)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s : {args.sortie}")
     return 0
 

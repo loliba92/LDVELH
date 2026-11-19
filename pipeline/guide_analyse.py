@@ -46,8 +46,13 @@ def quadrant(n, p, med_n, med_p):
     return (1 if n > med_n else 0) + (2 if p > med_p else 0)
 
 
-def dessiner_nuage(pts, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", police_gras="Helvetica-Bold"):
+COULEURS_NUIT = {"texte": TEXTE, "sourdine": SOURDINE, "or": OR, "filet": FILET, "fond": HexColor("#0c0a08"), "grille": HexColor("#2c261e")}
+
+
+def dessiner_nuage(pts, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", police_gras="Helvetica-Bold", c=None):
     """Nuage de points : annonces en ligne (échelle logarithmique) et cote (logarithmique). Les formes suffisent à lire le graphique sans la couleur."""
+    c = c or COULEURS_NUIT
+    OR, SOURDINE, TEXTE, FILET = c["or"], c["sourdine"], c["texte"], c["filet"]
     d = Drawing(largeur, hauteur)
     gx, gy, dr, hb = 16 * mm, 12 * mm, 4 * mm, 4 * mm
     if not pts:
@@ -60,7 +65,7 @@ def dessiner_nuage(pts, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", 
     d.add(Rect(gx, gy, largeur - gx - dr, hauteur - gy - hb, strokeColor=FILET, fillColor=None, strokeWidth=0.6))
     for p in (5, 10, 20, 50, 100, 200):
         if math.exp(lo) < p < math.exp(hi):
-            d.add(Line(gx, Y(p), largeur - dr, Y(p), strokeColor=HexColor("#2c261e"), strokeWidth=0.4))
+            d.add(Line(gx, Y(p), largeur - dr, Y(p), strokeColor=c["grille"], strokeWidth=0.4))
             d.add(String(gx - 2 * mm, Y(p) - 1.2 * mm, f"{p} €", fontName=police, fontSize=7, fillColor=SOURDINE, textAnchor="end"))
     for n in (0, 1, 3, 10, 30, 100):
         if n < nmax:
@@ -70,7 +75,7 @@ def dessiner_nuage(pts, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", 
     formes = []
     for n, p, titre in pts:
         q, x, y = quadrant(n, p, med_n, med_p), X(n), Y(p)
-        trait = dict(strokeColor=SOURDINE, strokeWidth=0.5, fillColor=None if q == 0 else SOURDINE if q == 3 else HexColor("#0c0a08"))
+        trait = dict(strokeColor=SOURDINE, strokeWidth=0.5, fillColor=None if q == 0 else SOURDINE if q == 3 else c["fond"])
         if q in (0, 3):
             forme = Circle(x, y, 1.5 * mm, **trait)
         elif q == 1:
@@ -146,3 +151,26 @@ def grands_mouvements(mouvements, nb=6):
 def indice_actuel(tendances):
     t = tendances.get("temps") or []
     return (t[0], t[-1]) if len(t) >= 2 else None
+
+
+def barres(lignes, largeur, hauteur, police, police_gras, c, divergent=False, unite=""):
+    """Diagramme en barres horizontales : [(libellé, valeur)]. `divergent` : axe au milieu, hausses à droite et baisses à gauche. Les valeurs sont écrites : la couleur n'est pas nécessaire."""
+    d = Drawing(largeur, hauteur)
+    if not lignes:
+        return d
+    pas = hauteur / len(lignes)
+    gauche = 38 * mm
+    zone = largeur - gauche - 22 * mm
+    vmax = max(abs(v) for _, v in lignes) or 1
+    zero = gauche + (zone / 2 if divergent else 0)
+    for i, (nom, v) in enumerate(lignes):
+        y = hauteur - (i + 1) * pas + pas * 0.2
+        long = abs(v) / vmax * (zone / 2 if divergent else zone)
+        x0 = zero if v >= 0 or not divergent else zero - long
+        d.add(String(0, y + 0.6 * mm, nom, fontName=police, fontSize=8, fillColor=c["texte"]))
+        d.add(Rect(x0, y, max(long, 0.4), pas * 0.55, strokeColor=c["or"], strokeWidth=0.5, fillColor=c["or"] if v >= 0 else None))
+        texte = f"{v:+.1f} %".replace(".", ",").replace("-", "−") if unite == "pct" else str(v)
+        d.add(String(x0 + long + 1.5 * mm if (v >= 0 or not divergent) else x0 - 1.5 * mm, y + 0.8 * mm, texte, fontName=police_gras, fontSize=8, fillColor=c["texte"], textAnchor="start" if (v >= 0 or not divergent) else "end"))
+    if divergent:
+        d.add(Line(zero, 0, zero, hauteur, strokeColor=c["sourdine"], strokeWidth=0.5))
+    return d
