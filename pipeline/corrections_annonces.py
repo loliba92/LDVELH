@@ -7,6 +7,7 @@ Une annonce est reconnue à son lien. Le fichier `data/manual/annonces_corrigees
 - reaffectee : l'annonce va à une autre édition (isbn13) ; ses prix et sa place dans la cote suivent ;
 - exclue : l'annonce n'est pas ce livre (autre livre, lot, hors sujet) ; elle sort des annonces et de la cote ;
 - vendue : l'annonce reste affichée avec la mention « Vendu » ; son édition (isbn13) suit le même traitement que confirmee.
+Une annonce de lot se corrige livre par livre : la clé est alors « <lien>|<ISBN d'origine du livre dans le lot> ». Une clé sans ISBN vaut pour l'annonce entière.
 La correction s'applique aux relevés à chaque reconstruction (annonces, cote eBay, agrégats Leboncoin et Vinted) : elle tient pour les relevés
 passés et futurs, et un nouveau relevé ne la défait pas. Elle se saisit par le lot « Corriger des cotes » (lignes « annonce ; lien ; édition ; note »).
 """
@@ -19,9 +20,15 @@ CHEMIN = Path(__file__).resolve().parent.parent / "data" / "manual" / "annonces_
 STATUTS = ("confirmee", "reaffectee", "exclue", "vendue")
 
 
-def _propre(lien, v):
-    """Entrée nettoyée, ou None si elle est invalide."""
-    if not isinstance(v, dict) or not re.fullmatch(r"https://[^\s;|]{5,300}", str(lien)):
+def cle_livre(lien, isbn_origine):
+    """Clé de la correction d'un livre d'une annonce de lot."""
+    return f"{lien}|{isbn_origine}"
+
+
+def _propre(cle, v):
+    """Entrée nettoyée, ou None si elle est invalide. `cle` : le lien, ou « lien|ISBN d'origine » pour un livre d'un lot."""
+    lien, _, origine = str(cle).partition("|")
+    if not isinstance(v, dict) or not re.fullmatch(r"https://[^\s;|]{5,300}", lien) or (origine and not re.fullmatch(r"\d{13}", origine)):
         return None
     statut = v.get("statut")
     isbn = str(v.get("isbn13") or "")

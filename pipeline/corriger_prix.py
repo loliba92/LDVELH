@@ -14,6 +14,8 @@ Un mot « reset » (ou « calcul ») à la place d'un prix retire la validation 
 Une ligne « annonce ; <lien> ; <statut> ; <édition> ; <note> » corrige une annonce (voir corrections_annonces.py) : statut confirmee, reaffectee
 (édition = ISBN13 de la bonne édition) ou exclue (édition vide). Exemple :
     annonce ; https://www.vinted.fr/items/123-le-livre ; reaffectee ; 9782070335398 ; photo de la V2
+Pour un livre d'une annonce de lot, un 6e champ donne l'ISBN d'origine du livre : la correction ne vaut que pour lui (les autres livres du lot restent inchangés).
+    annonce ; https://www.leboncoin.fr/ad/livres/123 ; reaffectee ; 9782070665822 ; V4 ; 9782070509263
 Usage : python pipeline/corriger_prix.py "9782070585168 ; 25 ; ; 60"
 """
 import json
@@ -62,9 +64,11 @@ def lire(texte):
         ligne = ligne.strip()
         if not ligne or ligne.startswith("#"):
             continue
-        champs = [c.strip() for c in ligne.split(";")] + ["", "", "", "", ""]
+        champs = [c.strip() for c in ligne.split(";")] + ["", "", "", "", "", ""]
         if champs[0].lower() == "annonce":
-            out.append({"annonce": True, "brut": ligne, "lien": champs[1], "statut": champs[2].lower(), "isbn13": champs[3], "note": champs[4]})
+            # 6e champ facultatif : ISBN d'origine du livre dans une annonce de lot (la correction ne vaut alors que pour ce livre)
+            cle = f"{champs[1]}|{champs[5]}" if champs[5] else champs[1]
+            out.append({"annonce": True, "brut": ligne, "lien": cle, "statut": champs[2].lower(), "isbn13": champs[3], "note": champs[4]})
             continue
         prix = {}
         for etat, brut in zip(ORDRE, champs[1:4]):

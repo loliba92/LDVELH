@@ -762,7 +762,7 @@ def main():
     for source in importer_leboncoin.SOURCES:
         for isbn, liste in annonces_incertaines(sorted(dossier_occasion.glob(f"incertaines-{source}-20*.csv")), liens_certains).items():
             incertaines.setdefault(isbn, []).extend(liste)
-    importer_leboncoin.etaler_lots(annonces, lots)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
+    importer_leboncoin.etaler_lots(annonces, lots, corrections)     # annonce de lot : une ligne « Lot de N livres », au prix de sa part, sous chacun de ses livres
     # Exemplaires relevés en librairie (leslibraires.fr) : présentés comme des annonces, avec le lien de la page du livre
     titres = {v["isbn13"]: v["titre"] for v in versions}
     for (isbn, etat), prix in libraires.items():
