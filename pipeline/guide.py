@@ -38,7 +38,6 @@ COUVERTURE_V1 = Path(__file__).resolve().parent / "guide" / "couverture-v1.jpg" 
 EMBLEME = WEB / "icons" / "icon-512.png"          # le sceau du site : le personnage encapuchonné
 SITE = "lacoteduheros.fr"
 LIEN_SITE = "https://lacoteduheros.fr"
-RARETE = {"tres_rare": "Très rare", "rare": "Rare", "peu_courant": "Peu courant", "courant": "Courant"}
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 36 mm (environ 160 points par pouce)
 COLONNES = 4
@@ -60,8 +59,22 @@ def date_longue(iso):
     return f"{d.day}{'er' if d.day == 1 else ''} {MOIS[d.month - 1]} {d.year}"
 
 
-def euros(v):
-    return "—" if v is None else f"{v:,.2f}".replace(",", " ").replace(".", ",") + " €"
+# Repères en mots, sans chiffre. Les seuils sont ceux du site (web/app.js : niveauCote, SEUILS_COTE, et le bloc « Offre d'occasion ») ; ils ne sont jamais affichés.
+SEUILS_PRIX = (10, 20, 40, 70)
+MOTS_PRIX = ("pas cher", "abordable", "moyen", "cher", "très cher")
+
+
+def niveau_prix(v):
+    """1 à 5 selon la cote, comme le site pour les visiteurs ; None sans cote."""
+    return None if v is None else 1 + sum(1 for x in SEUILS_PRIX if v >= x)
+
+
+def mot_offre(n, neuf=False):
+    """« Rareté en vente » : abondance des annonces en ligne à l'instant T. Les trois premiers niveaux suivent le bloc « Offre d'occasion » du site (aucune, une seule, quelques-unes) ;
+    le site réunit « beaucoup » en un seul niveau : ici il est coupé en courant et abondant (seuil propre au guide, jamais affiché)."""
+    if n == 0:
+        return "disponible neuf" if neuf else "introuvable"
+    return "rare" if n == 1 else "peu d'annonces" if n <= 3 else "courant" if n < 10 else "abondant"
 
 
 def _numero(v):
@@ -307,10 +320,10 @@ class TeteSerie(Flowable):
 
 
 class Fiche(Flowable):
-    """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, pastilles C / BE / TBE."""
-    def __init__(self, v, st, polices, web):
+    """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge"):
         super().__init__()
-        self.v, self.st, self.pol, self.web = v, st, polices, web
+        self.v, self.st, self.pol, self.web, self.reperes = v, st, polices, web, reperes
         self.largeur = L_CADRE / COLONNES
         self.iw = 36 * mm
         jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
@@ -322,10 +335,20 @@ class Fiche(Flowable):
             self.image = ImageReader(io.BytesIO(jpeg))
         f_texte, f_gras = polices[2], polices[3]
         self.titre = Paragraph(v.get("titre") or "", ParagraphStyle("t", fontName=f_gras, fontSize=8, leading=9.4, textColor=HexColor(st["texte"]), alignment=TA_CENTER))
-        self.th = max(self.titre.wrap(self.largeur - 3 * mm, 100 * mm)[1], 2 * 9.4)          # deux lignes réservées : les pastilles restent alignées d'un livre à l'autre
+        self.th = max(self.titre.wrap(self.largeur - 3 * mm, 100 * mm)[1], 2 * 9.4)          # deux lignes réservées : les repères restent alignés d'un livre à l'autre
+        num = f"n°\u00a0{v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
+        self.meta = f"{num}{v.get('version') or ''}"
+        self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1)
+        prix = v.get("prix") or {}
+        self.niveaux = [(lib, niveau_prix(prix.get(cle))) for lib, cle in (("C", "convenable"), ("BE", "bon"), ("TBE", "tres_bon"))]
+
+    def libelles(self):
+        """Tous les textes dessinés dans la cellule (pour les tests : aucun montant, aucun nombre décimal)."""
+        bon = self.niveaux[1][1]
+        return [self.v.get("titre") or "", self.meta, "Rareté en vente", self.offre, f"BE : {MOTS_PRIX[bon - 1] if bon else 'sans repère'}"]
 
     def wrap(self, *_):
-        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 9.2 * mm + 2.5 * mm
+        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 9.2 * mm + 3.6 * mm + 2.5 * mm
         return self.largeur, self.h
 
     def draw(self):
@@ -351,29 +374,47 @@ class Fiche(Flowable):
         y -= 3 * mm
         self.titre.drawOn(c, 1.5 * mm, y - self.th)
         y -= self.th + 3.4 * mm
-        num = f"n° {v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
-        rare = RARETE.get((v.get("rarete") or {}).get("niveau"), "")
         c.setFillColor(HexColor(st["sourdine"]))
         c.setFont(f_texte, 7)
-        c.drawCentredString(self.largeur / 2, y, f"{num}{v.get('version') or ''}{' · ' + rare if rare else ''}")
-        y -= 1.6 * mm
-        prix = v.get("prix") or {}
+        c.drawCentredString(self.largeur / 2, y, self.meta)
+        y -= 3.4 * mm
+        c.setFillColor(HexColor(st["sourdine"]))
+        lettres(c, self.largeur / 2, y, "Rareté en vente", f_texte, 5.4, 0.5, centre=True)
+        y -= 3 * mm
+        c.setFillColor(HexColor(st["titre"]))
+        c.setFont(f_gras, 7.4)
+        c.drawCentredString(self.largeur / 2, y, self.offre)
+        y -= 1.8 * mm
         pw, ph, gap = 13.6 * mm, 8 * mm, 1 * mm
         x = (self.largeur - 3 * pw - 2 * gap) / 2
-        for lib, cle in (("C", "convenable"), ("BE", "bon"), ("TBE", "tres_bon")):          # pastilles arrondies comme les badges du site
+        for lib, niveau in self.niveaux:          # pastilles arrondies comme les badges du site
             c.setFillColor(HexColor(st["pastille"]))
             c.setStrokeColor(HexColor(st["filet"]))
             c.setLineWidth(0.4)
             c.roundRect(x, y - ph, pw, ph, 2 * mm, fill=1, stroke=1)
             c.setFillColor(HexColor(st["sourdine"]))
             lettres(c, x + pw / 2, y - 2.9 * mm, lib, f_gras, 5.6, 0.6, centre=True)
-            c.setFillColor(HexColor(st["texte"]))
-            c.setFont(f_gras, 7.3)
-            c.drawCentredString(x + pw / 2, y - 6.4 * mm, euros(prix.get(cle)))
+            for k in range(5):          # jauge à cinq crans : plus elle est pleine, plus c'est cher
+                c.setFillColor(HexColor(st["or"]) if niveau and k < niveau else HexColor(st["grille"]))
+                c.setStrokeColor(HexColor(st["filet"]))
+                c.setLineWidth(0.25)
+                c.rect(x + 1.7 * mm + k * 2.05 * mm, y - 6.4 * mm, 1.7 * mm, 1.7 * mm, fill=1, stroke=1)
             x += pw + gap
+        bon = self.niveaux[1][1]
+        c.setFillColor(HexColor(st["texte"]))
+        c.setFont(f_texte, 6.8)
+        c.drawCentredString(self.largeur / 2, y - ph - 3 * mm, f"BE : {MOTS_PRIX[bon - 1] if bon else 'sans repère'}")
 
 
-def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False, visuel="v1"):
+def legende(styles):
+    """Page de légende : chaque mot des repères, sans seuil ni chiffre."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    return [P("Rareté en vente", "h2"), P("L'abondance des annonces en ligne au moment du guide : introuvable, rare, peu d'annonces, courant, abondant. Disponible neuf : le livre est encore vendu neuf."),
+            P("Prix", "h2"), P("Une jauge de cinq crans : plus elle est pleine, plus l'exemplaire est cher. Le mot donne le niveau de prix : pas cher, abordable, moyen, cher, très cher."),
+            ]
+
+
+def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre="clair", style="nuit", mention=False, visuel="v1", reperes="jauge"):
     """Écrit le PDF. Renvoie le nombre de livres."""
     st = STYLES[style]
     genere_le = genere_le or date.today().isoformat()
@@ -394,7 +435,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.drawImage(embleme(st["embleme"], 1.0, 128), MARGE_X, y - 1.6 * mm, 5.2 * mm, 5.2 * mm, mask="auto")
         c.setFillColor(C("sourdine"))
         c.setFont(f_texte, 7.6)
-        c.drawString(MARGE_X + 7 * mm, y, f"La Cote du Héros · {SITE} · cotes du {date_longue(date_cotes)}")
+        c.drawString(MARGE_X + 7 * mm, y, f"La Cote du Héros · {SITE} · repères du {date_longue(date_cotes)}")
         c.linkURL(LIEN_SITE, (MARGE_X, y - 2 * mm, MARGE_X + 80 * mm, y + 4 * mm), relative=0)
 
     def fond(c, doc):
@@ -566,12 +607,15 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                             ParagraphStyle("t2", parent=styles["toc"], leftIndent=12 * mm, fontSize=8.5, leading=11.5, textColor=C("sourdine"))]
     sommaire.dotsMinLevel = 0
     nb = sum(len(l) for _, vs in groupes for _, ss in vs for _, l in ss)
+    donnees_offre = donnees if isinstance(donnees, dict) else ga.charger()
+    offre_annonces = donnees_offre.get("offre", {})
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak(),
                 Paragraph("Présentation", styles["h1"]), Ornement(40 * mm, C("filet")), Spacer(1, 5 * mm),
                 Paragraph(f"La Cote du Héros suit les prix d'occasion des livres dont vous êtes le héros. Ce guide reprend {nb} éditions, éditeur par éditeur, puis édition par édition : "
-                          "jaquette, titre, numéro, version, rareté et cotes.", styles["corps"]), Spacer(1, 4 * mm),
-                Paragraph("C = convenable, BE = bon état, TBE = très bon état. Les cotes sont des estimations, à la date du " + date_longue(date_cotes) + ".", styles["corps"]),
+                          "jaquette, titre, numéro, version, puis deux repères en mots : la rareté en vente et le niveau de prix.", styles["corps"]), Spacer(1, 4 * mm),
+                Paragraph("Chaque mot est expliqué dans la légende. Ces repères sont ceux du " + date_longue(date_cotes) + ".", styles["corps"]),
                 Spacer(1, 4 * mm), Paragraph("Le site reste gratuit ; s'il vous est utile, vous pouvez « Offrir un café » depuis le site.", styles["corps"]),
+                PageBreak(), Paragraph("Légende", styles["h1"]), Ornement(40 * mm, C("filet")), Spacer(1, 4 * mm)] + legende(styles) + [
                 PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     if donnees is not False:
         histoire += section_analyse(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
@@ -585,7 +629,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                 histoire.append(PageBreak())
             histoire += [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for nom, livres in series_v:
-                cellules = [Fiche(v, st, pol, web) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
@@ -600,44 +644,27 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
 
 def section_analyse(versions, donnees, styles, date_cotes, polices, st):
-    """« Méthode et analyse » : méthode en termes généraux, nuage de points, état du marché. Les chiffres et phrases d'analyse sont calculés sur les données."""
+    """« Méthode et analyse » : méthode en termes généraux, puis un état du marché à la date du guide, SANS chiffre (que des mots), calculé sur les données :
+    synthèse, nuage de points des séries, panorama par plateforme et par éditeur, points d'attention."""
     f_titre, f_titre_gras, f_texte, f_gras = polices
     cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
-    pts = ga.points(versions, donnees["offre"])
+    textes, profs = ga.textes(versions, donnees, editeur_de, EDITEURS_CONNUS)
     h = [PageBreak(), P("Méthode et analyse", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 4 * mm),
          P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
            "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
-         P("Le nuage de points", "h2"),
-         P("Chaque point est une édition. Plus il est à droite, plus il y a d'annonces en ligne ; plus il est haut, plus la cote est élevée. Les pointillés marquent les médianes de toutes les éditions. "
-           "La forme du point dit dans quel coin il se trouve : disque vide, bon marché et peu d'annonces ; carré, bon marché et beaucoup d'annonces ; triangle, cher et peu d'annonces ; disque plein, cher et beaucoup d'annonces."),
-         Spacer(1, 3 * mm), ga.dessiner_nuage(pts, largeur=L_CADRE, police=f_texte, police_gras=f_gras, c=cx), Spacer(1, 2 * mm)]
-    h += [P(t) for t in ga.phrases_nuage(pts)]
-    t = donnees["tendances"]
-    h += [PageBreak(), P("État du marché", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 4 * mm)]
-    glob = (t.get("global") or {}).get("marche")
-    depart_fin = ga.indice_actuel(t)
-    if glob:
-        h.append(P(f"Depuis l'{t.get('reference', 'ancien relevé')}, {glob['n']} cotes ont été comparées : variation médiane {ga.pct(glob['mediane'])}, "
-                   f"{glob['hausses']} en hausse, {glob['baisses']} en baisse, {glob['stables']} stables."))
-    if depart_fin:
-        a, b = depart_fin
-        h.append(P(f"L'indice des cotes est passé de {str(a['indice']).replace('.', ',')} le {date_longue(a['date'])} à {str(b['indice']).replace('.', ',')} le {date_longue(b['date'])}."))
-    lv = ga.lignes_tendance(t, None, "version")
-    if lv:
-        h += [P("Variation médiane des cotes, par version", "h2"), ga.barres([(f"{c} ({n} éditions)", m * 100) for c, n, m, _, _ in lv], L_CADRE, 5 * len(lv) * mm + 4 * mm, f_texte, f_gras, cx, divergent=True, unite="pct")]
-    tr = ga.repartition_tranches(versions)
-    total = sum(n for _, n in tr) or 1
-    h += [P("Répartition des éditions par cote", "h2"), ga.barres([(nom, n) for nom, n in tr], L_CADRE, 5 * len(tr) * mm + 4 * mm, f_texte, f_gras, cx),
-          P(f"{total} éditions, selon leur cote en très bon état (à défaut en bon état).")]
-    hausses, baisses = ga.grands_mouvements(donnees["mouvements"])
-    for titre, liste in (("Plus fortes hausses de cote du dernier relevé", hausses), ("Plus fortes baisses de cote du dernier relevé", baisses)):
-        if liste:
-            tab = Table([["Livre", "Version", "Avant", "Après", "Variation"]] + [[ti[:34], v, euros(a), euros(b), ga.pct(pc)] for ti, v, a, b, pc in liste], colWidths=[66 * mm, 18 * mm, 24 * mm, 24 * mm, 24 * mm], hAlign="LEFT")
-            tab.setStyle(TableStyle([("FONTNAME", (0, 0), (-1, -1), f_texte), ("FONTNAME", (0, 0), (-1, 0), f_gras), ("FONTSIZE", (0, 0), (-1, -1), 8.5), ("TEXTCOLOR", (0, 0), (-1, -1), cx["texte"]),
-                                     ("TEXTCOLOR", (0, 0), (-1, 0), cx["or"]), ("LINEBELOW", (0, 0), (-1, 0), 0.5, cx["filet"]), ("ALIGN", (2, 0), (-1, -1), "RIGHT"), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5), ("TOPPADDING", (0, 0), (-1, -1), 2.5)]))
-            h += [P(titre, "h2"), tab]
-    h += [P("Limites", "h2"), P("Une cote est un ordre de grandeur, à la date indiquée : l'état réel d'un exemplaire peut l'éloigner. Les chiffres de cette section sont recalculés à chaque génération du guide.")]
+         P("Le marché en bref", "h2")]
+    h += [P(t) for t in textes["synthese"]]
+    h += [PageBreak(), P("Le nuage de points", "h2"),
+          P("Chaque point est une série, avec son éditeur entre parenthèses. Plus il est à droite, plus l'offre en ligne est fournie ; plus il est haut, plus les cotes sont élevées. "
+            "Les pointillés marquent le milieu du marché. La forme du point dit dans quel coin il se trouve : disque vide, offre faible et prix bas ; carré, offre forte et prix bas ; "
+            "triangle, offre faible et prix haut (série en tension) ; disque plein, offre forte et prix haut."),
+          Spacer(1, 3 * mm), ga.dessiner_nuage(profs, largeur=L_CADRE, police=f_texte, police_gras=f_gras, c=cx)]
+    h += [PageBreak(), P("Par plateforme", "h2")] + [P(t) for t in textes["plateformes"]]
+    h += [P("Par éditeur", "h2")] + [P(t) for t in textes["editeurs"]]
+    if textes["attention"]:
+        h += [P("Points d'attention", "h2")] + [P(t) for t in textes["attention"]]
+    h += [P("Limites", "h2"), P("Un état du marché est une photographie à la date du guide : il décrit l'offre du moment, pas une tendance. Les phrases de cette section sont recalculées à chaque génération du guide.")]
     return h
 
 

@@ -1,34 +1,37 @@
-"""Pages « Méthode et analyse » du guide PDF : nuage de points et chiffres de marché, calculés à chaque génération à partir des données du dépôt.
+"""Pages « Méthode et analyse » du guide PDF : un état du marché à la date du guide, SANS chiffre, calculé à chaque génération.
 
-Sources : web/data/versions.json (cotes), data/processed/butin.json (nombre d'annonces par édition : décomptes seulement), web/data/tendances.json et
-web/data/mouvements.json. Aucune annonce individuelle, aucun lien, aucun nom de site dans le PDF.
+Sources : web/data/versions.json (éditeur, série, cote) et data/processed/butin.json (nombre d'annonces par édition et par plateforme : décomptes seulement).
+Aucune annonce individuelle, aucun lien, aucune évolution dans le temps. Les seuils qui servent à classer restent ici : le PDF n'affiche que des mots.
+Une édition n'est jamais présentée seule : tout est dit pour un éditeur et une série.
 """
 import json
 import math
 import statistics
+import zlib
 from pathlib import Path
 
-from reportlab.graphics.shapes import Circle, Drawing, Line, Polygon, Rect, String
+from reportlab.graphics.shapes import Circle, Drawing, Group, Line, Polygon, Rect, String
 from reportlab.lib.colors import HexColor
 from reportlab.lib.units import mm
 
 RACINE = Path(__file__).resolve().parent.parent
-OR, SOURDINE, TEXTE, FILET = HexColor("#d9b45f"), HexColor("#b8ad99"), HexColor("#f2e9d8"), HexColor("#6f6a60")
+SOURCES = (("vin", "Vinted"), ("lbc", "Leboncoin"), ("ebay", "eBay"), ("lib", "les librairies"), ("rev", "les revendeurs"))
+MIN_EDITIONS = 4              # une série compte dans le nuage et les classements à partir de ce nombre d'éditions
+PART_PLATEFORME = ((0.5, "domine l'offre", "dominent l'offre"), (0.2, "tient une place importante", "tiennent une place importante"), (0.08, "apporte un complément", "apportent un complément"), (0.0, "reste discrète", "restent discrètes"))
+COULEURS_NUIT = {"texte": HexColor("#f2e9d8"), "sourdine": HexColor("#b8ad99"), "or": HexColor("#d9b45f"), "filet": HexColor("#6f6a60"), "fond": HexColor("#0c0a08"), "grille": HexColor("#2c261e")}
 EDITEURS_TENDANCE = ("Gallimard", "Gallimard Jeunesse", "Alkonost", "Scriptarium", "Hachette", "Elder Craft", "Sarbacane", "Bragelonne")
-TRANCHES = ((0, 10, "moins de 10 €"), (10, 20, "10 à 20 €"), (20, 40, "20 à 40 €"), (40, 70, "40 à 70 €"), (70, 10 ** 9, "70 € et plus"))          # mêmes tranches que le site
 
 
 def charger(racine=RACINE):
-    lire = lambda c: json.loads((Path(racine) / c).read_text(encoding="utf-8"))  # noqa: E731
     try:
-        offre = lire("data/processed/butin.json").get("offre", {})
+        offre = json.loads((Path(racine) / "data/processed/butin.json").read_text(encoding="utf-8")).get("offre", {})
     except (OSError, ValueError):
         offre = {}
-    return {"offre": offre, "tendances": lire("web/data/tendances.json"), "mouvements": lire("web/data/mouvements.json")}
+    return {"offre": offre}
 
 
 def nb_annonces(o):
-    return sum((o or {}).get(k, 0) or 0 for k in ("ebay", "lbc", "vin", "lib", "rev"))
+    return sum((o or {}).get(k, 0) or 0 for k, _ in SOURCES)
 
 
 def cote(v):
@@ -36,141 +39,186 @@ def cote(v):
     return p.get("tres_bon") or p.get("bon") or 0
 
 
-def points(versions, offre):
-    """[(nombre d'annonces, cote, titre)] : une édition avec ISBN et cote, un point."""
-    return [(nb_annonces(offre.get(v["isbn13"])), cote(v), v.get("titre") or "") for v in versions if v.get("isbn13") and cote(v) > 0]
-
-
-def quadrant(n, p, med_n, med_p):
-    """0 peu d'annonces et bon marché, 1 beaucoup et bon marché, 2 peu et cher, 3 beaucoup et cher (au-dessus de la médiane = « beaucoup », « cher »)."""
-    return (1 if n > med_n else 0) + (2 if p > med_p else 0)
-
-
-COULEURS_NUIT = {"texte": TEXTE, "sourdine": SOURDINE, "or": OR, "filet": FILET, "fond": HexColor("#0c0a08"), "grille": HexColor("#2c261e")}
-
-
-def dessiner_nuage(pts, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", police_gras="Helvetica-Bold", c=None):
-    """Nuage de points : annonces en ligne (échelle logarithmique) et cote (logarithmique). Les formes suffisent à lire le graphique sans la couleur."""
-    c = c or COULEURS_NUIT
-    OR, SOURDINE, TEXTE, FILET = c["or"], c["sourdine"], c["texte"], c["filet"]
-    d = Drawing(largeur, hauteur)
-    gx, gy, dr, hb = 16 * mm, 12 * mm, 4 * mm, 4 * mm
-    if not pts:
-        return d
-    med_n, med_p = statistics.median(n for n, _, _ in pts), statistics.median(p for _, p, _ in pts)
-    nmax = max(10, max(n for n, _, _ in pts)) + 1
-    lo, hi = math.log(max(1, min(p for _, p, _ in pts)) * 0.8), math.log(max(p for _, p, _ in pts) * 1.15)
-    X = lambda n: gx + math.log(n + 1) / math.log(nmax + 1) * (largeur - gx - dr)  # noqa: E731
-    Y = lambda p: gy + (math.log(p) - lo) / (hi - lo) * (hauteur - gy - hb)  # noqa: E731
-    d.add(Rect(gx, gy, largeur - gx - dr, hauteur - gy - hb, strokeColor=FILET, fillColor=None, strokeWidth=0.6))
-    for p in (5, 10, 20, 50, 100, 200):
-        if math.exp(lo) < p < math.exp(hi):
-            d.add(Line(gx, Y(p), largeur - dr, Y(p), strokeColor=c["grille"], strokeWidth=0.4))
-            d.add(String(gx - 2 * mm, Y(p) - 1.2 * mm, f"{p} €", fontName=police, fontSize=7, fillColor=SOURDINE, textAnchor="end"))
-    for n in (0, 1, 3, 10, 30, 100):
-        if n < nmax:
-            d.add(String(X(n), gy - 4.5 * mm, str(n), fontName=police, fontSize=7, fillColor=SOURDINE, textAnchor="middle"))
-    for (x1, y1, x2, y2) in ((X(med_n), gy, X(med_n), hauteur - hb), (gx, Y(med_p), largeur - dr, Y(med_p))):
-        d.add(Line(x1, y1, x2, y2, strokeColor=SOURDINE, strokeWidth=0.6, strokeDashArray=[3, 3]))
-    formes = []
-    for n, p, titre in pts:
-        q, x, y = quadrant(n, p, med_n, med_p), X(n), Y(p)
-        trait = dict(strokeColor=SOURDINE, strokeWidth=0.5, fillColor=None if q == 0 else SOURDINE if q == 3 else c["fond"])
-        if q in (0, 3):
-            forme = Circle(x, y, 1.5 * mm, **trait)
-        elif q == 1:
-            forme = Rect(x - 1.4 * mm, y - 1.4 * mm, 2.8 * mm, 2.8 * mm, **trait)
-        else:
-            forme = Polygon([x, y + 1.7 * mm, x - 1.6 * mm, y - 1.3 * mm, x + 1.6 * mm, y - 1.3 * mm], **trait)
-        formes.append(forme)
-    for f in formes:
-        d.add(f)
-    cart = {"hg": "Peu d'annonces, cher", "hd": "Beaucoup d'annonces, cher", "bg": "Peu d'annonces, bon marché", "bd": "Beaucoup d'annonces, bon marché"}
-    d.add(String(gx + 2 * mm, hauteur - hb - 4 * mm, cart["hg"], fontName=police_gras, fontSize=7.5, fillColor=OR))
-    d.add(String(largeur - dr - 2 * mm, hauteur - hb - 4 * mm, cart["hd"], fontName=police_gras, fontSize=7.5, fillColor=OR, textAnchor="end"))
-    d.add(String(gx + 2 * mm, gy + 2 * mm, cart["bg"], fontName=police_gras, fontSize=7.5, fillColor=OR))
-    d.add(String(largeur - dr - 2 * mm, gy + 2 * mm, cart["bd"], fontName=police_gras, fontSize=7.5, fillColor=OR, textAnchor="end"))
-    d.add(String(X(med_n) + 1.5 * mm, gy + 8 * mm, f"médiane : {int(med_n)}", fontName=police, fontSize=7, fillColor=SOURDINE))
-    d.add(String(gx + 1.5 * mm, Y(med_p) + 1.5 * mm, f"médiane : {med_p:.0f} €".replace(".", ","), fontName=police, fontSize=7, fillColor=SOURDINE))
-    d.add(String((largeur + gx) / 2, 1 * mm, "nombre d'annonces en ligne (échelle logarithmique)", fontName=police, fontSize=7.5, fillColor=TEXTE, textAnchor="middle"))
-    # étiquettes : les trois éditions les plus chères et les trois les plus recherchées
-    ordre = sorted(pts, key=lambda t: -t[1])[:3] + sorted(pts, key=lambda t: -t[0])[:3]
-    vus = set()
-    for n, p, titre in ordre:
-        if titre in vus:
-            continue
-        vus.add(titre)
-        droite = X(n) > largeur * 0.65
-        d.add(String(X(n) + (-2 if droite else 2) * mm, Y(p) + 1 * mm, titre[:26], fontName=police, fontSize=6.5, fillColor=TEXTE, textAnchor="end" if droite else "start"))
-    return d
-
-
-def phrases_nuage(pts):
-    """Phrases calculées sur les points."""
-    if not pts:
-        return []
-    med_n, med_p = statistics.median(n for n, _, _ in pts), statistics.median(p for _, p, _ in pts)
-    sans = sum(1 for n, _, _ in pts if n == 0)
-    q = [0, 0, 0, 0]
-    for n, p, _ in pts:
-        q[quadrant(n, p, med_n, med_p)] += 1
-    pl = lambda n, mot: f"{n} {mot}{'s' if n > 1 else ''}"  # noqa: E731
-    return [f"Le graphique place {len(pts)} éditions. La médiane est de {pl(int(med_n), 'annonce')} en ligne et de {round(med_p)} €.",
-            f"{pl(sans, 'édition')} ({round(100 * sans / len(pts))} %) {'sont' if sans > 1 else 'est'} sans annonce en ligne.",
-            f"Par rapport aux médianes : {q[2]} éditions chères et peu annoncées (triangles), {q[3]} chères et très annoncées (disques pleins), "
-            f"{q[0]} bon marché et peu annoncées (disques vides), {q[1]} bon marché et très annoncées (carrés)."]
-
-
-def pct(x):
-    return f"{x * 100:+.1f}".replace(".", ",").replace("-", "−") + " %"
-
-
-def lignes_tendance(tendances, filtre=None, nom=None):
-    """[(groupe, éditions comparées, variation médiane, hausses, baisses)] pour un type de groupe ('version', 'editeur', 'decennie', 'serie'), groupes trop petits écartés."""
+def profils(versions, offre, editeur_de):
+    """[{editeur, serie, editions, offre (annonces par édition, en moyenne), sans (part sans annonce), cote (médiane), sources {clé: total}}] pour les séries d'au moins MIN_EDITIONS éditions."""
+    groupes = {}
+    for v in versions:
+        if v.get("isbn13") and cote(v) > 0:
+            groupes.setdefault((editeur_de(v), (v.get("serie") or "").strip() or "Hors série"), []).append(v)
     sortie = []
-    for g in (tendances.get("groupes", {}).get("marche", {}).get(nom) or []):
-        if g.get("peu") or (filtre and not filtre(g["cle"])):
+    for (e, s), liste in groupes.items():
+        if len(liste) < MIN_EDITIONS:
             continue
-        sortie.append((g["cle"], g["n"], g["mediane"], g["hausses"], g["baisses"]))
+        o = [offre.get(v["isbn13"]) or {} for v in liste]
+        sortie.append({"editeur": e, "serie": s, "editions": len(liste), "offre": sum(nb_annonces(x) for x in o) / len(liste), "sans": sum(1 for x in o if nb_annonces(x) == 0) / len(liste),
+                       "cote": statistics.median(cote(v) for v in liste), "sources": {k: sum(x.get(k, 0) or 0 for x in o) for k, _ in SOURCES}})
     return sortie
 
 
-def repartition_tranches(versions):
-    """[(libellé, nombre d'éditions)] selon la cote."""
-    cotes = [cote(v) for v in versions if cote(v) > 0]
-    return [(nom, sum(1 for c in cotes if a <= c < b)) for a, b, nom in TRANCHES]
+def rang_relatif(valeur, valeurs):
+    """Part des valeurs strictement plus petites (0 à 1)."""
+    return sum(1 for x in valeurs if x < valeur) / max(1, len(valeurs) - 1) if len(valeurs) > 1 else 0.5
 
 
-def grands_mouvements(mouvements, nb=6):
-    """[(titre, version, avant, après, variation)] : les plus fortes hausses puis les plus fortes baisses (cotes, pas d'annonces)."""
-    hausses = sorted(mouvements.get("hausses") or [], key=lambda m: -m["pct"])[:nb]
-    baisses = sorted(mouvements.get("baisses") or [], key=lambda m: m["pct"])[:nb]
-    return [(m["titre"], m.get("version") or "", m["avant"], m["apres"], m["pct"]) for m in hausses], [(m["titre"], m.get("version") or "", m["avant"], m["apres"], m["pct"]) for m in baisses]
+def niveau_activite(r):
+    """Mot pour le rang relatif d'une série parmi les autres, d'après l'offre en ligne."""
+    return "très active" if r >= 0.8 else "active" if r >= 0.5 else "calme" if r >= 0.2 else "atone"
 
 
-def indice_actuel(tendances):
-    t = tendances.get("temps") or []
-    return (t[0], t[-1]) if len(t) >= 2 else None
+def niveau_prix(r):
+    return "haut" if r >= 0.67 else "moyen" if r >= 0.33 else "bas"
 
 
-def barres(lignes, largeur, hauteur, police, police_gras, c, divergent=False, unite=""):
-    """Diagramme en barres horizontales : [(libellé, valeur)]. `divergent` : axe au milieu, hausses à droite et baisses à gauche. Les valeurs sont écrites : la couleur n'est pas nécessaire."""
+def quadrant(offre, cote_, med_offre, med_cote):
+    """0 peu d'offre et bon marché, 1 beaucoup d'offre et bon marché, 2 peu d'offre et cher (en tension), 3 beaucoup d'offre et cher."""
+    return (1 if offre > med_offre else 0) + (2 if cote_ > med_cote else 0)
+
+
+def choix(cle, options):
+    """Variante de phrase choisie de façon stable d'après `cle` : la même donnée donne la même phrase, deux séries voisines n'ont pas toujours la même tournure."""
+    return options[zlib.crc32(str(cle).encode("utf-8")) % len(options)]
+
+
+def liste_mots(noms):
+    noms = list(noms)
+    return noms[0] if len(noms) == 1 else ", ".join(noms[:-1]) + " et " + noms[-1]
+
+
+def nom_serie(p):
+    return f"{p['editeur']} · {p['serie']}"
+
+
+def part_sources(profs):
+    total = sum(sum(p["sources"].values()) for p in profs) or 1
+    return {k: sum(p["sources"][k] for p in profs) / total for k, _ in SOURCES}
+
+
+def synthese(profs, versions, offre):
+    """Phrases de la synthèse globale du marché à la date du guide."""
+    if not profs:
+        return []
+    avec = sum(1 for v in versions if v.get("isbn13") and nb_annonces(offre.get(v["isbn13"])) > 0) / max(1, sum(1 for v in versions if v.get("isbn13")))
+    presence = "presque toutes" if avec >= 0.9 else "la grande majorité" if avec >= 0.7 else "environ la moitié" if avec >= 0.45 else "une minorité"
+    offres = [p["offre"] for p in profs]
+    actives = [p for p in profs if niveau_activite(rang_relatif(p["offre"], offres)) in ("très active", "active")]
+    ph = [f"À la date du guide, le marché de l'occasion est {'très animé' if avec >= 0.85 else 'animé' if avec >= 0.6 else 'plutôt calme'} : {presence} des éditions suivies ont au moins une annonce en ligne."]
+    if actives:
+        ph.append(f"L'activité se concentre sur {liste_mots(nom_serie(p) for p in sorted(actives, key=lambda p: -p['offre'])[:3])}, où l'offre est la plus fournie.")
+    calmes = [p for p in profs if niveau_activite(rang_relatif(p["offre"], offres)) == "atone"]
+    if calmes:
+        ph.append(f"À l'inverse, l'offre est atone pour {liste_mots(nom_serie(p) for p in sorted(calmes, key=lambda p: p['offre'])[:3])}.")
+    return ph
+
+
+def panorama_plateformes(profs):
+    """[(plateforme, phrase)] : le poids de chacune dans l'offre et les séries où elle se montre le plus."""
+    parts = part_sources(profs)
+    sortie = []
+    for k, nom in SOURCES:
+        if k == "rev" and parts[k] == 0:
+            continue
+        pluriel = nom.startswith("les ")
+        _, singulier, plur = next(m for m in PART_PLATEFORME if parts[k] >= m[0])
+        phares = [p for p in sorted(profs, key=lambda p: -p["sources"][k] / p["editions"]) if p["sources"][k] > 0][:2]
+        fin = f" {'Elles sont' if pluriel else 'Elle est'} surtout présente{'s' if pluriel else ''} pour {liste_mots(nom_serie(p) for p in phares)}." if phares and parts[k] >= 0.08 else ""
+        sujet = nom[0].upper() + nom[1:] if not nom.startswith("e") else nom
+        sortie.append((nom, f"{sujet} {plur if pluriel else singulier}.{fin}"))
+    return sortie
+
+
+def panorama_editeurs(profs, editeurs):
+    """[(éditeur, phrase)] : activité, niveau de prix et séries phares de chaque éditeur."""
+    offres = [p["offre"] for p in profs]
+    cotes = [p["cote"] for p in profs]
+    cotes_mot = {"bas": ("basses", "bas"), "moyen": ("moyennes", "moyen"), "haut": ("hautes", "haut")}
+    sortie = []
+    for e in editeurs:
+        ps = [p for p in profs if p["editeur"] == e]
+        if not ps:
+            continue
+        act = niveau_activite(rang_relatif(statistics.mean(p["offre"] for p in ps), offres))
+        px = niveau_prix(rang_relatif(statistics.median(p["cote"] for p in ps), cotes))
+        phares = liste_mots(p["serie"] for p in sorted(ps, key=lambda p: -p["editions"] * (1 + p["offre"]))[:3])
+        feminin, masculin = cotes_mot[px]
+        sortie.append((e, choix(e, (f"{e} : un marché {act.replace('très active', 'très actif').replace('active', 'actif')}, des cotes plutôt {feminin}. Séries à suivre : {phares}.",
+                                    f"Chez {e}, l'offre est {act} et le niveau des cotes {masculin}. Séries phares : {phares}."))))
+    return sortie
+
+
+def points_attention(profs):
+    """(séries en tension, séries abondantes) : [(éditeur, série)] ; la tension : cote haute et offre faible ; l'abondance : offre forte et cote basse."""
+    if not profs:
+        return [], []
+    mo, mc = statistics.median(p["offre"] for p in profs), statistics.median(p["cote"] for p in profs)
+    tension = sorted((p for p in profs if quadrant(p["offre"], p["cote"], mo, mc) == 2), key=lambda p: (-p["cote"] / (1 + p["offre"])))[:5]
+    abondantes = sorted((p for p in profs if quadrant(p["offre"], p["cote"], mo, mc) == 1), key=lambda p: -(p["offre"] / (1 + p["cote"])))[:5]
+    return [(p["editeur"], p["serie"]) for p in tension], [(p["editeur"], p["serie"]) for p in abondantes]
+
+
+def phrases_attention(profs):
+    t, a = points_attention(profs)
+    ph = []
+    if t:
+        ph.append(f"Séries en tension, où l'offre est rare pour des cotes élevées : {liste_mots(f'{e} · {s}' for e, s in t)}.")
+    if a:
+        ph.append(f"Séries abondantes, faciles à trouver à bas prix : {liste_mots(f'{e} · {s}' for e, s in a)}.")
+    return ph
+
+
+def dessiner_nuage(profs, largeur=174 * mm, hauteur=118 * mm, police="Helvetica", police_gras="Helvetica-Bold", c=None):
+    """Nuage de points : un point par série (éditeur entre parenthèses), offre en abscisse, niveau de prix en ordonnée. Ni graduation ni valeur : axes en mots ; les formes
+    (et non la couleur) disent le coin où se trouve la série."""
+    c = c or COULEURS_NUIT
     d = Drawing(largeur, hauteur)
-    if not lignes:
+    gx, gy, dr, hb = 8 * mm, 10 * mm, 4 * mm, 4 * mm
+    if not profs:
         return d
-    pas = hauteur / len(lignes)
-    gauche = 38 * mm
-    zone = largeur - gauche - 22 * mm
-    vmax = max(abs(v) for _, v in lignes) or 1
-    zero = gauche + (zone / 2 if divergent else 0)
-    for i, (nom, v) in enumerate(lignes):
-        y = hauteur - (i + 1) * pas + pas * 0.2
-        long = abs(v) / vmax * (zone / 2 if divergent else zone)
-        x0 = zero if v >= 0 or not divergent else zero - long
-        d.add(String(0, y + 0.6 * mm, nom, fontName=police, fontSize=8, fillColor=c["texte"]))
-        d.add(Rect(x0, y, max(long, 0.4), pas * 0.55, strokeColor=c["or"], strokeWidth=0.5, fillColor=c["or"] if v >= 0 else None))
-        texte = f"{v:+.1f} %".replace(".", ",").replace("-", "−") if unite == "pct" else str(v)
-        d.add(String(x0 + long + 1.5 * mm if (v >= 0 or not divergent) else x0 - 1.5 * mm, y + 0.8 * mm, texte, fontName=police_gras, fontSize=8, fillColor=c["texte"], textAnchor="start" if (v >= 0 or not divergent) else "end"))
-    if divergent:
-        d.add(Line(zero, 0, zero, hauteur, strokeColor=c["sourdine"], strokeWidth=0.5))
+    mo, mc = statistics.median(p["offre"] for p in profs), statistics.median(p["cote"] for p in profs)
+    omax = max(p["offre"] for p in profs) + 1
+    lo, hi = math.log(min(p["cote"] for p in profs) * 0.85), math.log(max(p["cote"] for p in profs) * 1.15)
+    X = lambda o: gx + math.log(o + 1) / math.log(omax + 1) * (largeur - gx - dr)  # noqa: E731
+    Y = lambda v: gy + (math.log(v) - lo) / (hi - lo) * (hauteur - gy - hb)  # noqa: E731
+    d.add(Rect(gx, gy, largeur - gx - dr, hauteur - gy - hb, strokeColor=c["filet"], fillColor=None, strokeWidth=0.6))
+    for (x1, y1, x2, y2) in ((X(mo), gy, X(mo), hauteur - hb), (gx, Y(mc), largeur - dr, Y(mc))):
+        d.add(Line(x1, y1, x2, y2, strokeColor=c["sourdine"], strokeWidth=0.6, strokeDashArray=[3, 3]))
+    for p in profs:
+        q, x, y = quadrant(p["offre"], p["cote"], mo, mc), X(p["offre"]), Y(p["cote"])
+        trait = dict(strokeColor=c["sourdine"], strokeWidth=0.6, fillColor=None if q == 0 else c["sourdine"] if q == 3 else c["fond"])
+        if q in (0, 3):
+            d.add(Circle(x, y, 1.9 * mm, **trait))
+        elif q == 1:
+            d.add(Rect(x - 1.8 * mm, y - 1.8 * mm, 3.6 * mm, 3.6 * mm, **trait))
+        else:
+            d.add(Polygon([x, y + 2.2 * mm, x - 2 * mm, y - 1.7 * mm, x + 2 * mm, y - 1.7 * mm], **trait))
+    for p in sorted(profs, key=lambda p: -p["editions"])[:9]:          # les séries les plus fournies sont nommées
+        x, y = X(p["offre"]), Y(p["cote"])
+        droite = x > largeur * 0.6
+        nom = f"{p['serie'][:24]} ({p['editeur'][:12]})"
+        d.add(String(x + (-3 if droite else 3) * mm, y + 1 * mm, nom, fontName=police, fontSize=6.6, fillColor=c["texte"], textAnchor="end" if droite else "start"))
+    for texte, x, y, ancre in (("En tension : offre faible, prix haut", gx + 2 * mm, hauteur - hb - 4 * mm, "start"), ("Offre forte, prix haut", largeur - dr - 2 * mm, hauteur - hb - 4 * mm, "end"),
+                               ("Offre faible, prix bas", gx + 2 * mm, gy + 2 * mm, "start"), ("Abondant : offre forte, prix bas", largeur - dr - 2 * mm, gy + 2 * mm, "end")):
+        d.add(String(x, y, texte, fontName=police_gras, fontSize=7.5, fillColor=c["or"], textAnchor=ancre))
+    # axes en mots : flèches dessinées (le sous-ensemble de police du site n'a pas de flèche)
+    ymid = 3.5 * mm
+    d.add(String(gx, 1.2 * mm, "offre faible", fontName=police, fontSize=8, fillColor=c["texte"]))
+    d.add(String(largeur - dr, 1.2 * mm, "offre forte", fontName=police, fontSize=8, fillColor=c["texte"], textAnchor="end"))
+    d.add(Line(gx + 22 * mm, ymid, largeur - dr - 22 * mm, ymid, strokeColor=c["sourdine"], strokeWidth=0.6))
+    d.add(Polygon([largeur - dr - 22 * mm, ymid + 1 * mm, largeur - dr - 19 * mm, ymid, largeur - dr - 22 * mm, ymid - 1 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
+    d.add(Line(3.2 * mm, gy + 18 * mm, 3.2 * mm, hauteur - hb - 14 * mm, strokeColor=c["sourdine"], strokeWidth=0.6))
+    d.add(Polygon([2.2 * mm, hauteur - hb - 17 * mm, 3.2 * mm, hauteur - hb - 14 * mm, 4.2 * mm, hauteur - hb - 17 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
+    g = Group(String(0, 0, "prix bas", fontName=police, fontSize=8, fillColor=c["texte"]), String(0, 0, "", fontName=police, fontSize=8))
+    g.rotate(90)
+    g.translate(gy + 1 * mm, -2.2 * mm)
+    d.add(g)
+    g2 = Group(String(0, 0, "prix haut", fontName=police, fontSize=8, fillColor=c["texte"], textAnchor="end"))
+    g2.rotate(90)
+    g2.translate(hauteur - hb - 1 * mm, -2.2 * mm)
+    d.add(g2)
     return d
+
+
+def textes(versions, donnees, editeur_de, editeurs):
+    """Tous les textes d'analyse calculés (pour les pages et pour les tests) : {rubrique: [phrases]}."""
+    profs = profils(versions, donnees["offre"], editeur_de)
+    return {"synthese": synthese(profs, versions, donnees["offre"]), "plateformes": [t for _, t in panorama_plateformes(profs)], "editeurs": [t for _, t in panorama_editeurs(profs, editeurs)],
+            "attention": phrases_attention(profs)}, profs
