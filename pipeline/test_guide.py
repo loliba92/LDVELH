@@ -66,6 +66,7 @@ class TestGuide(unittest.TestCase):
                     self.assertIsNone(re.search(r"\d+[,.]\d+", texte), texte)
         f = g.Fiche(self.versions[0], g.STYLES["nuit"], ("Times-Roman", "Times-Bold", "Helvetica", "Helvetica-Bold"), self.web, {})
         self.assertIn("Rareté en vente", f.libelles())
+        self.assertFalse(any(x in " ".join(f.libelles()).split() for x in ("C", "BE", "TBE")))
         self.assertNotIn("Rare", " ".join(f.meta.split(" · ")[1:]))          # plus de rareté structurelle à côté du numéro et de la version
 
     def test_pdf_genere_sans_montant_ni_decimal(self):
@@ -118,69 +119,106 @@ class TestGuide(unittest.TestCase):
         self.assertGreaterEqual(donnees.count(b"/Type /Page\n") + donnees.count(b"/Type /Page "), 5)          # couverture, présentation, sommaire, deux séries
 
 
-class TestAnalyse(unittest.TestCase):
+class TestRadar(unittest.TestCase):
     def setUp(self):
-        noms = (("Gallimard", "Serie Alpha"), ("Gallimard", "Serie Beta"), ("Alkonost", "Serie Gamma"), ("Hachette", "Serie Delta"))
+        noms = (("Gallimard", "Serie Alpha"), ("Gallimard", "Serie Beta"), ("Gallimard", "Serie Gamma"), ("Alkonost", "Serie Delta"), ("Hachette", "Serie Epsilon"))
         self.v, self.offre, k = [], {}, 0
         for i, (e, s) in enumerate(noms):
             for j in range(5):
                 k += 1
                 isbn = f"97800000{k:05d}"
                 self.v.append({"isbn13": isbn, "titre": f"Livre {k}", "serie": s, "editeur": e, "version": f"V{j % 2 + 1}", "prix": {"bon": 6.0 + 9 * i, "tres_bon": 8.0 + 12 * i}})
-                self.offre[isbn] = {"vin": (4 - i) * 3, "lbc": 1, "ebay": i % 2, "lib": 1 if i == 0 else 0}
+                self.offre[isbn] = {"vin": (5 - i) * 3, "lbc": 1, "ebay": i % 2, "lib": 1 if i == 0 else 0}
+        self.polices = ("Times-Roman", "Times-Bold", "Helvetica", "Helvetica-Bold")
+
+    def section(self):
+        styles = {k: g.ParagraphStyle(k) for k in ("corps", "h1", "h1m", "h2", "toc", "puce_radar")}
+        return g.section_radar(self.v, {"offre": self.offre}, styles, "2026-11-19", self.polices, g.STYLES["nuit"])
+
+    def textes(self, flowables):
+        from reportlab.graphics.shapes import Drawing
+        from reportlab.platypus import KeepTogether, Paragraph, Table
+        sortie = []
+        def parcourir(f):
+            if isinstance(f, Paragraph):
+                sortie.append(f.getPlainText())
+            elif isinstance(f, Drawing):
+                sortie.extend(getattr(x, "text", "") for x in f.contents)
+            elif isinstance(f, KeepTogether):
+                for x in f._content:
+                    parcourir(x)
+            elif isinstance(f, Table):
+                for ligne in f._cellvalues:
+                    for cellule in ligne:
+                        for x in (cellule if isinstance(cellule, list) else [cellule]):
+                            parcourir(x)
+        for f in flowables:
+            parcourir(f)
+        return sortie
 
     def test_profils_une_serie_par_editeur_avec_assez_d_editions(self):
         profs = ga.profils(self.v, self.offre, g.editeur_de)
-        self.assertEqual(sorted((p["editeur"], p["serie"]) for p in profs), sorted((e, s) for e, s in (("Gallimard", "Serie Alpha"), ("Gallimard", "Serie Beta"), ("Alkonost", "Serie Gamma"), ("Hachette", "Serie Delta"))))
+        self.assertEqual(len(profs), 5)
         self.assertEqual(ga.profils(self.v[:3], self.offre, g.editeur_de), [])          # trop peu d'éditions
 
-    def test_quadrants_et_mots(self):
+    def test_zones_comme_le_radar_du_site(self):
         self.assertEqual([ga.quadrant(o, c, 5, 20) for o, c in ((1, 10), (9, 10), (1, 30), (9, 30))], [0, 1, 2, 3])
-        self.assertEqual([ga.niveau_activite(r) for r in (0.9, 0.6, 0.3, 0.0)], ["très active", "active", "calme", "atone"])
-        self.assertEqual([ga.niveau_prix(r) for r in (0.9, 0.5, 0.1)], ["haut", "moyen", "bas"])
+        self.assertEqual(sorted(ga.ZONES.values()), sorted(["Peu d'annonces, cher", "Beaucoup d'annonces, cher", "Peu d'annonces, bon marché", "Beaucoup d'annonces, bon marché"]))
 
-    def test_aucun_chiffre_dans_les_pages_d_analyse(self):
-        textes, _ = ga.textes(self.v, {"offre": self.offre}, g.editeur_de, g.EDITEURS_CONNUS)
-        tous = [t for l in textes.values() for t in l]
-        self.assertTrue(tous)
-        for t in tous:
+    def test_aucun_chiffre_dans_le_chapitre_radar(self):
+        textes = self.textes(self.section())
+        self.assertGreater(len(textes), 20)
+        for t in textes:
             self.assertFalse(any(ch.isdigit() for ch in t), t)
-        # la section complète (paragraphes et titres) : aucun chiffre non plus
-        from reportlab.platypus import Paragraph
-        styles = {k: g.ParagraphStyle(k) for k in ("corps", "h1", "h1m", "h2", "toc")}
-        section = g.section_analyse(self.v, {"offre": self.offre}, styles, "2026-11-19", ("Times-Roman", "Times-Bold", "Helvetica", "Helvetica-Bold"), g.STYLES["nuit"])
-        for f in section:
-            if isinstance(f, Paragraph):
-                self.assertFalse(any(ch.isdigit() for ch in f.getPlainText()), f.getPlainText())
 
-    def test_chaque_phrase_nomme_un_editeur_et_une_serie_jamais_une_edition_seule(self):
-        textes, _ = ga.textes(self.v, {"offre": self.offre}, g.editeur_de, g.EDITEURS_CONNUS)
-        for t in textes["synthese"] + textes["attention"]:
-            self.assertNotRegex(t, r"\bV\d\b")
-        self.assertTrue(any("Gallimard · Serie" in t for t in textes["synthese"] + textes["plateformes"]))
+    def test_pas_de_ce_livre_et_un_radar_par_grand_editeur(self):
+        textes = " ".join(self.textes(self.section()))
+        self.assertNotIn("Ce livre", textes)
+        self.assertIn("Gallimard", textes)
+        profs = ga.profils(self.v, self.offre, g.editeur_de)
+        self.assertEqual(ga.grands_editeurs(profs), ["Gallimard"])
 
-    def test_les_plateformes_sont_nommees_dans_l_analyse_seulement(self):
-        textes, _ = ga.textes(self.v, {"offre": self.offre}, g.editeur_de, g.EDITEURS_CONNUS)
-        self.assertTrue(any("Vinted" in t for t in textes["plateformes"]))
+    def test_chaque_serie_est_etiquetee_editeur_et_serie(self):
+        profs = ga.profils(self.v, self.offre, g.editeur_de)
+        pts = ga.points_editions(self.v, self.offre)
+        d = ga.dessiner_radar(pts, [p for p in profs if p["editeur"] == "Gallimard"], 182 * g.mm, 90 * g.mm)
+        etiquettes = [getattr(x, "text", "") for x in d.contents]
+        self.assertTrue(any(t.startswith("Gallimard · Serie") for t in etiquettes))
+        for mot in ("peu d'annonces", "beaucoup d'annonces", "cher", "pas cher"):
+            self.assertIn(mot, etiquettes)
+
+    def test_verdicts_et_series_a_surveiller_en_mots(self):
+        profs = ga.profils(self.v, self.offre, g.editeur_de)
+        pts = ga.points_editions(self.v, self.offre)
+        for _, phrase in ga.verdicts_editeur([p for p in profs if p["editeur"] == "Gallimard"], pts):
+            self.assertFalse(any(ch.isdigit() for ch in phrase), phrase)
+        tendues, faciles = ga.series_a_surveiller(profs, pts)
+        for e, s, mot in tendues + faciles:
+            self.assertIn("à trouver", mot)
+        self.assertTrue(ga.lecture_globale(pts))
+
+    def test_les_plateformes_ne_sont_pas_nommees_dans_la_methode(self):
         source = (Path(__file__).resolve().parent / "guide.py").read_text(encoding="utf-8")
-        methode = source[source.index("Les cotes sont des estimations"):source.index("Le marché en bref")]
+        methode = source[source.index("Les cotes sont des estimations"):source.index("Le radar de tout le guide")]
         for nom in ("Vinted", "Leboncoin", "eBay"):
             self.assertNotIn(nom, methode)
-
-    def test_le_nuage_ne_contient_aucun_nombre(self):
-        profs = ga.profils(self.v, self.offre, g.editeur_de)
-        d = ga.dessiner_nuage(profs)
-        chaines = [getattr(x, "text", "") for x in d.contents]
-        self.assertTrue(any(chaines))
-        self.assertFalse(any(ch.isdigit() for c in chaines for ch in c))
-
-    def test_phrases_stables_et_variees(self):
-        self.assertEqual(ga.choix("Gallimard", ("a", "b")), ga.choix("Gallimard", ("a", "b")))
-        self.assertIn("Gallimard", ga.panorama_editeurs(ga.profils(self.v, self.offre, g.editeur_de), ["Gallimard"])[0][1])
 
     def test_le_pdf_ne_contient_pas_de_sans_publicite(self):
         for f in ("guide.py", "guide_analyse.py"):
             self.assertNotIn("sans publicité", (Path(__file__).resolve().parent / f).read_text(encoding="utf-8").lower())
+
+    def test_aucune_abreviation_d_etat_dans_le_pdf(self):
+        import re
+        import shutil
+        import subprocess
+        if not shutil.which("pdftotext"):
+            self.skipTest("pdftotext absent")
+        sortie = Path(tempfile.mkdtemp()) / "e.pdf"
+        g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
+        texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
+        self.assertIsNone(re.search(r"\b(C|BE|TBE)\b", texte), "abréviation d'état trouvée")
+        for mot in ("convenable", "bon état", "très bon état"):
+            self.assertNotIn(mot, texte.lower())
 
 
 if __name__ == "__main__":
