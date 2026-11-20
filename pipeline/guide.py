@@ -46,8 +46,9 @@ EMBLEME = WEB / "icons" / "icon-512.png"          # le sceau du site : le person
 SITE = "lacoteduheros.fr"
 LIEN_SITE = "https://lacoteduheros.fr"
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 30 mm (environ 195 points par pouce)
+LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 28 mm (environ 210 points par pouce)
 COLONNES = 5
+LARGEUR_JAQUETTE = 28 * mm          # largeur de la jaquette dans la grille (5 colonnes)
 MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
 L_PAGE, H_PAGE = A4
 L_CADRE = L_PAGE - 2 * MARGE_X
@@ -360,7 +361,7 @@ class Fiche(Flowable):
         super().__init__()
         self.v, self.st, self.pol, self.web, self.reperes = v, st, polices, web, reperes
         self.largeur = L_CADRE / COLONNES
-        self.iw = 30 * mm
+        self.iw = LARGEUR_JAQUETTE
         jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
         self.image = None
         self.ih = self.iw * 7 / 5
@@ -754,8 +755,12 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                     t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
                     rangs.append(t)
                 tete = TeteSerie(nom, len(livres), st, pol)
-                # les bandeaux d'éditeur, de version et de série ne sont jamais seuls en bas de page : au moins une rangée avec eux ; une rangée n'est jamais coupée ; V1 et V5 ne se mélangent pas dans une rangée
-                histoire += [KeepTogether((entete if i == 0 else []) + [tete] + rangs[:1])] + rangs[1:]
+                # une série qui tient sur une page n'est jamais coupée ; sinon, bandeaux avec au moins une rangée, et jamais une seule rangée isolée en haut de page
+                bloc = (entete if i == 0 else []) + [tete] + rangs
+                if sum(f.wrap(L_CADRE, H_PAGE)[1] for f in bloc) <= H_PAGE - HAUT - BAS:
+                    histoire += [KeepTogether(bloc)]
+                else:
+                    histoire += [KeepTogether((entete if i == 0 else []) + [tete] + rangs[:1])] + rangs[1:-2] + [KeepTogether(rangs[-2:])]
     if donnees is not False:
         histoire += [NextPageTemplate("texte"), PageBreak()] + section_radar(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
     doc.multiBuild(histoire)

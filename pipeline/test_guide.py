@@ -231,6 +231,28 @@ class TestRadar(unittest.TestCase):
         for mot in ("convenable", "bon état", "très bon état"):
             self.assertNotIn(mot, texte.lower())
 
+    def test_une_serie_courte_n_est_jamais_coupee_ni_une_rangee_isolee(self):
+        v = [livre(f"L{k}", f"Série {c}", str(k), "V1") for c, n in (("A", 8), ("B", 10), ("C", 6), ("D", 9), ("E", 7), ("F", 28)) for k in range(1, n + 1)]
+        evenements = []
+        origine = g.Fiche.draw
+        g.Fiche.draw = lambda self: (evenements.append((self.canv.getPageNumber(), self.v["serie"])), origine(self))[1]
+        try:
+            g.construire(v, Path(tempfile.mkdtemp()) / "m.pdf", "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees=False)
+        finally:
+            g.Fiche.draw = origine
+        passes = [[]]
+        for e in evenements:          # la construction se fait en plusieurs passes : seule la dernière compte
+            if passes[-1] and e[0] < passes[-1][-1][0]:
+                passes.append([])
+            passes[-1].append(e)
+        pages = {}
+        for page, serie in passes[-1]:
+            pages.setdefault(serie, []).append(page)
+        for serie in "ABCDE":
+            self.assertEqual(len(set(pages[f"Série {serie}"])), 1, f"Série {serie} coupée")
+        self.assertGreater(len(set(pages["Série F"])), 1)          # une longue série passe sur plusieurs pages
+        self.assertGreaterEqual(pages["Série F"].count(pages["Série F"][-1]), 6)          # la dernière page garde au moins deux rangées
+
 
 if __name__ == "__main__":
     unittest.main()
