@@ -60,7 +60,7 @@
    "version": "V1",
    "etat": "bon",
    "avant": 43.53,
-   "apres": 51.49,
+   "apres": 51.51,
    "pct": 0.183,
    "nature": "annonces",
    "nb": 3,
@@ -75,7 +75,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 49.49,
-   "apres": 57.49,
+   "apres": 57.51,
    "pct": 0.162,
    "nature": "annonces",
    "nb": 2,
@@ -90,8 +90,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 37.16,
-   "apres": 43.12,
-   "pct": 0.16,
+   "apres": 43.14,
+   "pct": 0.161,
    "nature": "annonces",
    "nb": 4,
    "recalibre": false
@@ -165,7 +165,7 @@
    "version": "V4",
    "etat": "bon",
    "avant": 44.83,
-   "apres": 49.33,
+   "apres": 49.32,
    "pct": 0.1,
    "nature": "ventes",
    "nb": 1,
@@ -192,9 +192,9 @@
  "nb_grands_mouvements": 12,
  "modele": {
   "actif": false,
-  "n_paires": 289,
-  "gain": 0.04,
-  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
-  "rapport_global": 1.071
+  "n_paires": 288,
+  "gain": 0.046,
+  "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
+  "rapport_global": 1.072
  }
 }

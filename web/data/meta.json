@@ -18,11 +18,11 @@
   "nb_prix_actuels": 718,
   "calibration": {
     "actif": false,
-    "n_paires": 289,
-    "gain": 0.04,
-    "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+    "n_paires": 288,
+    "gain": 0.046,
+    "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
     "calcule_le": "2026-11-20",
-    "rapport_global": 1.071,
+    "rapport_global": 1.072,
     "nb_recalibres": 0
   }
 }
