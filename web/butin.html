@@ -142,8 +142,6 @@
     <div class="rv-onglets rc-vue rc-periode" id="rc-quand" role="group" aria-label="Annonces reçues"><button type="button" data-quand="auj" aria-pressed="false">Aujourd'hui</button><button type="button" data-quand="sem" aria-pressed="false">Cette semaine</button><button type="button" data-quand="tout" aria-pressed="true">Toutes</button></div>
     <div class="rv-onglets rc-vue" id="rc-vue" role="group" aria-label="Affichage des annonces"><button type="button" data-vue="grille" aria-pressed="true">Jaquettes</button><button type="button" data-vue="liste" aria-pressed="false">Liste</button></div>
     <div class="champ rc-recherche"><label for="rc-q">Chercher un livre</label><input type="search" id="rc-q" autocomplete="off" placeholder="un mot du titre"></div>
-    <details class="rc-acc" id="rc-acc" open>
-    <summary>Filtres et tri <span class="rc-nb" id="rc-nb-filtres"></span></summary>
     <div class="rc-presets" id="rc-presets" role="group" aria-label="Préréglages">
       <span class="rc-presets-lib">Préréglages</span>
       <button type="button" data-preset="chasse">Chasse</button>
@@ -152,6 +150,8 @@
       <button type="button" data-preset="verification">Vérification</button>
     </div>
     <p class="sous rc-preset-txt" id="rc-preset-txt" hidden></p>
+    <details class="rc-acc" id="rc-acc" open>
+    <summary>Filtres et tri <span class="rc-nb" id="rc-nb-filtres"></span></summary>
     <div class="pp-outils">
       <label class="pp-tri"><span>Trier par</span><select id="rc-tri">
         <option value="recent">Date et heure (récentes d'abord)</option>
