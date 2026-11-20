@@ -2,7 +2,7 @@
  "date": "2026-11-20",
  "precedent": "2026-11-19",
  "nb_comparees": 1545,
- "nb_modifiees": 1443,
+ "nb_modifiees": 1442,
  "mediane_variation": -0.002,
  "nouvelles_cotes": 3,
  "hausses": [
@@ -52,18 +52,18 @@
    "recalibre": false
   },
   {
-   "id": "9782070585168",
-   "isbn13": "9782070585168",
-   "titre": "La Malédiction de Naar",
-   "serie": "Loup Solitaire",
-   "numero": "749",
+   "id": "9782070520329",
+   "isbn13": "9782070520329",
+   "titre": "Les Accessoires du Maître",
+   "serie": "L'Œil Noir",
+   "numero": "000",
    "version": "V1",
-   "etat": "tres_bon",
-   "avant": 49.49,
-   "apres": 57.59,
-   "pct": 0.164,
+   "etat": "bon",
+   "avant": 43.53,
+   "apres": 51.58,
+   "pct": 0.185,
    "nature": "annonces",
-   "nb": 2,
+   "nb": 3,
    "recalibre": false
   },
   {
@@ -75,10 +75,25 @@
    "version": "V1",
    "etat": "bon",
    "avant": 37.16,
-   "apres": 43.23,
-   "pct": 0.163,
+   "apres": 43.28,
+   "pct": 0.165,
    "nature": "annonces",
    "nb": 4,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 49.49,
+   "apres": 57.63,
+   "pct": 0.164,
+   "nature": "annonces",
+   "nb": 2,
    "recalibre": false
   },
   {
@@ -112,21 +127,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070520329",
-   "isbn13": "9782070520329",
-   "titre": "Les Accessoires du Maître",
-   "serie": "L'Œil Noir",
-   "numero": "000",
-   "version": "V1",
-   "etat": "convenable",
-   "avant": 35.18,
-   "apres": 39.15,
-   "pct": 0.113,
-   "nature": "archives",
-   "nb": 1,
-   "recalibre": false
-  },
-  {
    "id": "9782075084499",
    "isbn13": "9782075084499",
    "titre": "La Crypte du Sorcier",
@@ -148,12 +148,12 @@
    "serie": "L'Œil Noir",
    "numero": "000",
    "version": "V1",
-   "etat": "bon",
-   "avant": 43.53,
-   "apres": 47.96,
-   "pct": 0.102,
-   "nature": "annonces",
-   "nb": 2,
+   "etat": "convenable",
+   "avant": 35.18,
+   "apres": 38.8,
+   "pct": 0.103,
+   "nature": "archives",
+   "nb": 1,
    "recalibre": false
   }
  ],
@@ -177,9 +177,9 @@
  "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
-  "n_paires": 289,
-  "gain": 0.029,
+  "n_paires": 288,
+  "gain": 0.034,
   "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
-  "rapport_global": 1.055
+  "rapport_global": 1.053
  }
 }
