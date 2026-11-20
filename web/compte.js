@@ -48,11 +48,22 @@ window.Compte = (function () {
     espace: '<path d="M5 19L15 9"/><path d="M16 3l1 2.5L19.5 7 17 8l-1 2.5L15 8l-2.5-1L15 5.5z"/>',
     butin: '<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20"/>',
     equipe: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2 .6 3 2.5 3 5"/>',
+    livre: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
     deconnecter: '<path d="M10 4H5v16h5"/><path d="M15 8l4 4-4 4M19 12H9"/>'
   };
   function ico(nom) { return '<svg class="ico-menu" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICO[nom] + '</svg>'; }
 
   // Niveau minimum pour voir la ligne : Héros (tout compte connecté), niveau 2, niveau 3 (qui voit aussi ce qui est réservé aux niveaux d'en dessous)
+
+  // Guide PDF : nom du fichier lu une seule fois dans data/guide.json (sorciers et Zagor)
+  var guideFichier = '', guideDemande = false;
+  function lireGuide() {
+    if (guideDemande || (role !== 'admin' && role !== 'superadmin')) return;
+    guideDemande = true;
+    fetch('data/guide.json', { cache: 'no-cache' }).then(function (x) { return x.ok ? x.json() : null; }).then(function (g) {
+      if (g && /^guide-reference-[0-9a-f]{32}\.pdf$/.test(g.fichier || '')) { guideFichier = g.fichier; dessiner(); }
+    }).catch(function () { /* pas de guide : la ligne reste cachée */ });
+  }
 
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
@@ -69,6 +80,7 @@ window.Compte = (function () {
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butins et Annonces</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="evolutions.html">' + ico('butin') + 'Évolutions des prix</a></li>' : '') +
+      (guideFichier && (role === 'admin' || role === 'superadmin') ? '<li><a href="' + guideFichier + '" target="_blank" rel="noopener">' + ico('livre') + 'Guide de référence (PDF)</a></li>' : '') +
       (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('espace') + 'Prix et corrections</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
@@ -77,6 +89,7 @@ window.Compte = (function () {
   }
 
   function dessiner() {
+    lireGuide();
     var e = etat();
     var haut = $('#compte-haut');
     if (haut) {

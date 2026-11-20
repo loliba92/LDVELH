@@ -1681,7 +1681,7 @@
   }
   initSousOnglets();
   // Annonces : lien et onglet réservés au niveau 3 (le rôle arrive après la connexion)
-  let pepitesOuvertes = false, recuesOuvertes = false, analyseOuverte = false, guideLu = false;
+  let pepitesOuvertes = false, recuesOuvertes = false, analyseOuverte = false;
   function majAnnonces() {
     const super_ = estNiveau3(), niveau2 = estNiveau2();
     const replier = (onglet) => { if (onglet && onglet.getAttribute('aria-selected') === 'true') { const prix = document.querySelector('#rv-nav [data-pane="prix"]') || document.querySelector('#rv-nav [data-pane="pepites"]'); if (prix) prix.click(); } };
@@ -1704,10 +1704,6 @@
     else if (niveau2 && ancre === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     restaurerOnglet();
-    if (niveau2 && !guideLu) {          // lien non listé vers le guide PDF (sorciers et Zagor) : le nom du fichier est dans data/guide.json, présent seulement quand la publication a pu le générer
-      guideLu = true;
-      fetch('data/guide.json', { cache: 'no-cache' }).then((x) => (x.ok ? x.json() : null)).then((g) => { const lien = $('#guide-lien'); if (g && /^guide-reference-[0-9a-f]{32}\.pdf$/.test(g.fichier || '') && lien) { lien.href = g.fichier; $('#guide-zone').hidden = false; } }).catch(() => { /* pas de guide : le bouton reste caché */ });
-    }
     if (niveau2) chargerButin().then(() => dessinerPepites());
     if (niveau2) chargerAnnonces().then(() => { if (ANN && EDITIONS.length) afficher(); dessinerRecues(); });
     else if (EDITIONS.length) afficher();
