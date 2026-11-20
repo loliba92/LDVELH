@@ -58,12 +58,12 @@
    "serie": "Loup Solitaire",
    "numero": "749",
    "version": "V1",
-   "etat": "bon",
-   "avant": 37.16,
-   "apres": 43.21,
-   "pct": 0.163,
+   "etat": "tres_bon",
+   "avant": 49.49,
+   "apres": 57.59,
+   "pct": 0.164,
    "nature": "annonces",
-   "nb": 4,
+   "nb": 2,
    "recalibre": false
   },
   {
@@ -73,12 +73,12 @@
    "serie": "Loup Solitaire",
    "numero": "749",
    "version": "V1",
-   "etat": "tres_bon",
-   "avant": 49.49,
-   "apres": 57.57,
+   "etat": "bon",
+   "avant": 37.16,
+   "apres": 43.23,
    "pct": 0.163,
    "nature": "annonces",
-   "nb": 2,
+   "nb": 4,
    "recalibre": false
   },
   {
@@ -120,7 +120,7 @@
    "version": "V1",
    "etat": "convenable",
    "avant": 35.18,
-   "apres": 39.14,
+   "apres": 39.15,
    "pct": 0.113,
    "nature": "archives",
    "nb": 1,
@@ -177,9 +177,9 @@
  "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
-  "n_paires": 288,
-  "gain": 0.034,
+  "n_paires": 289,
+  "gain": 0.029,
   "raison": "le modèle ne bat pas assez les archives (gain 3%, 15% exigés)",
-  "rapport_global": 1.053
+  "rapport_global": 1.055
  }
 }
