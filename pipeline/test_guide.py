@@ -120,7 +120,10 @@ class TestGuide(unittest.TestCase):
         self.assertGreaterEqual(donnees.count(b"/Type /Page\n") + donnees.count(b"/Type /Page "), 5)          # couverture, présentation, sommaire, deux séries
 
     def test_couverture_titre_et_date(self):
+        import shutil
         import subprocess
+        if not shutil.which("pdftotext"):
+            self.skipTest("pdftotext absent")
         for variante in ("or", "creme"):
             g.TITRE_COUVERTURE = variante
             sortie = self.web / f"c-{variante}.pdf"
