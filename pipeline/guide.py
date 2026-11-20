@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import guide_analyse as ga
 
 # ---- RÉGLAGES à changer ici (valeur unique) : choix du propriétaire en attente ----
-STYLE_PAR_DEFAUT = "nuit"            # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
+STYLE_PAR_DEFAUT = "parchemin"          # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
 SOUS_TITRE_PAR_DEFAUT = "clair"      # sous-titre de la couverture « huile » : "clair" ou "bandeau" (sans effet sur la couverture V1)
 COUVERTURE_PAR_DEFAUT = "v1"         # illustration de couverture : "v1" (héros et dragon) ou "huile" (ancienne couverture)
 # -------------------------------------------------------------------------------------
