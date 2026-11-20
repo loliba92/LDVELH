@@ -51,11 +51,11 @@ MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
 L_PAGE, H_PAGE = A4
 L_CADRE = L_PAGE - 2 * MARGE_X
 
-# Deux directions de style. « nuit » reprend la palette du site. « parchemin » : crème du papier de la couverture et brun encre (couleurs nouvelles, pour l'impression papier).
+# Deux directions de style. « nuit » reprend la palette du site. « parchemin » : fond blanc, brun encre et or (couleurs nouvelles, pour l'impression papier).
 STYLES = {
     "nuit": {"fond": "#0c0a08", "texte": "#f2e9d8", "sourdine": "#b8ad99", "or": "#d9b45f", "titre": "#d9b45f", "filet": "#d2a64a", "pastille": "#2a2412", "grille": "#2c261e",
              "ombre": (0, 0, 0), "ombre_alpha": 0.5, "filigrane": 0.065, "embleme": (217, 180, 95)},
-    "parchemin": {"fond": "#f3e9d2", "texte": "#2a2118", "sourdine": "#6d5d47", "or": "#8c6a1c", "titre": "#7a5a14", "filet": "#b08a37", "pastille": "#e6d6b0", "grille": "#d9c9a3",
+    "parchemin": {"fond": "#ffffff", "texte": "#2a2118", "sourdine": "#6d5d47", "or": "#8c6a1c", "titre": "#7a5a14", "filet": "#b08a37", "pastille": "#e6d6b0", "grille": "#d9c9a3",
                   "ombre": (0.35, 0.25, 0.1), "ombre_alpha": 0.35, "filigrane": 0.10, "embleme": (140, 106, 28)},
 }
 
