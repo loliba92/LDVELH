@@ -640,7 +640,9 @@
     const pre = a.lien + '|';
     let c = null, origine = '';
     Object.keys(t).forEach((k) => { if (k.indexOf(pre) === 0 && (k.slice(pre.length) === a.ed.isbn || t[k].isbn13 === a.ed.isbn)) { c = t[k]; origine = k.slice(pre.length); } });
-    return c ? { c, origine } : { c: t[a.lien] || null, origine: '' };
+    if (c) return { c, origine };
+    const entiere = t[a.lien] || null;          // correction de l'annonce entière : pour un lot, une édition choisie ne vaut pas pour les autres livres
+    return { c: entiere && nbLot(a) && (entiere.statut === 'reaffectee' || entiere.statut === 'confirmee') ? null : entiere, origine: '' };
   };
   const estVendue = (a, t) => { const c = corrCarte(a, t).c; return !!((c && c.statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien])); };
   let NB_CORR = 0;
