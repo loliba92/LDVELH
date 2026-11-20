@@ -3,7 +3,7 @@
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
-  var configure = null, configPrete = false, exigeCompte = false, role = '', finAcces = '', echecRole = '', intention = null, reprisEnCours = false;
+  var configure = null, configPrete = false, exigeCompte = false, role = '', nomRelais = '', finAcces = '', echecRole = '', intention = null, reprisEnCours = false;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -65,6 +65,58 @@ window.Compte = (function () {
     }).catch(function () { /* pas de guide : la ligne reste cachée */ });
   }
 
+  // Guide PDF personnalisé : le nom de la personne est écrit au pied de chaque page (hors couverture), dans le navigateur ; jamais d'adresse
+  var PDFLIB = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+  function nomGuide() {
+    var n = String(nomRelais || (window.Cloud && window.Cloud.nom()) || '').replace(/[\u0000-\u001f|;\s]+/g, ' ').trim().slice(0, 30);
+    return n || 'un sorcier';
+  }
+  function chargerPdfLib() {
+    if (window.PDFLib) return Promise.resolve(window.PDFLib);
+    return new Promise(function (ok, ko) {
+      var sc = document.createElement('script');
+      sc.src = PDFLIB; sc.async = true;
+      sc.onload = function () { if (window.PDFLib) ok(window.PDFLib); else ko(new Error('pdf-lib')); };
+      sc.onerror = function () { ko(new Error('pdf-lib')); };
+      document.head.appendChild(sc);
+    });
+  }
+  function enregistrer(blob, fichier) {
+    var u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = fichier; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 60000);
+  }
+  function telechargerGuide() {
+    var nom = nomGuide(), brut = guideFichier;
+    annoncer('Préparation du guide à votre nom…');
+    return Promise.all([chargerPdfLib(), fetch(brut).then(function (x) { if (!x.ok) throw new Error('guide'); return x.arrayBuffer(); })]).then(function (t) {
+      var L = t[0];
+      return L.PDFDocument.load(t[1], { updateMetadata: false }).then(function (doc) {
+        return doc.embedFont(L.StandardFonts.Helvetica).then(function (police) {
+          var propre = nom.split('').filter(function (c) { try { police.widthOfTextAtSize(c, 6); return true; } catch (e) { return false; } }).join('').trim() || 'un sorcier';
+          var texte = 'Offert à ' + propre + ' · Document réservé aux sorciers de La Cote du Héros · ne pas diffuser';
+          doc.getPages().forEach(function (pg, i) {
+            if (i === 0) return;          // pas sur la couverture
+            var w = pg.getWidth(), tw = police.widthOfTextAtSize(texte, 6);
+            pg.drawRectangle({ x: (w - tw) / 2 - 4, y: 17.4, width: tw + 8, height: 8.6, color: L.rgb(1, 1, 1), opacity: 0.88 });          // lisible aussi sur les pages d'ouverture illustrées
+            pg.drawText(texte, { x: (w - tw) / 2, y: 20, size: 6, font: police, color: L.rgb(0.3, 0.24, 0.16) });
+          });
+          doc.setAuthor('La Cote du Héros · offert à ' + propre);
+          doc.setSubject((doc.getSubject() || '') + ' · Offert à ' + propre);
+          return doc.save().then(function (octets) {
+            var court = propre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            enregistrer(new Blob([octets], { type: 'application/pdf' }), 'guide-reference' + (court ? '-' + court : '') + '.pdf');
+            annoncer('Guide enregistré à votre nom.');
+          });
+        });
+      });
+    }).catch(function () {          // repli : le guide d'origine, sans le nom
+      var a = document.createElement('a');
+      a.href = brut; a.download = ''; document.body.appendChild(a); a.click(); a.remove();
+      annoncer('Guide téléchargé sans votre nom.');
+    });
+  }
+
   function bloc(e) {   // contenu commun au menu du haut et à la feuille mobile
     var nom = window.Cloud && window.Cloud.nom();
     if (e.cle === 'deconnecte') {
@@ -80,7 +132,7 @@ window.Compte = (function () {
       (role === 'admin' || role === 'superadmin' ? '<li><a href="butin.html">' + ico('butin') + 'Butins et Annonces</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="ajouter.html">' + ico('demande') + 'Ajouter des livres</a></li>' : '') +
       (role === 'admin' || role === 'superadmin' ? '<li><a href="evolutions.html">' + ico('butin') + 'Évolutions des prix</a></li>' : '') +
-      (guideFichier && (role === 'admin' || role === 'superadmin') ? '<li><a href="' + guideFichier + '" target="_blank" rel="noopener">' + ico('livre') + 'Guide de référence (PDF)</a></li>' : '') +
+      (guideFichier && (role === 'admin' || role === 'superadmin') ? '<li><a href="' + guideFichier + '" data-compte="guide" target="_blank" rel="noopener">' + ico('livre') + 'Guide de référence (PDF)</a></li>' : '') +
       (role === 'superadmin' ? '<li class="compte-section">Gestion</li><li><a href="revue-prix.html">' + ico('espace') + 'Prix et corrections</a></li>' : '') +
       (role === 'superadmin' && window.Compte.avecEquipe ? '<li><a href="equipe.html">' + ico('equipe') + 'Équipe</a></li>' : '') +
       (e.cle === 'a-jour' ? '<li><button type="button" class="bouton-lien" data-compte="sync">' + ico('sync') + 'Synchroniser maintenant</button></li>' : '') +
@@ -235,7 +287,7 @@ window.Compte = (function () {
     if (rolePromesse) return rolePromesse;                                   // une seule demande à la fois
     if (Date.now() - derniereRole < 60000 && role) return Promise.resolve();          // vérifié il y a moins d'une minute
     rolePromesse = window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; finAcces = r.fin || ''; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); garderRole(); if (role !== 'admin' && role !== 'superadmin' && window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); signalerCompte(); }
+      if (r && r.ok) { role = r.role; nomRelais = r.nom || ''; finAcces = r.fin || ''; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); garderRole(); if (role !== 'admin' && role !== 'superadmin' && window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
     }).catch(function () { echecRole = 'relais'; }).then(function () { rolePromesse = null; dessiner(); });
     return rolePromesse;
@@ -493,6 +545,7 @@ window.Compte = (function () {
       if (a === 'connecter') { fermerMenu(); connecter(); }
       else if (a === 'sync') { premiereReprise(); }
       else if (a === 'versions') { retrouverVersions(); }
+      else if (a === 'guide') { if (guideFichier) { e.preventDefault(); fermerMenu(); var feuilleG = $('#feuille-plus'); if (feuilleG && feuilleG.open) feuilleG.close(); telechargerGuide(); } }
       else if (a === 'role') { echecRole = ''; dessiner(); chargerRole(); }
       else if (a === 'avis') { e.preventDefault(); document.querySelectorAll('details.menu-plus[open]').forEach(function (x) { x.open = false; }); fermerMenu(); var feuilleA = $('#feuille-plus'); if (feuilleA && feuilleA.open) feuilleA.close(); donnerAvis(); }
       else if (a === 'supprimer') {
