@@ -118,6 +118,17 @@ class TestGuide(unittest.TestCase):
         self.assertTrue(donnees.startswith(b"%PDF"))
         self.assertGreaterEqual(donnees.count(b"/Type /Page\n") + donnees.count(b"/Type /Page "), 5)          # couverture, présentation, sommaire, deux séries
 
+    def test_couverture_titre_et_date(self):
+        import subprocess
+        for variante in ("or", "creme"):
+            g.TITRE_COUVERTURE = variante
+            sortie = self.web / f"c-{variante}.pdf"
+            g.construire(self.versions, sortie, "2026-11-19", web=self.web, genere_le="2026-11-19")
+            texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout
+            for attendu in ("LA COTE", "DU HÉROS", "GUIDE DE RÉFÉRENCE", "Édition du 19 novembre 2026"):
+                self.assertIn(attendu, texte)
+        g.TITRE_COUVERTURE = "or"
+
 
 class TestRadar(unittest.TestCase):
     def setUp(self):
