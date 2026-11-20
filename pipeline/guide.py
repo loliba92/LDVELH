@@ -48,7 +48,7 @@ LIEN_SITE = "https://lacoteduheros.fr"
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 28 mm (environ 210 points par pouce)
 COLONNES = 5
-LARGEUR_JAQUETTE = 28 * mm          # largeur de la jaquette dans la grille (5 colonnes)
+LARGEUR_JAQUETTE = 26 * mm          # largeur de la jaquette dans la grille (5 colonnes)
 MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
 L_PAGE, H_PAGE = A4
 L_CADRE = L_PAGE - 2 * MARGE_X
@@ -70,6 +70,7 @@ def date_longue(iso):
 # Repères en mots, sans chiffre. Les seuils sont ceux du site (web/app.js : niveauCote, SEUILS_COTE, et le bloc « Offre d'occasion ») ; ils ne sont jamais affichés.
 SEUILS_PRIX = (10, 20, 40, 70)
 MOTS_PRIX = ("pas cher", "abordable", "moyen", "cher", "très cher")
+LIBELLE_OFFRE, LIBELLE_PRIX = "En vente", "Prix d'occasion"          # titres des deux repères sur chaque fiche
 
 
 def niveau_prix(v):
@@ -355,6 +356,19 @@ class TeteSerie(Flowable):
         c.line(0, 1.6 * mm, L_CADRE, 1.6 * mm)
 
 
+CRAN, PAS_CRAN = 3 * mm, 3.4 * mm
+LARGEUR_JAUGE = 4 * PAS_CRAN + CRAN
+
+
+def jauge(c, x, y, niveau, st):
+    """Jauge à cinq crans, bord haut en y : plus elle est pleine, plus c'est cher."""
+    for k in range(5):
+        c.setFillColor(HexColor(st["or"]) if niveau and k < niveau else HexColor(st["grille"]))
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setLineWidth(0.3)
+        c.rect(x + k * PAS_CRAN, y - 2.4 * mm, CRAN, 2.4 * mm, fill=1, stroke=1)
+
+
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
     def __init__(self, v, st, polices, web, offre=None, reperes="jauge"):
@@ -380,10 +394,10 @@ class Fiche(Flowable):
 
     def libelles(self):
         """Tous les textes dessinés dans la cellule (pour les tests : aucun montant, aucun état, aucun nombre décimal)."""
-        return [self.v.get("titre") or "", self.meta, "Rareté en vente", self.offre, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"]
+        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"]
 
     def wrap(self, *_):
-        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 8.4 * mm + 2.5 * mm
+        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 2.5 * mm
         return self.largeur, self.h
 
     def draw(self):
@@ -414,19 +428,17 @@ class Fiche(Flowable):
         c.drawCentredString(self.largeur / 2, y, self.meta)
         y -= 3.4 * mm
         c.setFillColor(HexColor(st["sourdine"]))
-        lettres(c, self.largeur / 2, y, "Rareté en vente", f_texte, 5.4, 0.5, centre=True)
+        lettres(c, self.largeur / 2, y, LIBELLE_OFFRE, f_texte, 5.4, 0.5, centre=True)
         y -= 3 * mm
         c.setFillColor(HexColor(st["titre"]))
         c.setFont(f_gras, 7.4)
         c.drawCentredString(self.largeur / 2, y, self.offre)
-        y -= 1.8 * mm
-        cran, pas = 3 * mm, 3.4 * mm
-        x = (self.largeur - (4 * pas + cran)) / 2
-        for k in range(5):          # jauge à cinq crans : plus elle est pleine, plus c'est cher
-            c.setFillColor(HexColor(st["or"]) if self.niveau and k < self.niveau else HexColor(st["grille"]))
-            c.setStrokeColor(HexColor(st["filet"]))
-            c.setLineWidth(0.3)
-            c.rect(x + k * pas, y - 2.4 * mm, cran, 2.4 * mm, fill=1, stroke=1)
+        y -= 3.4 * mm
+        c.setFillColor(HexColor(st["sourdine"]))
+        lettres(c, self.largeur / 2, y, LIBELLE_PRIX, f_texte, 5.4, 0.5, centre=True)
+        y -= 1.4 * mm
+        jauge(c, (self.largeur - LARGEUR_JAUGE) / 2, y, self.niveau, st)
+        self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm}          # positions des repères (légende annotée)
         c.setFillColor(HexColor(st["texte"]))
         c.setFont(f_gras, 7.2)
         c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère")
@@ -470,12 +482,70 @@ def introduction(texte, variables, styles, st, pol):
     return sortie
 
 
-def legende(styles):
-    """Page de légende : chaque mot des repères, sans seuil ni chiffre."""
+OFFRE_SENS = (("abondant", "Beaucoup d'annonces : facile à trouver."), ("courant", "Plusieurs annonces : on le trouve sans difficulté."),
+              ("peu d'annonces", "Quelques annonces seulement : il faut surveiller."), ("rare", "Une seule annonce en ce moment."),
+              ("introuvable", "Aucune annonce aujourd'hui."), ("disponible neuf", "Encore vendu neuf."))
+PRIX_SENS = ("Se trouve à petit prix.", "Un prix doux, à la portée de tous.", "Un prix courant pour un livre de collection.", "Un exemplaire recherché.", "Un livre très recherché, parmi les plus chers.")
+
+
+class FicheAnnotee(Flowable):
+    """Une vraie fiche, avec une flèche et une phrase pour chaque repère."""
+    def __init__(self, fiche, st, polices):
+        super().__init__()
+        self.fiche, self.st, self.pol = fiche, st, polices
+
+    def wrap(self, *_):
+        self.fiche.wrap()
+        return L_CADRE, self.fiche.h
+
+    def draw(self):
+        c, st, f = self.canv, self.st, self.fiche
+        f.canv = c
+        f.draw()
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setFillColor(HexColor(st["texte"]))
+        c.setLineWidth(0.4)
+        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher).")):
+            y = f.reperes_y[cle]
+            c.line(f.largeur - 4 * mm, y, 56 * mm, y)
+            c.setFont(self.pol[2], 9.5)
+            c.drawString(58 * mm, y - 1.2 * mm, texte)
+
+
+class TableauNiveaux(Flowable):
+    """Une ligne par niveau : jauge (prix) ou rien (en vente), mot en gras, phrase courte."""
+    def __init__(self, lignes, st, polices, jauges=False):
+        super().__init__()
+        self.lignes, self.st, self.pol, self.jauges = lignes, st, polices, jauges
+
+    def wrap(self, *_):
+        return L_CADRE, len(self.lignes) * 7.5 * mm + 2 * mm
+
+    def draw(self):
+        c, st = self.canv, self.st
+        y = len(self.lignes) * 7.5 * mm
+        for k, (mot, phrase) in enumerate(self.lignes, 1):
+            if self.jauges:
+                jauge(c, 0, y - 1.2 * mm, k, st)
+            c.setFillColor(HexColor(st["titre"]))
+            c.setFont(self.pol[3], 10)
+            c.drawString(24 * mm if self.jauges else 0, y - 4 * mm, mot)
+            c.setFillColor(HexColor(st["texte"]))
+            c.setFont(self.pol[2], 10)
+            c.drawString(56 * mm, y - 4 * mm, phrase)
+            y -= 7.5 * mm
+
+
+def legende(styles, st=None, polices=None, exemple=None):
+    """Page de légende : une fiche annotée, puis chaque mot des repères avec sa phrase. Sans seuil ni chiffre de cote."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
-    return [P("Rareté en vente", "h2"), P("L'abondance des annonces en ligne au moment du guide : introuvable, rare, peu d'annonces, courant, abondant. Disponible neuf : le livre est encore vendu neuf."),
-            P("Prix", "h2"), P("Une jauge de cinq crans : plus elle est pleine, plus l'exemplaire est cher. Le mot donne le niveau de prix : pas cher, abordable, moyen, cher, très cher."),
-            ]
+    haut = []
+    if exemple is not None:
+        exemple.offre, exemple.niveau = "courant", 3
+        haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
+    return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
+                   P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher."),
+                   TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS)), st, polices, jauges=True) if st else Spacer(1, 1)]
 
 
 def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre=SOUS_TITRE_PAR_DEFAUT, style=STYLE_PAR_DEFAUT, mention=False, visuel=COUVERTURE_PAR_DEFAUT, reperes="jauge", meta=None, introduction_md=None):
@@ -729,8 +799,10 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     meta = meta or {}
     variables = {"nb_editions": meta.get("nb_versions") or nb, "nb_livres": meta.get("nb_livres") or len({v.get("livre_id") for v in versions}), "nb_series": meta.get("nb_series") or len({v.get("serie") for v in versions}), "date": date_longue(date_cotes)}
     texte_intro = introduction_md if introduction_md is not None else INTRODUCTION.read_text(encoding="utf-8")
+    candidats = [v for v in versions if v.get("couverture") and (web / v["couverture"]).exists() and ga.cote(v)]
+    exemple = Fiche(candidats[0] if candidats else versions[0], st, pol, web, {}, reperes) if versions else None
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
-        PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles) + [Paragraph("Sommaire", styles["h1"]), sommaire]
+        PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
     for k, (editeur, versions_ed) in enumerate(groupes):
         nom_versions = [ver for ver, _ in versions_ed]
