@@ -721,6 +721,7 @@
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
         if (estVendue({ lien, ed }, corr)) return;
+        if (nbLot({ titre }) || (BUT.lots && BUT.lots[lien])) return;                                // annonce de lot : pas de carte au Butin
         if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
         const partie = !enLigne(origine) && !!vue && !!BUT.date_ebay && vue < BUT.date_ebay;          // eBay non revue au dernier relevé : gardée sept jours, signalée « plus vue »
         if (partie && !plusVueRecente(vue, BUT.date_ebay)) return;
