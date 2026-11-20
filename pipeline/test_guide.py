@@ -65,7 +65,8 @@ class TestGuide(unittest.TestCase):
                     self.assertNotIn("€", texte)
                     self.assertIsNone(re.search(r"\d+[,.]\d+", texte), texte)
         f = g.Fiche(self.versions[0], g.STYLES["nuit"], ("Times-Roman", "Times-Bold", "Helvetica", "Helvetica-Bold"), self.web, {})
-        self.assertIn("Rareté en vente", f.libelles())
+        self.assertIn("En vente", f.libelles())
+        self.assertIn("Prix d'occasion", f.libelles())
         self.assertFalse(any(x in " ".join(f.libelles()).split() for x in ("C", "BE", "TBE")))
         self.assertNotIn("Rare", " ".join(f.meta.split(" · ")[1:]))          # plus de rareté structurelle à côté du numéro et de la version
 
@@ -235,11 +236,20 @@ class TestRadar(unittest.TestCase):
         v = [livre(f"L{k}", f"Série {c}", str(k), "V1") for c, n in (("A", 8), ("B", 10), ("C", 6), ("D", 9), ("E", 7), ("F", 28)) for k in range(1, n + 1)]
         evenements = []
         origine = g.Fiche.draw
-        g.Fiche.draw = lambda self: (evenements.append((self.canv.getPageNumber(), self.v["serie"])), origine(self))[1]
+        legende = {"en_cours": False}
+        origine_annotee = g.FicheAnnotee.draw
+
+        def annotee(self):          # la fiche d'exemple de la légende n'est pas une fiche du catalogue
+            legende["en_cours"] = True
+            origine_annotee(self)
+            legende["en_cours"] = False
+        g.FicheAnnotee.draw = annotee
+        g.Fiche.draw = lambda self: (None if legende["en_cours"] else evenements.append((self.canv.getPageNumber(), self.v["serie"])), origine(self))[1]
         try:
             g.construire(v, Path(tempfile.mkdtemp()) / "m.pdf", "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees=False)
         finally:
             g.Fiche.draw = origine
+            g.FicheAnnotee.draw = origine_annotee
         passes = [[]]
         for e in evenements:          # la construction se fait en plusieurs passes : seule la dernière compte
             if passes[-1] and e[0] < passes[-1][-1][0]:
