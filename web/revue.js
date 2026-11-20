@@ -634,17 +634,15 @@
   const SEUIL_PEPITE = 0.5, ECONOMIE_MINI = 3, ECONOMIE_FORTE = 30, ABR_ETAT = { convenable: 'C', bon: 'BE', tres_bon: 'TBE' };
   // Corrections du propriétaire (édition confirmée, rattachée à une autre édition, ou annonce exclue) : {lien: {statut, isbn13, le, par, note}}
   const corrigees = () => Object.assign({}, BUT && BUT.corrigees, ANN && ANN.corrigees);          // le Butin porte les annonces vendues de ses cartes, même sans le fichier complet
-  // Mention « Vendu » : l'annonce reste affichée (correction « vendue »)
-  // Vendue : marquée par vous (correction « vendue »), ou signalée vendue par le robot de relevé (barrée pendant sept jours)
+  // Vendue : marquée par vous (correction « vendue »), ou signalée vendue par le robot de relevé ; elle n'apparaît ni au Butin, ni dans Annonces, ni dans Analyse
   // Correction d'une carte : celle de son livre dans un lot (clé « lien|ISBN d'origine »), sinon celle de l'annonce entière ; `origine` : l'ISBN d'origine du livre dans le lot
-  const corrCarte = (a) => {
-    const t = corrigees(), pre = a.lien + '|';
+  const corrCarte = (a, t = corrigees()) => {
+    const pre = a.lien + '|';
     let c = null, origine = '';
     Object.keys(t).forEach((k) => { if (k.indexOf(pre) === 0 && (k.slice(pre.length) === a.ed.isbn || t[k].isbn13 === a.ed.isbn)) { c = t[k]; origine = k.slice(pre.length); } });
     return c ? { c, origine } : { c: t[a.lien] || null, origine: '' };
   };
-  const estVendue = (a) => !!((corrCarte(a).c && corrCarte(a).c.statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien]));
-  const vendueHtml = (a) => (estVendue(a) ? '<span class="an-vendu">Vendu</span>' : '');
+  const estVendue = (a, t) => { const c = corrCarte(a, t).c; return !!((c && c.statut === 'vendue') || (ANN && ANN.vendues && ANN.vendues[a.lien]) || (BUT && BUT.vendues && BUT.vendues[a.lien])); };
   let NB_CORR = 0;
   // Panneau « Corriger l'édition » d'une annonce : les jaquettes des éditions du livre à comparer avec la photo de l'annonce, puis un choix
   // En mode lite (liste Annonces), le panneau reste replié : le bouton « Corriger » de la ligne l'ouvre
@@ -717,10 +715,12 @@
   function pepites() {
     const lignes = [];
     if (!BUT) return lignes;
+    const corr = corrigees();
     EDITIONS.forEach((ed) => ETATS.forEach(([cle, lib]) => {
       const l = ed.etats[cle], pub = l && l.publie, liste = ed.isbn && BUT.annonces[ed.isbn] && BUT.annonces[ed.isbn][cle];
       if (!pub || !liste) return;
       liste.forEach(([prix, titre, lien, origine, vue, suppose]) => {
+        if (estVendue({ lien, ed }, corr)) return;
         if (origine === 'librairie' && cle === 'convenable') return;                                  // exemplaire abîmé en librairie (fiche : « Un peu abîmé ») : pas une pépite
         const partie = !enLigne(origine) && !!vue && !!BUT.date_ebay && vue < BUT.date_ebay;          // eBay non revue au dernier relevé : gardée sept jours, signalée « plus vue »
         if (partie && !plusVueRecente(vue, BUT.date_ebay)) return;
@@ -757,7 +757,6 @@
       : `<span class="jaq-vide pp-sans-jaq"><span>${esc(p.ed.titre)}</span></span>`;
     return `<article class="livre-carte pp-carte ${solide ? 'solide' : 'verifier'}"><a class="couv" href="./#fiche=${encodeURIComponent(p.ed.id)}" aria-label="Ouvrir la fiche du livre : ${esc(p.ed.titre)}">${img}` +
       (superPepite(p) ? `<span class="pp-super">Super pépite</span>` : '') +
-      (vendueHtml(p) ? '<span class="an-pancarte">Vendu</span>' : '') +
       lotBadge(p) +
       (p.trouver ? `<span class="pp-trouver">★ À trouver</span>` : '') +
       (nouvelle(p) ? `<span class="pp-nouveau">Nouveau</span>` : '') +
@@ -765,7 +764,7 @@
       `<span class="infos"><a class="titre" href="./#fiche=${encodeURIComponent(p.ed.id)}">${esc(p.ed.titre)}</a>` +
       `<span class="meta">${esc(p.ed.serie)}${num} · ${esc(p.ed.version)} · ${esc(p.lib)}</span>` +
       `<span class="meta pp-eco">au lieu de ${eur(p.pub)} · ${eur(eco)} d'économie</span>` +
-      `<span class="meta pp-source">Source : ${source}</span>` + lotHtml(p) + (p.partie ? '<span class="meta pp-plusvue">Plus vue au dernier relevé : peut-être vendue</span>' : '') + vendueHtml(p) +
+      `<span class="meta pp-source">Source : ${source}</span>` + lotHtml(p) + (p.partie ? '<span class="meta pp-plusvue">Plus vue au dernier relevé : peut-être vendue</span>' : '') +
       (reperee(p) ? `<span class="meta pp-reperee">${esc(reperee(p))}</span>` : '') +
       (solide ? '' : `<span class="meta pp-raison">${p.raisons.map(esc).join(' · ')}</span>`) + panneauCorrection(p) + `</span>` +
       `<a class="pp-ouvrir" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir l'annonce${lieu} (nouvel onglet) : ${esc(p.titre)}">Ouvrir l'annonce ↗</a>` +
@@ -1228,7 +1227,7 @@
         const a = o.a, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`, n = (a.tous || []).length;
         const num = a.ed.numero && !/^0+$/.test(a.ed.numero) ? ' n° ' + esc(a.ed.numero) : '';
         return `<article class="opp-carte opp-${o.fiab}">
-          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a>${vendueHtml(a)}<span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
+          <div class="opp-tete"><a class="opp-titre" href="${fiche}">${esc(a.ed.titre)}</a><span class="opp-fiab opp-f-${o.fiab}" title="${o.fiab === 'faible' ? esc(o.raison) : o.fiab === 'moyenne' ? 'Cote correcte, mais date de publication inconnue ou ancienne' : 'Cote confirmée par le marché, état précisé, annonce publiée il y a 30 jours ou moins'}">${LIB_FIAB[o.fiab]}</span></div>
           <p class="opp-meta">${esc(a.ed.serie)}${num} · ${esc(a.ed.version)} · ${ABR_ETAT[a.cle]} · ${n} annonce${n > 1 ? 's' : ''} de ce livre dans cet état</p>
           <div class="opp-chiffres"><span>Achat <b>${eur(a.prix)}</b> <small>${esc(NOM[a.fam])}</small></span><span>Prix du site <b>${eur(a.pub)}</b></span><span class="opp-marge">Marge <b>+${eur(o.marge)}</b> <small>(+${Math.round(o.roi * 100)} %)</small></span></div>
           <p class="opp-marche">En ligne : ${o.m.n} annonce${o.m.n > 1 ? 's' : ''}${o.m.n > 1 ? ` de ${eur(o.m.bas)} à ${eur(o.m.haut)}` : ''}${o.m.disparues.length ? ` · disparues (vendues ?) : ${o.m.disparues.slice(0, 4).map((x) => eur(x)).join(', ')}` : ''}</p>
@@ -1293,10 +1292,11 @@
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
       const dateRef = (o) => (enLigne(o) ? null : ANN.date_ebay);
-      const toutes = [], sw = souhaits();
+      const toutes = [], sw = souhaits(), corr = corrigees();
       Object.keys(ANN.annonces).forEach((isbn) => {
         const ed = parIsbn.get(isbn); if (!ed) return;
         ETATS.forEach(([cle, lib]) => (ANN.annonces[isbn][cle] || []).forEach(([prix, titre, lien, origine, vue, suppose]) => {
+          if (estVendue({ lien, ed }, corr)) return;
           const partie = !!(vue && dateRef(origine) && vue < dateRef(origine));
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
@@ -1345,7 +1345,7 @@
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
       // En ligne : même règle que le chiffre de l'accueil (ni annonces eBay « plus vues », ni lignes de lots, ni offres de revendeurs)
-      const nbEnLigne = toutes.filter((a) => !a.partie && !estVendue(a) && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
+      const nbEnLigne = toutes.filter((a) => !a.partie && !/^Lot de /.test(a.titre) && !Object.hasOwn(REVENDEURS, a.fam)).length;
       etat.textContent = `${vues.length} annonce${vues.length > 1 ? 's affichées' : ' affichée'} sur ${toutes.length} retenues (dont ${nbEnLigne} en ligne, comme sur l'accueil)${nbAbs ? (aberrRc && aberrRc.checked ? ` (${nbAbs} masquées : prix à 2 fois le très bon état ou plus)` : ` ; ${nbAbs} exclue${nbAbs > 1 ? 's' : ''} de la cote (prix à 2 fois le très bon état ou plus)`) : ''}. Dernier relevé eBay : ${jour(ANN.date_ebay || ANN.date)}.`;
       const carteListe = (a) => {
         const corr = panneauCorrection(a, true);
@@ -1360,7 +1360,7 @@
         const info = INFO_ED[a.ed.id] || {}, fiche = `./#fiche=${encodeURIComponent(a.ed.id)}`;
         const image = info.mini ? `<img src="${esc(info.mini)}" alt="Jaquette de ${esc(a.ed.titre)}" width="320" height="523" loading="lazy" decoding="async">` : `<span class="jaq-vide pp-sans-jaq"><span>${esc(a.ed.titre)}</span></span>`;
         return `<article class="an-carte${a.butin ? ' rc-butin' : ''}">
-          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${vendueHtml(a) ? '<span class="an-pancarte">Vendu</span>' : ''}${lotBadge(a)}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
+          <a class="an-jaq" href="${fiche}" aria-label="Ouvrir la fiche du livre : ${esc(a.ed.titre)}">${image}${lotBadge(a)}${a.trouver ? '<span class="an-trouver" title="À trouver">★</span>' : ''}</a>
           <div class="an-verdict">${a.nouveau ? '<span class="an-new">Nouveau</span>' : ''}${a.aberrant ? exclueHtml : ''}${a.pub == null ? '<span class="rc-vs">Pas de prix du site</span>' : pastilleVerdict(a.v, VERDICTS[a.v][0], cleRadar(a))}</div>
           <div class="an-prixlien"><b class="rc-prix">${eur(a.prix)}</b><a class="an-lien" href="${esc(a.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗<span class="sr-only"> (nouvel onglet) : ${esc(a.ed.titre)}</span></a></div>
           <a class="an-titre" href="${fiche}">${esc(a.ed.titre)}</a>
@@ -1574,12 +1574,13 @@
     const jourParis = (k) => new Date(Date.now() - k * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
     const coteDe = (ed) => Math.max(0, ...Object.values(ed.etats).map((l) => l.publie || 0));
     function compter() {
-      const limite = periode ? jourParis(periode) : '', vues = new Set(), lignes = [];
+      const limite = periode ? jourParis(periode) : '', vues = new Set(), lignes = [], corr = corrigees();
       EDITIONS.forEach((ed) => {
         if (!ed.isbn || vues.has(ed.isbn)) return;
         vues.add(ed.isbn);
         const liens = new Set(), par = ANN.annonces[ed.isbn] || {};
         Object.keys(par).forEach((etat) => (par[etat] || []).forEach(([, , lien, origine]) => {
+          if (estVendue({ lien, ed }, corr)) return;
           if (plateforme !== 'tout' && famille(origine) !== plateforme) return;
           if (limite && !(((ANN.premieres || {})[lien] || '').slice(0, 10) >= limite)) return;
           liens.add(lien);
