@@ -36,7 +36,7 @@ import guide_analyse as ga
 STYLE_PAR_DEFAUT = "parchemin"          # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
 SOUS_TITRE_PAR_DEFAUT = "clair"      # sous-titre de la couverture « huile » : "clair" ou "bandeau" (sans effet sur la couverture V1)
 COUVERTURE_PAR_DEFAUT = "v1"         # illustration de couverture : "v1" (héros et dragon) ou "huile" (ancienne couverture)
-TITRE_COUVERTURE = "or"              # titre de la couverture V1 : "or" (dégradé doré) ou "creme" (crème et contour)
+COUVERTURE_STYLE = "a"              # mise en page de la couverture V1 : "a" (revue de collection), "b" (affiche d'aventure) ou "c" (ouvrage de référence sobre)
 # -------------------------------------------------------------------------------------
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -205,9 +205,20 @@ def visuel_ouverture(style, indice, largeur_px=900):
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
-def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210):
+def _voile(img, px_mm, hauteur_mm, couleur, alpha, en_haut=False):
+    """Voile dégradé : transparent côté image, `alpha` au bord de la page."""
+    from PIL import Image as _I
+    degrade = _I.linear_gradient("L")          # noir en haut, blanc en bas
+    if en_haut:
+        degrade = degrade.transpose(_I.FLIP_TOP_BOTTOM)
+    masque = degrade.resize((img.width, round(hauteur_mm * px_mm))).point(lambda a: int((a / 255) ** 1.25 * 255 * alpha))
+    img.paste(_I.new("RGB", masque.size, couleur), (0, 0 if en_haut else img.height - masque.height), masque)
+
+
+def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210, voiles=(), global_=None, decalage_mm=0):
     """Toile de la couverture V1 (A4 entière) : l'illustration est agrandie (rééchantillonnage Lanczos, accentuation légère), son bas (roche) est recoupé,
-    et la toile est prolongée vers le haut par un fond flou tiré de l'illustration elle-même (largeur pleine : aucun bord flou sur les côtés). Un voile sombre dégradé en bas porte la signature."""
+    et la toile est prolongée vers le haut par un fond flou tiré de l'illustration elle-même. `voiles` : [(hauteur en mm, couleur, opacité, en haut ?)] ;
+    `global_` : (couleur, opacité) sur toute la page ; `decalage_mm` : décalage vertical de l'illustration (positif vers le bas)."""
     from PIL import ImageFilter
     px_mm = largeur_px / 210
     haut_px = round(297 * px_mm)
@@ -217,7 +228,7 @@ def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210):
     art = art.resize((round(art.width * f), round(art.height * f)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2, percent=35, threshold=2))
     fond = art.resize((largeur_px, haut_px), Image.LANCZOS).filter(ImageFilter.GaussianBlur(55))
     fond = ImageEnhance.Brightness(fond).enhance(0.7)
-    x, y = (largeur_px - art.width) // 2, haut_px - art.height
+    x, y = (largeur_px - art.width) // 2, haut_px - art.height + round(decalage_mm * px_mm)
     masque = Image.new("L", art.size, 255)
     bord = 38
     pixels = masque.load()
@@ -226,11 +237,23 @@ def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210):
         for k in range(art.width):
             pixels[k, i] = min(pixels[k, i], v)
     fond.paste(art, (x, y), masque)
-    voile = Image.linear_gradient("L").resize((largeur_px, round(108 * px_mm)))          # voile sombre : transparent en haut, presque plein en bas
-    voile = voile.point(lambda a: int((a / 255) ** 1.25 * 240))
-    fond.paste(Image.new("RGB", voile.size, (12, 6, 24)), (0, haut_px - voile.height), voile)
+    if global_:
+        fond.paste(Image.new("RGB", fond.size, global_[0]), (0, 0), Image.new("L", fond.size, int(255 * global_[1])))
+    for hauteur, couleur, alpha, en_haut in voiles:
+        _voile(fond, px_mm, hauteur, couleur, alpha, en_haut)
     tampon = io.BytesIO()
     fond.save(tampon, "JPEG", quality=84, optimize=True, progressive=True)
+    return ImageReader(io.BytesIO(tampon.getvalue()))
+
+
+def fenetre_couverture(largeur_px=1500, ratio=515 / 400, haut_px=150):
+    """Recadrage paysage de l'illustration (soleil, épée, dragon, torse du héros) pour la couverture en fenêtre."""
+    with Image.open(COUVERTURE_V1) as src:
+        h = round(src.width / ratio)
+        coupe = src.convert("RGB").crop((0, haut_px, src.width, haut_px + h))
+    coupe = coupe.resize((largeur_px, round(largeur_px / ratio)), Image.LANCZOS)
+    tampon = io.BytesIO()
+    coupe.save(tampon, "JPEG", quality=86, optimize=True)
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
@@ -700,68 +723,126 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.setFillColor(C("texte") if style == "parchemin" else C("or"))
         lettres(c, L_PAGE / 2, 19 * mm, f"La Cote du Héros · {SITE}", f_gras, 8, 1.5, centre=True)
 
-    def titre_v1(c):
-        """Titre en très grandes capitales sur deux lignes, pleine largeur : dégradé doré (ou crème), fin contour sombre, ombre douce ; texte vectoriel."""
-        lignes = ("LA COTE", "DU HÉROS")
-        largeur_utile = L_PAGE - 2 * 12 * mm
-        taille = 100.0
-        taille *= largeur_utile / max(pdfmetrics.stringWidth(l, f_titre_gras, taille) for l in lignes)
-        haut_cap = 0.66 * taille
-        y1 = H_PAGE - 15 * mm - haut_cap
-        y2 = y1 - haut_cap * 1.2
-        def texte(l, y, mode, dx=0, dy=0):
+    def largeur_lettres(texte, police, taille, espace):
+        return pdfmetrics.stringWidth(texte.upper(), police, taille) + espace * len(texte)
+
+    def ombre_texte(c, x, y, texte, police, taille, espace, dy=1.5, alpha=0.5):
+        c.setFillColor(HexColor("#000000"), alpha=alpha)
+        lettres(c, x + dy * 0.6, y - dy, texte, police, taille, espace, centre=True)
+
+    def losange(c, x, y, r=3.2):
+        t = c.beginPath()
+        t.moveTo(x, y + r); t.lineTo(x + r * 0.8, y); t.lineTo(x, y - r); t.lineTo(x - r * 0.8, y); t.close()
+        c.drawPath(t, fill=1, stroke=0)
+
+    def pied_lien(c, texte, x_droite, y, couleur, taille=9):
+        c.setFillColor(HexColor(couleur))
+        c.setFont(f_texte, taille)
+        c.drawRightString(x_droite, y, texte)
+        c.linkURL(LIEN_SITE, (x_droite - pdfmetrics.stringWidth(texte, f_texte, taille), y - 3, x_droite, y + taille), relative=0)
+
+    def couverture_a(c):
+        """Piste A : revue de collection. Illustration plein cadre, voiles sombres haut et bas, titre doré sur une ligne, accroches en bas à gauche."""
+        c.drawImage(couverture_v1(art_mm=210, voiles=[(81, (20, 16, 31), 0.90, True), (128, (20, 16, 31), 0.95, False)]), 0, 0, L_PAGE, H_PAGE)
+        titre, espace = "La Cote du Héros", 2.0
+        taille = 46 * min(1.0, 515 / largeur_lettres(titre, f_titre_gras, 46, espace))
+        ombre_texte(c, L_PAGE / 2, 770, titre, f_titre_gras, taille, espace)
+        c.setFillColor(HexColor("#e8c766"))
+        lettres(c, L_PAGE / 2, 770, titre, f_titre_gras, taille, espace, centre=True)
+        c.setStrokeColor(HexColor("#e8c766"))
+        c.setLineWidth(0.6)
+        c.line(40, 756, L_PAGE - 40, 756)
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 738, "Le guide de référence des livres dont vous êtes le héros", f_texte, 11.5, 1.5, centre=True)
+        accroches = ("Chaque livre, chaque édition, avec sa jaquette", "Rareté, niveau de prix et zone de 1 à 4", "Finir une série, retrouver les livres de son enfance", "Les quatre zones du marché, expliquées")
+        for i, t in enumerate(accroches):
+            y = 190 - 24 * i
+            c.setFillColor(HexColor("#e8c766"))
+            losange(c, 46, y + 4)
+            c.setFillColor(HexColor("#f4ecd8"))
+            c.setFont(f_gras, 12.5)
+            c.drawString(58, y, t)
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_titre, 16)
+        c.drawString(40, 45, "Olivier Bertrand")
+        pied_lien(c, f"{SITE} · Édition du {date_longue(genere_le)}", L_PAGE - 40, 45, "#bfb59a")
+
+    def couverture_b(c):
+        """Piste B : affiche d'aventure. Illustration plus serrée sous un voile violet, phrase d'affiche en haut, « HÉROS » très grand en bas, générique."""
+        c.drawImage(couverture_v1(art_mm=226, global_=((26, 15, 46), 0.35), voiles=[(99, (11, 7, 20), 0.95, False)]), 0, 0, L_PAGE, H_PAGE)
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_titre, 17)
+        c.drawCentredString(L_PAGE / 2, 800, "Chaque livre a son prix. Chaque prix a sa zone.")
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 262, "La Cote du", f_gras, 18, 9, centre=True)
+        mot, taille = "HÉROS", 118.0
+        taille *= min(1.0, 470 / pdfmetrics.stringWidth(mot, f_titre_gras, taille))
+        x = (L_PAGE - pdfmetrics.stringWidth(mot, f_titre_gras, taille)) / 2
+        y, haut = 160, 0.98 * taille          # le dégradé couvre aussi l'accent de « É »
+
+        def texte(mode, dx=0, dy=0):
             t = c.beginText()
             t.setFont(f_titre_gras, taille)
             t.setTextRenderMode(mode)
-            t.setTextOrigin((L_PAGE - pdfmetrics.stringWidth(l, f_titre_gras, taille)) / 2 + dx, y + dy)
-            t.textOut(l)
+            t.setTextOrigin(x + dx, y + dy)
+            t.textOut(mot)
             c.drawText(t)
-        for l, y in zip(lignes, (y1, y2)):
-            for k, a in ((3.2, 0.10), (2.2, 0.14), (1.2, 0.2)):          # ombre portée douce
-                c.saveState()
-                c.setFillColor(HexColor("#0a0418"), alpha=a)
-                texte(l, y, 0, k * 0.5, -k)
-                c.restoreState()
-            c.saveState()
-            if TITRE_COUVERTURE == "or":
-                texte(l, y, 7)          # le texte sert de découpe au dégradé
-                c.linearGradient(0, y + haut_cap, 0, y - 0.02 * taille, (HexColor("#fff0b8"), HexColor("#d9a93e"), HexColor("#8e6416")), (0, 0.45, 1), extend=False)
-            else:
-                c.setFillColor(HexColor("#f2e9d8"))
-                texte(l, y, 0)
-            c.restoreState()
-            c.saveState()
-            c.setStrokeColor(HexColor("#1a0d33"))
-            c.setLineWidth(1.4)
-            texte(l, y, 1)          # fin contour sombre
-            c.restoreState()
-        return y2
+        for k, a in ((6, 0.15), (4, 0.2), (2.5, 0.3)):          # ombre portée
+            c.saveState(); c.setFillColor(HexColor("#000000"), alpha=a); texte(0, 0, -k); c.restoreState()
+        c.saveState()
+        texte(7)          # le texte sert de découpe au dégradé or
+        c.linearGradient(0, y + haut, 0, y, (HexColor("#f7e08a"), HexColor("#b98a2b")), (0, 1), extend=False)
+        c.restoreState()
+        c.saveState(); c.setStrokeColor(HexColor("#2a1a05")); c.setLineWidth(1.0); texte(1); c.restoreState()
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_texte, 12)
+        c.drawCentredString(L_PAGE / 2, 120, "La cote d'occasion de tous les livres dont vous êtes le héros")
+        c.setFillColor(HexColor("#e8c766"))
+        lettres(c, L_PAGE / 2, 95, "Éditions V1, V2… · Jaquettes · Rareté et prix · Zones 1 à 4", f_gras, 9.5, 1.0, centre=True)
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 50, "Un guide d'Olivier Bertrand", f_texte, 10, 3, centre=True)
+        c.setFillColor(HexColor("#bfb59a"))
+        c.setFont(f_texte, 8.5)
+        c.drawCentredString(L_PAGE / 2, 36, f"{SITE} · {date_longue(genere_le)}")
+        c.linkURL(LIEN_SITE, (L_PAGE / 2 - 60, 33, L_PAGE / 2 - 8, 45), relative=0)
+
+    def couverture_c(c):
+        """Piste C : ouvrage de référence. Fond ivoire, illustration en fenêtre, titre foncé, deux lignes d'accroche."""
+        c.setFillColor(HexColor("#f3eee2"))
+        c.rect(0, 0, L_PAGE, H_PAGE, fill=1, stroke=0)
+        c.drawImage(fenetre_couverture(), 40, 380, 515, 400)
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.75)
+        c.rect(46, 386, 503, 388, fill=0, stroke=1)
+        titre = "La Cote du Héros"
+        taille = 46 * min(1.0, 515 / pdfmetrics.stringWidth(titre, f_titre_gras, 46))
+        c.setFillColor(HexColor("#1b1a17"))
+        c.setFont(f_titre_gras, taille)
+        c.drawCentredString(L_PAGE / 2, 320, titre)
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.6)
+        c.line(L_PAGE / 2 - 20, 303, L_PAGE / 2 - 5, 303); c.line(L_PAGE / 2 + 5, 303, L_PAGE / 2 + 20, 303)
+        c.setFillColor(HexColor("#a9842f"))
+        losange(c, L_PAGE / 2, 303, 2.6)
+        c.setFillColor(HexColor("#4a4336"))
+        c.setFont(f_titre, 19)
+        c.drawCentredString(L_PAGE / 2, 262, "Guide de référence des livres-jeux")
+        c.setFillColor(HexColor("#7a705c"))
+        lettres(c, L_PAGE / 2, 240, "Éditions, séries, raretés et niveaux de prix", f_texte, 10.5, 1.5, centre=True)
+        c.setFillColor(HexColor("#4a4336"))
+        c.setFont(f_texte, 11)
+        c.drawCentredString(L_PAGE / 2, 205, "Tous les livres classés par éditeur, édition et série, avec leurs jaquettes")
+        c.drawCentredString(L_PAGE / 2, 189, "Une page de méthode, quatre zones expliquées, la stratégie du collectionneur")
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.5)
+        c.line(L_PAGE / 2 - 30, 112, L_PAGE / 2 + 30, 112)
+        c.setFillColor(HexColor("#1b1a17"))
+        lettres(c, L_PAGE / 2, 90, "Olivier Bertrand", f_gras, 12, 3, centre=True)
+        pied_lien_centre = f"{SITE} · Édition du {date_longue(genere_le)}"
+        pied_lien(c, pied_lien_centre, L_PAGE / 2 + pdfmetrics.stringWidth(pied_lien_centre, f_texte, 9) / 2, 60, "#7a705c")
 
     def couverture_v1_page(c, doc):
-        """Couverture inspirée des couvertures de poche des années 1980 : très grand titre dans le ciel, encadré blanc et adresse du site en bas."""
-        c.drawImage(couverture_v1(), 0, 0, L_PAGE, H_PAGE)
-        y2 = titre_v1(c)
-        # pied de couverture, sur le voile sombre : sous-titre, auteur, adresse du site, date des cotes
-        c.setFillColor(HexColor("#f2e9d8"))
-        lettres(c, L_PAGE / 2, 63 * mm, "Guide de référence", f_gras, 16, 4.2, centre=True)
-        c.setFont(f_titre, 13.5)
-        c.drawCentredString(L_PAGE / 2, 55.5 * mm, "des livres dont vous êtes le héros")
-        c.setStrokeColor(HexColor("#d2a64a"))
-        c.setLineWidth(0.6)
-        c.line(L_PAGE / 2 - 14 * mm, 48 * mm, L_PAGE / 2 + 14 * mm, 48 * mm)
-        c.setFillColor(HexColor("#f2e9d8"))
-        lettres(c, L_PAGE / 2, 40 * mm, "par Olivier Bertrand", f_gras, 11.5, 2.6, centre=True)
-        c.setFillColor(HexColor("#d9b45f"))
-        lettres(c, L_PAGE / 2, 30 * mm, SITE, f_gras, 10, 2, centre=True)
-        c.linkURL(LIEN_SITE, (L_PAGE / 2 - 28 * mm, 27.5 * mm, L_PAGE / 2 + 28 * mm, 33.5 * mm), relative=0)
-        c.setFillColor(HexColor("#b8ad99"))
-        c.setFont(f_texte, 8.5)
-        c.drawCentredString(L_PAGE / 2, 17 * mm, f"Édition du {date_longue(genere_le)}")
-        c.setStrokeColor(HexColor("#d2a64a"))          # double filet doré autour de la page
-        c.setLineWidth(0.7)
-        c.rect(7 * mm, 7 * mm, L_PAGE - 14 * mm, H_PAGE - 14 * mm, fill=0, stroke=1)
-        c.setLineWidth(0.25)
-        c.rect(8.6 * mm, 8.6 * mm, L_PAGE - 17.2 * mm, H_PAGE - 17.2 * mm, fill=0, stroke=1)
+        {"a": couverture_a, "b": couverture_b, "c": couverture_c}[COUVERTURE_STYLE](c)
 
     def couverture(c, doc):
         if visuel == "v1":
@@ -1012,13 +1093,13 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
 
 
 def main(argv=None):
-    global TITRE_COUVERTURE
+    global COUVERTURE_STYLE
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
     a.add_argument("--style", default=STYLE_PAR_DEFAUT, choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
-    a.add_argument("--titre-couverture", default=TITRE_COUVERTURE, choices=("or", "creme"), help="titre de la couverture V1 : or (dégradé doré, par défaut) ou creme")
+    a.add_argument("--style-couverture", default=COUVERTURE_STYLE, choices=("a", "b", "c"), help="mise en page de la couverture : a (revue de collection, par défaut), b (affiche d'aventure) ou c (ouvrage de référence sobre)")
     a.add_argument("--visuel-couverture", default=COUVERTURE_PAR_DEFAUT, choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
     a.add_argument("--couverture", default=SOUS_TITRE_PAR_DEFAUT, choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
     a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")
@@ -1028,7 +1109,7 @@ def main(argv=None):
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
     editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
-    TITRE_COUVERTURE = args.titre_couverture
+    COUVERTURE_STYLE = args.style_couverture
     nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture, style=args.style, mention=args.mention_sorciers, visuel=args.visuel_couverture, meta=meta)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s, {construire.pages_catalogue} pages de catalogue remplies à {construire.remplissage * 100:.0f} % en moyenne : {args.sortie}")
     return 0

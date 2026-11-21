@@ -126,14 +126,14 @@ class TestGuide(unittest.TestCase):
         import subprocess
         if not shutil.which("pdftotext"):
             self.skipTest("pdftotext absent")
-        for variante in ("or", "creme"):
-            g.TITRE_COUVERTURE = variante
-            sortie = self.web / f"c-{variante}.pdf"
+        for style in ("a", "b", "c"):          # les trois mises en page de couverture portent titre, auteur, site et date
+            g.COUVERTURE_STYLE = style
+            sortie = self.web / f"c-{style}.pdf"
             g.construire(self.versions, sortie, "2026-11-19", web=self.web, genere_le="2026-11-19")
-            texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout
-            for attendu in ("LA COTE", "DU HÉROS", "GUIDE DE RÉFÉRENCE", "Édition du 19 novembre 2026"):
-                self.assertIn(attendu, texte)
-        g.TITRE_COUVERTURE = "or"
+            texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout.upper()
+            for attendu in ("COTE", "HÉROS", "OLIVIER BERTRAND", "LACOTEDUHEROS.FR", "19 NOVEMBRE 2026"):
+                self.assertIn(attendu, texte, f"style {style}")
+        g.COUVERTURE_STYLE = "a"
 
 
 class TestRadar(unittest.TestCase):
