@@ -1378,7 +1378,7 @@
         // Seuils en nombre d'annonces : « rare à trouver » jusqu'à maxRare, « facile à trouver » à partir de minFacile (quart bas et quart haut des livres du guide)
         const valeurs = [...new Set(pts.map((x) => x.n))].sort((u, v) => u - v);
         const maxRare = Math.max(...valeurs.filter((v) => part((x) => x.n < v) <= 25), 0), minFacile = valeurs.find((v) => part((x) => x.n < v) >= 75);
-        const seuils = `Peu d'annonces, c'est rare à trouver : ${maxRare === 0 ? 'aucune annonce' : `${pl(maxRare)} ou moins`}.${minFacile != null ? ` Beaucoup d'annonces, c'est facile à trouver : ${pl(minFacile)} ou plus.` : ''} Ces seuils comparent ce livre aux autres livres du guide.`;
+        const seuils = `Rare : ${maxRare === 0 ? 'aucune annonce' : `${pl(maxRare)} ou moins`}${minFacile != null ? ` · Facile : ${minFacile} ou plus` : ''} (d'après les autres livres).`;
         const W = 350, H = 220, gx = 36, gy = 10, gb = 30, dr = 12;
         const nmax = Math.max(10, ...pts.map((x) => x.n)) + 1;
         const lx = (n) => gx + (Math.log(n + 1) / Math.log(nmax + 1)) * (W - gx - dr);
@@ -1402,7 +1402,7 @@
           ${jauge("Combien d'annonces ?", moi.n ? pl(moi.n) + ' en ce moment' : 'aucune en ce moment', moi.n ? pctN : 0, "peu<small>rare à trouver</small>", "beaucoup<small>facile à trouver</small>", moi.n ? `Plus d'annonces que <b>${pctN} livres sur 100</b>.` : 'Aucune annonce en ce moment.', `${mn}<small>annonce${mn > 1 ? 's' : ''}</small>`)}
           ${jauge('Quel prix ?', `${fmt(moi.p)} en ${moi.tbe ? 'très bon' : 'bon'} état`, pctP, 'bon marché', 'cher', `Plus cher que <b>${pctP} livres sur 100</b>.`, fmt(mp))}
           <p class="sous fp-note">${seuils}</p>
-          <p class="sous fp-note">La médiane est la valeur du livre «\u00a0du milieu\u00a0» : la moitié des livres du guide est en dessous, l'autre moitié au-dessus.</p>
+          <p class="sous fp-note">Médiane : la moitié des livres est en dessous, l'autre au-dessus.</p>
           <details class="fp-detail"><summary>Voir tous les livres sur un graphique</summary>
             <p class="sous">Chaque point est une édition du guide. Plus il est à droite, plus il y a d'annonces ; plus il est haut, plus le livre est cher. Les pointillés marquent la médiane de tous les livres : ${mn} annonce${mn > 1 ? 's' : ''} et ${fmt(mp)}.</p>
             <div class="fp-cadre">${svgA}</div></details>`;
