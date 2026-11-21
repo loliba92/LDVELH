@@ -10,6 +10,7 @@ import argparse
 import io
 import json
 import re
+import statistics
 import sys
 import tempfile
 import time
@@ -48,7 +49,7 @@ LIEN_SITE = "https://lacoteduheros.fr"
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 28 mm (environ 210 points par pouce)
 COLONNES = 5
-LARGEUR_JAQUETTE = 26 * mm          # largeur de la jaquette dans la grille (5 colonnes)
+LARGEUR_JAQUETTE = 24 * mm          # largeur de la jaquette dans la grille (5 colonnes)
 MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
 L_PAGE, H_PAGE = A4
 L_CADRE = L_PAGE - 2 * MARGE_X
@@ -373,11 +374,22 @@ def jauge(c, x, y, niveau, st):
         c.rect(x + k * PAS_CRAN, y - 2.4 * mm, CRAN, 2.4 * mm, fill=1, stroke=1)
 
 
+def glyphe_zone(c, x, y, cote, zone, st):
+    """Mini nuage : un carré à quatre cases (nombre d'annonces de gauche à droite, prix de bas en haut) dont la case de la zone est en or."""
+    moitie = cote / 2
+    for q in range(4):
+        cx_, cy_ = x + (moitie if q in (1, 3) else 0), y + (moitie if q in (2, 3) else 0)
+        c.setFillColor(HexColor(st["or"]) if q == zone else HexColor(st["grille"]))
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setLineWidth(0.3)
+        c.rect(cx_, cy_, moitie, moitie, fill=1, stroke=1)
+
+
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
-    def __init__(self, v, st, polices, web, offre=None, reperes="jauge"):
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None):
         super().__init__()
-        self.v, self.st, self.pol, self.web, self.reperes = v, st, polices, web, reperes
+        self.v, self.st, self.pol, self.web, self.reperes, self.zone = v, st, polices, web, reperes, zone          # zone : 0 à 3 (voir guide_analyse.quadrant), None sans repère
         self.largeur = L_CADRE / COLONNES
         self.iw = LARGEUR_JAQUETTE
         jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
@@ -398,10 +410,10 @@ class Fiche(Flowable):
 
     def libelles(self):
         """Tous les textes dessinés dans la cellule (pour les tests : aucun montant, aucun état, aucun nombre décimal)."""
-        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"]
+        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"] + ([f"Zone {ga.NUM_ZONE[self.zone]}"] if self.zone is not None else [])
 
     def wrap(self, *_):
-        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 2.5 * mm
+        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 5.2 * mm + 2.5 * mm
         return self.largeur, self.h
 
     def draw(self):
@@ -442,10 +454,19 @@ class Fiche(Flowable):
         lettres(c, self.largeur / 2, y, LIBELLE_PRIX, f_texte, 5.4, 0.5, centre=True)
         y -= 1.4 * mm
         jauge(c, (self.largeur - LARGEUR_JAUGE) / 2, y, self.niveau, st)
-        self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm}          # positions des repères (légende annotée)
+        self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm, "zone": y - 10 * mm}          # positions des repères (légende annotée)
         c.setFillColor(HexColor(st["texte"]))
         c.setFont(f_gras, 7.2)
         c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère")
+        if self.zone is not None:          # où se situe le livre sur le nuage de points : petit carré à quatre cases, la sienne en or, et son numéro
+            n = ga.NUM_ZONE[self.zone]
+            tw = pdfmetrics.stringWidth(f"Zone {n}", f_gras, 6.6)
+            gx0, gy0 = (self.largeur - (4 * mm + 1.6 * mm + tw)) / 2, y - 6.4 * mm - 5.8 * mm
+            glyphe_zone(c, gx0, gy0, 4 * mm, self.zone, st)
+            c.setFillColor(HexColor(st["titre"]))
+            c.setFont(f_gras, 6.6)
+            c.drawString(gx0 + 5.6 * mm, gy0 + 1.2 * mm, f"Zone {n}")
+            self.reperes_y["zone"] = gy0 + 2 * mm
 
 
 INTRO_TAILLE = 15.6          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
@@ -509,7 +530,7 @@ class FicheAnnotee(Flowable):
         c.setStrokeColor(HexColor(st["filet"]))
         c.setFillColor(HexColor(st["texte"]))
         c.setLineWidth(0.4)
-        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher).")):
+        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher)."), ("zone", "Zone : où se situe le livre sur le nuage de points (zones 1 à 4).")):
             y = f.reperes_y[cle]
             c.line(f.largeur - 4 * mm, y, 56 * mm, y)
             c.setFont(self.pol[2], 9.5)
@@ -548,7 +569,7 @@ def legende(styles, st=None, polices=None, exemple=None):
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     haut = []
     if exemple is not None:
-        exemple.offre, exemple.niveau = "courant", 3
+        exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
         haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
     return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
                    P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher ; l'échelle donne les montants."),
@@ -808,6 +829,15 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     texte_intro = introduction_md if introduction_md is not None else INTRODUCTION.read_text(encoding="utf-8")
     candidats = [v for v in versions if v.get("couverture") and (web / v["couverture"]).exists() and ga.cote(v)]
     exemple = Fiche(candidats[0] if candidats else versions[0], st, pol, web, {}, reperes) if versions else None
+    donnees_zones = donnees if isinstance(donnees, dict) else (ga.charger() if donnees is None else None)
+    pts_zones = ga.points_editions(versions, donnees_zones["offre"]) if donnees_zones else []
+    med_o, med_c = (statistics.median(n for n, _ in pts_zones), statistics.median(p for _, p in pts_zones)) if pts_zones else (None, None)          # médianes de tout le guide : les deux pointillés du nuage
+
+    def zone_de(v):
+        c_ = ga.cote(v)
+        if med_o is None or not v.get("isbn13") or c_ <= 0:
+            return None
+        return ga.quadrant(ga.nb_annonces(donnees_zones["offre"].get(v["isbn13"])), c_, med_o, med_c)
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
         PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
@@ -825,7 +855,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         for j, (version, series_v) in enumerate(versions_ed):
             entete = (bandeau if j == 0 else []) + [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for i, (nom, livres) in enumerate(series_v):
-                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v)) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
@@ -853,8 +883,21 @@ def fr(x, decimales=None):
     return f"{x:g}".replace(".", ",") if decimales is None else f"{x:.{decimales}f}".replace(".", ",")
 
 
+class GlypheZone(Flowable):
+    """Le mini nuage à quatre cases d'une zone, pour la page de méthode."""
+    def __init__(self, zone, st):
+        super().__init__()
+        self.zone, self.st = zone, st
+
+    def wrap(self, *_):
+        return 7 * mm, 6 * mm
+
+    def draw(self):
+        glyphe_zone(self.canv, 0, 0.4 * mm, 5.2 * mm, self.zone, self.st)
+
+
 def page_nuage(versions, donnees, styles, polices, st):
-    """Une page « Lire le nuage de points » : le radar du guide expliqué (annonces en ligne contre prix), valeurs des deux médianes recalculées à chaque génération."""
+    """Une page de méthode : du nuage de points aux quatre zones, puis à la zone marquée sur chaque livre. Valeurs des médianes recalculées à chaque génération."""
     f_titre, f_titre_gras, f_texte, f_gras = polices
     cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
@@ -862,21 +905,19 @@ def page_nuage(versions, donnees, styles, polices, st):
     if not pts:
         return []
     e = ga.Echelles(pts, 100, 100)
-    prix_ex, annonces_ex = int(round(e.med_c * 2 / 5) * 5), max(1, int(e.med_o / 3))
-    zones = Table([[P(f"<b>{ga.ZONES[z]}</b>"), P(t)] for z, t in ((2, "Peu d'annonces et un prix élevé : les éditions recherchées."), (3, "Beaucoup d'annonces et un prix élevé : un marché actif, mais cher."),
-                                                                      (0, "Peu d'annonces et un prix bas : rares en vente, sans être chères."), (1, "Beaucoup d'annonces et un prix bas : faciles à trouver, et bon marché."))],
-                  colWidths=[58 * mm, L_CADRE - 58 * mm], hAlign="LEFT")
-    zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
-    return [PageBreak(), P("Lire le nuage de points", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-            P("À la fin du guide, le radar du héros place chaque édition sur un nuage de points. Chaque point est une édition ; sa place dit deux choses à la fois : combien d'annonces on en trouve en ce moment, et combien elle coûte."),
-            Spacer(1, 2 * mm), ga.dessiner_radar(pts, (), L_CADRE, 96 * mm, f_texte, f_gras, cx), Spacer(1, 3 * mm),
-            P("Comment se repérer", "h2"),
-            P("<b>De gauche à droite</b> : le nombre d'annonces en ligne, gradué en bas (0, 1, 2, 5, 10, 20, 50 annonces). À gauche, l'édition est difficile à trouver ; à droite, elle abonde."),
-            P("<b>De bas en haut</b> : le prix d'occasion, gradué sur le côté en euros. En bas, l'édition est bon marché ; en haut, elle est chère. Les graduations ne sont pas régulières : chaque repère double à peu près le précédent, pour que les petits prix restent lisibles."),
-            P(f"<b>Les deux pointillés</b> marquent le milieu du marché : la ligne verticale, à {fr(e.med_o)} annonces par édition (médiane de l'offre), et la ligne horizontale, à {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne."),
-            P("Les quatre zones", "h2"), zones,
-            P("Un exemple", "h2"),
-            P(f"Une édition à {annonces_ex} annonce{'s' if annonces_ex > 1 else ''} et à {prix_ex}\u00a0€ se place en haut à gauche : peu d'annonces, et un prix au-dessus de la médiane. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")]
+    sens = {2: "Peu d'annonces et un prix élevé : les éditions recherchées.", 3: "Beaucoup d'annonces et un prix élevé : un marché actif, mais cher.",
+            0: "Peu d'annonces et un prix bas : rares en vente, sans être chères.", 1: "Beaucoup d'annonces et un prix bas : faciles à trouver, et bon marché."}
+    ordre = sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])          # zone 1 à 4
+    zones = Table([[GlypheZone(q, st), P(f"<b>Zone {ga.NUM_ZONE[q]}</b> · {ga.ZONES[q]}"), P(sens[q])] for q in ordre], colWidths=[9 * mm, 66 * mm, L_CADRE - 75 * mm], hAlign="LEFT")
+    zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
+    return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+            P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
+            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 82 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
+            P(f"<b>1. Chaque édition est un point.</b> Sa place dépend de deux mesures : le nombre d'annonces en ligne, de gauche à droite (gradué en bas), et son prix d'occasion, de bas en haut (gradué sur le côté, en euros). Les repères ne sont pas réguliers : chacun double à peu près le précédent, pour garder les petits prix lisibles."),
+            P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par édition (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
+            P("<b>3. Chaque livre du guide porte sa zone.</b> Sous son prix, un petit carré à quatre cases, dont la sienne est en or, et son numéro : « Zone 1 » à « Zone 4 ». D'un coup d'œil, on sait où le livre se situe sur le nuage."),
+            Spacer(1, 1 * mm), zones,
+            P(f"Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")]
 
 
 def section_radar(versions, donnees, styles, date_cotes, polices, st):

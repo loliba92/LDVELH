@@ -59,6 +59,7 @@ ZONES = {0: "Peu d'annonces, bon marché", 1: "Beaucoup d'annonces, bon marché"
 VERDICTS = {0: (("rares en vente, mais bon marché", "rare en vente, mais bon marché"), "peu de vendeurs et un prix bas : un petit marché"),
             1: (("faciles à trouver, et bon marché", "facile à trouver, et bon marché"), "beaucoup de vendeurs et un prix bas : on trouve sans peine"),
             2: (("difficiles à trouver et chères", "difficile à trouver et chère"), "peu de vendeurs et un prix élevé : il faut guetter"), 3: (("faciles à trouver, mais chères", "facile à trouver, mais chère"), "un marché actif, où l'on trouve facilement mais cher")}
+NUM_ZONE = {2: 1, 3: 2, 0: 3, 1: 4}          # numéro de zone dans le guide, dans l'ordre de lecture du nuage : en haut à gauche, en haut à droite, en bas à gauche, en bas à droite
 GRANDS_RADARS = 3          # un radar par éditeur ayant au moins ce nombre de séries suivies
 
 
@@ -144,8 +145,8 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
                 etiquettes.append(rect)
                 d.add(String(xt, yt, nom, fontName=police_gras, fontSize=6.8, fillColor=c["texte"], textAnchor=ancre))
                 break
-    for texte, x, y, ancre in ((ZONES[2], gx + 2 * mm, hauteur - hb - 4 * mm, "start"), (ZONES[3], largeur - dr - 2 * mm, hauteur - hb - 4 * mm, "end"),
-                               (ZONES[0], gx + 2 * mm, gy + 2 * mm, "start"), (ZONES[1], largeur - dr - 2 * mm, gy + 2 * mm, "end")):
+    for texte, x, y, ancre in ((f"Zone {NUM_ZONE[2]} · {ZONES[2]}", gx + 2 * mm, hauteur - hb - 4 * mm, "start"), (f"Zone {NUM_ZONE[3]} · {ZONES[3]}", largeur - dr - 2 * mm, hauteur - hb - 4 * mm, "end"),
+                               (f"Zone {NUM_ZONE[0]} · {ZONES[0]}", gx + 2 * mm, gy + 2 * mm, "start"), (f"Zone {NUM_ZONE[1]} · {ZONES[1]}", largeur - dr - 2 * mm, gy + 2 * mm, "end")):
         d.add(String(x, y, texte, fontName=police_gras, fontSize=7.8, fillColor=c["or"], textAnchor=ancre))
     # axes en mots, avec de vraies flèches dessinées
     ym = 4.2 * mm
@@ -197,8 +198,8 @@ def lecture_globale(pts):
         r = parts[z] / total
         return "la plus grosse part" if z == ordre[0] else "une part importante" if r >= 0.22 else "une part modeste" if r >= 0.1 else "peu d'éditions"
     ph = ["Chaque point est une édition. Elle se place selon ce qu'on en trouve en ce moment, de gauche à droite, et selon son prix, de bas en haut ; les pointillés marquent le milieu du marché : la ligne verticale, à " + _fr(E.med_o) + " annonces par édition (médiane de l'offre) ; la ligne horizontale, à " + _fr(E.med_c, 2) + "\u00a0€ (médiane des prix). À droite de la verticale, on trouve beaucoup d'annonces ; au-dessus de l'horizontale, c'est cher.",
-          f"La plus grosse part des éditions se range en zone « {ZONES[ordre[0]].lower()} » : {VERDICTS[ordre[0]][1]}.",
-          f"La zone « {ZONES[ordre[-1]].lower()} » est la plus clairsemée : {VERDICTS[ordre[-1]][1]}."]
+          f"La plus grosse part des éditions se range en zone {NUM_ZONE[ordre[0]]} (« {ZONES[ordre[0]].lower()} ») : {VERDICTS[ordre[0]][1]}.",
+          f"La zone {NUM_ZONE[ordre[-1]]} (« {ZONES[ordre[-1]].lower()} ») est la plus clairsemée : {VERDICTS[ordre[-1]][1]}."]
     ph.append("Certaines éditions n'ont aucune annonce en ce moment : elles s'alignent tout à gauche du radar." if sans >= 0.05 else "Presque toutes les éditions ont au moins une annonce en ce moment.")
     return ph
 
@@ -225,7 +226,7 @@ def verdicts_editeur(profs_editeur, pts_fond):
         if liste:
             noms = liste_mots(p["serie"] for p in liste)
             v = VERDICTS[z][0][1 if len(liste) == 1 else 0]
-            sortie.append((z, choix(f"{z}{noms}", (f"{ZONES[z]} : {noms}, {v}.", f"{noms} : {v}. Zone « {ZONES[z].lower()} »."))))
+            sortie.append((z, choix(f"{z}{noms}", (f"Zone {NUM_ZONE[z]} · {ZONES[z]} : {noms}, {v}.", f"{noms} : {v}. Zone {NUM_ZONE[z]} (« {ZONES[z].lower()} »)."))))
     return sortie
 
 
