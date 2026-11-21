@@ -1,4 +1,5 @@
 """Tests du guide de référence en PDF (données de test petites, aucun réseau).   python pipeline/test_guide.py"""
+import re
 import socket
 import sys
 import tempfile
@@ -181,12 +182,15 @@ class TestRadar(unittest.TestCase):
         self.assertEqual([ga.quadrant(o, c, 5, 20) for o, c in ((1, 10), (9, 10), (1, 30), (9, 30))], [0, 1, 2, 3])
         self.assertEqual(sorted(ga.ZONES.values()), sorted(["Peu d'annonces, cher", "Beaucoup d'annonces, cher", "Peu d'annonces, bon marché", "Beaucoup d'annonces, bon marché"]))
 
-    def test_seules_les_medianes_sont_chiffrees_dans_le_chapitre_radar(self):
+    def test_le_chapitre_radar_ne_chiffre_que_les_medianes_et_les_graduations(self):
         textes = self.textes(self.section())
         self.assertGreater(len(textes), 20)
-        for t in textes:          # seules les deux médianes des pointillés sont chiffrées
-            self.assertTrue("médiane" in t or not any(ch.isdigit() for ch in t), t)
+        graduation = lambda t: bool(re.fullmatch(r"\d+(\u00a0€)?", t))          # repères des axes : « 10 » annonces ou « 10 € »
+        for t in textes:          # le reste du chapitre reste en mots
+            self.assertTrue("médiane" in t or graduation(t) or not any(ch.isdigit() for ch in t), t)
         self.assertEqual(len([t for t in textes if "médiane de l'offre" in t and "médiane des prix" in t]), 1)
+        self.assertTrue(any(graduation(t) and t.endswith("€") for t in textes), "graduations de prix")
+        self.assertTrue(any(graduation(t) and not t.endswith("€") for t in textes), "graduations d'annonces")
 
     def test_pas_de_ce_livre_et_un_radar_par_grand_editeur(self):
         textes = " ".join(self.textes(self.section()))

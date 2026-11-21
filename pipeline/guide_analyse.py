@@ -82,9 +82,13 @@ def points_editions(versions, offre):
     return [(nb_annonces(offre.get(v["isbn13"])), cote(v)) for v in versions if v.get("isbn13") and cote(v) > 0]
 
 
+REPERES_PRIX = (2, 5, 10, 20, 50, 100, 200)          # graduations des prix, en euros
+REPERES_OFFRE = (0, 1, 2, 5, 10, 20, 50)          # graduations du nombre d'annonces par édition
+
+
 class Echelles:
     """Échelles du radar : offre et prix en logarithmique, médianes (jamais affichées). Les zones se lisent toujours par rapport à tout le guide."""
-    def __init__(self, pts, largeur, hauteur, gx=20 * mm, gy=12 * mm, dr=4 * mm, hb=4 * mm):
+    def __init__(self, pts, largeur, hauteur, gx=28 * mm, gy=12 * mm, dr=4 * mm, hb=4 * mm):
         self.largeur, self.hauteur, self.gx, self.gy, self.dr, self.hb = largeur, hauteur, gx, gy, dr, hb
         self.med_o = statistics.median(n for n, _ in pts)
         self.med_c = statistics.median(p for _, p in pts)
@@ -106,7 +110,7 @@ def _recoupe(r, autres):
 
 
 def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, police="Helvetica", police_gras="Helvetica-Bold", c=None, editeur=None, max_etiquettes=14):
-    """Radar du héros, comme celui du site mais sans « Ce livre » : un point par édition, quatre zones, médianes en pointillés ; ni graduation ni valeur.
+    """Radar du héros, comme celui du site mais sans « Ce livre » : un point par édition, quatre zones, médianes en pointillés ; quelques graduations (prix en euros sur le côté, nombres d'annonces en bas).
     `series` : [{"editeur", "serie", "editions", "offre", "cote"}] dessinées en bulles étiquetées « Éditeur · Série » (taille selon le nombre d'éditions, sans légende chiffrée)."""
     c = c or COULEURS_NUIT
     d = Drawing(largeur, hauteur)
@@ -150,11 +154,23 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
     d.add(Line(gx + 30 * mm, ym, largeur - dr - 36 * mm, ym, strokeColor=c["sourdine"], strokeWidth=0.6))
     d.add(Polygon([largeur - dr - 36 * mm, ym + 1 * mm, largeur - dr - 33 * mm, ym, largeur - dr - 36 * mm, ym - 1 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
     d.add(Polygon([gx + 30 * mm, ym + 1 * mm, gx + 27 * mm, ym, gx + 30 * mm, ym - 1 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
-    d.add(String(gx - 2 * mm, hauteur - hb - 4 * mm, "cher", fontName=police, fontSize=8, fillColor=c["texte"], textAnchor="end"))
-    d.add(String(gx - 2 * mm, gy, "pas cher", fontName=police, fontSize=8, fillColor=c["texte"], textAnchor="end"))
-    d.add(Line(gx - 8 * mm, gy + 8 * mm, gx - 8 * mm, hauteur - hb - 12 * mm, strokeColor=c["sourdine"], strokeWidth=0.6))
-    d.add(Polygon([gx - 9 * mm, hauteur - hb - 12 * mm, gx - 8 * mm, hauteur - hb - 9 * mm, gx - 7 * mm, hauteur - hb - 12 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
-    d.add(Polygon([gx - 9 * mm, gy + 8 * mm, gx - 8 * mm, gy + 5 * mm, gx - 7 * mm, gy + 8 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
+    xa = gx - 14 * mm
+    d.add(String(0, hauteur - hb - 4 * mm, "cher", fontName=police, fontSize=8, fillColor=c["texte"]))
+    d.add(String(0, gy, "pas cher", fontName=police, fontSize=8, fillColor=c["texte"]))
+    d.add(Line(xa, gy + 8 * mm, xa, hauteur - hb - 12 * mm, strokeColor=c["sourdine"], strokeWidth=0.6))
+    d.add(Polygon([xa - 1 * mm, hauteur - hb - 12 * mm, xa, hauteur - hb - 9 * mm, xa + 1 * mm, hauteur - hb - 12 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
+    d.add(Polygon([xa - 1 * mm, gy + 8 * mm, xa, gy + 5 * mm, xa + 1 * mm, gy + 8 * mm], fillColor=c["sourdine"], strokeColor=c["sourdine"]))
+    # graduations : quelques prix en euros (échelle logarithmique) sur le côté, quelques nombres d'annonces en bas
+    for v in REPERES_PRIX:
+        if math.exp(E.lo) <= v <= math.exp(E.hi):
+            y = E.Y(v)
+            d.add(Line(gx, y, gx + 1.6 * mm, y, strokeColor=c["sourdine"], strokeWidth=0.5))
+            d.add(String(gx - 1.6 * mm, y - 1 * mm, f"{v}\u00a0€", fontName=police, fontSize=6.8, fillColor=c["texte"], textAnchor="end"))
+    for n in REPERES_OFFRE:
+        if n <= E.omax - 1:
+            x = E.X(n)
+            d.add(Line(x, gy, x, gy + 1.6 * mm, strokeColor=c["sourdine"], strokeWidth=0.5))
+            d.add(String(x, gy - 3.4 * mm, str(n), fontName=police, fontSize=6.8, fillColor=c["texte"], textAnchor="middle"))
     return d
 
 
