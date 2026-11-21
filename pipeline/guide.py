@@ -809,7 +809,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     candidats = [v for v in versions if v.get("couverture") and (web / v["couverture"]).exists() and ga.cote(v)]
     exemple = Fiche(candidats[0] if candidats else versions[0], st, pol, web, {}, reperes) if versions else None
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
-        PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
+        PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
     for k, (editeur, versions_ed) in enumerate(groupes):
         nom_versions = [ver for ver, _ in versions_ed]
@@ -846,6 +846,37 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     construire.remplissage = (sum(remplissage.values()) / len(remplissage)) if remplissage else 0.0          # taux moyen de remplissage des pages du catalogue
     construire.pages_catalogue = len(remplissage)
     return nb
+
+
+def fr(x, decimales=None):
+    """Nombre à la française (virgule), entier sans zéros inutiles."""
+    return f"{x:g}".replace(".", ",") if decimales is None else f"{x:.{decimales}f}".replace(".", ",")
+
+
+def page_nuage(versions, donnees, styles, polices, st):
+    """Une page « Lire le nuage de points » : le radar du guide expliqué (annonces en ligne contre prix), valeurs des deux médianes recalculées à chaque génération."""
+    f_titre, f_titre_gras, f_texte, f_gras = polices
+    cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    pts = ga.points_editions(versions, donnees["offre"])
+    if not pts:
+        return []
+    e = ga.Echelles(pts, 100, 100)
+    prix_ex, annonces_ex = int(round(e.med_c * 2 / 5) * 5), max(1, int(e.med_o / 3))
+    zones = Table([[P(f"<b>{ga.ZONES[z]}</b>"), P(t)] for z, t in ((2, "Peu d'annonces et un prix élevé : les éditions recherchées."), (3, "Beaucoup d'annonces et un prix élevé : un marché actif, mais cher."),
+                                                                      (0, "Peu d'annonces et un prix bas : rares en vente, sans être chères."), (1, "Beaucoup d'annonces et un prix bas : faciles à trouver, et bon marché."))],
+                  colWidths=[58 * mm, L_CADRE - 58 * mm], hAlign="LEFT")
+    zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
+    return [PageBreak(), P("Lire le nuage de points", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+            P("À la fin du guide, le radar du héros place chaque édition sur un nuage de points. Chaque point est une édition ; sa place dit deux choses à la fois : combien d'annonces on en trouve en ce moment, et combien elle coûte."),
+            Spacer(1, 2 * mm), ga.dessiner_radar(pts, (), L_CADRE, 96 * mm, f_texte, f_gras, cx), Spacer(1, 3 * mm),
+            P("Comment se repérer", "h2"),
+            P("<b>De gauche à droite</b> : le nombre d'annonces en ligne. À gauche, l'édition est difficile à trouver ; à droite, elle abonde."),
+            P("<b>De bas en haut</b> : le prix d'occasion. En bas, l'édition est bon marché ; en haut, elle est chère."),
+            P(f"<b>Les deux pointillés</b> marquent le milieu du marché : la ligne verticale, à {fr(e.med_o)} annonces par édition (médiane de l'offre), et la ligne horizontale, à {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne."),
+            P("Les quatre zones", "h2"), zones,
+            P("Un exemple", "h2"),
+            P(f"Une édition à {annonces_ex} annonce{'s' if annonces_ex > 1 else ''} et à {prix_ex}\u00a0€ se place en haut à gauche : peu d'annonces, et un prix au-dessus de la médiane. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")]
 
 
 def section_radar(versions, donnees, styles, date_cotes, polices, st):
