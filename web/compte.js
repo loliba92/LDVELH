@@ -3,7 +3,7 @@
    Ce fichier ne touche ni à la collection ni aux prix : il s'appuie sur Cloud (connexion, sauvegarde), Relais (niveau) et AppCollection (app.js). */
 window.Compte = (function () {
   var CLE_ROLE = 'cdh-role', SAUVE = 'cote-collection-avant-reprise';
-  var configure = null, configPrete = false, exigeCompte = false, role = '', nomRelais = '', finAcces = '', essaiAcces = false, echecRole = '', intention = null, reprisEnCours = false;
+  var configure = null, configPrete = false, exigeCompte = false, role = '', nomRelais = '', codeAcces = '', finAcces = '', essaiAcces = false, echecRole = '', intention = null, reprisEnCours = false;
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var lireSession = function (k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -68,8 +68,9 @@ window.Compte = (function () {
   // Guide PDF personnalisé : le nom de la personne est écrit au pied de chaque page (hors couverture), dans le navigateur ; jamais d'adresse
   var PDFLIB = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
   function nomGuide() {
-    var n = String(nomRelais || (window.Cloud && window.Cloud.nom()) || '').replace(/[\u0000-\u001f|;\s]+/g, ' ').trim().slice(0, 30);
-    return n || 'un sorcier';
+    var n = String(nomRelais || (window.Cloud && window.Cloud.nom()) || '').replace(/[\u0000-\u001f|;\s]+/g, ' ').trim();
+    if (codeAcces && !/ #[0-9a-f]{4}$/.test(n)) n = n.slice(0, 24).trim() + ' #' + codeAcces;          // prénom + code court, comme les Héros ; jamais d'adresse
+    return n.slice(0, 30) || 'un sorcier';
   }
   function chargerPdfLib() {
     if (window.PDFLib) return Promise.resolve(window.PDFLib);
@@ -287,7 +288,7 @@ window.Compte = (function () {
     if (rolePromesse) return rolePromesse;                                   // une seule demande à la fois
     if (Date.now() - derniereRole < 60000 && role) return Promise.resolve();          // vérifié il y a moins d'une minute
     rolePromesse = window.Relais.appeler('moi').then(function (r) {
-      if (r && r.ok) { role = r.role; nomRelais = r.nom || ''; finAcces = r.fin || ''; essaiAcces = r.essai === true; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); ecrireSession('cdh-essai', essaiAcces ? '1' : ''); garderRole(); if (role !== 'admin' && role !== 'superadmin' && window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); signalerCompte(); }
+      if (r && r.ok) { role = r.role; nomRelais = r.nom || ''; codeAcces = /^[0-9a-f]{4}$/.test(r.code || '') ? r.code : ''; ecrireSession('cdh-code', codeAcces); finAcces = r.fin || ''; essaiAcces = r.essai === true; echecRole = ''; derniereRole = Date.now(); ecrireSession(CLE_ROLE, role); ecrireSession('cdh-fin', finAcces); ecrireSession('cdh-essai', essaiAcces ? '1' : ''); garderRole(); if (role !== 'admin' && role !== 'superadmin' && window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); signalerCompte(); }
       else echecRole = (r && r.erreur) || 'inconnu';
     }).catch(function () { echecRole = 'relais'; }).then(function () { rolePromesse = null; dessiner(); });
     return rolePromesse;
@@ -557,7 +558,7 @@ window.Compte = (function () {
       }
       else if (a === 'deconnecter') {
         fermerMenu();
-        if (window.confirm('Votre collection reste dans votre Drive. Sur cet appareil, vous ne pourrez plus la modifier tant que vous ne vous reconnectez pas. Se déconnecter ?')) { window.Cloud.deconnecter(); role = ''; finAcces = ''; essaiAcces = false; ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); ecrireSession('cdh-essai', ''); dessiner(); }
+        if (window.confirm('Votre collection reste dans votre Drive. Sur cet appareil, vous ne pourrez plus la modifier tant que vous ne vous reconnectez pas. Se déconnecter ?')) { window.Cloud.deconnecter(); role = ''; finAcces = ''; essaiAcces = false; ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); ecrireSession('cdh-essai', ''); ecrireSession('cdh-code', ''); codeAcces = ''; dessiner(); }
       }
       return;
     }
@@ -581,12 +582,12 @@ window.Compte = (function () {
       exigeCompte = !!(c && c.client_id && c.collection === true);
       configPrete = true;
       if (!configure) { ['#compte-haut', '#compte-feuille'].forEach(function (s) { var n = $(s); if (n) n.hidden = true; }); return; }
-      role = lireSession(CLE_ROLE); finAcces = lireSession('cdh-fin') || ''; essaiAcces = lireSession('cdh-essai') === '1';
+      role = lireSession(CLE_ROLE); finAcces = lireSession('cdh-fin') || ''; essaiAcces = lireSession('cdh-essai') === '1'; codeAcces = lireSession('cdh-code') || '';
       var vu = roleVu();
       if (!role && vu && window.Cloud.lie()) { role = vu.r; finAcces = vu.fin || ''; essaiAcces = vu.essai === true; }          // dernier niveau connu, en attendant la vérification
       bandeau(); dessiner();
       if (window.Cloud.actif() && (!role || role === 'admin' || (role === 'superadmin' && !(vu && Date.now() - vu.t < 600000)))) chargerRole();   // un sorcier relit son niveau à chaque page : sa période peut avoir changé      // connexion reprise sans nouvel onglet : le niveau est relu
-      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); ecrireSession('cdh-essai', ''); oublierRole(); if (window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); role = ''; finAcces = ''; essaiAcces = false; } dessiner(); if (st === 'connecte' || window.Cloud.statut() === 'a-jour') chargerRole(); });          // le niveau est relu dès que la connexion est prête, en même temps que le Drive
+      window.Cloud.surChangement(function (st) { if (st === 'hors-ligne') { ecrireSession('cdh-bienvenue', ''); ecrireSession(CLE_ROLE, ''); ecrireSession('cdh-fin', ''); ecrireSession('cdh-essai', ''); ecrireSession('cdh-code', ''); codeAcces = ''; oublierRole(); if (window.Relais && window.Relais.oublierButin) window.Relais.oublierButin(); role = ''; finAcces = ''; essaiAcces = false; } dessiner(); if (st === 'connecte' || window.Cloud.statut() === 'a-jour') chargerRole(); });          // le niveau est relu dès que la connexion est prête, en même temps que le Drive
       document.addEventListener('cdh-nom', dessiner);
       document.addEventListener('cdh-collection', dessiner);
       // Reprendre les changements faits sur un autre appareil : à l'ouverture de la page et quand on y revient (au plus une fois par 30 s)

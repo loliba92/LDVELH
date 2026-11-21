@@ -4,7 +4,7 @@ const CLIENT = 'abc.apps.googleusercontent.com';
 const sha = (a) => 'sha256:' + crypto.createHash('sha256').update(a).digest('hex');
 const jeton = (email, prenom) => ({ azp: CLIENT, aud: CLIENT, expires_in: '3000', email, email_verified: 'true', given_name: prenom });
 
-function monde(debut = '2026-11-21T09:00:00Z', existants = false) {
+function monde(debut = '2026-11-21T09:00:00Z', seulementNouveaux = false) {
   const props = {}, cache = {};
   let maintenant = Date.parse(debut);
   const admins = { equipe: { [sha('chef@gmail.com')]: { nom: 'loliba (superadmin)', role: 'superadmin' },
@@ -33,7 +33,7 @@ function monde(debut = '2026-11-21T09:00:00Z', existants = false) {
   };
   props.CLIENT_ID = CLIENT; props.GITHUB_TOKEN = 'secret'; props.DEPOT = 'loliba92/LDVELH';
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(__dirname + '/../relais/logique.gs', 'utf8') + '\n' + fs.readFileSync(__dirname + '/../relais/Code.gs', 'utf8') + (existants ? '\nESSAI_COMPTES_EXISTANTS = true;' : ''), ctx);
+  vm.runInContext(fs.readFileSync(__dirname + '/../relais/logique.gs', 'utf8') + '\n' + fs.readFileSync(__dirname + '/../relais/Code.gs', 'utf8') + (seulementNouveaux ? '\nESSAI_COMPTES_EXISTANTS = false;' : ''), ctx);
   const post = (corps) => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(corps) } }).texte);
   return { post, props, cache, avancer: (jours) => { maintenant += jours * 86400000; cache.admins = undefined; delete cache.admins; } };
 }
@@ -66,11 +66,13 @@ test('dernier jour inclus, puis Héros : pas de second essai', () => {
   m.avancer(400); assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.alice' }).role, 'heros');
   assert.strictEqual(m.post({ action: 'butin_lire', jeton: 'ya29.alice' }).erreur, 'droits insuffisants');
 });
-test('un compte déjà connu (ligne « u: ») n\'a pas d\'essai, sauf réglage contraire', () => {
+test('un compte déjà connu (ligne « u: ») a aussi son essai ; avec le réglage contraire, seuls les comptes jamais vus l\'ont', () => {
   const m = monde(); m.props['u:' + sha('vieille@gmail.com').slice(7, 23)] = '1';
-  assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.vieille' }).role, 'heros');
-  const e = monde('2026-11-21T09:00:00Z', true); e.props['u:' + sha('vieille@gmail.com').slice(7, 23)] = '1';
-  assert.strictEqual(e.post({ action: 'moi', jeton: 'ya29.vieille' }).role, 'admin');
+  const r = m.post({ action: 'moi', jeton: 'ya29.vieille' });
+  assert.deepStrictEqual([r.role, r.fin, r.essai], ['admin', '2027-02-21', true]);
+  const n = monde('2026-11-21T09:00:00Z', true); n.props['u:' + sha('vieille@gmail.com').slice(7, 23)] = '1';
+  assert.strictEqual(n.post({ action: 'moi', jeton: 'ya29.vieille' }).role, 'heros');
+  assert.strictEqual(n.post({ action: 'moi', jeton: 'ya29.alice' }).role, 'admin');          // jamais vu : essai
 });
 test('ni l\'équipe, ni les comptes bloqués : pas d\'essai', () => {
   const m = monde();
@@ -80,6 +82,10 @@ test('ni l\'équipe, ni les comptes bloqués : pas d\'essai', () => {
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.futur' }).role, 'heros');            // sorcier à venir : pas d'accès anticipé
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.bloque' }).ok, false);
   assert.strictEqual(Object.keys(m.props).filter((k) => k.indexOf('es:') === 0).length, 0);
+});
+test('« moi » donne le code court du compte (quatre signes de l\'empreinte), pour tous les niveaux', () => {
+  const m = monde();
+  for (const [j, adresse] of [['ya29.alice', 'alice@gmail.com'], ['ya29.chef', 'chef@gmail.com']]) assert.strictEqual(m.post({ action: 'moi', jeton: j }).code, sha(adresse).slice(7, 11), j);
 });
 test('rien d\'identifiable n\'est gardé : ni adresse, ni nom, seulement l\'empreinte courte et la date', () => {
   const m = monde(); m.post({ action: 'moi', jeton: 'ya29.alice' });

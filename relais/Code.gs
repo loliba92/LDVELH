@@ -1,4 +1,4 @@
-// Version du 2026-11-21 10:11 (heure de Paris) : la réponse « moi » indique l'essai de trois mois.
+// Version du 2026-11-21 10:16 (heure de Paris) : la réponse « moi » donne le code court du compte (guide PDF à son nom).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -68,7 +68,7 @@ function verifierConnexion(jeton) {
 }
 
 /* Essai de trois mois : la fin est gardée dans les propriétés du script (clé « es: » + empreinte courte), jamais dans le dépôt.
-   Un compte qui avait déjà une ligne « u: » (arrivé avant l'essai) n'en reçoit pas, sauf ESSAI_COMPTES_EXISTANTS. */
+   Un compte qui avait déjà une ligne « u: » (arrivé avant l'essai) en reçoit un aussi tant que ESSAI_COMPTES_EXISTANTS vaut true. */
 function essaiDuCompte(identite, maintenantSec) {
   if (!identite || !identite.ok || identite.role !== 'heros') return identite;
   var props = PropertiesService.getScriptProperties(), aujourdhui = jourDe(maintenantSec), cle = 'es:' + votant(identite.empreinte);
@@ -136,7 +136,7 @@ function doPost(e) {
     var moi = v.identite, action = String(q.action || '');
     if (!peut(moi.role, action)) return reponse({ ok: false, erreur: 'droits insuffisants', role: moi.role });
 
-    if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom, fin: moi.fin || '', essai: moi.essai === true });
+    if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom, fin: moi.fin || '', essai: moi.essai === true, code: String(moi.empreinte || '').slice(7, 11) });
 
     if (action === 'ajout_livres') {
       var lignes = String(q.liste || '').split(/\n|\|/).map(function (x) { return x.trim(); }).filter(function (x) { return x; });

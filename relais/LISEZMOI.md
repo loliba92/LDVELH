@@ -49,8 +49,8 @@ modifier (crayon) > Version : Nouvelle version > Déployer*. L'adresse de l'appl
 ## Essai de sorcier
 
 Un compte jamais vu est sorcier pendant `MOIS_ESSAI` mois (3) à partir de sa première connexion, puis redevient Héros. Sa date de fin (dernier jour inclus) est gardée dans une
-propriété du script `es:<empreinte courte>` : ni adresse, ni nom, rien dans le dépôt. Il n'y a pas de second essai. Un compte déjà connu (propriété `u:`) n'en reçoit pas, sauf si
-`ESSAI_COMPTES_EXISTANTS` vaut `true` dans `logique.gs`. L'équipe (sorciers passés ou à venir) et les comptes bloqués n'en reçoivent pas. Tests : `node pipeline/test_relais_essai.js`.
+propriété du script `es:<empreinte courte>` : ni adresse, ni nom, rien dans le dépôt. Il n'y a pas de second essai. Un compte déjà connu (propriété `u:`) en reçoit un aussi à sa prochaine connexion
+(`ESSAI_COMPTES_EXISTANTS` vaut `true` dans `logique.gs` ; `false` : seulement les comptes jamais vus). L'équipe (sorciers passés ou à venir) et les comptes bloqués n'en reçoivent pas. Tests : `node pipeline/test_relais_essai.js`.
 
 ## Nouveaux comptes et avis
 

@@ -1,4 +1,4 @@
-// Version du 2026-11-21 10:09 (heure de Paris) : essai de trois mois au niveau sorcier pour un compte jamais vu.
+// Version du 2026-11-21 10:17 (heure de Paris) : l'essai de trois mois vaut aussi pour les comptes déjà connus.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -87,9 +87,9 @@ function decider(infos, fichier, clientId, empreinteDe, maintenantSec) {
 }
 
 /* Essai : un compte jamais vu est sorcier pendant MOIS_ESSAI mois à partir de sa première connexion, puis redevient Héros.
-   ESSAI_COMPTES_EXISTANTS : true pour que les comptes déjà connus (Héros) reçoivent aussi l'essai à leur prochaine connexion. */
+   ESSAI_COMPTES_EXISTANTS : true = les comptes déjà connus (Héros) reçoivent aussi l'essai à leur prochaine connexion ; false = seulement les comptes jamais vus. */
 var MOIS_ESSAI = 3;
-var ESSAI_COMPTES_EXISTANTS = false;
+var ESSAI_COMPTES_EXISTANTS = true;
 function ajouterMois(jour, mois) {
   var d = new Date(jour + 'T00:00:00Z'), j = d.getUTCDate();
   d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + mois);
