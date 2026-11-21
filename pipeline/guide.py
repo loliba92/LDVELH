@@ -593,7 +593,8 @@ def legende(styles, st=None, polices=None, exemple=None):
     haut = []
     if exemple is not None:
         exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
-        haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
+        haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm),
+                P("n° : le numéro de l'éditeur dans sa collection, pas forcément celui du tome dans la série.")]
     return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
                    P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher ; l'échelle donne les montants."),
                    TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS, FOURCHETTES)), st, polices, jauges=True) if st else Spacer(1, 1)]
