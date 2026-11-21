@@ -958,8 +958,6 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                     histoire += [KeepTogether(bloc)]
                 else:
                     histoire += [KeepTogether((entete if i == 0 else []) + [tete] + rangs[:1])] + rangs[1:-2] + [KeepTogether(rangs[-2:])]
-    if donnees is not False:
-        histoire += [NextPageTemplate("texte"), PageBreak()] + section_radar(versions, donnees if donnees is not None else ga.charger(), styles, date_cotes, pol, st)
     doc.multiBuild(histoire)
     construire.remplissage = (sum(remplissage.values()) / len(remplissage)) if remplissage else 0.0          # taux moyen de remplissage des pages du catalogue
     construire.pages_catalogue = len(remplissage)
@@ -1034,7 +1032,10 @@ def page_zones(styles, st, cx, exemples, parts=None):
                       colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
         ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
         h.append(ligne)
-    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. Plus loin, « La stratégie du collectionneur » propose des façons de s'en servir.")]
+    return h + [Spacer(1, 3 * mm),
+                P("<b>D'où viennent ces données ?</b> La Cote du Héros relève les annonces d'occasion sur les différents sites, puis les range par titre, par édition et par éditeur, ce qui reste difficile quand une annonce est incomplète ou ambiguë. "
+                  "Pour chaque livre, le site compte les annonces trouvées et calcule un prix médian : la moitié des annonces est moins chère, l'autre moitié plus chère."),
+                P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. Plus loin, « La stratégie du collectionneur » propose des façons de s'en servir.")]
 
 
 def encart(titre, texte, styles, cx):
