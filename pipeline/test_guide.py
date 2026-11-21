@@ -285,7 +285,7 @@ class TestRadar(unittest.TestCase):
         texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
         self.assertLess(texte.index("La méthode : le nuage et ses quatre zones"), texte.index("Sommaire"))
         plat = texte.replace("\n", " ")
-        self.assertRegex(plat, r"\d+(,\d)? annonces par édition \(médiane de l'offre\)")
+        self.assertRegex(plat, r"\d+(,\d)? annonces par livre \(médiane de l'offre\)")
         self.assertRegex(plat, r"\d+(,\d{2})? € \(médiane des prix\)")
         for n in "1234":
             self.assertIn(f"Zone {n}", plat)
