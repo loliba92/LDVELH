@@ -1,4 +1,4 @@
-// Version du 2026-11-06 07:16 (heure de Paris) : les comptes par jour du Butin ne sont plus envoyés aux sorciers (onglet Analyse réservé au Zagor).
+// Version du 2026-11-21 10:09 (heure de Paris) : essai de trois mois au niveau sorcier pour un compte jamais vu.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -63,8 +63,25 @@ function verifierConnexion(jeton) {
     try { infos = JSON.parse(r.getContentText()); } catch (e) { infos = {}; /* réponse illisible : refus plus bas */ }
     if (r.getResponseCode() === 200 && infos && infos.aud) { try { cache.put(cleGoogle, JSON.stringify(infos), 300); } catch (e) { /* trop gros ou cache indisponible */ } }
   }
-  var admins = lireAdmins();
-  return { identite: decider(infos, admins.contenu, prop('CLIENT_ID'), empreinteDe, Math.floor(Date.now() / 1000)), admins: admins };
+  var admins = lireAdmins(), maintenantSec = Math.floor(Date.now() / 1000);
+  return { identite: essaiDuCompte(decider(infos, admins.contenu, prop('CLIENT_ID'), empreinteDe, maintenantSec), maintenantSec), admins: admins };
+}
+
+/* Essai de trois mois : la fin est gardée dans les propriétés du script (clé « es: » + empreinte courte), jamais dans le dépôt.
+   Un compte qui avait déjà une ligne « u: » (arrivé avant l'essai) n'en reçoit pas, sauf ESSAI_COMPTES_EXISTANTS. */
+function essaiDuCompte(identite, maintenantSec) {
+  if (!identite || !identite.ok || identite.role !== 'heros') return identite;
+  var props = PropertiesService.getScriptProperties(), aujourdhui = jourDe(maintenantSec), cle = 'es:' + votant(identite.empreinte);
+  var fin = props.getProperty(cle) || '';
+  if (!fin && essaiPossible(identite, !!props.getProperty('u:' + votant(identite.empreinte)))) {
+    var verrou = LockService.getScriptLock();
+    verrou.waitLock(10000);
+    try {
+      fin = props.getProperty(cle) || '';
+      if (!fin) { fin = finEssai(aujourdhui); props.setProperty(cle, fin); }
+    } finally { verrou.releaseLock(); }
+  }
+  return appliquerEssai(identite, fin, aujourdhui);
 }
 
 /* À brancher sur un déclencheur « toutes les 5 minutes » (relais/LISEZMOI.md) : garde le service éveillé et la liste des admins en mémoire.

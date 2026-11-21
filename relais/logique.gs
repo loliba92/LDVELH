@@ -1,4 +1,4 @@
-// Version du 2026-11-18 21:28 (heure de Paris) : lot jaquette.yml (jaquette d'un livre, Zagor).
+// Version du 2026-11-21 10:09 (heure de Paris) : essai de trois mois au niveau sorcier pour un compte jamais vu.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -79,10 +79,31 @@ function decider(infos, fichier, clientId, empreinteDe, maintenantSec) {
   if (bloques.indexOf(adresse) >= 0 || bloques.indexOf(empreinte) >= 0) return { ok: false, raison: 'compte bloqué' };
   var equipe = fichier.equipe || {}, membre = null;
   Object.keys(equipe).forEach(function (k) { var c = minuscules(k); if (c === adresse || c === empreinte) membre = equipe[k]; });
+  var dejaMembre = !!membre;
   if (membre && !estEnPeriode(membre, jourDe(maintenantSec))) membre = null;     // sorcier avant son début ou après sa fin : Héros
   if (membre && ROLE_DE[membre.role] != null) return { ok: true, role: membre.role, nom: nettoyerNom(membre.nom) || 'Admin', empreinte: empreinte, fin: membre.role === 'admin' ? (membre.fin || '') : '' };
   var prenom = nettoyerNom(infos.given_name || infos.name || adresse.split('@')[0]).slice(0, 20) || 'Héros';
-  return { ok: true, role: 'heros', nom: prenom + ' #' + empreinte.slice(7, 11), empreinte: empreinte };
+  return { ok: true, role: 'heros', nom: prenom + ' #' + empreinte.slice(7, 11), empreinte: empreinte, dejaMembre: dejaMembre };
+}
+
+/* Essai : un compte jamais vu est sorcier pendant MOIS_ESSAI mois à partir de sa première connexion, puis redevient Héros.
+   ESSAI_COMPTES_EXISTANTS : true pour que les comptes déjà connus (Héros) reçoivent aussi l'essai à leur prochaine connexion. */
+var MOIS_ESSAI = 3;
+var ESSAI_COMPTES_EXISTANTS = false;
+function ajouterMois(jour, mois) {
+  var d = new Date(jour + 'T00:00:00Z'), j = d.getUTCDate();
+  d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() + mois);
+  var dernier = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(j, dernier));
+  return d.toISOString().slice(0, 10);
+}
+function finEssai(aujourdhui) { return ajouterMois(aujourdhui, MOIS_ESSAI); }
+/* Un essai commence-t-il ? Seulement pour un Héros qui n'a jamais été membre de l'équipe ; `dejaVu` : le compte était déjà connu avant l'essai. */
+function essaiPossible(identite, dejaVu) { return !!(identite && identite.ok && identite.role === 'heros' && !identite.dejaMembre && (ESSAI_COMPTES_EXISTANTS || !dejaVu)); }
+/* Identité avec le niveau sorcier tant que l'essai court (`fin` : dernier jour inclus, '' sans essai). */
+function appliquerEssai(identite, fin, aujourdhui) {
+  if (!identite || !identite.ok || identite.role !== 'heros' || !fin || fin < aujourdhui) return identite;
+  return { ok: true, role: 'admin', nom: identite.nom, empreinte: identite.empreinte, fin: fin, essai: true };
 }
 
 function peut(role, action) {
