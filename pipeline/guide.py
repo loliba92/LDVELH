@@ -91,6 +91,18 @@ def mot_offre(n, neuf=False):
     return "rare" if n == 1 else "peu d'annonces" if n <= 3 else "courant" if n < 10 else "abondant"
 
 
+MOIS_COURTS = ("janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc.")
+
+
+def sortie_prevue(v, jour):
+    """« 11 févr. 2027 » si le livre n'est pas encore sorti au jour donné (AAAA-MM-JJ), sinon None."""
+    p = str(v.get("parution") or "")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", p) or p <= jour:
+        return None
+    a, m, j = p.split("-")
+    return f"{int(j)} {MOIS_COURTS[int(m) - 1]} {a}"
+
+
 def _numero(v):
     n = str(v.get("numero") or "")
     return int(n) if n.isdigit() else 10 ** 6
@@ -410,7 +422,7 @@ def glyphe_zone(c, x, y, cote, zone, st):
 
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
-    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None):
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None, jour=None):
         super().__init__()
         self.v, self.st, self.pol, self.web, self.reperes, self.zone = v, st, polices, web, reperes, zone          # zone : 0 à 3 (voir guide_analyse.quadrant), None sans repère
         self.largeur = L_CADRE / COLONNES
@@ -428,12 +440,15 @@ class Fiche(Flowable):
         num = f"n°\u00a0{v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
         self.meta = f"{num}{v.get('version') or ''}"
         self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1)
-        prix = v.get("prix") or {}
-        self.niveau = niveau_prix(ga.cote(v))          # repère de prix : même état de référence que le site (très bon état, à défaut bon état)
+        self.lib_offre, self.mot_prix = LIBELLE_OFFRE, "prix inconnu"
+        self.niveau = niveau_prix(ga.cote(v)) if ga.cote(v) > 0 else None          # repère de prix : même état de référence que le site (très bon état, à défaut bon état) ; sans cote, pas de repère
+        sortie = sortie_prevue(v, jour or date.today().isoformat())
+        if sortie:          # livre annoncé, pas encore sorti : ni annonces ni prix
+            self.lib_offre, self.offre, self.niveau, self.mot_prix = "Pas encore sorti", f"sortie : {sortie}", None, "pas encore de prix"
 
     def libelles(self):
         """Tous les textes dessinés dans la cellule (pour les tests : aucun montant, aucun état, aucun nombre décimal)."""
-        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"] + ([f"Zone {ga.NUM_ZONE[self.zone]}"] if self.zone is not None else [])
+        return [self.v.get("titre") or "", self.meta, self.lib_offre, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else self.mot_prix] + ([f"Zone {ga.NUM_ZONE[self.zone]}"] if self.zone is not None else [])
 
     def wrap(self, *_):
         self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 5.2 * mm + 2.5 * mm
@@ -467,7 +482,7 @@ class Fiche(Flowable):
         c.drawCentredString(self.largeur / 2, y, self.meta)
         y -= 3.4 * mm
         c.setFillColor(HexColor(st["sourdine"]))
-        lettres(c, self.largeur / 2, y, LIBELLE_OFFRE, f_texte, 5.4, 0.5, centre=True)
+        lettres(c, self.largeur / 2, y, self.lib_offre, f_texte, 5.4, 0.5, centre=True)
         y -= 3 * mm
         c.setFillColor(HexColor(st["titre"]))
         c.setFont(f_gras, 7.4)
@@ -480,7 +495,7 @@ class Fiche(Flowable):
         self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm, "zone": y - 10 * mm}          # positions des repères (légende annotée)
         c.setFillColor(HexColor(st["texte"]))
         c.setFont(f_gras, 7.2)
-        c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère")
+        c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else self.mot_prix)
         if self.zone is not None:          # où se situe le livre sur le nuage de points : petit carré à quatre cases, la sienne en or, et son numéro
             n = ga.NUM_ZONE[self.zone]
             tw = pdfmetrics.stringWidth(f"Zone {n}", f_gras, 6.6)
@@ -532,7 +547,7 @@ def introduction(texte, variables, styles, st, pol):
 
 OFFRE_SENS = (("abondant", "Beaucoup d'annonces : facile à trouver."), ("courant", "Plusieurs annonces : on le trouve sans difficulté."),
               ("peu d'annonces", "Quelques annonces seulement : il faut surveiller."), ("rare", "Une seule annonce en ce moment."),
-              ("introuvable", "Aucune annonce aujourd'hui."), ("disponible neuf", "Encore vendu neuf."))
+              ("introuvable", "Aucune annonce aujourd'hui."), ("disponible neuf", "Encore vendu neuf."), ("pas encore sorti", "Annoncé : la fiche donne sa date de sortie prévue."))
 PRIX_SENS = ("Se trouve à petit prix.", "Un prix doux, à la portée de tous.", "Un prix courant pour un livre de collection.", "Un exemplaire recherché.", "Un livre très recherché, parmi les plus chers.")
 
 
@@ -553,7 +568,7 @@ class FicheAnnotee(Flowable):
         c.setStrokeColor(HexColor(st["filet"]))
         c.setFillColor(HexColor(st["texte"]))
         c.setLineWidth(0.4)
-        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher)."), ("zone", "Zone : où se situe le livre sur le nuage de points (zones 1 à 4).")):
+        for cle, texte in (("titre", "Titre, numéro de l'éditeur (pas celui du tome) et version."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher)."), ("zone", "Zone : où se situe le livre sur le nuage de points (zones 1 à 4).")):
             y = f.reperes_y[cle]
             c.line(f.largeur - 4 * mm, y, 56 * mm, y)
             c.setFont(self.pol[2], 9.5)
@@ -593,10 +608,9 @@ def legende(styles, st=None, polices=None, exemple=None):
     haut = []
     if exemple is not None:
         exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
-        haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm),
-                P("n° : le numéro de l'éditeur dans sa collection, pas forcément celui du tome dans la série.")]
+        haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
     return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
-                   P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher ; l'échelle donne les montants."),
+                   P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces : plus la jauge est pleine, plus il est cher. Sans cote, la fiche dit « prix inconnu »."),
                    TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS, FOURCHETTES)), st, polices, jauges=True) if st else Spacer(1, 1)]
 
 
@@ -943,7 +957,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         for j, (version, series_v) in enumerate(versions_ed):
             entete = (bandeau if j == 0 else []) + [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for i, (nom, livres) in enumerate(series_v):
-                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v)) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v), genere_le) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
