@@ -999,11 +999,13 @@ def page_nuage(versions, donnees, styles, polices, st):
     zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
     return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
             P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
-            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 74 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
+            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 60 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
             P(f"<b>1. Chaque livre est un point.</b> Sa place dépend de deux mesures : le nombre d'annonces en ligne, de gauche à droite (gradué en bas), et son prix d'occasion, de bas en haut (gradué sur le côté, en euros). Les repères ne sont pas réguliers : chacun double à peu près le précédent, pour garder les petits prix lisibles."),
             P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par livre (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Un livre sur deux se trouve de chaque côté de chaque ligne : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
             P("<b>3. Chaque livre du guide porte sa zone.</b> Sous son prix, un petit carré à quatre cases, dont la sienne est en or, et son numéro : « Zone 1 » à « Zone 4 ». D'un coup d'œil, on sait où le livre se situe sur le nuage."),
             Spacer(1, 1 * mm), zones,
+            P(f"<b>Que veulent dire ces pourcentages ?</b> La part des livres du guide dans chaque zone : {sum(n for n, _ in parts.values())} livres placés sur le nuage, d'après {_annonces_en_chiffres(sum(ga.nb_annonces(o) for o in donnees['offre'].values()))} en ligne aujourd'hui. "
+              "Les quatre parts font 100\u00a0% ; chaque zone pèse à peu près un quart, car les pointillés sont des médianes."),
             P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance."),
             P("<b>Le nuage ne sert pas à comparer deux livres</b>, qui n'ont pas forcément le même public ni le même tirage (deux éditions d'un même livre, elles, peuvent l'être). "
               "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c), parts)
@@ -1091,6 +1093,11 @@ ZONES_TEXTE = {
 
 
 MILLIERS = {1: "mille", 2: "deux mille", 3: "trois mille", 4: "quatre mille", 5: "cinq mille", 6: "six mille", 7: "sept mille", 8: "huit mille", 9: "neuf mille", 10: "dix mille"}
+
+
+def _annonces_en_chiffres(n):
+    """« plus de 5 000 annonces » (millier inférieur) ; « de nombreuses annonces » sous mille."""
+    return f"plus de {n // 1000 * 1000:,} annonces".replace(",", "\u00a0") if n >= 1000 else "de nombreuses annonces"
 
 
 def _annonces_en_mots(n):
