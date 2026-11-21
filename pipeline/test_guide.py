@@ -237,7 +237,7 @@ class TestRadar(unittest.TestCase):
             self.skipTest("pdftotext absent")
         sortie = Path(tempfile.mkdtemp()) / "e.pdf"
         g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
-        texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
+        texte = subprocess.run(["pdftotext", "-f", "2", str(sortie), "-"], capture_output=True, text=True).stdout          # hors couverture : ses lettres espacées sortent une à une du texte
         self.assertIsNone(re.search(r"\b(C|BE|TBE)\b", texte), "abréviation d'état trouvée")
         for mot in ("convenable", "bon état", "très bon état"):
             self.assertNotIn(mot, texte.lower())
