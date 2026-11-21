@@ -1065,8 +1065,8 @@ def page_strategie(styles, cx):
     h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("On ne collectionne pas tous de la même façon. Chaque zone est un marché à part, avec ses collectionneurs, son objectif et sa stratégie. "
            "Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider.")]
-    h += [Spacer(1, 2 * mm), encart("Attention aux V1", "Les livres dont vous êtes le héros en V1 sont extrêmement fragiles. Aujourd'hui, la colle ne tient plus, et ils demandent parfois une rénovation. "
-                                    "On ne les recommande pas pour la lecture : les V5, elles, sont extraordinaires pour cela. Les V1 sont plutôt destinées à la collection.", styles, cx)]
+    h += [Spacer(1, 2 * mm), encart("Attention aux V1 Gallimard", "Les livres dont vous êtes le héros en V1, chez Gallimard, sont extrêmement fragiles. Aujourd'hui, la colle ne tient plus, et ils demandent parfois une rénovation. "
+                                    "On ne les recommande pas pour la lecture : les V5, elles, sont extraordinaires pour cela. Les V1 Gallimard sont plutôt destinées à la collection.", styles, cx)]
     for q, paragraphes in sorted(sections, key=lambda x: ga.NUM_ZONE[x[0]]):
         h.append(KeepTogether([P(f"Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}", "h2")] + [P(t) for t in paragraphes]))
     h += [P("Si vous avez des doubles", "h2"), P("Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le marché est liquide : un livre cher y trouve preneur, surtout s'il est proposé un peu sous le prix des annonces voisines. Regardez-les avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles.")]
