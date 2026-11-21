@@ -79,8 +79,9 @@ class TestGuide(unittest.TestCase):
         sortie = self.web / "t.pdf"
         g.construire(self.versions, sortie, "2026-11-19", web=self.web, genere_le="2026-11-19", donnees={"offre": {}})
         texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
-        self.assertNotIn("€", texte)
-        self.assertIsNone(re.search(r"\d+[,.]\d+", texte))
+        self.assertRegex(texte, r"moins de 10\s€")          # l'échelle des prix de la légende, seul endroit des fourchettes
+        self.assertRegex(texte, r"70\s€ et plus")
+        self.assertIsNone(re.search(r"\d+[,.]\d+", texte.split("Le radar du héros")[0].split("Sommaire")[0]))          # ni décimal dans l'introduction ni dans la légende
         for mot in ("convenable", "bon état", "très bon état"):
             self.assertNotIn(mot, texte.lower())          # aucune explication des états
         self.assertIn("Ces repères sont ceux du", texte)
@@ -180,11 +181,12 @@ class TestRadar(unittest.TestCase):
         self.assertEqual([ga.quadrant(o, c, 5, 20) for o, c in ((1, 10), (9, 10), (1, 30), (9, 30))], [0, 1, 2, 3])
         self.assertEqual(sorted(ga.ZONES.values()), sorted(["Peu d'annonces, cher", "Beaucoup d'annonces, cher", "Peu d'annonces, bon marché", "Beaucoup d'annonces, bon marché"]))
 
-    def test_aucun_chiffre_dans_le_chapitre_radar(self):
+    def test_seules_les_medianes_sont_chiffrees_dans_le_chapitre_radar(self):
         textes = self.textes(self.section())
         self.assertGreater(len(textes), 20)
-        for t in textes:
-            self.assertFalse(any(ch.isdigit() for ch in t), t)
+        for t in textes:          # seules les deux médianes des pointillés sont chiffrées
+            self.assertTrue("médiane" in t or not any(ch.isdigit() for ch in t), t)
+        self.assertEqual(len([t for t in textes if "médiane de l'offre" in t and "médiane des prix" in t]), 1)
 
     def test_pas_de_ce_livre_et_un_radar_par_grand_editeur(self):
         textes = " ".join(self.textes(self.section()))

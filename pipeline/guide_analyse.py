@@ -158,6 +158,13 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
     return d
 
 
+def _fr(x, decimales=None):
+    """Nombre à la française : virgule décimale, sans zéros inutiles pour un entier."""
+    if decimales is None:
+        return f"{x:g}".replace(".", ",")
+    return f"{x:.{decimales}f}".replace(".", ",")
+
+
 def lecture_globale(pts):
     """Lecture vivante du radar de tout le guide, d'après la répartition des éditions entre les quatre zones (mots seulement)."""
     if not pts:
@@ -173,7 +180,7 @@ def lecture_globale(pts):
     def poids(z):
         r = parts[z] / total
         return "la plus grosse part" if z == ordre[0] else "une part importante" if r >= 0.22 else "une part modeste" if r >= 0.1 else "peu d'éditions"
-    ph = ["Chaque point est une édition. Elle se place selon ce qu'on en trouve en ce moment, de gauche à droite, et selon son prix, de bas en haut ; les pointillés marquent le milieu du marché.",
+    ph = ["Chaque point est une édition. Elle se place selon ce qu'on en trouve en ce moment, de gauche à droite, et selon son prix, de bas en haut ; les pointillés marquent le milieu du marché : la ligne verticale, à " + _fr(E.med_o) + " annonces par édition (médiane de l'offre) ; la ligne horizontale, à " + _fr(E.med_c, 2) + "\u00a0€ (médiane des prix). À droite de la verticale, on trouve beaucoup d'annonces ; au-dessus de l'horizontale, c'est cher.",
           f"La plus grosse part des éditions se range en zone « {ZONES[ordre[0]].lower()} » : {VERDICTS[ordre[0]][1]}.",
           f"La zone « {ZONES[ordre[-1]].lower()} » est la plus clairsemée : {VERDICTS[ordre[-1]][1]}."]
     ph.append("Certaines éditions n'ont aucune annonce en ce moment : elles s'alignent tout à gauche du radar." if sans >= 0.05 else "Presque toutes les éditions ont au moins une annonce en ce moment.")
