@@ -1,4 +1,4 @@
-// Version du 2026-11-21 10:09 (heure de Paris) : essai de trois mois au niveau sorcier pour un compte jamais vu.
+// Version du 2026-11-21 10:11 (heure de Paris) : la réponse « moi » indique l'essai de trois mois.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -136,7 +136,7 @@ function doPost(e) {
     var moi = v.identite, action = String(q.action || '');
     if (!peut(moi.role, action)) return reponse({ ok: false, erreur: 'droits insuffisants', role: moi.role });
 
-    if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom, fin: moi.fin || '' });
+    if (action === 'moi') return reponse({ ok: true, role: moi.role, nom: moi.nom, fin: moi.fin || '', essai: moi.essai === true });
 
     if (action === 'ajout_livres') {
       var lignes = String(q.liste || '').split(/\n|\|/).map(function (x) { return x.trim(); }).filter(function (x) { return x; });

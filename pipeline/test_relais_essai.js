@@ -50,7 +50,7 @@ test('trois mois calendaires, fin de mois comprise', () => {
 });
 test('un compte jamais vu est sorcier jusqu\'à la fin du troisième mois, avec son nom de Héros', () => {
   const m = monde(); const r = m.post({ action: 'moi', jeton: 'ya29.alice' });
-  assert.deepStrictEqual([r.ok, r.role, r.fin], [true, 'admin', '2027-02-21']);
+  assert.deepStrictEqual([r.ok, r.role, r.fin, r.essai], [true, 'admin', '2027-02-21', true]);
   assert.ok(/^Alice #[0-9a-f]{4}$/.test(r.nom), r.nom);
   assert.notStrictEqual(m.post({ action: 'butin_lire', jeton: 'ya29.alice' }).erreur, 'droits insuffisants');          // niveau sorcier : droits ouverts (GitHub est simulé)
 });
@@ -75,6 +75,7 @@ test('un compte déjà connu (ligne « u: ») n\'a pas d\'essai, sauf réglage c
 test('ni l\'équipe, ni les comptes bloqués : pas d\'essai', () => {
   const m = monde();
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.chef' }).role, 'superadmin');
+  assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.chef' }).essai, false);          // l'essai ne concerne que les comptes d'essai
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.ancien' }).role, 'heros');           // ancien sorcier : sa période est finie
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.futur' }).role, 'heros');            // sorcier à venir : pas d'accès anticipé
   assert.strictEqual(m.post({ action: 'moi', jeton: 'ya29.bloque' }).ok, false);
