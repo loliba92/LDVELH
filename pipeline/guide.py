@@ -1052,16 +1052,6 @@ def page_zones(styles, st, cx, exemples, parts=None):
                 P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. Plus loin, « La stratégie du collectionneur » propose des façons de s'en servir.")]
 
 
-def encart(titre, texte, styles, cx):
-    """Petit pavé d'avertissement : filet doré à gauche, fond doré très léger."""
-    f = cx["filet"]
-    cellule = [Paragraph(f"<b>{titre}</b>", styles["corps"]), Paragraph(texte, styles["corps"])]
-    t = Table([[cellule]], colWidths=[L_CADRE], hAlign="LEFT")
-    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), Color(f.red, f.green, f.blue, alpha=0.12)), ("LINEBEFORE", (0, 0), (0, -1), 2.2, f),
-                           ("LEFTPADDING", (0, 0), (-1, -1), 4 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 4 * mm), ("TOPPADDING", (0, 0), (-1, -1), 2.5 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5 * mm)]))
-    return t
-
-
 def page_strategie(styles, cx):
     """Un petit article : une stratégie par zone (qui collectionne, pourquoi, comment acquérir), puis les doubles."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
@@ -1086,8 +1076,6 @@ def page_strategie(styles, cx):
     h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("On ne collectionne pas tous de la même façon. Chaque zone est un marché à part, avec ses collectionneurs, son objectif et sa stratégie. "
            "Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider.")]
-    h += [Spacer(1, 2 * mm), encart("Attention aux V1 Gallimard", "Les livres dont vous êtes le héros en V1, chez Gallimard, sont extrêmement fragiles. Aujourd'hui, la colle ne tient plus, et ils demandent parfois une rénovation. "
-                                    "On ne les recommande pas pour la lecture : les V5, elles, sont extraordinaires pour cela. Les V1 Gallimard sont plutôt destinées à la collection.", styles, cx)]
     for q, paragraphes in sorted(sections, key=lambda x: ga.NUM_ZONE[x[0]]):
         h.append(KeepTogether([P(f"Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}", "h2")] + [P(t) for t in paragraphes]))
     h += [P("Si vous avez des doubles", "h2"), P("Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le marché est liquide : un livre cher y trouve preneur, surtout s'il est proposé un peu sous le prix des annonces voisines. Regardez-les avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles.")]
