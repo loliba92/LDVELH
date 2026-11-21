@@ -19,7 +19,7 @@
   "calibration": {
     "actif": false,
     "n_paires": 289,
-    "gain": 0.042,
+    "gain": 0.043,
     "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
     "calcule_le": "2026-11-21",
     "rapport_global": 1.072,
