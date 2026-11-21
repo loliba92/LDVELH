@@ -527,14 +527,26 @@
 
   // Sections de la page : un seul panneau à la fois ; les onglets Tendances et Demandes n'apparaissent que si leur contenu est disponible
   // Annonces retenues par le dernier relevé, eBay et librairies (data/annonces.json) : onglet « Annonces » et lien « Voir les annonces » de chaque livre
-  let ANN = null, annChargees = false;
+  let ANN = null, annChargees = false, annPrete = false, annErreur = false;
   const INFO_ED = {};          // par édition : jaquette, éditeur, année (data/versions.json), pour l'onglet Annonces
   const chargerAnnonces = () => {
     if (annChargees) return annChargees;
-    annChargees = window.Relais.lireAnnonces(true).catch(() => null)
-      .then((a) => { ANN = a && a.annonces ? a : null; return ANN; });
+    annErreur = false;
+    const lire = (n) => window.Relais.lireAnnonces(true).catch(() => null).then((a) => ((a && a.annonces) || n >= 2 ? a : new Promise((ok) => setTimeout(ok, 2500 * (n + 1))).then(() => lire(n + 1))));          // jusqu'à trois essais : le relais répond parfois en erreur
+    annChargees = lire(0).then((a) => { ANN = a && a.annonces ? a : null; annPrete = true; if (!ANN) { annErreur = true; annChargees = false; } return ANN; });          // après un échec, un nouvel essai reste possible
     return annChargees;
   };
+  // Message de la liste tant qu'il n'y a pas d'annonces : chargement, échec (avec « Réessayer »), ou relevé vide
+  const etatAnnonces = (el) => {
+    if (annErreur) el.innerHTML = 'Impossible de lire les annonces pour le moment. <button type="button" class="bouton-lien" data-reessayer-annonces>Réessayer</button>';
+    else el.textContent = annPrete ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…';
+  };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('[data-reessayer-annonces]');
+    if (!b) return;
+    if (b.parentElement) b.parentElement.textContent = 'Chargement…';
+    ['recues', 'annonces'].forEach((pane) => document.dispatchEvent(new CustomEvent('cdh-pane', { detail: pane })));
+  });
   const estNiveau3 = () => !!window.Compte && window.Compte.role() === 'superadmin';        // toutes les annonces : le niveau 3 seul (lues par le service technique)
   const estNiveau2 = () => !!window.Compte && ['admin', 'superadmin'].includes(window.Compte.role());        // Butin : niveaux 2 et 3
   // Butin : le service technique ne sert aux niveau 2 que les bonnes affaires (data/processed/butin.json), jamais la liste complète
@@ -605,7 +617,7 @@
     const dessiner = () => {
       const clair = (t) => norm(t).replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[^a-z0-9]+/g, ' ').trim();
       const mots = clair(champ.value).split(' ').filter(Boolean), q = mots.join(' ');
-      if (!ANN) { etat.textContent = annChargees ? 'Pas encore d\'annonces enregistrées : elles apparaîtront après le prochain relevé des prix.' : 'Chargement…'; liste.innerHTML = ''; return; }
+      if (!ANN) { etatAnnonces(etat); liste.innerHTML = ''; return; }
       const nbEd = Object.keys(ANN.annonces).length;
       // Sans recherche : les éditions dont une annonce a été vue le plus récemment
       const derniereVue = (ed) => Object.values(ANN.annonces[ed.isbn] || {}).reduce((m, l) => l.reduce((n, x) => (x[4] && x[4] > n ? x[4] : n), m), '');
@@ -1306,7 +1318,7 @@
       if (limite >= d.vues.length) p.parentElement.remove(); else p.textContent = libelleSuite(limite, d.vues.length);
     };
     dessinerRecues = () => {
-      if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      if (!ANN) { etatAnnonces(etat); liste.innerHTML = ''; return; }
       const cle = cleRc();
       if (!cacheRc || cacheRc.cle !== cle) {
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
@@ -1644,7 +1656,7 @@
     redessinerCouv = () => {
       if (!estNiveau3()) { zone.innerHTML = ''; return; }
       if (!ANN || !EDITIONS.length) {
-        zone.innerHTML = `<p class="sous">${annChargees && !ANN ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé." : 'Chargement…'}</p>`;
+        zone.innerHTML = '<p class="sous"></p>'; etatAnnonces(zone.firstChild);
         if (essais < 8 && !(annChargees && !ANN)) { essais += 1; setTimeout(redessinerCouv, 700); }
         return;
       }
