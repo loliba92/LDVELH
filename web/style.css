@@ -2197,6 +2197,8 @@ a.maj-ligne:hover { background: var(--surface-2); }
 .maj-echec .maj-quand { color: #f2a0a8; }
 .maj-vide { opacity: .65; }
 .maj-aide { margin: 0; padding: 0 14px 4px; font-size:var(--t-base); border-top: 1px solid var(--line); }
+.maj-rythme { margin: 8px 0 4px; padding: 0 14px; }
+.maj-rythme a { color: var(--gold); font: 700 var(--t-base) var(--f-ui); }
 .maj-aide summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--gold); }
 .maj-aide ul { margin: 6px 0 8px; padding-left: 18px; display: grid; gap: 6px; }
 @media (min-width: 700px) { .maj-liste { column-count: 2; column-gap: 12px; padding: 4px 10px; } }
