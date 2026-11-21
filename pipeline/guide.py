@@ -996,12 +996,14 @@ def page_nuage(versions, donnees, styles, polices, st):
     zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
     return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
             P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
-            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 82 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
+            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 74 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
             P(f"<b>1. Chaque livre est un point.</b> Sa place dépend de deux mesures : le nombre d'annonces en ligne, de gauche à droite (gradué en bas), et son prix d'occasion, de bas en haut (gradué sur le côté, en euros). Les repères ne sont pas réguliers : chacun double à peu près le précédent, pour garder les petits prix lisibles."),
             P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par livre (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Un livre sur deux se trouve de chaque côté de chaque ligne : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
             P("<b>3. Chaque livre du guide porte sa zone.</b> Sous son prix, un petit carré à quatre cases, dont la sienne est en or, et son numéro : « Zone 1 » à « Zone 4 ». D'un coup d'œil, on sait où le livre se situe sur le nuage."),
             Spacer(1, 1 * mm), zones,
-            P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c))
+            P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance."),
+            P("<b>Le nuage ne sert pas à comparer deux livres</b>, qui n'ont pas forcément le même public ni le même tirage (deux éditions d'un même livre, elles, peuvent l'être). "
+              "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c))
 
 
 def phrase_exemples(exemples):
@@ -1042,6 +1044,13 @@ def page_strategie(styles, cx):
     )
     h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("On ne collectionne pas tous de la même façon. Certains veulent finir une édition, d'autres une série entière, d'autres retrouver les livres de leur enfance ou courir après les raretés. Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider. Voici comment s'en servir.")]
+    par_zone = {2: "on guette, on prépare son budget, on vérifie l'édition et l'état. Une annonce sous le prix habituel ne dure pas.",
+                3: "on laisse venir, on compare les annonces, on négocie : un prix demandé n'est pas un prix payé.",
+                0: "rien ne presse ; on prend au passage quand on en croise un.",
+                1: "on choisit l'exemplaire sans se presser. Un débutant commence par là."}
+    h += [P("Quatre zones, quatre marchés, quatre façons d'agir", "h2"),
+          P("Le nuage ne compare pas deux livres : il distingue des marchés, et l'on n'agit pas de la même façon sur chacun.")]
+    h += [Paragraph(f"<b>Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}</b> : {par_zone[q]}", styles["puce_radar"], bulletText="•") for q in sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])]
     for titre, *paragraphes in sections:
         h += [P(titre, "h2")] + [P(t) for t in paragraphes]
     return h
