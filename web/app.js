@@ -1825,6 +1825,7 @@
       });
       bloc.innerHTML = `<details class="maj maj-${global}-global"><summary class="maj-resume"><span class="maj-point" aria-hidden="true"></span><span class="maj-texte"><span class="maj-etiq">Mises à jour automatiques</span><span class="maj-etat">${bilan}</span></span><span class="maj-fleche" aria-hidden="true"></span></summary>`
         + `<ul class="maj-liste">${lignes.join('')}</ul>`
+        + '<p class="maj-rythme"><a href="butin.html#rythme">Voir la page Rythme</a></p>'
         + '<details class="maj-aide"><summary>À quoi sert chaque ligne ?</summary><p class="sous">Touchez une ligne pour ouvrir son détail sur GitHub (journal, erreur éventuelle). Vert : réussi. Orange : plus de 2 h sans import (de 6 h à 23 h). Doré qui clignote : en cours. Rouge : échec, ou veille en retard. Gris : pas d\'exécution récente, ou limite d\'appels eBay atteinte (rien n\'est perdu).</p><ul>'
         + FAMILLES.filter(([f, nom]) => lots.some((l) => l.nom === nom)).map(([, nom, aide]) => {
             // Pour les imports, afficher les deux lignes LBC et Vinted au lieu de les regrouper

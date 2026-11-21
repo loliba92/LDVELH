@@ -1725,7 +1725,8 @@
     }
     if (niveau2 && (location.hash || '') === '#recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }          // lien de l'accueil
     const ancre = location.hash || '';
-    if (super_ && (ancre === '#analyse' || ancre === '#captures-recues') && !analyseOuverte) { analyseOuverte = true; ouvrirOnglet('analyse'); }          // ancien lien « annonces captées par jour »
+    if (super_ && ancre === '#rythme' && !analyseOuverte) { analyseOuverte = true; ouvrirOnglet('analyse'); const sous = document.getElementById('onglet-an-rythme'); if (sous) sous.click(); }          // lien « Voir la page Rythme » de l'accueil
+    else if (super_ && (ancre === '#analyse' || ancre === '#captures-recues') && !analyseOuverte) { analyseOuverte = true; ouvrirOnglet('analyse'); }          // ancien lien « annonces captées par jour »
     else if (niveau2 && ancre === '#captures-recues' && !recuesOuvertes) { recuesOuvertes = true; ouvrirOnglet('recues'); }
     if (niveau2 && (location.hash || '') === '#pepites' && !pepitesOuvertes) { pepitesOuvertes = true; ouvrirOnglet('pepites'); }   // lien direct du menu du compte : le rôle arrive après le chargement
     restaurerOnglet();
