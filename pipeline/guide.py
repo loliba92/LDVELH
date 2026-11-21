@@ -469,7 +469,7 @@ class Fiche(Flowable):
             self.reperes_y["zone"] = gy0 + 2 * mm
 
 
-INTRO_TAILLE = 15.6          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
+INTRO_TAILLE = 15.0          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
 INTRODUCTION = Path(__file__).resolve().parent / "guide" / "introduction.md"
 
 
