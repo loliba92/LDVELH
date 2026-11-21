@@ -905,8 +905,7 @@ def page_nuage(versions, donnees, styles, polices, st):
     if not pts:
         return []
     e = ga.Echelles(pts, 100, 100)
-    sens = {2: "Peu d'annonces et un prix élevé : les éditions recherchées.", 3: "Beaucoup d'annonces et un prix élevé : un marché actif, mais cher.",
-            0: "Peu d'annonces et un prix bas : rares en vente, sans être chères.", 1: "Beaucoup d'annonces et un prix bas : faciles à trouver, et bon marché."}
+    sens = {q: ZONES_TEXTE[q][0] for q in ZONES_TEXTE}          # surnom de chaque zone ; le détail est sur la page suivante
     ordre = sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])          # zone 1 à 4
     zones = Table([[GlypheZone(q, st), P(f"<b>Zone {ga.NUM_ZONE[q]}</b> · {ga.ZONES[q]}"), P(sens[q])] for q in ordre], colWidths=[9 * mm, 66 * mm, L_CADRE - 75 * mm], hAlign="LEFT")
     zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
@@ -917,7 +916,33 @@ def page_nuage(versions, donnees, styles, polices, st):
             P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par édition (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
             P("<b>3. Chaque livre du guide porte sa zone.</b> Sous son prix, un petit carré à quatre cases, dont la sienne est en or, et son numéro : « Zone 1 » à « Zone 4 ». D'un coup d'œil, on sait où le livre se situe sur le nuage."),
             Spacer(1, 1 * mm), zones,
-            P(f"Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")]
+            P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. La page suivante raconte ce que chaque zone veut dire. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")] + page_zones(styles, st, cx)
+
+
+def page_zones(styles, st, cx):
+    """Une page qui raconte les quatre zones : ce que le rapport entre le nombre d'annonces et le prix dit du marché. Aucun conseil d'achat ni de vente."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    h = [PageBreak(), P("Les quatre zones, une à une", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+         P("Le nombre d'annonces et le prix racontent chacun quelque chose. Leur rapport donne le sens : sur un marché ordinaire, plus il y a d'offres, plus les prix se tassent. Chaque zone dit si c'est le cas, ou non, et pourquoi.")]
+    for q in sorted(ZONES_TEXTE, key=lambda q: ga.NUM_ZONE[q]):
+        surnom, texte = ZONES_TEXTE[q]
+        ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {surnom}", "h2"), P(f"<i>{ga.ZONES[q]}</i>")] + [P(t) for t in texte]]], colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
+        ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
+        h.append(KeepTogether([ligne]))
+    return h + [Spacer(1, 2 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des conseils : une annonce est un prix demandé, pas un prix payé, et le guide ne dit jamais « achetez » ni « vendez ».")]
+
+
+# Surnom et explication de chaque zone (0 peu d'offre bon marché, 1 beaucoup d'offre bon marché, 2 peu d'offre cher, 3 beaucoup d'offre cher)
+ZONES_TEXTE = {
+    2: ("La rareté", ("Le livre est rare : peu de vendeurs s'en séparent, et ceux qui le font en demandent un bon prix. L'un entraîne l'autre. Voici la zone des livres que les collectionneurs cherchent : quand une annonce apparaît, elle ne reste pas longtemps en ligne.",
+                      "Ici, le prix dit simplement la rareté.")),
+    3: ("À regarder de près", ("D'ordinaire, quand les annonces se multiplient, les vendeurs se font concurrence et les prix se tassent. Un prix qui reste haut malgré l'abondance mérite donc une question. Deux explications possibles : la demande est très forte et absorbe l'offre, ou bien beaucoup de vendeurs demandent plus que ce que les acheteurs acceptent de payer.",
+                               "Voilà la zone des marchés tendus, où l'on achète et revend pour gagner un peu, et où le prix affiché est le moins sûr : comparez les annonces avant de vous fier à l'une d'elles.")),
+    0: ("Un marché calme", ("Peu d'annonces, mais un prix bas : peu de gens vendent, et peu de gens achètent. Ces livres intéressent peu les collectionneurs, donc personne ne fait monter les prix. Ce n'est pas de la rareté recherchée, c'est un marché tranquille.",
+                            "Un titre moins connu ou une série moins suivie s'y retrouvent souvent.")),
+    1: ("Le courant", ("Beaucoup d'offres et des prix bas : le livre est courant. Il circule beaucoup, on le trouve sans effort, et l'acheteur a le choix de l'exemplaire comme du vendeur.",
+                       "Aucune urgence : si une annonce passe, une autre la remplacera.")),
+}
 
 
 def section_radar(versions, donnees, styles, date_cotes, polices, st):

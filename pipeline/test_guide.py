@@ -290,6 +290,9 @@ class TestRadar(unittest.TestCase):
         for n in "1234":
             self.assertIn(f"Zone {n}", plat)
         self.assertIn("Chaque livre du guide porte sa zone", plat)
+        for surnom in ("La rareté", "À regarder de près", "Un marché calme", "Le courant"):          # une page raconte chaque zone
+            self.assertIn(surnom, plat)
+        self.assertIn("Les quatre zones, une à une", plat)
 
     def test_chaque_livre_porte_sa_zone_de_1_a_4_ou_aucune(self):
         pts = ga.points_editions(self.v, self.offre)
