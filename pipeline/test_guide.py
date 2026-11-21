@@ -290,7 +290,7 @@ class TestRadar(unittest.TestCase):
         for n in "1234":
             self.assertIn(f"Zone {n}", plat)
         self.assertIn("Chaque livre du guide porte sa zone", plat)
-        for surnom in ("La rareté : les livres rares", "À regarder de près", "Un marché calme", "Le courant"):          # une page raconte chaque zone
+        for surnom in ("La rareté : les livres rares", "Cher et liquide", "Un marché calme", "Le courant"):          # une page raconte chaque zone
             self.assertIn(surnom, plat)
         self.assertGreaterEqual(plat.count("Quelques exemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
         self.assertIn("Les quatre zones, une à une", plat)
