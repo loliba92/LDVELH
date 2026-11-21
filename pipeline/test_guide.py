@@ -83,8 +83,7 @@ class TestGuide(unittest.TestCase):
         self.assertRegex(texte, r"moins de 10\s€")          # l'échelle des prix de la légende, seul endroit des fourchettes
         self.assertRegex(texte, r"70\s€ et plus")
         self.assertIsNone(re.search(r"\d+[,.]\d+", texte.split("Le radar du héros")[0].split("Sommaire")[0]))          # ni décimal dans l'introduction ni dans la légende
-        for mot in ("convenable", "bon état", "très bon état"):
-            self.assertNotIn(mot, texte.lower())          # aucune explication des états
+        self.assertNotIn("convenable", texte.lower())          # aucune explication des états (le conseil « très bon état » de la stratégie n'en est pas une)
         self.assertIn("Ces repères sont ceux du", texte)
         self.assertNotIn("sans publicité", texte.lower())
 
@@ -239,8 +238,7 @@ class TestRadar(unittest.TestCase):
         g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
         texte = subprocess.run(["pdftotext", "-f", "2", str(sortie), "-"], capture_output=True, text=True).stdout          # hors couverture : ses lettres espacées sortent une à une du texte
         self.assertIsNone(re.search(r"\b(C|BE|TBE)\b", texte), "abréviation d'état trouvée")
-        for mot in ("convenable", "bon état", "très bon état"):
-            self.assertNotIn(mot, texte.lower())
+        self.assertNotIn("convenable", texte.lower())          # le conseil « très bon état » de la stratégie est le seul emploi de ces mots
 
     def test_une_serie_courte_n_est_jamais_coupee_ni_une_rangee_isolee(self):
         v = [livre(f"L{k}", f"Série {c}", str(k), "V1") for c, n in (("A", 8), ("B", 10), ("C", 6), ("D", 9), ("E", 7), ("F", 28)) for k in range(1, n + 1)]
@@ -295,7 +293,7 @@ class TestRadar(unittest.TestCase):
         self.assertGreaterEqual(plat.count("Quelques exemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
         self.assertIn("Les quatre zones, une à une", plat)
         self.assertLess(plat.index("La stratégie du collectionneur"), plat.index("Sommaire"))          # le petit article de stratégie suit les zones
-        for titre in ("Finir une édition", "Finir une série", "Chasser les raretés", "Si vous avez des doubles"):
+        for titre in ("Zone 1 · La rareté", "Zone 2 · Cher et liquide", "Zone 3 · Un marché calme", "Zone 4 · Le courant", "Attention aux V1", "Si vous avez des doubles"):
             self.assertIn(titre, plat)
 
     def test_chaque_livre_porte_sa_zone_de_1_a_4_ou_aucune(self):

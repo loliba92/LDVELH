@@ -1031,28 +1031,45 @@ def page_zones(styles, st, cx, exemples):
     return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. Plus loin, « La stratégie du collectionneur » propose des façons de s'en servir.")]
 
 
+def encart(titre, texte, styles, cx):
+    """Petit pavé d'avertissement : filet doré à gauche, fond doré très léger."""
+    f = cx["filet"]
+    cellule = [Paragraph(f"<b>{titre}</b>", styles["corps"]), Paragraph(texte, styles["corps"])]
+    t = Table([[cellule]], colWidths=[L_CADRE], hAlign="LEFT")
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), Color(f.red, f.green, f.blue, alpha=0.12)), ("LINEBEFORE", (0, 0), (0, -1), 2.2, f),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 4 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 4 * mm), ("TOPPADDING", (0, 0), (-1, -1), 2.5 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5 * mm)]))
+    return t
+
+
 def page_strategie(styles, cx):
-    """Un petit article : comment un collectionneur peut se servir des quatre zones, selon ce qu'il cherche."""
+    """Un petit article : une stratégie par zone (qui collectionne, pourquoi, comment acquérir), puis les doubles."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     sections = (
-        ("Finir une édition", "Vous voulez toute une édition, la V1 d'une série par exemple. Commencez par le plus simple : les livres de la zone 4 se trouvent sans effort et pour presque rien, la collection avance vite et vous gardez du budget. Gardez la zone 1 en tête dès le départ. Ces livres-là demandent de la patience : on les guette parfois des mois, et le jour où l'annonce arrive, il faut pouvoir payer le prix. Savoir tôt ce qu'il vous manque en zone 1, c'est savoir combien de temps prévoir."),
-        ("Finir une série", "Là, on cherche tous les numéros, quelle que soit l'édition. Cela laisse plus de liberté. Si la V1 d'un numéro est en zone 1 et sa V2 en zone 3, la V2 tient la même place sur l'étagère pour beaucoup moins cher. Regardez la zone de chaque édition avant de choisir laquelle chercher. Et sachez que le dernier numéro manquant est souvent un livre de zone 1 ou 2 : s'il manque encore, c'est justement parce qu'il est difficile à trouver."),
-        ("Retrouver les livres de son enfance", "Pas de liste à remplir, quelques titres qui comptent pour vous. S'ils sont courants, en zone 4, vous avez le luxe du choix : l'état, la jaquette, le vendeur, le prix. Prenez le temps de comparer, rien ne presse. Si l'un de vos titres tombe en zone 1, ce sera plus long, mais vous le saurez dès le début."),
-        ("Chasser les raretés", "Vous aimez la chasse. Votre terrain, c'est la zone 1 : peu d'annonces, des prix élevés. Le bon coup, c'est une annonce de zone 1 affichée en dessous du prix habituel du livre. Elle vient d'un vendeur pressé, ou qui ne connaît pas la valeur de ce qu'il vend. Cela arrive peu et ne dure pas : il faut être là le jour même, et le Butin et la Chasse, sur le site, sont faits pour cela. Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et les frais de port : un prix bas qui cache un autre livre n'est pas une bonne affaire.",
-         "En zone 2, laissez venir. Les annonces sont nombreuses, un prix demandé élevé n'est pas un prix payé : comparez, négociez. En zone 3, rien ne presse non plus, mais c'est là que le collectionneur de série fait des économies : peu d'annonces et pas cher, on prend au passage quand on en croise un."),
-        ("Si vous avez des doubles", "Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le marché est liquide : un livre cher y trouve preneur, surtout s'il est proposé un peu sous le prix des annonces voisines. Regardez-les avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles."),
+        (2, ("<b>Qui ?</b> Le complétiste : celui qui veut toute une édition ou toute une série, et qui cherche le dernier numéro manquant.",
+             "<b>Objectif.</b> Posséder ce que presque personne n'a, et boucher les trous de la collection.",
+             "<b>Stratégie.</b> On guette, parfois des mois, et le jour où l'annonce arrive, il faut pouvoir payer le prix : savoir tôt ce qu'il vous manque en zone 1, c'est savoir combien de temps prévoir. "
+             "Le bon coup est une annonce affichée en dessous du prix habituel du livre. Elle vient d'un vendeur pressé, ou qui ne connaît pas la valeur de ce qu'il vend. Cela arrive peu et ne dure pas : il faut être là le jour même, et le Butin et la Chasse, sur le site, sont faits pour cela. "
+             "Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et les frais de port : un prix bas qui cache un autre livre n'est pas une bonne affaire.")),
+        (3, ("<b>Qui ?</b> L'acheteur pressé, et celui qui achète pour revendre ou échanger.",
+             "<b>Objectif.</b> Trouver vite un livre très demandé, ou faire tourner sa collection.",
+             "<b>Stratégie.</b> Laissez venir. Les annonces sont nombreuses, un prix demandé élevé n'est pas un prix payé : comparez, négociez.")),
+        (0, ("<b>Qui ?</b> Le collectionneur de série, attiré par des titres moins connus ou des séries moins suivies.",
+             "<b>Objectif.</b> Compléter sans se ruiner.",
+             "<b>Stratégie.</b> Rien ne presse : peu d'annonces et pas cher, on prend au passage quand on en croise un. Le collectionneur de série y fait des économies.")),
+        (1, ("<b>Qui ?</b> Le débutant, et celui qui retrouve les livres de son enfance.",
+             "<b>Objectif.</b> Faire avancer la collection vite et pour presque rien.",
+             "<b>Stratégie.</b> Commencez par là : l'offre est large, vous choisissez l'exemplaire et le vendeur, sans vous presser. Sélectionnez le très bon état. "
+             "L'état est fondamental, et La Cote du Héros le précise pour chaque prix : sinon, on surpaie un livre qui ne vaut pas sa valeur. "
+             "Mieux vaut parfois payer un peu plus cher pour un état impeccable.")),
     )
     h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-         P("On ne collectionne pas tous de la même façon. Certains veulent finir une édition, d'autres une série entière, d'autres retrouver les livres de leur enfance ou courir après les raretés. Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider. Voici comment s'en servir.")]
-    par_zone = {2: "on guette, on prépare son budget, on vérifie l'édition et l'état. Une annonce sous le prix habituel ne dure pas.",
-                3: "on laisse venir, on compare les annonces, on négocie : un prix demandé n'est pas un prix payé.",
-                0: "rien ne presse ; on prend au passage quand on en croise un.",
-                1: "on choisit l'exemplaire sans se presser. Un débutant commence par là."}
-    h += [P("Quatre zones, quatre marchés, quatre façons d'agir", "h2"),
-          P("Le nuage ne compare pas deux livres : il distingue des marchés, et l'on n'agit pas de la même façon sur chacun.")]
-    h += [Paragraph(f"<b>Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}</b> : {par_zone[q]}", styles["puce_radar"], bulletText="•") for q in sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])]
-    for titre, *paragraphes in sections:
-        h += [P(titre, "h2")] + [P(t) for t in paragraphes]
+         P("On ne collectionne pas tous de la même façon. Chaque zone est un marché à part, avec ses collectionneurs, son objectif et sa stratégie. "
+           "Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider.")]
+    h += [Spacer(1, 2 * mm), encart("Attention aux V1", "Les livres dont vous êtes le héros en V1 sont extrêmement fragiles. Aujourd'hui, la colle ne tient plus, et ils demandent parfois une rénovation. "
+                                    "On ne les recommande pas pour la lecture : les V5, elles, sont extraordinaires pour cela. Les V1 sont plutôt destinées à la collection.", styles, cx)]
+    for q, paragraphes in sorted(sections, key=lambda x: ga.NUM_ZONE[x[0]]):
+        h.append(KeepTogether([P(f"Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}", "h2")] + [P(t) for t in paragraphes]))
+    h += [P("Si vous avez des doubles", "h2"), P("Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le marché est liquide : un livre cher y trouve preneur, surtout s'il est proposé un peu sous le prix des annonces voisines. Regardez-les avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles.")]
     return h
 
 
