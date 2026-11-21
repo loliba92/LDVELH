@@ -294,6 +294,9 @@ class TestRadar(unittest.TestCase):
             self.assertIn(surnom, plat)
         self.assertGreaterEqual(plat.count("Quelques exemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
         self.assertIn("Les quatre zones, une à une", plat)
+        self.assertLess(plat.index("La stratégie du collectionneur"), plat.index("Sommaire"))          # le petit article de stratégie suit les zones
+        for titre in ("Finir une édition", "Finir une série", "Chasser les raretés", "Si vous avez des doubles"):
+            self.assertIn(titre, plat)
 
     def test_chaque_livre_porte_sa_zone_de_1_a_4_ou_aucune(self):
         pts = ga.points_editions(self.v, self.offre)

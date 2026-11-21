@@ -205,9 +205,9 @@ def visuel_ouverture(style, indice, largeur_px=900):
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
-def couverture_v1(largeur_px=1240, art_mm=168, bas_coupe_px=210):
+def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210):
     """Toile de la couverture V1 (A4 entière) : l'illustration est agrandie (rééchantillonnage Lanczos, accentuation légère), son bas (roche) est recoupé,
-    et la toile est prolongée vers le haut et sur les côtés par un fond flou tiré de l'illustration elle-même : un vrai espace de titre dans le ciel violet."""
+    et la toile est prolongée vers le haut par un fond flou tiré de l'illustration elle-même (largeur pleine : aucun bord flou sur les côtés). Un voile sombre dégradé en bas porte la signature."""
     from PIL import ImageFilter
     px_mm = largeur_px / 210
     haut_px = round(297 * px_mm)
@@ -221,14 +221,14 @@ def couverture_v1(largeur_px=1240, art_mm=168, bas_coupe_px=210):
     masque = Image.new("L", art.size, 255)
     bord = 38
     pixels = masque.load()
-    for i in range(bord):
+    for i in range(bord):          # fondu seulement sur le bord haut
         v = int(255 * i / bord)
-        for j in range(art.height):
-            pixels[i, j] = min(pixels[i, j], v)
-            pixels[art.width - 1 - i, j] = min(pixels[art.width - 1 - i, j], v)
         for k in range(art.width):
             pixels[k, i] = min(pixels[k, i], v)
     fond.paste(art, (x, y), masque)
+    voile = Image.linear_gradient("L").resize((largeur_px, round(108 * px_mm)))          # voile sombre : transparent en haut, presque plein en bas
+    voile = voile.point(lambda a: int((a / 255) ** 1.25 * 240))
+    fond.paste(Image.new("RGB", voile.size, (12, 6, 24)), (0, haut_px - voile.height), voile)
     tampon = io.BytesIO()
     fond.save(tampon, "JPEG", quality=84, optimize=True, progressive=True)
     return ImageReader(io.BytesIO(tampon.getvalue()))
@@ -741,23 +741,27 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         """Couverture inspirée des couvertures de poche des années 1980 : très grand titre dans le ciel, encadré blanc et adresse du site en bas."""
         c.drawImage(couverture_v1(), 0, 0, L_PAGE, H_PAGE)
         y2 = titre_v1(c)
-        c.setStrokeColor(HexColor("#d2a64a"))          # fin filet doré
-        c.setLineWidth(0.8)
-        c.line(L_PAGE / 2 - 32 * mm, y2 - 9 * mm, L_PAGE / 2 + 32 * mm, y2 - 9 * mm)
+        # pied de couverture, sur le voile sombre : sous-titre, auteur, adresse du site, date des cotes
         c.setFillColor(HexColor("#f2e9d8"))
-        lettres(c, L_PAGE / 2, y2 - 19 * mm, "Guide de référence", f_gras, 15, 4, centre=True)
-        c.setFont(f_gras, 10)
-        c.drawCentredString(L_PAGE / 2, y2 - 27 * mm, f"Édition du {date_longue(genere_le)}")
-        c.setFillColor(HexColor("#ffffff"))          # encadré blanc : « Guide » et le sceau du site
-        c.rect(10 * mm, 10 * mm, 50 * mm, 22 * mm, fill=1, stroke=0)
-        c.setFillColor(HexColor("#0c0a08"))
-        c.setFont(f_titre_gras, 24)
-        c.drawString(14 * mm, 16.5 * mm, "Guide")
-        c.drawImage(embleme((140, 106, 28), 1.0, 256), 41 * mm, 13 * mm, 15 * mm, 15 * mm, mask="auto")
-        c.setFillColor(HexColor("#ffffff"))
-        c.setFont(f_gras, 9)
-        c.drawRightString(L_PAGE - 10 * mm, 12 * mm, SITE)
-        c.linkURL(LIEN_SITE, (L_PAGE - 50 * mm, 9 * mm, L_PAGE - 10 * mm, 17 * mm), relative=0)
+        lettres(c, L_PAGE / 2, 63 * mm, "Guide de référence", f_gras, 16, 4.2, centre=True)
+        c.setFont(f_titre, 13.5)
+        c.drawCentredString(L_PAGE / 2, 55.5 * mm, "des livres dont vous êtes le héros")
+        c.setStrokeColor(HexColor("#d2a64a"))
+        c.setLineWidth(0.6)
+        c.line(L_PAGE / 2 - 14 * mm, 48 * mm, L_PAGE / 2 + 14 * mm, 48 * mm)
+        c.setFillColor(HexColor("#f2e9d8"))
+        lettres(c, L_PAGE / 2, 40 * mm, "par Olivier Bertrand", f_gras, 11.5, 2.6, centre=True)
+        c.setFillColor(HexColor("#d9b45f"))
+        lettres(c, L_PAGE / 2, 30 * mm, SITE, f_gras, 10, 2, centre=True)
+        c.linkURL(LIEN_SITE, (L_PAGE / 2 - 28 * mm, 27.5 * mm, L_PAGE / 2 + 28 * mm, 33.5 * mm), relative=0)
+        c.setFillColor(HexColor("#b8ad99"))
+        c.setFont(f_texte, 8.5)
+        c.drawCentredString(L_PAGE / 2, 17 * mm, f"Édition du {date_longue(genere_le)}")
+        c.setStrokeColor(HexColor("#d2a64a"))          # double filet doré autour de la page
+        c.setLineWidth(0.7)
+        c.rect(7 * mm, 7 * mm, L_PAGE - 14 * mm, H_PAGE - 14 * mm, fill=0, stroke=1)
+        c.setLineWidth(0.25)
+        c.rect(8.6 * mm, 8.6 * mm, L_PAGE - 17.2 * mm, H_PAGE - 17.2 * mm, fill=0, stroke=1)
 
     def couverture(c, doc):
         if visuel == "v1":
@@ -941,7 +945,25 @@ def page_zones(styles, st, cx, exemples):
                       colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
         ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
         h.append(ligne)
-    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des conseils : une annonce est un prix demandé, pas un prix payé, et le guide ne dit jamais « achetez » ni « vendez ».")]
+    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. La page suivante propose des façons de s'en servir.")] + page_strategie(styles, cx)
+
+
+def page_strategie(styles, cx):
+    """Un petit article : comment un collectionneur peut se servir des quatre zones, selon ce qu'il cherche."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    sections = (
+        ("Finir une édition", "Vous voulez toute une édition, la V1 d'une série par exemple. Commencez par le plus simple : les livres de la zone 4 se trouvent sans effort et pour presque rien, la collection avance vite et vous gardez du budget. Gardez la zone 1 en tête dès le départ. Ces livres-là demandent de la patience : on les guette parfois des mois, et le jour où l'annonce arrive, il faut pouvoir payer le prix. Savoir tôt ce qu'il vous manque en zone 1, c'est savoir combien de temps prévoir."),
+        ("Finir une série", "Là, on cherche tous les numéros, quelle que soit l'édition. Cela laisse plus de liberté. Si la V1 d'un numéro est en zone 1 et sa V2 en zone 3, la V2 tient la même place sur l'étagère pour beaucoup moins cher. Regardez la zone de chaque édition avant de choisir laquelle chercher. Et sachez que le dernier numéro manquant est souvent un livre de zone 1 ou 2 : s'il manque encore, c'est justement parce qu'il est difficile à trouver."),
+        ("Retrouver les livres de son enfance", "Pas de liste à remplir, quelques titres qui comptent pour vous. S'ils sont courants, en zone 4, vous avez le luxe du choix : l'état, la jaquette, le vendeur, le prix. Prenez le temps de comparer, rien ne presse. Si l'un de vos titres tombe en zone 1, ce sera plus long, mais vous le saurez dès le début."),
+        ("Chasser les raretés", "Vous aimez la chasse. Votre terrain, c'est la zone 1 : peu d'annonces, des prix élevés. Le bon coup, c'est une annonce de zone 1 affichée en dessous du prix habituel du livre. Elle vient d'un vendeur pressé, ou qui ne connaît pas la valeur de ce qu'il vend. Cela arrive peu et ne dure pas : il faut être là le jour même, et le Butin et la Chasse, sur le site, sont faits pour cela. Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et les frais de port : un prix bas qui cache un autre livre n'est pas une bonne affaire.",
+         "En zone 2, laissez venir. Les annonces sont nombreuses, un prix demandé élevé n'est pas un prix payé : comparez, négociez. En zone 3, rien ne presse non plus, mais c'est là que le collectionneur de série fait des économies : peu d'annonces et pas cher, on prend au passage quand on en croise un."),
+        ("Si vous avez des doubles", "Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le prix demandé est haut mais les concurrents sont nombreux : regardez les annonces voisines avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles."),
+    )
+    h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+         P("On ne collectionne pas tous de la même façon. Certains veulent finir une édition, d'autres une série entière, d'autres retrouver les livres de leur enfance ou courir après les raretés. Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider. Voici comment s'en servir.")]
+    for titre, *paragraphes in sections:
+        h += [P(titre, "h2")] + [P(t) for t in paragraphes]
+    return h
 
 
 # Titre et récit de chaque zone (0 peu d'offre bon marché, 1 beaucoup d'offre bon marché, 2 peu d'offre cher, 3 beaucoup d'offre cher)
