@@ -283,8 +283,8 @@ class TestRadar(unittest.TestCase):
         sortie = Path(tempfile.mkdtemp()) / "n.pdf"
         g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
         texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
-        self.assertLess(texte.index("La méthode : le nuage et ses quatre zones"), texte.index("Sommaire"))
-        plat = texte.replace("\n", " ")
+        plat = texte.replace("\n", " ")          # le titre peut passer sur deux lignes
+        self.assertLess(plat.index("La méthode : le nuage et ses quatre zones"), plat.index("Sommaire"))
         self.assertRegex(plat, r"\d+(,\d)? annonces par livre \(médiane de l'offre\)")
         self.assertRegex(plat, r"\d+(,\d{2})? € \(médiane des prix\)")
         for n in "1234":
