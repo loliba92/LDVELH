@@ -31,5 +31,12 @@
     "adresse": "https://www.editionselvyon.com/",
     "description": "Éditeur de livres-jeux, de LDVELH et de RPG solo, qui publie aussi des jeux de société. Ses projets naissent de campagnes de financement sur La Ruche. Nous avons hâte de découvrir La Quête du Guerrier, et L’Auberge de l’Épouvante, que l’on peut même jouer directement dans le navigateur.",
     "image": "data/communaute/c1f5a31f4684.jpg"
+  },
+  {
+    "nom": "Trois mois de Sorcier offerts",
+    "adresse": "https://lacoteduheros.fr/essai-sorcier.html",
+    "description": "Créez votre compte Héros : pendant 3 mois, les outils du Sorcier sont offerts. Ce que vous découvrez, expliqué simplement.",
+    "image": "data/communaute/essai-sorcier.jpg",
+    "date": "2026-11-21"
   }
 ]

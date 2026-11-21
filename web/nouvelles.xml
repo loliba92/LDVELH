@@ -5,8 +5,17 @@
     <link>https://lacoteduheros.fr/communaute.html</link>
     <description>Les nouvelles de La Cote du Héros, le guide de cote des livres dont vous êtes le héros.</description>
     <language>fr-FR</language>
-    <lastBuildDate>Thu, 05 Nov 2026 08:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Sat, 21 Nov 2026 08:00:00 +0100</lastBuildDate>
     <atom:link href="https://lacoteduheros.fr/nouvelles.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Trois mois de Sorcier offerts</title>
+      <link>https://lacoteduheros.fr/essai-sorcier.html</link>
+      <guid isPermaLink="true">https://lacoteduheros.fr/essai-sorcier.html</guid>
+      <pubDate>Sat, 21 Nov 2026 08:00:00 +0100</pubDate>
+      <description>Créez votre compte Héros : pendant 3 mois, les outils du Sorcier sont offerts. Ce que vous découvrez, expliqué simplement.</description>
+      <enclosure url="https://lacoteduheros.fr/data/communaute/essai-sorcier.jpg" length="50004" type="image/jpeg"/>
+      <media:content url="https://lacoteduheros.fr/data/communaute/essai-sorcier.jpg" medium="image" type="image/jpeg"/>
+    </item>
     <item>
       <title>Le profil Sorcier arrive</title>
       <link>https://lacoteduheros.fr/sorcier.html</link>
