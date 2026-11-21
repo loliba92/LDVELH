@@ -1367,10 +1367,12 @@
       const jauge = (question, valeur, pct, bas, haut, phrase, mediane) => `<div class="fp-jauge"><div class="fp-jt"><span>${question}</span><span>${valeur}</span></div>
         <div class="fp-piste" role="img" aria-label="${esc(`${question} ${valeur}. ${phrase.replace(/<[^>]+>/g, '')}`)}"><i class="fp-tick"></i><i class="fp-rep" style="left:${Math.min(97, Math.max(3, pct))}%"></i></div>
         <div class="fp-ext"><span>${bas}</span><span class="fp-med-t">médiane : ${mediane}</span><span>${haut}</span></div><p class="fp-phrase">${phrase}</p></div>`;
-      // Cote de l'édition dans le temps (relevés des prix), avec la médiane des livres du guide : même état que « Quel prix ? », échelle logique pour garder les deux courbes lisibles
+      // Cote de l'édition dans le temps (relevés des prix), avec la médiane des livres de même éditeur et même version (éditeur seul sous 5 livres, puis tout le guide) : même état que « Quel prix ? », échelle logique pour garder les deux courbes lisibles
       const histoCote = () => {
         if (!moi || !HIST || !HIST.dates || HIST.dates.length < 2) return '';
-        const D = HIST.dates, c = HIST.cotes, base = DATA.filter((x) => x.isbn13 && coteFp(x) > 0);
+        const D = HIST.dates, c = HIST.cotes, tousLivres = DATA.filter((x) => x.isbn13 && coteFp(x) > 0);
+        const memeEd = tousLivres.filter((x) => (x.editeur || '') === (b.editeur || '')), memeVer = memeEd.filter((x) => x.version === b.version);
+        const [base, libMed] = memeVer.length >= 5 ? [memeVer, `Médiane des ${b.version} ${b.editeur}`] : memeEd.length >= 5 ? [memeEd, `Médiane de l'éditeur ${b.editeur}`] : [tousLivres, 'Médiane du guide'];
         const val = (x, i) => { const v = (c[`${x.id}|${x.prix.tres_bon ? 'tres_bon' : 'bon'}`] || [])[i]; return v > 0 ? v : null; };
         const mine = D.map((_, i) => val(b, i));
         const guide = D.map((_, i) => { const l = base.map((x) => val(x, i)).filter((v) => v != null).sort((u, v) => u - v); return l.length ? l[Math.floor(l.length / 2)] : null; });
@@ -1384,14 +1386,14 @@
         const i1 = mine.findIndex((v) => v != null), v0 = mine[i1], v1 = dernier(mine), pct = v1 / v0 - 1;
         const phrase = Math.abs(pct) < 0.005 ? `Cote stable depuis le ${dJ(D[i1])} : ${fmt(v1)}.` : `${fmt(v0)} le ${dJ(D[i1])}, ${fmt(v1)} aujourd'hui (${pct > 0 ? '+' : '−'}${(Math.abs(pct) * 100).toFixed(1).replace('.', ',')}\u00a0%).`;
         const gM = dernier(guide), etat = b.prix.tres_bon ? 'très bon' : 'bon';
-        const svg = `<svg class="fp-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(`Cote en ${etat} état du ${dJ(D[0])} au ${dJ(D[D.length - 1])} : ${phrase} Médiane des livres du guide : ${gM != null ? fmt(gM) : 'inconnue'}.`)}">`
+        const svg = `<svg class="fp-svg" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(`Cote en ${etat} état du ${dJ(D[0])} au ${dJ(D[D.length - 1])} : ${phrase} ${libMed} : ${gM != null ? fmt(gM) : 'inconnue'}.`)}">`
           + `<line x1="${gx}" x2="${W - dr}" y1="${H - gb}" y2="${H - gb}" class="fp-gr"/>`
           + `<path d="${trace(guide)}" class="fp-l-med"/><path d="${trace(mine)}" class="fp-l-moi"/>`
           + mine.map((v, i) => (v == null ? '' : `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i === mine.length - 1 ? 4 : 2.2}" class="fp-moi"/>`)).join('')
           + `<text x="${gx - 6}" y="${(Y(Math.max(...tous)) + 4).toFixed(1)}" text-anchor="end" class="fp-ax">${fmt(Math.max(...tous))}</text><text x="${gx - 6}" y="${(Y(Math.min(...tous)) + 4).toFixed(1)}" text-anchor="end" class="fp-ax">${fmt(Math.min(...tous))}</text>`
           + `<text x="${gx}" y="${H - 8}" class="fp-ax">${dJ(D[0])}</text><text x="${W - dr}" y="${H - 8}" text-anchor="end" class="fp-ax">${dJ(D[D.length - 1])}</text></svg>`;
         return `<h4 class="fp-sous">La cote dans le temps</h4><p class="sous">${phrase}</p><div class="fp-cadre">${svg}</div>
-          <p class="fp-leg"><span><i class="fp-pastille-moi"></i>Ce livre (${etat} état)</span><span><i class="fp-pastille-med"></i>Médiane du guide${gM != null ? ` : ${fmt(gM)}` : ''}</span></p>`;
+          <p class="fp-leg"><span><i class="fp-pastille-moi"></i>Ce livre (${etat} état)</span><span><i class="fp-pastille-med"></i>${esc(libMed)}${gM != null ? ` : ${fmt(gM)}` : ''}</span></p>`;
       };
       let haut = '';
       if (moi && pts.length > 20) {
