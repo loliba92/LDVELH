@@ -2249,6 +2249,9 @@ button.maj-ligne:hover { background: var(--surface-2); }
 .fp-zone-t { fill: var(--muted); font-size: 8.5px; font-weight: 700; opacity: .8; }
 .fp-leg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; color: var(--muted); font-size: var(--t-sm, .85rem); }
 .fp-leg i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+.fp-l-moi { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.fp-l-med { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: .8; }
+.fp-pastille-moi { background: var(--gold); } .fp-pastille-med { background: var(--muted); }
 
 /* Collection sur la jaquette (fiche) : les trois états posés en bas de l'image, le reste en dessous */
 .couv-cadre { position: relative; }
