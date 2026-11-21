@@ -36,7 +36,7 @@ import guide_analyse as ga
 STYLE_PAR_DEFAUT = "parchemin"          # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
 SOUS_TITRE_PAR_DEFAUT = "clair"      # sous-titre de la couverture « huile » : "clair" ou "bandeau" (sans effet sur la couverture V1)
 COUVERTURE_PAR_DEFAUT = "v1"         # illustration de couverture : "v1" (héros et dragon) ou "huile" (ancienne couverture)
-COUVERTURE_STYLE = "a"              # mise en page de la couverture V1 : "a" (revue de collection), "b" (affiche d'aventure) ou "c" (ouvrage de référence sobre)
+COUVERTURE_STYLE = "b"              # mise en page de la couverture V1 : "a" (revue de collection), "b" (affiche d'aventure) ou "c" (ouvrage de référence sobre)
 # -------------------------------------------------------------------------------------
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -1099,7 +1099,7 @@ def main(argv=None):
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
     a.add_argument("--style", default=STYLE_PAR_DEFAUT, choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
-    a.add_argument("--style-couverture", default=COUVERTURE_STYLE, choices=("a", "b", "c"), help="mise en page de la couverture : a (revue de collection, par défaut), b (affiche d'aventure) ou c (ouvrage de référence sobre)")
+    a.add_argument("--style-couverture", default=COUVERTURE_STYLE, choices=("a", "b", "c"), help="mise en page de la couverture : a (revue de collection), b (affiche d'aventure, par défaut) ou c (ouvrage de référence sobre)")
     a.add_argument("--visuel-couverture", default=COUVERTURE_PAR_DEFAUT, choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
     a.add_argument("--couverture", default=SOUS_TITRE_PAR_DEFAUT, choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
     a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")

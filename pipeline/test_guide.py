@@ -133,7 +133,7 @@ class TestGuide(unittest.TestCase):
             texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout.upper()
             for attendu in ("COTE", "HÉROS", "OLIVIER BERTRAND", "LACOTEDUHEROS.FR", "19 NOVEMBRE 2026"):
                 self.assertIn(attendu, texte, f"style {style}")
-        g.COUVERTURE_STYLE = "a"
+        g.COUVERTURE_STYLE = "b"
 
 
 class TestRadar(unittest.TestCase):
