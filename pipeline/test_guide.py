@@ -269,5 +269,20 @@ class TestRadar(unittest.TestCase):
         self.assertGreaterEqual(pages["Série F"].count(pages["Série F"][-1]), 6)          # la dernière page garde au moins deux rangées
 
 
+    def test_une_page_explique_le_nuage_de_points_avant_le_sommaire(self):
+        import re
+        import shutil
+        import subprocess
+        if not shutil.which("pdftotext"):
+            self.skipTest("pdftotext absent")
+        sortie = Path(tempfile.mkdtemp()) / "n.pdf"
+        g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
+        texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
+        self.assertLess(texte.index("Lire le nuage de points"), texte.index("Sommaire"))
+        plat = texte.replace("\n", " ")
+        self.assertRegex(plat, r"médiane de l'offre\), et la ligne horizontale, à \d+(,\d{2})? €")
+        self.assertIn("Les quatre zones", plat)
+
+
 if __name__ == "__main__":
     unittest.main()
