@@ -1,5 +1,12 @@
 [
   {
+    "nom": "Trois mois de Sorcier offerts",
+    "adresse": "https://lacoteduheros.fr/essai-sorcier.html",
+    "description": "Créez votre compte Héros : pendant 3 mois, les outils du Sorcier sont offerts. Ce que vous découvrez, expliqué simplement.",
+    "image": "data/communaute/essai-sorcier.jpg",
+    "date": "2026-11-21"
+  },
+  {
     "nom": "Le lot d'achat et de vente",
     "adresse": "https://lacoteduheros.fr/lot.html",
     "description": "Un outil réservé aux Sorciers : cochez plusieurs livres et voyez le prix à offrir, le prix à afficher et le port du lot, avec un exemple pas à pas.",
@@ -9,13 +16,13 @@
   {
     "nom": "Le profil Sorcier arrive",
     "adresse": "https://lacoteduheros.fr/sorcier.html",
-    "description": "Un nouveau profil arrive : le Sorcier, sur invitation jusqu'à la fin de l'année. Ce qu'il apporte par rapport au Héros et au Visiteur, expliqué simplement.",
+    "description": "Un nouveau profil arrive : le Sorcier, offert 3 mois à tout nouveau compte. Ce qu'il apporte par rapport au Héros et au Visiteur, expliqué simplement.",
     "image": "data/communaute/sorcier.jpg",
     "annonce": {
       "date": "2026-11-05",
       "jours": 14,
       "titre": "Les sorciers arrivent.",
-      "texte": "Un nouveau profil, sur invitation jusqu'à la fin de l'année.",
+      "texte": "Un nouveau profil, offert 3 mois à tout nouveau compte.",
       "sans_sorcier": true
     },
     "date": "2026-11-05"
@@ -31,12 +38,5 @@
     "adresse": "https://www.editionselvyon.com/",
     "description": "Éditeur de livres-jeux, de LDVELH et de RPG solo, qui publie aussi des jeux de société. Ses projets naissent de campagnes de financement sur La Ruche. Nous avons hâte de découvrir La Quête du Guerrier, et L’Auberge de l’Épouvante, que l’on peut même jouer directement dans le navigateur.",
     "image": "data/communaute/c1f5a31f4684.jpg"
-  },
-  {
-    "nom": "Trois mois de Sorcier offerts",
-    "adresse": "https://lacoteduheros.fr/essai-sorcier.html",
-    "description": "Créez votre compte Héros : pendant 3 mois, les outils du Sorcier sont offerts. Ce que vous découvrez, expliqué simplement.",
-    "image": "data/communaute/essai-sorcier.jpg",
-    "date": "2026-11-21"
   }
 ]
