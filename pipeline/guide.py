@@ -859,7 +859,10 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
     h = [P("Le radar du héros", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
            "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
-         P("Le radar de tout le guide", "h2"), ga.dessiner_radar(pts, (), L_CADRE, 128 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm)]
+         P("Le radar de tout le guide", "h2"),
+         P("Ce nuage de points repose sur une collecte délicate. La Cote du Héros relève les annonces d'occasion, puis les range par titre, par édition et par éditeur, ce qui reste difficile quand une annonce est incomplète ou ambiguë. "
+           "Pour chaque édition, le site compte les annonces trouvées et calcule un prix médian : la moitié des annonces est moins chère, l'autre moitié plus chère."),
+         ga.dessiner_radar(pts, (), L_CADRE, 128 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm)]
     h += [P(t) for t in ga.lecture_globale(pts)]
     editeurs = ga.grands_editeurs(profs)
     for i, e in enumerate(editeurs):
