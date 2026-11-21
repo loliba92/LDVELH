@@ -1067,8 +1067,8 @@
       const fratrie = editionIsbn(b);
       let par = null;          // {état: [[prix, titre, lien, origine, vue, supposé, version]]} : cette édition, la moins chère d'abord
       if (ANN && ANN.annonces) {
-        const vues = new Set(), m = {};
-        fratrie.forEach((x) => { const p = ANN.annonces[x.isbn13]; if (p) ETATS.forEach((e) => (p[e.k] || []).forEach((a) => { if (vues.has(a[2])) return; vues.add(a[2]); (m[e.k] = m[e.k] || []).push([a[0], a[1], a[2], a[3], a[4], a[5], x.version, a[6]]); })); });
+        const vues = new Set(), m = {}, vendueFiche = (lien) => !!((ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[lien]));          // une annonce vendue n'est plus listée
+        fratrie.forEach((x) => { const p = ANN.annonces[x.isbn13]; if (p) ETATS.forEach((e) => (p[e.k] || []).forEach((a) => { if (vues.has(a[2]) || vendueFiche(a[2])) return; vues.add(a[2]); (m[e.k] = m[e.k] || []).push([a[0], a[1], a[2], a[3], a[4], a[5], x.version, a[6]]); })); });
         ETATS.forEach((e) => { if (m[e.k]) m[e.k].sort((u, v) => u[0] - v[0]); });
         par = Object.keys(m).length ? m : null;
       }
@@ -1099,10 +1099,9 @@
       }));
       const ligneFiche = (r) => {
         const plusVue = !enLigne(r.origine) && !!(r.vue && ANN.date_ebay && r.vue < ANN.date_ebay);
-        const vendu = ANN && ((ANN.corrigees && ANN.corrigees[r.lien] && ANN.corrigees[r.lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[r.lien]));
         const cPrix = `<td class="ann-prix" data-l="Prix"${r.nu != null && r.nu !== r.prix ? ` title="${esc(`Prix livré, dont ${fmt(Math.round((r.prix - r.nu) * 100) / 100)} de frais`)}"` : ''}>${fmt(r.prix)}</td>`;
         const cEtat = `<td class="ann-etat" data-l="État"><span class="ann-badge ann-badge-${r.e.k}" role="img" title="${esc(r.e.long)}" aria-label="${esc(r.e.long)}">${ABREGE[r.e.k]}</span></td>`;
-        const cAnnonce = `<td class="ann-annonce">${lienAnn(r.origine, r.lien, r.titre)}${vendu ? '<span class="an-vendu">Vendu</span>' : ''}${r.origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(r.vue)}">plus vue</span>` : ''}</td>`;
+        const cAnnonce = `<td class="ann-annonce">${lienAnn(r.origine, r.lien, r.titre)}${r.origine === 'titre' ? '<span class="ann-titre">trouvée par le titre</span>' : ''}${plusVue ? `<span class="ann-titre" title="Plus vue depuis le ${dateCourte(r.vue)}">plus vue</span>` : ''}</td>`;
         const cEcart = `<td class="ann-ecart" data-l="Écart">${r.v ? `<span class="rc-pastille ${VERDICTS_IMP[r.v][1]}">${VERDICTS_IMP[r.v][0]}</span>` : ''}${r.cote != null ? `<span class="ann-site">site ${fmt(r.cote)} · ${r.ecart > 0 ? '+' : r.ecart < 0 ? '−' : ''}${Math.abs(r.ecart)} %</span>` : ''}</td>`;
         return `<tr>${cAnnonce}${cEtat}<td class="ann-nom" data-l="Site">${r.site}</td>${celluleDate(r.lien, r.vue)}${cPrix}${cEcart}${boutonExclure(r.lien, r.titre)}</tr>`;
       };
@@ -1117,13 +1116,13 @@
         const th = (k) => (k === 'annonce' ? '<th scope="col" class="ann-th-annonce">Annonce</th>' : tete[Object.keys(TRIS_ANN).indexOf(k)]);
         return `<div class="ann-cadre"><table class="ann-tab"><caption class="sr-only">Annonces retenues pour cette édition</caption><thead><tr>${ordre.map(th).join('')}${estNiveau3() ? '<th scope="col" class="ann-th-act"><span class="sr-only">Action</span></th>' : ''}</tr></thead><tbody>${vues.map(ligneFiche).join('')}</tbody></table></div>${vues.length < lignes.length ? `<p class="ann-plus"><button type="button" class="bouton bouton-clair" data-ann-plus>Voir les ${lignes.length - vues.length} autres annonces</button></p>` : ''}`;
       };
-      // Chaque annonce retenue compte une fois : plus vue, vendue, lot (pas l'offre d'un livre seul), sinon en ligne : même règle que « Offre d'occasion »
-      const cats = { ligne: 0, lot: 0, vendue: 0, plus: 0 };
+      // Chaque annonce retenue compte une fois : plus vue, lot (pas l'offre d'un livre seul), sinon en ligne : même règle que « Offre d'occasion »
+      const cats = { ligne: 0, lot: 0, plus: 0 };
       ETATS.forEach((e) => ((par && par[e.k]) || []).forEach(([, titre, lien, origine, vue]) => {
-        const plus = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay), vendue = !!((ANN.corrigees && ANN.corrigees[lien] && ANN.corrigees[lien].statut === 'vendue') || (ANN.vendues && ANN.vendues[lien]));
-        cats[plus ? 'plus' : vendue ? 'vendue' : /^Lot de /.test(titre) ? 'lot' : 'ligne'] += 1;
+        const plus = !enLigne(origine) && !!(vue && ANN.date_ebay && vue < ANN.date_ebay);
+        cats[plus ? 'plus' : /^Lot de /.test(titre) ? 'lot' : 'ligne'] += 1;
       }));
-      const segments = [cats.ligne && `${cats.ligne} en ligne`, cats.lot && `${cats.lot} lot${cats.lot > 1 ? 's' : ''}`, cats.vendue && `${cats.vendue} vendue${cats.vendue > 1 ? 's' : ''}`, cats.plus && `${cats.plus} plus vue${cats.plus > 1 ? 's' : ''}`].filter(Boolean);
+      const segments = [cats.ligne && `${cats.ligne} en ligne`, cats.lot && `${cats.lot} lot${cats.lot > 1 ? 's' : ''}`, cats.plus && `${cats.plus} plus vue${cats.plus > 1 ? 's' : ''}`].filter(Boolean);
       const dont = nb > cats.ligne ? `, dont ${segments.length > 1 ? segments.slice(0, -1).join(', ') + ' et ' + segments[segments.length - 1] : segments[0]}` : '';
       if (resume && (nb || inc.length)) resume.lastChild.textContent = `Annonces retenues (${nb})${dont}${inc.length ? `, ${inc.length} à vérifier` : ''} `;
       if (!nb && !inc.length) { zone.innerHTML = `<p class="sous">${ANN ? `Aucune annonce retenue pour cette édition.` : 'Pas encore de relevé d\'annonces.'}</p>`; return; }
@@ -2262,7 +2261,7 @@
   // Pépite du jour : choisie par le Zagor, offerte aux Héros (fichier public data/pepite-du-jour.json, écrit par le service technique)
   let PJ = null, pjChargee = false, pjAtterri = false;
   const jourParis = (retard = 0) => new Date(Date.now() - retard * 86400000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Paris' });
-  const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && PJ.date === jourParis() ? PJ : null);          // valable le jour où elle est offerte (jour de Paris) : elle disparaît dès le lendemain
+  const pepiteJour = () => (PJ && PJ.isbn13 && PJ.lien && !PJ.vendue && !(OFFRE && OFFRE.vendues && OFFRE.vendues[PJ.lien]) && PJ.date === jourParis() ? PJ : null);          // valable le jour où elle est offerte (jour de Paris) : elle disparaît dès le lendemain
   const voitPepiteJour = () => !sansCompte() && !!window.Compte && window.Compte.actif();       // tout compte connecté (Héros, sorcier, Zagor) ; jamais un visiteur
   function chargerPepiteJour() {
     if (pjChargee) return;
@@ -2278,12 +2277,12 @@
     const p = voitPepiteJour() ? pepiteJour() : null, b = p && DATA.find((x) => x.isbn13 === p.isbn13);      // réservée au compte connecté : jamais aux visiteurs
     if (!b) { z.innerHTML = ''; return; }
     const quand = new Date(p.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-    z.innerHTML = `<section class="carte pep-accueil${p.vendue ? ' pep-vendue' : ''}" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}${p.vendue ? ' · <b>Vendue</b>' : ''}</p>
+    z.innerHTML = `<section class="carte pep-accueil" id="pepite-jour" aria-labelledby="pa-titre"><p class="surtitre" id="pa-titre">Pépite du jour · ${esc(quand)}</p>
       <div class="pa-corps">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="Jaquette de ${esc(b.titre)}" width="80" height="112" decoding="async">` : ''}
         <div><p class="pa-titre">${esc(b.titre)}</p><p class="sous">${esc(b.serie)}${esc(numero(b))} · ${esc(b.version)} · ${esc(p.etat)}</p>
           <p class="pa-prix"><b>${fmt(p.prix)}</b>${p.pct != null ? ` <span>−${p.pct} % sous la cote</span>` : ''}</p></div></div>
-      <p class="actions">${p.vendue ? '' : `<a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a>`}<a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
-      <p class="sous">Déniché par La Cote du Héros.${p.vendue ? '' : ' Prix indicatif : l\'annonce peut déjà être vendue, à vérifier.'} La Cote du Héros ne prend ni marge ni commission.</p></section>`;
+      <p class="actions"><a class="bouton" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer">Voir l'annonce ↗</a><a class="bouton bouton-clair" href="${b.isbn13 ? 'livre/' + esc(b.isbn13) + '.html' : '#'}">Fiche du livre</a></p>
+      <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l\'annonce peut déjà être vendue, à vérifier. La Cote du Héros ne prend ni marge ni commission.</p></section>`;
     if (location.hash === '#pepite-jour' && !pjAtterri) { pjAtterri = true; const bloc = $('#pepite-jour'); if (bloc) bloc.scrollIntoView({ behavior: 'instant', block: 'start' }); }
   }
   // Menu du bas : « Annonces » porte un badge : pour un sorcier, le nombre de livres de sa liste qui ont une pépite ; pour un Héros, 1 quand une pépite du jour est offerte
@@ -2580,7 +2579,7 @@
       <ul class="a-trouver"><li class="pep-jour-li">
         <div class="l-livre">${b.couverture ? `<img src="${esc(racine(b.couverture_mini || b.couverture))}" alt="" width="40" height="56" loading="lazy" data-i="${esc((b.serie || '?').trim().charAt(0).toUpperCase())}">` : tuile(b)}
           <div><button type="button" data-id="${esc(b.id)}">${esc(b.titre)}</button><span class="sous sur-ligne">${esc(b.serie)}${esc(numero(b))} <span class="nowrap"><span class="badge">${esc(b.version)}</span></span></span></div></div>
-        ${estNiveau3() ? `<div class="pep-actions"><button type="button" class="retirer" data-pepite-retirer>Retirer</button>${p.vendue ? '' : '<button type="button" class="retirer" data-pepite-vendre>Marquer vendue</button>'}</div>` : ''}
+        ${estNiveau3() ? `<div class="pep-actions"><button type="button" class="retirer" data-pepite-retirer>Retirer</button><button type="button" class="retirer" data-pepite-vendre>Marquer vendue</button></div>` : ''}
         <div class="pep-liste"><a class="pep" href="${esc(p.lien)}" target="_blank" rel="noopener noreferrer" aria-label="Pépite du jour ${fmt(p.prix)} (${nomOrigine(p.origine)}, nouvel onglet)"><span class="pp-trouver-etoile" aria-hidden="true">★</span> <b>${fmt(p.prix)}</b> <span class="pep-d">${esc(p.etat)}${p.pct != null ? ' · −' + p.pct + ' %' : ''}${p.pub ? ' · cote ' + fmt(p.pub) : ''} · ${nomOrigine(p.origine)}</span> ↗</a></div>
       </li></ul>
       <p class="sous">Déniché par La Cote du Héros. Prix indicatif : l'annonce peut déjà être vendue, pensez à la vérifier.${estNiveau3() ? ' <button type="button" class="bouton-lien pep-partager" data-partager-jour>Créer la carte à partager</button>' : ''}</p>`;

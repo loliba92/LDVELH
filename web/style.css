@@ -1938,7 +1938,6 @@ body.cotes-masquees #f-coll, body.cotes-masquees label:has(#f-mine) { display: n
 .ann-tab .rc-pastille { font-size: var(--t-xs); line-height: 1.5; white-space: nowrap; }
 .ann-tab .ann-site { font-size: var(--t-xs); color: var(--muted); white-space: nowrap; }
 .ann-tab .ann-titre { display: inline-block; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: var(--t-xs); }
-.ann-tab .an-vendu { margin-right: 6px; }
 .ann-tab .ann-act { text-align: right; }
 .annonces-corps .ann-exclure { min-height: 28px; padding: 0 9px; border: 1px dashed var(--line-strong); border-radius: 999px; background: none; color: var(--muted); font: 600 var(--t-xs)/1.6 var(--f-ui); cursor: pointer; white-space: nowrap; }
 .annonces-corps .ann-exclure:hover, .annonces-corps .ann-exclure:focus-visible { color: var(--gold); border-color: var(--gold); }
@@ -2441,7 +2440,6 @@ button.rc-pastille-radar:focus-visible { outline: 3px solid var(--gold); outline
 .pa-corps img { flex: none; width: 80px; height: 112px; object-fit: cover; border: 1px solid var(--line-strong); border-radius: 4px; }
 .pa-titre { margin: 0; font: 700 1.35rem/1.15 var(--f-display); }
 .pep-accueil .sous { margin: 2px 0 0; }
-.pep-vendue .pa-titre, .pep-vendue .pa-prix { text-decoration: line-through; opacity: .6; }   /* pépite vendue : barrée */
 .pa-prix { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
 .pa-prix b { font: 700 2rem/1 var(--f-display); color: var(--gold); }
 .pa-prix span { color: var(--gold); font-weight: 700; }
@@ -2982,7 +2980,6 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .corr-bouton:hover, .corr-bouton[aria-expanded="true"] { color: var(--gold); border-color: var(--gold); }
 /* Pancarte « Vendu » en travers de la jaquette */
 .an-pancarte { position: absolute; left: -26%; right: -26%; top: 38%; z-index: 1; padding: 4px 0; background: #b3262f; color: #fff; text-align: center; font: 800 .8rem/1.2 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; transform: rotate(-35deg); box-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none; }
-.an-vendu { display: inline-block; align-self: flex-start; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); font: 700 .72rem/1.5 var(--f-ui); white-space: nowrap; }
 
 /* Heure par heure : trois couleurs distinctes, légende identique au tracé */
 .cp-h { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
