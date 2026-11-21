@@ -2,8 +2,8 @@
  "date": "2026-11-21",
  "precedent": "2026-11-20",
  "nb_comparees": 1548,
- "nb_modifiees": 1430,
- "mediane_variation": -0.003,
+ "nb_modifiees": 1431,
+ "mediane_variation": -0.002,
  "nouvelles_cotes": 0,
  "hausses": [
   {
@@ -37,21 +37,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070585168",
-   "isbn13": "9782070585168",
-   "titre": "La Malédiction de Naar",
-   "serie": "Loup Solitaire",
-   "numero": "749",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 57.51,
-   "apres": 64.71,
-   "pct": 0.125,
-   "nature": "annonces",
-   "nb": 2,
-   "recalibre": false
-  },
-  {
    "id": "9782070509621",
    "isbn13": "9782070509621",
    "titre": "Le Tombeau des Maléfices",
@@ -73,12 +58,12 @@
    "serie": "Loup Solitaire",
    "numero": "749",
    "version": "V1",
-   "etat": "bon",
-   "avant": 43.14,
-   "apres": 48.15,
-   "pct": 0.116,
+   "etat": "tres_bon",
+   "avant": 57.51,
+   "apres": 64.56,
+   "pct": 0.123,
    "nature": "annonces",
-   "nb": 4,
+   "nb": 1,
    "recalibre": false
   },
   {
@@ -94,6 +79,21 @@
    "pct": 0.113,
    "nature": "annonces",
    "nb": 3,
+   "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 43.14,
+   "apres": 47.89,
+   "pct": 0.11,
+   "nature": "annonces",
+   "nb": 4,
    "recalibre": false
   },
   {
@@ -132,9 +132,9 @@
  "nb_grands_mouvements": 8,
  "modele": {
   "actif": false,
-  "n_paires": 291,
-  "gain": 0.052,
+  "n_paires": 290,
+  "gain": 0.048,
   "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
-  "rapport_global": 1.079
+  "rapport_global": 1.084
  }
 }
