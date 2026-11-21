@@ -994,7 +994,8 @@ def page_nuage(versions, donnees, styles, polices, st):
     e = ga.Echelles(pts, 100, 100)
     sens = {q: ZONES_TEXTE[q][0].split(" : ")[0] for q in ZONES_TEXTE}          # surnom de chaque zone ; le détail est sur les pages suivantes
     ordre = sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])          # zone 1 à 4
-    zones = Table([[GlypheZone(q, st), P(f"<b>Zone {ga.NUM_ZONE[q]}</b> · {ga.ZONES[q]}"), P(sens[q])] for q in ordre], colWidths=[9 * mm, 66 * mm, L_CADRE - 75 * mm], hAlign="LEFT")
+    parts = ga.parts_zones(versions, donnees["offre"], e.med_o, e.med_c)          # part de chaque zone parmi les livres du nuage
+    zones = Table([[GlypheZone(q, st), P(f"<b>Zone {ga.NUM_ZONE[q]}</b> · {ga.ZONES[q]}"), P(f"{sens[q]} · {parts[q][1]}\u00a0%")] for q in ordre], colWidths=[9 * mm, 66 * mm, L_CADRE - 75 * mm], hAlign="LEFT")
     zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
     return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
             P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
@@ -1005,7 +1006,7 @@ def page_nuage(versions, donnees, styles, polices, st):
             Spacer(1, 1 * mm), zones,
             P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance."),
             P("<b>Le nuage ne sert pas à comparer deux livres</b>, qui n'ont pas forcément le même public ni le même tirage (deux éditions d'un même livre, elles, peuvent l'être). "
-              "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c), ga.parts_zones(versions, donnees["offre"], e.med_o, e.med_c))
+              "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c), parts)
 
 
 def phrase_exemples(exemples):
