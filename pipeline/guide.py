@@ -1089,7 +1089,7 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
     h += [P(t) for t in ga.lecture_globale(pts)]
     h += [P("Que faire de ce radar ?", "h2"),
           P("Sur La Cote du Héros, chaque livre est placé sur ce même graphique. Il sert à vous poser la bonne question : dois-je acheter, attendre ou passer mon chemin ?"),
-          P("<b>Vous débutez, sans aucun livre ?</b> Commencez par la zone « beaucoup d'annonces, bon marché », en bas à droite : les vendeurs sont nombreux et les prix bas. "
+          P(f"<b>Vous débutez, sans aucun livre ?</b> Commencez par la zone {ga.NUM_ZONE[1]}, « beaucoup d'annonces, bon marché », en bas à droite : les vendeurs sont nombreux et les prix bas. "
             "Vous constituez votre collection sans courir après les livres, ni risquer de payer trop cher.")]
     editeurs = ga.grands_editeurs(profs)
     for i, e in enumerate(editeurs):
