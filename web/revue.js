@@ -1429,7 +1429,7 @@
     if (effacerRc) effacerRc.addEventListener('click', () => { razFiltres(); dessinerRecues(); });
     // Préréglages : chaque bouton remet tout à zéro puis règle les filtres d'un usage
     const PRESETS = {
-      chasse: ['pépites sans réserve, les meilleures affaires d\'abord.', () => { pepRc.checked = true; sansRc.checked = true; triRc.value = 'ecart'; }],
+      chasse: ['pépites et annonces moins chères que le site, les meilleures affaires d\'abord.', () => { bonRc.checked = true; triRc.value = 'ecart'; }],
       veille: ['annonces arrivées aujourd\'hui, les plus récentes d\'abord.', () => { periode = 'auj'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'auj'))); triRc.value = 'recent'; }],
       comparaison: ['classées par prix croissant. Tapez un titre pour comparer les annonces d\'un même livre.', () => { triRc.value = 'prix'; }],
       verification: ['annonces dont l\'édition ou l\'état reste à confirmer, les meilleures affaires d\'abord.', () => { verifRc.checked = true; triRc.value = 'ecart'; }],
