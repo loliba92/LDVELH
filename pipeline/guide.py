@@ -1061,6 +1061,15 @@ ZONES_TEXTE = {
 }
 
 
+MILLIERS = {1: "mille", 2: "deux mille", 3: "trois mille", 4: "quatre mille", 5: "cinq mille", 6: "six mille", 7: "sept mille", 8: "huit mille", 9: "neuf mille", 10: "dix mille"}
+
+
+def _annonces_en_mots(n):
+    """« plus de cinq mille annonces » (millier inférieur, en toutes lettres) ; « de nombreuses annonces » sans chiffre exploitable."""
+    mots = MILLIERS.get(n // 1000)
+    return f"plus de {mots} annonces" if mots else "de nombreuses annonces"
+
+
 def section_radar(versions, donnees, styles, date_cotes, polices, st):
     """Chapitre « Le radar du héros » : le radar du site pour tout le guide, un radar par grand éditeur (une bulle par série), puis les séries à surveiller.
     Axes et zones en mots ; les deux médianes (pointillés) sont écrites une fois, dans la lecture du radar ; phrases calculées à chaque génération."""
@@ -1073,7 +1082,8 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
          P("Les cotes sont des estimations tirées de plusieurs sources : archives, annonces en ligne et librairies. Une annonce est un prix demandé, pas un prix payé. "
            "La confiance d'une cote dépend du nombre d'observations. Une cote n'est pas un prix garanti."),
          P("Le radar de tout le guide", "h2"),
-         P("Ce nuage de points repose sur une collecte délicate. La Cote du Héros relève les annonces d'occasion, puis les range par titre, par édition et par éditeur, ce qui reste difficile quand une annonce est incomplète ou ambiguë. "
+         P("Ce nuage de points repose sur une collecte délicate. Derrière lui, il y a " + _annonces_en_mots(sum(ga.nb_annonces(o) for o in donnees["offre"].values())) + " en circulation aujourd'hui sur les différents sites : une estimation de ce que le marché propose, pas un décompte exact. "
+           "La Cote du Héros les relève, puis les range par titre, par édition et par éditeur, ce qui reste difficile quand une annonce est incomplète ou ambiguë. "
            "Pour chaque édition, le site compte les annonces trouvées et calcule un prix médian : la moitié des annonces est moins chère, l'autre moitié plus chère."),
          ga.dessiner_radar(pts, (), L_CADRE, 128 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm)]
     h += [P(t) for t in ga.lecture_globale(pts)]
