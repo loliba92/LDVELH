@@ -40,7 +40,7 @@ function monde() {
   props.CLIENT_ID = CLIENT; props.GITHUB_TOKEN = 'secret'; props.DEPOT = 'loliba92/LDVELH';
   props['u:' + sha('alice@gmail.com').slice(7, 23)] = '1'; props['u:' + sha('bob@gmail.com').slice(7, 23)] = '1';          // comptes déjà connus : pas d'essai de sorcier
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(__dirname + '/../relais/logique.gs', 'utf8') + '\n' + fs.readFileSync(__dirname + '/../relais/Code.gs', 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync(__dirname + '/../relais/logique.gs', 'utf8') + '\n' + fs.readFileSync(__dirname + '/../relais/Code.gs', 'utf8') + '\nESSAI_COMPTES_EXISTANTS = false;', ctx);
   const post = (corps) => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify(corps) } }).texte);
   const get = (parametres) => JSON.parse(ctx.doGet({ parameter: parametres }).texte);
   return { post, get, props, cache, appels };
