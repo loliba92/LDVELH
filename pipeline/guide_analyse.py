@@ -175,6 +175,32 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
     return d
 
 
+def exemples_zones(versions, offre, med_o, med_c, par_zone=2):
+    """{zone (0 à 3) : [{titre, serie, numero, version, annonces, cote}]} : quelques livres typiques de chaque zone, de séries différentes, recalculés à chaque génération.
+    Zone « peu d'annonces, cher » : les plus chers parmi les très peu offerts ; « beaucoup, cher » : les plus chers ; « peu, bon marché » : les moins chers qu'on trouve encore ; « beaucoup, bon marché » : les plus offerts."""
+    rangs = {0: [], 1: [], 2: [], 3: []}
+    for v in versions:
+        c, isbn = cote(v), v.get("isbn13")
+        if not isbn or c <= 0 or not v.get("titre") or v.get("serie") in (None, "", "Non classée"):
+            continue
+        n = nb_annonces(offre.get(isbn))
+        rangs[quadrant(n, c, med_o, med_c)].append({"titre": v["titre"], "serie": v["serie"], "numero": v.get("numero"), "version": v.get("version") or "", "annonces": n, "cote": c})
+    rares = [x for x in rangs[2] if x["annonces"] <= med_o / 2] or rangs[2]
+    ordres = {2: sorted(rares, key=lambda x: -x["cote"]), 3: sorted(rangs[3], key=lambda x: -x["cote"]),
+              0: sorted([x for x in rangs[0] if x["annonces"] >= 1] or rangs[0], key=lambda x: x["cote"]), 1: sorted(rangs[1], key=lambda x: (-x["annonces"], x["cote"]))}
+    sortie = {}
+    for q, liste in ordres.items():
+        vus, choisis = set(), []
+        for x in liste:
+            if x["serie"] in vus:
+                continue
+            vus.add(x["serie"]); choisis.append(x)
+            if len(choisis) >= par_zone:
+                break
+        sortie[q] = choisis
+    return sortie
+
+
 def _fr(x, decimales=None):
     """Nombre à la française : virgule décimale, sans zéros inutiles pour un entier."""
     if decimales is None:
