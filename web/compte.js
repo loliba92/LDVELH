@@ -89,7 +89,7 @@ window.Compte = (function () {
   }
   function telechargerGuide() {
     var nom = nomGuide(), brut = guideFichier;
-    annoncer('Préparation du guide à votre nom…');
+    annoncer('Préparation du guide…');
     return Promise.all([chargerPdfLib(), fetch(brut).then(function (x) { if (!x.ok) throw new Error('guide'); return x.arrayBuffer(); })]).then(function (t) {
       var L = t[0];
       return L.PDFDocument.load(t[1], { updateMetadata: false }).then(function (doc) {
@@ -107,14 +107,14 @@ window.Compte = (function () {
           return doc.save().then(function (octets) {
             var court = propre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
             enregistrer(new Blob([octets], { type: 'application/pdf' }), 'guide-reference' + (court ? '-' + court : '') + '.pdf');
-            annoncer('Guide enregistré à votre nom.');
+            annoncer('Guide enregistré.');
           });
         });
       });
     }).catch(function () {          // repli : le guide d'origine, sans le nom
       var a = document.createElement('a');
       a.href = brut; a.download = ''; document.body.appendChild(a); a.click(); a.remove();
-      annoncer('Guide téléchargé sans votre nom.');
+      annoncer('Guide téléchargé.');
     });
   }
 
