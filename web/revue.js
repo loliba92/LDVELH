@@ -538,7 +538,7 @@
   };
   // Message de la liste tant qu'il n'y a pas d'annonces : chargement, échec (avec « Réessayer »), ou relevé vide
   const etatAnnonces = (el) => {
-    if (annErreur) el.innerHTML = 'Impossible de lire les annonces pour le moment. <button type="button" class="bouton-lien" data-reessayer-annonces>Réessayer</button>';
+    if (annErreur) { const raison = window.Relais && window.Relais.derniereErreur ? window.Relais.derniereErreur() : ''; el.innerHTML = 'Impossible de lire les annonces pour le moment' + (raison ? ' (' + esc(raison) + ')' : '') + '. <button type="button" class="bouton-lien" data-reessayer-annonces>Réessayer</button>'; }
     else el.textContent = annPrete ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…';
   };
   document.addEventListener('click', (e) => {
