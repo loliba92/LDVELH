@@ -1431,17 +1431,13 @@
     const PRESETS = {
       chasse: ['pépites et annonces moins chères que le site, les meilleures affaires d\'abord.', () => { bonRc.checked = true; triRc.value = 'ecart'; }],
       veille: ['annonces arrivées aujourd\'hui, les plus récentes d\'abord.', () => { periode = 'auj'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'auj'))); triRc.value = 'recent'; }],
-      comparaison: ['classées par prix croissant. Tapez un titre pour comparer les annonces d\'un même livre.', () => { triRc.value = 'prix'; }],
-      verification: ['annonces dont l\'édition ou l\'état reste à confirmer, les meilleures affaires d\'abord.', () => { verifRc.checked = true; triRc.value = 'ecart'; }],
     };
     const txtPreset = $('#rc-preset-txt');
     document.querySelectorAll('#rc-presets [data-preset]').forEach((b) => b.addEventListener('click', () => {
       const p = PRESETS[b.dataset.preset]; if (!p) return;
       razFiltres(); p[1]();
-      if (b.dataset.preset === 'comparaison') { modeVue = 'grille'; boutonsVue.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.vue === 'grille'))); }
       if (txtPreset) { txtPreset.textContent = `${b.textContent} : ${p[0]}`; txtPreset.hidden = false; }
       dessinerRecues();
-      if (b.dataset.preset === 'comparaison' && rechercheRc) rechercheRc.focus();
     }));
     // « Sans réserve » et « À vérifier » s'excluent
     if (sansRc && verifRc) { sansRc.addEventListener('change', () => { if (sansRc.checked) verifRc.checked = false; }); verifRc.addEventListener('change', () => { if (verifRc.checked) sansRc.checked = false; limite = 60; dessinerRecues(); }); }
