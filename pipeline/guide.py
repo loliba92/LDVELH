@@ -73,6 +73,10 @@ MOTS_PRIX = ("pas cher", "abordable", "moyen", "cher", "très cher")
 LIBELLE_OFFRE, LIBELLE_PRIX = "En vente", "Prix d'occasion"          # titres des deux repères sur chaque fiche
 
 
+NBSP = "\u00a0"
+FOURCHETTES = ((f"moins de {SEUILS_PRIX[0]}{NBSP}€",) + tuple(f"{a} à {b}{NBSP}€" for a, b in zip(SEUILS_PRIX, SEUILS_PRIX[1:])) + (f"{SEUILS_PRIX[-1]}{NBSP}€ et plus",))          # échelle en euros, tirée des seuils
+
+
 def niveau_prix(v):
     """1 à 5 selon la cote, comme le site pour les visiteurs ; None sans cote."""
     return None if v is None else 1 + sum(1 for x in SEUILS_PRIX if v >= x)
@@ -524,28 +528,31 @@ class TableauNiveaux(Flowable):
     def draw(self):
         c, st = self.canv, self.st
         y = len(self.lignes) * 7.5 * mm
-        for k, (mot, phrase) in enumerate(self.lignes, 1):
+        for k, (mot, phrase, *fourchette) in enumerate(self.lignes, 1):
             if self.jauges:
                 jauge(c, 0, y - 1.2 * mm, k, st)
             c.setFillColor(HexColor(st["titre"]))
             c.setFont(self.pol[3], 10)
             c.drawString(24 * mm if self.jauges else 0, y - 4 * mm, mot)
             c.setFillColor(HexColor(st["texte"]))
+            if fourchette:
+                c.setFont(self.pol[3], 10)
+                c.drawString(52 * mm, y - 4 * mm, fourchette[0])
             c.setFont(self.pol[2], 10)
-            c.drawString(56 * mm, y - 4 * mm, phrase)
+            c.drawString(86 * mm if fourchette else 56 * mm, y - 4 * mm, phrase)
             y -= 7.5 * mm
 
 
 def legende(styles, st=None, polices=None, exemple=None):
-    """Page de légende : une fiche annotée, puis chaque mot des repères avec sa phrase. Sans seuil ni chiffre de cote."""
+    """Page de légende : une fiche annotée, puis chaque mot des repères avec sa phrase ; l'échelle des prix donne la fourchette en euros de chaque niveau."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     haut = []
     if exemple is not None:
         exemple.offre, exemple.niveau = "courant", 3
         haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
     return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
-                   P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher."),
-                   TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS)), st, polices, jauges=True) if st else Spacer(1, 1)]
+                   P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher ; l'échelle donne les montants."),
+                   TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS, FOURCHETTES)), st, polices, jauges=True) if st else Spacer(1, 1)]
 
 
 def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=None, editeurs=None, donnees=None, sous_titre=SOUS_TITRE_PAR_DEFAUT, style=STYLE_PAR_DEFAUT, mention=False, visuel=COUVERTURE_PAR_DEFAUT, reperes="jauge", meta=None, introduction_md=None):
@@ -843,7 +850,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
 def section_radar(versions, donnees, styles, date_cotes, polices, st):
     """Chapitre « Le radar du héros » : le radar du site pour tout le guide, un radar par grand éditeur (une bulle par série), puis les séries à surveiller.
-    Aucun chiffre : axes et zones en mots, phrases calculées à chaque génération."""
+    Axes et zones en mots ; les deux médianes (pointillés) sont écrites une fois, dans la lecture du radar ; phrases calculées à chaque génération."""
     f_titre, f_titre_gras, f_texte, f_gras = polices
     cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
