@@ -134,14 +134,16 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
         d.add(Circle(x, y, r, strokeColor=c["fond"], strokeWidth=0.8, fillColor=c["or"]))
         pris.append((s, x, y, r))
     etiquettes = []
-    for s, x, y, r in pris[:max_etiquettes]:
+    bulles = [(x - r, y - r, x + r, y + r) for _, x, y, r in pris]
+    for i, (s, x, y, r) in enumerate(pris[:max_etiquettes]):
+        autres = bulles[:i] + bulles[i + 1:]          # un libellé ne recouvre pas une autre bulle
         nom = f"{s['editeur']} · {s['serie']}" if s.get("etiquette_editeur", True) else s["serie"]
         w, h = len(nom) * 0.47 * 6.8, 6.8 * 1.15
         for dx, dy, ancre in ((r + 1.2 * mm, -h / 3, "start"), (-r - 1.2 * mm, -h / 3, "end"), (0, r + 1 * mm, "middle"), (0, -r - h - 0.5 * mm, "middle")):
             xt, yt = x + dx, y + dy
             x0 = xt if ancre == "start" else xt - w if ancre == "end" else xt - w / 2
             rect = (x0, yt, x0 + w, yt + h)
-            if rect[0] >= gx and rect[2] <= largeur - dr and rect[1] >= gy and rect[3] <= hauteur - hb and not _recoupe(rect, etiquettes):
+            if rect[0] >= gx and rect[2] <= largeur - dr and rect[1] >= gy and rect[3] <= hauteur - hb and not _recoupe(rect, etiquettes) and not _recoupe(rect, autres):
                 etiquettes.append(rect)
                 d.add(String(xt, yt, nom, fontName=police_gras, fontSize=6.8, fillColor=c["texte"], textAnchor=ancre))
                 break
@@ -241,7 +243,7 @@ def lecture_globale(pts):
         return "la plus grosse part" if z == ordre[0] else "une part importante" if r >= 0.22 else "une part modeste" if r >= 0.1 else "peu de livres"
     ph = ["Chaque point est un livre. Il se place selon ce qu'on en trouve en ce moment, de gauche à droite, et selon son prix, de bas en haut ; les pointillés marquent le milieu du marché : la ligne verticale, à " + _fr(E.med_o) + " annonces par livre (médiane de l'offre) ; la ligne horizontale, à " + _fr(E.med_c, 2) + "\u00a0€ (médiane des prix). À droite de la verticale, on trouve beaucoup d'annonces ; au-dessus de l'horizontale, c'est cher.",
           f"La plus grosse part des livres se range en zone {NUM_ZONE[ordre[0]]} (« {ZONES[ordre[0]].lower()} ») : {VERDICTS[ordre[0]][1]}.",
-          f"La zone {NUM_ZONE[ordre[-1]]} (« {ZONES[ordre[-1]].lower()} ») est la plus clairsemée : {VERDICTS[ordre[-1]][1]}."]
+          f"La zone {NUM_ZONE[ordre[-1]]} (« {ZONES[ordre[-1]].lower()} ») regroupe le moins de livres : {VERDICTS[ordre[-1]][1]}."]
     ph.append("Certains livres n'ont aucune annonce en ce moment : ils s'alignent tout à gauche du radar." if sans >= 0.05 else "Presque tous les livres ont au moins une annonce en ce moment.")
     return ph
 
