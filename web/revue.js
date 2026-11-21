@@ -1043,7 +1043,8 @@
   let dessinerRecues = () => {};
   function initRecues() {
     const rechercheRc = $('#rc-q');
-    if (rechercheRc) rechercheRc.addEventListener('input', () => { limite = 60; dessinerRecues(); });
+    let minuteRc = 0; const planifierRc = () => { clearTimeout(minuteRc); minuteRc = setTimeout(() => { limite = 60; dessinerRecues(); }, 150); };          // la frappe ne redessine qu'une fois la saisie posée
+    if (rechercheRc) rechercheRc.addEventListener('input', planifierRc);
     const liste = $('#rc-liste'), etat = $('#rc-etat'), source = $('#rc-source'), enligne = $('#rc-enligne'), verdict = $('#rc-verdict'), trouverRc = $('#rc-trouver'), sansRc = $('#rc-sans'), triRc = $('#rc-tri');
     if (!liste) return;
     let limite = 60;
@@ -1180,7 +1181,7 @@
       if (a.fam === 'vinted' && a.premiere) { const c = a.premiere; const j = c.length > 10 && !Number.isNaN(Date.parse(c)) ? jourParis(new Date(c)) : c.slice(0, 10); return { jours: Math.max(0, ecartJours(j)), estime: true }; }
       return { jours: null, estime: false };
     }
-    const quandCle = (a) => (a.publiee || (a.premiere || a.vue || '').slice(0, 10)) + '|' + (a.premiere || '');
+    const quandCle = (a) => a.qc || (a.qc = (a.publiee || (a.premiere || a.vue || '').slice(0, 10)) + '|' + (a.premiere || ''));          // calculée une fois par annonce : le tri la relit des milliers de fois
     const ageTexte = (a) => {
       if (a.ageJ == null) return 'date inconnue';
       const n = a.ageJ, base = a.ageEstime ? 'trouvée par le site' : 'publiée';
@@ -1291,8 +1292,23 @@
       ecart: (a, b) => (a.pub ? a.prix / a.pub : 99) - (b.pub ? b.prix / b.pub : 99) || parRecent(a, b),
       origine: (a, b) => a.fam.localeCompare(b.fam) || parRecent(a, b),
     }[mode] || parRecent);
+    // La liste complète des annonces n'est reconstruite que si les données changent ; un filtre ne fait que trier et filtrer cette liste
+    const reperes = new WeakMap(); let nbReperes = 0, cacheRc = null, dernieresVues = null;
+    const reperer = (o) => { if (!o) return 0; if (!reperes.has(o)) reperes.set(o, ++nbReperes); return reperes.get(o); };
+    const cleRc = () => { let sw = ''; try { sw = localStorage.getItem('cote-souhaits-v1') || ''; } catch (e) { /* sans stockage */ } return [reperer(ANN), reperer(BUT), reperer(EDITIONS), Object.keys(INFO_ED).length, sw].join('|'); };
+    const libelleSuite = (n, total) => `Afficher plus (${n.toLocaleString('fr-FR')} sur ${total.toLocaleString('fr-FR')})`;
+    // « Afficher plus » ajoute les cartes suivantes sans redessiner celles déjà à l'écran
+    const ajouterPage = () => {
+      const d = dernieresVues, grille = liste.firstElementChild; if (!d || !grille) return;
+      const debut = limite; limite += 60;
+      grille.insertAdjacentHTML('beforeend', d.vues.slice(debut, limite).map(d.carte).join(''));
+      const p = liste.querySelector('#rc-plus'); if (!p) return;
+      if (limite >= d.vues.length) p.parentElement.remove(); else p.textContent = libelleSuite(limite, d.vues.length);
+    };
     dessinerRecues = () => {
       if (!ANN) { etat.textContent = annChargees ? "Pas encore d'annonces enregistrées : elles apparaîtront après le prochain relevé des prix." : 'Chargement…'; liste.innerHTML = ''; return; }
+      const cle = cleRc();
+      if (!cacheRc || cacheRc.cle !== cle) {
       const parIsbn = new Map(); EDITIONS.forEach((ed) => { if (ed.isbn && !parIsbn.has(ed.isbn)) parIsbn.set(ed.isbn, ed); });
       const dateRef = (o) => (enLigne(o) ? null : ANN.date_ebay);
       const toutes = [], sw = souhaits(), corr = corrigees();
@@ -1304,7 +1320,7 @@
           const pub = ed.etats[cle] && ed.etats[cle].publie, butin = !!pub && prix <= SEUIL_PEPITE * pub && pub - prix >= ECONOMIE_MINI && !partie;
           toutes.push({ ed, trouver: !!sw[ed.id], lib, cle, prix, pub, v: verdictDe(prix, pub), titre, lien, fam: famille(origine), vue, partie, butin, points: pointsAVerifier(origine, suppose), premiere: (ANN.premieres && ANN.premieres[lien]) || '', publiee: (ANN.publiees && ANN.publiees[lien]) || '' });
           // une librairie n'est pas une annonce de particulier : sa cote suit sa propre règle
-          { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
+          { const z = toutes[toutes.length - 1]; const tbe = ed.etats.tres_bon && ed.etats.tres_bon.publie; z.aberrant = z.fam !== 'librairie' && !!tbe && prix >= SEUIL_ABERRANT * tbe; z.rech = norm(`${ed.titre} ${ed.serie} ${ed.version} ${titre}`); const f = fraicheurDe(z); z.ageJ = f.jours; z.ageEstime = f.estime; z.nouveau = f.jours != null && !f.estime && f.jours <= 2; }
         }));
       });
       TOUTES_RC = toutes.filter((a) => !a.aberrant); TOUTES_RC.nbAberrantes = toutes.length - TOUTES_RC.length; redessinerCapt();
@@ -1330,11 +1346,14 @@
         periode = o.per || 'tout'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === periode)));
         limite = o.lim || 60; defilementEnAttente = o.y;
       }
+      cacheRc = { cle, toutes };
+      }
+      const toutes = cacheRc.toutes;
       // Recherche tolérante : chaque mot doit se trouver dans le titre, la série ou l'édition (sans accents ni majuscules),
       // ou à une lettre près pour les mots de 4 lettres et plus (« sorcir » trouve « sorcier »)
       const mots = norm(rechercheRc ? rechercheRc.value : '').split(/\s+/).filter(Boolean);
-      const proche = (mot, texte) => texte.includes(mot) || (mot.length >= 4 && texte.split(/[^a-z0-9]+/).some((x) => distance(mot, x) <= 1 && Math.abs(x.length - mot.length) <= 1));
-      const vues = toutes.filter((a) => !/^Lot de /.test(a.titre) && (!mots.length || mots.every((m) => proche(m, norm(`${a.ed.titre} ${a.ed.serie} ${a.ed.version} ${a.titre}`)))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie) && !(aberrRc && aberrRc.checked && a.aberrant)
+      const proche = (mot, a) => a.rech.includes(mot) || (mot.length >= 4 && (a.rechMots || (a.rechMots = a.rech.split(/[^a-z0-9]+/))).some((x) => Math.abs(x.length - mot.length) <= 1 && distance(mot, x) <= 1));
+      const vues = toutes.filter((a) => !/^Lot de /.test(a.titre) && (!mots.length || mots.every((m) => proche(m, a))) && (source.value === 'tout' || a.fam === source.value) && (verdict.value === 'tout' || a.v === verdict.value || (verdict.value === 'pepite' && a.v === 'super')) && (!trouverRc.checked || a.trouver) && (!sansRc || !sansRc.checked || !a.points.length) && (!verifRc || !verifRc.checked || a.points.length > 0) && dansPeriode(a) && !(enligne.checked && a.partie) && !(aberrRc && aberrRc.checked && a.aberrant)
         && (!pepRc || !pepRc.checked || ((a.v === 'pepite' || a.v === 'super') && !(a.fam === 'librairie' && a.cle === 'convenable') && (!a.partie || plusVueRecente(a.vue, ANN.date_ebay)))) && (!bonRc || !bonRc.checked || ['dessous', 'pepite', 'super'].includes(a.v))
         && (!serieRc || !serieRc.value || a.ed.serie === serieRc.value) && (!editionRc || !editionRc.value || a.ed.version === editionRc.value)
         && (!editeurRc || !editeurRc.value || (INFO_ED[a.ed.id] || {}).editeur === editeurRc.value) && (!etatfRc || !etatfRc.value || a.cle === etatfRc.value)
@@ -1344,6 +1363,7 @@
       const dansPlus = [source.value !== 'tout', verdict.value !== 'tout', serieRc && serieRc.value, editionRc && editionRc.value, editeurRc && editeurRc.value, etatfRc && etatfRc.value, pminRc && pminRc.value !== '', pmaxRc && pmaxRc.value !== ''].filter(Boolean).length;
       const actifs = dansPlus + [aberrRc && aberrRc.checked, verifRc && verifRc.checked, periode !== 'tout', trouverRc.checked, pepRc && pepRc.checked, bonRc && bonRc.checked, sansRc && sansRc.checked].filter(Boolean).length;
       if (nbPlus) nbPlus.textContent = actifs ? `(${actifs} actif${actifs > 1 ? 's' : ''})` : '';
+      const nbSel = $('#rc-nb-sel'); if (nbSel) nbSel.textContent = `· ${vues.length.toLocaleString('fr-FR')} annonce${vues.length > 1 ? 's' : ''}`;
       if (effacerRc) effacerRc.hidden = !(dansPlus || (aberrRc && aberrRc.checked) || (verifRc && verifRc.checked) || periode !== 'tout' || trouverRc.checked || (pepRc && pepRc.checked) || (bonRc && bonRc.checked) || (sansRc && sansRc.checked));
       const nbAbs = toutes.filter((a) => a.aberrant).length;
       const lbl = $('#rc-aberr-nb'); if (lbl) lbl.textContent = nbAbs ? `(${nbAbs})` : '';
@@ -1376,8 +1396,9 @@
         </article>`;
       };
       RADAR.clear(); toutes.forEach((a) => { const k = cleRadar(a); if (k) RADAR.set(k, a); });
-      const page = vues.slice(0, limite);
-      liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carteGrille).join('') + '</div>' : '<div class="rc-liste">' + page.map(carteListe).join('') + '</div>') + (vues.length > limite ? '<p><button type="button" class="bouton bouton-clair" id="rc-plus">Afficher plus</button></p>' : '');
+      const page = vues.slice(0, limite), carte = modeVue === 'grille' ? carteGrille : carteListe;
+      dernieresVues = { vues, carte };
+      liste.innerHTML = (modeVue === 'grille' ? '<div class="an-grille">' + page.map(carte).join('') + '</div>' : '<div class="rc-liste">' + page.map(carte).join('') + '</div>') + (vues.length > limite ? `<p><button type="button" class="bouton bouton-clair" id="rc-plus">${libelleSuite(page.length, vues.length)}</button></p>` : '');
       appliquerDefilement();
     };
     liste.addEventListener('click', (e) => {
@@ -1385,7 +1406,7 @@
       if (rd) { ouvrirRadar(RADAR.get(rd.dataset.radar)); return; }
       const corr = e.target.closest && e.target.closest('.corr-bouton');
       if (corr) { const d = corr.closest('article').querySelector(':scope > .corr-lite'); if (d) { d.open = !d.open; corr.setAttribute('aria-expanded', String(d.open)); } return; }
-      if (e.target.id === 'rc-plus') { limite += 60; dessinerRecues(); }
+      if (e.target.id === 'rc-plus') ajouterPage();
     });
     source.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     enligne.addEventListener('change', () => { limite = 60; dessinerRecues(); });
@@ -1394,7 +1415,7 @@
     trouverRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     if (sansRc) sansRc.addEventListener('change', () => { limite = 60; dessinerRecues(); });
     [pepRc, bonRc, serieRc, editionRc, editeurRc, etatfRc, aberrRc].forEach((el) => { if (el) el.addEventListener('change', () => { limite = 60; dessinerRecues(); }); });
-    [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', () => { limite = 60; dessinerRecues(); }); });
+    [pminRc, pmaxRc].forEach((el) => { if (el) el.addEventListener('input', planifierRc); });
     const razFiltres = () => {
       [trouverRc, pepRc, bonRc, sansRc, verifRc].forEach((el) => { if (el) el.checked = false; });
       if (aberrRc) aberrRc.checked = false;
@@ -1738,5 +1759,6 @@
     $('#rv-envoyer').addEventListener('click', envoyer);
     afficher();
     dessinerPepites();                                     // les annonces peuvent arriver avant les éditions : on redessine les pépites quand elles sont là
+    { const rc = document.getElementById('pane-recues'); if (ANN && rc && !rc.hidden) dessinerRecues(); }          // idem pour l'onglet Annonces reçues, s'il est ouvert
   }).catch(() => { $('#rv-liste').innerHTML = '<p class="erreur">Les données n\'ont pas pu être chargées.</p>'; });
 })();
