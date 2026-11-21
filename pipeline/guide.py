@@ -771,8 +771,10 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         """Piste B : affiche d'aventure. Illustration plus serrée sous un voile violet, phrase d'affiche en haut, « HÉROS » très grand en bas, générique."""
         c.drawImage(couverture_v1(art_mm=226, global_=((26, 15, 46), 0.35), voiles=[(99, (11, 7, 20), 0.95, False)]), 0, 0, L_PAGE, H_PAGE)
         c.setFillColor(HexColor("#f4ecd8"))
-        c.setFont(f_titre, 17)
-        c.drawCentredString(L_PAGE / 2, 800, "Chaque livre a son prix. Chaque prix a sa zone.")
+        phrase = "Le guide de ceux qui collectionnent les livres dont vous êtes le héros."
+        taille_phrase = min(17.0, 17.0 * 500 / pdfmetrics.stringWidth(phrase, f_titre, 17))          # tient dans la largeur de la page
+        c.setFont(f_titre, taille_phrase)
+        c.drawCentredString(L_PAGE / 2, 800, phrase)
         c.setFillColor(HexColor("#f4ecd8"))
         lettres(c, L_PAGE / 2, 262, "La Cote du", f_gras, 18, 9, centre=True)
         mot, taille = "HÉROS", 118.0
