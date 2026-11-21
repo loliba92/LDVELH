@@ -40,9 +40,17 @@ window.Relais = (function () {
   function aimerLien(adresse, aime) { return appeler('aimer_lien', { adresse: adresse, aime: aime }); }
   function mesLikes() { return appeler('mes_likes', {}); }
   // Butin (bonnes affaires seulement, niveaux 2 et 3) ou toutes les annonces (niveau 3 seul) : lus par le service technique. Résultat : les annonces, ou null.
+  var derniereRaison = '';          // pourquoi la dernière lecture a échoué (affiché à côté de « Réessayer »)
   function lireAnnonces(toutes) {
-    return pret.then(function () { return actif() ? appeler(toutes ? 'annonces_lire' : 'butin_lire', {}).then(function (r) { return r && r.ok ? r.annonces : null; }) : null; });
+    return pret.then(function () {
+      if (!actif()) return null;
+      return appeler(toutes ? 'annonces_lire' : 'butin_lire', {}).then(function (r) {
+        derniereRaison = r && r.ok ? '' : ((r && r.erreur) || 'réponse illisible');
+        return r && r.ok ? r.annonces : null;
+      }, function (e) { derniereRaison = 'pas de réponse du relais'; throw e; });
+    });
   }
+  function derniereErreur() { return derniereRaison; }
 
   // Butin avec affichage immédiat : la dernière réponse gardée sur l'appareil (12 h au plus, niveaux 2 et 3 seulement) est donnée tout de suite à surCache,
   // puis la réponse fraîche est renvoyée (et gardée). Effacée à la déconnexion et si la personne n'est plus de niveau 2 ou 3.
@@ -58,5 +66,5 @@ window.Relais = (function () {
     });
   }
 
-  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireLikes: lireLikes, aimerLien: aimerLien, mesLikes: mesLikes, lireAnnonces: lireAnnonces, lireButin: lireButin, oublierButin: oublierButin, pret: pret };
+  return { preuve: preuve, actif: actif, configure: configure, appeler: appeler, envoyerLot: envoyerLot, lireNotes: lireNotes, lireLikes: lireLikes, aimerLien: aimerLien, mesLikes: mesLikes, lireAnnonces: lireAnnonces, derniereErreur: derniereErreur, lireButin: lireButin, oublierButin: oublierButin, pret: pret };
 })();
