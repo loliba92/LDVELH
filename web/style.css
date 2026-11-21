@@ -2823,6 +2823,7 @@ dialog { border-top: 1px solid var(--line-strong); border-radius: var(--r-carte)
 .rc-plus summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; gap: 6px; color: var(--gold); font: 700 var(--t-base) var(--f-ui); }
 .rc-plus .pp-outils { margin-top: 8px; }
 .rc-nb { color: var(--text); }
+.rc-nb-sel { color: var(--muted, var(--text)); font-weight: 400; }
 .rc-prix-champ { width: 5.5em; min-height: 40px; }
 /* Annonces : température */
 .an-temp { display: inline-block; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 4px; font: 700 var(--t-xs)/1.6 var(--f-ui); letter-spacing: .03em; white-space: nowrap; color: var(--muted); flex: none; }
