@@ -567,11 +567,11 @@ class TableauNiveaux(Flowable):
         self.lignes, self.st, self.pol, self.jauges = lignes, st, polices, jauges
 
     def wrap(self, *_):
-        return L_CADRE, len(self.lignes) * 7.5 * mm + 2 * mm
+        return L_CADRE, len(self.lignes) * 6.7 * mm + 2 * mm
 
     def draw(self):
         c, st = self.canv, self.st
-        y = len(self.lignes) * 7.5 * mm
+        y = len(self.lignes) * 6.7 * mm
         for k, (mot, phrase, *fourchette) in enumerate(self.lignes, 1):
             if self.jauges:
                 jauge(c, 0, y - 1.2 * mm, k, st)
@@ -584,7 +584,7 @@ class TableauNiveaux(Flowable):
                 c.drawString(52 * mm, y - 4 * mm, fourchette[0])
             c.setFont(self.pol[2], 10)
             c.drawString(86 * mm if fourchette else 56 * mm, y - 4 * mm, phrase)
-            y -= 7.5 * mm
+            y -= 6.7 * mm
 
 
 def legende(styles, st=None, polices=None, exemple=None):
@@ -924,7 +924,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
             return None
         return ga.quadrant(ga.nb_annonces(donnees_zones["offre"].get(v["isbn13"])), c_, med_o, med_c)
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
-        PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
+        ] + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("La feuille d'aventure", styles["h1m"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 1 * mm)] + legende(styles, st, pol, exemple) + (page_strategie(styles, {"filet": HexColor(st["filet"])}) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
     for k, (editeur, versions_ed) in enumerate(groupes):
         nom_versions = [ver for ver, _ in versions_ed]
@@ -1026,7 +1026,7 @@ def page_zones(styles, st, cx, exemples):
                       colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
         ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
         h.append(ligne)
-    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. La page suivante propose des façons de s'en servir.")] + page_strategie(styles, cx)
+    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. Plus loin, « La stratégie du collectionneur » propose des façons de s'en servir.")]
 
 
 def page_strategie(styles, cx):

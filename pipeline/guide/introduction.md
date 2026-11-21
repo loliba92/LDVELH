@@ -22,7 +22,7 @@ Trois repères l'accompagnent :
 - **le niveau de prix**, une jauge à cinq crans et un mot, de « pas cher » à « très cher » : plus la jauge est pleine, plus l'exemplaire est cher ;
 - **la zone**, de 1 à 4 : l'endroit où se situe le livre sur le nuage de points du guide, selon son nombre d'annonces et son prix. La page « La méthode » explique comment la lire.
 
-Ces repères sont ceux du {date}. Lisez-les comme une indication, pas comme un verdict. La légende redonne le sens de chaque mot.
+Ces repères sont ceux du {date}. Lisez-les comme une indication, pas comme un verdict. La feuille d'aventure redonne le sens de chaque mot.
 
 Bonne lecture, et bonne chasse. **lacoteduheros.fr**
 
