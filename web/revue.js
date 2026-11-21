@@ -1429,7 +1429,7 @@
     if (effacerRc) effacerRc.addEventListener('click', () => { razFiltres(); dessinerRecues(); });
     // Préréglages : chaque bouton remet tout à zéro puis règle les filtres d'un usage
     const PRESETS = {
-      chasse: ['pépites et annonces moins chères que le site, les meilleures affaires d\'abord.', () => { bonRc.checked = true; triRc.value = 'ecart'; }],
+      chasse: ['pépites et annonces moins chères que le site, les plus récentes d\'abord.', () => { bonRc.checked = true; triRc.value = 'recent'; }],
       veille: ['annonces arrivées aujourd\'hui, les plus récentes d\'abord.', () => { periode = 'auj'; boutonsQuand.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.quand === 'auj'))); triRc.value = 'recent'; }],
     };
     const txtPreset = $('#rc-preset-txt');
