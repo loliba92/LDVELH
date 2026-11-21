@@ -126,14 +126,14 @@ class TestGuide(unittest.TestCase):
         import subprocess
         if not shutil.which("pdftotext"):
             self.skipTest("pdftotext absent")
-        for variante in ("or", "creme"):
-            g.TITRE_COUVERTURE = variante
-            sortie = self.web / f"c-{variante}.pdf"
+        for style in ("a", "b", "c"):          # les trois mises en page de couverture portent titre, auteur, site et date
+            g.COUVERTURE_STYLE = style
+            sortie = self.web / f"c-{style}.pdf"
             g.construire(self.versions, sortie, "2026-11-19", web=self.web, genere_le="2026-11-19")
-            texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout
-            for attendu in ("LA COTE", "DU HÉROS", "GUIDE DE RÉFÉRENCE", "Édition du 19 novembre 2026"):
-                self.assertIn(attendu, texte)
-        g.TITRE_COUVERTURE = "or"
+            texte = subprocess.run(["pdftotext", "-f", "1", "-l", "1", str(sortie), "-"], capture_output=True, text=True).stdout.upper()
+            for attendu in ("COTE", "HÉROS", "OLIVIER BERTRAND", "LACOTEDUHEROS.FR", "19 NOVEMBRE 2026"):
+                self.assertIn(attendu, texte, f"style {style}")
+        g.COUVERTURE_STYLE = "b"
 
 
 class TestRadar(unittest.TestCase):
@@ -187,7 +187,8 @@ class TestRadar(unittest.TestCase):
         self.assertGreater(len(textes), 20)
         graduation = lambda t: bool(re.fullmatch(r"\d+(\u00a0€)?", t))          # repères des axes : « 10 » annonces ou « 10 € »
         for t in textes:          # le reste du chapitre reste en mots
-            self.assertTrue("médiane" in t or graduation(t) or not any(ch.isdigit() for ch in t), t)
+            sans_zone = re.sub(r"[Zz]one [1-4]", "zone", t)          # le numéro d'une zone n'est pas un chiffre de marché
+            self.assertTrue("médiane" in t or graduation(t) or not any(ch.isdigit() for ch in sans_zone), t)
         self.assertEqual(len([t for t in textes if "médiane de l'offre" in t and "médiane des prix" in t]), 1)
         self.assertTrue(any(graduation(t) and t.endswith("€") for t in textes), "graduations de prix")
         self.assertTrue(any(graduation(t) and not t.endswith("€") for t in textes), "graduations d'annonces")
@@ -212,7 +213,7 @@ class TestRadar(unittest.TestCase):
         profs = ga.profils(self.v, self.offre, g.editeur_de)
         pts = ga.points_editions(self.v, self.offre)
         for _, phrase in ga.verdicts_editeur([p for p in profs if p["editeur"] == "Gallimard"], pts):
-            self.assertFalse(any(ch.isdigit() for ch in phrase), phrase)
+            self.assertFalse(any(ch.isdigit() for ch in re.sub(r"[Zz]one [1-4]", "zone", phrase)), phrase)
         tendues, faciles = ga.series_a_surveiller(profs, pts)
         for e, s, mot in tendues + faciles:
             self.assertIn("à trouver", mot)
@@ -236,7 +237,7 @@ class TestRadar(unittest.TestCase):
             self.skipTest("pdftotext absent")
         sortie = Path(tempfile.mkdtemp()) / "e.pdf"
         g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
-        texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
+        texte = subprocess.run(["pdftotext", "-f", "2", str(sortie), "-"], capture_output=True, text=True).stdout          # hors couverture : ses lettres espacées sortent une à une du texte
         self.assertIsNone(re.search(r"\b(C|BE|TBE)\b", texte), "abréviation d'état trouvée")
         for mot in ("convenable", "bon état", "très bon état"):
             self.assertNotIn(mot, texte.lower())
@@ -273,7 +274,7 @@ class TestRadar(unittest.TestCase):
         self.assertGreaterEqual(pages["Série F"].count(pages["Série F"][-1]), 6)          # la dernière page garde au moins deux rangées
 
 
-    def test_une_page_explique_le_nuage_de_points_avant_le_sommaire(self):
+    def test_une_page_de_methode_explique_le_nuage_et_les_zones_avant_le_sommaire(self):
         import re
         import shutil
         import subprocess
@@ -282,10 +283,31 @@ class TestRadar(unittest.TestCase):
         sortie = Path(tempfile.mkdtemp()) / "n.pdf"
         g.construire(self.v, sortie, "2026-11-19", web=Path(tempfile.mkdtemp()), genere_le="2026-11-19", donnees={"offre": self.offre})
         texte = subprocess.run(["pdftotext", str(sortie), "-"], capture_output=True, text=True).stdout
-        self.assertLess(texte.index("Lire le nuage de points"), texte.index("Sommaire"))
+        self.assertLess(texte.index("La méthode : le nuage et ses quatre zones"), texte.index("Sommaire"))
         plat = texte.replace("\n", " ")
-        self.assertRegex(plat, r"médiane de l'offre\), et la ligne horizontale, à \d+(,\d{2})? €")
-        self.assertIn("Les quatre zones", plat)
+        self.assertRegex(plat, r"\d+(,\d)? annonces par édition \(médiane de l'offre\)")
+        self.assertRegex(plat, r"\d+(,\d{2})? € \(médiane des prix\)")
+        for n in "1234":
+            self.assertIn(f"Zone {n}", plat)
+        self.assertIn("Chaque livre du guide porte sa zone", plat)
+        for surnom in ("La rareté : les livres rares", "Cher et liquide", "Un marché calme", "Le courant"):          # une page raconte chaque zone
+            self.assertIn(surnom, plat)
+        self.assertGreaterEqual(plat.count("Quelques exemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
+        self.assertIn("Les quatre zones, une à une", plat)
+        self.assertLess(plat.index("La stratégie du collectionneur"), plat.index("Sommaire"))          # le petit article de stratégie suit les zones
+        for titre in ("Finir une édition", "Finir une série", "Chasser les raretés", "Si vous avez des doubles"):
+            self.assertIn(titre, plat)
+
+    def test_chaque_livre_porte_sa_zone_de_1_a_4_ou_aucune(self):
+        pts = ga.points_editions(self.v, self.offre)
+        med_o, med_c = 0, 0
+        import statistics
+        med_o, med_c = statistics.median(n for n, _ in pts), statistics.median(p for _, p in pts)
+        zones = {ga.quadrant(ga.nb_annonces(self.offre.get(v["isbn13"])), ga.cote(v), med_o, med_c) for v in self.v if v.get("isbn13") and ga.cote(v) > 0}
+        self.assertTrue(zones <= {0, 1, 2, 3} and len(zones) >= 2)
+        f = g.Fiche(self.v[0], g.STYLES["parchemin"], ("Helvetica",) * 4, self.web if hasattr(self, "web") else Path("."), self.offre, "jauge", 3)
+        self.assertIn("Zone 2", f.libelles())          # quadrant 3 : zone 2
+        self.assertNotIn("Zone", " ".join(g.Fiche(self.v[0], g.STYLES["parchemin"], ("Helvetica",) * 4, Path("."), self.offre, "jauge").libelles()))
 
 
 if __name__ == "__main__":

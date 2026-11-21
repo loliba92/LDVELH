@@ -10,6 +10,7 @@ import argparse
 import io
 import json
 import re
+import statistics
 import sys
 import tempfile
 import time
@@ -35,7 +36,7 @@ import guide_analyse as ga
 STYLE_PAR_DEFAUT = "parchemin"          # direction de style : "nuit" (sombre et or) ou "parchemin" (fond crème, pour l'impression)
 SOUS_TITRE_PAR_DEFAUT = "clair"      # sous-titre de la couverture « huile » : "clair" ou "bandeau" (sans effet sur la couverture V1)
 COUVERTURE_PAR_DEFAUT = "v1"         # illustration de couverture : "v1" (héros et dragon) ou "huile" (ancienne couverture)
-TITRE_COUVERTURE = "or"              # titre de la couverture V1 : "or" (dégradé doré) ou "creme" (crème et contour)
+COUVERTURE_STYLE = "b"              # mise en page de la couverture V1 : "a" (revue de collection), "b" (affiche d'aventure) ou "c" (ouvrage de référence sobre)
 # -------------------------------------------------------------------------------------
 
 RACINE = Path(__file__).resolve().parent.parent
@@ -48,7 +49,7 @@ LIEN_SITE = "https://lacoteduheros.fr"
 MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
 LARGEUR_JAQUETTE_PX = 230           # jaquette « small » réduite : nette à 28 mm (environ 210 points par pouce)
 COLONNES = 5
-LARGEUR_JAQUETTE = 26 * mm          # largeur de la jaquette dans la grille (5 colonnes)
+LARGEUR_JAQUETTE = 24 * mm          # largeur de la jaquette dans la grille (5 colonnes)
 MARGE_X, HAUT, BAS = 14 * mm, 21 * mm, 19 * mm
 L_PAGE, H_PAGE = A4
 L_CADRE = L_PAGE - 2 * MARGE_X
@@ -204,9 +205,20 @@ def visuel_ouverture(style, indice, largeur_px=900):
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
-def couverture_v1(largeur_px=1240, art_mm=168, bas_coupe_px=210):
+def _voile(img, px_mm, hauteur_mm, couleur, alpha, en_haut=False):
+    """Voile dégradé : transparent côté image, `alpha` au bord de la page."""
+    from PIL import Image as _I
+    degrade = _I.linear_gradient("L")          # noir en haut, blanc en bas
+    if en_haut:
+        degrade = degrade.transpose(_I.FLIP_TOP_BOTTOM)
+    masque = degrade.resize((img.width, round(hauteur_mm * px_mm))).point(lambda a: int((a / 255) ** 1.25 * 255 * alpha))
+    img.paste(_I.new("RGB", masque.size, couleur), (0, 0 if en_haut else img.height - masque.height), masque)
+
+
+def couverture_v1(largeur_px=1240, art_mm=210, bas_coupe_px=210, voiles=(), global_=None, decalage_mm=0):
     """Toile de la couverture V1 (A4 entière) : l'illustration est agrandie (rééchantillonnage Lanczos, accentuation légère), son bas (roche) est recoupé,
-    et la toile est prolongée vers le haut et sur les côtés par un fond flou tiré de l'illustration elle-même : un vrai espace de titre dans le ciel violet."""
+    et la toile est prolongée vers le haut par un fond flou tiré de l'illustration elle-même. `voiles` : [(hauteur en mm, couleur, opacité, en haut ?)] ;
+    `global_` : (couleur, opacité) sur toute la page ; `decalage_mm` : décalage vertical de l'illustration (positif vers le bas)."""
     from PIL import ImageFilter
     px_mm = largeur_px / 210
     haut_px = round(297 * px_mm)
@@ -216,20 +228,32 @@ def couverture_v1(largeur_px=1240, art_mm=168, bas_coupe_px=210):
     art = art.resize((round(art.width * f), round(art.height * f)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.2, percent=35, threshold=2))
     fond = art.resize((largeur_px, haut_px), Image.LANCZOS).filter(ImageFilter.GaussianBlur(55))
     fond = ImageEnhance.Brightness(fond).enhance(0.7)
-    x, y = (largeur_px - art.width) // 2, haut_px - art.height
+    x, y = (largeur_px - art.width) // 2, haut_px - art.height + round(decalage_mm * px_mm)
     masque = Image.new("L", art.size, 255)
     bord = 38
     pixels = masque.load()
-    for i in range(bord):
+    for i in range(bord):          # fondu seulement sur le bord haut
         v = int(255 * i / bord)
-        for j in range(art.height):
-            pixels[i, j] = min(pixels[i, j], v)
-            pixels[art.width - 1 - i, j] = min(pixels[art.width - 1 - i, j], v)
         for k in range(art.width):
             pixels[k, i] = min(pixels[k, i], v)
     fond.paste(art, (x, y), masque)
+    if global_:
+        fond.paste(Image.new("RGB", fond.size, global_[0]), (0, 0), Image.new("L", fond.size, int(255 * global_[1])))
+    for hauteur, couleur, alpha, en_haut in voiles:
+        _voile(fond, px_mm, hauteur, couleur, alpha, en_haut)
     tampon = io.BytesIO()
     fond.save(tampon, "JPEG", quality=84, optimize=True, progressive=True)
+    return ImageReader(io.BytesIO(tampon.getvalue()))
+
+
+def fenetre_couverture(largeur_px=1500, ratio=515 / 400, haut_px=150):
+    """Recadrage paysage de l'illustration (soleil, épée, dragon, torse du héros) pour la couverture en fenêtre."""
+    with Image.open(COUVERTURE_V1) as src:
+        h = round(src.width / ratio)
+        coupe = src.convert("RGB").crop((0, haut_px, src.width, haut_px + h))
+    coupe = coupe.resize((largeur_px, round(largeur_px / ratio)), Image.LANCZOS)
+    tampon = io.BytesIO()
+    coupe.save(tampon, "JPEG", quality=86, optimize=True)
     return ImageReader(io.BytesIO(tampon.getvalue()))
 
 
@@ -373,11 +397,22 @@ def jauge(c, x, y, niveau, st):
         c.rect(x + k * PAS_CRAN, y - 2.4 * mm, CRAN, 2.4 * mm, fill=1, stroke=1)
 
 
+def glyphe_zone(c, x, y, cote, zone, st):
+    """Mini nuage : un carré à quatre cases (nombre d'annonces de gauche à droite, prix de bas en haut) dont la case de la zone est en or."""
+    moitie = cote / 2
+    for q in range(4):
+        cx_, cy_ = x + (moitie if q in (1, 3) else 0), y + (moitie if q in (2, 3) else 0)
+        c.setFillColor(HexColor(st["or"]) if q == zone else HexColor(st["grille"]))
+        c.setStrokeColor(HexColor(st["filet"]))
+        c.setLineWidth(0.3)
+        c.rect(cx_, cy_, moitie, moitie, fill=1, stroke=1)
+
+
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
-    def __init__(self, v, st, polices, web, offre=None, reperes="jauge"):
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None):
         super().__init__()
-        self.v, self.st, self.pol, self.web, self.reperes = v, st, polices, web, reperes
+        self.v, self.st, self.pol, self.web, self.reperes, self.zone = v, st, polices, web, reperes, zone          # zone : 0 à 3 (voir guide_analyse.quadrant), None sans repère
         self.largeur = L_CADRE / COLONNES
         self.iw = LARGEUR_JAQUETTE
         jpeg = jaquette_jpeg(web / v["couverture"]) if v.get("couverture") else None
@@ -398,10 +433,10 @@ class Fiche(Flowable):
 
     def libelles(self):
         """Tous les textes dessinés dans la cellule (pour les tests : aucun montant, aucun état, aucun nombre décimal)."""
-        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"]
+        return [self.v.get("titre") or "", self.meta, LIBELLE_OFFRE, self.offre, LIBELLE_PRIX, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère"] + ([f"Zone {ga.NUM_ZONE[self.zone]}"] if self.zone is not None else [])
 
     def wrap(self, *_):
-        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 2.5 * mm
+        self.h = self.ih + 3 * mm + self.th + 3.8 * mm + 7 * mm + 3.6 * mm + 8.4 * mm + 5.2 * mm + 2.5 * mm
         return self.largeur, self.h
 
     def draw(self):
@@ -442,13 +477,22 @@ class Fiche(Flowable):
         lettres(c, self.largeur / 2, y, LIBELLE_PRIX, f_texte, 5.4, 0.5, centre=True)
         y -= 1.4 * mm
         jauge(c, (self.largeur - LARGEUR_JAUGE) / 2, y, self.niveau, st)
-        self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm}          # positions des repères (légende annotée)
+        self.reperes_y = {"titre": self.h - self.ih - 3 * mm - self.th / 2, "offre": y + 4.4 * mm, "prix": y - 1.2 * mm, "zone": y - 10 * mm}          # positions des repères (légende annotée)
         c.setFillColor(HexColor(st["texte"]))
         c.setFont(f_gras, 7.2)
         c.drawCentredString(self.largeur / 2, y - 6.4 * mm, MOTS_PRIX[self.niveau - 1] if self.niveau else "sans repère")
+        if self.zone is not None:          # où se situe le livre sur le nuage de points : petit carré à quatre cases, la sienne en or, et son numéro
+            n = ga.NUM_ZONE[self.zone]
+            tw = pdfmetrics.stringWidth(f"Zone {n}", f_gras, 6.6)
+            gx0, gy0 = (self.largeur - (4 * mm + 1.6 * mm + tw)) / 2, y - 6.4 * mm - 5.8 * mm
+            glyphe_zone(c, gx0, gy0, 4 * mm, self.zone, st)
+            c.setFillColor(HexColor(st["titre"]))
+            c.setFont(f_gras, 6.6)
+            c.drawString(gx0 + 5.6 * mm, gy0 + 1.2 * mm, f"Zone {n}")
+            self.reperes_y["zone"] = gy0 + 2 * mm
 
 
-INTRO_TAILLE = 15.6          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
+INTRO_TAILLE = 15.0          # corps de l'introduction (points) : à réduire si le texte dépasse deux pages
 INTRODUCTION = Path(__file__).resolve().parent / "guide" / "introduction.md"
 
 
@@ -509,7 +553,7 @@ class FicheAnnotee(Flowable):
         c.setStrokeColor(HexColor(st["filet"]))
         c.setFillColor(HexColor(st["texte"]))
         c.setLineWidth(0.4)
-        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher).")):
+        for cle, texte in (("titre", "Titre, numéro et version de l'édition."), ("offre", "En vente : combien d'annonces en ligne aujourd'hui."), ("prix", "Prix d'occasion : de 1 cran (pas cher) à 5 crans (très cher)."), ("zone", "Zone : où se situe le livre sur le nuage de points (zones 1 à 4).")):
             y = f.reperes_y[cle]
             c.line(f.largeur - 4 * mm, y, 56 * mm, y)
             c.setFont(self.pol[2], 9.5)
@@ -548,7 +592,7 @@ def legende(styles, st=None, polices=None, exemple=None):
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     haut = []
     if exemple is not None:
-        exemple.offre, exemple.niveau = "courant", 3
+        exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
         haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
     return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
                    P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces. Plus la jauge est pleine, plus il est cher ; l'échelle donne les montants."),
@@ -679,64 +723,126 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.setFillColor(C("texte") if style == "parchemin" else C("or"))
         lettres(c, L_PAGE / 2, 19 * mm, f"La Cote du Héros · {SITE}", f_gras, 8, 1.5, centre=True)
 
-    def titre_v1(c):
-        """Titre en très grandes capitales sur deux lignes, pleine largeur : dégradé doré (ou crème), fin contour sombre, ombre douce ; texte vectoriel."""
-        lignes = ("LA COTE", "DU HÉROS")
-        largeur_utile = L_PAGE - 2 * 12 * mm
-        taille = 100.0
-        taille *= largeur_utile / max(pdfmetrics.stringWidth(l, f_titre_gras, taille) for l in lignes)
-        haut_cap = 0.66 * taille
-        y1 = H_PAGE - 15 * mm - haut_cap
-        y2 = y1 - haut_cap * 1.2
-        def texte(l, y, mode, dx=0, dy=0):
+    def largeur_lettres(texte, police, taille, espace):
+        return pdfmetrics.stringWidth(texte.upper(), police, taille) + espace * len(texte)
+
+    def ombre_texte(c, x, y, texte, police, taille, espace, dy=1.5, alpha=0.5):
+        c.setFillColor(HexColor("#000000"), alpha=alpha)
+        lettres(c, x + dy * 0.6, y - dy, texte, police, taille, espace, centre=True)
+
+    def losange(c, x, y, r=3.2):
+        t = c.beginPath()
+        t.moveTo(x, y + r); t.lineTo(x + r * 0.8, y); t.lineTo(x, y - r); t.lineTo(x - r * 0.8, y); t.close()
+        c.drawPath(t, fill=1, stroke=0)
+
+    def pied_lien(c, texte, x_droite, y, couleur, taille=9):
+        c.setFillColor(HexColor(couleur))
+        c.setFont(f_texte, taille)
+        c.drawRightString(x_droite, y, texte)
+        c.linkURL(LIEN_SITE, (x_droite - pdfmetrics.stringWidth(texte, f_texte, taille), y - 3, x_droite, y + taille), relative=0)
+
+    def couverture_a(c):
+        """Piste A : revue de collection. Illustration plein cadre, voiles sombres haut et bas, titre doré sur une ligne, accroches en bas à gauche."""
+        c.drawImage(couverture_v1(art_mm=210, voiles=[(81, (20, 16, 31), 0.90, True), (128, (20, 16, 31), 0.95, False)]), 0, 0, L_PAGE, H_PAGE)
+        titre, espace = "La Cote du Héros", 2.0
+        taille = 46 * min(1.0, 515 / largeur_lettres(titre, f_titre_gras, 46, espace))
+        ombre_texte(c, L_PAGE / 2, 770, titre, f_titre_gras, taille, espace)
+        c.setFillColor(HexColor("#e8c766"))
+        lettres(c, L_PAGE / 2, 770, titre, f_titre_gras, taille, espace, centre=True)
+        c.setStrokeColor(HexColor("#e8c766"))
+        c.setLineWidth(0.6)
+        c.line(40, 756, L_PAGE - 40, 756)
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 738, "Le guide de référence des livres dont vous êtes le héros", f_texte, 11.5, 1.5, centre=True)
+        accroches = ("Chaque livre, chaque édition, avec sa jaquette", "Rareté, niveau de prix et zone de 1 à 4", "Finir une série, retrouver les livres de son enfance", "Les quatre zones du marché, expliquées")
+        for i, t in enumerate(accroches):
+            y = 190 - 24 * i
+            c.setFillColor(HexColor("#e8c766"))
+            losange(c, 46, y + 4)
+            c.setFillColor(HexColor("#f4ecd8"))
+            c.setFont(f_gras, 12.5)
+            c.drawString(58, y, t)
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_titre, 16)
+        c.drawString(40, 45, "Olivier Bertrand")
+        pied_lien(c, f"{SITE} · Édition du {date_longue(genere_le)}", L_PAGE - 40, 45, "#bfb59a")
+
+    def couverture_b(c):
+        """Piste B : affiche d'aventure. Illustration plus serrée sous un voile violet, phrase d'affiche en haut, « HÉROS » très grand en bas, générique."""
+        c.drawImage(couverture_v1(art_mm=226, global_=((26, 15, 46), 0.35), voiles=[(99, (11, 7, 20), 0.95, False)]), 0, 0, L_PAGE, H_PAGE)
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_titre, 17)
+        c.drawCentredString(L_PAGE / 2, 800, "Chaque livre a son prix. Chaque prix a sa zone.")
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 262, "La Cote du", f_gras, 18, 9, centre=True)
+        mot, taille = "HÉROS", 118.0
+        taille *= min(1.0, 470 / pdfmetrics.stringWidth(mot, f_titre_gras, taille))
+        x = (L_PAGE - pdfmetrics.stringWidth(mot, f_titre_gras, taille)) / 2
+        y, haut = 160, 0.98 * taille          # le dégradé couvre aussi l'accent de « É »
+
+        def texte(mode, dx=0, dy=0):
             t = c.beginText()
             t.setFont(f_titre_gras, taille)
             t.setTextRenderMode(mode)
-            t.setTextOrigin((L_PAGE - pdfmetrics.stringWidth(l, f_titre_gras, taille)) / 2 + dx, y + dy)
-            t.textOut(l)
+            t.setTextOrigin(x + dx, y + dy)
+            t.textOut(mot)
             c.drawText(t)
-        for l, y in zip(lignes, (y1, y2)):
-            for k, a in ((3.2, 0.10), (2.2, 0.14), (1.2, 0.2)):          # ombre portée douce
-                c.saveState()
-                c.setFillColor(HexColor("#0a0418"), alpha=a)
-                texte(l, y, 0, k * 0.5, -k)
-                c.restoreState()
-            c.saveState()
-            if TITRE_COUVERTURE == "or":
-                texte(l, y, 7)          # le texte sert de découpe au dégradé
-                c.linearGradient(0, y + haut_cap, 0, y - 0.02 * taille, (HexColor("#fff0b8"), HexColor("#d9a93e"), HexColor("#8e6416")), (0, 0.45, 1), extend=False)
-            else:
-                c.setFillColor(HexColor("#f2e9d8"))
-                texte(l, y, 0)
-            c.restoreState()
-            c.saveState()
-            c.setStrokeColor(HexColor("#1a0d33"))
-            c.setLineWidth(1.4)
-            texte(l, y, 1)          # fin contour sombre
-            c.restoreState()
-        return y2
+        for k, a in ((6, 0.15), (4, 0.2), (2.5, 0.3)):          # ombre portée
+            c.saveState(); c.setFillColor(HexColor("#000000"), alpha=a); texte(0, 0, -k); c.restoreState()
+        c.saveState()
+        texte(7)          # le texte sert de découpe au dégradé or
+        c.linearGradient(0, y + haut, 0, y, (HexColor("#f7e08a"), HexColor("#b98a2b")), (0, 1), extend=False)
+        c.restoreState()
+        c.saveState(); c.setStrokeColor(HexColor("#2a1a05")); c.setLineWidth(1.0); texte(1); c.restoreState()
+        c.setFillColor(HexColor("#f4ecd8"))
+        c.setFont(f_texte, 12)
+        c.drawCentredString(L_PAGE / 2, 120, "La cote d'occasion de tous les livres dont vous êtes le héros")
+        c.setFillColor(HexColor("#e8c766"))
+        lettres(c, L_PAGE / 2, 95, "Éditions V1, V2… · Jaquettes · Rareté et prix · Zones 1 à 4", f_gras, 9.5, 1.0, centre=True)
+        c.setFillColor(HexColor("#f4ecd8"))
+        lettres(c, L_PAGE / 2, 50, "Un guide d'Olivier Bertrand", f_texte, 10, 3, centre=True)
+        c.setFillColor(HexColor("#bfb59a"))
+        c.setFont(f_texte, 8.5)
+        c.drawCentredString(L_PAGE / 2, 36, f"{SITE} · {date_longue(genere_le)}")
+        c.linkURL(LIEN_SITE, (L_PAGE / 2 - 60, 33, L_PAGE / 2 - 8, 45), relative=0)
+
+    def couverture_c(c):
+        """Piste C : ouvrage de référence. Fond ivoire, illustration en fenêtre, titre foncé, deux lignes d'accroche."""
+        c.setFillColor(HexColor("#f3eee2"))
+        c.rect(0, 0, L_PAGE, H_PAGE, fill=1, stroke=0)
+        c.drawImage(fenetre_couverture(), 40, 380, 515, 400)
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.75)
+        c.rect(46, 386, 503, 388, fill=0, stroke=1)
+        titre = "La Cote du Héros"
+        taille = 46 * min(1.0, 515 / pdfmetrics.stringWidth(titre, f_titre_gras, 46))
+        c.setFillColor(HexColor("#1b1a17"))
+        c.setFont(f_titre_gras, taille)
+        c.drawCentredString(L_PAGE / 2, 320, titre)
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.6)
+        c.line(L_PAGE / 2 - 20, 303, L_PAGE / 2 - 5, 303); c.line(L_PAGE / 2 + 5, 303, L_PAGE / 2 + 20, 303)
+        c.setFillColor(HexColor("#a9842f"))
+        losange(c, L_PAGE / 2, 303, 2.6)
+        c.setFillColor(HexColor("#4a4336"))
+        c.setFont(f_titre, 19)
+        c.drawCentredString(L_PAGE / 2, 262, "Guide de référence des livres-jeux")
+        c.setFillColor(HexColor("#7a705c"))
+        lettres(c, L_PAGE / 2, 240, "Éditions, séries, raretés et niveaux de prix", f_texte, 10.5, 1.5, centre=True)
+        c.setFillColor(HexColor("#4a4336"))
+        c.setFont(f_texte, 11)
+        c.drawCentredString(L_PAGE / 2, 205, "Tous les livres classés par éditeur, édition et série, avec leurs jaquettes")
+        c.drawCentredString(L_PAGE / 2, 189, "Une page de méthode, quatre zones expliquées, la stratégie du collectionneur")
+        c.setStrokeColor(HexColor("#a9842f"))
+        c.setLineWidth(0.5)
+        c.line(L_PAGE / 2 - 30, 112, L_PAGE / 2 + 30, 112)
+        c.setFillColor(HexColor("#1b1a17"))
+        lettres(c, L_PAGE / 2, 90, "Olivier Bertrand", f_gras, 12, 3, centre=True)
+        pied_lien_centre = f"{SITE} · Édition du {date_longue(genere_le)}"
+        pied_lien(c, pied_lien_centre, L_PAGE / 2 + pdfmetrics.stringWidth(pied_lien_centre, f_texte, 9) / 2, 60, "#7a705c")
 
     def couverture_v1_page(c, doc):
-        """Couverture inspirée des couvertures de poche des années 1980 : très grand titre dans le ciel, encadré blanc et adresse du site en bas."""
-        c.drawImage(couverture_v1(), 0, 0, L_PAGE, H_PAGE)
-        y2 = titre_v1(c)
-        c.setStrokeColor(HexColor("#d2a64a"))          # fin filet doré
-        c.setLineWidth(0.8)
-        c.line(L_PAGE / 2 - 32 * mm, y2 - 9 * mm, L_PAGE / 2 + 32 * mm, y2 - 9 * mm)
-        c.setFillColor(HexColor("#f2e9d8"))
-        lettres(c, L_PAGE / 2, y2 - 19 * mm, "Guide de référence", f_gras, 15, 4, centre=True)
-        c.setFont(f_gras, 10)
-        c.drawCentredString(L_PAGE / 2, y2 - 27 * mm, f"Édition du {date_longue(genere_le)}")
-        c.setFillColor(HexColor("#ffffff"))          # encadré blanc : « Guide » et le sceau du site
-        c.rect(10 * mm, 10 * mm, 50 * mm, 22 * mm, fill=1, stroke=0)
-        c.setFillColor(HexColor("#0c0a08"))
-        c.setFont(f_titre_gras, 24)
-        c.drawString(14 * mm, 16.5 * mm, "Guide")
-        c.drawImage(embleme((140, 106, 28), 1.0, 256), 41 * mm, 13 * mm, 15 * mm, 15 * mm, mask="auto")
-        c.setFillColor(HexColor("#ffffff"))
-        c.setFont(f_gras, 9)
-        c.drawRightString(L_PAGE - 10 * mm, 12 * mm, SITE)
-        c.linkURL(LIEN_SITE, (L_PAGE - 50 * mm, 9 * mm, L_PAGE - 10 * mm, 17 * mm), relative=0)
+        {"a": couverture_a, "b": couverture_b, "c": couverture_c}[COUVERTURE_STYLE](c)
 
     def couverture(c, doc):
         if visuel == "v1":
@@ -808,6 +914,15 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     texte_intro = introduction_md if introduction_md is not None else INTRODUCTION.read_text(encoding="utf-8")
     candidats = [v for v in versions if v.get("couverture") and (web / v["couverture"]).exists() and ga.cote(v)]
     exemple = Fiche(candidats[0] if candidats else versions[0], st, pol, web, {}, reperes) if versions else None
+    donnees_zones = donnees if isinstance(donnees, dict) else (ga.charger() if donnees is None else None)
+    pts_zones = ga.points_editions(versions, donnees_zones["offre"]) if donnees_zones else []
+    med_o, med_c = (statistics.median(n for n, _ in pts_zones), statistics.median(p for _, p in pts_zones)) if pts_zones else (None, None)          # médianes de tout le guide : les deux pointillés du nuage
+
+    def zone_de(v):
+        c_ = ga.cote(v)
+        if med_o is None or not v.get("isbn13") or c_ <= 0:
+            return None
+        return ga.quadrant(ga.nb_annonces(donnees_zones["offre"].get(v["isbn13"])), c_, med_o, med_c)
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
         PageBreak(), Paragraph("Légende", styles["h2"])] + legende(styles, st, pol, exemple) + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
@@ -825,7 +940,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         for j, (version, series_v) in enumerate(versions_ed):
             entete = (bandeau if j == 0 else []) + [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for i, (nom, livres) in enumerate(series_v):
-                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v)) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
@@ -853,8 +968,21 @@ def fr(x, decimales=None):
     return f"{x:g}".replace(".", ",") if decimales is None else f"{x:.{decimales}f}".replace(".", ",")
 
 
+class GlypheZone(Flowable):
+    """Le mini nuage à quatre cases d'une zone, pour la page de méthode."""
+    def __init__(self, zone, st):
+        super().__init__()
+        self.zone, self.st = zone, st
+
+    def wrap(self, *_):
+        return 7 * mm, 6 * mm
+
+    def draw(self):
+        glyphe_zone(self.canv, 0, 0.4 * mm, 5.2 * mm, self.zone, self.st)
+
+
 def page_nuage(versions, donnees, styles, polices, st):
-    """Une page « Lire le nuage de points » : le radar du guide expliqué (annonces en ligne contre prix), valeurs des deux médianes recalculées à chaque génération."""
+    """Une page de méthode : du nuage de points aux quatre zones, puis à la zone marquée sur chaque livre. Valeurs des médianes recalculées à chaque génération."""
     f_titre, f_titre_gras, f_texte, f_gras = polices
     cx = {"texte": HexColor(st["texte"]), "sourdine": HexColor(st["sourdine"]), "or": HexColor(st["or"]), "filet": HexColor(st["filet"]), "fond": HexColor(st["fond"]), "grille": HexColor(st["grille"])}
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
@@ -862,21 +990,75 @@ def page_nuage(versions, donnees, styles, polices, st):
     if not pts:
         return []
     e = ga.Echelles(pts, 100, 100)
-    prix_ex, annonces_ex = int(round(e.med_c * 2 / 5) * 5), max(1, int(e.med_o / 3))
-    zones = Table([[P(f"<b>{ga.ZONES[z]}</b>"), P(t)] for z, t in ((2, "Peu d'annonces et un prix élevé : les éditions recherchées."), (3, "Beaucoup d'annonces et un prix élevé : un marché actif, mais cher."),
-                                                                      (0, "Peu d'annonces et un prix bas : rares en vente, sans être chères."), (1, "Beaucoup d'annonces et un prix bas : faciles à trouver, et bon marché."))],
-                  colWidths=[58 * mm, L_CADRE - 58 * mm], hAlign="LEFT")
-    zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
-    return [PageBreak(), P("Lire le nuage de points", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-            P("À la fin du guide, le radar du héros place chaque édition sur un nuage de points. Chaque point est une édition ; sa place dit deux choses à la fois : combien d'annonces on en trouve en ce moment, et combien elle coûte."),
-            Spacer(1, 2 * mm), ga.dessiner_radar(pts, (), L_CADRE, 96 * mm, f_texte, f_gras, cx), Spacer(1, 3 * mm),
-            P("Comment se repérer", "h2"),
-            P("<b>De gauche à droite</b> : le nombre d'annonces en ligne, gradué en bas (0, 1, 2, 5, 10, 20, 50 annonces). À gauche, l'édition est difficile à trouver ; à droite, elle abonde."),
-            P("<b>De bas en haut</b> : le prix d'occasion, gradué sur le côté en euros. En bas, l'édition est bon marché ; en haut, elle est chère. Les graduations ne sont pas régulières : chaque repère double à peu près le précédent, pour que les petits prix restent lisibles."),
-            P(f"<b>Les deux pointillés</b> marquent le milieu du marché : la ligne verticale, à {fr(e.med_o)} annonces par édition (médiane de l'offre), et la ligne horizontale, à {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne."),
-            P("Les quatre zones", "h2"), zones,
-            P("Un exemple", "h2"),
-            P(f"Une édition à {annonces_ex} annonce{'s' if annonces_ex > 1 else ''} et à {prix_ex}\u00a0€ se place en haut à gauche : peu d'annonces, et un prix au-dessus de la médiane. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")]
+    sens = {q: ZONES_TEXTE[q][0].split(" : ")[0] for q in ZONES_TEXTE}          # surnom de chaque zone ; le détail est sur les pages suivantes
+    ordre = sorted(ga.NUM_ZONE, key=lambda q: ga.NUM_ZONE[q])          # zone 1 à 4
+    zones = Table([[GlypheZone(q, st), P(f"<b>Zone {ga.NUM_ZONE[q]}</b> · {ga.ZONES[q]}"), P(sens[q])] for q in ordre], colWidths=[9 * mm, 66 * mm, L_CADRE - 75 * mm], hAlign="LEFT")
+    zones.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 0)]))
+    return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+            P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
+            Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 82 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
+            P(f"<b>1. Chaque édition est un point.</b> Sa place dépend de deux mesures : le nombre d'annonces en ligne, de gauche à droite (gradué en bas), et son prix d'occasion, de bas en haut (gradué sur le côté, en euros). Les repères ne sont pas réguliers : chacun double à peu près le précédent, pour garder les petits prix lisibles."),
+            P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par édition (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Une édition sur deux se trouve de chaque côté de chaque ligne : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
+            P("<b>3. Chaque livre du guide porte sa zone.</b> Sous son prix, un petit carré à quatre cases, dont la sienne est en or, et son numéro : « Zone 1 » à « Zone 4 ». D'un coup d'œil, on sait où le livre se situe sur le nuage."),
+            Spacer(1, 1 * mm), zones,
+            P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c))
+
+
+def phrase_exemples(exemples):
+    """« Quelques exemples d'aujourd'hui : … » d'après les livres choisis pour une zone."""
+    morceaux = []
+    for x in exemples:
+        num = f" n°\u00a0{x['numero']}" if x.get("numero") and str(x["numero"]).strip("0") else ""
+        n = x["annonces"]
+        offre = "aucune annonce en ce moment" if n == 0 else f"{n} annonce{'s' if n > 1 else ''} en ligne"
+        morceaux.append(f"« {x['titre']} » ({x['serie']}{num}, {x['version']}), {offre}, autour de {round(x['cote'])}\u00a0€")
+    return ("Quelques exemples d'aujourd'hui : " + " ; ".join(morceaux) + ".") if morceaux else ""
+
+
+def page_zones(styles, st, cx, exemples):
+    """Les quatre zones racontées : ce que le rapport entre le nombre d'annonces et le prix dit d'un livre, avec des exemples du guide. Aucun conseil d'achat ni de vente."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    h = [PageBreak(), P("Les quatre zones, une à une", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+         P("Un livre n'est jamais « cher » ou « bon marché » tout seul : cela dépend du nombre d'exemplaires qui sont à vendre. En croisant le nombre d'annonces et le prix, on obtient une petite histoire sur chaque livre. Sur un marché ordinaire, plus il y a d'offres, plus les prix se tassent ; chaque zone dit si c'est le cas, ou non, et pourquoi. Voici ce que raconte chacune, avec des exemples tirés du guide à la date de sa génération.")]
+    for q in sorted(ZONES_TEXTE, key=lambda q: ga.NUM_ZONE[q]):
+        titre, texte = ZONES_TEXTE[q]
+        ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {titre}", "h2"), P(f"<i>{ga.ZONES[q]}</i>")] + [P(t) for t in texte + (phrase_exemples(exemples.get(q, [])),) if t]]],
+                      colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
+        ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
+        h.append(ligne)
+    return h + [Spacer(1, 3 * mm), P("Ces lectures sont des repères pour comprendre un marché, pas des promesses : une annonce est un prix demandé, pas un prix payé. La page suivante propose des façons de s'en servir.")] + page_strategie(styles, cx)
+
+
+def page_strategie(styles, cx):
+    """Un petit article : comment un collectionneur peut se servir des quatre zones, selon ce qu'il cherche."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    sections = (
+        ("Finir une édition", "Vous voulez toute une édition, la V1 d'une série par exemple. Commencez par le plus simple : les livres de la zone 4 se trouvent sans effort et pour presque rien, la collection avance vite et vous gardez du budget. Gardez la zone 1 en tête dès le départ. Ces livres-là demandent de la patience : on les guette parfois des mois, et le jour où l'annonce arrive, il faut pouvoir payer le prix. Savoir tôt ce qu'il vous manque en zone 1, c'est savoir combien de temps prévoir."),
+        ("Finir une série", "Là, on cherche tous les numéros, quelle que soit l'édition. Cela laisse plus de liberté. Si la V1 d'un numéro est en zone 1 et sa V2 en zone 3, la V2 tient la même place sur l'étagère pour beaucoup moins cher. Regardez la zone de chaque édition avant de choisir laquelle chercher. Et sachez que le dernier numéro manquant est souvent un livre de zone 1 ou 2 : s'il manque encore, c'est justement parce qu'il est difficile à trouver."),
+        ("Retrouver les livres de son enfance", "Pas de liste à remplir, quelques titres qui comptent pour vous. S'ils sont courants, en zone 4, vous avez le luxe du choix : l'état, la jaquette, le vendeur, le prix. Prenez le temps de comparer, rien ne presse. Si l'un de vos titres tombe en zone 1, ce sera plus long, mais vous le saurez dès le début."),
+        ("Chasser les raretés", "Vous aimez la chasse. Votre terrain, c'est la zone 1 : peu d'annonces, des prix élevés. Le bon coup, c'est une annonce de zone 1 affichée en dessous du prix habituel du livre. Elle vient d'un vendeur pressé, ou qui ne connaît pas la valeur de ce qu'il vend. Cela arrive peu et ne dure pas : il faut être là le jour même, et le Butin et la Chasse, sur le site, sont faits pour cela. Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et les frais de port : un prix bas qui cache un autre livre n'est pas une bonne affaire.",
+         "En zone 2, laissez venir. Les annonces sont nombreuses, un prix demandé élevé n'est pas un prix payé : comparez, négociez. En zone 3, rien ne presse non plus, mais c'est là que le collectionneur de série fait des économies : peu d'annonces et pas cher, on prend au passage quand on en croise un."),
+        ("Si vous avez des doubles", "Un double en zone 1 se vend bien, puisqu'on le cherche. En zone 2, le marché est liquide : un livre cher y trouve preneur, surtout s'il est proposé un peu sous le prix des annonces voisines. Regardez-les avant de fixer le vôtre. En zones 3 et 4, il n'y a pas grand-chose à gagner à attendre : l'offre est large, ou la demande est faible. La liste « À vendre » du site est là pour ces doubles."),
+    )
+    h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+         P("On ne collectionne pas tous de la même façon. Certains veulent finir une édition, d'autres une série entière, d'autres retrouver les livres de leur enfance ou courir après les raretés. Les zones ne disent pas quoi faire, elles disent où l'on se trouve : de quoi savoir par où commencer, et ce qu'il vaut mieux attendre. Premier réflexe, quelle que soit votre façon de collectionner : regarder la zone du livre avant de se décider. Voici comment s'en servir.")]
+    for titre, *paragraphes in sections:
+        h += [P(titre, "h2")] + [P(t) for t in paragraphes]
+    return h
+
+
+# Titre et récit de chaque zone (0 peu d'offre bon marché, 1 beaucoup d'offre bon marché, 2 peu d'offre cher, 3 beaucoup d'offre cher)
+ZONES_TEXTE = {
+    2: ("La rareté : les livres rares", ("Ce sont les livres rares. Peu d'exemplaires sont à vendre, et le prix est élevé : les deux vont ensemble. Un livre devient rare pour des raisons simples : il a été peu imprimé, son édition est épuisée depuis longtemps, ou ses propriétaires le gardent précieusement et ne le revendent presque jamais.",
+                                          "Du côté des acheteurs, c'est l'inverse : les collectionneurs qui cherchent ce titre sont plus nombreux que les exemplaires disponibles. Quand une annonce apparaît, plusieurs personnes la guettent, et le vendeur peut demander un prix élevé. Le prix n'invente pas la rareté, il la constate : c'est ce que l'on appelle la rareté d'un livre.")),
+    3: ("Cher et liquide : beaucoup d'annonces, mais cher", ("Beaucoup d'annonces et un prix élevé : c'est une zone chère, et c'est une zone liquide. Liquide, cela veut dire que le marché est actif : il y a du monde, des vendeurs comme des acheteurs, et les livres circulent.",
+                                                              "D'ordinaire, quand les vendeurs sont nombreux, ils se font concurrence et les prix baissent. Si le prix reste haut malgré tout, deux explications sont possibles : la demande est très forte et absorbe l'offre, ou bien certains vendeurs demandent plus que ce que les acheteurs acceptent de payer. Rappelons qu'une annonce est un prix demandé, pas un prix payé.",
+                                                              "Voilà la zone où certains achètent pour revendre plus cher. Comme le marché est liquide, un livre y trouve preneur : proposé un peu en dessous du prix des annonces voisines, il part en général plus vite. En revanche, le prix affiché y est le moins sûr : on compare avant de se fier à une annonce.")),
+    0: ("Un marché calme : peu d'annonces, mais bon marché", ("Peu d'annonces et un prix bas. Ici, il ne faut pas confondre : peu d'exemplaires à vendre ne veut pas dire rare. La rareté suppose que l'on cherche le livre ; or personne ne se bat pour celui-ci. Peu de gens vendent, et peu de gens achètent.",
+                                                              "Ces livres intéressent moins les collectionneurs : des titres moins connus, des séries moins suivies, des éditions que l'on ne cherche pas. Les prix restent bas parce que la demande est faible, pas parce que l'offre est abondante. Le marché y est tranquille, sans tension d'aucun côté.")),
+    1: ("Le courant : beaucoup d'annonces, bon marché", ("Beaucoup d'annonces et un prix bas : ce sont les livres courants. Ils ont été beaucoup imprimés, beaucoup vendus, et beaucoup de gens s'en séparent aujourd'hui : l'offre est large et les vendeurs se font concurrence, ce qui tire les prix vers le bas.",
+                                                         "L'acheteur est dans une position confortable : il choisit l'exemplaire (l'état, la jaquette) et le vendeur, sans se presser. Un livre courant n'est pas un livre sans intérêt : c'est souvent celui que l'on a lu enfant, simplement facile à retrouver.")),
+}
 
 
 def section_radar(versions, donnees, styles, date_cotes, polices, st):
@@ -911,13 +1093,13 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
 
 
 def main(argv=None):
-    global TITRE_COUVERTURE
+    global COUVERTURE_STYLE
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     a.add_argument("--sortie", default="guide-reference.pdf")
     a.add_argument("--series", default="", help="noms de séries séparés par des virgules (essai)")
     a.add_argument("--editeurs", default="", help="noms d'éditeurs séparés par des virgules (essai)")
     a.add_argument("--style", default=STYLE_PAR_DEFAUT, choices=tuple(STYLES), help="direction de style : nuit (sombre et or) ou parchemin (fond crème, pour l'impression)")
-    a.add_argument("--titre-couverture", default=TITRE_COUVERTURE, choices=("or", "creme"), help="titre de la couverture V1 : or (dégradé doré, par défaut) ou creme")
+    a.add_argument("--style-couverture", default=COUVERTURE_STYLE, choices=("a", "b", "c"), help="mise en page de la couverture : a (revue de collection), b (affiche d'aventure, par défaut) ou c (ouvrage de référence sobre)")
     a.add_argument("--visuel-couverture", default=COUVERTURE_PAR_DEFAUT, choices=("v1", "huile"), help="illustration de couverture : v1 (héros et dragon, par défaut) ou huile (ancienne couverture)")
     a.add_argument("--couverture", default=SOUS_TITRE_PAR_DEFAUT, choices=("clair", "bandeau"), help="variante du sous-titre de la couverture « huile »")
     a.add_argument("--mention-sorciers", action="store_true", help="ajoute la mention « Document réservé aux sorciers… » en pied de page (option)")
@@ -927,7 +1109,7 @@ def main(argv=None):
     meta = json.loads((WEB / "data" / "meta.json").read_text(encoding="utf-8"))
     series = {s.strip() for s in args.series.split(",") if s.strip()} or None
     editeurs = {s.strip() for s in args.editeurs.split(",") if s.strip()} or None
-    TITRE_COUVERTURE = args.titre_couverture
+    COUVERTURE_STYLE = args.style_couverture
     nb = construire(versions, args.sortie, meta.get("genere_le") or date.today().isoformat(), series, editeurs=editeurs, sous_titre=args.couverture, style=args.style, mention=args.mention_sorciers, visuel=args.visuel_couverture, meta=meta)
     print(f"{nb} livres, {Path(args.sortie).stat().st_size // 1024} Ko, {time.time() - debut:.1f} s, {construire.pages_catalogue} pages de catalogue remplies à {construire.remplissage * 100:.0f} % en moyenne : {args.sortie}")
     return 0

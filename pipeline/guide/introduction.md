@@ -16,10 +16,11 @@ La Cote du Héros est née de cette difficulté : savoir de quelle édition on p
 
 Le guide suit l'ordre d'une étagère bien rangée. On ouvre d'abord un éditeur, puis une édition (V1, V2…), puis une série. Chaque livre y figure avec sa jaquette, son titre, son numéro et sa version.
 
-Deux repères l'accompagnent, en mots ou en jauge, sans aucun chiffre :
+Trois repères l'accompagnent :
 
 - **la rareté en vente**, c'est-à-dire l'abondance des annonces en ligne au moment du guide, de « introuvable » à « abondant » ;
-- **le niveau de prix**, une jauge à cinq crans et un mot, de « pas cher » à « très cher » : plus la jauge est pleine, plus l'exemplaire est cher.
+- **le niveau de prix**, une jauge à cinq crans et un mot, de « pas cher » à « très cher » : plus la jauge est pleine, plus l'exemplaire est cher ;
+- **la zone**, de 1 à 4 : l'endroit où se situe le livre sur le nuage de points du guide, selon son nombre d'annonces et son prix. La page « La méthode » explique comment la lire.
 
 Ces repères sont ceux du {date}. Lisez-les comme une indication, pas comme un verdict. La légende redonne le sens de chaque mot.
 
