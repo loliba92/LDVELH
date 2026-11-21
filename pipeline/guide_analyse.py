@@ -175,6 +175,22 @@ def dessiner_radar(pts_fond, series=(), largeur=182 * mm, hauteur=150 * mm, poli
     return d
 
 
+def parts_zones(versions, offre, med_o, med_c):
+    """{zone (0 à 3) : (livres, pourcentage entier)} : la part de chaque zone parmi les livres placés sur le nuage ; les pourcentages font toujours 100 (plus fortes décimales d'abord)."""
+    nb = {0: 0, 1: 0, 2: 0, 3: 0}
+    for v in versions:
+        if v.get("isbn13") and cote(v) > 0:
+            nb[quadrant(nb_annonces(offre.get(v["isbn13"])), cote(v), med_o, med_c)] += 1
+    total = sum(nb.values())
+    if not total:
+        return {q: (0, 0) for q in nb}
+    brut = {q: 100 * n / total for q, n in nb.items()}
+    pct = {q: int(x) for q, x in brut.items()}
+    for q in sorted(brut, key=lambda q: brut[q] - pct[q], reverse=True)[:100 - sum(pct.values())]:
+        pct[q] += 1
+    return {q: (nb[q], pct[q]) for q in nb}
+
+
 def exemples_zones(versions, offre, med_o, med_c, par_zone=2):
     """{zone (0 à 3) : [{titre, serie, numero, version, annonces, cote}]} : quelques livres typiques de chaque zone, de séries différentes, recalculés à chaque génération.
     Zone « peu d'annonces, cher » : les plus chers parmi les très peu offerts ; « beaucoup, cher » : les plus chers ; « peu, bon marché » : les moins chers qu'on trouve encore ; « beaucoup, bon marché » : les plus offerts."""

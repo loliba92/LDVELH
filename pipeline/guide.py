@@ -1005,7 +1005,7 @@ def page_nuage(versions, donnees, styles, polices, st):
             Spacer(1, 1 * mm), zones,
             P("Par exemple, un livre marqué « Zone 1 » a peu d'annonces et un prix élevé : il se trouve en haut à gauche du nuage. Les pages suivantes racontent ce que chaque zone veut dire, avec des exemples. Ce nuage est une photographie à la date du guide : il décrit le marché du moment, pas une tendance."),
             P("<b>Le nuage ne sert pas à comparer deux livres</b>, qui n'ont pas forcément le même public ni le même tirage (deux éditions d'un même livre, elles, peuvent l'être). "
-              "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c))
+              "Il distingue <b>quatre marchés différents</b> : on n'aborde pas un marché rare comme un marché courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c), ga.parts_zones(versions, donnees["offre"], e.med_o, e.med_c))
 
 
 def phrase_exemples(exemples):
@@ -1019,14 +1019,14 @@ def phrase_exemples(exemples):
     return ("Quelques exemples d'aujourd'hui : " + " ; ".join(morceaux) + ".") if morceaux else ""
 
 
-def page_zones(styles, st, cx, exemples):
+def page_zones(styles, st, cx, exemples, parts=None):
     """Les quatre zones racontées : ce que le rapport entre le nombre d'annonces et le prix dit d'un livre, avec des exemples du guide. Aucun conseil d'achat ni de vente."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     h = [PageBreak(), P("Les quatre zones, une à une", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
          P("Un livre n'est jamais « cher » ou « bon marché » tout seul : cela dépend du nombre d'exemplaires qui sont à vendre. En croisant le nombre d'annonces et le prix, on obtient une petite histoire sur chaque livre. Sur un marché ordinaire, plus il y a d'offres, plus les prix se tassent ; chaque zone dit si c'est le cas, ou non, et pourquoi. Voici ce que raconte chacune, avec des exemples tirés du guide à la date de sa génération.")]
     for q in sorted(ZONES_TEXTE, key=lambda q: ga.NUM_ZONE[q]):
         titre, texte = ZONES_TEXTE[q]
-        ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {titre}", "h2"), P(f"<i>{ga.ZONES[q]}</i>")] + [P(t) for t in texte + (phrase_exemples(exemples.get(q, [])),) if t]]],
+        ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {titre}", "h2"), P(f"<i>{ga.ZONES[q]}</i>")] + ([P(f"<b>{parts[q][1]}\u00a0% des livres du guide</b> ({parts[q][0]}\u00a0livres)")] if parts and parts[q][0] else []) + [P(t) for t in texte + (phrase_exemples(exemples.get(q, [])),) if t]]],
                       colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
         ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
         h.append(ligne)
