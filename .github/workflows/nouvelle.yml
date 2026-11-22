@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       phrase:
-        description: Phrase de l'image, sous le titre
+        description: Phrase de l'image (une phrase naturelle, comme on parle)
         required: true
         type: string
       texte:
