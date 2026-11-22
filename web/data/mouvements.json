@@ -2,10 +2,25 @@
  "date": "2026-11-22",
  "precedent": "2026-11-21",
  "nb_comparees": 1548,
- "nb_modifiees": 1379,
- "mediane_variation": -0.003,
+ "nb_modifiees": 1376,
+ "mediane_variation": -0.002,
  "nouvelles_cotes": 0,
  "hausses": [
+  {
+   "id": "9782803414857",
+   "isbn13": "9782803414857",
+   "titre": "Appel vers l'espace",
+   "serie": "Non classée",
+   "numero": null,
+   "version": "V1",
+   "etat": "bon",
+   "avant": 22.54,
+   "apres": 29.44,
+   "pct": 0.306,
+   "nature": "annonces",
+   "nb": 1,
+   "recalibre": false
+  },
   {
    "id": "9782070332892",
    "isbn13": "9782070332892",
@@ -34,6 +49,21 @@
    "pct": 0.224,
    "nature": "annonces",
    "nb": 6,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333158",
+   "isbn13": "9782070333158",
+   "titre": "Le Château des Ténèbres",
+   "serie": "Quête du Graal",
+   "numero": "315",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 4.82,
+   "apres": 5.79,
+   "pct": 0.201,
+   "nature": "ventes",
+   "nb": 1,
    "recalibre": false
   },
   {
@@ -82,6 +112,21 @@
    "recalibre": false
   },
   {
+   "id": "9782070566440",
+   "isbn13": "9782070566440",
+   "titre": "Les Héritiers de Dorgan",
+   "serie": "Défis et Sortilèges",
+   "numero": "648",
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 8.58,
+   "apres": 9.48,
+   "pct": 0.105,
+   "nature": "ventes",
+   "nb": 1,
+   "recalibre": false
+  },
+  {
    "id": "9782070585168",
    "isbn13": "9782070585168",
    "titre": "La Malédiction de Naar",
@@ -90,7 +135,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 64.6,
-   "apres": 71.39,
+   "apres": 71.38,
    "pct": 0.105,
    "nature": "annonces",
    "nb": 1,
@@ -114,11 +159,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 7,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
-  "n_paires": 291,
-  "gain": 0.061,
+  "n_paires": 292,
+  "gain": 0.057,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
   "rapport_global": 1.087
  }
