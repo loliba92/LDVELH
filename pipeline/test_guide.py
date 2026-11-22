@@ -53,7 +53,7 @@ class TestGuide(unittest.TestCase):
     def test_reperes_en_mots_memes_seuils_que_le_site(self):
         self.assertEqual([g.niveau_prix(v) for v in (None, 5, 10, 19.9, 20, 45, 70, 200)], [None, 1, 2, 2, 3, 4, 5, 5])
         self.assertEqual([g.MOTS_PRIX[n - 1] for n in (1, 2, 3, 4, 5)], ["pas cher", "abordable", "moyen", "cher", "très cher"])
-        self.assertEqual([g.mot_offre(n) for n in (0, 1, 2, 3, 4, 9, 10, 50)], ["introuvable", "rare", "peu d'annonces", "peu d'annonces", "courant", "courant", "abondant", "abondant"])
+        self.assertEqual([g.mot_offre(n, mediane=7) for n in (0, 1, 7, 8, 50)], ["introuvable", "peu d'annonces", "peu d'annonces", "beaucoup d'annonces", "beaucoup d'annonces"])
         self.assertEqual(g.mot_offre(0, neuf=True), "disponible neuf")
 
     def test_aucun_montant_ni_decimal_dans_le_catalogue(self):
@@ -290,10 +290,10 @@ class TestRadar(unittest.TestCase):
         self.assertIn("Chaque livre du guide porte sa zone", plat)
         for surnom in ("La rareté", "Cher et liquide", "Un marché calme", "Le courant"):          # une page raconte chaque zone
             self.assertIn(surnom, plat)
-        self.assertGreaterEqual(plat.count("Quelques exemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
+        self.assertGreaterEqual(plat.count("xemple d'aujourd'hui") + plat.count("xemples d'aujourd'hui"), 2)          # des exemples du guide pour les zones qui en ont
         self.assertIn("Les quatre zones, une à une", plat)
         self.assertLess(plat.index("La stratégie du collectionneur"), plat.index("Sommaire"))          # le petit article de stratégie suit les zones
-        for titre in ("Zone 1 · La rareté", "Zone 2 · Cher et liquide", "Zone 3 · Un marché calme", "Zone 4 · Le courant", "Si vous avez des doubles"):
+        for titre in ("J'achète", "Je vends", "Zone 1", "Zone 4", "Acheter en lot"):
             self.assertIn(titre, plat)
 
     def test_chaque_livre_porte_sa_zone_de_1_a_4_ou_aucune(self):

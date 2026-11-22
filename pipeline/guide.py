@@ -83,12 +83,13 @@ def niveau_prix(v):
     return None if v is None else 1 + sum(1 for x in SEUILS_PRIX if v >= x)
 
 
-def mot_offre(n, neuf=False):
-    """« Rareté en vente » : abondance des annonces en ligne à l'instant T. Les trois premiers niveaux suivent le bloc « Offre d'occasion » du site (aucune, une seule, quelques-unes) ;
-    le site réunit « beaucoup » en un seul niveau : ici il est coupé en courant et abondant (seuil propre au guide, jamais affiché)."""
+def mot_offre(n, neuf=False, mediane=None):
+    """« En vente » : les mots du nuage. Au-dessus de la médiane des annonces par livre, « beaucoup d'annonces » ; sinon « peu d'annonces ». Sans annonce : « introuvable » (« disponible neuf » s'il se vend encore neuf).
+    Sans médiane (guide sans nuage), le repli sépare à 3 annonces."""
     if n == 0:
         return "disponible neuf" if neuf else "introuvable"
-    return "rare" if n == 1 else "peu d'annonces" if n <= 3 else "courant" if n < 10 else "abondant"
+    seuil = 3 if mediane is None else mediane
+    return "beaucoup d'annonces" if n > seuil else "peu d'annonces"
 
 
 MOIS_COURTS = ("janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc.")
@@ -422,7 +423,7 @@ def glyphe_zone(c, x, y, cote, zone, st):
 
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
-    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None, jour=None):
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None, jour=None, mediane=None):
         super().__init__()
         self.v, self.st, self.pol, self.web, self.reperes, self.zone = v, st, polices, web, reperes, zone          # zone : 0 à 3 (voir guide_analyse.quadrant), None sans repère
         self.largeur = L_CADRE / COLONNES
@@ -439,7 +440,7 @@ class Fiche(Flowable):
         self.th = max(self.titre.wrap(self.largeur - 3 * mm, 100 * mm)[1], 2 * 9.4)          # deux lignes réservées : les repères restent alignés d'un livre à l'autre
         num = f"n°\u00a0{v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
         self.meta = f"{num}{v.get('version') or ''}"
-        self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1)
+        self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1, mediane)
         self.lib_offre, self.mot_prix = LIBELLE_OFFRE, "prix inconnu"
         self.niveau = niveau_prix(ga.cote(v)) if ga.cote(v) > 0 else None          # repère de prix : même état de référence que le site (très bon état, à défaut bon état) ; sans cote, pas de repère
         sortie = sortie_prevue(v, jour or date.today().isoformat())
@@ -545,8 +546,7 @@ def introduction(texte, variables, styles, st, pol):
     return sortie
 
 
-OFFRE_SENS = (("abondant", "Beaucoup d'annonces : facile à trouver."), ("courant", "Plusieurs annonces : on le trouve sans difficulté."),
-              ("peu d'annonces", "Quelques annonces seulement : il faut surveiller."), ("rare", "Une seule annonce en ce moment."),
+OFFRE_SENS = (("beaucoup d'annonces", "Plus d'annonces que la médiane du guide : on trouve facilement."), ("peu d'annonces", "Autant d'annonces que la médiane, ou moins : il faut surveiller."),
               ("introuvable", "Aucune annonce aujourd'hui."), ("disponible neuf", "Encore vendu neuf."), ("pas encore sorti", "Annoncé : la fiche donne sa date de sortie prévue."))
 PRIX_SENS = ("Se trouve à petit prix.", "Un prix doux, à la portée de tous.", "Un prix courant pour un livre de collection.", "Un exemplaire recherché.", "Un livre très recherché, parmi les plus chers.")
 
@@ -607,9 +607,9 @@ def legende(styles, st=None, polices=None, exemple=None):
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     haut = []
     if exemple is not None:
-        exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
+        exemple.offre, exemple.niveau, exemple.zone = "beaucoup d'annonces", 2, 1
         haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
-    return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
+    return haut + [P("En vente", "h2"), P("Le nombre d'annonces en ligne, comparé à la médiane du guide, comme sur le nuage."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
                    P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces : plus la jauge est pleine, plus il est cher. Sans cote, la fiche dit « prix inconnu »."),
                    TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS, FOURCHETTES)), st, polices, jauges=True) if st else Spacer(1, 1)]
 
@@ -957,7 +957,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         for j, (version, series_v) in enumerate(versions_ed):
             entete = (bandeau if j == 0 else []) + [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for i, (nom, livres) in enumerate(series_v):
-                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v), genere_le) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v), genere_le, med_o) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
@@ -1013,14 +1013,14 @@ def page_nuage(versions, donnees, styles, polices, st):
     return [PageBreak(), P("La méthode : le nuage et ses quatre zones", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
             P("Pour situer chaque livre, le guide s'appuie sur un nuage de points. Il se lit en trois temps."),
             Spacer(1, 1 * mm), ga.dessiner_radar(pts, (), L_CADRE, 60 * mm, f_texte, f_gras, cx), Spacer(1, 2 * mm),
-            P("<b>1. Chaque livre est un point.</b> Plus il est à droite, plus il a d'annonces en ligne. Plus il est haut, plus son prix d'occasion est élevé (en euros, sur le côté). Les repères doublent à peu près à chaque graduation, pour garder les petits prix lisibles."),
-            P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par livre (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Chaque ligne a la moitié des livres de chaque côté : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
+            P("<b>1. Chaque livre est un point.</b> Plus il est à droite, plus il a d'annonces en ligne. Plus il est haut, plus son prix d'occasion est élevé (en euros, sur le côté). Les repères doublent à peu près à chaque graduation, pour que les petits prix restent lisibles."),
+            P(f"<b>2. Deux lignes pointillées coupent le nuage en quatre zones.</b> La verticale marque le milieu de l'offre : {fr(e.med_o)} annonces par livre (médiane de l'offre). L'horizontale marque le milieu des prix : {fr(e.med_c, 2)}\u00a0€ (médiane des prix). Chaque ligne laisse la moitié des livres de chaque côté : « beaucoup d'annonces » ou « cher » veut dire au-dessus de la médiane, pas hors de prix."),
             P("<b>3. Chaque livre du guide porte sa zone.</b> Un petit carré à quatre cases sous son prix, avec sa zone en or et son numéro, de « Zone 1 » à « Zone 4 »."),
             Spacer(1, 1 * mm), zones,
-            P(f"<b>Que veulent dire ces pourcentages ?</b> La part des livres du guide dans chaque zone : {sum(n for n, _ in parts.values())} livres placés sur le nuage, d'après {_annonces_en_chiffres(sum(ga.nb_annonces(o) for o in donnees['offre'].values()))} en ligne. "
-              "Les quatre parts font 100\u00a0% ; chaque zone pèse à peu près un quart, car les pointillés sont des médianes."),
+            P(f"<b>Que veulent dire ces pourcentages ?</b> Il s'agit de la part des livres du guide qui se trouvent dans chaque zone : {sum(n for n, _ in parts.values())} livres placés sur le nuage, d'après {_annonces_en_chiffres(sum(ga.nb_annonces(o) for o in donnees['offre'].values()))} en ligne. "
+              "Les quatre parts font 100\u00a0%. Chaque zone pèse à peu près un quart, parce que les pointillés sont des médianes."),
             P("Ce nuage est une photographie du marché à la date du guide, pas une tendance."),
-            P("<b>Ce nuage ne compare pas deux livres</b> : chacun a son public et son tirage (deux éditions d'un même livre, elles, se comparent). Il distingue <b>quatre marchés</b> : on n'achète pas un livre rare comme un livre courant. Chaque zone a sa stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c, 1), parts)
+            P("<b>Le nuage ne sert pas à comparer deux livres.</b> Chacun a son public et son tirage (deux éditions d'un même livre, elles, peuvent se comparer). Il montre quatre marchés différents : on n'achète pas un livre rare comme un livre courant, et chaque zone appelle sa propre stratégie, expliquée plus loin.")] + page_zones(styles, st, cx, ga.exemples_zones(versions, donnees["offre"], e.med_o, e.med_c, 1), parts)
 
 
 def phrase_exemples(exemples):
@@ -1031,63 +1031,64 @@ def phrase_exemples(exemples):
         n = x["annonces"]
         offre = "aucune annonce en ce moment" if n == 0 else f"{n} annonce{'s' if n > 1 else ''} en ligne"
         morceaux.append(f"« {x['titre']} » ({x['serie']}{num}, {x['version']}), {offre}, autour de {round(x['cote'])}\u00a0€")
-    return ("Quelques exemples d'aujourd'hui : " + " ; ".join(morceaux) + ".") if morceaux else ""
+    return (("Exemple d'aujourd'hui : " if len(morceaux) == 1 else "Quelques exemples d'aujourd'hui : ") + " ; ".join(morceaux) + ".") if morceaux else ""
 
 
 def page_zones(styles, st, cx, exemples, parts=None):
     """Les quatre zones racontées : ce que le rapport entre le nombre d'annonces et le prix dit d'un livre, avec des exemples du guide. Aucun conseil d'achat ni de vente."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     h = [PageBreak(), P("Les quatre zones, une à une", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-         P("Un prix ne se lit pas seul : il faut le regarder avec le nombre d'annonces. Voici ce que dit chaque zone, avec des exemples du jour.")]
+         P("Un prix se lit avec le nombre d'annonces. Voici ce que cela donne, zone par zone.")]
     for q in sorted(ZONES_TEXTE, key=lambda q: ga.NUM_ZONE[q]):
         titre, texte = ZONES_TEXTE[q]
         ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {titre}", "h2"), P(f"<i>{ga.ZONES[q]}</i>" + (f" · <b>{parts[q][1]}\u00a0% des livres du guide</b> ({parts[q][0]}\u00a0livres)" if parts and parts[q][0] else ""))] + [P(t) for t in texte + (phrase_exemples(exemples.get(q, [])),) if t]]],
                       colWidths=[11 * mm, L_CADRE - 11 * mm], hAlign="LEFT")
-        ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 4 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
+        ligne.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (0, 0), 2.5 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm)]))
         h.append(ligne)
     return h + [Spacer(1, 3 * mm),
-                P("<b>D'où viennent ces données ?</b> La Cote du Héros relève les annonces d'occasion, les classe par titre, édition et éditeur, puis calcule le prix médian de chaque livre, c'est-à-dire le prix du milieu. Une annonce est un prix demandé, pas un prix payé : ces repères ne sont pas des promesses.")]
+                P("<b>D'où viennent ces données ?</b> La Cote du Héros relève les annonces d'occasion, les range par titre, édition et éditeur, puis calcule le prix médian de chaque livre, le prix du milieu. Une annonce est un prix demandé, pas un prix payé : ces repères ne sont pas des promesses.")]
 
 
 def page_strategie(styles, cx):
-    """Un petit article : une stratégie par zone (qui collectionne, pourquoi, comment acquérir), puis les doubles."""
+    """La stratégie du collectionneur : un grand tableau, une ligne par zone, deux colonnes (j'achète, je vends), puis une note sur les lots."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
-    sections = (
-        (2, ("<b>Qui ?</b> Le complétiste : il veut toute une édition ou toute une série, et cherche le dernier numéro manquant.",
-             "<b>Objectif.</b> Posséder ce que presque personne n'a, et boucher les trous de la collection.",
-             "<b>Stratégie.</b> On guette, parfois des mois, avec le budget prêt : savoir tôt ce qui manque en zone 1, c'est savoir combien de temps prévoir. "
-             "Le bon coup est une annonce sous le prix habituel : elle ne dure pas, et le Butin et la Chasse du site servent à la repérer. "
-             "Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et le port.")),
-        (3, ("<b>Qui ?</b> L'acheteur pressé, ou celui qui achète pour revendre ou échanger.",
-             "<b>Objectif.</b> Trouver vite un livre très demandé, ou faire tourner sa collection.",
-             "<b>Stratégie.</b> Laissez venir : les annonces sont nombreuses. Un prix demandé n'est pas un prix payé, comparez et négociez.")),
-        (0, ("<b>Qui ?</b> Le collectionneur de série, attiré par des titres moins connus.",
-             "<b>Objectif.</b> Compléter sans se ruiner.",
-             "<b>Stratégie.</b> Rien ne presse : on prend au passage quand on en croise un.")),
-        (1, ("<b>Qui ?</b> Le débutant, ou celui qui retrouve les livres de son enfance.",
-             "<b>Objectif.</b> Avancer vite et pour presque rien.",
-             "<b>Stratégie.</b> Commencez par là : l'offre est large, choisissez l'exemplaire et le vendeur sans vous presser. "
-             "Visez le très bon état. L'état est fondamental, et La Cote du Héros le précise pour chaque prix : sinon, on surpaie un livre qui ne vaut pas sa valeur. "
-             "Mieux vaut payer un peu plus cher pour un état impeccable.")),
-    )
-    h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-         P("Chaque zone est un marché à part, avec ses collectionneurs et sa stratégie. Premier réflexe : regarder la zone du livre avant de se décider.")]
-    for q, paragraphes in sorted(sections, key=lambda x: ga.NUM_ZONE[x[0]]):
-        h.append(KeepTogether([P(f"Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}", "h2")] + [P(t) for t in paragraphes]))
-    h += [P("Si vous avez des doubles", "h2"), P("En zone 1, un double se vend bien : on le cherche. En zone 2, le marché est actif : proposez-le un peu sous les annonces voisines. En zones 3 et 4, inutile d'attendre : l'offre est large ou la demande faible. La liste « À vendre » du site sert à cela.")]
-    return h
+    cases = {
+        2: ("On guette, parfois des mois, avec le budget prêt : savoir tôt ce qui vous manque, c'est savoir combien de temps prévoir. Le bon coup, c'est une annonce sous le prix habituel : elle ne dure pas, et le Butin et la Chasse du site servent à la repérer. Vérifiez l'édition (V1, V2…), l'état et le port.",
+            "Un double se vend bien, puisqu'on le cherche. Vous pouvez demander le prix du marché."),
+        3: ("Laissez venir : les annonces sont nombreuses. Un prix demandé n'est pas un prix payé, comparez et négociez.",
+            "Le marché est actif. Proposez votre livre un peu sous les annonces voisines : il partira plus vite."),
+        0: ("Rien ne presse : on prend au passage, quand on en croise un. Les lots y sont utiles pour compléter une série sans se ruiner.",
+            "Peu de gens achètent. Soyez patient, et n'espérez pas plus que le prix du marché."),
+        1: ("On commence ici. L'offre est large : choisissez l'exemplaire et le vendeur sans vous presser, et achetez en lot quand vous le pouvez. Visez le très bon état : l'état est fondamental, et La Cote du Héros le précise pour chaque prix. Sinon, on surpaie un livre qui ne vaut pas sa valeur. Mieux vaut payer un peu plus cher pour un état impeccable.",
+            "Il y a beaucoup d'offre : vos doubles se vendent bas. Regroupez-les en lot plutôt que de les vendre un à un."),
+    }
+    lignes = [[P("<b>Zone</b>"), P("<b>J'achète</b>"), P("<b>Je vends</b>")]]
+    for q in sorted(cases, key=lambda q: ga.NUM_ZONE[q]):
+        lignes.append([P(f"<b>Zone {ga.NUM_ZONE[q]}</b><br/>{ZONES_TEXTE[q][0]}"), P(cases[q][0]), P(cases[q][1])])
+    f = cx["filet"]
+    largeur = [27 * mm, (L_CADRE - 27 * mm) * 0.58, (L_CADRE - 27 * mm) * 0.42]
+    t = Table(lignes, colWidths=largeur, hAlign="LEFT", repeatRows=1)
+    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, 0), Color(f.red, f.green, f.blue, alpha=0.18)),
+                           ("LINEBELOW", (0, 0), (-1, -1), 0.4, f), ("LINEABOVE", (0, 0), (-1, 0), 0.4, f), ("LINEAFTER", (0, 0), (0, -1), 0.4, f), ("LINEAFTER", (1, 0), (1, -1), 0.4, f),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 2 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.2 * mm)]))
+    return [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+            P("Un collectionneur ne fait pas qu'acheter : il achète, et il revend. Chaque zone est un marché différent : avant d'acheter ou de vendre, regardez d'abord dans quelle zone se trouve le livre."),
+            Spacer(1, 3 * mm), t, Spacer(1, 4 * mm),
+            P("<b>Acheter en lot.</b> Plutôt qu'un livre à la fois, achetez un lot : plusieurs livres chez un même vendeur, avec un seul port. Le prix de chaque livre baisse, et c'est la façon la plus économique d'avancer. "
+              "Regardez l'état de chaque livre, pas seulement le prix total. Les doubles qui arrivent avec le lot se revendent ensuite, et financent les achats suivants. "
+              "Le site propose un outil pour composer un lot d'achat ou de vente, avec son prix et son port.")]
 
 
 # Titre et récit de chaque zone (0 peu d'offre bon marché, 1 beaucoup d'offre bon marché, 2 peu d'offre cher, 3 beaucoup d'offre cher)
 ZONES_TEXTE = {
-    2: ("La rareté", ("Peu d'exemplaires à vendre, et un prix élevé. Ces livres ont été peu imprimés, sont épuisés, ou leurs propriétaires les gardent.",
-                      "Les collectionneurs sont plus nombreux que les exemplaires : quand une annonce apparaît, on la guette, et le vendeur peut demander cher.")),
-    3: ("Cher et liquide", ("Beaucoup d'annonces, et pourtant des prix élevés. Le marché est actif : il y a des vendeurs, des acheteurs, et les livres circulent.",
-                           "Si les prix restent hauts, c'est que la demande est très forte, ou que certains vendeurs demandent trop. On compare avant d'acheter.")),
-    0: ("Un marché calme", ("Peu d'annonces, mais des prix bas. Peu d'exemplaires à vendre ne veut pas dire rare : ici, personne ne se bat pour ces livres.",
-                           "Titres moins connus, séries moins suivies : la demande est faible, donc les prix restent bas.")),
-    1: ("Le courant", ("Beaucoup d'annonces et des prix bas. Ces livres ont été beaucoup imprimés, et beaucoup de gens les revendent : les vendeurs se font concurrence.",
-                      "On choisit son exemplaire sans se presser. Ce sont souvent les livres que l'on a lus enfant, faciles à retrouver.")),
+    2: ("La rareté", ("Il y a peu d'exemplaires à vendre, et les prix sont élevés. Ces livres ont été peu imprimés, ils sont épuisés depuis longtemps, ou leurs propriétaires ne s'en séparent pas.",
+                      "Comme les collectionneurs sont plus nombreux que les exemplaires, chaque annonce est guettée, et le vendeur peut se permettre de demander cher.")),
+    3: ("Cher et liquide", ("Il y a beaucoup d'annonces, et pourtant les prix restent élevés. Le marché est actif : il y a autant de vendeurs que d'acheteurs, et les livres changent de mains.",
+                           "Si les prix ne baissent pas, c'est que la demande est très forte, ou que certains vendeurs demandent trop. Comparez plusieurs annonces avant d'acheter.")),
+    0: ("Un marché calme", ("Il y a peu d'annonces, mais les prix sont bas. Attention : peu d'exemplaires à vendre ne veut pas dire rare. Ici, personne ne se bat pour ces livres.",
+                           "Ce sont des titres moins connus ou des séries moins suivies. La demande est faible, alors les prix restent bas.")),
+    1: ("Le courant", ("Il y a beaucoup d'annonces, et les prix sont bas. Ces livres ont été beaucoup imprimés et beaucoup de gens les revendent, alors les vendeurs se font concurrence.",
+                      "Vous prenez le temps de choisir votre exemplaire. Ce sont souvent les livres que l'on a lus enfant, faciles à retrouver.")),
 }
 
 

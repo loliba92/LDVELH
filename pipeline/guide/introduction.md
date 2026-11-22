@@ -18,7 +18,7 @@ Le guide suit l'ordre d'une étagère bien rangée. On ouvre d'abord un éditeur
 
 Trois repères l'accompagnent :
 
-- **la rareté en vente**, c'est-à-dire l'abondance des annonces en ligne au moment du guide, de « introuvable » à « abondant » ;
+- **le nombre d'annonces en ligne** : « introuvable », « peu d'annonces » ou « beaucoup d'annonces » ;
 - **le niveau de prix**, une jauge à cinq crans et un mot, de « pas cher » à « très cher » : plus la jauge est pleine, plus l'exemplaire est cher ;
 - **la zone**, de 1 à 4 : l'endroit où se situe le livre sur le nuage de points du guide, selon son nombre d'annonces et son prix. La page « La méthode » explique comment la lire.
 
