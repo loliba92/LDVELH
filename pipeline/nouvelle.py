@@ -292,11 +292,37 @@ def creer(titre, phrase, texte, fond=FOND_PAR_DEFAUT, jour=None, slug="", descri
             "web/data/communaute.json", "web/nouvelles.xml"]
 
 
+def images_guide_du_mois(jour=None, dossier=None):
+    """Images (grande et vignette) de la carte mensuelle du guide, avec le mois écrit : une par mois depuis la première édition, celles qui manquent seulement.
+    Renvoie les chemins écrits."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import flux_nouvelles as fn
+    jour = jour or date.today()
+    dossier = Path(dossier) if dossier else WEB / "data" / "communaute"
+    dossier.mkdir(parents=True, exist_ok=True)
+    ecrits, (a, m) = [], fn.PREMIERE_EDITION
+    while (a, m) <= (jour.year, jour.month):
+        grande_f, petite_f = dossier / f"guide-{a}-{m:02d}-partage.jpg", dossier / f"guide-{a}-{m:02d}.jpg"
+        if not (grande_f.exists() and petite_f.exists()):
+            grande, petite = images(f"Le guide de référence\n{fn.MOIS[m - 1].capitalize()} {a}", "Un PDF qui réunit toutes les éditions des livres dont vous êtes le héros, pour reconnaître la vôtre.", "heros-dragon")
+            grande.save(grande_f, quality=88, optimize=True)
+            petite.save(petite_f, quality=88, optimize=True)
+            ecrits += [str(grande_f), str(petite_f)]
+        a, m = (a + 1, 1) if m == 12 else (a, m + 1)
+    return ecrits
+
+
 def main(argv=None):
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     for nom in ("titre", "phrase", "texte", "texte_facebook", "description", "fond", "date", "slug", "apercu"):
         a.add_argument("--" + nom.replace("_", "-"), default=os.environ.get("NOUVELLE_" + nom.upper(), ""))
+    a.add_argument("--guide-du-mois", action="store_true", help="crée les images de la carte mensuelle du guide qui manquent")
+    a.add_argument("--jusqu-a", default="", help="avec --guide-du-mois : jour limite AAAA-MM-JJ (par défaut aujourd'hui)")
     o = a.parse_args(argv)
+    if o.guide_du_mois:
+        jour = datetime.strptime(o.jusqu_a, "%Y-%m-%d").date() if o.jusqu_a else None
+        print("\n".join(x.replace(str(RACINE) + "/", "") for x in images_guide_du_mois(jour)))
+        return 0
     try:
         chemins = creer(o.titre, o.phrase, o.texte, o.fond or FOND_PAR_DEFAUT, o.date or None, o.slug, o.description, o.texte_facebook, o.apercu or None)
     except ValueError as e:

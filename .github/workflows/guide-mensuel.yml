@@ -1,7 +1,7 @@
 name: Guide du mois
 
 # Le 1er de chaque mois : ajoute la carte « Guide de référence : édition du mois » à la page Communauté (web/data/communaute.json) et au flux RSS (web/nouvelles.xml), puis republie le site.
-# Aucune demande à un site distant. Voir pipeline/flux_nouvelles.py.
+# L'image de chaque mois est créée avec le mois écrit dessus (pipeline/nouvelle.py). Aucune demande à un site distant. Voir pipeline/flux_nouvelles.py.
 on:
   schedule:
     - cron: "40 5 1 * *"
@@ -25,8 +25,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Tests du flux
-        run: python pipeline/test_flux_nouvelles.py
+      - run: pip install pillow numpy fonttools brotli
+      - name: Tests du flux et des images
+        run: cd pipeline && python -m unittest test_flux_nouvelles test_nouvelle
+      - name: Images du mois (avec le mois écrit dessus)
+        run: python pipeline/nouvelle.py --guide-du-mois | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Ajouter la carte et reconstruire le flux
         run: python pipeline/flux_nouvelles.py | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer et republier
@@ -34,6 +37,6 @@ jobs:
           git config user.name "guide-mensuel"
           git config user.email "guide-mensuel@users.noreply.github.com"
           AVANT="$(git rev-parse HEAD)"
-          REJOUER='python pipeline/flux_nouvelles.py' .github/scripts/publier.sh "Flux : guide du mois ($(date +%F))" web/data/communaute.json web/nouvelles.xml
+          REJOUER='python pipeline/nouvelle.py --guide-du-mois && python pipeline/flux_nouvelles.py' .github/scripts/publier.sh "Flux : guide du mois ($(date +%F))" web/data/communaute web/data/communaute.json web/nouvelles.xml
           [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
           gh workflow run pages.yml

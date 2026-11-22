@@ -50,7 +50,10 @@ class TestFlux(unittest.TestCase):
         self.assertEqual(e[1]["nom"], "Guide de référence : édition de janvier 2027")
         self.assertEqual(len({x["adresse"] for x in e}), 2)
         self.assertTrue(all(x["adresse"].startswith("https://lacoteduheros.fr/guide-reference.html#guide-") for x in e))
-        self.assertTrue(all(x["image_flux"].endswith("guide-reference-partage.jpg") and x["texte_flux"] for x in e))
+        self.assertEqual([x["image_flux"] for x in e], ["data/communaute/guide-2026-12-partage.jpg", "data/communaute/guide-2027-01-partage.jpg"])
+        self.assertTrue(all(x["texte_flux"] for x in e))
+        self.assertEqual(editions_mensuelles(date(2027, 4, 1))[-1]["nom"], "Guide de référence : édition d'avril 2027")
+        self.assertEqual(editions_mensuelles(date(2027, 8, 1))[-1]["nom"], "Guide de référence : édition d'août 2027")
         ajoutee = ajouter_editions(LISTE, date(2027, 1, 15))
         self.assertEqual(nouvelles(ajoutee)[0]["date"], "2027-01-01")
         self.assertEqual(ajouter_editions(ajoutee, date(2027, 1, 20)), ajoutee)      # sans doublon

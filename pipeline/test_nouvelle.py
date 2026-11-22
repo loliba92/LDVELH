@@ -65,6 +65,15 @@ class TestNouvelle(unittest.TestCase):
         fonds = re.findall(r'<option value="([a-z\-]+)">', page_communaute[page_communaute.index('id="nouv-fond"'):])
         self.assertEqual(fonds[:len(nouvelle.FONDS)], list(nouvelle.FONDS))
 
+    def test_images_du_guide_du_mois_une_par_mois_et_sans_refaire(self):
+        from datetime import date
+        with tempfile.TemporaryDirectory() as d:
+            premiers = nouvelle.images_guide_du_mois(date(2026, 11, 30), d)
+            self.assertEqual(premiers, [])          # avant la première édition : rien
+            ecrits = nouvelle.images_guide_du_mois(date(2027, 1, 1), d)
+            self.assertEqual(sorted(Path(x).name for x in ecrits), ["guide-2026-12-partage.jpg", "guide-2026-12.jpg", "guide-2027-01-partage.jpg", "guide-2027-01.jpg"])
+            self.assertEqual(nouvelle.images_guide_du_mois(date(2027, 1, 20), d), [])          # déjà faites
+
     def test_nouvelle_refusee_si_champ_vide(self):
         with self.assertRaises(ValueError):
             nouvelle.creer("", "Phrase.", "Texte")
