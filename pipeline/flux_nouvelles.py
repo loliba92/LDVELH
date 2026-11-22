@@ -38,8 +38,8 @@ def editions_mensuelles(jour):
         sortie.append({
             "nom": f"Guide de référence : édition {de_mois(m)} {a}",
             "adresse": f"{BASE}guide-reference.html#guide-{a}-{m:02d}",
-            "description": f"Le guide PDF {de_mois(m)} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur. Offert avec votre compte.",
-            "texte_flux": (f"Le guide de référence {de_mois(m)} {a} est prêt.\n\nTous les livres avec leurs repères, et la stratégie du collectionneur, dans un PDF refait chaque jour.\n\n"
+            "description": f"Le guide PDF {de_mois(m)} {a} est prêt : toutes les éditions des livres dont vous êtes le héros, pour reconnaître la vôtre et compléter vos séries.",
+            "texte_flux": (f"Le guide de référence {de_mois(m)} {a} est prêt.\n\nC'est un PDF qui réunit plus de 500 éditions des livres dont vous êtes le héros : il sert à reconnaître son édition, à tenir sa collection à jour et à compléter ses séries. Il est refait chaque jour.\n\n"
                            "Pour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris."),
             "image": f"data/communaute/guide-{a}-{m:02d}.jpg",
             "image_flux": f"data/communaute/guide-{a}-{m:02d}-partage.jpg",          # créées avant la carte : voir pipeline/nouvelle.py (--guide-du-mois)

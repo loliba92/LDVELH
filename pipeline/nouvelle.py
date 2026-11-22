@@ -304,7 +304,7 @@ def images_guide_du_mois(jour=None, dossier=None):
     while (a, m) <= (jour.year, jour.month):
         grande_f, petite_f = dossier / f"guide-{a}-{m:02d}-partage.jpg", dossier / f"guide-{a}-{m:02d}.jpg"
         if not (grande_f.exists() and petite_f.exists()):
-            grande, petite = images(f"Le guide de référence\n{fn.de_mois(m)} {a}", "L'édition du mois est prête : créez votre compte gratuit, puis ouvrez le menu pour la télécharger.", "heros-dragon")
+            grande, petite = images(f"Le guide de référence\n{fn.MOIS[m - 1].capitalize()} {a}", "Un PDF qui réunit toutes les éditions des livres dont vous êtes le héros, pour reconnaître la vôtre.", "heros-dragon")
             grande.save(grande_f, quality=88, optimize=True)
             petite.save(petite_f, quality=88, optimize=True)
             ecrits += [str(grande_f), str(petite_f)]
