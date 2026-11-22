@@ -69,7 +69,7 @@ propriété du script `es:<empreinte courte>` : ni adresse, ni nom, rien dans le
 
 ## Garde-fous
 
-- Seuls les lots `corriger-prix.yml`, `corriger-fiche.yml`, `ajout-isbn.yml` et `communaute.yml` peuvent être lancés, avec leurs champs connus et une taille limitée. `communaute.yml` (liste de la Communauté) est réservé au Zagor.
+- Seuls les lots `corriger-prix.yml`, `corriger-fiche.yml`, `ajout-isbn.yml`, `communaute.yml` et `nouvelle.yml` peuvent être lancés, avec leurs champs connus et une taille limitée. `communaute.yml` (liste de la Communauté) et `nouvelle.yml` (créer une nouvelle du site : images, page, carte, flux) sont réservés au Zagor, comme tout lot lancé par l'action `envoyer`.
 - Le nom enregistré est posé par le relais, jamais par le site.
 - On ne peut ni se retirer ni se bloquer soi-même, ni retirer le dernier SuperAdmin.
 - La liste des admins est relue à chaque envoi (30 secondes de mémoire au plus) : un retrait est quasi immédiat.

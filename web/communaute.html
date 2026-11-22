@@ -56,7 +56,7 @@
 <h1>Communauté</h1>
 <p class="chapeau">Les livres dont vous êtes le héros vivent grâce à des passionnés : des chaînes, des éditeurs, des écrivains, des sites, des collectionneurs, des boutiques. Voici ceux que nous aimons suivre.</p>
 
-<p class="comm-admin"><button type="button" class="bouton-lien" id="comm-ajout" hidden>Ajouter un lien</button></p>
+<p class="comm-admin"><button type="button" class="bouton-lien" id="comm-ajout" hidden>Ajouter un lien</button> <button type="button" class="bouton-lien" id="comm-nouvelle" hidden>Créer une nouvelle</button></p>
 <p class="comm-vide" id="comm-vide">La liste se construit : les premières adresses arrivent bientôt. Vous en connaissez une qui mérite d'y figurer ? <a href="contact.html">Écrivez-moi</a>.</p>
 <div class="comm-liste" id="comm-liste"></div>
 <dialog class="comm-dialog" id="comm-dialog" aria-labelledby="comm-titre">
@@ -99,6 +99,33 @@
   <button type="button" data-plus aria-haspopup="dialog" aria-expanded="false" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg><span>Compte</span></button>
 </nav>
 
+<dialog class="comm-dialog comm-dialog-large" id="nouv-dialog" aria-labelledby="nouv-titre-dialogue">
+  <form class="comm-form" id="nouv-form">
+    <h2 id="nouv-titre-dialogue">Créer une nouvelle</h2>
+    <p class="sous">La page, les images, la carte de la Communauté et le flux RSS sont faits tout seuls. Make publie ensuite sur Facebook.</p>
+    <div class="champ"><label for="nouv-titre">Titre (écrit en grand sur l'image)</label><input type="text" id="nouv-titre" required maxlength="80" autocomplete="off"></div>
+    <div class="champ"><label for="nouv-phrase">Phrase de l'image (sous le titre)</label><input type="text" id="nouv-phrase" required maxlength="140" autocomplete="off"></div>
+    <div class="champ"><label for="nouv-texte">Texte de l'article</label><textarea id="nouv-texte" required rows="9" maxlength="8000"></textarea>
+      <p class="sous">Paragraphes séparés par une ligne vide. « ## Titre » pour une section, « - » pour une puce, « 1. » pour une étape, **gras**, [texte](adresse).</p></div>
+    <div class="champ"><label for="nouv-facebook">Texte de la publication Facebook (facultatif)</label><textarea id="nouv-facebook" rows="5" maxlength="3000"></textarea></div>
+    <div class="champ"><label for="nouv-desc">Description de la carte (facultatif, sinon la phrase de l'image)</label><input type="text" id="nouv-desc" maxlength="300" autocomplete="off"></div>
+    <div class="champ"><label for="nouv-fond">Illustration de fond</label>
+    <select id="nouv-fond">
+      <option value="dragon-rouge">Un sorcier face à un dragon rouge</option>
+      <option value="sorcier-dragon">Un sorcier face à un dragon</option>
+      <option value="dragon-noir">Un sorcier dans l'ombre d'un dragon noir</option>
+      <option value="duel-neige">Un duel au coucher du soleil</option>
+      <option value="duel-ruines">Un duel dans des ruines</option>
+      <option value="golem">Un guerrier face à un golem de lave</option>
+      <option value="glace">Un guerrier face à un géant des glaces</option>
+      <option value="hydre">Une hydre attaque un navire</option>
+      <option value="heros-dragon">Un héros brandit son épée face à un dragon</option>
+    </select></div>
+    <div class="champ"><label for="nouv-date">Date (facultatif, sinon aujourd'hui)</label><input type="date" id="nouv-date"></div>
+    <p><button type="submit" class="bouton">Créer et publier</button> <button type="button" class="bouton-lien" id="nouv-fermer">Fermer</button></p>
+    <p class="corriger-msg" id="nouv-msg" role="status" hidden></p>
+  </form>
+</dialog>
 <dialog class="feuille" id="feuille-plus" aria-labelledby="feuille-plus-titre">
   <div class="feuille-poignee" aria-hidden="true"></div>
   <div class="feuille-tete"><h2 id="feuille-plus-titre">Mon compte</h2><button type="button" class="fermer feuille-fermer" aria-label="Fermer le menu">×</button></div>

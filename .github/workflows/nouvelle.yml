@@ -1,0 +1,85 @@
+name: Nouvelle du site
+
+# Lancé depuis le site : le Zagor remplit le formulaire « Créer une nouvelle » de la page Communauté (web/communaute.js), le service technique (relais/Code.gs, lot « nouvelle.yml »)
+# lance ce lot avec les champs. Il fabrique les images, la page, la carte de la Communauté et le flux RSS (pipeline/nouvelle.py), puis republie le site.
+# Make lit ensuite le flux (nouvelles.xml) et publie sur Facebook. Aucune demande à un site distant.
+# Garde-fous : seul le propriétaire du dépôt (la clé du service technique) peut lancer ce lot ; les champs passent par des variables d'environnement, lues comme du texte, jamais exécutées.
+on:
+  workflow_dispatch:
+    inputs:
+      titre:
+        description: Titre, écrit en grand sur l'image et en tête de la page
+        required: true
+        type: string
+      phrase:
+        description: Phrase de l'image, sous le titre
+        required: true
+        type: string
+      texte:
+        description: Texte de l'article (paragraphes séparés par une ligne vide ; « ## » titre ; « - » puces ; « 1. » étapes ; **gras** ; [texte](adresse))
+        required: true
+        type: string
+      facebook:
+        description: Texte de la publication Facebook (facultatif)
+        required: false
+        type: string
+      description:
+        description: Description courte de la carte (facultatif ; sinon la phrase de l'image)
+        required: false
+        type: string
+      fond:
+        description: Illustration de fond (identifiant)
+        required: false
+        type: string
+      date:
+        description: Date AAAA-MM-JJ (facultatif ; sinon aujourd'hui)
+        required: false
+        type: string
+      auteur:
+        description: Personne qui a lancé le lot (ajouté par le service technique)
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+# Même file d'attente que les autres écritures de données : un envoi du site n'est jamais écrasé (voir .github/scripts/publier.sh).
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  nouvelle:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NOUVELLE_TITRE: ${{ inputs.titre }}
+      NOUVELLE_PHRASE: ${{ inputs.phrase }}
+      NOUVELLE_TEXTE: ${{ inputs.texte }}
+      NOUVELLE_TEXTE_FACEBOOK: ${{ inputs.facebook }}
+      NOUVELLE_DESCRIPTION: ${{ inputs.description }}
+      NOUVELLE_FOND: ${{ inputs.fond }}
+      NOUVELLE_DATE: ${{ inputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow numpy fonttools brotli
+      - name: Tests
+        run: cd pipeline && python -m unittest test_nouvelle test_flux_nouvelles
+      - name: Créer la nouvelle
+        run: |
+          set -o pipefail
+          python pipeline/nouvelle.py | tee chemins.txt
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "nouvelle"
+          git config user.email "nouvelle@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/nouvelle.py' .github/scripts/publier.sh "Nouvelle du site : ${NOUVELLE_TITRE}" $(cat chemins.txt)
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml
+          echo "Nouvelle publiée : https://lacoteduheros.fr/$(grep -m1 '^web/.*\.html$' chemins.txt | sed 's#^web/##')" >> "$GITHUB_STEP_SUMMARY"

@@ -42,7 +42,7 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   bienvenue: 'heros',             // premier passage d'un compte : l'éditeur est prévenu par courriel
   avis: 'heros'                   // un avis libre sur le site, envoyé par courriel à l'éditeur
 };
-var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'], 'communaute.yml': ['commandes'], 'jaquette.yml': ['identifiant', 'adresse'] };   // lots que le relais accepte de lancer, avec leurs champs
+var LOTS = { 'corriger-prix.yml': ['corrections'], 'ajout-isbn.yml': ['liste', 'releve'], 'corriger-fiche.yml': ['corrections'], 'communaute.yml': ['commandes'], 'nouvelle.yml': ['titre', 'phrase', 'texte', 'facebook', 'description', 'fond', 'date'], 'jaquette.yml': ['identifiant', 'adresse'] };   // lots que le relais accepte de lancer, avec leurs champs
 var LIMITE_CHAMP = 20000;
 var EMETTEURS = ['accounts.google.com', 'https://accounts.google.com'];
 

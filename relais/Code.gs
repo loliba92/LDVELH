@@ -1,4 +1,4 @@
-// Version du 2026-11-21 10:16 (heure de Paris) : la réponse « moi » donne le code court du compte (guide PDF à son nom).
+// Version du 2026-11-22 17:02 (heure de Paris) : le lot « nouvelle.yml » (nouvelle du site, lancée depuis la page Communauté) est accepté.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
