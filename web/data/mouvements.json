@@ -15,8 +15,8 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 2.85,
-   "apres": 3.48,
-   "pct": 0.221,
+   "apres": 3.54,
+   "pct": 0.242,
    "nature": "archives",
    "nb": 0,
    "recalibre": false
@@ -30,8 +30,8 @@
    "version": "V1",
    "etat": "bon",
    "avant": 3.08,
-   "apres": 3.68,
-   "pct": 0.195,
+   "apres": 3.76,
+   "pct": 0.221,
    "nature": "annonces",
    "nb": 6,
    "recalibre": false
@@ -103,8 +103,8 @@
  "modele": {
   "actif": false,
   "n_paires": 291,
-  "gain": 0.058,
+  "gain": 0.061,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
-  "rapport_global": 1.085
+  "rapport_global": 1.087
  }
 }
