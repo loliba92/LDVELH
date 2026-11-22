@@ -1,0 +1,67 @@
+name: Nouvelle du site
+description: "Crée une nouvelle (page, images, carte de la Communauté, flux RSS) et la publie. Seul le propriétaire du dépôt peut la lancer."
+title: "Nouvelle : "
+body:
+  - type: input
+    id: titre
+    attributes:
+      label: Titre
+      description: "Écrit en grand sur l'image et en tête de la page. Court (une ligne ou deux)."
+    validations:
+      required: true
+  - type: input
+    id: phrase
+    attributes:
+      label: "Phrase de l'image"
+      description: "Une phrase lisible, écrite sous le titre sur l'image."
+    validations:
+      required: true
+  - type: textarea
+    id: texte
+    attributes:
+      label: "Texte de l'article"
+      description: "Paragraphes séparés par une ligne vide. Titre de section : « ## Titre ». Puces : lignes « - texte ». Étapes : « 1. texte ». Gras : **mot**. Lien : [texte](adresse)."
+    validations:
+      required: true
+  - type: textarea
+    id: facebook
+    attributes:
+      label: Texte de la publication Facebook
+      description: "Le texte détaillé repris par le flux RSS puis par Make. Facultatif : sinon, le titre et la description de la carte."
+  - type: input
+    id: description
+    attributes:
+      label: Description de la carte
+      description: "Courte, affichée dans la Communauté. Facultatif : sinon, la phrase de l'image."
+  - type: dropdown
+    id: fond
+    attributes:
+      label: Illustration de fond
+      options:
+        - "dragon-rouge : Un sorcier face à un dragon rouge"
+        - "sorcier-dragon : Un sorcier face à un dragon"
+        - "dragon-noir : Un sorcier dans l'ombre d'un dragon noir"
+        - "duel-neige : Un duel au coucher du soleil"
+        - "duel-ruines : Un duel dans des ruines"
+        - "golem : Un guerrier face à un golem de lave"
+        - "glace : Un guerrier face à un géant des glaces"
+        - "hydre : Une hydre attaque un navire"
+        - "heros-dragon : Un héros brandit son épée face à un dragon"
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: "Facultatif, au format AAAA-MM-JJ. Sinon, la date du jour."
+  - type: dropdown
+    id: mode
+    attributes:
+      label: "Que faire ?"
+      options:
+        - Publier
+        - "Aperçu des images seulement"
+      default: 0
+    validations:
+      required: true

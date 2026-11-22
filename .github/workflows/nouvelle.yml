@@ -1,0 +1,79 @@
+name: Nouvelle du site (formulaire)
+
+# Le propriétaire ouvre une issue avec le formulaire « Nouvelle du site » (.github/ISSUE_TEMPLATE/nouvelle.yml) : titre, phrase de l'image, texte de l'article,
+# texte Facebook, illustration. Ce lot fabrique les images, la page, la carte de la Communauté et le flux RSS (pipeline/nouvelle.py), republie le site, puis répond sur
+# l'issue et la ferme. Make lit ensuite le flux (nouvelles.xml) et publie sur Facebook.
+# Garde-fous : seule une issue ouverte par le propriétaire du dépôt, dont le titre commence par « Nouvelle », déclenche ce lot ; le texte de l'issue n'est jamais exécuté
+# (il passe par une variable d'environnement, lue comme du texte). Aucune demande à un site distant.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+# Même file d'attente que les autres écritures de données : un envoi du site n'est jamais écrasé (voir .github/scripts/publier.sh).
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  nouvelle:
+    if: github.event.issue.user.login == github.repository_owner && startsWith(github.event.issue.title, 'Nouvelle')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CORPS: ${{ github.event.issue.body }}
+      NUMERO: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow numpy fonttools brotli
+      - name: Tests
+        run: cd pipeline && python -m unittest test_nouvelle test_flux_nouvelles
+      - name: Créer la nouvelle
+        id: creer
+        run: |
+          set +e
+          python pipeline/nouvelle.py --formulaire > chemins.txt 2> erreur.txt
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - name: Aperçu des images
+        id: apercu
+        if: steps.creer.outputs.code == '0' && hashFiles('apercu/*') != ''
+        run: echo "oui=1" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: steps.apercu.outputs.oui == '1'
+        with:
+          name: apercu-images
+          path: apercu/
+      - name: Enregistrer et republier
+        id: publier
+        if: steps.creer.outputs.code == '0' && steps.apercu.outputs.oui != '1'
+        run: |
+          git config user.name "nouvelle"
+          git config user.email "nouvelle@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/nouvelle.py --formulaire' \
+            .github/scripts/publier.sh "Nouvelle du site (issue $NUMERO)" $(cat chemins.txt)
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml
+          echo "publiee=1" >> "$GITHUB_OUTPUT"
+      - name: Répondre et fermer l'issue
+        if: always()
+        run: |
+          ADRESSE="$(grep -m1 '^web/.*\.html$' chemins.txt | sed 's#^web/##')"
+          if [ "${{ steps.creer.outputs.code }}" != "0" ]; then
+            { echo "La nouvelle n'a pas été créée :"; echo; cat erreur.txt; } > compte-rendu.txt
+          elif [ "${{ steps.apercu.outputs.oui }}" = "1" ]; then
+            echo "Aperçu prêt : les images sont dans les fichiers (« apercu-images ») de l'exécution : ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. Rien n'a été publié." > compte-rendu.txt
+          elif [ "${{ steps.publier.outputs.publiee }}" = "1" ]; then
+            echo "Nouvelle publiée : https://lacoteduheros.fr/${ADRESSE}. Le site est republié dans environ une minute ; Make la publiera sur Facebook à son prochain passage." > compte-rendu.txt
+          else
+            echo "Nouvelle non publiée : voir le journal du lot." > compte-rendu.txt
+          fi
+          gh issue comment "$NUMERO" --body-file compte-rendu.txt
+          gh issue close "$NUMERO" --reason completed
