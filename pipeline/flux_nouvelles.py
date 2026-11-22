@@ -25,18 +25,24 @@ MOIS = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août
 PREMIERE_EDITION = (2026, 12)
 
 
+def de_mois(m):
+    """« de décembre », « d'avril » : le mois (1 à 12) avec sa préposition."""
+    nom = MOIS[m - 1]
+    return ("d'" if nom[0] in "aeiouéhâ" else "de ") + nom
+
+
 def editions_mensuelles(jour):
     """Une entrée par premier du mois, de PREMIERE_EDITION jusqu'au mois de `jour` (un objet date)."""
     sortie, (a, m) = [], PREMIERE_EDITION
     while (a, m) <= (jour.year, jour.month):
         sortie.append({
-            "nom": f"Guide de référence : édition de {MOIS[m - 1]} {a}",
+            "nom": f"Guide de référence : édition {de_mois(m)} {a}",
             "adresse": f"{BASE}guide-reference.html#guide-{a}-{m:02d}",
-            "description": f"Le guide PDF de {MOIS[m - 1]} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur. Offert avec votre compte.",
-            "texte_flux": (f"Le guide de référence de {MOIS[m - 1]} {a} est prêt.\n\nTous les livres avec leurs repères, et la stratégie du collectionneur, dans un PDF refait chaque jour.\n\n"
+            "description": f"Le guide PDF {de_mois(m)} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur. Offert avec votre compte.",
+            "texte_flux": (f"Le guide de référence {de_mois(m)} {a} est prêt.\n\nTous les livres avec leurs repères, et la stratégie du collectionneur, dans un PDF refait chaque jour.\n\n"
                            "Pour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris."),
-            "image": "data/communaute/guide-reference.jpg",
-            "image_flux": "data/communaute/guide-reference-partage.jpg",
+            "image": f"data/communaute/guide-{a}-{m:02d}.jpg",
+            "image_flux": f"data/communaute/guide-{a}-{m:02d}-partage.jpg",          # créées avant la carte : voir pipeline/nouvelle.py (--guide-du-mois)
             "date": f"{a}-{m:02d}-01",
         })
         a, m = (a + 1, 1) if m == 12 else (a, m + 1)
