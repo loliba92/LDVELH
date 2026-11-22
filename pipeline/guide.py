@@ -944,8 +944,10 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
     def zone_de(v):
         c_ = ga.cote(v)
-        if med_o is None or not v.get("isbn13") or c_ <= 0:
+        if med_o is None or sortie_prevue(v, genere_le or date.today().isoformat()):
             return None
+        if not v.get("isbn13") or c_ <= 0:
+            return 2          # prix inconnu : zone 1, la rareté
         return ga.quadrant(ga.nb_annonces(donnees_zones["offre"].get(v["isbn13"])), c_, med_o, med_c)
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
         ] + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("La feuille d'aventure", styles["h1m"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 1 * mm)] + legende(styles, st, pol, exemple) + (page_strategie(styles, {"filet": HexColor(st["filet"])}) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
