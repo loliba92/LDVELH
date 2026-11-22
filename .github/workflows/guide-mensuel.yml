@@ -1,0 +1,39 @@
+name: Guide du mois
+
+# Le 1er de chaque mois : ajoute la carte « Guide de référence : édition du mois » à la page Communauté (web/data/communaute.json) et au flux RSS (web/nouvelles.xml), puis republie le site.
+# Aucune demande à un site distant. Voir pipeline/flux_nouvelles.py.
+on:
+  schedule:
+    - cron: "40 5 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: ecriture-donnees
+  cancel-in-progress: false
+
+jobs:
+  flux:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests du flux
+        run: python pipeline/test_flux_nouvelles.py
+      - name: Ajouter la carte et reconstruire le flux
+        run: python pipeline/flux_nouvelles.py | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Enregistrer et republier
+        run: |
+          git config user.name "guide-mensuel"
+          git config user.email "guide-mensuel@users.noreply.github.com"
+          AVANT="$(git rev-parse HEAD)"
+          REJOUER='python pipeline/flux_nouvelles.py' .github/scripts/publier.sh "Flux : guide du mois ($(date +%F))" web/data/communaute.json web/nouvelles.xml
+          [ "$(git rev-parse HEAD)" != "$AVANT" ] || exit 0
+          gh workflow run pages.yml
