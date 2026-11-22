@@ -1,7 +1,7 @@
 {
   "genere_le": "2026-11-22",
   "nb_versions": 537,
-  "nb_livres": 295,
+  "nb_livres": 294,
   "nb_series": 45,
   "sources_prix": [
     "Relevé d'archives (historique)",
@@ -15,10 +15,10 @@
     "Prix demandé (annonce active)",
     "Prix historique"
   ],
-  "nb_prix_actuels": 715,
+  "nb_prix_actuels": 717,
   "calibration": {
     "actif": false,
-    "n_paires": 291,
+    "n_paires": 293,
     "gain": 0.061,
     "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
     "calcule_le": "2026-11-22",
