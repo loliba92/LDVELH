@@ -31,9 +31,12 @@ def editions_mensuelles(jour):
     while (a, m) <= (jour.year, jour.month):
         sortie.append({
             "nom": f"Guide de référence : édition de {MOIS[m - 1]} {a}",
-            "adresse": f"{BASE}sorcier.html#guide-{a}-{m:02d}",
-            "description": f"Le guide PDF de {MOIS[m - 1]} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur, pour les Sorciers et les Héros en essai.",
-            "image": "data/communaute/sorcier.jpg",
+            "adresse": f"{BASE}guide-reference.html#guide-{a}-{m:02d}",
+            "description": f"Le guide PDF de {MOIS[m - 1]} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur. Offert avec votre compte.",
+            "texte_flux": (f"Le guide de référence de {MOIS[m - 1]} {a} est prêt.\n\nTous les livres, leurs repères du marché et la stratégie du collectionneur, dans un PDF refait chaque jour.\n\n"
+                           "Pour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris."),
+            "image": "data/communaute/guide-reference.jpg",
+            "image_flux": "data/communaute/guide-reference-partage.jpg",
             "date": f"{a}-{m:02d}-01",
         })
         a, m = (a + 1, 1) if m == 12 else (a, m + 1)

@@ -49,6 +49,8 @@ class TestFlux(unittest.TestCase):
         self.assertEqual([x["date"] for x in e], ["2026-12-01", "2027-01-01"])
         self.assertEqual(e[1]["nom"], "Guide de référence : édition de janvier 2027")
         self.assertEqual(len({x["adresse"] for x in e}), 2)
+        self.assertTrue(all(x["adresse"].startswith("https://lacoteduheros.fr/guide-reference.html#guide-") for x in e))
+        self.assertTrue(all(x["image_flux"].endswith("guide-reference-partage.jpg") and x["texte_flux"] for x in e))
         ajoutee = ajouter_editions(LISTE, date(2027, 1, 15))
         self.assertEqual(nouvelles(ajoutee)[0]["date"], "2027-01-01")
         self.assertEqual(ajouter_editions(ajoutee, date(2027, 1, 20)), ajoutee)      # sans doublon
