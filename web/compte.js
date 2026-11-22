@@ -190,8 +190,9 @@ window.Compte = (function () {
       b = document.createElement('div'); b.id = 'compte-fin'; b.className = 'compte-bandeau'; b.setAttribute('role', 'status');
       var haut = $('.haut'); if (haut) haut.after(b); else document.body.prepend(b);
     }
-    var quand = reste === 0 ? 'aujourd\'hui' : reste === 1 ? 'demain' : 'dans ' + reste + ' jours';
-    b.innerHTML = '<span>Votre accès sorcier va bientôt se terminer : <strong>' + new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + '</strong> (' + quand + '). Ensuite, vous redevenez Héros : votre collection est conservée.</span>';
+    var date = new Date(finAcces + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    var debut = reste === 0 ? 'Dernier jour de Sorcier aujourd\'hui.' : reste === 1 ? 'Dernier jour de Sorcier demain.' : 'Il vous reste ' + reste + ' jours de Sorcier, offerts jusqu\'au <strong class="nowrap">' + date + '</strong>.';
+    b.innerHTML = '<span>' + debut + ' Profitez-en : votre collection et votre compte continuent ensuite, et le guide téléchargé reste à vous.</span>';
     b.hidden = false;
   }
 
