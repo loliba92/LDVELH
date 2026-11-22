@@ -70,6 +70,7 @@ def date_longue(iso):
 
 # Repères en mots, sans chiffre. Les seuils sont ceux du site (web/app.js : niveauCote, SEUILS_COTE, et le bloc « Offre d'occasion ») ; ils ne sont jamais affichés.
 SEUILS_PRIX = (10, 20, 40, 70)
+ZONES_COURTES = {2: "rareté", 3: "cher et liquide", 0: "marché calme", 1: "le courant"}          # nom court de chaque zone (clé : zone interne)
 MOTS_PRIX = ("pas cher", "abordable", "moyen", "cher", "très cher")
 LIBELLE_OFFRE, LIBELLE_PRIX = "En vente", "Prix d'occasion"          # titres des deux repères sur chaque fiche
 
@@ -126,7 +127,7 @@ def editeur_de(v):
 
 
 def grouper(versions, series=None, editeurs=None):
-    """[(éditeur, [(version, [(série, [livres par numéro])])])] : éditeurs du plus fourni au moins fourni (« Autres éditeurs » en dernier),
+    """[(éditeur, [(version, [(série, [livres par numéro])])])] : éditeurs du plus fourni au moins fourni (Gallimard Jeunesse juste après Gallimard, « Autres éditeurs » en dernier),
     versions en ordre naturel, séries par ordre alphabétique. On ne mélange jamais deux versions. `series` et `editeurs` : filtres d'essai."""
     arbre = {}
     for v in versions:
@@ -136,6 +137,9 @@ def grouper(versions, series=None, editeurs=None):
             continue
         arbre.setdefault(e, {}).setdefault(v.get("version") or "?", {}).setdefault(s, []).append(v)
     ordre = sorted(arbre, key=lambda e: (e == AUTRES, -sum(len(l) for par in arbre[e].values() for l in par.values()), e.casefold()))
+    if "Gallimard" in ordre and "Gallimard Jeunesse" in ordre:          # Gallimard Jeunesse toujours à la suite de Gallimard
+        ordre.remove("Gallimard Jeunesse")
+        ordre.insert(ordre.index("Gallimard") + 1, "Gallimard Jeunesse")
     return [(e, [(ver, [(s, sorted(l, key=lambda v: (_numero(v), v.get("titre") or ""))) for s, l in sorted(arbre[e][ver].items(), key=lambda x: x[0].casefold())])
                  for ver in sorted(arbre[e], key=_rang_version)]) for e in ordre]
 
@@ -654,6 +658,17 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
             c.setLineWidth(0.6)
             c.rect(6 * mm, 6 * mm, L_PAGE - 12 * mm, H_PAGE - 12 * mm, fill=0, stroke=1)
 
+    def legende_pied(c, y=15.6 * mm):
+        """Note en bas des pages du catalogue : l'échelle des prix en euros et le rappel des quatre zones."""
+        seuils = SEUILS_PRIX
+        bornes = [f"moins de {seuils[0]}\u00a0€"] + [f"{a}-{b}\u00a0€" for a, b in zip(seuils, seuils[1:])] + [f"{seuils[-1]}\u00a0€ et +"]
+        prix = "  ·  ".join(f"{mot} {borne}" for mot, borne in zip(MOTS_PRIX, bornes))
+        zones = "  ·  ".join(f"{ga.NUM_ZONE[q]} {nom}" for q, nom in sorted(ZONES_COURTES.items(), key=lambda x: ga.NUM_ZONE[x[0]]))
+        texte = f"Prix d'occasion : {prix}        Zones : {zones}"
+        taille = min(6.2, 6.2 * L_CADRE / pdfmetrics.stringWidth(texte, f_texte, 6.2))
+        c.setFont(f_texte, taille); c.setFillColor(C("sourdine"))
+        c.drawCentredString(L_PAGE / 2, y, texte)
+
     def pied(c, doc, entete=True):
         c.setStrokeColor(C("filet"))
         c.setLineWidth(0.4)
@@ -675,8 +690,32 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     def page_texte(c, doc):
         pied(c, doc)
 
+    def menu_catalogue(c, courant):
+        """Ligne de liens sous l'en-tête : le sommaire, puis chaque éditeur (celui de la page en gras)."""
+        noms = ["Sommaire"] + list(liste_editeurs)
+        taille = 6.6
+        def larg(t, police):
+            return pdfmetrics.stringWidth(t, police, taille)
+        sep = 3.2 * mm
+        total = sum(larg(n, f_gras if n == courant else f_texte) for n in noms) + sep * (len(noms) - 1)
+        if total > L_CADRE:
+            taille *= L_CADRE / total
+            total = L_CADRE
+            sep *= L_CADRE / total
+        y = H_PAGE - 19 * mm
+        x = (L_PAGE - sum(larg(n, f_gras if n == courant else f_texte) for n in noms) - sep * (len(noms) - 1)) / 2
+        for n in noms:
+            police = f_gras if n == courant else f_texte
+            c.setFont(police, taille)
+            c.setFillColor(C("titre") if n == courant else C("sourdine"))
+            c.drawString(x, y, n)
+            w = larg(n, police)
+            c.linkRect("", "sommaire" if n == "Sommaire" else f"ed:{n}", (x - 1 * mm, y - 1.2 * mm, x + w + 1 * mm, y + 3 * mm), relative=0, thickness=0)
+            x += w + sep
+
     def page_catalogue(c, doc):
         pied(c, doc)
+        legende_pied(c)
         eds = []
         for e, v in ([etat["debut"]] if etat["debut"][0] else []) + etat["vus"]:
             if not eds or eds[-1][0] != e:
@@ -691,6 +730,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.setLineWidth(0.4)
         c.line(MARGE_X, H_PAGE - 14.5 * mm, L_PAGE - MARGE_X, H_PAGE - 14.5 * mm)
         actifs = eds[-1][1] if eds else []
+        menu_catalogue(c, eds[-1][0] if eds else None)
         for k, ver in enumerate(etat["versions"]):          # onglets de version sur le bord de la page
             actif = ver in actifs
             ty = H_PAGE - 40 * mm - k * 24 * mm
@@ -698,6 +738,8 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
             c.setStrokeColor(C("filet"))
             c.setLineWidth(0.5)
             c.roundRect(L_PAGE - 6.5 * mm, ty, 9 * mm, 20 * mm, 2 * mm, fill=1, stroke=1)
+            if eds:
+                c.linkRect("", f"ver:{eds[-1][0]}:{ver}", (L_PAGE - 6.5 * mm, ty, L_PAGE - 0.5 * mm, ty + 20 * mm), relative=0, thickness=0)
             c.saveState()
             c.translate(L_PAGE - 2.6 * mm, ty + 10 * mm)
             c.rotate(90)
@@ -888,6 +930,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.linkURL(LIEN_SITE, (L_PAGE / 2 - 25 * mm, 24 * mm, L_PAGE / 2 + 25 * mm, 30 * mm), relative=0)
 
     remplissage = {}
+    liste_editeurs = []          # éditeurs du guide, dans l'ordre : le menu des pages du catalogue
 
     class Doc(BaseDocTemplate):
         def handle_documentBegin(self):
@@ -904,13 +947,15 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
 
         def afterFlowable(self, f):
             if isinstance(f, TitreVersion):
+                self.canv.bookmarkPage(f"ver:{f.editeur}:{f.version}")          # destination du menu : onglets de version
                 self.entree_sommaire(1, f.getPlainText())
-            elif isinstance(f, TeteSerie):
-                self.entree_sommaire(2, f.getPlainText())
             elif isinstance(f, Marqueur) and f.valeurs.get("niveau0"):
+                self.canv.bookmarkPage(f"ed:{f.valeurs['niveau0']}")          # destination du menu : liste des éditeurs
                 self.entree_sommaire(0, f.valeurs["niveau0"])
             elif isinstance(f, Paragraph) and f.style.name in ("h1m", "h1i"):
                 self.entree_sommaire(0, f.getPlainText())
+            elif isinstance(f, Paragraph) and f.style.name == "h1" and f.getPlainText() == "Sommaire":
+                self.canv.bookmarkPage("sommaire")
 
         def afterPage(self):
             if self.pageTemplate.id == "catalogue":          # taux de remplissage de la page (hauteur utilisée sur hauteur utile)
@@ -952,6 +997,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
         ] + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("La feuille d'aventure", styles["h1m"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 1 * mm)] + legende(styles, st, pol, exemple) + (page_strategie(styles, {"filet": HexColor(st["filet"])}) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
+    liste_editeurs[:] = [e for e, _ in groupes]
     for k, (editeur, versions_ed) in enumerate(groupes):
         nom_versions = [ver for ver, _ in versions_ed]
         total = sum(len(l) for _, ss in versions_ed for _, l in ss)
