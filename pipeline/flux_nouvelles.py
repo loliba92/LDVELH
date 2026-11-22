@@ -3,10 +3,11 @@
 Usage : python pipeline/flux_nouvelles.py
 Une nouvelle est une entrée de web/data/communaute.json qui porte un champ « date » (AAAA-MM-JJ) : titre, texte, lien et image de la carte.
 Le flux est reconstruit en entier, les plus récentes en premier (20 au plus).
+Le 1er de chaque mois, une carte « Guide de référence : édition du mois » s'ajoute à la liste Communauté, donc au flux (workflow guide-mensuel.yml).
 """
 import json
 import mimetypes
-from datetime import datetime
+from datetime import date, datetime
 from email.utils import format_datetime
 from pathlib import Path
 from xml.sax.saxutils import escape, quoteattr
@@ -18,6 +19,32 @@ SORTIE = RACINE / "web" / "nouvelles.xml"
 BASE = "https://lacoteduheros.fr/"
 MAX_NOUVELLES = 20
 PARIS = ZoneInfo("Europe/Paris")
+
+
+MOIS = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre")
+PREMIERE_EDITION = (2026, 12)
+
+
+def editions_mensuelles(jour):
+    """Une entrée par premier du mois, de PREMIERE_EDITION jusqu'au mois de `jour` (un objet date)."""
+    sortie, (a, m) = [], PREMIERE_EDITION
+    while (a, m) <= (jour.year, jour.month):
+        sortie.append({
+            "nom": f"Guide de référence : édition de {MOIS[m - 1]} {a}",
+            "adresse": f"{BASE}sorcier.html#guide-{a}-{m:02d}",
+            "description": f"Le guide PDF de {MOIS[m - 1]} {a} est prêt : les repères, les quatre zones et la stratégie du collectionneur, pour les Sorciers et les Héros en essai.",
+            "image": "data/communaute/sorcier.jpg",
+            "date": f"{a}-{m:02d}-01",
+        })
+        a, m = (a + 1, 1) if m == 12 else (a, m + 1)
+    return sortie
+
+
+def ajouter_editions(liste, jour):
+    """Ajoute en tête de la liste les éditions mensuelles qui n'y sont pas encore ; renvoie la liste."""
+    connues = {x.get("adresse") for x in liste}
+    neuves = [x for x in editions_mensuelles(jour) if x["adresse"] not in connues]
+    return sorted(neuves, key=lambda x: x["date"], reverse=True) + list(liste)
 
 
 def nouvelles(liste):
@@ -78,8 +105,11 @@ def construire(liste, racine=RACINE):
 
 def main():
     liste = json.loads(LISTE.read_text(encoding="utf-8"))
-    SORTIE.write_text(construire(liste), encoding="utf-8")
-    print(f"{len(nouvelles(liste))} nouvelle(s) dans le flux")
+    complete = ajouter_editions(liste, date.today())
+    if complete != liste:
+        LISTE.write_text(json.dumps(complete, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    SORTIE.write_text(construire(complete), encoding="utf-8")
+    print(f"{len(nouvelles(complete))} nouvelle(s) dans le flux")
 
 
 if __name__ == "__main__":

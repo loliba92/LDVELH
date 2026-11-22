@@ -531,7 +531,7 @@ def introduction(texte, variables, styles, st, pol):
         if t.startswith("# "):
             sortie += [Paragraph(_inline(t[2:]), styles["h1i"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 6 * mm)]
         elif t.startswith("## "):
-            sortie.append(Paragraph(_inline(t[3:]), styles["h2"]))
+            sortie.append(Paragraph(_inline(t[3:]), styles["h2_intro"]))
         elif t.startswith("*") and t.endswith("*") and not t.startswith("**"):
             sortie += [Paragraph(_inline(t.strip("*")), styles["exergue"]), Spacer(1, 6 * mm)]
         elif lignes[0].lstrip().startswith("- "):
@@ -627,6 +627,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         "corps": ParagraphStyle("corps", fontName=f_texte, fontSize=10.5, leading=15.5, textColor=C("texte")),
         "h1": ParagraphStyle("h1", fontName=f_titre_gras, fontSize=30, leading=34, textColor=C("titre"), spaceAfter=7 * mm),
         "h1m": ParagraphStyle("h1m", fontName=f_titre_gras, fontSize=30, leading=34, textColor=C("titre"), spaceAfter=6 * mm),
+        "h2_intro": ParagraphStyle("h2_intro", fontName=f_titre_gras, fontSize=17, leading=21, textColor=C("titre"), spaceBefore=7 * mm, spaceAfter=3 * mm, leftIndent=8 * mm, keepWithNext=1),
         "h2": ParagraphStyle("h2", fontName=f_titre_gras, fontSize=17, leading=20, textColor=C("titre"), spaceBefore=5 * mm, spaceAfter=2 * mm, keepWithNext=1),
         "toc": ParagraphStyle("toc", fontName=f_texte, fontSize=10, leading=14, textColor=C("texte")),
         "h1i": ParagraphStyle("h1i", fontName=f_titre_gras, fontSize=34, leading=38, textColor=C("titre"), spaceAfter=3 * mm),
@@ -814,10 +815,8 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         c.setFillColor(HexColor("#f4ecd8"))
         c.setFont(f_texte, 12)
         c.drawCentredString(L_PAGE / 2, 120, "La cote d'occasion de tous les livres dont vous êtes le héros")
-        c.setFillColor(HexColor("#e8c766"))
-        lettres(c, L_PAGE / 2, 95, "Éditions V1, V2… · Jaquettes · Rareté et prix · Zones 1 à 4", f_gras, 9.5, 1.0, centre=True)
         c.setFillColor(HexColor("#f4ecd8"))
-        lettres(c, L_PAGE / 2, 50, "Un guide d'Olivier Bertrand", f_texte, 10, 3, centre=True)
+        lettres(c, L_PAGE / 2, 50, "Par Olivier Bertrand", f_texte, 10, 3, centre=True)
         c.setFillColor(HexColor("#bfb59a"))
         c.setFont(f_texte, 8.5)
         c.drawCentredString(L_PAGE / 2, 36, f"{SITE} · {date_longue(genere_le)}")

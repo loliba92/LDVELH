@@ -1353,6 +1353,21 @@
     'moyen/cher': "L'offre est courante, mais le prix est élevé.", 'moyen/bas': "L'offre est courante, et le prix est bas.",
     'moyen/moyen': "Rien d'extrême : l'offre et le prix sont dans la moyenne des livres du guide.",
     'aucune/cher': 'Aucun vendeur ne le propose, et sa cote est élevée.', 'aucune/bas': 'Aucun vendeur ne le propose, et sa cote est basse.', 'aucune/moyen': 'Aucun vendeur ne le propose en ce moment.' };
+  // Zone 1 à 4 du guide PDF : annonces et cote comparées aux médianes de tous les livres (au-dessus de la médiane : « beaucoup », « cher »)
+  const ZONES_FICHE = { 2: ['Zone 1', 'La rareté', 'Peu d\'annonces, cher'], 3: ['Zone 2', 'Cher et liquide', 'Beaucoup d\'annonces, cher'], 0: ['Zone 3', 'Un marché calme', 'Peu d\'annonces, bon marché'], 1: ['Zone 4', 'Le courant', 'Beaucoup d\'annonces, bon marché'] };
+  function remplirZone(b) {
+    chargerOffre().then(() => {
+      const e = $('#fiche-zone');
+      if (ficheOuverte !== b.id || !e) return;
+      const cote = (x) => (x.prix && (x.prix.tres_bon || x.prix.bon)) || 0, nb = (o) => (o ? (o.ebay || 0) + (o.lbc || 0) + (o.vin || 0) + (o.lib || 0) + (o.rev || 0) : 0);
+      if (!OFFRE || !OFFRE.offre || !b.isbn13 || !cote(b)) { e.hidden = true; return; }
+      const pts = DATA.filter((x) => x.isbn13 && cote(x) > 0).map((x) => [nb(OFFRE.offre[x.isbn13]), cote(x)]);
+      const mediane = (l) => { const t = [...l].sort((u, v) => u - v), m = t.length >> 1; return t.length % 2 ? t[m] : (t[m - 1] + t[m]) / 2; };
+      const q = (nb(OFFRE.offre[b.isbn13]) > mediane(pts.map((x) => x[0])) ? 1 : 0) + (cote(b) > mediane(pts.map((x) => x[1])) ? 2 : 0);
+      const [num, nom, sens] = ZONES_FICHE[q];
+      e.textContent = `${num} · ${nom}`; e.title = `${num} du guide : ${sens.toLowerCase()}`;
+    }).catch(() => { const e = $('#fiche-zone'); if (e) e.hidden = true; });
+  }
   function remplirPosition(b) {
     chargerOffre().then(() => {
       const zone = $('#fp-corps');
@@ -1488,7 +1503,7 @@
           <div>
             <div class="fiche-tete"><h2 id="fiche-titre">${esc(b.titre)}</h2>
               <button type="button" class="fermer" id="fermer" aria-label="Fermer la fiche">×</button></div>
-            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
+            <p class="fiche-sous"><span class="badge">${esc(b.version)}</span><span>${esc(b.serie)}${esc(numero(b))}</span>${pastilleRarete(b)}${estNiveau2() ? '<span class="rarete zone-pastille" id="fiche-zone">Zone …</span>' : ''}${b.parution ? `<span class="rarete" title="Livre annoncé, pas encore en librairie">Paraît le ${new Date(b.parution + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}${b.en_vente === 1 ? '<span>· encore en vente neuve</span>' : ''}</p>
             ${b.parution && b.isbn13 ? `<p class="fiche-precommande"><span>Précommander :</span>${[['Libraires', `https://www.leslibraires.fr/livre/${b.isbn13}`], ['Fnac', `https://www.fnac.com/SearchResult/ResultList.aspx?Search=${b.isbn13}`], ['Amazon', `https://www.amazon.fr/s?k=${b.isbn13}`]].map(([nom, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="${nom} (nouvel onglet)">${nom} ↗</a>`).join('')}</p>` : ''}
             <div class="note-livre" id="note-livre" hidden></div>
             ${cotesMasquees() ? `<h3 class="fiche-cotes-titre">Prix de cette édition${estNiveau2() ? blocTendance(b, sel.k) : ''}</h3>
@@ -1526,7 +1541,7 @@
     brancherCorriger();
     if (estNiveau3()) brancherLissage(b);
     if (voitAnnonces()) remplirAnnonces(b);
-    if (estNiveau2()) { remplirOffre(b); remplirPosition(b); }
+    if (estNiveau2()) { remplirOffre(b); remplirPosition(b); remplirZone(b); }
     $('#fermer').addEventListener('click', () => dlg.close());
     $('#fiche-contenu').querySelectorAll('[data-autre]').forEach((el) =>
       el.addEventListener('click', () => { if (el.dataset.autre !== b.id) ouvrirFiche(el.dataset.autre); }));

@@ -1,7 +1,9 @@
 import unittest
 import xml.etree.ElementTree as ET
 
-from flux_nouvelles import construire, date_rss, nouvelles
+from datetime import date
+
+from flux_nouvelles import construire, date_rss, ajouter_editions, editions_mensuelles, nouvelles
 
 LISTE = [
     {"nom": "Lien extérieur", "adresse": "https://autre.example/", "description": "sans date", "image": ""},
@@ -29,6 +31,17 @@ class TestFlux(unittest.TestCase):
     def test_date_a_l_heure_de_paris(self):
         self.assertEqual(date_rss("2026-11-05"), "Thu, 05 Nov 2026 08:00:00 +0100")
         self.assertEqual(date_rss("2026-07-14"), "Tue, 14 Jul 2026 08:00:00 +0200")
+
+    def test_edition_mensuelle_le_premier_du_mois(self):
+        self.assertEqual(editions_mensuelles(date(2026, 11, 30)), [])
+        e = editions_mensuelles(date(2027, 1, 1))
+        self.assertEqual([x["date"] for x in e], ["2026-12-01", "2027-01-01"])
+        self.assertEqual(e[1]["nom"], "Guide de référence : édition de janvier 2027")
+        self.assertEqual(len({x["adresse"] for x in e}), 2)
+        ajoutee = ajouter_editions(LISTE, date(2027, 1, 15))
+        self.assertEqual(nouvelles(ajoutee)[0]["date"], "2027-01-01")
+        self.assertEqual(ajouter_editions(ajoutee, date(2027, 1, 20)), ajoutee)      # sans doublon
+        ET.fromstring(construire(ajoutee))
 
     def test_flux_vide_reste_valide(self):
         ET.fromstring(construire([]))
