@@ -2,7 +2,7 @@
  "date": "2026-11-22",
  "precedent": "2026-11-21",
  "nb_comparees": 1548,
- "nb_modifiees": 1376,
+ "nb_modifiees": 1377,
  "mediane_variation": -0.002,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -135,10 +135,25 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 64.6,
-   "apres": 71.38,
+   "apres": 71.39,
    "pct": 0.105,
    "nature": "annonces",
    "nb": 1,
+   "recalibre": false
+  },
+  {
+   "id": "9782070333516",
+   "isbn13": "9782070333516",
+   "titre": "La Vengeance d'Althéos",
+   "serie": "Chroniques Crétoises",
+   "numero": "351",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 10.38,
+   "apres": 11.42,
+   "pct": 0.1,
+   "nature": "annonces",
+   "nb": 32,
    "recalibre": false
   }
  ],
@@ -159,11 +174,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 10,
+ "nb_grands_mouvements": 11,
  "modele": {
   "actif": false,
-  "n_paires": 292,
-  "gain": 0.057,
+  "n_paires": 291,
+  "gain": 0.061,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
   "rapport_global": 1.087
  }
