@@ -893,17 +893,25 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
     class Doc(BaseDocTemplate):
         def handle_documentBegin(self):
             etat.update({"editeur": None, "version": None, "versions": [], "index": 0, "nb": 0, "nv": 0, "debut": (None, None), "vus": []})          # chaque passage de construction repart de zéro
+            self.n_signet = 0
             super().handle_documentBegin()
+
+        def entree_sommaire(self, niveau, texte):
+            """Une ligne du sommaire : un signet à cet endroit, et la ligne (titre et numéro de page) devient un lien vers lui."""
+            self.n_signet += 1
+            cle = f"s{self.n_signet}"
+            self.canv.bookmarkPage(cle)
+            self.notify("TOCEntry", (niveau, texte, self.page, cle))
 
         def afterFlowable(self, f):
             if isinstance(f, TitreVersion):
-                self.notify("TOCEntry", (1, f.getPlainText(), self.page))
+                self.entree_sommaire(1, f.getPlainText())
             elif isinstance(f, TeteSerie):
-                self.notify("TOCEntry", (2, f.getPlainText(), self.page))
+                self.entree_sommaire(2, f.getPlainText())
             elif isinstance(f, Marqueur) and f.valeurs.get("niveau0"):
-                self.notify("TOCEntry", (0, f.valeurs["niveau0"], self.page))
+                self.entree_sommaire(0, f.valeurs["niveau0"])
             elif isinstance(f, Paragraph) and f.style.name in ("h1m", "h1i"):
-                self.notify("TOCEntry", (0, f.getPlainText(), self.page))
+                self.entree_sommaire(0, f.getPlainText())
 
         def afterPage(self):
             if self.pageTemplate.id == "catalogue":          # taux de remplissage de la page (hauteur utilisée sur hauteur utile)
