@@ -90,7 +90,7 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 64.6,
-   "apres": 71.39,
+   "apres": 71.38,
    "pct": 0.105,
    "nature": "annonces",
    "nb": 1,
@@ -117,8 +117,8 @@
  "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
-  "n_paires": 291,
-  "gain": 0.061,
+  "n_paires": 292,
+  "gain": 0.057,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
   "rapport_global": 1.087
  }
