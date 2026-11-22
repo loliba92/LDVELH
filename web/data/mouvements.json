@@ -2,7 +2,7 @@
  "date": "2026-11-22",
  "precedent": "2026-11-21",
  "nb_comparees": 1548,
- "nb_modifiees": 1376,
+ "nb_modifiees": 1378,
  "mediane_variation": -0.003,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -80,6 +80,21 @@
    "nature": "prix éditeur",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782070585168",
+   "isbn13": "9782070585168",
+   "titre": "La Malédiction de Naar",
+   "serie": "Loup Solitaire",
+   "numero": "749",
+   "version": "V1",
+   "etat": "tres_bon",
+   "avant": 64.6,
+   "apres": 71.39,
+   "pct": 0.105,
+   "nature": "annonces",
+   "nb": 1,
+   "recalibre": false
   }
  ],
  "baisses": [
@@ -99,11 +114,11 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 6,
+ "nb_grands_mouvements": 7,
  "modele": {
   "actif": false,
-  "n_paires": 292,
-  "gain": 0.057,
+  "n_paires": 291,
+  "gain": 0.061,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
   "rapport_global": 1.087
  }
