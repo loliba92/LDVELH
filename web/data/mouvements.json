@@ -135,25 +135,10 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 64.6,
-   "apres": 71.39,
+   "apres": 71.37,
    "pct": 0.105,
    "nature": "annonces",
    "nb": 1,
-   "recalibre": false
-  },
-  {
-   "id": "9782070333516",
-   "isbn13": "9782070333516",
-   "titre": "La Vengeance d'Althéos",
-   "serie": "Chroniques Crétoises",
-   "numero": "351",
-   "version": "V1",
-   "etat": "bon",
-   "avant": 10.38,
-   "apres": 11.42,
-   "pct": 0.1,
-   "nature": "annonces",
-   "nb": 32,
    "recalibre": false
   }
  ],
@@ -174,12 +159,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 11,
+ "nb_grands_mouvements": 10,
  "modele": {
   "actif": false,
-  "n_paires": 291,
-  "gain": 0.063,
-  "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
+  "n_paires": 293,
+  "gain": 0.054,
+  "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
   "rapport_global": 1.087
  }
 }
