@@ -8,11 +8,11 @@
     <lastBuildDate>Sun, 22 Nov 2026 08:00:00 +0100</lastBuildDate>
     <atom:link href="https://lacoteduheros.fr/nouvelles.xml" rel="self" type="application/rss+xml"/>
     <item>
-      <title>Le guide de référence, offert et mis à jour chaque jour</title>
+      <title>Le guide de référence, offert</title>
       <link>https://lacoteduheros.fr/guide-reference.html</link>
       <guid isPermaLink="true">https://lacoteduheros.fr/guide-reference.html</guid>
       <pubDate>Sun, 22 Nov 2026 08:00:00 +0100</pubDate>
-      <description>Toutes les éditions, leur cote, quatre zones pour s'y retrouver et la stratégie du collectionneur : le guide PDF est offert et refait chaque jour. Ce qu'il contient et comment l'obtenir, expliqué simplement.</description>
+      <description>Chaque livre, chaque édition, sa cote, et une méthode simple pour acheter et vendre : le guide PDF est offert et refait chaque jour.</description>
       <enclosure url="https://lacoteduheros.fr/data/communaute/guide-reference.jpg" length="29499" type="image/jpeg"/>
       <media:content url="https://lacoteduheros.fr/data/communaute/guide-reference.jpg" medium="image" type="image/jpeg"/>
     </item>
