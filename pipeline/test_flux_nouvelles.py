@@ -28,6 +28,12 @@ class TestFlux(unittest.TestCase):
         self.assertEqual(items[1].findtext("description"), "A & B")
         self.assertIsNone(items[1].find("enclosure"))
 
+    def test_texte_flux_remplace_la_description_dans_le_flux_seulement(self):
+        liste = [{"nom": "Longue", "adresse": "https://lacoteduheros.fr/c.html", "description": "courte", "texte_flux": "Texte long.\n\nSuite.", "image": "", "date": "2026-11-06"}]
+        item = ET.fromstring(construire(liste)).find("./channel/item")
+        self.assertEqual(item.findtext("description"), "Texte long.\n\nSuite.")
+        self.assertEqual(liste[0]["description"], "courte")
+
     def test_date_a_l_heure_de_paris(self):
         self.assertEqual(date_rss("2026-11-05"), "Thu, 05 Nov 2026 08:00:00 +0100")
         self.assertEqual(date_rss("2026-07-14"), "Tue, 14 Jul 2026 08:00:00 +0200")
