@@ -10,6 +10,7 @@
   if (!liste) return;
   const form = document.getElementById('comm-form'), vide = document.getElementById('comm-vide'), msg = document.getElementById('comm-msg');
   const ajout = document.getElementById('comm-ajout'), fenetre = document.getElementById('comm-dialog');
+  const nouvelle = document.getElementById('comm-nouvelle');
   let donnees = [];
   let nombres = {}, mes = new Set();
   const connecte = () => !!window.Cloud && window.Cloud.actif();
@@ -24,6 +25,7 @@
   const dessiner = () => {
     const z = estZagor();
     ajout.hidden = !z;
+    if (nouvelle) nouvelle.hidden = !z;
     vide.hidden = donnees.length > 0;
     liste.innerHTML = donnees.map((x) => `<article class="comm-lien">
       ${x.image ? `<img src="${esc(x.image)}" alt="" width="640" height="360" loading="lazy" decoding="async">` : `<span class="comm-tuile" aria-hidden="true">${esc(x.nom.charAt(0).toUpperCase())}</span>`}
@@ -69,5 +71,34 @@
     window.Relais.mesLikes().then((r) => { mes = new Set((r && r.ok && r.adresses) || []); dessiner(); }).catch(() => dessiner());
   });
   window.Relais.lireLikes().then((r) => { nombres = (r && r.ok && r.likes) || {}; dessiner(); }).catch(() => {});
+  // Nouvelle du site : le Zagor remplit le formulaire, le service technique lance le lot « nouvelle.yml » (pipeline/nouvelle.py : images, page, carte, flux RSS)
+  const nouvDialog = document.getElementById('nouv-dialog'), nouvForm = document.getElementById('nouv-form'), nouvMsg = document.getElementById('nouv-msg');
+  const identifiant = (t) => t.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60).replace(/-$/, '');
+  const nouvDire = (t) => { nouvMsg.textContent = t; nouvMsg.hidden = false; };
+  if (nouvelle && nouvDialog && nouvForm) {
+    nouvelle.addEventListener('click', () => { nouvMsg.hidden = true; nouvDialog.showModal(); });
+    document.getElementById('nouv-fermer').addEventListener('click', () => nouvDialog.close());
+    nouvForm.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const v = (id) => document.getElementById(id).value.trim();
+      const titre = v('nouv-titre'), phrase = v('nouv-phrase'), texte = v('nouv-texte'), date = v('nouv-date');
+      if (!titre || !phrase || !texte) return nouvDire('Le titre, la phrase de l\'image et le texte de l\'article sont obligatoires.');
+      if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return nouvDire('La date doit être au format AAAA-MM-JJ.');
+      const nom = identifiant(titre);
+      if (!nom) return nouvDire('Le titre doit contenir au moins une lettre ou un chiffre.');
+      if (donnees.some((x) => String(x.adresse || '').endsWith('/' + nom + '.html'))) return nouvDire('Une nouvelle avec ce titre existe déjà : changez le titre.');
+      if (!window.confirm('Publier cette nouvelle maintenant ? Elle sera visible par tous sur le site.')) return;
+      const entrees = { titre, phrase, texte, fond: v('nouv-fond') };
+      if (v('nouv-facebook')) entrees.facebook = v('nouv-facebook');
+      if (v('nouv-desc')) entrees.description = v('nouv-desc');
+      if (date) entrees.date = date;
+      try {
+        const r = await window.Relais.envoyerLot('nouvelle.yml', entrees);
+        if (r.status === 204) nouvDire('Envoyé. La nouvelle sera en ligne dans environ 3 minutes : rechargez la page ensuite.');
+        else if (r.status === 401 || r.status === 403) nouvDire("Ce compte n'a pas accès à cette fonction, ou la connexion Google a expiré : reconnectez-vous.");
+        else nouvDire(`Échec de l'envoi : ${r.erreur || 'code ' + r.status}.`);
+      } catch (e) { nouvDire('Envoi impossible : vérifiez votre connexion.'); }
+    });
+  }
   fetch('data/communaute.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : [])).catch(() => []).then((d) => { donnees = Array.isArray(d) ? d : []; dessiner(); });
 })();

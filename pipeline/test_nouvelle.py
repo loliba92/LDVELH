@@ -60,21 +60,10 @@ class TestNouvelle(unittest.TestCase):
             chemins = nouvelle.creer("Essai", "Phrase.", "Texte", "golem", "2026-11-22", apercu=d)
             self.assertEqual(sorted(Path(c).name for c in chemins), ["essai-carte.jpg", "essai-partage.jpg"])
 
-    def test_lecture_du_formulaire_de_l_issue(self):
-        corps = ("### Titre\n\nMon titre\n\n### Phrase de l'image\n\nMa phrase.\n\n### Texte de l'article\n\nPremier.\n\n## Section\n\nSecond.\n\n"
-                 "### Texte de la publication Facebook\n\n_No response_\n\n### Description de la carte\n\nCarte.\n\n"
-                 "### Illustration de fond\n\ngolem : Un guerrier face à un golem de lave\n\n### Date\n\n2026-12-15\n\n### Que faire ?\n\nPublier")
-        v = nouvelle.lire_formulaire(corps)
-        self.assertEqual((v["titre"], v["phrase"], v["fond"], v["date"], v["mode"]), ("Mon titre", "Ma phrase.", "golem", "2026-12-15", "Publier"))
-        self.assertEqual(v["texte"], "Premier.\n\n## Section\n\nSecond.")
-        self.assertEqual(v["texte_facebook"], "")
-
-    def test_formulaire_aligne_sur_le_programme(self):
-        modele = (nouvelle.RACINE / ".github" / "ISSUE_TEMPLATE" / "nouvelle.yml").read_text(encoding="utf-8")
-        intitules = set(re.findall(r'^\s+label: "?([^"\n]+?)"?$', modele, flags=re.M))
-        self.assertEqual(set(nouvelle.CHAMPS_FORMULAIRE) - intitules, set())
-        fonds = re.findall(r'^\s+- "([a-z\-]+) : ', modele, flags=re.M)
-        self.assertEqual(fonds, list(nouvelle.FONDS))
+    def test_formulaire_du_site_aligne_sur_le_programme(self):
+        page_communaute = (nouvelle.WEB / "communaute.html").read_text(encoding="utf-8")
+        fonds = re.findall(r'<option value="([a-z\-]+)">', page_communaute[page_communaute.index('id="nouv-fond"'):])
+        self.assertEqual(fonds[:len(nouvelle.FONDS)], list(nouvelle.FONDS))
 
     def test_nouvelle_refusee_si_champ_vide(self):
         with self.assertRaises(ValueError):

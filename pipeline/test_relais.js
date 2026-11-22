@@ -129,6 +129,7 @@ test('droits par niveau', () => {
   assert.ok(!p('admin', 'envoyer')); assert.ok(!p('admin', 'journal')); assert.ok(!p('admin', 'equipe_ajouter')); assert.ok(!p('admin', 'releve'));   // un sorcier n'administre rien
   assert.ok(!p('heros', 'butin_lire')); assert.ok(p('admin', 'butin_lire')); assert.ok(p('superadmin', 'butin_lire'));
   assert.ok(!p('heros', 'annonces_lire')); assert.ok(p('admin', 'annonces_lire')); assert.ok(p('superadmin', 'annonces_lire'));   // toutes les annonces : sorciers et Zagor
+  assert.ok(!p('admin', 'envoyer'));   // lancer un lot (dont « nouvelle.yml ») : le Zagor seulement
   assert.ok(p('superadmin', 'envoyer')); assert.ok(p('superadmin', 'equipe_ajouter')); assert.ok(p('superadmin', 'releve'));
   assert.ok(!p('superadmin', 'inconnue')); assert.ok(!p('inconnu', 'moi'));
 });
@@ -140,6 +141,10 @@ test('envoi : seuls les lots et champs connus passent', () => {
   assert.strictEqual(v('jaquette.yml', { identifiant: '9782070332908', adresse: 'https://exemple.fr/a.png' }).ok, true);
   assert.strictEqual(v('jaquette.yml', { adresse: 'https://exemple.fr/a.png' }).ok, false);   // l'identifiant est obligatoire
   assert.strictEqual(v('jaquette.yml', { identifiant: '9782070332908', adresse: 'https://exemple.fr/a.png', auteur: 'Chef' }).ok, false);
+  assert.strictEqual(v('nouvelle.yml', { titre: 'T', phrase: 'P', texte: 'X', facebook: 'F', description: 'D', fond: 'golem', date: '2026-12-15' }).ok, true);
+  assert.strictEqual(v('nouvelle.yml', { phrase: 'P', texte: 'X' }).ok, false);   // le titre est obligatoire
+  assert.strictEqual(v('nouvelle.yml', { titre: 'T', auteur: 'Chef' }).ok, false);   // le nom est posé par le relais
+  assert.strictEqual(v('nouvelle.yml', { titre: 'T', inconnu: 'x' }).ok, false);
   assert.strictEqual(v('pages.yml', { x: 'y' }).ok, false);
   assert.strictEqual(v('corriger-prix.yml', { corrections: 'a', auteur: 'Chef' }).ok, false);   // le nom est posé par le relais, jamais par le site
   assert.strictEqual(v('corriger-prix.yml', {}).ok, false);

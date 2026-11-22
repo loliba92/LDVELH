@@ -1,7 +1,7 @@
 """Nouvelle du site, de l'idée à la publication : page, images, carte de la Communauté et flux RSS.
 
 Usage : python pipeline/nouvelle.py --titre "…" --phrase "…" --texte "…" [--texte-facebook "…"] [--description "…"] [--fond dragon-rouge] [--date AAAA-MM-JJ] [--slug mon-article] [--apercu DOSSIER]
-Chaque option se lit aussi dans la variable d'environnement NOUVELLE_<OPTION> (titre, phrase, texte, texte_facebook, description, fond, date, slug). Avec --formulaire, les champs viennent du corps d'une issue (variable CORPS), créée avec .github/ISSUE_TEMPLATE/nouvelle.yml : voir .github/workflows/nouvelle.yml.
+Chaque option se lit aussi dans la variable d'environnement NOUVELLE_<OPTION> (titre, phrase, texte, texte_facebook, description, fond, date, slug). Depuis le site : le Zagor remplit le formulaire de la page Communauté, le service technique lance .github/workflows/nouvelle.yml, qui passe les champs par ces variables d'environnement.
 
 Écrit : web/<slug>.html, web/images/<slug>.webp, web/data/communaute/<slug>-partage.jpg et <slug>.jpg, une entrée en tête de web/data/communaute.json,
 puis reconstruit web/nouvelles.xml (pipeline/flux_nouvelles.py). Avec --apercu, seules les trois images sont écrites, dans le dossier donné.
@@ -292,36 +292,11 @@ def creer(titre, phrase, texte, fond=FOND_PAR_DEFAUT, jour=None, slug="", descri
             "web/data/communaute.json", "web/nouvelles.xml"]
 
 
-CHAMPS_FORMULAIRE = {"Titre": "titre", "Phrase de l'image": "phrase", "Texte de l'article": "texte", "Texte de la publication Facebook": "texte_facebook",
-                     "Description de la carte": "description", "Illustration de fond": "fond", "Date": "date", "Que faire ?": "mode"}
-
-
-def lire_formulaire(corps):
-    """Valeurs d'une issue créée avec le formulaire .github/ISSUE_TEMPLATE/nouvelle.yml (« ### Intitulé » puis la réponse)."""
-    corps = (corps or "").replace("\r\n", "\n")
-    entetes = "|".join(re.escape(k) for k in CHAMPS_FORMULAIRE)
-    morceaux = re.split(rf"^### ({entetes})[ \t]*$", corps, flags=re.M)
-    valeurs = {}
-    for intitule, reponse in zip(morceaux[1::2], morceaux[2::2]):
-        v = reponse.strip()
-        valeurs[CHAMPS_FORMULAIRE[intitule]] = "" if v == "_No response_" else v
-    if valeurs.get("fond"):
-        valeurs["fond"] = valeurs["fond"].split(" : ")[0].strip()
-    return valeurs
-
-
 def main(argv=None):
     a = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     for nom in ("titre", "phrase", "texte", "texte_facebook", "description", "fond", "date", "slug", "apercu"):
         a.add_argument("--" + nom.replace("_", "-"), default=os.environ.get("NOUVELLE_" + nom.upper(), ""))
-    a.add_argument("--formulaire", action="store_true", help="lit les champs dans le corps d'une issue (variable CORPS)")
     o = a.parse_args(argv)
-    if o.formulaire:
-        v = lire_formulaire(os.environ.get("CORPS", ""))
-        for nom in ("titre", "phrase", "texte", "texte_facebook", "description", "fond", "date"):
-            setattr(o, nom, v.get(nom, ""))
-        if v.get("mode", "").lower().startswith("aperçu") or v.get("mode", "").lower().startswith("apercu"):
-            o.apercu = o.apercu or "apercu"
     try:
         chemins = creer(o.titre, o.phrase, o.texte, o.fond or FOND_PAR_DEFAUT, o.date or None, o.slug, o.description, o.texte_facebook, o.apercu or None)
     except ValueError as e:

@@ -2616,6 +2616,12 @@ button.rc-pastille-radar:focus-visible { outline: 3px solid var(--gold); outline
 .comm-dialog { width: min(420px, calc(100vw - 32px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--surface); color: var(--text); }
 .comm-dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .comm-form h2 { margin: 0 0 10px; font: 700 1.2rem var(--f-display); }
+.comm-dialog-large { width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow-y: auto; }
+.comm-form .champ { margin-bottom: 10px; }
+.comm-form textarea, .comm-form select { width: 100%; box-sizing: border-box; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); }
+.comm-form textarea { resize: vertical; line-height: 1.45; }
+.comm-dialog-large .champ input { width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px 12px; font: inherit; border-radius: var(--r); border: 1px solid var(--line-strong); background: var(--bg); color: var(--text); }
+.comm-admin .bouton-lien + .bouton-lien { margin-left: 18px; }
 .comm-like { margin: 6px 0 0; font-size:var(--t-base); }
 
 /* Page d'une nouvelle (ex. sorcier.html) et bloc d'ouverture */
