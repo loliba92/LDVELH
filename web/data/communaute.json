@@ -1,5 +1,12 @@
 [
   {
+    "nom": "Le guide de référence, offert et mis à jour chaque jour",
+    "adresse": "https://lacoteduheros.fr/guide-reference.html",
+    "description": "Toutes les éditions, leur cote, quatre zones pour s'y retrouver et la stratégie du collectionneur : le guide PDF est offert et refait chaque jour. Ce qu'il contient et comment l'obtenir, expliqué simplement.",
+    "image": "data/communaute/guide-reference.jpg",
+    "date": "2026-11-22"
+  },
+  {
     "nom": "Trois mois de Sorcier offerts",
     "adresse": "https://lacoteduheros.fr/essai-sorcier.html",
     "description": "Créez votre compte Héros : pendant 3 mois, les outils du Sorcier sont offerts. Ce que vous découvrez, expliqué simplement.",
