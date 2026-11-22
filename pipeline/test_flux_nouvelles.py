@@ -34,6 +34,11 @@ class TestFlux(unittest.TestCase):
         self.assertEqual(item.findtext("description"), "Texte long.\n\nSuite.")
         self.assertEqual(liste[0]["description"], "courte")
 
+    def test_image_flux_remplace_l_image_de_la_carte_dans_le_flux(self):
+        liste = [{"nom": "Grande", "adresse": "https://lacoteduheros.fr/d.html", "description": "t", "image": "data/communaute/petite.jpg", "image_flux": "data/communaute/grande.jpg", "date": "2026-11-07"}]
+        item = ET.fromstring(construire(liste)).find("./channel/item")
+        self.assertEqual(item.find("enclosure").get("url"), "https://lacoteduheros.fr/data/communaute/grande.jpg")
+
     def test_date_a_l_heure_de_paris(self):
         self.assertEqual(date_rss("2026-11-05"), "Thu, 05 Nov 2026 08:00:00 +0100")
         self.assertEqual(date_rss("2026-07-14"), "Tue, 14 Jul 2026 08:00:00 +0200")

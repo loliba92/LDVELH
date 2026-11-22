@@ -1,7 +1,7 @@
 """Flux RSS des nouvelles du site (web/nouvelles.xml), à relier à une page Facebook (Make).
 
 Usage : python pipeline/flux_nouvelles.py
-Une nouvelle est une entrée de web/data/communaute.json qui porte un champ « date » (AAAA-MM-JJ) : titre, texte, lien et image de la carte. Le champ facultatif « texte_flux » remplace la description dans le flux (texte plus détaillé pour les publications).
+Une nouvelle est une entrée de web/data/communaute.json qui porte un champ « date » (AAAA-MM-JJ) : titre, texte, lien et image de la carte. Les champs facultatifs « texte_flux » et « image_flux » remplacent la description et l'image dans le flux (texte détaillé et grande image pour les publications).
 Le flux est reconstruit en entier, les plus récentes en premier (20 au plus).
 Le 1er de chaque mois, une carte « Guide de référence : édition du mois » s'ajoute à la liste Communauté, donc au flux (workflow guide-mensuel.yml).
 """
@@ -71,7 +71,7 @@ def element(x, racine=RACINE):
         f"      <pubDate>{date_rss(x['date'])}</pubDate>",
         f"      <description>{escape(x.get('texte_flux') or x.get('description', ''))}</description>",
     ]
-    chemin = x.get("image", "")
+    chemin = x.get("image_flux") or x.get("image", "")
     if chemin:
         fichier = racine / "web" / chemin
         taille = fichier.stat().st_size if fichier.is_file() else 0
