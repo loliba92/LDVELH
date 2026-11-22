@@ -2,8 +2,8 @@
   {
     "nom": "Le guide de référence, offert",
     "adresse": "https://lacoteduheros.fr/guide-reference.html",
-    "description": "Chaque livre, chaque édition et ses repères du marché, avec une stratégie pour acheter et vendre : le guide PDF est offert et refait chaque jour.",
-    "texte_flux": "Le guide de référence de La Cote du Héros est offert.\n\nToutes les éditions des livres dont vous êtes le héros, éditeur par éditeur, avec pour chaque livre trois repères : ce qu'on trouve en vente, une jauge de prix (de « pas cher » à « très cher ») et sa zone sur le nuage du marché. Une page de stratégie du collectionneur dit quoi faire, zone par zone, pour acheter et pour vendre. Le PDF est refait chaque jour.\n\nPour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris.\n\nNous ne conservons jamais votre adresse e-mail.",
+    "description": "Chaque livre, chaque édition et ses repères, avec la stratégie du collectionneur : le guide PDF est offert et refait chaque jour.",
+    "texte_flux": "Le guide de référence de La Cote du Héros est offert.\n\nToutes les éditions des livres dont vous êtes le héros, éditeur par éditeur, avec pour chaque livre trois repères : le nombre d'annonces en ligne, une jauge de prix (de « pas cher » à « très cher ») et sa zone. Une page dédiée donne la stratégie du collectionneur, zone par zone. Le PDF est refait chaque jour.\n\nPour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris.\n\nNous ne conservons jamais votre adresse e-mail.",
     "image": "data/communaute/guide-reference.jpg",
     "image_flux": "data/communaute/guide-reference-partage.jpg",
     "date": "2026-11-22"
@@ -21,7 +21,7 @@
     "nom": "Le lot d'achat et de vente",
     "adresse": "https://lacoteduheros.fr/lot.html",
     "description": "Un outil réservé aux Sorciers : cochez plusieurs livres et voyez le prix à offrir, le prix à afficher et le port du lot, avec un exemple pas à pas.",
-    "texte_flux": "Le lot : acheter et vendre plusieurs livres d'un coup.\n\nUn outil réservé aux Sorciers. Sur l'étagère, cochez la case sur la jaquette de plusieurs livres : une barre apparaît en bas de l'écran et chiffre le lot. Elle donne le prix à offrir pour l'acheter (avec une remise de lot de 10 % dès 2 livres, jusqu'à 25 % dès 11), le prix à afficher pour le vendre, avec un minimum, la facilité d'acheter ou de vendre (facile, moyen, difficile) et le port, en un seul colis.\n\nCes montants sont des repères : la négociation reste à votre main.",
+    "texte_flux": "Le lot : plusieurs livres d'un coup.\n\nUn outil réservé aux Sorciers. Sur l'étagère, cochez plusieurs livres : une barre en bas de l'écran chiffre le lot et indique le port, en un seul colis. Les remises de lot vont de 10 % dès 2 livres à 25 % dès 11.\n\nCes montants sont des repères : la discussion reste à votre main.",
     "image": "data/communaute/lot.jpg",
     "image_flux": "data/communaute/lot-partage.jpg",
     "date": "2026-11-05"
@@ -30,7 +30,7 @@
     "nom": "Le profil Sorcier arrive",
     "adresse": "https://lacoteduheros.fr/sorcier.html",
     "description": "Un nouveau profil arrive : le Sorcier, offert 3 mois à tout nouveau compte. Ce qu'il apporte par rapport au Héros et au Visiteur, expliqué simplement.",
-    "texte_flux": "Le site propose trois profils : le Visiteur, le Héros et le Sorcier.\n\nLe Visiteur consulte le guide librement, sans compte. Le Héros, avec un compte Google gratuit, voit le prix estimé par état et compose sa collection : scan des codes-barres, doubles à vendre, livres à trouver, valeur suivie. Le Sorcier ajoute les outils pour repérer les bonnes affaires : annonces reçues, Butin, pépites, évolution des prix, lot d'achat et de vente, mouvements de la collection, ajout par ISBN et guide de référence.\n\nLe profil Sorcier est offert 3 mois à tout nouveau compte, dès sa première connexion.",
+    "texte_flux": "Le site propose trois profils : le Visiteur, le Héros et le Sorcier.\n\nLe Visiteur consulte le guide librement, sans compte. Le Héros, avec un compte Google gratuit, voit le prix estimé par état et compose sa collection : scan des codes-barres, doubles à vendre, livres à trouver, valeur suivie. Le Sorcier ajoute des outils en plus : annonces reçues, Butin, pépites, évolution des prix, lot d'achat et de vente, mouvements de la collection, ajout par ISBN et guide de référence.\n\nLe profil Sorcier est offert 3 mois à tout nouveau compte, dès sa première connexion.",
     "image": "data/communaute/sorcier.jpg",
     "image_flux": "data/communaute/sorcier-partage.jpg",
     "annonce": {

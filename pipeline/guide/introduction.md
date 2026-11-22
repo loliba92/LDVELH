@@ -24,6 +24,6 @@ Trois repères l'accompagnent :
 
 Ces repères sont ceux du {date}. Lisez-les comme une indication, pas comme un verdict. La feuille d'aventure redonne le sens de chaque mot.
 
-Bonne lecture, et bonne chasse. **lacoteduheros.fr**
+Bonne lecture. **lacoteduheros.fr**
 
 Le site reste gratuit ; s'il vous est utile, vous pouvez « Offrir un café » depuis le site.

@@ -98,7 +98,7 @@ def _lignes(texte, police, largeur_max):
     sortie = []
     for bloc in texte.split("\n"):
         courante = ""
-        for mot in bloc.split():
+        for mot in [m for m in re.split(r"[ \t]+", bloc) if m]:          # seules les espaces ordinaires coupent : une espace insécable garde « 3 mois » ensemble
             essai = f"{courante} {mot}".strip()
             if police.getlength(essai) <= largeur_max or not courante:
                 courante = essai
@@ -130,17 +130,17 @@ def affiche(titre, phrase, fond, taille=(1200, 630)):
     im.alpha_composite(icone, (round(marge), round(L * 0.042)))
     # texte : le titre (et la phrase avec lui) rétrécit jusqu'à tenir dans l'image, sur trois lignes au plus
     dispo = H - (L * 0.042 + cote + L * 0.02) - L * 0.045
-    taille_titre = L * 0.088
+    taille_titre = L * 0.064
     while True:
-        taille_phrase = min(L * 0.037, taille_titre * 0.42)
+        taille_phrase = min(L * 0.042, taille_titre * 0.7)
         pt, pp = _police("titre", taille_titre), _police("texte", taille_phrase)
-        lignes_titre, lignes_phrase = _lignes(titre, pt, L * 0.66), _lignes(phrase, pp, L * 0.60)
+        lignes_titre, lignes_phrase = _lignes(titre, pt, L * 0.66), _lignes(phrase, pp, L * 0.62)
         h_titre = len(lignes_titre) * taille_titre * 1.0
         h_filet = L * 0.0038
         h_phrase = len(lignes_phrase) * taille_phrase * 1.28
         espace_haut, espace_bas = L * 0.02, L * 0.018
         bloc = h_titre + espace_haut + h_filet + espace_bas + h_phrase
-        if (len(lignes_titre) <= 3 and len(lignes_phrase) <= 4 and bloc <= dispo) or taille_titre <= L * 0.04:
+        if (len(lignes_titre) <= 3 and len(lignes_phrase) <= 5 and bloc <= dispo) or taille_titre <= L * 0.04:
             break
         taille_titre *= 0.94
     haut = max(H * 0.61 - bloc / 2, L * 0.042 + cote + L * 0.02)
