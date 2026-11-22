@@ -26,6 +26,11 @@ class TestGuide(unittest.TestCase):
         self.versions = [livre("Zèbre", "Série B", "2", "V1", "covers/a.webp"), livre("Alpha", "Série A", "10", "V1", "covers/a.webp"),
                          livre("Beta", "Série A", "2", "V2", "covers/absente.webp", prix=(None, None, None)), livre("Beta", "Série A", "2", "V1")]
 
+    def test_gallimard_jeunesse_suit_gallimard(self):
+        v = [livre("A", "S", "1", "V1"), livre("B", "S", "2", "V1"), livre("C", "S", "3", "V1"), livre("D", "T", "1", "V1", editeur="Alkonost"), livre("E", "T", "2", "V1", editeur="Alkonost"),
+             livre("F", "U", "1", "V1", editeur="Gallimard Jeunesse")]
+        self.assertEqual([e for e, _ in g.grouper(v)], ["Gallimard", "Gallimard Jeunesse", "Alkonost"])
+
     def test_plan_editeur_version_serie(self):
         v = [livre("A", "Série B", "2", "V10"), livre("B", "Série B", "10", "V2"), livre("C", "Série A", "3", "V2"), livre("D", "Série A", "1", "V1"), livre("E", "Série A", "2", "V2"),
              livre("F", "X", "1", "V1", editeur="Alkonost"), livre("G", "Y", "1", "V1", editeur="<span>page copiée</span>"), livre("H", "Z", "1", "V1", editeur="Jean Nugent")]
