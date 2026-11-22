@@ -14,12 +14,12 @@
       <pubDate>Sun, 22 Nov 2026 08:00:00 +0100</pubDate>
       <description>Le guide de référence de La Cote du Héros est offert.
 
-Toutes les éditions des livres dont vous êtes le héros, éditeur par éditeur, avec pour chaque livre trois repères : ce qu'on trouve en vente, une jauge de prix (de « pas cher » à « très cher ») et sa zone sur le nuage du marché. Une page de stratégie du collectionneur dit quoi faire, zone par zone, pour acheter et pour vendre. Le PDF est refait chaque jour.
+Toutes les éditions des livres dont vous êtes le héros, éditeur par éditeur, avec pour chaque livre trois repères : le nombre d'annonces en ligne, une jauge de prix (de « pas cher » à « très cher ») et sa zone. Une page dédiée donne la stratégie du collectionneur, zone par zone. Le PDF est refait chaque jour.
 
 Pour l'avoir : créez votre compte gratuit avec Google. Vous profitez de 3 mois de Sorcier, guide compris.
 
 Nous ne conservons jamais votre adresse e-mail.</description>
-      <enclosure url="https://lacoteduheros.fr/data/communaute/guide-reference-partage.jpg" length="140732" type="image/jpeg"/>
+      <enclosure url="https://lacoteduheros.fr/data/communaute/guide-reference-partage.jpg" length="137093" type="image/jpeg"/>
       <media:content url="https://lacoteduheros.fr/data/communaute/guide-reference-partage.jpg" medium="image" type="image/jpeg"/>
     </item>
     <item>
@@ -32,7 +32,7 @@ Nous ne conservons jamais votre adresse e-mail.</description>
 Vous créez votre compte Héros ? Dès votre première connexion, vous profitez aussi de tous les outils du Sorcier pendant 3 mois, sans rien faire : l'accès aux annonces, le Butin (les annonces à 50 % du prix du site ou moins), toutes les pépites, l'évolution des prix, le lot d'achat et de vente, l'ajout de livres par ISBN et le guide de référence en PDF.
 
 Le compte est gratuit, passe par Google, et votre collection reste dans votre propre Google Drive.</description>
-      <enclosure url="https://lacoteduheros.fr/data/communaute/essai-sorcier-partage.jpg" length="130895" type="image/jpeg"/>
+      <enclosure url="https://lacoteduheros.fr/data/communaute/essai-sorcier-partage.jpg" length="132278" type="image/jpeg"/>
       <media:content url="https://lacoteduheros.fr/data/communaute/essai-sorcier-partage.jpg" medium="image" type="image/jpeg"/>
     </item>
     <item>
@@ -42,10 +42,10 @@ Le compte est gratuit, passe par Google, et votre collection reste dans votre pr
       <pubDate>Thu, 05 Nov 2026 08:00:00 +0100</pubDate>
       <description>Le site propose trois profils : le Visiteur, le Héros et le Sorcier.
 
-Le Visiteur consulte le guide librement, sans compte. Le Héros, avec un compte Google gratuit, voit le prix estimé par état et compose sa collection : scan des codes-barres, doubles à vendre, livres à trouver, valeur suivie. Le Sorcier ajoute les outils pour repérer les bonnes affaires : annonces reçues, Butin, pépites, évolution des prix, lot d'achat et de vente, mouvements de la collection, ajout par ISBN et guide de référence.
+Le Visiteur consulte le guide librement, sans compte. Le Héros, avec un compte Google gratuit, voit le prix estimé par état et compose sa collection : scan des codes-barres, doubles à vendre, livres à trouver, valeur suivie. Le Sorcier ajoute des outils en plus : annonces reçues, Butin, pépites, évolution des prix, lot d'achat et de vente, mouvements de la collection, ajout par ISBN et guide de référence.
 
 Le profil Sorcier est offert 3 mois à tout nouveau compte, dès sa première connexion.</description>
-      <enclosure url="https://lacoteduheros.fr/data/communaute/sorcier-partage.jpg" length="138593" type="image/jpeg"/>
+      <enclosure url="https://lacoteduheros.fr/data/communaute/sorcier-partage.jpg" length="143267" type="image/jpeg"/>
       <media:content url="https://lacoteduheros.fr/data/communaute/sorcier-partage.jpg" medium="image" type="image/jpeg"/>
     </item>
     <item>
@@ -53,12 +53,12 @@ Le profil Sorcier est offert 3 mois à tout nouveau compte, dès sa première co
       <link>https://lacoteduheros.fr/lot.html</link>
       <guid isPermaLink="true">https://lacoteduheros.fr/lot.html</guid>
       <pubDate>Thu, 05 Nov 2026 08:00:00 +0100</pubDate>
-      <description>Le lot : acheter et vendre plusieurs livres d'un coup.
+      <description>Le lot : plusieurs livres d'un coup.
 
-Un outil réservé aux Sorciers. Sur l'étagère, cochez la case sur la jaquette de plusieurs livres : une barre apparaît en bas de l'écran et chiffre le lot. Elle donne le prix à offrir pour l'acheter (avec une remise de lot de 10 % dès 2 livres, jusqu'à 25 % dès 11), le prix à afficher pour le vendre, avec un minimum, la facilité d'acheter ou de vendre (facile, moyen, difficile) et le port, en un seul colis.
+Un outil réservé aux Sorciers. Sur l'étagère, cochez plusieurs livres : une barre en bas de l'écran chiffre le lot et indique le port, en un seul colis. Les remises de lot vont de 10 % dès 2 livres à 25 % dès 11.
 
-Ces montants sont des repères : la négociation reste à votre main.</description>
-      <enclosure url="https://lacoteduheros.fr/data/communaute/lot-partage.jpg" length="117434" type="image/jpeg"/>
+Ces montants sont des repères : la discussion reste à votre main.</description>
+      <enclosure url="https://lacoteduheros.fr/data/communaute/lot-partage.jpg" length="121588" type="image/jpeg"/>
       <media:content url="https://lacoteduheros.fr/data/communaute/lot-partage.jpg" medium="image" type="image/jpeg"/>
     </item>
   </channel>
