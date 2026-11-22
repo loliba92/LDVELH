@@ -1050,28 +1050,33 @@ def page_zones(styles, st, cx, exemples, parts=None):
 
 
 def page_strategie(styles, cx):
-    """Un petit article : une stratégie par zone (qui collectionne, pourquoi, comment acquérir), puis les doubles."""
+    """La stratégie du collectionneur : un grand tableau, une ligne par zone, deux colonnes (j'achète, je vends), puis une note sur les lots."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
-    sections = (
-        (2, ("Voilà le terrain du complétiste, celui qui veut finir toute une édition ou toute une série et qui cherche le dernier numéro manquant. Il veut posséder ce que presque personne n'a et boucher les trous de sa collection.",
-             "Ici, il faut guetter, parfois pendant des mois, et avoir le budget prêt le jour où l'annonce arrive. Savoir tôt ce qui vous manque en zone 1, c'est savoir combien de temps prévoir. "
-             "Le bon coup, c'est une annonce sous le prix habituel : elle ne dure pas, et le Butin et la Chasse du site sont là pour la repérer. "
-             "Avant d'acheter, vérifiez l'édition (V1, V2…), l'état et les frais de port.")),
-        (3, ("On y croise l'acheteur pressé, ou celui qui achète pour revendre ou échanger : on trouve vite un livre très demandé, ou on fait tourner sa collection.",
-             "Laissez venir, les annonces sont nombreuses. Un prix demandé n'est pas un prix payé : comparez, négociez.")),
-        (0, ("Le collectionneur de série y fait son marché : des titres moins connus, pour compléter sans se ruiner.",
-             "Rien ne presse. On prend au passage, quand on en croise un.")),
-        (1, ("Le débutant commence ici, comme celui qui retrouve les livres de son enfance. L'idée est d'avancer vite, pour presque rien.",
-             "L'offre est large : vous choisissez l'exemplaire et le vendeur sans vous presser. "
-             "Visez le très bon état. L'état est fondamental, et La Cote du Héros le précise pour chaque prix : sinon, on surpaie un livre qui ne vaut pas sa valeur. "
-             "Mieux vaut payer un peu plus cher pour un état impeccable.")),
-    )
-    h = [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-         P("Chaque zone est un marché différent, avec ses collectionneurs et sa manière de s'y prendre. Avant d'acheter, regardez d'abord dans quelle zone se trouve le livre.")]
-    for q, paragraphes in sorted(sections, key=lambda x: ga.NUM_ZONE[x[0]]):
-        h.append(KeepTogether([P(f"Zone {ga.NUM_ZONE[q]} · {ZONES_TEXTE[q][0].split(' : ')[0]}", "h2")] + [P(t) for t in paragraphes]))
-    h += [P("Si vous avez des doubles", "h2"), P("En zone 1, un double se vend bien, puisqu'on le cherche. En zone 2, le marché est actif : proposez le vôtre un peu sous les annonces voisines. En zones 3 et 4, inutile d'attendre : il y a trop d'offre ou trop peu de demande. La liste « À vendre » du site est faite pour cela.")]
-    return h
+    cases = {
+        2: ("On guette, parfois des mois, avec le budget prêt : savoir tôt ce qui vous manque, c'est savoir combien de temps prévoir. Le bon coup, c'est une annonce sous le prix habituel : elle ne dure pas, et le Butin et la Chasse du site servent à la repérer. Vérifiez l'édition (V1, V2…), l'état et le port.",
+            "Un double se vend bien, puisqu'on le cherche. Vous pouvez demander le prix du marché."),
+        3: ("Laissez venir : les annonces sont nombreuses. Un prix demandé n'est pas un prix payé, comparez et négociez.",
+            "Le marché est actif. Proposez votre livre un peu sous les annonces voisines : il partira plus vite."),
+        0: ("Rien ne presse : on prend au passage, quand on en croise un. Les lots y sont utiles pour compléter une série sans se ruiner.",
+            "Peu de gens achètent. Soyez patient, et n'espérez pas plus que le prix du marché."),
+        1: ("On commence ici. L'offre est large : choisissez l'exemplaire et le vendeur sans vous presser, et achetez en lot quand vous le pouvez. Visez le très bon état : l'état est fondamental, et La Cote du Héros le précise pour chaque prix. Sinon, on surpaie un livre qui ne vaut pas sa valeur. Mieux vaut payer un peu plus cher pour un état impeccable.",
+            "Il y a beaucoup d'offre : vos doubles se vendent bas. Regroupez-les en lot plutôt que de les vendre un à un."),
+    }
+    lignes = [[P("<b>Zone</b>"), P("<b>J'achète</b>"), P("<b>Je vends</b>")]]
+    for q in sorted(cases, key=lambda q: ga.NUM_ZONE[q]):
+        lignes.append([P(f"<b>Zone {ga.NUM_ZONE[q]}</b><br/>{ZONES_TEXTE[q][0]}"), P(cases[q][0]), P(cases[q][1])])
+    f = cx["filet"]
+    largeur = [27 * mm, (L_CADRE - 27 * mm) * 0.58, (L_CADRE - 27 * mm) * 0.42]
+    t = Table(lignes, colWidths=largeur, hAlign="LEFT", repeatRows=1)
+    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, 0), Color(f.red, f.green, f.blue, alpha=0.18)),
+                           ("LINEBELOW", (0, 0), (-1, -1), 0.4, f), ("LINEABOVE", (0, 0), (-1, 0), 0.4, f), ("LINEAFTER", (0, 0), (0, -1), 0.4, f), ("LINEAFTER", (1, 0), (1, -1), 0.4, f),
+                           ("LEFTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 2 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.2 * mm)]))
+    return [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
+            P("Un collectionneur ne fait pas qu'acheter : il achète, et il revend. Chaque zone est un marché différent : avant d'acheter ou de vendre, regardez d'abord dans quelle zone se trouve le livre."),
+            Spacer(1, 3 * mm), t, Spacer(1, 4 * mm),
+            P("<b>Acheter en lot.</b> Plutôt qu'un livre à la fois, achetez un lot : plusieurs livres chez un même vendeur, avec un seul port. Le prix de chaque livre baisse, et c'est la façon la plus économique d'avancer. "
+              "Regardez l'état de chaque livre, pas seulement le prix total. Les doubles qui arrivent avec le lot se revendent ensuite, et financent les achats suivants. "
+              "Le site propose un outil pour composer un lot d'achat ou de vente, avec son prix et son port.")]
 
 
 # Titre et récit de chaque zone (0 peu d'offre bon marché, 1 beaucoup d'offre bon marché, 2 peu d'offre cher, 3 beaucoup d'offre cher)

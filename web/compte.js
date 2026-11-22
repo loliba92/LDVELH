@@ -90,7 +90,13 @@ window.Compte = (function () {
   function telechargerGuide() {
     var nom = nomGuide(), brut = guideFichier;
     annoncer('Préparation du guide…');
-    return Promise.all([chargerPdfLib(), fetch(brut).then(function (x) { if (!x.ok) throw new Error('guide'); return x.arrayBuffer(); })]).then(function (t) {
+    var sansNom = role === 'superadmin';          // le Zagor reçoit le guide d'origine, sans nom ni mention en pied de page
+    return Promise.all([sansNom ? null : chargerPdfLib(), fetch(brut).then(function (x) { if (!x.ok) throw new Error('guide'); return x.arrayBuffer(); })]).then(function (t) {
+      if (sansNom) {
+        enregistrer(new Blob([t[1]], { type: 'application/pdf' }), 'guide-reference.pdf');
+        annoncer('Guide enregistré.');
+        return;
+      }
       var L = t[0];
       return L.PDFDocument.load(t[1], { updateMetadata: false }).then(function (doc) {
         return doc.embedFont(L.StandardFonts.Helvetica).then(function (police) {
