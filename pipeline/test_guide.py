@@ -53,7 +53,7 @@ class TestGuide(unittest.TestCase):
     def test_reperes_en_mots_memes_seuils_que_le_site(self):
         self.assertEqual([g.niveau_prix(v) for v in (None, 5, 10, 19.9, 20, 45, 70, 200)], [None, 1, 2, 2, 3, 4, 5, 5])
         self.assertEqual([g.MOTS_PRIX[n - 1] for n in (1, 2, 3, 4, 5)], ["pas cher", "abordable", "moyen", "cher", "très cher"])
-        self.assertEqual([g.mot_offre(n) for n in (0, 1, 2, 3, 4, 9, 10, 50)], ["introuvable", "rare", "peu d'annonces", "peu d'annonces", "courant", "courant", "abondant", "abondant"])
+        self.assertEqual([g.mot_offre(n, mediane=7) for n in (0, 1, 7, 8, 50)], ["introuvable", "peu d'annonces", "peu d'annonces", "beaucoup d'annonces", "beaucoup d'annonces"])
         self.assertEqual(g.mot_offre(0, neuf=True), "disponible neuf")
 
     def test_aucun_montant_ni_decimal_dans_le_catalogue(self):

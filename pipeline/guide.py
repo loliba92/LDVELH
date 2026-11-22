@@ -83,12 +83,13 @@ def niveau_prix(v):
     return None if v is None else 1 + sum(1 for x in SEUILS_PRIX if v >= x)
 
 
-def mot_offre(n, neuf=False):
-    """« Rareté en vente » : abondance des annonces en ligne à l'instant T. Les trois premiers niveaux suivent le bloc « Offre d'occasion » du site (aucune, une seule, quelques-unes) ;
-    le site réunit « beaucoup » en un seul niveau : ici il est coupé en courant et abondant (seuil propre au guide, jamais affiché)."""
+def mot_offre(n, neuf=False, mediane=None):
+    """« En vente » : les mots du nuage. Au-dessus de la médiane des annonces par livre, « beaucoup d'annonces » ; sinon « peu d'annonces ». Sans annonce : « introuvable » (« disponible neuf » s'il se vend encore neuf).
+    Sans médiane (guide sans nuage), le repli sépare à 3 annonces."""
     if n == 0:
         return "disponible neuf" if neuf else "introuvable"
-    return "rare" if n == 1 else "peu d'annonces" if n <= 3 else "courant" if n < 10 else "abondant"
+    seuil = 3 if mediane is None else mediane
+    return "beaucoup d'annonces" if n > seuil else "peu d'annonces"
 
 
 MOIS_COURTS = ("janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc.")
@@ -422,7 +423,7 @@ def glyphe_zone(c, x, y, cote, zone, st):
 
 class Fiche(Flowable):
     """Un livre : jaquette avec ombre douce, titre, numéro, version, rareté, offre en vente, repères de prix par état (jauge à cinq crans ou mot). Aucun chiffre de cote."""
-    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None, jour=None):
+    def __init__(self, v, st, polices, web, offre=None, reperes="jauge", zone=None, jour=None, mediane=None):
         super().__init__()
         self.v, self.st, self.pol, self.web, self.reperes, self.zone = v, st, polices, web, reperes, zone          # zone : 0 à 3 (voir guide_analyse.quadrant), None sans repère
         self.largeur = L_CADRE / COLONNES
@@ -439,7 +440,7 @@ class Fiche(Flowable):
         self.th = max(self.titre.wrap(self.largeur - 3 * mm, 100 * mm)[1], 2 * 9.4)          # deux lignes réservées : les repères restent alignés d'un livre à l'autre
         num = f"n°\u00a0{v['numero']} · " if v.get("numero") and str(v["numero"]).strip("0") else ""
         self.meta = f"{num}{v.get('version') or ''}"
-        self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1)
+        self.offre = mot_offre(ga.nb_annonces((offre or {}).get(v.get("isbn13") or "")), v.get("en_vente") == 1, mediane)
         self.lib_offre, self.mot_prix = LIBELLE_OFFRE, "prix inconnu"
         self.niveau = niveau_prix(ga.cote(v)) if ga.cote(v) > 0 else None          # repère de prix : même état de référence que le site (très bon état, à défaut bon état) ; sans cote, pas de repère
         sortie = sortie_prevue(v, jour or date.today().isoformat())
@@ -545,8 +546,7 @@ def introduction(texte, variables, styles, st, pol):
     return sortie
 
 
-OFFRE_SENS = (("abondant", "Beaucoup d'annonces : facile à trouver."), ("courant", "Plusieurs annonces : on le trouve sans difficulté."),
-              ("peu d'annonces", "Quelques annonces seulement : il faut surveiller."), ("rare", "Une seule annonce en ce moment."),
+OFFRE_SENS = (("beaucoup d'annonces", "Plus d'annonces que la médiane du guide : on trouve facilement."), ("peu d'annonces", "Autant d'annonces que la médiane, ou moins : il faut surveiller."),
               ("introuvable", "Aucune annonce aujourd'hui."), ("disponible neuf", "Encore vendu neuf."), ("pas encore sorti", "Annoncé : la fiche donne sa date de sortie prévue."))
 PRIX_SENS = ("Se trouve à petit prix.", "Un prix doux, à la portée de tous.", "Un prix courant pour un livre de collection.", "Un exemplaire recherché.", "Un livre très recherché, parmi les plus chers.")
 
@@ -607,9 +607,9 @@ def legende(styles, st=None, polices=None, exemple=None):
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     haut = []
     if exemple is not None:
-        exemple.offre, exemple.niveau, exemple.zone = "courant", 3, 3
+        exemple.offre, exemple.niveau, exemple.zone = "beaucoup d'annonces", 2, 1
         haut = [P("Lire une fiche", "h2"), FicheAnnotee(exemple, st, polices), Spacer(1, 3 * mm)]
-    return haut + [P("En vente", "h2"), P("L'abondance des annonces en ligne au moment du guide."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
+    return haut + [P("En vente", "h2"), P("Le nombre d'annonces en ligne, comparé à la médiane du guide, comme sur le nuage."), TableauNiveaux(OFFRE_SENS, st, polices) if st else Spacer(1, 1),
                    P("Prix d'occasion", "h2"), P("Le niveau de prix d'un exemplaire, d'après les cotes et les annonces : plus la jauge est pleine, plus il est cher. Sans cote, la fiche dit « prix inconnu »."),
                    TableauNiveaux(tuple(zip(MOTS_PRIX, PRIX_SENS, FOURCHETTES)), st, polices, jauges=True) if st else Spacer(1, 1)]
 
@@ -957,7 +957,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
         for j, (version, series_v) in enumerate(versions_ed):
             entete = (bandeau if j == 0 else []) + [Marqueur(etat, editeur=editeur, version=version, versions=nom_versions), TitreVersion(editeur, version, st, pol)]
             for i, (nom, livres) in enumerate(series_v):
-                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v), genere_le) for v in livres]
+                cellules = [Fiche(v, st, pol, web, offre_annonces, reperes, zone_de(v), genere_le, med_o) for v in livres]
                 while len(cellules) % COLONNES:
                     cellules.append("")
                 rangs = []
@@ -1038,7 +1038,7 @@ def page_zones(styles, st, cx, exemples, parts=None):
     """Les quatre zones racontées : ce que le rapport entre le nombre d'annonces et le prix dit d'un livre, avec des exemples du guide. Aucun conseil d'achat ni de vente."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     h = [PageBreak(), P("Les quatre zones, une à une", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
-         P("Le prix d'un livre ne dit pas grand-chose tout seul : il faut le regarder avec le nombre d'annonces. Voici ce que cela donne, zone par zone.")]
+         P("Un prix se lit avec le nombre d'annonces. Voici ce que cela donne, zone par zone.")]
     for q in sorted(ZONES_TEXTE, key=lambda q: ga.NUM_ZONE[q]):
         titre, texte = ZONES_TEXTE[q]
         ligne = Table([[GlypheZone(q, st), [P(f"Zone {ga.NUM_ZONE[q]} · {titre}", "h2"), P(f"<i>{ga.ZONES[q]}</i>" + (f" · <b>{parts[q][1]}\u00a0% des livres du guide</b> ({parts[q][0]}\u00a0livres)" if parts and parts[q][0] else ""))] + [P(t) for t in texte + (phrase_exemples(exemples.get(q, [])),) if t]]],
