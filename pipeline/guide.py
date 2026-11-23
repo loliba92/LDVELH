@@ -1027,6 +1027,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
                     histoire += [KeepTogether(bloc)]
                 else:
                     histoire += [KeepTogether((entete if i == 0 else []) + [tete] + rangs[:1])] + rangs[1:-2] + [KeepTogether(rangs[-2:])]
+    histoire += page_mentions(styles, st)
     doc.multiBuild(histoire)
     construire.remplissage = (sum(remplissage.values()) / len(remplissage)) if remplissage else 0.0          # taux moyen de remplissage des pages du catalogue
     construire.pages_catalogue = len(remplissage)
@@ -1204,6 +1205,23 @@ def section_radar(versions, donnees, styles, date_cotes, polices, st):
         h += [P("Les séries à surveiller", "h2"), P("Celles où l'offre se raréfie alors que les prix montent, et celles où l'on peut encore se servir sans attendre."), Spacer(1, 1 * mm), colonnes]
     h += [P("Un radar est une photographie à la date du guide : il décrit l'offre du moment, pas une tendance. Ses phrases sont recalculées à chaque génération.")]
     return h
+
+
+def page_mentions(styles, st):
+    """Dernière page : mentions et droits (indépendance, marques, couvertures, prix indicatifs, reproduction)."""
+    P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
+    blocs = [
+        ("Un guide indépendant", "Ce guide est un document d'information, réalisé par un passionné. Il n'est ni affilié, ni approuvé, ni soutenu par les éditeurs, les auteurs ou les ayants droit des livres cités."),
+        ("Marques et titres", "Les titres, noms de collections, noms d'éditeurs et marques cités appartiennent à leurs propriétaires. Ils ne servent qu'à désigner les livres, sans suggérer aucun lien avec eux."),
+        ("Couvertures", "Les couvertures sont reproduites en petit format, à titre d'illustration, pour reconnaître chaque édition. Elles restent la propriété de leurs éditeurs et de leurs auteurs. Un ayant droit qui souhaite en demander le retrait peut écrire à La Cote du Héros par la page Contact du site."),
+        ("Prix et zones", "Les repères sont calculés à partir d'annonces d'occasion relevées sur des sites de vente en ligne. Une annonce est un prix demandé, pas un prix payé. Les prix, les zones et les nombres d'annonces sont indicatifs, valables à la date inscrite en pied de page. Ils ne sont garantis ni exacts ni complets, et ne constituent ni une expertise ni un conseil d'achat ou de vente."),
+        ("Sites cités", "Les noms des sites de vente cités appartiennent à leurs propriétaires. La Cote du Héros n'a aucun lien avec eux."),
+        ("Droits", "Les textes, la mise en page et l'analyse de ce guide sont l'œuvre de La Cote du Héros. Tous droits réservés."),
+    ]
+    corps = []
+    for titre, texte in blocs:
+        corps += [P(titre, "h2"), P(texte), Spacer(1, 2 * mm)]
+    return [NextPageTemplate("texte"), PageBreak(), P("Mentions et droits", "h1m"), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 3 * mm)] + corps + [Spacer(1, 4 * mm), P("La Cote du Héros · lacoteduheros.fr")]
 
 
 def main(argv=None):
