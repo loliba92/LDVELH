@@ -2,7 +2,7 @@
  "date": "2026-11-23",
  "precedent": "2026-11-22",
  "nb_comparees": 1548,
- "nb_modifiees": 1373,
+ "nb_modifiees": 1379,
  "mediane_variation": -0.002,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -22,21 +22,6 @@
    "recalibre": false
   },
   {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
-   "etat": "tres_bon",
-   "avant": 3.54,
-   "apres": 4.16,
-   "pct": 0.175,
-   "nature": "archives",
-   "nb": 0,
-   "recalibre": false
-  },
-  {
    "id": "9782070333783",
    "isbn13": "9782070333783",
    "titre": "Le Chemin Maudit",
@@ -45,23 +30,23 @@
    "version": "V1",
    "etat": "tres_bon",
    "avant": 50.41,
-   "apres": 58.55,
-   "pct": 0.161,
+   "apres": 58.6,
+   "pct": 0.162,
    "nature": "annonces",
    "nb": 5,
    "recalibre": false
   },
   {
-   "id": "9782070332892",
-   "isbn13": "9782070332892",
-   "titre": "Le Talisman de la Mort",
-   "serie": "Défis Fantastiques",
-   "numero": "289",
-   "version": "V1",
+   "id": "9782070512706",
+   "isbn13": "9782070512706",
+   "titre": "L'Emeraude de la Rivière Noire",
+   "serie": "Sherlock Holmes",
+   "numero": "623",
+   "version": "V2",
    "etat": "bon",
-   "avant": 3.77,
-   "apres": 4.32,
-   "pct": 0.146,
+   "avant": 17.69,
+   "apres": 20.4,
+   "pct": 0.153,
    "nature": "annonces",
    "nb": 6,
    "recalibre": false
@@ -98,12 +83,12 @@
   }
  ],
  "baisses": [],
- "nb_grands_mouvements": 6,
+ "nb_grands_mouvements": 5,
  "modele": {
   "actif": false,
-  "n_paires": 295,
-  "gain": 0.065,
+  "n_paires": 297,
+  "gain": 0.063,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
-  "rapport_global": 1.085
+  "rapport_global": 1.087
  }
 }
