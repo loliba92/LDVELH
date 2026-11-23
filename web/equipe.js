@@ -25,10 +25,18 @@
     return e === 'droits insuffisants' ? 'Ce compte n\'a pas accès à cette page.' : /expir|jeton/.test(e) ? 'La connexion a expiré : reconnectez-vous avec le bouton du compte.' : /action inconnue/.test(e) ? 'Mettez à jour le relais (relais/Code.gs et logique.gs) : cette action n\'existe pas encore.' : e.charAt(0).toUpperCase() + e.slice(1) + '.';
   }
 
+  // Comptes héros dont l'essai de trois mois court : sorciers, au même titre que ceux de l'équipe (la liste des comptes compte les 300 derniers arrivés)
+  function enEssai() {
+    if (!COMPTES || !COMPTES.jour || !EQUIPE) return 0;
+    var actifs = {};
+    EQUIPE.equipe.forEach(function (m) { if (!m.echu && !m.avenir) actifs[m.empreinte.slice(7, 11)] = true; });
+    return COMPTES.liste.filter(function (c) { var k = /#([0-9a-f]{4})$/.exec(c.nom); return c.essai_fin && c.essai_fin >= COMPTES.jour && !(k && actifs[k[1]]); }).length;
+  }
+
   function tuiles() {
     if (!EQUIPE) return;
     var zagors = EQUIPE.equipe.filter(function (m) { return m.role === 'superadmin'; }).length;
-    var sorciers = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && !m.echu && !m.avenir; }).length;
+    var sorciers = EQUIPE.equipe.filter(function (m) { return m.role === 'admin' && !m.echu && !m.avenir; }).length + enEssai();
     var heros = TOTAL == null ? null : Math.max(0, TOTAL - zagors - sorciers);
     var t = $('#eq-tuiles');
     t.innerHTML = [['superadmin', zagors, 'Zagor' + (zagors > 1 ? 's' : '')], ['admin', sorciers, 'Sorcier' + (sorciers > 1 ? 's' : '')], ['heros', heros, 'Héros']].map(function (x) {
