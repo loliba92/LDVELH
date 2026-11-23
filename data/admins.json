@@ -12,6 +12,13 @@
       "depuis": "2026-10-31",
       "debut": "2026-11-01",
       "fin": "2026-12-31"
+    },
+    "sha256:bf7ca06fb1887ca16c12c2e47bcbe95fbfee92673f60518090771d3c98fd7114": {
+      "nom": "phalazur #bf7c",
+      "role": "admin",
+      "depuis": "2026-11-23",
+      "debut": "2026-11-23",
+      "fin": "2027-02-11"
     }
   },
   "bloques": []
