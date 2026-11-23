@@ -26,6 +26,13 @@
       "depuis": "2026-11-23",
       "debut": "2026-11-23",
       "fin": "2027-02-08"
+    },
+    "sha256:385f12d19dca8c9794e5c8e1bc93f0e03b16fd2d32109b9fb399a1fbea8fb12f": {
+      "nom": "albertconteur #385f",
+      "role": "admin",
+      "depuis": "2026-11-23",
+      "debut": "2026-11-23",
+      "fin": "2027-02-01"
     }
   },
   "bloques": []
