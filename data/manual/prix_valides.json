@@ -2215,10 +2215,17 @@
    "le": "2026-11-06",
    "par": "loliba (superadmin)"
   },
-  "9782070582693|convenable": {
-   "prix": 25.0,
+  "9782070582693|bon": {
+   "prix": 34.61,
    "decision": "corrige",
-   "le": "2026-10-17"
+   "le": "2026-11-23",
+   "par": "loliba (superadmin)"
+  },
+  "9782070582693|convenable": {
+   "prix": 29.42,
+   "decision": "corrige",
+   "le": "2026-11-23",
+   "par": "loliba (superadmin)"
   },
   "9782070582693|tres_bon": {
    "prix": 38.88,
