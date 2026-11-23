@@ -45,6 +45,21 @@
     t.hidden = false;
   }
 
+  // Panneau « Gérer » d'un compte en essai : mêmes champs que pour un membre de l'équipe ; il agit par le rang du compte (le site ne connaît pas son empreinte)
+  function carteEssai(c) {
+    var fin = c.essai_fin, debut = moinsTroisMois(fin), cle = 'essai:' + c.rang;
+    return '<li class="eq-ligne" data-essai><div class="eq-haut"><span class="eq-avatar niveau-admin">' + icone('admin') + '</span>' +
+      '<div class="eq-texte"><strong>' + esc(c.nom) + '</strong> <span class="compte-niveau niveau-admin">' + NOMS.admin + '</span>' +
+      '<span class="eq-fin">' + esc(jour(debut) + ' → ' + jour(fin)) + '</span></div>' +
+      '<button type="button" class="eq-btn-gerer" data-gerer aria-expanded="false">Gérer</button></div>' +
+      '<div class="eq-corps" hidden>' +
+      '<form class="eq-fin-form" data-e="' + esc(cle) + '" data-nom="' + esc(c.nom) + '"><label>Début <input type="date" name="debut" value="' + esc(debut) + '"></label><label>Fin <input type="date" name="fin" value="' + esc(fin) + '"></label>' +
+      '<button type="submit" class="bouton bouton-clair">Enregistrer</button></form>' +
+      '<div class="eq-actions"><button type="button" class="bouton bouton-clair" data-act="essai_retirer" data-e="' + esc(cle) + '">Retirer</button>' +
+      '<button type="button" class="bouton bouton-clair" data-act="essai_bloquer" data-e="' + esc(cle) + '">Bloquer</button></div>' +
+      '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></div></li>';
+  }
+
   function carte(m) {
     var etatTexte = '', hors = m.echu || m.avenir;
     if (m.role === 'admin') {
@@ -107,10 +122,10 @@
   }
 
   var COMPTES = null, nbZagors = 0, nbSorciers = 0;
-  // Fin de l'essai de trois mois d'un compte arrivé à cette date (même calcul que le relais)
-  function plusTroisMois(d) {
+  // Début d'un essai de trois mois, d'après sa fin (le relais n'en garde que la fin)
+  function moinsTroisMois(d) {
     var x = new Date(d + 'T12:00:00'), j = x.getDate();
-    x.setDate(1); x.setMonth(x.getMonth() + 3);
+    x.setDate(1); x.setMonth(x.getMonth() - 3);
     x.setDate(Math.min(j, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate()));
     return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
   }
@@ -123,7 +138,7 @@
     if (EQUIPE) EQUIPE.equipe.forEach(function (m) { if (!m.echu && !m.avenir) actifs[m.empreinte.slice(7, 11)] = true; });
     var liste = r.liste.filter(function (c) { var k = /#([0-9a-f]{4})$/.exec(c.nom); return !(k && actifs[k[1]]); });
     var enCours = function (c) { return !!(c.essai_fin && r.jour && c.essai_fin >= r.jour); };
-    // Un compte dont l'essai court est un sorcier comme les autres : même carte, dans la section Sorciers (sans bouton : il n'est pas dans l'équipe)
+    // Un compte dont l'essai court est un sorcier comme les autres : même carte et même panneau « Gérer », dans la section Sorciers
     var essais = liste.filter(enCours);
     liste = liste.filter(function (c) { return !enCours(c); });
     var L = $('#eq-sorciers');
@@ -131,12 +146,8 @@
     if (EQUIPE && essais.length) {
       var vide = L.querySelector('li.sous');
       if (vide) vide.parentNode.removeChild(vide);
-      L.insertAdjacentHTML('beforeend', essais.map(function (c) {
-        var debut = c.date && plusTroisMois(c.date) === c.essai_fin ? jour(c.date) + ' → ' : 'jusqu\'au ';
-        return '<li class="eq-ligne" data-essai><div class="eq-haut"><span class="eq-avatar niveau-admin">' + icone('admin') + '</span>' +
-          '<div class="eq-texte"><strong>' + esc(c.nom) + '</strong> <span class="compte-niveau niveau-admin">' + NOMS.admin + '</span>' +
-          '<span class="eq-fin">' + esc(debut + jour(c.essai_fin)) + '</span></div></div></li>';
-      }).join(''));
+      L.insertAdjacentHTML('beforeend', essais.map(carteEssai).join(''));
+      rouvrir();
     }
     if (EQUIPE) etat.textContent = nbZagors + ' Zagor' + (nbZagors > 1 ? 's' : '') + ', ' + (nbSorciers + essais.length) + ' sorcier' + (nbSorciers + essais.length > 1 ? 's' : '') + '.';
     var sans = Math.max(0, r.total - r.connus);
@@ -197,12 +208,20 @@
     }
     var b = ev.target.closest('[data-act]');
     if (!b) return;
-    var bloquer = b.dataset.act === 'equipe_bloquer';
+    var essaiAct = /^essai_/.test(b.dataset.act), bloquer = /_bloquer$/.test(b.dataset.act);
     if (!window.confirm(bloquer ? 'Bloquer ce compte ? Il sera retiré de l\'équipe et ne pourra plus rien envoyer, même comme Héros.' : 'Retirer cette personne ? Elle redeviendra Héros.')) return;
     direMembre(b.dataset.e, 'Enregistrement…');
-    window.Relais.appeler(b.dataset.act, { empreinte: b.dataset.e }).then(function (r) {
+    window.Relais.appeler(b.dataset.act, essaiAct ? { rang: Number(b.dataset.e.slice(6)) } : { empreinte: b.dataset.e }).then(function (r) {
       if (!r || !r.ok) return direMembre(b.dataset.e, erreurLisible(r), true);
       dire(bloquer ? 'Compte bloqué.' : 'Personne retirée.');
+      if (essaiAct) {                                        // le compte quitte les sorciers (retiré : retour chez les héros ; bloqué : disparaît)
+        var rang = Number(b.dataset.e.slice(6));
+        COMPTES.liste = COMPTES.liste.filter(function (c) { return !(bloquer && c.rang === rang); }).map(function (c) { if (c.rang === rang) c.essai_fin = ''; return c; });
+        delete OUVERTS[b.dataset.e];
+        tuiles(); dessinerComptes();
+        setTimeout(charger, 2500);
+        return;
+      }
       RETIRES[b.dataset.e] = Date.now();
       if (bloquer) EQUIPE.bloques.push(b.dataset.e);
       dessiner(EQUIPE);
@@ -213,6 +232,17 @@
     if (!f) return;
     ev.preventDefault();
     var e = f.dataset.e, debut = f.elements.debut.value, fin = f.elements.fin.value;
+    if (/^essai:/.test(e)) {                                 // compte en essai : la période devient celle d'un sorcier de l'équipe
+      if (!fin) return direMembre(e, 'Indiquez la date de fin.', true);
+      direMembre(e, 'Enregistrement…');
+      window.Relais.appeler('equipe_promouvoir', { rang: Number(e.slice(6)), debut: debut, fin: fin }).then(function (r) {
+        if (!r || !r.ok) return direMembre(e, erreurLisible(r), true);
+        delete OUVERTS[e];
+        dire(f.dataset.nom.replace(/\s*#[0-9a-f]{4}$/, '') + ' : sorcier' + (debut ? ' à partir du ' + jour(debut) : '') + ', jusqu\'au ' + jour(fin) + '.');
+        setTimeout(charger, 2500);                           // laisse à GitHub le temps de servir la nouvelle liste
+      }).catch(function () { direMembre(e, 'Le relais ne répond pas : vérifiez votre connexion.', true); });
+      return;
+    }
     direMembre(e, 'Enregistrement…');
     window.Relais.appeler('equipe_periode', { empreinte: e, debut: debut, fin: fin }).then(function (r) {
       if (!r || !r.ok) return direMembre(e, erreurLisible(r), true);

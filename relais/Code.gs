@@ -1,4 +1,4 @@
-// Version du 2026-11-23 13:50 (heure de Paris) : la liste des comptes de la page Équipe donne la fin de l'essai de trois mois de chaque compte.
+// Version du 2026-11-23 15:53 (heure de Paris) : un compte en essai se gère comme un sorcier de l'équipe (période, retrait, blocage).
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -82,6 +82,11 @@ function essaiDuCompte(identite, maintenantSec) {
     } finally { verrou.releaseLock(); }
   }
   return appliquerEssai(identite, fin, aujourdhui);
+}
+
+/* Met fin à l'essai d'un compte dès maintenant (la fin devient la veille) : il n'en reçoit pas de nouveau. */
+function terminerEssai(empreinte) {
+  PropertiesService.getScriptProperties().setProperty('es:' + votant(empreinte), jourDe(Math.floor(Date.now() / 1000) - 86400));
 }
 
 /* À brancher sur un déclencheur « toutes les 5 minutes » (relais/LISEZMOI.md) : garde le service éveillé et la liste des admins en mémoire.
@@ -347,6 +352,19 @@ function doPost(e) {
       var resP = ajouterMembre(v.admins.contenu, empP, ligneP.split('|')[0], 'admin', moi.empreinte, q.fin, jourDe(Math.floor(Date.now() / 1000)), q.debut);
       if (!resP.ok) return reponse({ ok: false, erreur: resP.raison });
       ecrireAdmins(resP.fichier, v.admins.sha, 'Équipe : promotion en sorcier par ' + moi.nom);
+      terminerEssai(empP);                          // la période fixée remplace l'essai
+      return reponse({ ok: true });
+    }
+
+    if (action === 'essai_retirer' || action === 'essai_bloquer') {          // SuperAdmin : un compte en essai (désigné par son rang) redevient héros, ou est bloqué
+      var empE = PropertiesService.getScriptProperties().getProperty('ue:' + (Number(q.rang) || 0));
+      if (!empE) return reponse({ ok: false, erreur: 'compte introuvable ou trop ancien pour être géré ici' });
+      if (action === 'essai_bloquer') {
+        var resE = bloquerCompte(v.admins.contenu, empE, moi.empreinte);
+        if (!resE.ok) return reponse({ ok: false, erreur: resE.raison });
+        ecrireAdmins(resE.fichier, v.admins.sha, 'Équipe : bloquer par ' + moi.nom);
+      }
+      terminerEssai(empE);
       return reponse({ ok: true });
     }
 
