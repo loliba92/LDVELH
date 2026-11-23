@@ -23,6 +23,13 @@ test('pépite du jour : réservée au Zagor, champs vérifiés', () => {
     assert.strictEqual(L('validerPepite')(Object.assign({}, bonne, { [champ]: valeur })).ok, false, champ + ' = ' + valeur);
   assert.strictEqual(J(L('validerPepite')(Object.assign({}, bonne, { solide: 'oui' }))).pepite.solide, false);
 });
+test('liste des comptes : fin de l\'essai de chaque compte', () => {
+  const emp = h('nouveau@gmail.com'), props = { ['ue:17']: emp, ['es:' + L('votant')(emp)]: '2027-02-23', 'ue:16': h('autre@gmail.com') };
+  assert.strictEqual(L('finEssaiDuRang')(props, 17), '2027-02-23');
+  assert.strictEqual(L('finEssaiDuRang')(props, 16), '');          // empreinte connue, essai pas commencé
+  assert.strictEqual(L('finEssaiDuRang')(props, 3), '');           // compte sans empreinte gardée
+});
+
 test('comptes_lire est réservé au SuperAdmin', () => {
   assert.strictEqual(L('peut')('superadmin', 'comptes_lire'), true);
   assert.strictEqual(L('peut')('admin', 'comptes_lire'), false);

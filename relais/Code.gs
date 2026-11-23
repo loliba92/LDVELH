@@ -1,4 +1,4 @@
-// Version du 2026-11-22 17:02 (heure de Paris) : le lot « nouvelle.yml » (nouvelle du site, lancée depuis la page Communauté) est accepté.
+// Version du 2026-11-23 13:50 (heure de Paris) : la liste des comptes de la page Équipe donne la fin de l'essai de trois mois de chaque compte.
 /* Relais entre le site (La Cote du Héros) et GitHub, hébergé dans Google Apps Script.
    Le site envoie la connexion Google de la personne ; le relais la vérifie, regarde son niveau dans data/admins.json, puis lance lui-même
    les lots GitHub. La clé GitHub reste ici, dans les propriétés du script : aucun administrateur ne la voit.
@@ -334,9 +334,9 @@ function doPost(e) {
     if (action === 'comptes_lire') {               // SuperAdmin : total, arrivées du jour et prénoms (comptes arrivés depuis l'ajout de cette liste)
       var tout = PropertiesService.getScriptProperties().getProperties(), vals = [];
       Object.keys(tout).forEach(function (k) { if (/^un:\d+$/.test(k)) vals.push({ rang: Number(k.slice(3)), valeur: tout[k] }); });
-      var lc = listerComptes(vals, Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd'), 300);
-      lc.liste.forEach(function (c) { c.promouvable = !!tout['ue:' + c.rang]; });       // le bouton « Passer sorcier » n'apparaît que pour ces comptes
-      return reponse({ ok: true, total: Number(tout['u:total']) || 0, aujourdhui: lc.aujourdhui, connus: lc.connus, liste: lc.liste });
+      var jourC = Utilities.formatDate(new Date(), 'Europe/Paris', 'yyyy-MM-dd'), lc = listerComptes(vals, jourC, 300);
+      lc.liste.forEach(function (c) { c.promouvable = !!tout['ue:' + c.rang]; c.essai_fin = finEssaiDuRang(tout, c.rang); });       // le bouton « Passer sorcier » n'apparaît que pour ces comptes ; fin de l'essai affichée à sa place
+      return reponse({ ok: true, jour: jourC, total: Number(tout['u:total']) || 0, aujourdhui: lc.aujourdhui, connus: lc.connus, liste: lc.liste });
     }
 
     if (action === 'equipe_promouvoir') {          // SuperAdmin : un héros de la liste devient sorcier, sur une période (fin obligatoire)

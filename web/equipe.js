@@ -113,11 +113,14 @@
     else if (r.liste.length && !r.liste.some(function (c) { return c.promouvable; })) etatC.textContent += ' Aucun héros promouvable pour l\'instant : il faut qu\'il se reconnecte depuis la mise à jour.';
     ul.innerHTML = liste.length ? liste.map(function (c) {
       // Seuls les comptes dont le relais garde l'empreinte peuvent être promus (promouvable)
-      var passer = c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
+      var fin = c.essai_fin || '', enCours = fin && r.jour && fin >= r.jour;
+      var jolie = function (d) { return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); };
+      var essai = fin ? '<span class="sous eq-essai">' + (enCours ? 'Sorcier jusqu\'au ' : 'Essai terminé le ') + esc(jolie(fin)) + '</span>' : '';
+      var passer = enCours ? essai : essai + (c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
         '<form class="eq-passer" hidden data-rang="' + esc(c.rang) + '" data-nom="' + esc(c.nom) + '">' +
         '<label>Jusqu\'au <input type="date" name="fin" required></label>' +
         '<button type="submit" class="bouton bouton-clair">Enregistrer</button>' +
-        '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '';
+        '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '');
       return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span>' + passer + '</li>';
     }).join('') : '<li class="sous">Aucun prénom enregistré pour l\'instant.</li>';
   }

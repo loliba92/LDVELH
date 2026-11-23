@@ -1,4 +1,4 @@
-// Version du 2026-11-21 10:17 (heure de Paris) : l'essai de trois mois vaut aussi pour les comptes déjà connus.
+// Version du 2026-11-23 13:50 (heure de Paris) : la liste des comptes de la page Équipe donne la fin de l'essai de trois mois de chaque compte.
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -255,6 +255,8 @@ function validerNote(livre, note) {
   return { ok: true, livre: l, note: n };
 }
 function votant(empreinte) { return String(empreinte).replace('sha256:', '').slice(0, 16); }
+/* Fin d'essai (AAAA-MM-JJ) d'un compte de la liste : `props` = propriétés du script, `rang` = son numéro d'arrivée ; '' si l'essai n'a pas commencé. */
+function finEssaiDuRang(props, rang) { var e = props['ue:' + rang]; return e ? (props['es:' + votant(e)] || '') : ''; }
 /* votes : { votant: note }. Note 0 = retirer sa note. Renvoie { ok, votes } ou { ok:false, raison }. */
 function appliquerNote(votes, qui, note) {
   var v = copie(votes || {});
