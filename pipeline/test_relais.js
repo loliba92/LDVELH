@@ -30,6 +30,14 @@ test('liste des comptes : fin de l\'essai de chaque compte', () => {
   assert.strictEqual(L('finEssaiDuRang')(props, 3), '');           // compte sans empreinte gardée
 });
 
+test('essai : retirer et bloquer par rang, réservés au SuperAdmin', () => {
+  for (const a of ['essai_retirer', 'essai_bloquer']) {
+    assert.strictEqual(L('peut')('superadmin', a), true);
+    assert.strictEqual(L('peut')('admin', a), false);
+    assert.strictEqual(L('peut')('heros', a), false);
+  }
+});
+
 test('comptes_lire est réservé au SuperAdmin', () => {
   assert.strictEqual(L('peut')('superadmin', 'comptes_lire'), true);
   assert.strictEqual(L('peut')('admin', 'comptes_lire'), false);

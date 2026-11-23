@@ -1,4 +1,4 @@
-// Version du 2026-11-23 13:50 (heure de Paris) : la liste des comptes de la page Équipe donne la fin de l'essai de trois mois de chaque compte.
+// Version du 2026-11-23 15:53 (heure de Paris) : un compte en essai se gère comme un sorcier de l'équipe (période, retrait, blocage).
 /* Règles du relais : qui est qui, qui peut quoi, et ce que l'on accepte d'envoyer à GitHub.
    Calcul pur, sans appel réseau : le même fichier tourne dans Apps Script et dans les tests (pipeline/test_relais.js). */
 
@@ -26,6 +26,8 @@ var ACTIONS = {                       // niveau minimal pour chaque action
   equipe_bloquer: 'superadmin',
   equipe_periode: 'superadmin',   // dates de début et de fin d'un sorcier (facultatives)
   equipe_promouvoir: 'superadmin', // un héros de la liste devient sorcier (fin obligatoire, début facultatif)
+  essai_retirer: 'superadmin',     // met fin à l'essai d'un compte de la liste, désigné par son rang
+  essai_bloquer: 'superadmin',     // bloque un compte de la liste, désigné par son rang, et met fin à son essai
   releve: 'superadmin',
   comptes_lire: 'superadmin',      // total des comptes et liste des prénoms, par ordre d'arrivée
   ajout_livres: 'admin',          // sorciers et Zagors : ajout de livres en série (liste d'ISBN), voir quotaAjout
