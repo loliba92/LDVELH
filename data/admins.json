@@ -19,6 +19,13 @@
       "depuis": "2026-11-23",
       "debut": "2026-11-23",
       "fin": "2027-02-11"
+    },
+    "sha256:64afda978e07235da2bc72e01799eaf58d4f167806ca1ac4f3a798b8d4f49b82": {
+      "nom": "quadafra #64af",
+      "role": "admin",
+      "depuis": "2026-11-23",
+      "debut": "2026-11-23",
+      "fin": "2027-02-08"
     }
   },
   "bloques": []
