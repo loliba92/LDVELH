@@ -995,7 +995,7 @@ def construire(versions, sortie, date_cotes, series=None, web=WEB, genere_le=Non
             return 2          # prix inconnu : zone 1, la rareté
         return ga.quadrant(ga.nb_annonces(donnees_zones["offre"].get(v["isbn13"])), c_, med_o, med_c)
     histoire = [Spacer(1, 1), NextPageTemplate("texte"), PageBreak()] + introduction(texte_intro, variables, styles, st, pol) + [
-        ] + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("La feuille d'aventure", styles["h1m"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 1 * mm)] + legende(styles, st, pol, exemple) + (page_strategie(styles, {"filet": HexColor(st["filet"])}) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
+        ] + (page_nuage(versions, donnees if donnees is not None else ga.charger(), styles, pol, st) if donnees is not False else []) + [PageBreak(), Paragraph("La feuille d'aventure", styles["h1m"]), Ornement(40 * mm, HexColor(st["filet"])), Spacer(1, 1 * mm)] + legende(styles, st, pol, exemple) + (page_strategie(styles, {"filet": HexColor(st["filet"])}, st) if donnees is not False else []) + [PageBreak(), Paragraph("Sommaire", styles["h1"]), sommaire]
     GRANDS = ("Gallimard", "Gallimard Jeunesse", "Alkonost")          # pages d'ouverture pleine page ; les autres éditeurs ont un bandeau dans le flux
     liste_editeurs[:] = [e for e, _ in groupes]
     for k, (editeur, versions_ed) in enumerate(groupes):
@@ -1040,15 +1040,15 @@ def fr(x, decimales=None):
 
 class GlypheZone(Flowable):
     """Le mini nuage à quatre cases d'une zone, pour la page de méthode."""
-    def __init__(self, zone, st):
+    def __init__(self, zone, st, cote=5.2 * mm):
         super().__init__()
-        self.zone, self.st = zone, st
+        self.zone, self.st, self.cote = zone, st, cote
 
     def wrap(self, *_):
-        return 7 * mm, 6 * mm
+        return self.cote + 1.8 * mm, self.cote + 0.8 * mm
 
     def draw(self):
-        glyphe_zone(self.canv, 0, 0.4 * mm, 5.2 * mm, self.zone, self.st)
+        glyphe_zone(self.canv, 0, 0.4 * mm, self.cote, self.zone, self.st)
 
 
 def page_nuage(versions, donnees, styles, polices, st):
@@ -1104,7 +1104,7 @@ def page_zones(styles, st, cx, exemples, parts=None):
                 P("<b>D'où viennent ces données ?</b> La Cote du Héros relève les annonces d'occasion, les range par titre, édition et éditeur, puis calcule le prix médian de chaque livre, le prix du milieu. Une annonce est un prix demandé, pas un prix payé : ces repères ne sont pas des promesses.")]
 
 
-def page_strategie(styles, cx):
+def page_strategie(styles, cx, st):
     """La stratégie du collectionneur : un grand tableau, une ligne par zone, deux colonnes (j'achète, je vends), puis une note sur les lots."""
     P = lambda t, k="corps": Paragraph(t, styles[k])  # noqa: E731
     cases = {
@@ -1119,16 +1119,22 @@ def page_strategie(styles, cx):
     }
     lignes = [[P("<b>Zone</b>"), P("<b>J'achète</b>"), P("<b>Je vends</b>")]]
     for q in sorted(cases, key=lambda q: ga.NUM_ZONE[q]):
-        lignes.append([P(f"<b>Zone {ga.NUM_ZONE[q]}</b><br/>{ZONES_TEXTE[q][0]}"), P(cases[q][0]), P(cases[q][1])])
+        icone = Table([[GlypheZone(q, st)], [P(f"<b>Zone {ga.NUM_ZONE[q]}</b><br/>{ZONES_TEXTE[q][0]}")]], hAlign="LEFT")
+        icone.setStyle(TableStyle([("LEFTPADDING", (0, 0), (-1, -1), 0), ("RIGHTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0.8 * mm)]))
+        lignes.append([icone, P(cases[q][0]), P(cases[q][1])])
     f = cx["filet"]
-    largeur = [27 * mm, (L_CADRE - 27 * mm) * 0.58, (L_CADRE - 27 * mm) * 0.42]
+    largeur = [30 * mm, (L_CADRE - 30 * mm) * 0.58, (L_CADRE - 30 * mm) * 0.42]
     t = Table(lignes, colWidths=largeur, hAlign="LEFT", repeatRows=1)
     t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("BACKGROUND", (0, 0), (-1, 0), Color(f.red, f.green, f.blue, alpha=0.18)),
                            ("LINEBELOW", (0, 0), (-1, -1), 0.4, f), ("LINEABOVE", (0, 0), (-1, 0), 0.4, f), ("LINEAFTER", (0, 0), (0, -1), 0.4, f), ("LINEAFTER", (1, 0), (1, -1), 0.4, f),
                            ("LEFTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("RIGHTPADDING", (0, 0), (-1, -1), 2.5 * mm), ("TOPPADDING", (0, 0), (-1, -1), 2 * mm), ("BOTTOMPADDING", (0, 0), (-1, -1), 2.2 * mm)]))
+    lecture = Table([[GlypheZone(2, st, 12 * mm), [P("<b>Comment lire ces icônes</b>"),
+                      P("Chaque icône est un petit carré à quatre cases, comme le nuage de points. <b>De gauche à droite</b>, il y a de plus en plus d'annonces. <b>De bas en haut</b>, les prix montent. La <b>case en or</b> est la zone : ici, la zone 1, en haut à gauche, c'est peu d'annonces et des prix élevés.")]]],
+                    colWidths=[17 * mm, L_CADRE - 17 * mm], hAlign="LEFT")
+    lecture.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0), ("TOPPADDING", (0, 0), (-1, -1), 0), ("BOTTOMPADDING", (0, 0), (-1, -1), 0)]))
     return [PageBreak(), P("La stratégie du collectionneur", "h1m"), Ornement(40 * mm, cx["filet"]), Spacer(1, 3 * mm),
             P("Un collectionneur ne fait pas qu'acheter : il achète, et il revend. Chaque zone est un marché différent : avant d'acheter ou de vendre, regardez d'abord dans quelle zone se trouve le livre."),
-            Spacer(1, 3 * mm), t, Spacer(1, 4 * mm),
+            Spacer(1, 3 * mm), lecture, Spacer(1, 3 * mm), t, Spacer(1, 4 * mm),
             P("<b>Acheter en lot.</b> Plutôt qu'un livre à la fois, achetez un lot : plusieurs livres chez un même vendeur, avec un seul port. Le prix de chaque livre baisse, et c'est la façon la plus économique d'avancer. "
               "Regardez l'état de chaque livre, pas seulement le prix total. Les doubles qui arrivent avec le lot se revendent ensuite, et financent les achats suivants. "
               "Le site propose un outil pour composer un lot d'achat ou de vente, avec son prix et son port.")]
