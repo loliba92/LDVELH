@@ -101,11 +101,19 @@
     rouvrir();                                              // tout de suite : rien de ce qui suit ne doit pouvoir empêcher de rouvrir les profils
     var n = r.bloques.length;
     $('#eq-bloques').textContent = n ? n + ' compte' + (n > 1 ? 's' : '') + ' bloqué' + (n > 1 ? 's' : '') + '. Pour en débloquer un, ajoutez de nouveau son adresse.' : 'Aucun compte bloqué.';
+    nbZagors = z.length; nbSorciers = s.length;
     etat.textContent = z.length + ' Zagor' + (z.length > 1 ? 's' : '') + ', ' + s.length + ' sorcier' + (s.length > 1 ? 's' : '') + '.';
     try { tuiles(); dessinerComptes(); } catch (e) { /* les compteurs ne doivent pas gêner le reste */ }
   }
 
-  var COMPTES = null;
+  var COMPTES = null, nbZagors = 0, nbSorciers = 0;
+  // Fin de l'essai de trois mois d'un compte arrivé à cette date (même calcul que le relais)
+  function plusTroisMois(d) {
+    var x = new Date(d + 'T12:00:00'), j = x.getDate();
+    x.setDate(1); x.setMonth(x.getMonth() + 3);
+    x.setDate(Math.min(j, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate()));
+    return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+  }
   // La liste des comptes contient tout le monde. Un membre de l'équipe y est reconnu à ses quatre signes d'empreinte (« Prénom #ab12 »)
   // et n'est pas compté dans les héros, sauf si sa période est finie ou pas commencée.
   function dessinerComptes() {
@@ -115,16 +123,22 @@
     if (EQUIPE) EQUIPE.equipe.forEach(function (m) { if (!m.echu && !m.avenir) actifs[m.empreinte.slice(7, 11)] = true; });
     var liste = r.liste.filter(function (c) { var k = /#([0-9a-f]{4})$/.exec(c.nom); return !(k && actifs[k[1]]); });
     var enCours = function (c) { return !!(c.essai_fin && r.jour && c.essai_fin >= r.jour); };
-    var jolie = function (d) { return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); };
-    var court = function (d) { return d ? new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''; };
-    // Un compte dont l'essai court est sorcier : il est dans la section Sorciers, sous l'équipe, et plus parmi les héros
+    // Un compte dont l'essai court est un sorcier comme les autres : même carte, dans la section Sorciers (sans bouton : il n'est pas dans l'équipe)
     var essais = liste.filter(enCours);
     liste = liste.filter(function (c) { return !enCours(c); });
-    $('#eq-t-essais').hidden = $('#eq-essais').hidden = !essais.length;
-    $('#eq-t-essais').textContent = essais.length + ' compte' + (essais.length > 1 ? 's' : '') + ' en essai de trois mois :';
-    $('#eq-essais').innerHTML = essais.map(function (c) {
-      return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">jusqu\'au ' + esc(jolie(c.essai_fin)) + ' · n° ' + esc(c.rang) + '</span></li>';
-    }).join('');
+    var L = $('#eq-sorciers');
+    Array.prototype.forEach.call(L.querySelectorAll('[data-essai]'), function (n) { n.parentNode.removeChild(n); });
+    if (EQUIPE && essais.length) {
+      var vide = L.querySelector('li.sous');
+      if (vide) vide.parentNode.removeChild(vide);
+      L.insertAdjacentHTML('beforeend', essais.map(function (c) {
+        var debut = c.date && plusTroisMois(c.date) === c.essai_fin ? jour(c.date) + ' → ' : 'jusqu\'au ';
+        return '<li class="eq-ligne" data-essai><div class="eq-haut"><span class="eq-avatar niveau-admin">' + icone('admin') + '</span>' +
+          '<div class="eq-texte"><strong>' + esc(c.nom) + '</strong> <span class="compte-niveau niveau-admin">' + NOMS.admin + '</span>' +
+          '<span class="eq-fin">' + esc(debut + jour(c.essai_fin)) + '</span></div></div></li>';
+      }).join(''));
+    }
+    if (EQUIPE) etat.textContent = nbZagors + ' Zagor' + (nbZagors > 1 ? 's' : '') + ', ' + (nbSorciers + essais.length) + ' sorcier' + (nbSorciers + essais.length > 1 ? 's' : '') + '.';
     var sans = Math.max(0, r.total - r.connus);
     etatC.textContent = TOTAL + ' compte' + (r.total > 1 ? 's' : '') + ' (équipe comprise), dont ' + r.aujourdhui + ' aujourd\'hui. Derniers héros arrivés' + (sans ? ' (les ' + sans + ' premiers sans prénom)' : '') + ' :';
     // Diagnostic : le relais renvoie-t-il la version qui sait promouvoir ?
@@ -132,14 +146,13 @@
     else if (r.liste.length && !r.liste.some(function (c) { return c.promouvable; })) etatC.textContent += ' Aucun héros promouvable pour l\'instant : il faut qu\'il se reconnecte depuis la mise à jour.';
     ul.innerHTML = liste.length ? liste.map(function (c) {
       // Seuls les comptes dont le relais garde l'empreinte peuvent être promus (promouvable)
-      var essai = c.essai_fin ? '<span class="sous eq-essai">Essai terminé le ' + esc(jolie(c.essai_fin)) + '</span>' : '';
-      var passer = essai + (c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
+      var passer = (c.promouvable ? '<button type="button" class="bouton-lien eq-passer-ouvrir" data-passer aria-expanded="false">Passer sorcier</button>' +
         '<form class="eq-passer" hidden data-rang="' + esc(c.rang) + '" data-nom="' + esc(c.nom) + '">' +
         '<label>Jusqu\'au <input type="date" name="fin" required></label>' +
         '<button type="submit" class="bouton bouton-clair">Enregistrer</button>' +
         '<p class="rv-ajout-bilan eq-msg-ligne" role="status" hidden></p></form>' : '');
       return '<li class="eq-heros"><strong>' + esc(c.nom) + '</strong><span class="sous">' + esc(c.date ? new Date(c.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '') + ' · n° ' + esc(c.rang) + '</span>' + passer + '</li>';
-    }).join('') : '<li class="sous">' + (essais.length ? 'Tous les comptes récents sont en essai.' : 'Aucun prénom enregistré pour l\'instant.') + '</li>';
+    }).join('') : '<li class="sous">' + (essais.length ? 'Aucun autre héros pour l\'instant.' : 'Aucun prénom enregistré pour l\'instant.') + '</li>';
   }
 
   function comptes() {
