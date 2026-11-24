@@ -2,7 +2,7 @@
  "date": "2026-11-24",
  "precedent": "2026-11-23",
  "nb_comparees": 1548,
- "nb_modifiees": 1379,
+ "nb_modifiees": 1381,
  "mediane_variation": -0.002,
  "nouvelles_cotes": 0,
  "hausses": [
@@ -65,6 +65,21 @@
    "nature": "prix éditeur",
    "nb": 0,
    "recalibre": false
+  },
+  {
+   "id": "9782012000735",
+   "isbn13": "9782012000735",
+   "titre": "Les griffes du Shogun",
+   "serie": "Tempus",
+   "numero": null,
+   "version": "V1",
+   "etat": "convenable",
+   "avant": 5.0,
+   "apres": 5.51,
+   "pct": 0.102,
+   "nature": "archives",
+   "nb": 0,
+   "recalibre": false
   }
  ],
  "baisses": [
@@ -84,12 +99,12 @@
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 5,
+ "nb_grands_mouvements": 6,
  "modele": {
   "actif": false,
-  "n_paires": 301,
-  "gain": 0.054,
+  "n_paires": 302,
+  "gain": 0.049,
   "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
-  "rapport_global": 1.079
+  "rapport_global": 1.076
  }
 }
