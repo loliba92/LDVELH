@@ -88,8 +88,8 @@
  "modele": {
   "actif": false,
   "n_paires": 297,
-  "gain": 0.061,
+  "gain": 0.064,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
-  "rapport_global": 1.085
+  "rapport_global": 1.087
  }
 }
