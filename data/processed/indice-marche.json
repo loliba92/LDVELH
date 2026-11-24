@@ -1,5 +1,5 @@
 {
- "date": "2026-11-23",
+ "date": "2026-11-24",
  "groupes": {
   "V1 · <span class=\"title--section\">Présentation</span> <div class=\"content\"> <div class=\"inside\"> <p itemprop=\"description\">Maître du jeu.</p> </div> </div> </article> </div> <span id=\"reviews-anchor\"></span> <div class=\"product-review\" hx-get=\"/htmx/product-reviews/2251050?review_id=\" hx-trigger=\"intersect once\"> <div class=\"d-flex justify-content-center\"> <div class=\"spinner-border\" role=\"status\"> <span class=\"visually-hidden\">Loading...</span> </div> </div> </div> <div> <div class=\"bottom-add-to-cart\"> <a href=\"#product-aside\" class=\"btn btn-primary\">Acheter": {
    "indice": 99.61,
@@ -41,14 +41,18 @@
     [
      "2026-11-23",
      99.61
+    ],
+    [
+     "2026-11-24",
+     99.61
     ]
    ],
    "indice_moyenne": 99.61
   },
   "V1 · Alkonost": {
-   "indice": 80.88,
+   "indice": 80.52,
    "livres": 8,
-   "annonces": 12,
+   "annonces": 13,
    "historique": [
     [
      "2026-10-17",
@@ -201,12 +205,16 @@
     [
      "2026-11-23",
      80.88
+    ],
+    [
+     "2026-11-24",
+     80.52
     ]
    ],
-   "indice_moyenne": 80.81
+   "indice_moyenne": 80.33
   },
   "V1 · Bragelonne": {
-   "indice": 119.82,
+   "indice": 123.8,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -337,14 +345,18 @@
     [
      "2026-11-23",
      119.82
+    ],
+    [
+     "2026-11-24",
+     123.8
     ]
    ],
-   "indice_moyenne": 119.82
+   "indice_moyenne": 123.8
   },
   "V1 · CREE 75": {
-   "indice": 169.81,
+   "indice": 188.31,
    "livres": 1,
-   "annonces": 3,
+   "annonces": 4,
    "historique": [
     [
      "2026-11-13",
@@ -389,12 +401,16 @@
     [
      "2026-11-23",
      169.81
+    ],
+    [
+     "2026-11-24",
+     188.31
     ]
    ],
-   "indice_moyenne": 169.81
+   "indice_moyenne": 188.31
   },
   "V1 · Elder Craft": {
-   "indice": 39.02,
+   "indice": 39.41,
    "livres": 2,
    "annonces": 7,
    "historique": [
@@ -545,12 +561,16 @@
     [
      "2026-11-23",
      39.02
+    ],
+    [
+     "2026-11-24",
+     39.41
     ]
    ],
-   "indice_moyenne": 58.39
+   "indice_moyenne": 59.09
   },
   "V1 · Enchanteurs et chevaliers .": {
-   "indice": 117.84,
+   "indice": 121.64,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -617,14 +637,18 @@
     [
      "2026-11-23",
      117.84
+    ],
+    [
+     "2026-11-24",
+     121.64
     ]
    ],
-   "indice_moyenne": 117.84
+   "indice_moyenne": 121.64
   },
   "V1 · Gallimard": {
-   "indice": 97.22,
+   "indice": 97.15,
    "livres": 192,
-   "annonces": 4359,
+   "annonces": 4371,
    "historique": [
     [
      "2026-10-14",
@@ -764,35 +788,39 @@
     ],
     [
      "2026-11-18",
-     97.85
+     97.87
     ],
     [
      "2026-11-19",
-     97.63
+     97.65
     ],
     [
      "2026-11-20",
-     97.63
+     97.65
     ],
     [
      "2026-11-21",
-     97.5
+     97.52
     ],
     [
      "2026-11-22",
-     97.34
+     97.36
     ],
     [
      "2026-11-23",
-     97.22
+     97.24
+    ],
+    [
+     "2026-11-24",
+     97.15
     ]
    ],
-   "indice_moyenne": 81.52
+   "indice_moyenne": 81.42
   },
   "V1 · Hachette": {
-   "indice": 95.75,
+   "indice": 95.47,
    "livres": 6,
-   "annonces": 48,
+   "annonces": 49,
    "historique": [
     [
      "2026-10-17",
@@ -945,12 +973,16 @@
     [
      "2026-11-23",
      95.75
+    ],
+    [
+     "2026-11-24",
+     95.47
     ]
    ],
-   "indice_moyenne": 80.01
+   "indice_moyenne": 79.68
   },
   "V1 · Jean Nugent": {
-   "indice": 113.96,
+   "indice": 114.79,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -977,14 +1009,18 @@
     [
      "2026-11-23",
      113.96
+    ],
+    [
+     "2026-11-24",
+     114.79
     ]
    ],
-   "indice_moyenne": 122.2
+   "indice_moyenne": 128.42
   },
   "V1 · Jean-Pierre Pécau": {
-   "indice": 88.63,
+   "indice": 93.95,
    "livres": 1,
-   "annonces": 7,
+   "annonces": 13,
    "historique": [
     [
      "2026-10-25",
@@ -1104,13 +1140,17 @@
     ],
     [
      "2026-11-23",
-     88.63
+     92.18
+    ],
+    [
+     "2026-11-24",
+     93.95
     ]
    ],
-   "indice_moyenne": 91.33
+   "indice_moyenne": 99.31
   },
   "V1 · La Loi du sabre .": {
-   "indice": 80.65,
+   "indice": 80.85,
    "livres": 1,
    "annonces": 12,
    "historique": [
@@ -1209,12 +1249,16 @@
     [
      "2026-11-23",
      80.65
+    ],
+    [
+     "2026-11-24",
+     80.85
     ]
    ],
-   "indice_moyenne": 80.65
+   "indice_moyenne": 80.85
   },
   "V1 · R.L Stine": {
-   "indice": 99.45,
+   "indice": 99.02,
    "livres": 1,
    "annonces": 2,
    "historique": [
@@ -1241,14 +1285,18 @@
     [
      "2026-11-23",
      99.45
+    ],
+    [
+     "2026-11-24",
+     99.02
     ]
    ],
-   "indice_moyenne": 99.45
+   "indice_moyenne": 99.02
   },
   "V1 · Sarbacane": {
-   "indice": 77.71,
+   "indice": 77.91,
    "livres": 2,
-   "annonces": 15,
+   "annonces": 16,
    "historique": [
     [
      "2026-10-20",
@@ -1389,9 +1437,13 @@
     [
      "2026-11-23",
      77.71
+    ],
+    [
+     "2026-11-24",
+     77.91
     ]
    ],
-   "indice_moyenne": 71.94
+   "indice_moyenne": 72.2
   },
   "V1 · Scriptarium": {
    "indice": 79.71,
@@ -1521,12 +1573,16 @@
     [
      "2026-11-23",
      79.71
+    ],
+    [
+     "2026-11-24",
+     79.71
     ]
    ],
-   "indice_moyenne": 81.23
+   "indice_moyenne": 81.45
   },
   "V1 · Superpouvoirs.": {
-   "indice": 128.0,
+   "indice": 129.04,
    "livres": 1,
    "annonces": 25,
    "historique": [
@@ -1577,14 +1633,18 @@
     [
      "2026-11-23",
      128.0
+    ],
+    [
+     "2026-11-24",
+     129.04
     ]
    ],
-   "indice_moyenne": 128.0
+   "indice_moyenne": 129.04
   },
   "V2 · Alkonost": {
-   "indice": 75.94,
-   "livres": 4,
-   "annonces": 4,
+   "indice": 75.74,
+   "livres": 6,
+   "annonces": 7,
    "historique": [
     [
      "2026-10-17",
@@ -1672,77 +1732,81 @@
     ],
     [
      "2026-11-07",
-     92.05
+     92.06
     ],
     [
      "2026-11-08",
-     88.59
+     88.61
     ],
     [
      "2026-11-09",
-     85.96
+     85.99
     ],
     [
      "2026-11-10",
-     83.96
+     83.99
     ],
     [
      "2026-11-11",
-     82.43
+     82.46
     ],
     [
      "2026-11-12",
-     81.19
+     81.22
     ],
     [
      "2026-11-13",
-     80.19
+     80.21
     ],
     [
      "2026-11-14",
-     79.39
+     79.4
     ],
     [
      "2026-11-15",
-     78.75
+     78.76
     ],
     [
      "2026-11-16",
-     78.17
+     78.18
     ],
     [
      "2026-11-17",
-     77.68
+     77.69
     ],
     [
      "2026-11-18",
-     77.28
+     77.29
     ],
     [
      "2026-11-19",
-     76.94
+     76.92
     ],
     [
      "2026-11-20",
-     76.65
+     76.63
     ],
     [
      "2026-11-21",
-     76.36
+     76.34
     ],
     [
      "2026-11-22",
-     76.15
+     76.11
     ],
     [
      "2026-11-23",
-     75.94
+     75.9
+    ],
+    [
+     "2026-11-24",
+     75.74
     ]
    ],
-   "indice_moyenne": 75.93
+   "indice_moyenne": 75.74
   },
   "V2 · Elder Craft": {
-   "indice": 77.8,
+   "indice": 77.76,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -1893,14 +1957,18 @@
     [
      "2026-11-23",
      77.8
+    ],
+    [
+     "2026-11-24",
+     77.76
     ]
    ],
-   "indice_moyenne": 77.8
+   "indice_moyenne": 77.76
   },
   "V2 · Gallimard": {
-   "indice": 99.85,
+   "indice": 99.84,
    "livres": 110,
-   "annonces": 944,
+   "annonces": 966,
    "historique": [
     [
      "2026-10-14",
@@ -2060,15 +2128,179 @@
     ],
     [
      "2026-11-23",
-     99.85
+     99.83
+    ],
+    [
+     "2026-11-24",
+     99.84
     ]
    ],
-   "indice_moyenne": 88.74
+   "indice_moyenne": 88.91
+  },
+  "V3 · Alkonost": {
+   "indice": 110.81,
+   "livres": 1,
+   "annonces": 1,
+   "historique": [
+    [
+     "2026-10-18",
+     100.0
+    ],
+    [
+     "2026-10-19",
+     100.0
+    ],
+    [
+     "2026-10-20",
+     100.0
+    ],
+    [
+     "2026-10-21",
+     100.0
+    ],
+    [
+     "2026-10-22",
+     100.0
+    ],
+    [
+     "2026-10-23",
+     100.0
+    ],
+    [
+     "2026-10-24",
+     100.0
+    ],
+    [
+     "2026-10-25",
+     100.0
+    ],
+    [
+     "2026-10-26",
+     100.0
+    ],
+    [
+     "2026-10-27",
+     100.0
+    ],
+    [
+     "2026-10-28",
+     100.0
+    ],
+    [
+     "2026-10-29",
+     100.0
+    ],
+    [
+     "2026-10-30",
+     100.0
+    ],
+    [
+     "2026-10-31",
+     101.12
+    ],
+    [
+     "2026-11-01",
+     102.24
+    ],
+    [
+     "2026-11-02",
+     103.23
+    ],
+    [
+     "2026-11-03",
+     104.1
+    ],
+    [
+     "2026-11-04",
+     104.84
+    ],
+    [
+     "2026-11-05",
+     105.47
+    ],
+    [
+     "2026-11-06",
+     106.09
+    ],
+    [
+     "2026-11-07",
+     106.58
+    ],
+    [
+     "2026-11-08",
+     107.08
+    ],
+    [
+     "2026-11-09",
+     107.58
+    ],
+    [
+     "2026-11-10",
+     107.95
+    ],
+    [
+     "2026-11-11",
+     108.32
+    ],
+    [
+     "2026-11-12",
+     108.7
+    ],
+    [
+     "2026-11-13",
+     108.94
+    ],
+    [
+     "2026-11-14",
+     109.19
+    ],
+    [
+     "2026-11-15",
+     109.44
+    ],
+    [
+     "2026-11-16",
+     109.69
+    ],
+    [
+     "2026-11-17",
+     109.94
+    ],
+    [
+     "2026-11-18",
+     110.06
+    ],
+    [
+     "2026-11-19",
+     110.19
+    ],
+    [
+     "2026-11-20",
+     110.31
+    ],
+    [
+     "2026-11-21",
+     110.43
+    ],
+    [
+     "2026-11-22",
+     110.56
+    ],
+    [
+     "2026-11-23",
+     110.68
+    ],
+    [
+     "2026-11-24",
+     110.81
+    ]
+   ],
+   "indice_moyenne": 110.81
   },
   "V3 · Gallimard": {
-   "indice": 93.58,
+   "indice": 93.19,
    "livres": 35,
-   "annonces": 225,
+   "annonces": 220,
    "historique": [
     [
      "2026-10-14",
@@ -2229,14 +2461,18 @@
     [
      "2026-11-23",
      93.58
+    ],
+    [
+     "2026-11-24",
+     93.19
     ]
    ],
-   "indice_moyenne": 89.36
+   "indice_moyenne": 88.66
   },
   "V4 · Alkonost": {
-   "indice": 70.08,
+   "indice": 75.76,
    "livres": 1,
-   "annonces": 1,
+   "annonces": 2,
    "historique": [
     [
      "2026-10-17",
@@ -2296,107 +2532,111 @@
     ],
     [
      "2026-10-31",
-     100.0
+     100.58
     ],
     [
      "2026-11-01",
-     100.0
+     101.09
     ],
     [
      "2026-11-02",
-     100.0
+     101.54
     ],
     [
      "2026-11-03",
-     100.0
+     101.98
     ],
     [
      "2026-11-04",
-     100.0
+     102.36
     ],
     [
      "2026-11-05",
-     100.0
+     102.68
     ],
     [
      "2026-11-06",
-     91.01
+     96.68
     ],
     [
      "2026-11-07",
-     84.73
+     92.17
     ],
     [
      "2026-11-08",
-     80.31
+     88.74
     ],
     [
      "2026-11-09",
-     77.21
+     86.15
     ],
     [
      "2026-11-10",
-     75.04
+     84.13
     ],
     [
      "2026-11-11",
-     73.49
+     82.51
     ],
     [
      "2026-11-12",
-     72.48
+     81.31
     ],
     [
      "2026-11-13",
-     71.71
+     80.3
     ],
     [
      "2026-11-14",
-     71.16
+     79.48
     ],
     [
      "2026-11-15",
-     70.78
+     78.8
     ],
     [
      "2026-11-16",
-     70.54
+     78.26
     ],
     [
      "2026-11-17",
-     70.39
+     77.77
     ],
     [
      "2026-11-18",
-     70.23
+     77.33
     ],
     [
      "2026-11-19",
-     70.16
+     76.99
     ],
     [
      "2026-11-20",
-     70.08
+     76.66
     ],
     [
      "2026-11-21",
-     70.08
+     76.42
     ],
     [
      "2026-11-22",
-     70.08
+     76.18
     ],
     [
      "2026-11-23",
-     70.08
+     75.94
+    ],
+    [
+     "2026-11-24",
+     75.76
     ]
    ],
-   "indice_moyenne": 70.08
+   "indice_moyenne": 75.76
   },
   "V4 · Gallimard": {
-   "indice": 95.56,
+   "indice": 95.26,
    "livres": 47,
-   "annonces": 450,
+   "annonces": 445,
    "historique": [
     [
      "2026-10-14",
@@ -2557,14 +2797,18 @@
     [
      "2026-11-23",
      95.56
+    ],
+    [
+     "2026-11-24",
+     95.26
     ]
    ],
-   "indice_moyenne": 80.25
+   "indice_moyenne": 80.03
   },
   "V5 · Gallimard Jeunesse": {
-   "indice": 73.99,
+   "indice": 73.39,
    "livres": 45,
-   "annonces": 290,
+   "annonces": 299,
    "historique": [
     [
      "2026-10-14",
@@ -2572,162 +2816,166 @@
     ],
     [
      "2026-10-15",
-     93.91
+     93.4
     ],
     [
      "2026-10-17",
-     93.91
+     93.4
     ],
     [
      "2026-10-18",
-     93.91
+     93.4
     ],
     [
      "2026-10-19",
-     93.91
+     93.4
     ],
     [
      "2026-10-20",
-     93.91
+     93.4
     ],
     [
      "2026-10-21",
-     93.91
+     93.4
     ],
     [
      "2026-10-22",
-     93.91
+     93.4
     ],
     [
      "2026-10-23",
-     93.91
+     93.4
     ],
     [
      "2026-10-24",
-     93.91
+     93.4
     ],
     [
      "2026-10-25",
-     93.91
+     93.4
     ],
     [
      "2026-10-26",
-     93.91
+     93.4
     ],
     [
      "2026-10-27",
-     93.91
+     93.4
     ],
     [
      "2026-10-28",
-     93.91
+     93.4
     ],
     [
      "2026-10-29",
-     93.91
+     93.4
     ],
     [
      "2026-10-30",
-     93.91
+     93.4
     ],
     [
      "2026-10-31",
-     93.91
+     93.4
     ],
     [
      "2026-11-01",
-     93.91
+     93.4
     ],
     [
      "2026-11-02",
-     93.91
+     93.4
     ],
     [
      "2026-11-03",
-     93.91
+     93.4
     ],
     [
      "2026-11-04",
-     93.91
+     93.4
     ],
     [
      "2026-11-05",
-     93.91
+     93.4
     ],
     [
      "2026-11-06",
-     91.16
+     90.71
     ],
     [
      "2026-11-07",
-     88.92
+     88.48
     ],
     [
      "2026-11-08",
-     86.92
+     86.5
     ],
     [
      "2026-11-09",
-     85.11
+     84.7
     ],
     [
      "2026-11-10",
-     83.48
+     83.08
     ],
     [
      "2026-11-11",
-     82.0
+     81.62
     ],
     [
      "2026-11-12",
-     80.85
+     80.47
     ],
     [
      "2026-11-13",
-     80.02
+     79.64
     ],
     [
      "2026-11-14",
-     79.44
+     79.07
     ],
     [
      "2026-11-15",
-     78.53
+     78.16
     ],
     [
      "2026-11-16",
-     77.76
+     77.37
     ],
     [
      "2026-11-17",
-     77.01
+     76.63
     ],
     [
      "2026-11-18",
-     76.37
+     75.98
     ],
     [
      "2026-11-19",
-     75.79
+     75.4
     ],
     [
      "2026-11-20",
-     75.24
+     74.84
     ],
     [
      "2026-11-21",
-     74.76
+     74.36
     ],
     [
      "2026-11-22",
-     74.34
+     73.95
     ],
     [
      "2026-11-23",
-     73.99
+     73.6
+    ],
+    [
+     "2026-11-24",
+     73.39
     ]
    ],
-   "indice_moyenne": 72.92
+   "indice_moyenne": 72.81
   }
  },
  "editeurs": {
@@ -2771,13 +3019,17 @@
     [
      "2026-11-23",
      99.61
+    ],
+    [
+     "2026-11-24",
+     99.61
     ]
    ]
   },
   "Alkonost": {
-   "indice": 81.61,
-   "livres": 13,
-   "annonces": 17,
+   "indice": 82.17,
+   "livres": 16,
+   "annonces": 23,
    "historique": [
     [
      "2026-10-17",
@@ -2837,104 +3089,108 @@
     ],
     [
      "2026-10-31",
-     100.0
+     101.05
     ],
     [
      "2026-11-01",
-     100.0
+     101.05
     ],
     [
      "2026-11-02",
-     100.0
+     101.05
     ],
     [
      "2026-11-03",
-     100.0
+     101.05
     ],
     [
      "2026-11-04",
-     100.0
+     101.05
     ],
     [
      "2026-11-05",
-     100.0
+     101.05
     ],
     [
      "2026-11-06",
-     97.39
+     98.42
     ],
     [
      "2026-11-07",
-     95.05
+     96.06
     ],
     [
      "2026-11-08",
-     92.89
+     93.91
     ],
     [
      "2026-11-09",
-     90.96
+     91.97
     ],
     [
      "2026-11-10",
-     89.25
+     90.24
     ],
     [
      "2026-11-11",
-     87.73
+     88.7
     ],
     [
      "2026-11-12",
-     86.45
+     87.41
     ],
     [
      "2026-11-13",
-     85.54
+     86.49
     ],
     [
      "2026-11-14",
-     84.9
+     85.84
     ],
     [
      "2026-11-15",
-     84.43
+     85.37
     ],
     [
      "2026-11-16",
-     84.1
+     85.03
     ],
     [
      "2026-11-17",
-     83.86
+     84.79
     ],
     [
      "2026-11-18",
-     83.68
+     84.6
     ],
     [
      "2026-11-19",
-     83.53
+     84.45
     ],
     [
      "2026-11-20",
-     82.97
+     83.89
     ],
     [
      "2026-11-21",
-     82.44
+     83.37
     ],
     [
      "2026-11-22",
-     82.02
+     82.95
     ],
     [
      "2026-11-23",
-     81.61
+     82.53
+    ],
+    [
+     "2026-11-24",
+     82.17
     ]
    ]
   },
   "Bragelonne": {
-   "indice": 119.82,
+   "indice": 123.8,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -3065,13 +3321,17 @@
     [
      "2026-11-23",
      119.82
+    ],
+    [
+     "2026-11-24",
+     123.8
     ]
    ]
   },
   "CREE 75": {
-   "indice": 169.81,
+   "indice": 188.31,
    "livres": 1,
-   "annonces": 3,
+   "annonces": 4,
    "historique": [
     [
      "2026-11-13",
@@ -3116,11 +3376,15 @@
     [
      "2026-11-23",
      169.81
+    ],
+    [
+     "2026-11-24",
+     188.31
     ]
    ]
   },
   "Elder Craft": {
-   "indice": 108.34,
+   "indice": 108.45,
    "livres": 3,
    "annonces": 10,
    "historique": [
@@ -3271,11 +3535,15 @@
     [
      "2026-11-23",
      108.34
+    ],
+    [
+     "2026-11-24",
+     108.45
     ]
    ]
   },
   "Enchanteurs et chevaliers .": {
-   "indice": 117.84,
+   "indice": 121.64,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -3342,13 +3610,17 @@
     [
      "2026-11-23",
      117.84
+    ],
+    [
+     "2026-11-24",
+     121.64
     ]
    ]
   },
   "Gallimard": {
-   "indice": 97.77,
+   "indice": 97.68,
    "livres": 384,
-   "annonces": 5978,
+   "annonces": 6002,
    "historique": [
     [
      "2026-10-14",
@@ -3492,7 +3764,7 @@
     ],
     [
      "2026-11-19",
-     98.35
+     98.36
     ],
     [
      "2026-11-20",
@@ -3504,18 +3776,22 @@
     ],
     [
      "2026-11-22",
-     97.9
+     97.92
     ],
     [
      "2026-11-23",
-     97.77
+     97.79
+    ],
+    [
+     "2026-11-24",
+     97.68
     ]
    ]
   },
   "Gallimard Jeunesse": {
-   "indice": 73.99,
+   "indice": 73.39,
    "livres": 45,
-   "annonces": 290,
+   "annonces": 299,
    "historique": [
     [
      "2026-10-14",
@@ -3523,166 +3799,170 @@
     ],
     [
      "2026-10-15",
-     93.91
+     93.4
     ],
     [
      "2026-10-17",
-     93.91
+     93.4
     ],
     [
      "2026-10-18",
-     93.91
+     93.4
     ],
     [
      "2026-10-19",
-     93.91
+     93.4
     ],
     [
      "2026-10-20",
-     93.91
+     93.4
     ],
     [
      "2026-10-21",
-     93.91
+     93.4
     ],
     [
      "2026-10-22",
-     93.91
+     93.4
     ],
     [
      "2026-10-23",
-     93.91
+     93.4
     ],
     [
      "2026-10-24",
-     93.91
+     93.4
     ],
     [
      "2026-10-25",
-     93.91
+     93.4
     ],
     [
      "2026-10-26",
-     93.91
+     93.4
     ],
     [
      "2026-10-27",
-     93.91
+     93.4
     ],
     [
      "2026-10-28",
-     93.91
+     93.4
     ],
     [
      "2026-10-29",
-     93.91
+     93.4
     ],
     [
      "2026-10-30",
-     93.91
+     93.4
     ],
     [
      "2026-10-31",
-     93.91
+     93.4
     ],
     [
      "2026-11-01",
-     93.91
+     93.4
     ],
     [
      "2026-11-02",
-     93.91
+     93.4
     ],
     [
      "2026-11-03",
-     93.91
+     93.4
     ],
     [
      "2026-11-04",
-     93.91
+     93.4
     ],
     [
      "2026-11-05",
-     93.91
+     93.4
     ],
     [
      "2026-11-06",
-     91.16
+     90.71
     ],
     [
      "2026-11-07",
-     88.92
+     88.48
     ],
     [
      "2026-11-08",
-     86.92
+     86.5
     ],
     [
      "2026-11-09",
-     85.11
+     84.7
     ],
     [
      "2026-11-10",
-     83.48
+     83.08
     ],
     [
      "2026-11-11",
-     82.0
+     81.62
     ],
     [
      "2026-11-12",
-     80.85
+     80.47
     ],
     [
      "2026-11-13",
-     80.02
+     79.64
     ],
     [
      "2026-11-14",
-     79.44
+     79.07
     ],
     [
      "2026-11-15",
-     78.53
+     78.16
     ],
     [
      "2026-11-16",
-     77.76
+     77.37
     ],
     [
      "2026-11-17",
-     77.01
+     76.63
     ],
     [
      "2026-11-18",
-     76.37
+     75.98
     ],
     [
      "2026-11-19",
-     75.79
+     75.4
     ],
     [
      "2026-11-20",
-     75.24
+     74.84
     ],
     [
      "2026-11-21",
-     74.76
+     74.36
     ],
     [
      "2026-11-22",
-     74.34
+     73.95
     ],
     [
      "2026-11-23",
-     73.99
+     73.6
+    ],
+    [
+     "2026-11-24",
+     73.39
     ]
    ]
   },
   "Hachette": {
-   "indice": 95.75,
+   "indice": 95.47,
    "livres": 6,
-   "annonces": 48,
+   "annonces": 49,
    "historique": [
     [
      "2026-10-17",
@@ -3835,11 +4115,15 @@
     [
      "2026-11-23",
      95.75
+    ],
+    [
+     "2026-11-24",
+     95.47
     ]
    ]
   },
   "Jean Nugent": {
-   "indice": 113.96,
+   "indice": 114.79,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -3866,13 +4150,17 @@
     [
      "2026-11-23",
      113.96
+    ],
+    [
+     "2026-11-24",
+     114.79
     ]
    ]
   },
   "Jean-Pierre Pécau": {
-   "indice": 88.63,
+   "indice": 93.95,
    "livres": 1,
-   "annonces": 7,
+   "annonces": 13,
    "historique": [
     [
      "2026-10-25",
@@ -3992,12 +4280,16 @@
     ],
     [
      "2026-11-23",
-     88.63
+     92.18
+    ],
+    [
+     "2026-11-24",
+     93.95
     ]
    ]
   },
   "La Loi du sabre .": {
-   "indice": 80.65,
+   "indice": 80.85,
    "livres": 1,
    "annonces": 12,
    "historique": [
@@ -4096,11 +4388,15 @@
     [
      "2026-11-23",
      80.65
+    ],
+    [
+     "2026-11-24",
+     80.85
     ]
    ]
   },
   "R.L Stine": {
-   "indice": 99.45,
+   "indice": 99.02,
    "livres": 1,
    "annonces": 2,
    "historique": [
@@ -4127,13 +4423,17 @@
     [
      "2026-11-23",
      99.45
+    ],
+    [
+     "2026-11-24",
+     99.02
     ]
    ]
   },
   "Sarbacane": {
-   "indice": 77.71,
+   "indice": 77.91,
    "livres": 2,
-   "annonces": 15,
+   "annonces": 16,
    "historique": [
     [
      "2026-10-20",
@@ -4274,6 +4574,10 @@
     [
      "2026-11-23",
      77.71
+    ],
+    [
+     "2026-11-24",
+     77.91
     ]
    ]
   },
@@ -4405,11 +4709,15 @@
     [
      "2026-11-23",
      79.71
+    ],
+    [
+     "2026-11-24",
+     79.71
     ]
    ]
   },
   "Superpouvoirs.": {
-   "indice": 128.0,
+   "indice": 129.04,
    "livres": 1,
    "annonces": 25,
    "historique": [
@@ -4460,6 +4768,10 @@
     [
      "2026-11-23",
      128.0
+    ],
+    [
+     "2026-11-24",
+     129.04
     ]
    ]
   }
@@ -4505,13 +4817,17 @@
     [
      "2026-11-23",
      99.61
+    ],
+    [
+     "2026-11-24",
+     99.61
     ]
    ]
   },
   "Alkonost": {
-   "indice": 81.61,
-   "livres": 13,
-   "annonces": 17,
+   "indice": 82.17,
+   "livres": 16,
+   "annonces": 23,
    "historique": [
     [
      "2026-10-17",
@@ -4571,104 +4887,108 @@
     ],
     [
      "2026-10-31",
-     100.0
+     101.05
     ],
     [
      "2026-11-01",
-     100.0
+     101.05
     ],
     [
      "2026-11-02",
-     100.0
+     101.05
     ],
     [
      "2026-11-03",
-     100.0
+     101.05
     ],
     [
      "2026-11-04",
-     100.0
+     101.05
     ],
     [
      "2026-11-05",
-     100.0
+     101.05
     ],
     [
      "2026-11-06",
-     97.39
+     98.42
     ],
     [
      "2026-11-07",
-     95.05
+     96.06
     ],
     [
      "2026-11-08",
-     92.89
+     93.91
     ],
     [
      "2026-11-09",
-     90.96
+     91.97
     ],
     [
      "2026-11-10",
-     89.25
+     90.24
     ],
     [
      "2026-11-11",
-     87.73
+     88.7
     ],
     [
      "2026-11-12",
-     86.45
+     87.41
     ],
     [
      "2026-11-13",
-     85.54
+     86.49
     ],
     [
      "2026-11-14",
-     84.9
+     85.84
     ],
     [
      "2026-11-15",
-     84.43
+     85.37
     ],
     [
      "2026-11-16",
-     84.1
+     85.03
     ],
     [
      "2026-11-17",
-     83.86
+     84.79
     ],
     [
      "2026-11-18",
-     83.68
+     84.6
     ],
     [
      "2026-11-19",
-     83.53
+     84.45
     ],
     [
      "2026-11-20",
-     82.97
+     83.89
     ],
     [
      "2026-11-21",
-     82.44
+     83.37
     ],
     [
      "2026-11-22",
-     82.02
+     82.95
     ],
     [
      "2026-11-23",
-     81.61
+     82.53
+    ],
+    [
+     "2026-11-24",
+     82.17
     ]
    ]
   },
   "Bragelonne": {
-   "indice": 119.82,
+   "indice": 123.8,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -4799,13 +5119,17 @@
     [
      "2026-11-23",
      119.82
+    ],
+    [
+     "2026-11-24",
+     123.8
     ]
    ]
   },
   "CREE 75": {
-   "indice": 169.81,
+   "indice": 188.31,
    "livres": 1,
-   "annonces": 3,
+   "annonces": 4,
    "historique": [
     [
      "2026-11-13",
@@ -4850,11 +5174,15 @@
     [
      "2026-11-23",
      169.81
+    ],
+    [
+     "2026-11-24",
+     188.31
     ]
    ]
   },
   "Elder Craft": {
-   "indice": 108.34,
+   "indice": 108.45,
    "livres": 3,
    "annonces": 10,
    "historique": [
@@ -5005,11 +5333,15 @@
     [
      "2026-11-23",
      108.34
+    ],
+    [
+     "2026-11-24",
+     108.45
     ]
    ]
   },
   "Enchanteurs et chevaliers .": {
-   "indice": 117.84,
+   "indice": 121.64,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -5076,13 +5408,17 @@
     [
      "2026-11-23",
      117.84
+    ],
+    [
+     "2026-11-24",
+     121.64
     ]
    ]
   },
   "Gallimard": {
-   "indice": 97.38,
+   "indice": 97.27,
    "livres": 429,
-   "annonces": 6268,
+   "annonces": 6301,
    "historique": [
     [
      "2026-10-14",
@@ -5210,15 +5546,15 @@
     ],
     [
      "2026-11-15",
-     99.27
+     99.26
     ],
     [
      "2026-11-16",
-     98.86
+     98.85
     ],
     [
      "2026-11-17",
-     98.56
+     98.55
     ],
     [
      "2026-11-18",
@@ -5242,14 +5578,18 @@
     ],
     [
      "2026-11-23",
-     97.38
+     97.39
+    ],
+    [
+     "2026-11-24",
+     97.27
     ]
    ]
   },
   "Hachette": {
-   "indice": 95.75,
+   "indice": 95.47,
    "livres": 6,
-   "annonces": 48,
+   "annonces": 49,
    "historique": [
     [
      "2026-10-17",
@@ -5402,11 +5742,15 @@
     [
      "2026-11-23",
      95.75
+    ],
+    [
+     "2026-11-24",
+     95.47
     ]
    ]
   },
   "Jean Nugent": {
-   "indice": 113.96,
+   "indice": 114.79,
    "livres": 1,
    "annonces": 3,
    "historique": [
@@ -5433,13 +5777,17 @@
     [
      "2026-11-23",
      113.96
+    ],
+    [
+     "2026-11-24",
+     114.79
     ]
    ]
   },
   "Jean-Pierre Pécau": {
-   "indice": 88.63,
+   "indice": 93.95,
    "livres": 1,
-   "annonces": 7,
+   "annonces": 13,
    "historique": [
     [
      "2026-10-25",
@@ -5559,12 +5907,16 @@
     ],
     [
      "2026-11-23",
-     88.63
+     92.18
+    ],
+    [
+     "2026-11-24",
+     93.95
     ]
    ]
   },
   "La Loi du sabre .": {
-   "indice": 80.65,
+   "indice": 80.85,
    "livres": 1,
    "annonces": 12,
    "historique": [
@@ -5663,11 +6015,15 @@
     [
      "2026-11-23",
      80.65
+    ],
+    [
+     "2026-11-24",
+     80.85
     ]
    ]
   },
   "R.L Stine": {
-   "indice": 99.45,
+   "indice": 99.02,
    "livres": 1,
    "annonces": 2,
    "historique": [
@@ -5694,13 +6050,17 @@
     [
      "2026-11-23",
      99.45
+    ],
+    [
+     "2026-11-24",
+     99.02
     ]
    ]
   },
   "Sarbacane": {
-   "indice": 77.71,
+   "indice": 77.91,
    "livres": 2,
-   "annonces": 15,
+   "annonces": 16,
    "historique": [
     [
      "2026-10-20",
@@ -5841,6 +6201,10 @@
     [
      "2026-11-23",
      77.71
+    ],
+    [
+     "2026-11-24",
+     77.91
     ]
    ]
   },
@@ -5972,11 +6336,15 @@
     [
      "2026-11-23",
      79.71
+    ],
+    [
+     "2026-11-24",
+     79.71
     ]
    ]
   },
   "Superpouvoirs.": {
-   "indice": 128.0,
+   "indice": 129.04,
    "livres": 1,
    "annonces": 25,
    "historique": [
@@ -6027,6 +6395,10 @@
     [
      "2026-11-23",
      128.0
+    ],
+    [
+     "2026-11-24",
+     129.04
     ]
    ]
   }
@@ -6034,354 +6406,354 @@
  "cascade": {
   "V1 · Gallimard": {
    "depuis": "2026-10-11",
-   "date": "2026-11-23",
-   "variation_pct": -18.48,
+   "date": "2026-11-24",
+   "variation_pct": -18.58,
    "debut": 100.0,
-   "fin": 81.52,
-   "prix_observes": 495,
+   "fin": 81.42,
+   "prix_observes": 497,
    "series": [
     {
      "serie": "Sorcellerie!",
      "livres": 4,
-     "annonces": 213,
+     "annonces": 214,
      "contribution_pct": -1.12,
      "debut": 100.0,
-     "fin": 60.01,
-     "variation_pct": -39.99
+     "fin": 59.89,
+     "variation_pct": -40.11
     },
     {
      "serie": "Défis et Sortilèges",
      "livres": 8,
-     "annonces": 224,
-     "contribution_pct": -1.11,
+     "annonces": 220,
+     "contribution_pct": -1.06,
      "debut": 100.0,
-     "fin": 76.79,
-     "variation_pct": -23.21
+     "fin": 77.65,
+     "variation_pct": -22.35
     },
     {
      "serie": "Loup Solitaire",
      "livres": 22,
-     "annonces": 634,
-     "contribution_pct": -2.54,
+     "annonces": 631,
+     "contribution_pct": -2.57,
      "debut": 100.0,
-     "fin": 78.42,
-     "variation_pct": -21.58
+     "fin": 78.07,
+     "variation_pct": -21.93
     },
     {
      "serie": "Défis Fantastiques",
      "livres": 56,
-     "annonces": 1256,
-     "contribution_pct": -6.21,
+     "annonces": 1308,
+     "contribution_pct": -6.34,
      "debut": 100.0,
-     "fin": 78.44,
-     "variation_pct": -21.56
+     "fin": 78.37,
+     "variation_pct": -21.63
     },
     {
      "serie": "L'Œil Noir",
      "livres": 20,
-     "annonces": 249,
-     "contribution_pct": -1.69,
+     "annonces": 222,
+     "contribution_pct": -1.65,
      "debut": 100.0,
-     "fin": 81.83,
-     "variation_pct": -18.17
+     "fin": 81.86,
+     "variation_pct": -18.14
     },
     {
      "serie": "Autres séries (20)",
      "autres": true,
      "livres": 82,
-     "annonces": 1783,
-     "contribution_pct": -5.79,
+     "annonces": 1776,
+     "contribution_pct": -5.85,
      "debut": 100.0,
-     "fin": 86.41,
-     "variation_pct": -13.59
+     "fin": 86.25,
+     "variation_pct": -13.75
     }
    ]
   },
   "V2 · Gallimard": {
    "depuis": "2026-10-11",
-   "date": "2026-11-23",
-   "variation_pct": -11.26,
+   "date": "2026-11-24",
+   "variation_pct": -11.09,
    "debut": 100.0,
-   "fin": 88.74,
+   "fin": 88.91,
    "prix_observes": 222,
    "series": [
     {
      "serie": "Sorcellerie!",
      "livres": 4,
-     "annonces": 38,
-     "contribution_pct": -1.18,
+     "annonces": 39,
+     "contribution_pct": -1.19,
      "debut": 100.0,
-     "fin": 73.45,
-     "variation_pct": -26.55
+     "fin": 73.2,
+     "variation_pct": -26.8
     },
     {
      "serie": "Loup*Ardent",
      "livres": 4,
-     "annonces": 23,
-     "contribution_pct": -0.6,
+     "annonces": 22,
+     "contribution_pct": -0.59,
      "debut": 100.0,
-     "fin": 79.09,
-     "variation_pct": -20.91
+     "fin": 79.21,
+     "variation_pct": -20.79
     },
     {
      "serie": "Loup Solitaire",
      "livres": 28,
-     "annonces": 326,
-     "contribution_pct": -5.58,
+     "annonces": 330,
+     "contribution_pct": -5.65,
      "debut": 100.0,
-     "fin": 80.6,
-     "variation_pct": -19.4
+     "fin": 80.43,
+     "variation_pct": -19.57
     },
     {
      "serie": "Défis de l'Histoire",
      "livres": 4,
-     "annonces": 23,
-     "contribution_pct": -0.61,
+     "annonces": 24,
+     "contribution_pct": -0.62,
      "debut": 100.0,
-     "fin": 85.22,
-     "variation_pct": -14.78
+     "fin": 85.01,
+     "variation_pct": -14.99
     },
     {
      "serie": "Défis Fantastiques",
      "livres": 39,
-     "annonces": 278,
-     "contribution_pct": -1.7,
+     "annonces": 298,
+     "contribution_pct": -1.89,
      "debut": 100.0,
-     "fin": 94.81,
-     "variation_pct": -5.19
+     "fin": 94.3,
+     "variation_pct": -5.7
     },
     {
      "serie": "Autres séries (7)",
      "autres": true,
      "livres": 31,
-     "annonces": 256,
-     "contribution_pct": -1.59,
+     "annonces": 253,
+     "contribution_pct": -1.14,
      "debut": 100.0,
-     "fin": 94.14,
-     "variation_pct": -5.86
+     "fin": 95.7,
+     "variation_pct": -4.3
     }
    ]
   },
   "V3 · Gallimard": {
    "depuis": "2026-10-11",
-   "date": "2026-11-23",
-   "variation_pct": -10.64,
+   "date": "2026-11-24",
+   "variation_pct": -11.34,
    "debut": 100.0,
-   "fin": 89.36,
+   "fin": 88.66,
    "prix_observes": 59,
    "series": [
     {
      "serie": "Défis Fantastiques",
      "livres": 16,
-     "annonces": 94,
-     "contribution_pct": -5.69,
+     "annonces": 93,
+     "contribution_pct": -6.03,
      "debut": 100.0,
-     "fin": 87.23,
-     "variation_pct": -12.77
+     "fin": 86.49,
+     "variation_pct": -13.51
     },
     {
      "serie": "Loup Solitaire",
      "livres": 19,
-     "annonces": 131,
-     "contribution_pct": -4.94,
+     "annonces": 127,
+     "contribution_pct": -5.32,
      "debut": 100.0,
-     "fin": 91.08,
-     "variation_pct": -8.92
+     "fin": 90.4,
+     "variation_pct": -9.6
     }
    ]
   },
   "V4 · Gallimard": {
    "depuis": "2026-10-11",
-   "date": "2026-11-23",
-   "variation_pct": -19.75,
+   "date": "2026-11-24",
+   "variation_pct": -19.97,
    "debut": 100.0,
-   "fin": 80.25,
+   "fin": 80.03,
    "prix_observes": 101,
    "series": [
     {
      "serie": "Loup Solitaire",
      "livres": 19,
-     "annonces": 146,
-     "contribution_pct": -9.31,
+     "annonces": 144,
+     "contribution_pct": -9.4,
      "debut": 100.0,
-     "fin": 76.97,
-     "variation_pct": -23.03
+     "fin": 76.74,
+     "variation_pct": -23.26
     },
     {
      "serie": "Défis Fantastiques",
      "livres": 24,
-     "annonces": 250,
-     "contribution_pct": -11.37,
+     "annonces": 248,
+     "contribution_pct": -11.59,
      "debut": 100.0,
-     "fin": 78.19,
-     "variation_pct": -21.81
+     "fin": 77.78,
+     "variation_pct": -22.22
     },
     {
      "serie": "Sorcellerie!",
      "livres": 4,
-     "annonces": 54,
-     "contribution_pct": 0.93,
+     "annonces": 53,
+     "contribution_pct": 1.02,
      "debut": 100.0,
-     "fin": 112.34,
-     "variation_pct": 12.34
+     "fin": 113.64,
+     "variation_pct": 13.64
     }
    ]
   },
   "V5 · Gallimard Jeunesse": {
    "depuis": "2026-10-11",
-   "date": "2026-11-23",
-   "variation_pct": -27.08,
+   "date": "2026-11-24",
+   "variation_pct": -27.19,
    "debut": 100.0,
-   "fin": 72.92,
-   "prix_observes": 81,
+   "fin": 72.81,
+   "prix_observes": 82,
    "series": [
     {
      "serie": "Loup Solitaire",
      "livres": 20,
-     "annonces": 117,
-     "contribution_pct": -12.97,
+     "annonces": 118,
+     "contribution_pct": -12.79,
      "debut": 100.0,
-     "fin": 69.25,
-     "variation_pct": -30.75
+     "fin": 69.24,
+     "variation_pct": -30.76
     },
     {
      "serie": "Défis Fantastiques",
      "livres": 19,
-     "annonces": 143,
-     "contribution_pct": -11.34,
+     "annonces": 149,
+     "contribution_pct": -11.6,
      "debut": 100.0,
-     "fin": 74.29,
-     "variation_pct": -25.71
+     "fin": 74.16,
+     "variation_pct": -25.84
     },
     {
      "serie": "Quête du Graal",
      "livres": 6,
-     "annonces": 30,
-     "contribution_pct": -2.77,
+     "annonces": 32,
+     "contribution_pct": -2.81,
      "debut": 100.0,
-     "fin": 78.93,
-     "variation_pct": -21.07
+     "fin": 78.43,
+     "variation_pct": -21.57
     }
    ]
   },
   "V1 · Alkonost": {
    "depuis": "2026-10-15",
-   "date": "2026-11-23",
-   "variation_pct": -19.19,
+   "date": "2026-11-24",
+   "variation_pct": -19.67,
    "debut": 100.0,
-   "fin": 80.81,
+   "fin": 80.33,
    "prix_observes": 10,
    "series": [
     {
      "serie": "Livre-jeu",
      "livres": 1,
-     "annonces": 2,
-     "contribution_pct": -4.93,
+     "annonces": 3,
+     "contribution_pct": -4.96,
      "debut": 100.0,
-     "fin": 76.06,
-     "variation_pct": -23.94
+     "fin": 75.86,
+     "variation_pct": -24.14
     },
     {
      "serie": "Les Contes",
      "livres": 3,
      "annonces": 5,
-     "contribution_pct": -9.66,
+     "contribution_pct": -9.63,
      "debut": 100.0,
-     "fin": 76.48,
-     "variation_pct": -23.52
+     "fin": 76.49,
+     "variation_pct": -23.51
     },
     {
      "serie": "Forge divine",
      "livres": 1,
      "annonces": 2,
-     "contribution_pct": -1.76,
+     "contribution_pct": -1.8,
      "debut": 100.0,
-     "fin": 82.26,
-     "variation_pct": -17.74
+     "fin": 81.86,
+     "variation_pct": -18.14
     },
     {
      "serie": "Destins",
      "livres": 1,
      "annonces": 1,
-     "contribution_pct": -1.66,
+     "contribution_pct": -1.77,
      "debut": 100.0,
-     "fin": 83.14,
-     "variation_pct": -16.86
+     "fin": 82.07,
+     "variation_pct": -17.93
     },
     {
      "serie": "Littéraction",
      "livres": 2,
      "annonces": 2,
-     "contribution_pct": -1.18,
+     "contribution_pct": -1.5,
      "debut": 100.0,
-     "fin": 93.68,
-     "variation_pct": -6.32
+     "fin": 91.97,
+     "variation_pct": -8.03
     }
    ]
   },
   "V2 · Alkonost": {
    "depuis": "2026-10-15",
-   "date": "2026-11-23",
-   "variation_pct": -24.07,
+   "date": "2026-11-24",
+   "variation_pct": -24.26,
    "debut": 100.0,
-   "fin": 75.93,
-   "prix_observes": 4,
+   "fin": 75.74,
+   "prix_observes": 6,
    "series": [
     {
      "serie": "Littéraction",
-     "livres": 1,
-     "annonces": 1,
-     "contribution_pct": -7.77,
+     "livres": 2,
+     "annonces": 3,
+     "contribution_pct": -10.36,
      "debut": 100.0,
-     "fin": 70.07,
-     "variation_pct": -29.93
+     "fin": 70.06,
+     "variation_pct": -29.94
     },
     {
      "serie": "Destins",
-     "livres": 3,
-     "annonces": 3,
-     "contribution_pct": -16.29,
+     "livres": 4,
+     "annonces": 4,
+     "contribution_pct": -13.9,
      "debut": 100.0,
-     "fin": 78.0,
-     "variation_pct": -22.0
+     "fin": 78.76,
+     "variation_pct": -21.24
     }
    ]
   },
   "V4 · Alkonost": {
    "depuis": "2026-10-15",
-   "date": "2026-11-23",
-   "variation_pct": -29.92,
+   "date": "2026-11-24",
+   "variation_pct": -24.24,
    "debut": 100.0,
-   "fin": 70.08,
-   "prix_observes": 1,
+   "fin": 75.76,
+   "prix_observes": 2,
    "series": [
     {
      "serie": "Fabled Lands",
      "livres": 1,
-     "annonces": 1,
-     "contribution_pct": -29.92,
+     "annonces": 2,
+     "contribution_pct": -24.24,
      "debut": 100.0,
-     "fin": 70.08,
-     "variation_pct": -29.92
+     "fin": 75.76,
+     "variation_pct": -24.24
     }
    ]
   },
   "V1 · Hachette": {
    "depuis": "2026-10-15",
-   "date": "2026-11-23",
-   "variation_pct": -19.99,
+   "date": "2026-11-24",
+   "variation_pct": -20.32,
    "debut": 100.0,
-   "fin": 80.01,
+   "fin": 79.68,
    "prix_observes": 16,
    "series": [
     {
      "serie": "La Saga du Prêtre Jean",
      "livres": 5,
-     "annonces": 46,
-     "contribution_pct": -19.99,
+     "annonces": 47,
+     "contribution_pct": -20.32,
      "debut": 100.0,
-     "fin": 78.68,
-     "variation_pct": -21.32
+     "fin": 78.3,
+     "variation_pct": -21.7
     },
     {
      "serie": "Tempus",
@@ -6394,208 +6766,227 @@
     }
    ]
   },
+  "V3 · Alkonost": {
+   "depuis": "2026-10-17",
+   "date": "2026-11-24",
+   "variation_pct": 10.81,
+   "debut": 100.0,
+   "fin": 110.81,
+   "prix_observes": 1,
+   "series": [
+    {
+     "serie": "Fabled Lands",
+     "livres": 1,
+     "annonces": 1,
+     "contribution_pct": 10.81,
+     "debut": 100.0,
+     "fin": 110.81,
+     "variation_pct": 10.81
+    }
+   ]
+  },
   "V1 · Elder Craft": {
    "depuis": "2026-10-17",
-   "date": "2026-11-23",
-   "variation_pct": -41.61,
+   "date": "2026-11-24",
+   "variation_pct": -40.91,
    "debut": 100.0,
-   "fin": 58.39,
+   "fin": 59.09,
    "prix_observes": 3,
    "series": [
     {
      "serie": "RPG BooK",
      "livres": 2,
      "annonces": 7,
-     "contribution_pct": -41.61,
+     "contribution_pct": -40.91,
      "debut": 100.0,
-     "fin": 58.39,
-     "variation_pct": -41.61
+     "fin": 59.09,
+     "variation_pct": -40.91
     }
    ]
   },
   "V2 · Elder Craft": {
    "depuis": "2026-10-17",
-   "date": "2026-11-23",
-   "variation_pct": -22.2,
+   "date": "2026-11-24",
+   "variation_pct": -22.24,
    "debut": 100.0,
-   "fin": 77.8,
+   "fin": 77.76,
    "prix_observes": 2,
    "series": [
     {
      "serie": "RPG BooK",
      "livres": 1,
      "annonces": 3,
-     "contribution_pct": -22.2,
+     "contribution_pct": -22.24,
      "debut": 100.0,
-     "fin": 77.8,
-     "variation_pct": -22.2
+     "fin": 77.76,
+     "variation_pct": -22.24
     }
    ]
   },
   "V1 · Sarbacane": {
    "depuis": "2026-10-19",
-   "date": "2026-11-23",
-   "variation_pct": -28.06,
+   "date": "2026-11-24",
+   "variation_pct": -27.8,
    "debut": 100.0,
-   "fin": 71.94,
+   "fin": 72.2,
    "prix_observes": 4,
    "series": [
     {
      "serie": "Reine",
      "livres": 2,
-     "annonces": 15,
-     "contribution_pct": -28.06,
+     "annonces": 16,
+     "contribution_pct": -27.8,
      "debut": 100.0,
-     "fin": 71.94,
-     "variation_pct": -28.06
+     "fin": 72.2,
+     "variation_pct": -27.8
     }
    ]
   },
   "V1 · Bragelonne": {
    "depuis": "2026-10-22",
-   "date": "2026-11-23",
-   "variation_pct": 19.82,
+   "date": "2026-11-24",
+   "variation_pct": 23.8,
    "debut": 100.0,
-   "fin": 119.82,
+   "fin": 123.8,
    "prix_observes": 1,
    "series": [
     {
      "serie": "Destiny Quest",
      "livres": 1,
      "annonces": 3,
-     "contribution_pct": 19.82,
+     "contribution_pct": 23.8,
      "debut": 100.0,
-     "fin": 119.82,
-     "variation_pct": 19.82
+     "fin": 123.8,
+     "variation_pct": 23.8
     }
    ]
   },
   "V1 · Scriptarium": {
    "depuis": "2026-10-23",
-   "date": "2026-11-23",
-   "variation_pct": -18.77,
+   "date": "2026-11-24",
+   "variation_pct": -18.55,
    "debut": 100.0,
-   "fin": 81.23,
+   "fin": 81.45,
    "prix_observes": 6,
    "series": [
     {
      "serie": "Les Légendes du Loup Solitaire",
      "livres": 1,
      "annonces": 2,
-     "contribution_pct": -21.78,
+     "contribution_pct": -21.89,
      "debut": 100.0,
-     "fin": 75.92,
-     "variation_pct": -24.08
+     "fin": 75.72,
+     "variation_pct": -24.28
     },
     {
      "serie": "Défis et Sortilèges (Scriptarium)",
      "livres": 3,
      "annonces": 5,
-     "contribution_pct": 3.02,
+     "contribution_pct": 3.34,
      "debut": 100.0,
-     "fin": 105.14,
-     "variation_pct": 5.14
+     "fin": 105.69,
+     "variation_pct": 5.69
     }
    ]
   },
   "V1 · Jean-Pierre Pécau": {
    "depuis": "2026-10-24",
-   "date": "2026-11-23",
-   "variation_pct": -8.67,
+   "date": "2026-11-24",
+   "variation_pct": -0.69,
    "debut": 100.0,
-   "fin": 91.33,
+   "fin": 99.31,
    "prix_observes": 3,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
-     "annonces": 7,
-     "contribution_pct": -8.67,
+     "annonces": 13,
+     "contribution_pct": -0.69,
      "debut": 100.0,
-     "fin": 91.33,
-     "variation_pct": -8.67
+     "fin": 99.31,
+     "variation_pct": -0.69
     }
    ]
   },
   "V1 · La Loi du sabre .": {
    "depuis": "2026-10-30",
-   "date": "2026-11-23",
-   "variation_pct": -19.35,
+   "date": "2026-11-24",
+   "variation_pct": -19.15,
    "debut": 100.0,
-   "fin": 80.65,
+   "fin": 80.85,
    "prix_observes": 2,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
      "annonces": 12,
-     "contribution_pct": -19.35,
+     "contribution_pct": -19.15,
      "debut": 100.0,
-     "fin": 80.65,
-     "variation_pct": -19.35
+     "fin": 80.85,
+     "variation_pct": -19.15
     }
    ]
   },
   "V1 · Enchanteurs et chevaliers .": {
    "depuis": "2026-11-07",
-   "date": "2026-11-23",
-   "variation_pct": 17.84,
+   "date": "2026-11-24",
+   "variation_pct": 21.64,
    "debut": 100.0,
-   "fin": 117.84,
+   "fin": 121.64,
    "prix_observes": 1,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
      "annonces": 3,
-     "contribution_pct": 17.84,
+     "contribution_pct": 21.64,
      "debut": 100.0,
-     "fin": 117.84,
-     "variation_pct": 17.84
+     "fin": 121.64,
+     "variation_pct": 21.64
     }
    ]
   },
   "V1 · Superpouvoirs.": {
    "depuis": "2026-11-11",
-   "date": "2026-11-23",
-   "variation_pct": 28.0,
+   "date": "2026-11-24",
+   "variation_pct": 29.04,
    "debut": 100.0,
-   "fin": 128.0,
+   "fin": 129.04,
    "prix_observes": 2,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
      "annonces": 25,
-     "contribution_pct": 28.0,
+     "contribution_pct": 29.04,
      "debut": 100.0,
-     "fin": 128.0,
-     "variation_pct": 28.0
+     "fin": 129.04,
+     "variation_pct": 29.04
     }
    ]
   },
   "V1 · CREE 75": {
    "depuis": "2026-11-12",
-   "date": "2026-11-23",
-   "variation_pct": 69.81,
+   "date": "2026-11-24",
+   "variation_pct": 88.31,
    "debut": 100.0,
-   "fin": 169.81,
+   "fin": 188.31,
    "prix_observes": 2,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
-     "annonces": 3,
-     "contribution_pct": 69.81,
+     "annonces": 4,
+     "contribution_pct": 88.31,
      "debut": 100.0,
-     "fin": 169.81,
-     "variation_pct": 69.81
+     "fin": 188.31,
+     "variation_pct": 88.31
     }
    ]
   },
   "V1 · <span class=\"title--section\">Présentation</span> <div class=\"content\"> <div class=\"inside\"> <p itemprop=\"description\">Maître du jeu.</p> </div> </div> </article> </div> <span id=\"reviews-anchor\"></span> <div class=\"product-review\" hx-get=\"/htmx/product-reviews/2251050?review_id=\" hx-trigger=\"intersect once\"> <div class=\"d-flex justify-content-center\"> <div class=\"spinner-border\" role=\"status\"> <span class=\"visually-hidden\">Loading...</span> </div> </div> </div> <div> <div class=\"bottom-add-to-cart\"> <a href=\"#product-aside\" class=\"btn btn-primary\">Acheter": {
    "depuis": "2026-11-14",
-   "date": "2026-11-23",
+   "date": "2026-11-24",
    "variation_pct": -0.39,
    "debut": 100.0,
    "fin": 99.61,
@@ -6614,39 +7005,39 @@
   },
   "V1 · R.L Stine": {
    "depuis": "2026-11-17",
-   "date": "2026-11-23",
-   "variation_pct": -0.55,
+   "date": "2026-11-24",
+   "variation_pct": -0.98,
    "debut": 100.0,
-   "fin": 99.45,
+   "fin": 99.02,
    "prix_observes": 2,
    "series": [
     {
      "serie": "Choisis ton aventure",
      "livres": 1,
      "annonces": 2,
-     "contribution_pct": -0.55,
+     "contribution_pct": -0.98,
      "debut": 100.0,
-     "fin": 99.45,
-     "variation_pct": -0.55
+     "fin": 99.02,
+     "variation_pct": -0.98
     }
    ]
   },
   "V1 · Jean Nugent": {
    "depuis": "2026-11-17",
-   "date": "2026-11-23",
-   "variation_pct": 22.2,
+   "date": "2026-11-24",
+   "variation_pct": 28.42,
    "debut": 100.0,
-   "fin": 122.2,
+   "fin": 128.42,
    "prix_observes": 3,
    "series": [
     {
      "serie": "Non classée",
      "livres": 1,
      "annonces": 3,
-     "contribution_pct": 22.2,
+     "contribution_pct": 28.42,
      "debut": 100.0,
-     "fin": 122.2,
-     "variation_pct": 22.2
+     "fin": 128.42,
+     "variation_pct": 28.42
     }
    ]
   }
