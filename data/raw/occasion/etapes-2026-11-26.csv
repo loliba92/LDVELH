@@ -1,2 +1,2 @@
 source,etape1,etape2,non_validee,lot,hors_genre,r_supposee_attente,r_supposee_sans_photo,r_supposee_photo_floue,r_supposee_photo_indispo,r_supposee_sans_rapport,r_plusieurs_editions,r_page_pas_lue,r_a_identifier
-vinted,9,0,0,0,0,0,0,0,0,0,0,0,0
+vinted,9,0,1,0,0,0,0,0,0,0,1,0,0
