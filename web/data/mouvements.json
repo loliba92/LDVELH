@@ -42,7 +42,7 @@
  "modele": {
   "actif": false,
   "n_paires": 303,
-  "gain": 0.046,
+  "gain": 0.045,
   "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
   "rapport_global": 1.071
  }
