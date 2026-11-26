@@ -1,34 +1,49 @@
 {
- "date": "2026-11-25",
- "precedent": "2026-11-24",
- "nb_comparees": 1548,
- "nb_modifiees": 1377,
+ "date": "2026-11-26",
+ "precedent": "2026-11-25",
+ "nb_comparees": 1551,
+ "nb_modifiees": 1361,
  "mediane_variation": -0.002,
- "nouvelles_cotes": 3,
- "hausses": [],
- "baisses": [
+ "nouvelles_cotes": 0,
+ "hausses": [
   {
-   "id": "9782070506941",
-   "isbn13": "9782070506941",
-   "titre": "Retour à la Montagne de Feu",
+   "id": "9782075227285",
+   "isbn13": "9782075227285",
+   "titre": "Le Voyage de la Pierre de Lune",
+   "serie": "Loup Solitaire",
+   "numero": "763",
+   "version": "V5",
+   "etat": "tres_bon",
+   "avant": 13.36,
+   "apres": 15.01,
+   "pct": 0.124,
+   "nature": "prix éditeur",
+   "nb": 0,
+   "recalibre": false
+  },
+  {
+   "id": "9782075084499",
+   "isbn13": "9782075084499",
+   "titre": "La Crypte du Sorcier",
    "serie": "Défis Fantastiques",
-   "numero": "717",
-   "version": "V2",
-   "etat": "bon",
-   "avant": 10.31,
-   "apres": 8.56,
-   "pct": -0.17,
-   "nature": "archives",
+   "numero": "474",
+   "version": "V4",
+   "etat": "tres_bon",
+   "avant": 8.39,
+   "apres": 9.31,
+   "pct": 0.11,
+   "nature": "prix éditeur",
    "nb": 0,
    "recalibre": false
   }
  ],
- "nb_grands_mouvements": 1,
+ "baisses": [],
+ "nb_grands_mouvements": 2,
  "modele": {
   "actif": false,
-  "n_paires": 302,
-  "gain": 0.061,
+  "n_paires": 301,
+  "gain": 0.063,
   "raison": "le modèle ne bat pas assez les archives (gain 6%, 15% exigés)",
-  "rapport_global": 1.086
+  "rapport_global": 1.087
  }
 }
