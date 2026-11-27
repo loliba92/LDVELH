@@ -22,13 +22,29 @@
    "recalibre": false
   }
  ],
- "baisses": [],
- "nb_grands_mouvements": 1,
+ "baisses": [
+  {
+   "id": "9782070332861",
+   "isbn13": "9782070332861",
+   "titre": "Le Manoir de l'Enfer",
+   "serie": "Défis Fantastiques",
+   "numero": "286",
+   "version": "V1",
+   "etat": "bon",
+   "avant": 15.5,
+   "apres": 13.86,
+   "pct": -0.106,
+   "nature": "annonces",
+   "nb": 63,
+   "recalibre": false
+  }
+ ],
+ "nb_grands_mouvements": 2,
  "modele": {
   "actif": false,
-  "n_paires": 304,
-  "gain": 0.046,
-  "raison": "le modèle ne bat pas assez les archives (gain 5%, 15% exigés)",
-  "rapport_global": 1.061
+  "n_paires": 305,
+  "gain": 0.043,
+  "raison": "le modèle ne bat pas assez les archives (gain 4%, 15% exigés)",
+  "rapport_global": 1.06
  }
 }
